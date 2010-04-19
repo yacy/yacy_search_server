@@ -67,28 +67,6 @@ public class MapHeap {
         this.blob = new Heap(heapFile, keylength, ordering, buffermax);
         this.cache = new ConcurrentARC<String, Map<String, String>>(cachesize, Runtime.getRuntime().availableProcessors());
         this.fillchar = fillchar;
-        /*
-        // debug
-        try {
-            kelondroCloneableIterator<byte[]> i = keys(true, false);
-            int c = 20;
-            HashSet<String> t = new HashSet<String>();
-            while (i.hasNext()) {
-                c--; if (c <= 0) break;
-                byte[] b = i.next();
-                String s = new String(b);
-                System.out.println("*** DEBUG kelondroMap " + blob.name() + " KEY=" + s);
-                t.add(s);
-            }
-            Iterator<String> j = t.iterator();
-            while (j.hasNext()) {
-                String s = j.next();
-                if (this.get(s) == null) System.out.println("*** DEBUG kelondroMap " + blob.name() + " KEY=" + s + " cannot be found.");
-            }
-        } catch (IOException e) {
-            Log.logException(e);
-        }
-        */
     }
    
     /**
@@ -155,10 +133,10 @@ public class MapHeap {
         assert key.length() > 0;
         assert newMap != null;
         key = normalizeKey(key);
-        byte[] keyb = key.getBytes("UTF-8");
+        byte[] keyb = key.getBytes();
         String s = map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ");
         assert s != null;
-        byte[] sb = s.getBytes("UTF-8");
+        byte[] sb = s.getBytes();
         synchronized (this) {
             // write entry
         	if (blob != null) blob.put(keyb, sb);
@@ -180,7 +158,7 @@ public class MapHeap {
         
         synchronized (this) {
             // remove from cache
-            cache.remove(new String(key, "UTF-8"));
+            cache.remove(new String(key));
     
             // remove from file
             blob.remove(key);
@@ -196,7 +174,7 @@ public class MapHeap {
         // update elementCount
         if (key == null) return;
         key = normalizeKey(key);
-        byte[] keyb = key.getBytes("UTF-8");
+        byte[] keyb = key.getBytes();
         
         synchronized (this) {
             // remove from cache
@@ -217,10 +195,21 @@ public class MapHeap {
         assert key != null;
         if (cache == null) return false; // case may appear during shutdown
         key = normalizeKey(key);
-        byte[] keyb = key.getBytes("UTF-8");
+        byte[] keyb = key.getBytes();
         boolean h;
         synchronized (this) {
             h = this.cache.containsKey(key) || this.blob.has(keyb);
+        }
+        return h;
+    }
+    
+    public boolean has(byte[] key) {
+        assert key != null;
+        if (cache == null) return false; // case may appear during shutdown
+        key = normalizeKey(key);
+        boolean h;
+        synchronized (this) {
+            h = this.cache.containsKey(new String(key)) || this.blob.has(key);
         }
         return h;
     }
@@ -264,7 +253,7 @@ public class MapHeap {
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
         key = normalizeKey(key);
-        byte[] keyb = key.getBytes("UTF-8");
+        byte[] keyb = key.getBytes();
         
         Map<String, String> map;
         if (storeCache) {
@@ -393,7 +382,7 @@ public class MapHeap {
                 return null;
             }
             try {
-                final Map<String, String> obj = get(new String(nextKey, "UTF-8"));
+                final Map<String, String> obj = get(new String(nextKey));
                 if (obj == null) throw new kelondroException("no more elements available");
                 return obj;
             } catch (final IOException e) {
@@ -422,7 +411,7 @@ public class MapHeap {
             // iterate over keys
             Iterator<byte[]> i = map.keys(true, false);
             while (i.hasNext()) {
-                System.out.println("key: " + new String(i.next(), "UTF-8"));
+                System.out.println("key: " + new String(i.next()));
             }
             // clean up
             map.close();

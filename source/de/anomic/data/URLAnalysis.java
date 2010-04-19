@@ -415,7 +415,7 @@ public class URLAnalysis {
 
     public static int diffurlcol(final String metadataPath, final String statisticFile, final String diffFile) throws IOException, RowSpaceExceededException {
         System.out.println("INDEX DIFF URL-COL startup");
-        final HandleMap idx = new HandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 4, new File(statisticFile), 0);
+        final HandleMap idx = new HandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 4, new File(statisticFile));
         final MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
         final HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1000000);
         System.out.println("INDEX DIFF URL-COL loaded dump, starting diff");
@@ -444,7 +444,7 @@ public class URLAnalysis {
         // format: 0=text, 1=html, 2=rss/xml
         System.out.println("URL EXPORT startup");
         final MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
-        final HandleSet hs = (diffFile == null) ? null : new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
+        final HandleSet hs = (diffFile == null) ? null : new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile));
         System.out.println("URL EXPORT loaded dump, starting export");
         final Export e = mr.export(new File(export), ".*", hs, format, false);
         try {
@@ -459,7 +459,7 @@ public class URLAnalysis {
         System.out.println("URL DELETE startup");
         final MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
         final int mrSize = mr.size();
-        final HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
+        final HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile));
         System.out.println("URL DELETE loaded dump, starting deletion of " + hs.size() + " entries from " + mrSize);
         for (final byte[] refhash: hs) {
             mr.remove(refhash);

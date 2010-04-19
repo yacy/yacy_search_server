@@ -50,6 +50,18 @@ public class BufferedObjectIndex implements ObjectIndex, Iterable<Row.Entry> {
         this.entryComparator = new Row.EntryComparator(backend.row().objectOrder);
     }
     
+    public byte[] smallestKey() {
+        if (this.buffer == null || this.buffer.isEmpty()) return this.backend.smallestKey();
+        if (this.backend.isEmpty()) return this.buffer.smallestKey();
+        return this.backend.row().getOrdering().smallest(this.buffer.smallestKey(), this.backend.smallestKey());
+    }
+    
+    public byte[] largestKey() {
+        if (this.buffer == null || this.buffer.isEmpty()) return this.backend.largestKey();
+        if (this.backend.isEmpty()) return this.buffer.largestKey();
+        return this.backend.row().getOrdering().largest(this.buffer.largestKey(), this.backend.largestKey());
+    }
+    
     private final void flushBuffer() throws IOException, RowSpaceExceededException {
         if (this.buffer.size() > 0) {
             for (Row.Entry e: this.buffer) {

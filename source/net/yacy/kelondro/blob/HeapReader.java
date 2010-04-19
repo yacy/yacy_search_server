@@ -154,7 +154,7 @@ public class HeapReader {
         // there is an index and a gap file:
         // read the index file:
         try {
-            this.index = new HandleMap(this.keylength, this.ordering, 8, fif, 1000000);
+            this.index = new HandleMap(this.keylength, this.ordering, 8, fif);
         } catch (IOException e) {
             Log.logException(e);
             return false;
@@ -237,7 +237,7 @@ public class HeapReader {
             // new seek position
             seek += 4L + reclen;
         }
-        indexready.finish(true);
+        indexready.finish();
         
         // finish the index generation
         try {
@@ -561,7 +561,7 @@ public class HeapReader {
         
         public entries(final File blobFile, final int keylen) throws IOException {
             if (!(blobFile.exists())) throw new IOException("file " + blobFile + " does not exist");
-            this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 4*1024*1024));
+            this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 8*1024*1024));
             this.keylen = keylen;
             this.blobFile = blobFile;
             this.nextEntry = next0();

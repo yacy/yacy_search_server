@@ -42,7 +42,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     }
     
     public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
-        return new HandleSet(keylength, this, space, space);
+        return new HandleSet(keylength, this, space);
     }
     
     public boolean wellformed(final byte[] a) {
@@ -78,17 +78,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         if ( asc) return "nu";
         return null;
     }
-    /*
-    private final static long cardinalI(final byte[] key) {
-        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
-        long c = 0;
-        int p = 0;
-        while ((p < 8) && (p < key.length)) c = (c << 8) | ((long) key[p++] & 0xFF);
-        while (p++ < 8) c = (c << 8);
-        c = c >>> 1;
-        return c;
-    }
-    */
+    
     private final static long cardinalI(final byte[] key, int off, int len) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
@@ -159,19 +149,31 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     // two arrays are also equal if one array is a subset of the other's array
     // with filled-up char(0)-values
     public final int compare(final byte[] a, final byte[] b) {
-        return (asc) ? compare0(a, 0, a.length, b, 0, b.length) : compare0(b, 0, b.length, a, 0, a.length);
+        if (a.length == b.length) {
+            return (asc) ? compare0(a, 0, b, 0, a.length) : compare0(b, 0, a, 0, a.length);
+        }
+        int length = Math.min(a.length, b.length);
+        if (asc) {
+            int c = compare0(a, 0, b, 0, length);
+            if (c != 0) return c;
+            return (a.length > b.length) ? 1 : -1;
+        }
+        int c = compare0(b, 0, a, 0, length);
+        if (c != 0) return c;
+        return (a.length > b.length) ? -1 : 1;
     }
 
-    public final int compare(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
-        return (asc) ? compare0(a, aoffset, alength, b, boffset, blength) : compare0(b, boffset, blength, a, aoffset, alength);
+    public final int compare(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
+        return (asc) ? compare0(a, aoffset, b, boffset, length) : compare0(b, boffset, a, aoffset, length);
     }
 
-    public final int compare0(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
-        if (zero == null) return compares(a, aoffset, alength, b, boffset, blength);
+    public final int compare0(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
+        if (zero == null) return compares(a, aoffset, b, boffset, length);
         // we have an artificial start point. check all combinations
-        final int az = compares(a, aoffset, alength, zero, 0, zero.length); // -1 if a < z; 0 if a == z; 1 if a > z
-        final int bz = compares(b, boffset, blength, zero, 0, zero.length); // -1 if b < z; 0 if b == z; 1 if b > z
-        if (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
+        assert length == zero.length;
+        final int az = compares(a, aoffset, zero, 0, length); // -1 if a < z; 0 if a == z; 1 if a > z
+        final int bz = compares(b, boffset, zero, 0, length); // -1 if b < z; 0 if b == z; 1 if b > z
+        if (az == bz) return compares(a, aoffset, b, boffset, length);
         return sig(az - bz);
     }
 
@@ -197,12 +199,10 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return true;
     }
    
-    public static final int compares(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
+    public static final int compares(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
         int i = 0;
-        final int al = Math.min(alength, a.length - aoffset);
-        final int bl = Math.min(blength, b.length - boffset);
         int aa, bb;
-        while ((i < al) && (i < bl)) {
+        while (i < length) {
             aa = 0xff & a[i + aoffset];
             bb = 0xff & b[i + boffset];
             if (aa > bb) return 1;
@@ -210,9 +210,6 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
             // else the bytes are equal and it may go on yet undecided
             i++;
         }
-        // compare length
-        if (al > bl) return 1;
-        if (al < bl) return -1;
         // they are equal
         return 0;
     }

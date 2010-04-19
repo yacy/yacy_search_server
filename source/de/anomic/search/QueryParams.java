@@ -26,7 +26,6 @@
 
 package de.anomic.search;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -62,7 +61,6 @@ public final class QueryParams {
     }
     
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
-    public static final Bitfield catchall_constraint = new Bitfield(4, "______");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
     public static final Pattern matchnothing_pattern = Pattern.compile("");
     
@@ -235,15 +233,6 @@ public final class QueryParams {
         return keyhashes;
     }
     
-    public static HashSet<String> hashes2StringSet(final String query) {
-        if (query == null) return new HashSet<String>();
-        final HashSet<String> keyhashes = new HashSet<String>();
-        for (int i = 0; i < (query.length() / Word.commonHashLength); i++) {
-            keyhashes.add(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength));
-        }
-        return keyhashes;
-    }
-    
     public static HandleSet hashes2Handles(final String query) {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query == null) return keyhashes;
@@ -254,18 +243,7 @@ public final class QueryParams {
         }
         return keyhashes;
     }
-    /*
-    public static String hashSet2hashString(final TreeSet<byte[]> hashes) {
-        final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
-        int p = 0;
-        for (byte[] b : hashes) {
-            assert b.length == Word.commonHashLength : "hash = " + new String(b);
-            System.arraycopy(b, 0, bb, p, Word.commonHashLength);
-            p += Word.commonHashLength;
-        }
-        return new String(bb);
-    }
-     */
+    
     public static String hashSet2hashString(final HandleSet hashes) {
         final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
         int p = 0;
@@ -295,7 +273,7 @@ public final class QueryParams {
         return new String(sb);
     }
     
-    public static final boolean matches(final String text, final HandleSet keyhashes) {
+    protected static final boolean matches(final String text, final HandleSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
     	final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text).keySet());

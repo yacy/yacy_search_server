@@ -252,6 +252,14 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return MemoryControl.available() < minmemremaining;
     }
     
+    public byte[] smallestKey() {
+        return this.index.smallestKey();
+    }
+    
+    public byte[] largestKey() {
+        return this.index.largestKey();
+    }
+    
     public static long tableSize(final File tablefile, final int recordsize) throws IOException {
         // returns number of records in table
         return Records.tableSize(tablefile, recordsize);
@@ -272,7 +280,9 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
 
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        synchronized (table) {
+            assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        }
         final HashMap<String, String> map = new HashMap<String, String>(8);
         map.put("tableSize", Integer.toString(index.size()));
         map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
@@ -404,11 +414,24 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
     public String filename() {
         return this.file.filename().toString();
     }
+
+    public Entry get(final byte[] key) throws IOException {
+        if ((file == null) || (index == null)) return null;
+        synchronized (this) {
+            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+            assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        }
+        Entry e = get0(key);
+        if (e != null && this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes())) return e;
+        synchronized (this) {
+            e = get0(key);
+            assert e == null || this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes());
+            return e;
+        }
+    }
     
-    public synchronized Entry get(final byte[] key) throws IOException {
+    private Entry get0(final byte[] key) throws IOException {
     	if ((file == null) || (index == null)) return null;
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         final int i = (int) index.get(key);
         if (i == -1) return null;
         final byte[] b = new byte[rowdef.objectsize];
@@ -427,13 +450,15 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return rowdef.newEntry(b);
     }
 
-    public synchronized boolean has(final byte[] key) {
+    public boolean has(final byte[] key) {
+        /*
         try {
             assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         } catch (final IOException e) {
             Log.logSevere("Table", "", e);
         }
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        */
         return index.has(key);
     }
 
@@ -521,7 +546,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
     }
 
-    public synchronized Entry put(final Entry row, final Date entryDate) throws IOException, RowSpaceExceededException {
+    public Entry put(final Entry row, final Date entryDate) throws IOException, RowSpaceExceededException {
         return replace(row);
     }
 
@@ -707,11 +732,11 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return this.rowdef;
     }
 
-    public synchronized int size() {
+    public int size() {
         return index.size();
     }
     
-    public synchronized boolean isEmpty() {
+    public boolean isEmpty() {
         return index.isEmpty();
     }
     

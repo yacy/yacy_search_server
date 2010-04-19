@@ -44,6 +44,8 @@ public interface ObjectIndex extends Iterable<Row.Entry> {
     public int size();
     public boolean isEmpty();
     public Row row();
+    public byte[] smallestKey();
+    public byte[] largestKey();
     public boolean has(byte[] key); // use this only if there is no get in case that has returns true
     public Row.Entry get(byte[] key) throws IOException;
     public Row.Entry replace(Row.Entry row) throws RowSpaceExceededException, IOException;

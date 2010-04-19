@@ -82,7 +82,6 @@ public final class HeapWriter {
         this.keylength = keylength;
         this.index = new HandleMap(keylength, ordering, 8, 100000);
         this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), outBuffer));
-        //this.doublecheck = new HashSet<String>();
         this.seek = 0;
     }
 

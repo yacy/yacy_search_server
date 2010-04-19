@@ -66,4 +66,12 @@ public abstract class AbstractOrder<A> implements Order<A> {
     public int hashCode() {
         return this.signature().hashCode();
     }
+    
+    public A smallest(A a, A b) {
+        return (compare(a, b) > 0) ? b : a;
+    }
+
+    public A largest(A a, A b) {
+        return (compare(a, b) > 0) ? a : b;
+    }
 }

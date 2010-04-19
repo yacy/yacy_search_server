@@ -54,7 +54,8 @@ public final class BinSearch {
         if (beginPos >= endPos) return false;
         final int pivot = (beginPos + endPos) / 2;
         if ((pivot < 0) || (pivot >= this.count)) return false;
-        final int c = objectOrder.compare(this.chunks, pivot * this.chunksize, this.chunksize, t, 0, t.length);
+        assert this.chunksize == t.length;
+        final int c = objectOrder.compare(this.chunks, pivot * this.chunksize, t, 0, this.chunksize);
         if (c == 0) return true;
         if (c < 0) /* buffer < t */ return contains(t, pivot + 1, endPos);
         if (c > 0) /* buffer > t */ return contains(t, beginPos, pivot);

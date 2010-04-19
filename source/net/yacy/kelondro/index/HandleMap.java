@@ -52,7 +52,7 @@ import net.yacy.kelondro.order.CloneableIterator;
 public final class HandleMap implements Iterable<Row.Entry> {
     
     private   final Row rowdef;
-    protected ObjectIndexCache index;
+    private RowSetArray index;
     
     /**
      * initialize a HandleMap
@@ -64,12 +64,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
      */
     public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
-        this.index = new ObjectIndexCache(rowdef, expectedspace);
-    }
-    
-    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace, final int initialspace) throws RowSpaceExceededException {
-        this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
-        this.index = new ObjectIndexCache(rowdef, expectedspace, initialspace);
+        this.index = new RowSetArray(rowdef, spread(expectedspace));
     }
 
     /**
@@ -80,8 +75,8 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @throws IOException 
      * @throws RowSpaceExceededException 
      */
-    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final File file, final int expectedspace) throws IOException, RowSpaceExceededException {
-        this(keylength, objectOrder, idxbytes, expectedspace, (int) (file.length() / (keylength + idxbytes)));
+    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final File file) throws IOException, RowSpaceExceededException {
+        this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)));
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
         if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
@@ -97,6 +92,10 @@ public final class HandleMap implements Iterable<Row.Entry> {
         is.close();
         is = null;
         assert this.index.size() == file.length() / (keylength + idxbytes);
+    }
+    
+    private static final int spread(int expectedspace) {
+        return Math.min(Runtime.getRuntime().availableProcessors() * 2, Math.max(1, expectedspace / 3000));
     }
     
     public final int[] saturation() {
@@ -319,12 +318,10 @@ public final class HandleMap implements Iterable<Row.Entry> {
         private final BlockingQueue<entry> cache;
         private final HandleMap map;
         private Future<HandleMap> result;
-        private boolean sortAtEnd;
         
         public initDataConsumer(final HandleMap map) {
             this.map = map;
             cache = new LinkedBlockingQueue<entry>();
-            sortAtEnd = false;
         }
         
         protected final void setResult(final Future<HandleMap> result) {
@@ -348,8 +345,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
          * to signal the initialization thread that no more entries will be submitted with consumer()
          * this method must be called. The process will not terminate if this is not called before.
          */
-        public final void finish(final boolean sortAtEnd) {
-            this.sortAtEnd = sortAtEnd;
+        public final void finish() {
             try {
                 cache.put(poisonEntry);
             } catch (InterruptedException e) {
@@ -379,9 +375,6 @@ public final class HandleMap implements Iterable<Row.Entry> {
                 Log.logException(e);
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
-            }
-            if (sortAtEnd) {
-                map.index.finishInitialization();
             }
             return map;
         }

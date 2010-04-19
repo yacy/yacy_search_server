@@ -212,6 +212,7 @@ public class CrawlProfile {
     }
 
     public entry getEntry(final String handle) {
+        if (profileTable == null) return null;
         Map<String, String> m;
         try {
             m = profileTable.get(handle);

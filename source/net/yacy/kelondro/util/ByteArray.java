@@ -71,11 +71,13 @@ public class ByteArray {
     }
     
     public int compareTo(final ByteArray b, final ByteOrder order) {
-        return order.compare(this.buffer, 0, this.buffer.length, b.buffer, 0, b.buffer.length);
+        assert this.buffer.length == b.buffer.length;
+        return order.compare(this.buffer, b.buffer);
     }
     
     public int compareTo(final int aoffset, final int alength, final ByteArray b, final int boffset, final int blength, final ByteOrder order) {
-        return order.compare(this.buffer, aoffset, alength, b.buffer, boffset, blength);
+        assert alength == blength;
+        return order.compare(this.buffer, aoffset, b.buffer, boffset, blength);
     }
     
     public int hashCode() {

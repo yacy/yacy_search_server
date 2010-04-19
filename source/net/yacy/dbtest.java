@@ -13,8 +13,8 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.kelondro.index.ObjectArrayCache;
 import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.ObjectIndexCache;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -406,93 +406,6 @@ public class dbtest {
                         System.out.println();
                     }
                 }
-            }
-            
-            if (command.equals("stressThreaded")) {
-                // 
-                // args: <number-of-writes> <number-of-reads-per-write> <random-startpoint>
-                // example: java -ea  -classpath classes dbtest stressThreaded kelondroEcoTable kelondroFlexTable stressthreadedtest 500 50 0 
-                /* result with svn 4346
-                   kelondroFlex:
-                   removed: 70, size of jcontrol set: 354, size of kcontrol set: 354
-                   Database size = 354 unique entries.
-                   Execution time: open=1329, command=36234, close=17, total=37580
-                   kelondroEco:
-                   removed: 70, size of jcontrol set: 354, size of kcontrol set: 354
-                   Database size = 354 unique entries.
-                   Execution time: open=1324, command=34032, close=1, total=35357
-                 */
-                final long writeCount = Long.parseLong(args[4]);
-                final long readCount = Long.parseLong(args[5]);
-                final long randomstart = Long.parseLong(args[6]);
-                final Random random = new Random(randomstart);
-                long r;
-                Long R;
-                int p, rc=0;
-                final ArrayList<Long> ra = new ArrayList<Long>();
-                final HashSet<Long> jcontrol = new HashSet<Long>();
-                final ObjectArrayCache kcontrol = new ObjectArrayCache(1, 0);
-                for (int i = 0; i < writeCount; i++) {
-                    r = Math.abs(random.nextLong() % 1000);
-                    jcontrol.add(Long.valueOf(r));
-                    kcontrol.putb((int) r, "x".getBytes());
-                    InstantBusyThread.oneTimeJob(new WriteJob(table_test, table_reference, r), 0, 50);
-                    if (random.nextLong() % 5 == 0) ra.add(Long.valueOf(r));
-                    for (int j = 0; j < readCount; j++) {
-                        InstantBusyThread.oneTimeJob(new ReadJob(table_test, table_reference, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
-                    }
-                    if (!ra.isEmpty() && random.nextLong() % 7 == 0) {
-                        rc++;
-                        p = Math.abs(random.nextInt() % ra.size());
-                        R = ra.get(p);
-                        jcontrol.remove(R);
-                        kcontrol.removeb((int) R.longValue());
-                        System.out.println("remove: " + R.longValue());
-                        InstantBusyThread.oneTimeJob(new RemoveJob(table_test, table_reference, (ra.remove(p)).longValue()), 0, 50);
-                    }
-                }
-                System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
-                while (InstantBusyThread.instantThreadCounter > 0) {
-                    try {Thread.sleep(1000);} catch (final InterruptedException e) {} // wait for all tasks to finish
-                    System.out.println("count: "  + InstantBusyThread.instantThreadCounter + ", jobs: " + InstantBusyThread.jobs.toString());
-                }
-                try {Thread.sleep(6000);} catch (final InterruptedException e) {}
-            }
-            
-            if (command.equals("stressSequential")) {
-                // 
-                // args: <number-of-writes> <number-of-reads> <random-startpoint>
-                final long writeCount = Long.parseLong(args[4]);
-                final long readCount = Long.parseLong(args[5]);
-                final long randomstart = Long.parseLong(args[6]);
-                final Random random = new Random(randomstart);
-                long r;
-                Long R;
-                int p, rc=0;
-                final ArrayList<Long> ra = new ArrayList<Long>();
-                final HashSet<Long> jcontrol = new HashSet<Long>();
-                final ObjectArrayCache kcontrol = new ObjectArrayCache(1, 0);
-                for (int i = 0; i < writeCount; i++) {
-                    //if (i == 30) random = new Random(randomstart);
-                    r = Math.abs(random.nextLong() % 1000);
-                    jcontrol.add(Long.valueOf(r));
-                    kcontrol.putb((int) r, "x".getBytes());
-                    new WriteJob(table_test, table_reference, r).run();
-                    if (random.nextLong() % 5 == 0) ra.add(Long.valueOf(r));
-                    for (int j = 0; j < readCount; j++) {
-                        new ReadJob(table_test, table_reference, random.nextLong() % writeCount).run();
-                    }
-                    if (!ra.isEmpty() && random.nextLong() % 7 == 0) {
-                        rc++;
-                        p = Math.abs(random.nextInt() % ra.size());
-                        R = ra.get(p);
-                        jcontrol.remove(R);
-                        kcontrol.removeb((int) R.longValue());
-                        new RemoveJob(table_test, table_reference, (ra.remove(p)).longValue()).run();
-                    }
-                }
-                try {Thread.sleep(1000);} catch (final InterruptedException e) {}
-                System.out.println("removed: " + rc + ", size of jcontrol set: " + jcontrol.size() + ", size of kcontrol set: " + kcontrol.size());
             }
             
             final long aftercommand = System.currentTimeMillis();

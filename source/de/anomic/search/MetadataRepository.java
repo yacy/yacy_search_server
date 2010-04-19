@@ -81,7 +81,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                 Log.logException(e1);
             }
         }
-        this.urlIndexFile = new Cache(backupIndex, 20000000, 20000000);
+        this.urlIndexFile = backupIndex; //new Cache(backupIndex, 20000000, 20000000);
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
     }
@@ -120,6 +120,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
         assert urlIndexFile != null : "urlHash = " + new String(urlHash);
+        if (urlIndexFile == null) return null;
         try {
             final Row.Entry entry = urlIndexFile.get(urlHash);
             if (entry == null) return null;
@@ -132,7 +133,6 @@ public final class MetadataRepository implements Iterable<byte[]> {
     public void store(final URIMetadataRow entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
         URIMetadataRow oldEntry;
-        synchronized (this) {
         try {
             Row.Entry oe = (urlIndexFile == null) ? null : urlIndexFile.get(entry.hash());
             oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
@@ -153,7 +153,6 @@ public final class MetadataRepository implements Iterable<byte[]> {
             urlIndexFile.put(entry.toRowEntry());
         } catch (RowSpaceExceededException e) {
             throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
-        }
         }
         statsDump = null;
     }

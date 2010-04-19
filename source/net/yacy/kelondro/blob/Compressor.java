@@ -348,7 +348,6 @@ public class Compressor implements BLOB {
         while (!this.buffer.isEmpty()) {
             if (!flushOne()) break;
         }
-        assert this.bufferlength == 0;
     }
 
     public int replace(byte[] key, Rewriter rewriter) throws IOException {

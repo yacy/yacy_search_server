@@ -113,11 +113,7 @@ public class IndexTest {
         Runtime.getRuntime().gc();
         final long freeStartKelondro = MemoryControl.available();
         HandleMap ii = null;
-        try {
-            ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count, count);
-        } catch (RowSpaceExceededException e1) {
-            e1.printStackTrace();
-        }
+        ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count);
         for (int i = 0; i < count; i++)
             try {
                 ii.putUnique(tests[i], 1);

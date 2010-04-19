@@ -87,19 +87,24 @@ public class StackIterator<E> implements CloneableIterator<E> {
         throw new java.lang.UnsupportedOperationException("merge does not support remove");
     }
     
-    public static <A> CloneableIterator<A> stack(final Collection<CloneableIterator<A>> iterators) {
+    @SuppressWarnings("unchecked")
+    public static <A> CloneableIterator<A> stack(final CloneableIterator<A>[] iterators) {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
         if (iterators == null) return null;
-        if (iterators.isEmpty()) return null;
-        return stack(iterators.iterator());
-    }
-    
-    private static <A> CloneableIterator<A> stack(final Iterator<CloneableIterator<A>> iiterators) {
-        if (iiterators == null) return null;
-        if (!(iiterators.hasNext())) return null;
-        final CloneableIterator<A> one = iiterators.next();
-        if (!(iiterators.hasNext())) return one;
-        return new StackIterator<A>(one, stack(iiterators));
+        if (iterators.length == 0) return null;
+        if (iterators.length == 1) {
+            return iterators[0];
+        }
+        if (iterators.length == 2) {
+            if (iterators[0] == null) return iterators[1];
+            if (iterators[1] == null) return iterators[0];
+            return new StackIterator<A>(iterators[0], iterators[1]);
+        }
+        CloneableIterator<A> a = iterators[0];
+        final CloneableIterator<A>[] iterators0 = new CloneableIterator[iterators.length - 1];
+        System.arraycopy(iterators, 1, iterators0, 0, iterators.length - 1);
+        if (a == null) return stack(iterators0);
+        return new StackIterator<A>(a, stack(iterators0));
     }
 }

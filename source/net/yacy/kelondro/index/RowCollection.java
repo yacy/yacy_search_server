@@ -162,6 +162,8 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     
     private static Column exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4;
 
+    protected static final int exportOverheadSize = 14;
+
     private static Row exportRow(final int chunkcachelength) {
         /*
         return new Row(
@@ -184,16 +186,16 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
          * because of a strange bug these objects cannot be initialized as normal
          * static final. If I try that, they are not initialized and are assigned null. why?
          */
-        return new Row(new Column[]{
+        Row er = new Row(new Column[]{
                     exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4,
                     new Column("byte[] collection-" + chunkcachelength)
                 },
                 NaturalOrder.naturalOrder
         );
+        assert er.objectsize == chunkcachelength +exportOverheadSize;
+        return er;
     }
     
-    protected static final int exportOverheadSize = 14;
-
     public synchronized byte[] exportCollection() {
         // returns null if the collection is empty
         trim(false);
@@ -373,7 +375,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
             this.sortBound = 1;
         } else if (
                 this.sortBound + 1 == chunkcount &&
-                this.rowdef.objectOrder.compare(chunkcache, rowdef.objectsize * (chunkcount - 2), rowdef.primaryKeyLength,
+                this.rowdef.objectOrder.compare(chunkcache, rowdef.objectsize * (chunkcount - 2),
                                                 chunkcache, rowdef.objectsize * (chunkcount - 1), rowdef.primaryKeyLength) == -1) {
             this.sortBound = chunkcount;
         }
@@ -455,7 +457,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return r;
     }
     
-    protected synchronized byte[] smallestKey() {
+    public synchronized byte[] smallestKey() {
         if (chunkcount == 0) return null;
         this.sort();
         final Row.Entry r = get(0, false);
@@ -463,7 +465,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return b;
     }
     
-    protected synchronized byte[] largestKey() {
+    public synchronized byte[] largestKey() {
         if (chunkcount == 0) return null;
         this.sort();
         final Row.Entry r = get(chunkcount - 1, false);
@@ -929,7 +931,6 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         final int c = this.rowdef.objectOrder.compare(
                 chunkcache,
                 i * this.rowdef.objectsize,
-                this.rowdef.primaryKeyLength,
                 chunkcache,
                 j * this.rowdef.objectsize,
                 this.rowdef.primaryKeyLength);
@@ -939,7 +940,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     protected synchronized int compare(final byte[] a, final int astart, final int alength, final int chunknumber) {
         assert (chunknumber < chunkcount);
         final int l = Math.min(this.rowdef.primaryKeyLength, Math.min(a.length - astart, alength));
-        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize, this.rowdef.primaryKeyLength);
+        return rowdef.objectOrder.compare(a, astart, chunkcache, chunknumber * this.rowdef.objectsize, l);
     }
     
     protected final boolean match(final int i, final int j) {

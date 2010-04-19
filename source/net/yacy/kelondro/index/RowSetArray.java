@@ -27,22 +27,37 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.yacy.kelondro.index.Row.Entry;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.StackIterator;
 
 
-public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
+public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Cloneable {
 
     private final Row      rowdef;
-    private final RowSet[] array;
+    private final ObjectIndexCache[] array;
     
     public RowSetArray(final Row rowdef, final int arraySize) {
-        this.array = new RowSet[arraySize];
+        //assert arraySize < 100 : arraySize;
+        this.array = new ObjectIndexCache[arraySize];
         this.rowdef = rowdef;
         for (int i = 0; i < arraySize; i++) {
-            this.array[i] = null;
+            this.array[i] = new ObjectIndexCache(rowdef, 0);
         }
+    }
+    
+    private RowSetArray(final Row rowdef, final ObjectIndexCache[] array) {
+        this.array = array;
+        this.rowdef = rowdef;
+    }
+    
+    public RowSetArray clone() {
+        ObjectIndexCache[] a = new ObjectIndexCache[this.array.length];
+        for (int i = 0; i < this.array.length; i++) {
+            a[i] = this.array[i].clone();
+        }
+        return new RowSetArray(this.rowdef, a);
     }
     
     private final int indexFor(final byte[] key) {
@@ -53,10 +68,34 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return (int) (this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) % ((long) array.length));
     }
     
-    private final RowSet accessArray(final int i) {
-        RowSet r = this.array[i];
+    public final byte[] smallestKey() {
+        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.array.length);
+        synchronized (this.array) {
+            for (ObjectIndexCache rs: this.array) try {
+                keysort.put(rs.smallestKey());
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
+        }
+        return keysort.smallestKey();
+    }
+    
+    public final byte[] largestKey() {
+        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.array.length);
+        synchronized (this.array) {
+            for (ObjectIndexCache rs: this.array) try {
+                keysort.put(rs.largestKey());
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
+        }
+        return keysort.largestKey();
+    }
+    
+    private final ObjectIndexCache accessArray(final int i) {
+        ObjectIndexCache r = this.array[i];
         if (r == null) synchronized (this.array) {
-            r = new RowSet(this.rowdef);
+            r = new ObjectIndexCache(this.rowdef, 0);
             this.array[i] = r;
         }
         return r;
@@ -97,7 +136,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     public final Entry get(final byte[] key) {
         final int i = indexFor(key);
         if (i < 0) return null;
-        final RowSet r = this.array[i];
+        final ObjectIndexCache r = this.array[i];
         if (r == null) return null;
         return r.get(key);
     }
@@ -105,7 +144,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     public final boolean has(final byte[] key) {
         final int i = indexFor(key);
         if (i < 0) return false;
-        final RowSet r = this.array[i];
+        final ObjectIndexCache r = this.array[i];
         if (r == null) return false;
         return r.has(key);
     }
@@ -115,7 +154,6 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
             final Collection<CloneableIterator<byte[]>> col = new ArrayList<CloneableIterator<byte[]>>();
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) {
-                    this.array[i].sort();
                     col.add(this.array[i].keys(up, firstKey));
                 }
             }
@@ -171,13 +209,15 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return this.rowdef;
     }
 
+    @SuppressWarnings("unchecked")
     public final CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) {
         synchronized (this.array) {
-            final Collection<CloneableIterator<Entry>> col = new ArrayList<CloneableIterator<Entry>>();
+            final CloneableIterator<Entry>[] col = new CloneableIterator[this.array.length];
             for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) {
-                    this.array[i].sort();
-                    col.add(this.array[i].rows(up, firstKey));
+                if (this.array[i] == null) {
+                    col[i] = null;
+                } else {
+                    col[i] = this.array[i].rows(up, firstKey);
                 }
             }
             return StackIterator.stack(col);

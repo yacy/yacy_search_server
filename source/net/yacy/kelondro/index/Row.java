@@ -329,7 +329,8 @@ public final class Row {
         public final int compareTo(final Entry o) {
             // compares only the content of the primary key
             if (objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
-            return objectOrder.compare(this.bytes(), 0, this.getPrimaryKeyLength(), o.bytes(), 0, o.getPrimaryKeyLength());
+            assert primaryKeyLength == o.getPrimaryKeyLength();
+            return objectOrder.compare(this.bytes(), 0, o.bytes(), 0, primaryKeyLength);
         }
         
         public int compare(final Entry o1, final Entry o2) {
@@ -696,7 +697,8 @@ public final class Row {
         
         public Entry get(final byte[] key) {
             for (Entry e: this.queue) {
-                if (objectOrder.compare(key, 0, key.length, e.bytes(), 0, e.getPrimaryKeyLength()) == 0) {
+                assert key.length == e.getPrimaryKeyLength();
+                if (objectOrder.compare(key, 0, e.bytes(), 0, key.length) == 0) {
                     return e;
                 }
             }
@@ -708,7 +710,8 @@ public final class Row {
             Entry e;
             while (i.hasNext()) {
                 e = i.next();
-                if (objectOrder.compare(key, 0, key.length, e.bytes(), 0, e.getPrimaryKeyLength()) == 0) {
+                assert key.length == e.getPrimaryKeyLength();
+                if (objectOrder.compare(key, 0, e.bytes(), 0, key.length) == 0) {
                     i.remove();
                     return e;
                 }

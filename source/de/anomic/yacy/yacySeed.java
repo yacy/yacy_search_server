@@ -109,24 +109,24 @@ public class yacySeed implements Cloneable {
     public static final String PEERTYPE = "PeerType";
 
     /** static/dynamic (if the IP changes often for any reason) */
-    public static final String IPTYPE    = "IPType";
-    public static final String FLAGS     = "Flags";
-    public static final String FLAGSZERO = "____";
+    private static final String IPTYPE    = "IPType";
+    private static final String FLAGS     = "Flags";
+    private static final String FLAGSZERO = "____";
     /** the applications version */
-    public static final String VERSION   = "Version";
+    public  static final String VERSION   = "Version";
 
-    public static final String YOURTYPE  = "yourtype";
-    public static final String LASTSEEN  = "LastSeen";
-    public static final String USPEED    = "USpeed";
+    public  static final String YOURTYPE  = "yourtype";
+    public  static final String LASTSEEN  = "LastSeen";
+    private static final String USPEED    = "USpeed";
 
     /** the name of the peer (user-set) */
-    public static final String NAME      = "Name";
-    public static final String HASH      = "Hash";
+    public  static final String NAME      = "Name";
+    private static final String HASH      = "Hash";
     /** Birthday - first startup */
-    public static final String BDATE     = "BDate";
+    private static final String BDATE     = "BDate";
     /** UTC-Offset */
-    public static final String UTC       = "UTC";
-    public static final String PEERTAGS  = "Tags";
+    public  static final String UTC       = "UTC";
+    private static final String PEERTAGS  = "Tags";
 
     /** the speed of indexing (pages/minute) of the peer */
     public static final String ISPEED    = "ISpeed";
@@ -154,7 +154,7 @@ public class yacySeed implements Cloneable {
     public static final String PORT      = "Port";
     public static final String SEEDLIST  = "seedURL";
     /** zero-value */
-    public static final String ZERO      = "0";
+    private static final String ZERO      = "0";
     
     private static final int FLAG_DIRECT_CONNECT            = 0;
     private static final int FLAG_ACCEPT_REMOTE_CRAWL       = 1;
@@ -171,9 +171,8 @@ public class yacySeed implements Cloneable {
     public String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
     private final ConcurrentHashMap<String, String> dna;
-    public int available;
-    public int selectscore = -1; // only for debugging
-    public String alternativeIP = null;
+    protected int selectscore = -1; // only for debugging
+    private String alternativeIP = null;
 
     public yacySeed(final String theHash, final ConcurrentHashMap<String, String> theDna) {
         // create a seed with a pre-defined hash map
@@ -182,11 +181,10 @@ public class yacySeed implements Cloneable {
         this.dna = theDna;
         final String flags = this.dna.get(yacySeed.FLAGS);
         if ((flags == null) || (flags.length() != 4)) { this.dna.put(yacySeed.FLAGS, yacySeed.FLAGSZERO); }
-        this.available = 0;
         this.dna.put(yacySeed.NAME, checkPeerName(get(yacySeed.NAME, "&empty;")));
     }
 
-    public yacySeed(final String theHash) {
+    private yacySeed(final String theHash) {
         this.dna = new ConcurrentHashMap<String, String>();
 
         // settings that can only be computed by originating peer:
@@ -233,8 +231,6 @@ public class yacySeed implements Cloneable {
         this.dna.put(yacySeed.INDEX_IN, yacySeed.ZERO);  // received index
         this.dna.put(yacySeed.URL_OUT, yacySeed.ZERO);   // send URLs
         this.dna.put(yacySeed.URL_IN, yacySeed.ZERO);    // received URLs
-
-        this.available = 0;
     }
     
     /**
@@ -418,25 +414,6 @@ public class yacySeed implements Cloneable {
      */
     public static String hexHash2b64Hash(final String hexHash) {
         return Base64Order.enhancedCoder.encode(Digest.decodeHex(hexHash));
-    }
-
-    /**
-     * <code>12 * 6 bit = 72 bit = 9 byte</code>
-     * @param b64Hash a base64 hash
-     * @return returns a base256 - a byte - representation of the given base64 hash
-     */
-    public static byte[] b64Hash2b256Hash(final String b64Hash) {
-        assert b64Hash.length() == 12;
-        return Base64Order.enhancedCoder.decode(b64Hash);
-    }
-    
-    /**
-     * @param b256Hash a base256 hash - normal byte number system
-     * @return the base64 representation of the given base256 hash
-     */
-    public static String b256Hash2b64Hash(final byte[] b256Hash) {
-        assert b256Hash.length == 9;
-        return Base64Order.enhancedCoder.encode(b256Hash);
     }
     
     /**

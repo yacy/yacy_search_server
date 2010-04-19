@@ -284,12 +284,12 @@ public class ZURL implements Iterable<ZURL.Entry> {
 
     }
 
-    public class kiter implements Iterator<Entry> {
+    private class kiter implements Iterator<Entry> {
         // enumerates entry elements
-        Iterator<Row.Entry> i;
-        boolean error = false;
+        private Iterator<Row.Entry> i;
+        private boolean error = false;
         
-        public kiter(final boolean up, final String firstHash) throws IOException {
+        private kiter(final boolean up, final String firstHash) throws IOException {
             i = urlIndex.rows(up, (firstHash == null) ? null : firstHash.getBytes());
             error = false;
         }

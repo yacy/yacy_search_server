@@ -43,9 +43,8 @@ import java.util.concurrent.TimeUnit;
 
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.index.Cache;
-import net.yacy.kelondro.index.Column;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.ObjectIndex;
-import net.yacy.kelondro.index.ObjectIndexCache;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -53,7 +52,6 @@ import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.order.StackIterator;
 import net.yacy.kelondro.util.DateFormatter;
@@ -68,7 +66,6 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     // the table type can be either kelondroFlex or kelondroEco
 
     private static final int EcoFSBufferSize = 20;
-    static final ObjectIndex dummyIndex = new ObjectIndexCache(new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, 2, "key")}, NaturalOrder.naturalOrder), 0);
 
     // the thread pool for the keeperOf executor service
     private ExecutorService executor;
@@ -83,8 +80,6 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     private long  fileSizeLimit;
     private boolean useTailCache;
     private boolean exceed134217727;
-    //private BlockingQueue<DiscoverOrder> orderQueue;
-    //private Discovery[] discoveryThreads;
     
     public SplitTable(
             final File path, 
@@ -95,7 +90,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         this(path, tablename, rowdef, ArrayStack.oneMonth, (long) Integer.MAX_VALUE, useTailCache, exceed134217727);
     }
 
-    public SplitTable(
+    private SplitTable(
             final File path, 
             final String tablename, 
             final Row rowdef, 
@@ -111,22 +106,34 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         this.useTailCache = useTailCache;
         this.exceed134217727 = exceed134217727;
         this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
-        /*
-        this.orderQueue = new LinkedBlockingQueue<DiscoverOrder>();
-        this.discoveryThreads = new Discovery[Runtime.getRuntime().availableProcessors() + 1];
-        for (int i = 0; i < this.discoveryThreads.length; i++) {
-            this.discoveryThreads[i] = new Discovery(this.orderQueue);
-            this.discoveryThreads[i].start();
-        }
-        */
         init();
     }
     
-    String newFilename() {
+    public final byte[] smallestKey() {
+        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
+        for (ObjectIndex oi: this.tables.values()) try {
+            keysort.put(oi.smallestKey());
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        return keysort.smallestKey();
+    }
+    
+    public final byte[] largestKey() {
+        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
+        for (ObjectIndex oi: this.tables.values()) try {
+            keysort.put(oi.largestKey());
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        return keysort.largestKey();
+    }
+
+    private String newFilename() {
         return prefix + "." + DateFormatter.formatShortMilliSecond(new Date()) + ".table";
     }
     
-    public void init() throws RowSpaceExceededException {
+    private void init() throws RowSpaceExceededException {
         current = null;
 
         // initialized tables map
@@ -286,11 +293,11 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return this.rowdef;
     }
     
-    public synchronized boolean has(final byte[] key) {
+    public boolean has(final byte[] key) {
         return keeperOf(key) != null;
     }
     
-    public synchronized Row.Entry get(final byte[] key) throws IOException {
+    public Row.Entry get(final byte[] key) throws IOException {
         final ObjectIndex keeper = keeperOf(key);
         if (keeper == null) return null;
         return keeper.get(key);
@@ -331,248 +338,43 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return table;
     }
     
-    public synchronized Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
+    public Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex keeper = keeperOf(row.getColBytes(0, true));
         if (keeper != null) return keeper.replace(row);
-        keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
+        synchronized (this.tables) {
+            keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
+        }
         keeper.put(row);
         return null;
     }
     
-    public synchronized void put(final Row.Entry row) throws IOException, RowSpaceExceededException {
+    public void put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex keeper = keeperOf(row.getColBytes(0, true));
         if (keeper != null) {keeper.put(row); return;}
-        assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
-        keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
+        synchronized (this.tables) {
+            assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
+            keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
+        }
         keeper.put(row);
     }
     
-    /**
-     * challenge class for concurrent keeperOf implementation
-     *
-     */
-    /*
-    private static final class Challenge {
-        // the Challenge is a discover order entry
-        private final byte[] key;
-        private int responseCounter, finishCounter;
-        private ObjectIndex discovery;
-        private Semaphore readyCheck;
-        public Challenge(final byte[] key, int finishCounter) {
-            this.key = key;
-            this.responseCounter = 0;
-            this.finishCounter = finishCounter;
-            this.readyCheck = new Semaphore(0);
-            this.discovery = null;
-        }
-        public byte[] getKey() {
-            return this.key;
-        }
-        public synchronized void commitNoDiscovery() {
-            this.responseCounter++;
-            if (this.responseCounter >= this.finishCounter) this.readyCheck.release();
-        }
-        public synchronized void commitDiscovery(ObjectIndex discovery) {
-            this.responseCounter++;
-            this.discovery = discovery;
-            this.readyCheck.release();
-        }
-        public ObjectIndex discover(long timeout) {
-            if (this.discovery != null) return this.discovery;
-            try {
-                this.readyCheck.tryAcquire(1, timeout, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {}
-            return this.discovery;
-        }
-    }
-    */
-    
-    /**
-     * A DiscoverOrder is a class to order a check for a specific table
-     * for the occurrences of a given key
-     *
-     */
-    /*
-    private static final class DiscoverOrder {
-        public Challenge challenge;
-        public ObjectIndex objectIndex;
-        public DiscoverOrder() {
-            this.challenge = null;
-            this.objectIndex = null;
-        }
-        public DiscoverOrder(Challenge challenge, ObjectIndex objectIndex) {
-            this.challenge = challenge;
-            this.objectIndex = objectIndex;
-        }
-        public void executeOrder() {
-            try {
-                if (this.objectIndex.has(this.challenge.getKey())) {
-                    this.challenge.commitDiscovery(this.objectIndex);
-                } else {
-                    this.challenge.commitNoDiscovery();
-                }
-            } catch (Exception e) {
-                Log.logSevere("SplitTable", "", e);
-                this.challenge.commitNoDiscovery();
-            }
-        }
-    }
-    private static final DiscoverOrder poisonDiscoverOrder = new DiscoverOrder();
-    */
-    
-    /**
-     * the Discovery class is used to start some concurrent threads that check the database
-     * table files for occurrences of key after a keeperOf was submitted
-     *
-     */
-    /*
-    private static final class Discovery extends Thread {
-        // the class discovers keeper locations in the splitted table
-        BlockingQueue<DiscoverOrder> orderQueue;
-        public Discovery(BlockingQueue<DiscoverOrder> orderQueue) {
-            super("SplitTable-Discovery");
-            this.orderQueue = orderQueue;
-        }
-        public void run() {
-            DiscoverOrder order;
-            while (true) {
-                try {
-                    order = orderQueue.take();
-                    if (order == poisonDiscoverOrder) break;
-                    // check if in the given objectIndex is the key as given in the order
-                    order.executeOrder();
-                } catch (InterruptedException e) {
-                    Log.logSevere("SplitTable", "", e);
-                    //continue;
-                    break;
-                }
-            }
-            Log.logInfo("SplitTable.Discovery", "terminated discovery thread " + this.getName());
-        }
-    }
-    
-    private boolean discoveriesAlive() {
-        for (int i = 0; i < this.discoveryThreads.length; i++) {
-            if (!this.discoveryThreads[i].isAlive()) return false;
-        }
-        return true;
-    }
-    */
 
     private ObjectIndex keeperOf(final byte[] key) {
-        //if (!discoveriesAlive()) {
-            //synchronized (tables) {
         if (key == null) return null;
-                for (ObjectIndex oi: tables.values()) {
-                    if (oi.has(key)) return oi;
-                }
-                return null;
-            //}
-        //}
-            /*
-        Challenge challenge = null;
-        synchronized (tables) {
-            int tableCount = this.tables.size();
-            challenge = new Challenge(key, tableCount);
-            
-            // submit discover orders to the processing units
-            final Iterator<ObjectIndex> i = tables.values().iterator();
-            DiscoverOrder order;
-            boolean offered;
-            while (i.hasNext()) {
-                order = new DiscoverOrder(challenge, i.next());
-                offered = this.orderQueue.offer(order);
-                if (!offered) {
-                    // for some reason the queue did not accept the order
-                    // so we execute the order here
-                    order.executeOrder();
-                    Log.logWarning("SplitTable", "executed a challenge order without concurrency. queue size = " + this.orderQueue.size());
-                }
-            }
-        }
-        // wait for a result
-        ObjectIndex result = challenge.discover(1000);
-        //System.out.println("result of discovery: file = " + ((result == null) ? "null" : result.filename()));
-        return result;
-        */
-    }
-    
-    /*
-    private static final class ReadyCheck {
-        private boolean r;
-        public ReadyCheck() {
-            this.r = false;
-        }
-        public void isReady() {
-            this.r = true;
-        }
-        public boolean check() {
-            return this.r;
-        }
-    }
-    private ObjectIndex keeperOf(final byte[] key) {
-        
-        if (tables.size() < 2) {
-            // no concurrency if not needed
-            for (final ObjectIndex table : tables.values()) {
-                if (table.has(key)) return table;
-            }
-            return null;
-        }
-        
-        // because the index is stored only in one table,
-        // and the index is completely in RAM, a concurrency will create
-        // not concurrent File accesses
-        
-        // start a concurrent query to database tables
-        final CompletionService<ObjectIndex> cs = new ExecutorCompletionService<ObjectIndex>(executor);
-        int accepted = 0;
-        final ReadyCheck ready = new ReadyCheck();
-        for (final ObjectIndex table : tables.values()) {
-            if (ready.check()) break; // found already a table
-            try {
-                cs.submit(new Callable<ObjectIndex>() {
-                    public ObjectIndex call() {
-                        if (table.has(key)) {
-                            ready.isReady();
-                            return table;
-                        }
-                        return dummyIndex;
-                    }
-                });
-                accepted++;
-            } catch (final RejectedExecutionException e) {
-                // the executor is either shutting down or the blocking queue is full
-                // execute the search direct here without concurrency
-                if (table.has(key)) return table;
-            }
-        }
-
-        // read the result
-        try {
-            for (int i = 0; i < accepted; i++) {
-                final Future<ObjectIndex> f = cs.take();
-                if (f == null) continue;
-                final ObjectIndex index = f.get();
-                if (index == dummyIndex) continue;
-                return index;
-            }
-            return null;
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (final ExecutionException e) {
-        	Log.logSevere("SplitTable", "", e);
-            throw new RuntimeException(e.getCause());
+        for (ObjectIndex oi: tables.values()) {
+            if (oi.has(key)) return oi;
         }
         return null;
     }
-    */
-    public synchronized void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
+    
+    public void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex table = (this.current == null) ? null : tables.get(this.current);
-        if (table == null) table = newTable(); else table = checkTable(table);
+        synchronized (this.tables) {
+            if (table == null) table = newTable(); else table = checkTable(table);
+        }
         table.addUnique(row);
     }
     
@@ -585,13 +387,13 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return report;
     }
     
-    public synchronized Row.Entry remove(final byte[] key) throws IOException {
+    public Row.Entry remove(final byte[] key) throws IOException {
         final ObjectIndex table = keeperOf(key);
         if (table == null) return null;
         return table.remove(key);
     }
     
-    public synchronized Row.Entry removeOne() throws IOException {
+    public Row.Entry removeOne() throws IOException {
         final Iterator<ObjectIndex> i = tables.values().iterator();
         ObjectIndex table, maxtable = null;
         int maxcount = -1;
@@ -608,7 +410,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return maxtable.removeOne();
     }
     
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(tables.size());
         final Iterator<ObjectIndex> i = tables.values().iterator();
         CloneableIterator<byte[]> k;
@@ -619,7 +421,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return MergeIterator.cascade(c, rowdef.objectOrder, MergeIterator.simpleMerge, up);
     }
     
-    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
+    public CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(tables.size());
         final Iterator<ObjectIndex> i = tables.values().iterator();
         while (i.hasNext()) {
@@ -636,26 +438,18 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
+    @SuppressWarnings("unchecked")
     public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
-        final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(tables.size());
+        final CloneableIterator<Row.Entry>[] c = new CloneableIterator[tables.size()];
         final Iterator<ObjectIndex> i = tables.values().iterator();
+        int d = 0;
         while (i.hasNext()) {
-            c.add(i.next().rows());
+            c[d++] = i.next().rows();
         }
         return StackIterator.stack(c);
     }
     
     public synchronized void close() {
-        // stop discover threads
-        /*
-        if (this.orderQueue != null) for (int i = 0; i < this.discoveryThreads.length; i++) {
-            try {
-                this.orderQueue.put(poisonDiscoverOrder);
-            } catch (InterruptedException e) {
-                Log.logSevere("SplitTable", "", e);
-            }
-        }
-        */
         if (tables == null) return;
         this.executor.shutdown();
         try {

@@ -36,8 +36,10 @@ public interface ByteOrder extends Order<byte[]> {
     public boolean wellformed(byte[] a);
     
     public boolean wellformed(byte[] a, int start, int len);
+
+    public int compare(byte[] a, byte[] b);
     
-    public int compare(byte[] a, int astart, int alen, byte[] b, int bstart, int blen);
+    public int compare(byte[] a, int astart, byte[] b, int bstart, int len);
 
     public boolean equal(final byte[] a, final byte[] b);
     
@@ -47,4 +49,7 @@ public interface ByteOrder extends Order<byte[]> {
     
     public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException;
 
+    public byte[] smallest(byte[] a, byte[] b);
+
+    public byte[] largest(byte[] a, byte[] b);
 }

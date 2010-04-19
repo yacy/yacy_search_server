@@ -89,7 +89,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
     
     public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
-        return new HandleSet(keylength, this, space, space);
+        return new HandleSet(keylength, this, space);
     }
 
     public static byte[] zero(int length) {
@@ -416,9 +416,9 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public final int compare(final byte[] a, final byte[] b) {
         try {
         return (asc) ?
-                ((zero == null) ? compares(a, b) : compare0(a, 0, a.length, b, 0, b.length))
+                ((zero == null) ? compares(a, b) : compare0(a, 0, b, 0, a.length))
                 :
-                ((zero == null) ? compares(b, a) : compare0(b, 0, b.length, a, 0, a.length));
+                ((zero == null) ? compares(b, a) : compare0(b, 0, a, 0, a.length));
         } catch (Exception e) {
             // if a or b is not well-formed, an ArrayIndexOutOfBoundsException may occur
             // in that case we don't want that the exception makes databse functions
@@ -439,16 +439,16 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         }
     }
 
-    public final int compare(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
+    public final int compare(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
         try {
             return (asc) ?
-                    compare0(a, aoffset, alength, b, boffset, blength)
+                    compare0(a, aoffset, b, boffset, length)
                     :
-                    compare0(b, boffset, blength, a, aoffset, alength);
+                    compare0(b, boffset, a, aoffset, length);
         } catch (Exception e) {
             // same handling as in simple compare method above
-            boolean wfa = wellformed(a, aoffset, alength);
-            boolean wfb = wellformed(b, boffset, blength);
+            boolean wfa = wellformed(a, aoffset, length);
+            boolean wfb = wellformed(b, boffset, length);
             if (wfa && wfb) {
                 // uh strange. throw the exception
                 if (e instanceof ArrayIndexOutOfBoundsException) throw (ArrayIndexOutOfBoundsException) e;
@@ -456,17 +456,17 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             }
             if (wfa) return (asc) ? -1 :  1;
             if (wfb) return (asc) ?  1 : -1;
-            return ((asc) ? 1 : -1) * NaturalOrder.naturalOrder.compare(a, aoffset, alength, b, boffset, blength);
+            return ((asc) ? 1 : -1) * NaturalOrder.naturalOrder.compare(a, aoffset, b, boffset, length);
         }
     }
     
-    private final int compare0(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
-        if (zero == null) return compares(a, aoffset, alength, b, boffset, blength);
+    private final int compare0(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
+        if (zero == null) return compares(a, aoffset, b, boffset, length);
 
         // we have an artificial start point. check all combinations
-        final int az = compares(a, aoffset, alength, zero, 0, Math.min(alength, zero.length)); // -1 if a < z; 0 if a == z; 1 if a > z
-        final int bz = compares(b, boffset, blength, zero, 0, Math.min(blength, zero.length)); // -1 if b < z; 0 if b == z; 1 if b > z
-        if (az == bz) return compares(a, aoffset, alength, b, boffset, blength);
+        final int az = compares(a, aoffset, zero, 0, Math.min(length, zero.length)); // -1 if a < z; 0 if a == z; 1 if a > z
+        final int bz = compares(b, boffset, zero, 0, Math.min(length, zero.length)); // -1 if b < z; 0 if b == z; 1 if b > z
+        if (az == bz) return compares(a, aoffset, b, boffset, length);
         return sig(az - bz);
     }
     
@@ -497,24 +497,21 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return 0;
     }
     
-    private final int compares(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
-        assert (aoffset + alength <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + alength;
-        assert (boffset + blength <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + blength;
+    private final int compares(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
+        assert (aoffset + length <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + length;
+        assert (boffset + length <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + length;
         assert (ahpla.length == 128);
         short i = 0;
-        final int al = Math.min(alength, a.length - aoffset);
-        final int bl = Math.min(blength, b.length - boffset);
-        final short ml = (short) Math.min(al, bl);
         byte ac, bc;
         //byte acc, bcc;
         //int c = 0;
-        while (i < ml) {
-            assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + NaturalOrder.arrayList(a, aoffset, al);
-            assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + NaturalOrder.arrayList(b, boffset, al);
+        while (i < length) {
+            assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + NaturalOrder.arrayList(a, aoffset, length);
+            assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + NaturalOrder.arrayList(b, boffset, length);
             ac = a[aoffset + i];
-            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + NaturalOrder.arrayList(a, aoffset, al);
+            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + NaturalOrder.arrayList(a, aoffset, length);
             bc = b[boffset + i];
-            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + NaturalOrder.arrayList(b, boffset, al);
+            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + NaturalOrder.arrayList(b, boffset, length);
             assert ac != 0;
             assert bc != 0;
             //if ((ac == 0) && (bc == 0)) return 0; // zero-terminated length
@@ -534,9 +531,6 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             //return c;
             return ab[(ac << 7) | bc];
         }
-        // compare length
-        if (al > bl) return 1;
-        if (al < bl) return -1;
         // they are equal
         return 0;
     }

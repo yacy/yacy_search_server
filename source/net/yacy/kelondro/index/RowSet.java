@@ -77,8 +77,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         assert orderbound >= 0 : "orderbound = " + orderbound;
         if (orderbound < 0) return new RowSet(rowdef);
         final byte[] chunkcache = new byte[size * rowdef.objectsize];
-        assert b.length - exportOverheadSize == size * rowdef.objectsize;
-        if (b.length - exportOverheadSize != size * rowdef.objectsize) return new RowSet(rowdef);
+        //assert b.length - exportOverheadSize == size * rowdef.objectsize : "b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize;
+        if (b.length - exportOverheadSize != size * rowdef.objectsize) {
+            Log.logSevere("RowSet", "exportOverheadSize wrong: b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize);
+            return new RowSet(rowdef);
+        }
         System.arraycopy(b, exportOverheadSize, chunkcache, 0, chunkcache.length);
         return new RowSet(rowdef, size, chunkcache, orderbound);
     }
@@ -201,22 +204,17 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             sort();
         }
         
-        if ((this.rowdef.objectOrder != null) && (this.rowdef.objectOrder instanceof Base64Order) && (this.sortBound > 4000)) {
+        if (this.rowdef.objectOrder != null && this.rowdef.objectOrder instanceof Base64Order) {
             // first try to find in sorted area
             assert this.rowdef.objectOrder.wellformed(a, astart, alength) : "not wellformed: " + new String(a, astart, alength);
-            final int p = binarySearch(a, astart, alength);
-            if (p >= 0) return p;
-            
-            // then find in unsorted area
-            return iterativeSearch(a, astart, alength, this.sortBound, this.chunkcount);
-        } else {
-            // first try to find in sorted area
-            final int p = binarySearch(a, astart, alength);
-            if (p >= 0) return p;
+        }
         
-            // then find in unsorted area
-            return iterativeSearch(a, astart, alength, this.sortBound, this.chunkcount);
-        }        
+        // first try to find in sorted area
+        final int p = binarySearch(a, astart, alength);
+        if (p >= 0) return p;
+    
+        // then find in unsorted area
+        return iterativeSearch(a, astart, alength, this.sortBound, this.chunkcount);
     }
     
     private final int iterativeSearch(final byte[] key, final int astart, final int alength, final int leftBorder, final int rightBound) {
@@ -386,25 +384,8 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      */
     public final RowSet merge(final RowSet c) throws RowSpaceExceededException {
         assert c != null;
-        /*
-        if (this.isSorted() && this.size() >= c.size()) {
-            return mergeInsert(this, c);
-        }*/
         return mergeEnum(this, c);
     }
-    /*
-    private static kelondroRowSet mergeInsert(kelondroRowSet sorted, kelondroRowCollection small) {
-        assert sorted.rowdef == small.rowdef;
-        assert sorted.isSorted();
-        assert small.size() <= sorted.size();
-        sorted.ensureSize(sorted.size() + small.size());
-        for (int i = 0; i < small.size(); i++) {
-            
-        }
-        
-        return sorted;
-    }
-*/
     
     /**
      * merge this row collection with another row collection using an simultanous iteration of the input collections
@@ -436,7 +417,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             c0p = c0i * objectsize;
             c1p = c1i * objectsize;
             o = c0.rowdef.objectOrder.compare(
-                    c0.chunkcache, c0p, c0.rowdef.primaryKeyLength,
+                    c0.chunkcache, c0p,
                     c1.chunkcache, c1p, c0.rowdef.primaryKeyLength);
             if (o == 0) {
                 r.addSorted(c0.chunkcache, c0p, objectsize);

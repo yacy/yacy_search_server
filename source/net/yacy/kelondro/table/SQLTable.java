@@ -102,7 +102,15 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
         }
         
     }
+
+    public byte[] smallestKey() {
+        return null;
+    }
     
+    public byte[] largestKey() {
+        return null;
+    }
+
     public String filename() {
         return "dbtest." + theDBConnection.hashCode();
     }

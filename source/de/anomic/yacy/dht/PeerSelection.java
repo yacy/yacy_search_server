@@ -26,10 +26,11 @@ package de.anomic.yacy.dht;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -90,7 +91,7 @@ public class PeerSelection {
         
     }
     
-    public static boolean guessIfOwnWord(final yacySeedDB seedDB, final byte[] wordhash, final String urlhash) {
+    private static boolean guessIfOwnWord(final yacySeedDB seedDB, final byte[] wordhash, final String urlhash) {
         if (seedDB == null) return false;
         int connected = seedDB.sizeConnected();
         if (connected == 0) return true;
@@ -102,7 +103,7 @@ public class PeerSelection {
         return false;
     }
     
-    public static boolean verifyIfOwnWord(final yacySeedDB seedDB, byte[] wordhash, String urlhash, int redundancy) {
+    private static boolean verifyIfOwnWord(final yacySeedDB seedDB, byte[] wordhash, String urlhash, int redundancy) {
         String myHash = seedDB.mySeed().hash;
         wordhash = FlatWordPartitionScheme.positionToHash(seedDB.scheme.dhtPosition(wordhash, urlhash));
         Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, true);
@@ -122,7 +123,7 @@ public class PeerSelection {
         return null;
     }
 
-    public static ArrayList<yacySeed> getAcceptRemoteIndexSeedsList(
+    protected static ArrayList<yacySeed> getAcceptRemoteIndexSeedsList(
             yacySeedDB seedDB,
             final byte[] starthash,
             int max,
@@ -151,7 +152,7 @@ public class PeerSelection {
         private final Iterator<yacySeed> se;
         private yacySeed nextSeed;
         private final yacySeedDB seedDB;
-        private final HashSet<String> doublecheck;
+        private final HandleSet doublecheck;
         private int remaining;
         private boolean alsoMyOwn;
         
@@ -159,7 +160,7 @@ public class PeerSelection {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
             this.remaining = max;
-            this.doublecheck = new HashSet<String>();
+            this.doublecheck = new HandleSet(12, Base64Order.enhancedCoder, 0);
             this.nextSeed = nextInternal();
             this.alsoMyOwn = alsoMyOwn && nextSeed != null && (Base64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) > 0);
         }
@@ -175,8 +176,14 @@ public class PeerSelection {
                 while (se.hasNext()) {
                     s = se.next();
                     if (s == null) return null;
-                    if (doublecheck.contains(s.hash)) return null;
-                    this.doublecheck.add(s.hash);
+                    byte[] hashb = s.hash.getBytes();
+                    if (doublecheck.has(hashb)) return null;
+                    try {
+                        this.doublecheck.put(hashb);
+                    } catch (RowSpaceExceededException e) {
+                        Log.logException(e);
+                        break;
+                    }
                     if (s.getFlagAcceptRemoteIndex()) {
                         this.remaining--;
                         return s;

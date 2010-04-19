@@ -33,7 +33,6 @@ import java.lang.ref.SoftReference;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -43,6 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
@@ -65,7 +66,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
   
     // global statics
 
-    public static final int dhtActivityMagic = 32;
+    private static final int dhtActivityMagic = 32;
     
     /**
      * <p><code>public static final String <strong>DBFILE_OWN_SEED</strong> = "mySeed.txt"</code></p>
@@ -78,13 +79,13 @@ public final class yacySeedDB implements AlternativeDomainNames {
     public static final String[] doubleaccFields = new String[] {yacySeed.RSPEED};
     
     // class objects
-    protected File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
-    protected File myOwnSeedFile;
-    protected MapDataMining seedActiveDB, seedPassiveDB, seedPotentialDB;
+    private File seedActiveDBFile, seedPassiveDBFile, seedPotentialDBFile;
+    private File myOwnSeedFile;
+    private MapDataMining seedActiveDB, seedPassiveDB, seedPotentialDB;
     
-    public int lastSeedUpload_seedDBSize = 0;
+    protected int lastSeedUpload_seedDBSize = 0;
     public long lastSeedUpload_timeStamp = System.currentTimeMillis();
-    public String lastSeedUpload_myIP = "";
+    protected String lastSeedUpload_myIP = "";
 
     public  yacyPeerActions peerActions;
     public  yacyNewsPool newsPool;
@@ -273,7 +274,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
     
-    public void saveMySeed() {
+    protected void saveMySeed() {
         try {
           this.mySeed().save(myOwnSeedFile);
         } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not save mySeed '"+ myOwnSeedFile +"': "+ e.getMessage()); }
@@ -305,7 +306,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
     }
     
-    protected synchronized MapDataMining resetSeedTable(MapDataMining seedDB, final File seedDBFile) {
+    private synchronized MapDataMining resetSeedTable(MapDataMining seedDB, final File seedDBFile) {
         // this is an emergency function that should only be used if any problem with the
         // seed.db is detected
         yacyCore.log.logWarning("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
@@ -319,8 +320,8 @@ public final class yacySeedDB implements AlternativeDomainNames {
     }
     
     public synchronized void resetActiveTable() { seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile); }
-    public synchronized void resetPassiveTable() { seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile); }
-    public synchronized void resetPotentialTable() { seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile); }
+    private synchronized void resetPassiveTable() { seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile); }
+    private synchronized void resetPotentialTable() { seedPotentialDB = resetSeedTable(seedPotentialDB, seedPotentialDBFile); }
     
     public void close() {
         if (seedActiveDB != null) seedActiveDB.close();
@@ -397,12 +398,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, seedActiveDB, minVersion);
     }
     
-    public Iterator<yacySeed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
+    private Iterator<yacySeed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, seedPassiveDB, minVersion);
     }
     
-    public Iterator<yacySeed> seedsPotential(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
+    private Iterator<yacySeed> seedsPotential(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
         return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, seedPotentialDB, minVersion);
     }
@@ -451,7 +452,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
     }
 
-    public synchronized void addDisconnected(final yacySeed seed) {
+    protected synchronized void addDisconnected(final yacySeed seed) {
         if (seed.isProper(false) != null) return;
         try {
             nameLookupCache.remove(seed.getName());
@@ -470,7 +471,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
     }
 
-    public synchronized void addPotential(final yacySeed seed) {
+    protected synchronized void addPotential(final yacySeed seed) {
         if (seed.isProper(false) != null) return;
         try {
             nameLookupCache.remove(seed.getName());
@@ -503,28 +504,16 @@ public final class yacySeedDB implements AlternativeDomainNames {
 		} catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
         
-    public boolean hasConnected(final String hash) {
-    try {
+    public boolean hasConnected(final byte[] hash) {
         return seedActiveDB.has(hash);
-    } catch (final IOException e) {
-        return false;
-    }
     }
 
-    public boolean hasDisconnected(final String hash) {
-    try {
+    public boolean hasDisconnected(final byte[] hash) {
         return seedPassiveDB.has(hash);
-    } catch (final IOException e) {
-        return false;
-    }
     }
  
-    public boolean hasPotential(final String hash) {
-    try {
+    public boolean hasPotential(final byte[] hash) {
         return seedPotentialDB.has(hash);
-    } catch (final IOException e) {
-        return false;
-    }
     }
         
     private yacySeed get(final String hash, final MapDataMining database) {
@@ -644,7 +633,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         int pos = -1;
         String addressStr = null;
         InetAddress seedIPAddress = null;        
-        final HashSet<String> badPeerHashes = new HashSet<String>();
+        final HandleSet badPeerHashes = new HandleSet(12, Base64Order.enhancedCoder, 0);
         
         if (lookupConnected) {
             // enumerate the cache and simultanous insert values
@@ -656,7 +645,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
                         	Log.logWarning("YACY","lookupByIP/Connected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
-                        	badPeerHashes.add(seed.hash);
+                        	try {
+                                badPeerHashes.put(seed.hash.getBytes());
+                            } catch (RowSpaceExceededException e1) {
+                                Log.logException(e1);
+                                break;
+                            }
                         	continue; 
                         }
                         if ((pos = addressStr.indexOf(':'))!= -1) {
@@ -669,7 +663,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 } catch (final UnknownHostException ex) {}
             }
             // delete bad peers
-            final Iterator<String> i = badPeerHashes.iterator();
+            final Iterator<byte[]> i = badPeerHashes.iterator();
             while (i.hasNext()) try {seedActiveDB.remove(i.next());} catch (final IOException e1) {Log.logException(e1);}
             badPeerHashes.clear();
         }
@@ -685,7 +679,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
                         addressStr = seed.getPublicAddress();
                         if (addressStr == null) {
                             Log.logWarning("YACY","lookupByIPDisconnected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
-                            badPeerHashes.add(seed.hash);
+                            try {
+                                badPeerHashes.put(seed.hash.getBytes());
+                            } catch (RowSpaceExceededException e1) {
+                                Log.logException(e1);
+                                break;
+                            }
                             continue;
                         }
                         if ((pos = addressStr.indexOf(':'))!= -1) {
@@ -698,7 +697,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 } catch (final UnknownHostException ex) {}
             }
             // delete bad peers
-            final Iterator<String> i = badPeerHashes.iterator();
+            final Iterator<byte[]> i = badPeerHashes.iterator();
             while (i.hasNext()) try {seedActiveDB.remove(i.next());} catch (final IOException e1) {Log.logException(e1);}
             badPeerHashes.clear();
         }
@@ -739,10 +738,6 @@ public final class yacySeedDB implements AlternativeDomainNames {
             return null;
         }
     }
-    
-    public ArrayList<String> storeCache(final File seedFile) throws IOException {
-    	return storeCache(seedFile, false);
-    }
 
     private ArrayList<String> storeCache(final File seedFile, final boolean addMySeed) throws IOException {
         PrintWriter pw = null;
@@ -778,7 +773,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return v;
     }
 
-    public String uploadCache(final yacySeedUploader uploader, 
+    protected String uploadCache(final yacySeedUploader uploader, 
             final serverSwitch sb,
             final yacySeedDB seedDB,
             final DigestURI seedURL) throws Exception {
@@ -931,14 +926,14 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
     }
 
-    class seedEnum implements Iterator<yacySeed> {
+    private class seedEnum implements Iterator<yacySeed> {
         
-        MapDataMining.mapIterator it;
-        yacySeed nextSeed;
-        MapDataMining database;
-        float minVersion;
+        private MapDataMining.mapIterator it;
+        private yacySeed nextSeed;
+        private MapDataMining database;
+        private float minVersion;
         
-        public seedEnum(final boolean up, final boolean rot, final byte[] firstKey, final byte[] secondKey, final MapDataMining database, final float minVersion) {
+        private seedEnum(final boolean up, final boolean rot, final byte[] firstKey, final byte[] secondKey, final MapDataMining database, final float minVersion) {
             this.database = database;
             this.minVersion = minVersion;
             try {
@@ -963,7 +958,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             }
         }
         
-        public seedEnum(final boolean up, final String field, final MapDataMining database) {
+        private seedEnum(final boolean up, final String field, final MapDataMining database) {
             this.database = database;
             try {
                 it = database.maps(up, field);
@@ -982,7 +977,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             return (nextSeed != null);
         }
         
-        public yacySeed internalNext() {
+        private yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
             try {
                 ConcurrentHashMap<String, String> dna;

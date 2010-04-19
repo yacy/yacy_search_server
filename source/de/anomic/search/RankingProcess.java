@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +62,7 @@ import de.anomic.yacy.graphics.ProfilingGraph;
 public final class RankingProcess extends Thread {
     
     public  static BinSearch[] ybrTables = null; // block-rank tables
-    public  static final int maxYBR = 3; // the lower this value, the faster the search
+    private static final int maxYBR = 3; // the lower this value, the faster the search
     private static boolean useYBR = true;
     private static final int maxDoubleDomAll = 100, maxDoubleDomSpecial = 10000;
     
@@ -80,7 +79,7 @@ public final class RankingProcess extends Thread {
     private final SortStack<WordReferenceVars> stack;
     private int feeders;
     private final ConcurrentHashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
-    private final HashSet<String> handover; // key = urlhash; used for double-check of urls that had been handed over to search process
+    //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
     
     private final Navigator ref;  // reference score computation for the commonSense heuristic
     private final Navigator hostNavigator;
@@ -95,7 +94,7 @@ public final class RankingProcess extends Thread {
         this.localSearchInclusion = null;
         this.stack = new SortStack<WordReferenceVars>(maxentries, true);
         this.doubleDomCache = new ConcurrentHashMap<String, SortStack<WordReferenceVars>>();
-        this.handover = new HashSet<String>();
+        //this.handover = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.getOrdering(), 0);
         this.query = query;
         this.order = order;
         this.maxentries = maxentries;
@@ -277,11 +276,11 @@ public final class RankingProcess extends Thread {
     	assert this.feeders >= 0 : "feeders = " + this.feeders;
     }
     
-    public void moreFeeders(final int countMoreFeeders) {
+    protected void moreFeeders(final int countMoreFeeders) {
     	this.feeders += countMoreFeeders;
     }
     
-    public boolean feedingIsFinished() {
+    private boolean feedingIsFinished() {
     	return this.feeders == 0;
     }
     
@@ -302,7 +301,7 @@ public final class RankingProcess extends Thread {
         return false;
     }
     
-    public Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {
+    protected Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {
         // direct access to the result maps is needed for abstract generation
         // this is only available if execQuery() was called before
         return localSearchInclusion;
@@ -481,14 +480,19 @@ public final class RankingProcess extends Thread {
             }
             
             // accept url
-            //System.out.println("handing over hash " + page.hash());
-            this.handover.add(new String(page.hash())); // remember that we handed over this url
+            /*
+            try {
+                this.handover.put(page.hash()); // remember that we handed over this url
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
+            */
             return page;
         }
         return null;
     }
     
-    public int size() {
+    protected int size() {
         //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
         int c = stack.size();
         for (SortStack<WordReferenceVars> s: this.doubleDomCache.values()) {
@@ -541,7 +545,7 @@ public final class RankingProcess extends Thread {
         return this.remote_peerCount;
     }
     
-    public void remove(final WordReferenceVars reference) {
+    protected void remove(final WordReferenceVars reference) {
         stack.remove(reference);
         urlhashes.remove(reference.urlHash);
     }
@@ -586,7 +590,6 @@ public final class RankingProcess extends Thread {
         if (result.size() < 2) result.clear(); // navigators with one entry are not useful
         return result;
     }
-
 
     public static final Comparator<Map.Entry<String, Integer>> mecomp = new Comparator<Map.Entry<String, Integer>>() {
         public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {

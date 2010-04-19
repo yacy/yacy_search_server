@@ -206,7 +206,7 @@ public class yacyPeerActions {
         // we do this if we did not get contact with the other peer
         if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: no contact to a " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
         synchronized (seedDB) {
-            if (!seedDB.hasDisconnected(peer.hash)) { disconnects++; }
+            if (!seedDB.hasDisconnected(peer.hash.getBytes())) { disconnects++; }
             peer.put("dct", Long.toString(System.currentTimeMillis()));
             seedDB.addDisconnected(peer); // update info
         }

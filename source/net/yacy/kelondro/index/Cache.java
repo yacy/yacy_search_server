@@ -79,7 +79,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         init();
         objectTracker.put(backupIndex.filename(), this);
     }
-    
+
     private void init() {
         Row row = index.row();
         this.keyrow = new Row(new Column[]{row.column(0)}, row.objectOrder);
@@ -118,6 +118,14 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return this.missLimit;
     }
     
+    public byte[] smallestKey() {
+        return this.index.smallestKey();
+    }
+    
+    public byte[] largestKey() {
+        return this.index.largestKey();
+    }
+
     public static final Iterator<String> filenames() {
         // iterates string objects; all file names from record tracker
         return objectTracker.keySet().iterator();

@@ -83,7 +83,7 @@ public class Bitfield implements Cloneable {
     public boolean get(final int pos) {
         assert (pos >= 0);
         final int slot = pos >> 3; // /8
-        if (slot > bb.length) return false;
+        if (slot >= bb.length) return false;
         return (bb[slot] & (1 << (pos % 8))) > 0;
     }
 
