@@ -737,7 +737,7 @@ public class bookmarksDB {
             final String s[] = listManager.collection2string(getTags()).split(",");
             final StringBuilder stringBuilder = new StringBuilder();
             for (final String element : s){
-                if(!element.startsWith("/")){
+                if(element.startsWith("/")){
                     stringBuilder.append(element);
                     stringBuilder.append(",");
                 }
