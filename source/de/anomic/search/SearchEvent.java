@@ -223,6 +223,7 @@ public final class SearchEvent {
        // execute deletion of failed words
        int rw = this.results.failedURLs.size();
        if (rw > 0) {
+           long start = System.currentTimeMillis();
            final HandleSet removeWords = query.queryHashes;
            try {
                removeWords.putAll(query.excludeHashes);
@@ -233,12 +234,12 @@ public final class SearchEvent {
                final Iterator<byte[]> j = removeWords.iterator();
                // remove the same url hashes for multiple words
                while (j.hasNext()) {
-                   this.query.getSegment().termIndex().remove(j.next(), this.results.failedURLs.keySet());
+                   this.query.getSegment().termIndex().remove(j.next(), this.results.failedURLs);
                }                    
            } catch (IOException e) {
                Log.logException(e);
            }
-           Log.logInfo("SearchEvents", "cleaning up event " + query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
+           Log.logInfo("SearchEvents", "cleaning up event " + query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words in " + (System.currentTimeMillis() - start) + " milliseconds");
        }
    }
    

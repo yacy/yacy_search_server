@@ -192,6 +192,10 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         index = null;
     }
     
+    public final String toString() {
+        return this.index.toString();
+    }
+    
     // set tools
     
     public HandleSet joinConstructive(final HandleSet other) throws RowSpaceExceededException {

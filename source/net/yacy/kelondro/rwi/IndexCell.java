@@ -256,12 +256,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return removed + (reduced / this.array.rowdef().objectsize);
     }
 
-    public int remove(byte[] termHash, Set<String> urlHashes) throws IOException {
-        int removed = this.ram.remove(termHash, urlHashes);
-        int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
-        return removed + (reduced / this.array.rowdef().objectsize);
-    }
-
     public boolean remove(byte[] termHash, byte[] urlHashBytes) throws IOException {
         boolean removed = this.ram.remove(termHash, urlHashBytes);
         int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashBytes));
@@ -276,16 +270,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             this.urlHashes = urlHashes;
         }
         
-        public RemoveRewriter(Set<String> urlHashes) {
-            this.urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-            for (String s: urlHashes)
-                try {
-                    this.urlHashes.put(s.getBytes());
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-                }
-        }
-        
         public RemoveRewriter(byte[] urlHashBytes) {
             this.urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             try {
@@ -296,6 +280,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
         
         public ReferenceContainer<ReferenceType> rewrite(ReferenceContainer<ReferenceType> container) {
+            container.sort();
             container.removeEntries(urlHashes);
             return container;
         }

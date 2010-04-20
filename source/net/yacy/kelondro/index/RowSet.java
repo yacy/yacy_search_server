@@ -75,7 +75,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         if (size < 0) return new RowSet(rowdef);
         final int orderbound = (int) NaturalOrder.decodeLong(b, 10, 4);
         assert orderbound >= 0 : "orderbound = " + orderbound;
-        if (orderbound < 0) return new RowSet(rowdef);
+        if (orderbound < 0) return new RowSet(rowdef); // error
         final byte[] chunkcache = new byte[size * rowdef.objectsize];
         //assert b.length - exportOverheadSize == size * rowdef.objectsize : "b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize;
         if (b.length - exportOverheadSize != size * rowdef.objectsize) {

@@ -366,27 +366,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         return 0;
     }
- 
-    public int remove(final byte[] termHash, final Set<String> urlHashes) {
-        assert this.cache != null;
-        if (urlHashes.isEmpty()) return 0;
-        ByteArray tha = new ByteArray(termHash);
-        int count;
-        synchronized (cache) {
-            final ReferenceContainer<ReferenceType> c = cache.get(tha);
-            if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
-                // removal successful
-                if (c.isEmpty()) {
-                    delete(termHash);
-                } else {
-                    cache.put(tha, c);
-                }
-                return count;
-            }
-        }
-        return 0;
-    }
- 
+
     public void add(final ReferenceContainer<ReferenceType> container) throws RowSpaceExceededException {
         // this puts the entries into the cache
     	assert this.cache != null;

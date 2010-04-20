@@ -199,6 +199,8 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     public synchronized byte[] exportCollection() {
         // returns null if the collection is empty
         trim(false);
+        sort(); // experimental; supervise CPU load
+        assert this.sortBound == this.chunkcount; // on case the collection is sorted
         assert this.size() * this.rowdef.objectsize == this.chunkcache.length : "this.size() = " + this.size() + ", objectsize = " + this.rowdef.objectsize + ", chunkcache.length = " + this.chunkcache.length;
         final Row row = exportRow(chunkcache.length);
         final Row.Entry entry = row.newEntry();
@@ -227,9 +229,11 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if (chunkcache.length >= needed) return 0;
         assert needed > 0 : "needed = " + needed;
         long allocram = needed * growfactorLarge100 / 100L;
+        allocram -= allocram % rowdef.objectsize;
         assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
         if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, false)) return allocram;
         allocram = needed * growfactorSmall100 / 100L;
+        allocram -= allocram % rowdef.objectsize;
         assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
         if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, forcegc)) return allocram;
         return needed;
@@ -239,7 +243,8 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if (elements == 0) return;
         final long allocram = neededSpaceForEnsuredSize(elements, true);
         if (allocram == 0) return;
-        assert allocram > chunkcache.length : "wrong alloc computation: allocram = " + allocram + ", chunkcache.length = " + chunkcache.length;
+        assert chunkcache.length < elements * rowdef.objectsize : "wrong alloc computation (1): elements * rowdef.objectsize = " + (elements * rowdef.objectsize) + ", chunkcache.length = " + chunkcache.length;
+        assert allocram > chunkcache.length : "wrong alloc computation (2): allocram = " + allocram + ", chunkcache.length = " + chunkcache.length;
         if (allocram > Integer.MAX_VALUE || !MemoryControl.request(allocram, true))
         	throw new RowSpaceExceededException(allocram, "RowCollection grow");
         try {
@@ -564,7 +569,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
 
     }
     
-    protected synchronized final void sort() {
+    public synchronized final void sort() {
         assert (this.rowdef.objectOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
         if (this.chunkcount < isortlimit) {
@@ -609,6 +614,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         //assert this.isSorted();
     }
 
+    /*
     public synchronized final void sort2() {
         assert (this.rowdef.objectOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
@@ -643,7 +649,8 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         this.sortBound = this.chunkcount;
         //assert this.isSorted();
     }
-
+    */
+    
     private static class qsortthread implements Callable<Object> {
         private RowCollection rc;
         int L, R, S;

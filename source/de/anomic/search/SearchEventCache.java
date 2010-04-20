@@ -53,7 +53,7 @@ public class SearchEventCache {
         SearchEvent event;
         while (i.hasNext()) {
             event = i.next();
-            if ((all) || (event.getEventTime() + eventLifetime < System.currentTimeMillis())) {
+            if (all || event.getEventTime() + eventLifetime < System.currentTimeMillis()) {
                 event.cleanup();
                 
                 // remove the event

@@ -61,7 +61,7 @@ public class ResultFetcher {
     protected       Worker[]                workerThreads;
     protected final SortStore<ResultEntry>  result;
     protected final SortStore<MediaSnippet> images; // container to sort images by size
-    protected final HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
+    protected final HandleSet               failedURLs; // a set of urlhashes that could not been verified during search
     protected final HandleSet               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
@@ -84,7 +84,7 @@ public class ResultFetcher {
         this.snippetComputationAllTime = 0;
         this.result = new SortStore<ResultEntry>(-1, true); // this is the result, enriched with snippets, ranked and ordered by ranking
         this.images = new SortStore<MediaSnippet>(-1, true);
-        this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
+        this.failedURLs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search
@@ -167,7 +167,7 @@ public class ResultFetcher {
                     // get next entry
                     page = rankedCache.takeURL(true, taketimeout);
                     if (page == null) break;
-                    if (failedURLs.get(new String(page.hash())) != null) continue;
+                    if (failedURLs.has(page.hash())) continue;
                     
                     final ResultEntry resultEntry = fetchSnippet(page, snippetMode); // does not fetch snippets if snippetMode == 0
 
@@ -230,7 +230,7 @@ public class ResultFetcher {
                     (snippetMode == 2) ? Integer.MAX_VALUE : 30000,
                     query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH_EVENT", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            Log.logInfo("SEARCH", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
@@ -241,13 +241,7 @@ public class ResultFetcher {
                 return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
-                registerFailure(new String(page.hash()), "no text snippet for URL " + metadata.url());
-                if (!peers.mySeed().isVirgin())
-                    try {
-                        TextSnippet.failConsequences(query.getSegment(), page.word(), snippet, query.id(false));
-                    } catch (IOException e) {
-                        Log.logException(e);
-                    }
+                registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
                 return null;
             }
         } else {
@@ -255,7 +249,7 @@ public class ResultFetcher {
             startTime = System.currentTimeMillis();
             final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, (snippetMode == 2), 6000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH_EVENT", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
+            Log.logInfo("SEARCH", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
             
             if (mediaSnippets != null && !mediaSnippets.isEmpty()) {
                 // found media snippets, return entry
@@ -264,16 +258,20 @@ public class ResultFetcher {
                 return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
-                registerFailure(new String(page.hash()), "no media snippet for URL " + metadata.url());
+                registerFailure(page.hash(), "no media snippet for URL " + metadata.url());
                 return null;
             }
         }
         // finished, no more actions possible here
     }
     
-    private void registerFailure(final String urlhash, final String reason) {
-        this.failedURLs.put(urlhash, reason);
-        Log.logInfo("search", "sorted out hash " + urlhash + " during search: " + reason);
+    private void registerFailure(final byte[] urlhash, final String reason) {
+        try {
+            this.failedURLs.put(urlhash);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        Log.logInfo("SEARCH", "sorted out urlhash " + new String(urlhash) + " during search: " + reason);
     }
     
     public int resultCount() {

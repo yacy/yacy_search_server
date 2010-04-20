@@ -412,6 +412,7 @@ public class ArrayStack implements BLOB {
         File location;
         BLOB blob;
         public blobItem(Date creation, File location, BLOB blob) {
+            assert blob != null;
             this.creation = creation;
             this.location = location;
             this.blob = blob;

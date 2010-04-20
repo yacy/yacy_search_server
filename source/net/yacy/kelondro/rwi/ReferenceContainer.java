@@ -188,13 +188,6 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return count;
     }
 
-    public int removeEntries(final Set<String> urlHashes) {
-        int count = 0;
-        final Iterator<String> i = urlHashes.iterator();
-        while (i.hasNext()) count += (remove(i.next().getBytes()) == null) ? 0 : 1;
-        return count;
-    }
-
     public Iterator<ReferenceType> entries() {
         // returns an iterator of indexRWIEntry objects
         return new entryIterator();

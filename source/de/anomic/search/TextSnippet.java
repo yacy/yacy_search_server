@@ -583,29 +583,4 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
     }
     
-    public static String failConsequences(Segment indexSegment, final WordReferenceVars word, final TextSnippet snippet, final String eventID) throws IOException {
-        // problems with snippet fetch
-        final byte[] urlHash = snippet.getUrl().hash();
-        final String querystring = SetTools.setToString(snippet.getRemainingHashes(), ' ');
-        if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||
-            (snippet.getErrorCode() == ERROR_RESOURCE_LOADING) ||
-            (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
-            (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
-            Log.logInfo("TextSnippet", "error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            indexSegment.urlMetadata().remove(urlHash);
-            final SearchEvent event = SearchEventCache.getEvent(eventID);
-            assert indexSegment != null;
-            assert event != null : "eventID = " + eventID;
-            assert event.getQuery() != null;
-            indexSegment.termIndex().remove(event.getQuery().queryHashes, urlHash);
-            event.remove(word);
-        }
-        if (snippet.getErrorCode() == ERROR_NO_MATCH) {
-            Log.logInfo("TextSnippet", "error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            indexSegment.termIndex().remove(snippet.getRemainingHashes(), urlHash);
-            SearchEventCache.getEvent(eventID).remove(word);
-        }
-        return snippet.getError();
-    }
-    
 }
