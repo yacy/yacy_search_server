@@ -280,7 +280,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
 
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
-        synchronized (table) {
+        synchronized (this) {
             assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         }
         final HashMap<String, String> map = new HashMap<String, String>(8);
