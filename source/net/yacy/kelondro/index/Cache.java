@@ -298,7 +298,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         
         // remove entry from miss- and hit-cache
         if (readMissCache != null) {
-            if (readMissCache.remove(key) != null) {
+            if (readMissCache.delete(key)) {
                 this.hasnotHit++;
             }
         }
@@ -329,7 +329,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         
         // remove entry from miss- and hit-cache
         if (readMissCache != null) {
-            if (readMissCache.remove(key) != null) {
+            if (readMissCache.delete(key)) {
                 this.hasnotHit++;
                 // the entry does not exist before
                 try {
@@ -378,7 +378,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         
         // remove entry from miss- and hit-cache
         if (readMissCache != null) {
-            this.readMissCache.remove(key);
+            this.readMissCache.delete(key);
             this.hasnotDelete++;
             // the entry does not exist before
         }
@@ -413,7 +413,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         
         // remove entry from miss- and hit-cache
         if (readMissCache != null) {
-            this.readMissCache.remove(key);
+            this.readMissCache.delete(key);
             this.hasnotDelete++;
         }
 
@@ -453,6 +453,37 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         // todo: remove reported entries from the cache!!!
     }
     
+    public final synchronized boolean delete(final byte[] key) throws IOException {
+        checkMissSpace();
+        
+        // add entry to miss-cache
+        if (checkMissSpace()) try {
+            // set the miss cache; if there was already an entry we know that the return value must be null
+            final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
+            if (dummy == null) {
+                this.hasnotUnique++;
+            } else {
+                this.hasnotHit++;
+                this.hasnotDouble++;
+            }
+        } catch (RowSpaceExceededException e) {
+            clearCache();
+        }
+        
+        // remove entry from hit-cache
+        if (readHitCache != null) {
+            final Row.Entry entry = readHitCache.remove(key);
+            if (entry == null) {
+                this.readMiss++;
+            } else {
+                this.readHit++;
+                this.cacheDelete++;
+            }
+        }
+        
+        return index.delete(key);
+    }
+
     public final synchronized Row.Entry remove(final byte[] key) throws IOException {
         checkMissSpace();
         
@@ -498,8 +529,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
             clearCache();
         }
         if (readHitCache != null) {
-            final Row.Entry dummy = readHitCache.remove(key);
-            if (dummy != null) this.cacheDelete++;
+            if (readHitCache.delete(key)) this.cacheDelete++;
         }
         return entry;
     }

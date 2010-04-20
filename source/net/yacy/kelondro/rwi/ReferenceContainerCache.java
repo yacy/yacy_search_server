@@ -334,7 +334,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         ByteArray tha = new ByteArray(termHash);
         synchronized (cache) {
 	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
-	        if ((c != null) && (c.remove(urlHashBytes) != null)) {
+	        if (c != null && c.delete(urlHashBytes)) {
 	            // removal successful
 	            if (c.isEmpty()) {
 	                delete(termHash);

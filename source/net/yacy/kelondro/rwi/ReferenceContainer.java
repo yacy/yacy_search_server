@@ -184,7 +184,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     public int removeEntries(final HandleSet urlHashes) {
         int count = 0;
         final Iterator<byte[]> i = urlHashes.iterator();
-        while (i.hasNext()) count += (remove(i.next()) == null) ? 0 : 1;
+        while (i.hasNext()) count += (delete(i.next())) ? 1 : 0;
         return count;
     }
 
@@ -460,7 +460,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 if ((ie0 != null) && (ie1 != null)) {
                     assert (ie0.metadataHash().length == keylength) : "ie0.urlHash() = " + new String(ie0.metadataHash());
                     assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
-                    if (iterate_pivot) se.remove(); pivot.remove(ie0.metadataHash());
+                    if (iterate_pivot) se.remove(); pivot.delete(ie0.metadataHash());
                 }
             }
         return pivot;

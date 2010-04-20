@@ -592,6 +592,10 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
+    public boolean delete(final byte[] key) throws IOException {
+        return remove(key) != null;
+    }
+    
     public synchronized Entry remove(final byte[] key) throws IOException {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();

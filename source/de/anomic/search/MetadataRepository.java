@@ -680,7 +680,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         // then delete the urls using this list
         int cnt = 0;
         for (String h: l) {
-            if (urlIndexFile.remove(h.getBytes()) != null) cnt++;
+            if (urlIndexFile.delete(h.getBytes())) cnt++;
         }
         
         // finally remove the line with statistics

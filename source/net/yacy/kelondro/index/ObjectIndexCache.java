@@ -199,6 +199,20 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         return d0;
 	}
 	
+    public final synchronized boolean delete(final byte[] key) {
+        finishInitialization();
+        // if the new entry is within the initialization part, just delete it
+        boolean b = index0.delete(key);
+        if (b) {
+            assert index0.get(key) == null; // check if remove worked
+            return true;
+        }
+        // else remove it from the index1
+        b = index1.delete(key);
+        assert index1.get(key) == null : "removed " + ((b) ? " true" : " false") + ", and index entry still exists"; // check if remove worked
+        return b;
+    }
+
     public final synchronized Row.Entry remove(final byte[] key) {
         finishInitialization();
         // if the new entry is within the initialization part, just delete it

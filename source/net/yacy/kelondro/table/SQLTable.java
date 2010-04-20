@@ -273,6 +273,10 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
+    public boolean delete(final byte[] key) throws IOException {
+        return remove(key) != null;
+    }
+    
     public Row.Entry removeOne() {
         return null;
     }

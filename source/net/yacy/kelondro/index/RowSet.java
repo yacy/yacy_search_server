@@ -166,33 +166,37 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         }
     }
 
-    private final Row.Entry remove(final byte[] a, final int start, final int length) {
-        final int index = find(a, start, length);
-        if (index < 0) {
-            return null;
-        }
-        final Row.Entry entry = super.get(index, true);
-        super.removeRow(index, true); // keep order of collection!
-        //int findagainindex = 0;
-        //assert (findagainindex = find(a, start, length)) < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + NaturalOrder.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + NaturalOrder.arrayList(a, start, length); // check if the remove worked
-        return entry;
-    }
-
     /**
      * remove a byte[] from the set.
      * if the entry was found, return the entry, but delete the entry from the set
      * if the entry was not found, return null.
      */
+    public final synchronized boolean delete(final byte[] a) {
+        boolean exists = false;
+        int index;
+        while (true) {
+            index = find(a, 0, a.length);
+            if (index < 0) {
+                return exists;
+            } else {
+                exists = true;
+                super.removeRow(index, true); // keep order of collection!
+            }
+        }
+    }
+
     public final synchronized Row.Entry remove(final byte[] a) {
         Row.Entry entry = null;
-        Row.Entry tmp;
-        do {
-            tmp = remove(a, 0, a.length);
-            if (tmp != null) {
-                entry = tmp;
+        int index;
+        while (true) {
+            index = find(a, 0, a.length);
+            if (index < 0) {
+                return entry;
+            } else {
+                entry = super.get(index, true);
+                super.removeRow(index, true); // keep order of collection!
             }
-        } while (tmp != null);
-        return entry;
+        }
     }
 
     private final int find(final byte[] a, final int astart, final int alength) {
@@ -492,7 +496,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
                 e.printStackTrace();
             }
         d.sort();
-        d.remove("fuenf".getBytes());
+        d.delete("fuenf".getBytes());
         final Iterator<Row.Entry> ii = d.iterator();
         String s;
         System.out.print("INPUT-ITERATOR: ");
@@ -594,11 +598,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
                 e.printStackTrace();
             }
             if (i % 1000 == 0) {
-                for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
+                for (int j = 0; j < delkeys.length; j++) c.delete(delkeys[j]);
                 c.sort();
             }
         }
-        for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
+        for (int j = 0; j < delkeys.length; j++) c.delete(delkeys[j]);
         c.sort();
         random = new Random(0);
         for (int i = 0; i < testsize; i++) {

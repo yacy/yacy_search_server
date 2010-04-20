@@ -387,6 +387,12 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return report;
     }
     
+    public boolean delete(final byte[] key) throws IOException {
+        final ObjectIndex table = keeperOf(key);
+        if (table == null) return false;
+        return table.delete(key);
+    }
+    
     public Row.Entry remove(final byte[] key) throws IOException {
         final ObjectIndex table = keeperOf(key);
         if (table == null) return null;

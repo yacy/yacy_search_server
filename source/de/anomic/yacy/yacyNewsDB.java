@@ -110,7 +110,7 @@ public class yacyNewsDB {
     }
 
     public void remove(final String id) throws IOException {
-        news.remove(id.getBytes());
+        news.delete(id.getBytes());
     }
 
     public synchronized yacyNewsRecord put(final yacyNewsRecord record) throws IOException, RowSpaceExceededException {

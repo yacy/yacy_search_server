@@ -167,6 +167,12 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
         accessArray(i).put(row);
     }
 
+    public final boolean delete(final byte[] key) {
+        final int i = indexFor(key);
+        if (i < 0) return false;
+        return accessArray(i).delete(key);
+    }
+
     public final Entry remove(final byte[] key) {
         final int i = indexFor(key);
         if (i < 0) return null;

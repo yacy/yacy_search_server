@@ -113,7 +113,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (hash == null) return false;
         //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " remove " + hash);
         try {
-            urlIndex.remove(hash);
+            urlIndex.delete(hash);
             return true;
         } catch (final IOException e) {
             return false;

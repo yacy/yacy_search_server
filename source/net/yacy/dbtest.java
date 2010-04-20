@@ -151,7 +151,7 @@ public class dbtest {
             System.out.println("remove: " + NaturalOrder.arrayList(entry.getKey(), 0, entry.getKey().length));
             try {
                 getTable_test().remove(entry.getKey());
-                if (getTable_reference() != null) getTable_reference().remove(entry.getKey());
+                if (getTable_reference() != null) getTable_reference().delete(entry.getKey());
             } catch (final IOException e) {
                 System.err.println(e);
                 Log.logException(e);
@@ -377,7 +377,7 @@ public class dbtest {
                     start = System.currentTimeMillis();
                     for (int i = 0; i < count; i++) {
                         key = randomHash(random);
-                        table_test.remove(key);
+                        table_test.delete(key);
                     }
                     remove = System.currentTimeMillis() - start;
                     

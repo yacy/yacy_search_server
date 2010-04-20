@@ -52,6 +52,7 @@ public interface ObjectIndex extends Iterable<Row.Entry> {
     public void put(Row.Entry row) throws IOException, RowSpaceExceededException;
     public void addUnique(Row.Entry row) throws RowSpaceExceededException, IOException; // no double-check
     public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException; // removes all elements that are double (to be used after all addUnique)
+    public boolean delete(byte[] key) throws IOException;
     public Row.Entry remove(byte[] key) throws IOException;
     public Row.Entry removeOne() throws IOException;
     public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key

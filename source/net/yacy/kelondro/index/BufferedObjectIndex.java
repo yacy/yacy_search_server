@@ -157,6 +157,14 @@ public class BufferedObjectIndex implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
 
+    public boolean delete(byte[] key) throws IOException {
+        synchronized (this.backend) {
+            boolean b = this.buffer.delete(key);
+            if (b) return true;
+            return this.backend.delete(key);
+        }
+    }
+
     public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         synchronized (this.backend) {
             flushBuffer();
