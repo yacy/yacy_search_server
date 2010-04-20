@@ -622,6 +622,7 @@ public class ArrayStack implements BLOB {
         private void next0() {
             while (this.bii.hasNext()) {
                 BLOB b = this.bii.next().blob;
+                if (b == null) continue;
                 try {
                     this.next = b.get(key);
                     if (this.next != null) return;
