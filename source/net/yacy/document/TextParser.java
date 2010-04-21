@@ -32,16 +32,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.document.parser.bzipParser;
 import net.yacy.document.parser.csvParser;
@@ -72,19 +69,12 @@ import net.yacy.kelondro.util.FileUtils;
 public final class TextParser {
 
     private static final Log log = new Log("PARSER");
-    
-    // use a collator to relax when distinguishing between lowercase und uppercase letters
-    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
-    static {
-        insensitiveCollator.setStrength(Collator.SECONDARY);
-        insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
-    }
 
-    private static final Map<String, Idiom> mime2parser = new TreeMap<String, Idiom>(insensitiveCollator);
-    private static final Map<String, Idiom> ext2parser = new TreeMap<String, Idiom>(insensitiveCollator);
-    private static final Map<String, String> ext2mime = new TreeMap<String, String>(insensitiveCollator);
-    private static final Set<String> denyMime = new TreeSet<String>(insensitiveCollator);
-    private static final Set<String> denyExtension = new TreeSet<String>(insensitiveCollator);
+    private static final Map<String, Idiom> mime2parser = new ConcurrentHashMap<String, Idiom>();
+    private static final Map<String, Idiom> ext2parser = new ConcurrentHashMap<String, Idiom>();
+    private static final Map<String, String> ext2mime = new ConcurrentHashMap<String, String>();
+    private static final Map<String, Object> denyMime = new ConcurrentHashMap<String, Object>();
+    private static final Map<String, Object> denyExtensionx = new ConcurrentHashMap<String, Object>();
     
     static {
         initParser(new bzipParser());
@@ -130,6 +120,7 @@ public final class TextParser {
         }
         
         if (prototypeMime != null) for (String ext: parser.supportedExtensions()) {
+            ext = ext.toLowerCase();
             String s = ext2mime.get(ext);
             if (s != null) log.logSevere("parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
             ext2mime.put(ext, prototypeMime);
@@ -137,6 +128,7 @@ public final class TextParser {
         
         for (String ext: parser.supportedExtensions()) {
             // process the extensions
+            ext = ext.toLowerCase();
             Idiom p0 = ext2parser.get(ext);
             if (p0 != null) log.logSevere("parser for extension '" + ext + "' was set to '" + p0.getName() + "', overwriting with new parser '" + parser.getName() + "'.");
             ext2parser.put(ext, parser);
@@ -318,7 +310,8 @@ public final class TextParser {
         String ext = url.getFileExtension();
         Idiom idiom;
         if (ext != null && ext.length() > 0) {
-            if (denyExtension.contains(ext)) throw new ParserException("file extension '" + ext + "' is denied (1)", url);
+            ext = ext.toLowerCase();
+            if (denyExtensionx.containsKey(ext)) throw new ParserException("file extension '" + ext + "' is denied (1)", url);
             idiom = ext2parser.get(ext);
             if (idiom != null) idioms.add(idiom);
         }
@@ -326,14 +319,14 @@ public final class TextParser {
         // check given mime type
         if (mimeType1 != null) {
             mimeType1 = normalizeMimeType(mimeType1);
-            if (denyMime.contains(mimeType1)) throw new ParserException("mime type '" + mimeType1 + "' is denied (1)", url);
+            if (denyMime.containsKey(mimeType1)) throw new ParserException("mime type '" + mimeType1 + "' is denied (1)", url);
             idiom = mime2parser.get(mimeType1);
             if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
         }
         
         // check mime type computed from extension
         String mimeType2 = ext2mime.get(ext);
-        if (mimeType2 == null || denyMime.contains(mimeType2)) return idioms; // in this case we are a bit more lazy
+        if (mimeType2 == null || denyMime.containsKey(mimeType2)) return idioms; // in this case we are a bit more lazy
         idiom = mime2parser.get(mimeType2);
         if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
         
@@ -346,15 +339,15 @@ public final class TextParser {
     public static String supportsMime(String mimeType) {
         if (mimeType == null) return null;
         mimeType = normalizeMimeType(mimeType);
-        if (denyMime.contains(mimeType)) return "mime type '" + mimeType + "' is denied (2)";
+        if (denyMime.containsKey(mimeType)) return "mime type '" + mimeType + "' is denied (2)";
         if (mime2parser.get(mimeType) == null) return "no parser for mime '" + mimeType + "' available";
         return null;
     }
     
     public static String supportsExtension(final DigestURI url) {
-        String ext = url.getFileExtension();
+        String ext = url.getFileExtension().toLowerCase();
         if (ext == null || ext.length() == 0) return null;
-        if (denyExtension.contains(ext)) return "file extension '" + ext + "' is denied (2)";
+        if (denyExtensionx.containsKey(ext)) return "file extension '" + ext + "' is denied (2)";
         String mimeType = ext2mime.get(ext);
         if (mimeType == null) return "no parser available";
         Idiom idiom = mime2parser.get(mimeType);
@@ -368,11 +361,12 @@ public final class TextParser {
     }
     
     public static String mimeOf(String ext) {
-        return ext2mime.get(ext);
+        return ext2mime.get(ext.toLowerCase());
     }
     
     private static String normalizeMimeType(String mimeType) {
         if (mimeType == null) return "application/octet-stream";
+        mimeType = mimeType.toLowerCase();
         final int pos = mimeType.indexOf(';');
         return ((pos < 0) ? mimeType.trim() : mimeType.substring(0, pos).trim());
     }
@@ -382,13 +376,13 @@ public final class TextParser {
         String n;
         for (String s: denyList.split(",")) {
             n = normalizeMimeType(s);
-            if (n != null && n.length() > 0) denyMime.add(n);
+            if (n != null && n.length() > 0) denyMime.put(n, null);
         }
     }
     
     public static String getDenyMime() {
         String s = "";
-        for (String d: denyMime) s += d + ",";
+        for (String d: denyMime.keySet()) s += d + ",";
         if (s.length() > 0) s = s.substring(0, s.length() - 1);
         return s;
     }
@@ -396,22 +390,22 @@ public final class TextParser {
     public static void grantMime(String mime, boolean grant) {
         String n = normalizeMimeType(mime);
         if (n == null || n.length() == 0) return;
-        if (grant) denyMime.remove(n); else denyMime.add(n);
+        if (grant) denyMime.remove(n); else denyMime.put(n, null);
     }
     
     public static void setDenyExtension(String denyList) {
-        denyExtension.clear();
-        for (String s: denyList.split(",")) denyExtension.add(s);
+        denyExtensionx.clear();
+        for (String s: denyList.split(",")) denyExtensionx.put(s, null);
     }
     
     public static String getDenyExtension() {
         String s = "";
-        for (String d: denyExtension) s += d + ",";
+        for (String d: denyExtensionx.keySet()) s += d + ",";
         s = s.substring(0, s.length() - 1);
         return s;
     }
     
     public static void grantExtension(String ext, boolean grant) {
-        if (grant) denyExtension.remove(ext); else denyExtension.add(ext);
+        if (grant) denyExtensionx.remove(ext); else denyExtensionx.put(ext, null);
     }
 }
