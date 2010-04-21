@@ -69,6 +69,7 @@ import net.yacy.kelondro.util.FileUtils;
 public final class TextParser {
 
     private static final Log log = new Log("PARSER");
+    private static final Object v = new Object();
 
     private static final Map<String, Idiom> mime2parser = new ConcurrentHashMap<String, Idiom>();
     private static final Map<String, Idiom> ext2parser = new ConcurrentHashMap<String, Idiom>();
@@ -376,7 +377,7 @@ public final class TextParser {
         String n;
         for (String s: denyList.split(",")) {
             n = normalizeMimeType(s);
-            if (n != null && n.length() > 0) denyMime.put(n, null);
+            if (n != null && n.length() > 0) denyMime.put(n, v);
         }
     }
     
@@ -390,12 +391,12 @@ public final class TextParser {
     public static void grantMime(String mime, boolean grant) {
         String n = normalizeMimeType(mime);
         if (n == null || n.length() == 0) return;
-        if (grant) denyMime.remove(n); else denyMime.put(n, null);
+        if (grant) denyMime.remove(n); else denyMime.put(n, v);
     }
     
     public static void setDenyExtension(String denyList) {
         denyExtensionx.clear();
-        for (String s: denyList.split(",")) denyExtensionx.put(s, null);
+        for (String s: denyList.split(",")) denyExtensionx.put(s, v);
     }
     
     public static String getDenyExtension() {
@@ -406,6 +407,6 @@ public final class TextParser {
     }
     
     public static void grantExtension(String ext, boolean grant) {
-        if (grant) denyExtensionx.remove(ext); else denyExtensionx.put(ext, null);
+        if (grant) denyExtensionx.remove(ext); else denyExtensionx.put(ext, v);
     }
 }
