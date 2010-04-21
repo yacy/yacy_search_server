@@ -465,6 +465,7 @@ public class Balancer {
     		}
     		
     		byte[] n = entry.getValue().getFirst();
+    		if (n == null) continue;
     		if (delay) {
     			final long w = Latency.waitingRemainingGuessed(n, minimumLocalDelta, minimumGlobalDelta);
     			if (w > maximumwaiting) {

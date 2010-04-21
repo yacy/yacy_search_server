@@ -138,6 +138,17 @@ public final class Records {
         return size / recordsize;
     }
     
+    public final static void fixTableSize(final File tablefile, final long recordsize) throws IOException {
+        if (!tablefile.exists()) return;
+        final long size = tablefile.length();
+        long cut = size % recordsize;
+        if (cut > 0) {
+            RandomAccessFile raf = new RandomAccessFile(tablefile, "rw");
+            raf.setLength(size - cut);
+            raf.close();
+        }
+    }
+    
     /**
      * @return the number of records in file plus number of records in buffer
      * @throws IOException

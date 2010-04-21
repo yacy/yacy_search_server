@@ -153,6 +153,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
                 f.renameTo(new File(path, newname));
             }
         }
+        // read new list again
         tablefile = path.list();
         
         // first pass: find tables
@@ -173,14 +174,11 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
                 time = d.getTime();
                 if (time > maxtime) {
                     current = tablefile[i];
+                    assert this.current != null;
                     maxtime = time;
                 }
                 
-                try {
-                    t.put(tablefile[i], Table.staticRAMIndexNeed(f, rowdef));
-                } catch (IOException e) {
-                    Log.logWarning("SplitTable", "file " + f.toString() + " appears to be corrupted: " + e.getMessage());
-                }
+                t.put(tablefile[i], Table.staticRAMIndexNeed(f, rowdef));
             }
         }
         
@@ -215,6 +213,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             }
             tables.put(maxf, table);
         }
+        assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
         
         // init the thread pool for the keeperOf executor service
         this.executor = new ThreadPoolExecutor(
@@ -223,8 +222,6 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
                 TimeUnit.SECONDS, 
                 new LinkedBlockingQueue<Runnable>(), 
                 new NamePrefixThreadFactory(prefix));
-        
-        
     }
     
     public void clear() throws IOException {
@@ -317,6 +314,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             }
         }
         tables.put(this.current, table);
+        assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
         return table;
     }
     
@@ -343,6 +341,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         ObjectIndex keeper = keeperOf(row.getColBytes(0, true));
         if (keeper != null) return keeper.replace(row);
         synchronized (this.tables) {
+            assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
         }
         keeper.put(row);
@@ -373,6 +372,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex table = (this.current == null) ? null : tables.get(this.current);
         synchronized (this.tables) {
+            assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             if (table == null) table = newTable(); else table = checkTable(table);
         }
         table.addUnique(row);

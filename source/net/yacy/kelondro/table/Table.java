@@ -70,16 +70,16 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
 
     // static tracker objects
     private final static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
-    public  final static long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
+    private final static long maxarraylength = 134217727L; // that may be the maximum size of array length in some JVMs
     
-    private   final long minmemremaining; // if less than this memory is remaininig, the memory copy of a table is abandoned
-    private   final int buffersize;
-    protected final Row rowdef;
-    protected final File tablefile;
-    protected final Row taildef;
-    protected       HandleMap index;
-    protected       BufferedRecords file;
-    protected       RowSet table;
+    private final long minmemremaining; // if less than this memory is remaininig, the memory copy of a table is abandoned
+    private final int buffersize;
+    private final Row rowdef;
+    private final File tablefile;
+    private final Row taildef;
+    private       HandleMap index;
+    private       BufferedRecords file;
+    private       RowSet table;
     
     public Table(
     		final File tablefile,
@@ -119,7 +119,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         
         try {
             // open an existing table file
-            final int fileSize = (int) tableSize(tablefile, rowdef.objectsize);
+            int fileSize = (int) tableSize(tablefile, rowdef.objectsize, true);
             
             // initialize index and copy table
             final int  records = Math.max(fileSize, initialSpace);
@@ -260,9 +260,24 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return this.index.largestKey();
     }
     
-    public static long tableSize(final File tablefile, final int recordsize) throws IOException {
-        // returns number of records in table
-        return Records.tableSize(tablefile, recordsize);
+    public static long tableSize(final File tablefile, final int recordsize, boolean fixIfCorrupted) throws kelondroException {
+        try {
+            return Records.tableSize(tablefile, recordsize);
+        } catch (final IOException e) {
+            if (!fixIfCorrupted) {
+                Log.logSevere("Table", "table size broken for file " + tablefile.toString(), e);
+                throw new kelondroException(e.getMessage());
+            }
+            Log.logSevere("Table", "table size broken, try to fix " + tablefile.toString());
+            try {
+                Records.fixTableSize(tablefile, recordsize);
+                Log.logInfo("Table", "successfully fixed table file " + tablefile.toString());
+                return Records.tableSize(tablefile, recordsize);
+            } catch (final IOException ee) {
+                Log.logSevere("Table", "table size fix did not work", ee);
+                throw new kelondroException(e.getMessage());
+            }
+        }
     }
 
     public static final Iterator<String> filenames() {
@@ -296,8 +311,8 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return this.table != null;
     }
     
-    public static long staticRAMIndexNeed(final File f, final Row rowdef) throws IOException {
-        return (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize) * RowCollection.growfactorLarge100 / 100L);
+    public static long staticRAMIndexNeed(final File f, final Row rowdef) {
+        return (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize, true) * RowCollection.growfactorLarge100 / 100L);
     }
     
     public synchronized void addUnique(final Entry row) throws IOException, RowSpaceExceededException {
@@ -757,8 +772,8 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return new rowIteratorNoOrder();
     }
 
-    public class rowIteratorNoOrder implements CloneableIterator<Entry> {
-        final Iterator<byte[]> ri;
+    private class rowIteratorNoOrder implements CloneableIterator<Entry> {
+        private final Iterator<byte[]> ri;
         
         public rowIteratorNoOrder() throws IOException {
             ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
@@ -792,13 +807,13 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return new rowIterator(up, firstKey);
     }
 
-    public class rowIterator implements CloneableIterator<Entry> {
-        Iterator<byte[]> i;
-        boolean up;
-        byte[] fk;
-        int c;
+    private class rowIterator implements CloneableIterator<Entry> {
+        private Iterator<byte[]> i;
+        private boolean up;
+        private byte[] fk;
+        private int c;
         
-        public rowIterator(final boolean up, final byte[] firstKey) {
+        private rowIterator(final boolean up, final byte[] firstKey) {
             this.up = up;
             this.fk = firstKey;
             this.i  = index.keys(up, firstKey);
