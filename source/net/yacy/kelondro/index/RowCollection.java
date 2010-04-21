@@ -257,7 +257,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, false)) return allocram;
         allocram = needed * growfactorSmall100 / 100L;
         allocram -= allocram % rowdef.objectsize;
-        assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
+        assert allocram >= 0 : "elements = " + elements + ", new = " + allocram;
         if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, forcegc)) return allocram;
         return needed;
     }
