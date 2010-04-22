@@ -96,10 +96,14 @@ public class HeapModifier extends HeapReader implements BLOB {
      */
     public void remove(byte[] key) throws IOException {
         key = normalizeKey(key);
+
+        // pre-check before synchronization
+        long seek = index.get(key);
+        if (seek < 0) return;
         
         synchronized (this) {
-            // check if the index contains the key
-            final long seek = index.get(key);
+            // check again if the index contains the key
+            seek = index.get(key);
             if (seek < 0) return;
             
             // check consistency of the index
@@ -238,10 +242,14 @@ public class HeapModifier extends HeapReader implements BLOB {
 	public int replace(byte[] key, final Rewriter rewriter) throws IOException {
 	    key = normalizeKey(key);
 	    assert key.length == this.keylength;
-	    
-	    synchronized (this) {
-    	    // check if the index contains the key
-            final long pos = index.get(key);
+	 
+	    // pre-check before synchronization
+        long pos = index.get(key);
+        if (pos < 0) return 0;
+        
+        synchronized (this) {
+            // check again if the index contains the key
+            pos = index.get(key);
             if (pos < 0) return 0;
             
             // check consistency of the index
