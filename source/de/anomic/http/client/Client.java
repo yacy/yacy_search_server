@@ -119,7 +119,6 @@ public class Client {
         	conManager.shutdown();
         }
         conManager = new MultiThreadedHttpConnectionManager();
-        apacheHttpClient = new HttpClient(conManager);
         
         /**
          * set options for connection manager
@@ -135,6 +134,7 @@ public class Client {
         conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
         conManager.getParams().setReceiveBufferSize(16 * 1024 * 1024); // set this high to avoid storage in temporary files
         
+        apacheHttpClient = new HttpClient(conManager);
         // only one retry
         apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
                                                   new DefaultHttpMethodRetryHandler(1, false));
@@ -233,6 +233,7 @@ public class Client {
         apacheHttpClient.getParams().setIntParameter(HttpMethodParams.SO_TIMEOUT, timeout);
         apacheHttpClient.getParams().setIntParameter(HttpMethodParams.HEAD_BODY_CHECK_TIMEOUT, timeout);
         apacheHttpClient.setConnectionTimeout(timeout);
+        apacheHttpClient.setTimeout(60000);
     }
     
     /**
@@ -475,7 +476,7 @@ public class Client {
             DigestURI url = new DigestURI(method.getURI().toString(), null);
             if (url.hash() != null) Latency.slowdown(new String(url.hash()).substring(6), url.getHost());
             ConnectionInfo.removeConnection(generateConInfo(method));
-            throw e;
+            throw new IOException(e.getMessage());
         } catch (final IOException e) {
             // cleanUp statistics
             DigestURI url = new DigestURI(method.getURI().toString(), null);
@@ -488,6 +489,9 @@ public class Client {
             if (url.hash() != null) Latency.slowdown(new String(url.hash()).substring(6), url.getHost());
             ConnectionInfo.removeConnection(generateConInfo(method));
             throw new IOException(e.getMessage());
+        } finally {
+            // cleanUp statistics
+            ConnectionInfo.removeConnection(generateConInfo(method));
         }
         if (Log.isFinest("HTTPC")) Log.logFinest("HTTPC", "<-" + method.hashCode() + " response headers " +
                 Arrays.toString(method.getResponseHeaders()));
