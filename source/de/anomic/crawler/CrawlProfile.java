@@ -85,11 +85,6 @@ public class CrawlProfile {
         this.profileTable = null;
     }
     
-    @Override
-    public void finalize() {
-        this.close();
-    }
-    
     public int size() {
         return profileTable.size();
     }

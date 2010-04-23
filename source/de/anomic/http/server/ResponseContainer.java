@@ -176,14 +176,4 @@ public class ResponseContainer {
 	public void setAccountingName(final String accName) {
 		incomingAccountingName = accName;
 	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#finalize()
-	 */
-    @Override
-	protected void finalize() {
-		closeStream();
-	}
 }

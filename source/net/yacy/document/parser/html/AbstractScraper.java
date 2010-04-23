@@ -95,11 +95,6 @@ public abstract class AbstractScraper implements Scraper {
         tags1 = null;
     }
     
-    @Override
-    protected void finalize() {
-        close();
-    }
-    
 }
 
 

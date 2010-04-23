@@ -590,10 +590,5 @@ dc_rights
             }
         }        
     }
-    
-    protected void finalize() throws Throwable {
-        this.close();
-        super.finalize();
-    }
 
 }

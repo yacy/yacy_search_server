@@ -530,13 +530,6 @@ public final class TransformerWriter extends Writer {
         // if you want to flush all, call close() at end of writing;
     }
 
-    @Override
-    protected void finalize() throws IOException {
-        // if we are forced to close, we of course flush the buffer first,
-        // then close the connection
-        close();
-    }
-
     public void close() throws IOException {
         final char quotechar = (inSingleQuote) ? singlequote : doublequote;
         if (buffer != null) {

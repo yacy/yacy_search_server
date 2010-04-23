@@ -67,10 +67,5 @@ public abstract class AbstractTransformer implements Transformer {
         tags0 = null;
         tags1 = null;
     }
-    
-    @Override
-    protected void finalize() {
-        close();
-    }
         
 }

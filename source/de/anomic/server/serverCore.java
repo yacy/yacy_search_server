@@ -656,10 +656,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             
         }
         
-        protected void finalize() {
-            this.close();
-        }
-        
         private void listen() {
             try {
                 // start dialog

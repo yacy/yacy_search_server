@@ -132,9 +132,4 @@ public final class ByteCountOutputStream extends BufferedOutputStream {
         }            
     }
     
-    protected final void finalize() throws Throwable {
-        if (!this.finished) 
-            finish();
-        super.finalize();
-    }    
 }

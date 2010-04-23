@@ -164,10 +164,4 @@ public class XMLTables {
         commit(true);
     }
 
-    // we finalize the operation by saving everything throug the scheduler
-    // this method is called by the java GC bevore it destroys the object
-    protected void finalize() throws IOException {
-    	close();
-    }
-
 }

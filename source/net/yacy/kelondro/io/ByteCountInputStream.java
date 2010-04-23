@@ -143,10 +143,4 @@ public final class ByteCountInputStream extends FilterInputStream {
             byteCountInfo.clear();
         }
     }
-    
-    protected final void finalize() throws Throwable {
-        if (!this.finished) 
-            finish();
-        super.finalize();
-    }
 }

@@ -82,10 +82,6 @@ public class ReferenceIterator <ReferenceType extends Reference> implements Clon
         if (blobs != null) this.blobs.close();
         blobs = null;
     }
-    
-    protected void finalize() {
-        this.close();
-    }
 
     public CloneableIterator<ReferenceContainer<ReferenceType>> clone(Object modifier) {
         if (blobs != null) this.blobs.close();
