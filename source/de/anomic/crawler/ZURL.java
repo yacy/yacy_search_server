@@ -141,7 +141,11 @@ public class ZURL implements Iterable<ZURL.Entry> {
     
     public ArrayList<ZURL.Entry> list(int max) {
         ArrayList<ZURL.Entry> l = new ArrayList<ZURL.Entry>();
+        DigestURI url;
         for (ZURL.Entry entry: this) {
+            if (entry == null) continue;
+            url = entry.url();
+            if (url == null) continue;
             l.add(entry);
             if (max-- <= 0) l.remove(0);
         }
