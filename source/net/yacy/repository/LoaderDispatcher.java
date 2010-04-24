@@ -264,6 +264,12 @@ public final class LoaderDispatcher {
         if (protocol.equals("smb")) response = smbLoader.load(request, true);
         if (response != null) {
             // we got something. Now check if we want to store that to the cache
+            // first check looks if we want to store the content to the cache
+            if (!crawlProfile.storeHTCache()) {
+                // no caching wanted. Thats ok, do not write any message
+                return response;
+            }
+            // second check tells us if the protocoll tells us something about caching
             String storeError = response.shallStoreCacheForCrawler();
             if (storeError == null) {
                 try {

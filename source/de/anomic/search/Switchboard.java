@@ -1639,9 +1639,10 @@ public final class Switchboard extends serverSwitch {
         
         // PARSE CONTENT
         final long parsingStartTime = System.currentTimeMillis();
-        byte[] b = null;
-        try {
-            // fetch the document
+        // fetch the document from the response
+        byte[] b = response.getContent();
+        if (b == null) try {
+            // fetch the document from cache
             b = Cache.getContent(response.url());
             if (b == null) {
                 this.log.logWarning("the resource '" + response.url() + "' is missing in the cache.");
