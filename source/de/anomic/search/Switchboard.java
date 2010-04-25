@@ -1997,10 +1997,14 @@ public final class Switchboard extends serverSwitch {
             return false;
         }
         boolean hasDoneSomething = false;
-        if (this.dhtDispatcher.cloudSize() > this.peers.scheme.verticalPartitions() * 4) {
+        
+        // accumulate RWIs to transmission cloud
+        if (this.dhtDispatcher.cloudSize() > this.peers.scheme.verticalPartitions() * 2) {
         	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
         } else if (MemoryControl.available() < 1024*1024*25) {
-        	log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
+            log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
+        } else if (Client.connectionCount() > 10) {
+            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + Client.connectionCount());
         } else {
             byte[] startHash = null, limitHash = null;
             int tries = 10;
@@ -2025,8 +2029,12 @@ public final class Switchboard extends serverSwitch {
             hasDoneSomething = hasDoneSomething | enqueued;
             log.logInfo("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
         }
+        
+        // check if we can deliver entries to other peers
         if (this.dhtDispatcher.transmissionSize() >= 10) {
         	log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());
+        } else if (Client.connectionCount() > 10) {
+            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + Client.connectionCount());
         } else {
         	boolean dequeued = this.dhtDispatcher.dequeueContainer();
         	hasDoneSomething = hasDoneSomething | dequeued;

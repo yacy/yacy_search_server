@@ -125,9 +125,11 @@ public class Client {
          */
         // conManager.getParams().setDefaultMaxConnectionsPerHost(4); // default 2
         HostConfiguration localHostConfiguration = new HostConfiguration();
-        conManager.getParams().setMaxTotalConnections(200); // Proxy may need many connections
+        conManager.getParams().setMaxTotalConnections(50); // Proxy may need many connections
         conManager.getParams().setConnectionTimeout(60000); // set a default timeout
-        conManager.getParams().setDefaultMaxConnectionsPerHost(10);
+        conManager.getParams().setDefaultMaxConnectionsPerHost(2);
+        localHostConfiguration.setHost("0:0:0:0:0:0:0:1%0");
+        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
         localHostConfiguration.setHost("localhost");
         conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
         localHostConfiguration.setHost("127.0.0.1");
@@ -150,13 +152,13 @@ public class Client {
      * 
      * this is the time the method is callable, not the time it is called
      */
-    private static final int cleanupIntervall = 60000;
+    private static final int cleanupIntervall = 15000;
     /**
      * close connections when they are not used for this time
      * 
      * or otherwise: hold connections this time open to reuse them
      */
-    private static final long closeConnectionsAfterMillis = 120000;
+    private static final long closeConnectionsAfterMillis = 12000;
     /**
      * time the last cleanup was started
      */
