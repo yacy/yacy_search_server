@@ -177,8 +177,8 @@ public class ReferenceOrder {
         }
     }
     
-    public int authority(final String urlHash) {
-        return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
+    public int authority(final byte[] urlHash) {
+        return (doms.getScore(new String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
     }
 
     public long cardinal(final WordReferenceVars t) {
@@ -193,10 +193,9 @@ public class ReferenceOrder {
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
         int maxmaxpos = max.maxposition();
         int minminpos = min.minposition();
-        String mdhb = new String(t.metadataHash());
         final long r =
              ((256 - DigestURI.domLengthNormalized(t.metadataHash())) << ranking.coeff_domlength)
-           + ((ranking.coeff_ybr > 12) ? ((256 - (RankingProcess.ybr(mdhb) << 4)) << ranking.coeff_ybr) : 0)
+           + ((ranking.coeff_ybr > 12) ? ((256 - (RankingProcess.ybr(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
            + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
            + ((maxmaxpos           == minminpos        )   ? 0 : (256 - (((t.minposition()  - minminpos          ) << 8) / (maxmaxpos          - minminpos)          )) << ranking.coeff_posintext)
@@ -211,7 +210,7 @@ public class ReferenceOrder {
            + ((max.lother()        == min.lother())        ? 0 : (((t.lother()       - min.lother()        ) << 8) / (max.lother()       - min.lother())        ) << ranking.coeff_lother)
            + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
            + tf
-           + ((ranking.coeff_authority > 12) ? (authority(mdhb) << ranking.coeff_authority) : 0)
+           + ((ranking.coeff_authority > 12) ? (authority(t.metadataHash()) << ranking.coeff_authority) : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)

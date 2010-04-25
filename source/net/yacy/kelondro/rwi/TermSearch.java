@@ -27,16 +27,17 @@
 
 package net.yacy.kelondro.rwi;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.order.Base64Order;
 
 
 public class TermSearch <ReferenceType extends Reference> {
 
     private final ReferenceContainer<ReferenceType> joinResult;
-    HashMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers;
+    TreeMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers;
     
     public TermSearch(
             Index<ReferenceType> base,
@@ -48,16 +49,16 @@ public class TermSearch <ReferenceType extends Reference> {
         
         this.inclusionContainers =
             (queryHashes.isEmpty()) ?
-                new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
+                new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder) :
                 base.searchConjunction(queryHashes, urlselection);
                 
         if (!inclusionContainers.isEmpty() &&
             (inclusionContainers.size() < queryHashes.size()))
-            inclusionContainers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(0); // prevent that only a subset is returned
+            inclusionContainers = new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder); // prevent that only a subset is returned
         
-        HashMap<byte[], ReferenceContainer<ReferenceType>> exclusionContainers =
+        TreeMap<byte[], ReferenceContainer<ReferenceType>> exclusionContainers =
             (inclusionContainers.isEmpty()) ?
-                new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
+                new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder) :
                 base.searchConjunction(excludeHashes, urlselection);
     
         // join and exclude the result
@@ -72,7 +73,7 @@ public class TermSearch <ReferenceType extends Reference> {
         return this.joinResult;
     }
     
-    public HashMap<byte[], ReferenceContainer<ReferenceType>> inclusion() {
+    public TreeMap<byte[], ReferenceContainer<ReferenceType>> inclusion() {
         return this.inclusionContainers;
     }
     

@@ -30,11 +30,13 @@ package net.yacy.kelondro.rwi;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Order;
 
 public abstract class AbstractIndex <ReferenceType extends Reference> implements Index<ReferenceType> {
@@ -91,16 +93,16 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * @param urlselection
      * @return map of wordhash:indexContainer
      */
-    public HashMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final HandleSet wordHashes, final HandleSet urlselection) {
+    public TreeMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final HandleSet wordHashes, final HandleSet urlselection) {
     	// first check if there is any entry that has no match; this uses only operations in ram
     	/*
     	Iterator<byte[]> i = wordHashes.iterator();
         while (i.hasNext()) {
-            if (!this.has(i.next())); return new HashMap<byte[], ReferenceContainer<ReferenceType>>(0);
+            if (!this.has(i.next())); return new TreeMap<byte[], ReferenceContainer<ReferenceType>>(0);
         }
         */
     	// retrieve entities that belong to the hashes
-        final HashMap<byte[], ReferenceContainer<ReferenceType>> containers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(wordHashes.size());
+        final TreeMap<byte[], ReferenceContainer<ReferenceType>> containers = new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder);
         byte[] singleHash;
         ReferenceContainer<ReferenceType> singleContainer;
         final Iterator<byte[]> i = wordHashes.iterator();
@@ -118,7 +120,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             }
         
             // check result
-            if ((singleContainer == null || singleContainer.isEmpty())) return new HashMap<byte[], ReferenceContainer<ReferenceType>>(0);
+            if ((singleContainer == null || singleContainer.isEmpty())) return new TreeMap<byte[], ReferenceContainer<ReferenceType>>(Base64Order.enhancedCoder);
         
             containers.put(singleHash, singleContainer);
         }
@@ -136,7 +138,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * @return ReferenceContainer the join result
      * @throws RowSpaceExceededException 
      */
-    public ReferenceContainer<ReferenceType> searchJoin(final TreeSet<byte[]> wordHashes, final HandleSet urlselection, final int maxDistance) throws RowSpaceExceededException {
+    public ReferenceContainer<ReferenceType> searchJoin(final HandleSet wordHashes, final HandleSet urlselection, final int maxDistance) throws RowSpaceExceededException {
         // first check if there is any entry that has no match;
         // this uses only operations in ram
         for (byte[] wordHash: wordHashes) {

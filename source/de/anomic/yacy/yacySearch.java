@@ -135,14 +135,7 @@ public class yacySearch extends Thread {
         	containerCache.oneFeederTerminated();
         }
     }
-    /*
-    public static String set2string(final TreeSet<byte[]> hashes) {
-        String wh = "";
-        final Iterator<byte[]> iter = hashes.iterator();
-        while (iter.hasNext()) { wh = wh + new String(iter.next()); }
-        return wh;
-    }
-     */
+    
     public static String set2string(final HandleSet hashes) {
         String wh = "";
         final Iterator<byte[]> iter = hashes.iterator();

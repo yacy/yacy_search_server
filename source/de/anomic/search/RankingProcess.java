@@ -31,10 +31,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -72,7 +72,7 @@ public final class RankingProcess extends Thread {
     private final int[] flagcount; // flag counter
     private final HandleSet misses; // contains url-hashes that could not been found in the LURL-DB
     //private final int[] domZones;
-    private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
+    private TreeMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     
     private int remote_resourceSize, remote_indexCount, remote_peerCount;
     private int local_resourceSize, local_indexCount;
@@ -683,14 +683,15 @@ public final class RankingProcess extends Thread {
         useYBR = usage;
     }
     
-    public static int ybr(final String urlHash) {
+    public static int ybr(final byte[] urlHash) {
         // returns the YBR value in a range of 0..15, where 0 means best ranking and 15 means worst ranking
         if (ybrTables == null) return 15;
         if (!(useYBR)) return 15;
-        final String domHash = urlHash.substring(6);
+        byte[] domhash = new byte[6];
+        System.arraycopy(urlHash, 6, domhash, 0, 6);
         final int m = Math.min(maxYBR, ybrTables.length);
         for (int i = 0; i < m; i++) {
-            if ((ybrTables[i] != null) && (ybrTables[i].contains(domHash.getBytes()))) {
+            if ((ybrTables[i] != null) && (ybrTables[i].contains(domhash))) {
                 //System.out.println("YBR FOUND: " + urlHash + " (" + i + ")");
                 return i;
             }

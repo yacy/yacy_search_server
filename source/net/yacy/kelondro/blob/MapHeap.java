@@ -227,8 +227,16 @@ public class MapHeap {
     
     private String normalizeKey(String key) {
         if (blob == null || key == null) return key;
-        if (key.length() > blob.keylength()) key = key.substring(0, blob.keylength());
-        while (key.length() < blob.keylength()) key += fillchar;
+        if (key.length() > blob.keylength()) {
+            return key.substring(0, blob.keylength());
+        }
+        if (key.length() < blob.keylength()) {
+            byte[] k = key.getBytes();
+            byte[] b = new byte[blob.keylength()];
+            System.arraycopy(k, 0, b, 0, k.length);
+            for (int i = k.length; i < b.length; i++) b[i] = (byte) fillchar;
+            return new String(b);
+        }
         return key;
     }
 
@@ -237,13 +245,13 @@ public class MapHeap {
         if (key.length > blob.keylength()) {
             byte[] b = new byte[blob.keylength()];
             System.arraycopy(key, 0, b, 0, blob.keylength());
-            key = b;
+            return b;
         }
         if (key.length < blob.keylength()) {
             byte[] b = new byte[blob.keylength()];
             System.arraycopy(key, 0, b, 0, key.length);
-            for (int i = key.length; i < blob.keylength(); i++) b[i] = (byte) fillchar;
-            key = b;
+            for (int i = key.length; i < b.length; i++) b[i] = (byte) fillchar;
+            return b;
         }
         return key;
     }

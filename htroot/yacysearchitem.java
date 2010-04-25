@@ -119,19 +119,19 @@ public class yacysearchitem {
             prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + new String(result.hash()) + "&urlmaskfilter=.*");
             prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + new String(result.hash()) + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", new String(result.hash()));
-
+            String resulthashString = new String(result.hash());
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_link", result.urlstring());
             prop.put("content_display", display);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
-            prop.put("content_urlhash", new String(result.hash()));
-            prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(new String(result.hash())));
+            prop.put("content_urlhash", resulthashString);
+            prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(resulthashString));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
             prop.put("content_date", Switchboard.dateString(result.modified()));
             prop.put("content_date822", Switchboard.dateString822(result.modified()));
-            prop.put("content_ybr", RankingProcess.ybr(new String(result.hash())));
+            prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
             prop.putHTML("content_host", result.url().getHost());
@@ -140,7 +140,6 @@ public class yacysearchitem {
             prop.put("content_nl", (item == 0) ? 0 : 1);
             
             final TreeSet<String>[] query = theQuery.queryWords();
-            DigestURI wordURL = null;
             try {
                 prop.putHTML("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
             } catch (final UnsupportedEncodingException e) {}

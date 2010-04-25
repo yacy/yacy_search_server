@@ -30,6 +30,7 @@ package net.yacy.kelondro.rwi;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.index.HandleSet;
@@ -144,7 +145,7 @@ public interface Index <ReferenceType extends Reference> {
      * @param urlselection
      * @return map of wordhash:indexContainer
      */
-    public HashMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final HandleSet wordHashes, final HandleSet urlselection);        
+    public TreeMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final HandleSet wordHashes, final HandleSet urlselection);        
   
     /**
      * delete all references entries
