@@ -560,7 +560,9 @@ public class ftpc {
             quit();
             outPrintln("---- Connection closed.");
         } catch (final IOException e) {
-            errPrintln("Connection to server lost.");
+            // Connection to server lost
+            // do not append any error to errPrintln because we can silently go over this error
+            // otherwise the client treats this case as an error and does not accept the result of the session
         }
         try {
             closeConnection();
