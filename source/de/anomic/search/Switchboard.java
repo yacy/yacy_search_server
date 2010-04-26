@@ -2003,7 +2003,7 @@ public final class Switchboard extends serverSwitch {
         	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
         } else if (MemoryControl.available() < 1024*1024*25) {
             log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
-        } else if (Client.connectionCount() > 10) {
+        } else if (Client.connectionCount() > 25) {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + Client.connectionCount());
         } else {
             byte[] startHash = null, limitHash = null;
