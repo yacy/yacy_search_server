@@ -2033,7 +2033,7 @@ public final class Switchboard extends serverSwitch {
         // check if we can deliver entries to other peers
         if (this.dhtDispatcher.transmissionSize() >= 10) {
         	log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());
-        } else if (Client.connectionCount() > 10) {
+        } else if (Client.connectionCount() > 25) {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + Client.connectionCount());
         } else {
         	boolean dequeued = this.dhtDispatcher.dequeueContainer();
