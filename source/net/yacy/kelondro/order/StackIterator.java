@@ -22,9 +22,7 @@
 
 package net.yacy.kelondro.order;
 
-import java.util.Collection;
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 
 
 public class StackIterator<E> implements CloneableIterator<E> {

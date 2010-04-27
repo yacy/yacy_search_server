@@ -20,11 +20,10 @@ public class status_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         Segment segment = null;
-        if (post == null || !post.containsKey("html")) {
-            prop.setLocalized(false);
-            if (post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
-                segment = sb.indexSegments.segment(post.get("segment"));
-            }
+        boolean html = post != null && post.containsKey("html");
+        prop.setLocalized(html);
+        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
+            segment = sb.indexSegments.segment(post.get("segment"));
         }
         if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         
@@ -33,9 +32,16 @@ public class status_p {
         final int cacheMaxSize = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
         prop.putNum("ppm", sb.currentPPM());
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
-        prop.put("wordCacheSize", Integer.toString(segment.termIndex().getBufferSize()));
-        prop.put("wordCacheMaxSize", Integer.toString(cacheMaxSize));
-		//
+        prop.putNum("wordCacheSize", segment.termIndex().getBufferSize());
+        prop.putNum("wordCacheMaxSize", cacheMaxSize);
+		
+        // crawl queues
+        prop.putNum("localCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
+        prop.putNum("limitCrawlSize", sb.crawlQueues.limitCrawlJobSize());
+        prop.putNum("remoteCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
+        prop.putNum("loaderSize", sb.crawlQueues.workerSize());        
+        prop.putNum("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
+        
 		// memory usage and system attributes
         prop.putNum("freeMemory", MemoryControl.free());
         prop.putNum("totalMemory", MemoryControl.total());

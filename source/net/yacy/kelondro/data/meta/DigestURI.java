@@ -35,7 +35,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.text.Collator;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -936,7 +935,7 @@ public class DigestURI implements Serializable {
         return hosthash6("http", host, 80);
     }
     
-    private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
+    //private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
     public static final int domLengthEstimation(final byte[] urlHashBytes) {
         // generates an estimation of the original domain length

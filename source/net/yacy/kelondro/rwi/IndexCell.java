@@ -28,23 +28,19 @@ package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 import java.util.concurrent.Semaphore;
 
 import de.anomic.yacy.graphics.ProfilingGraph;
 
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.index.SimpleARC;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.Order;
-import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
 

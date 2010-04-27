@@ -1,12 +1,9 @@
 package de.anomic.crawler;
 
-import net.yacy.kelondro.logging.Log;
-
 public abstract class AbstractImporter extends Thread implements Importer {
 
     private int jobID = -1;
     private String jobType;
-    private Log log;
     private boolean stopped = false;
     private boolean paused = false;
     private long globalStart = System.currentTimeMillis();
@@ -19,7 +16,6 @@ public abstract class AbstractImporter extends Thread implements Importer {
     	this.jobType = theJobType;
 
         // initializing the logger and setting a more verbose thread name
-        this.log = new Log("IMPORT_" + this.jobType + "_" + this.jobID);
         this.setName("IMPORT_" + this.jobType + "_" + this.jobID);
     }
     

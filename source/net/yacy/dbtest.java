@@ -5,16 +5,13 @@ package net.yacy;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 import net.yacy.kelondro.index.ObjectIndex;
-import net.yacy.kelondro.index.ObjectIndexCache;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -26,7 +23,6 @@ import net.yacy.kelondro.table.SQLTable;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.visualization.ChartPlotter;
 
 

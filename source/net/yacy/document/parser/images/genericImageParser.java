@@ -222,7 +222,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
     
     public static ImageInfo parseJavaImage(
                             final DigestURI location,
-                            final BufferedImage image) throws ParserException {
+                            final BufferedImage image) {
         ImageInfo ii = new ImageInfo(location);
         ii.image = image;
         

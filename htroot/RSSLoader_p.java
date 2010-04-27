@@ -27,7 +27,6 @@
 
 import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
-import java.util.Map;
 
 import net.yacy.document.Document;
 import net.yacy.document.ParserException;
@@ -36,8 +35,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.search.Segment;
-import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -51,18 +48,6 @@ public class RSSLoader_p {
         
         if (post == null) {
             return prop;
-        }
-        
-        // get segment
-        Segment indexSegment = null;
-        if (post.containsKey("segment")) {
-            String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
-        } else {
-            // take default segment
-            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
         
         DigestURI url = null;
@@ -103,7 +88,7 @@ public class RSSLoader_p {
         }
         
         // get the links out of the rss
-        Map<DigestURI, String> map = doc.getAnchors();
+        //Map<DigestURI, String> map = doc.getAnchors();
         
         // put the urls into crawler using the proxy profile
         

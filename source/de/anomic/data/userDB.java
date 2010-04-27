@@ -49,7 +49,6 @@ import de.anomic.http.server.RequestHeader;
 
 public final class userDB {
     
-    private static final int USERNAME_MAX_LENGTH = 128;
     private static final int USERNAME_MIN_LENGTH = 4;
     
     private MapHeap userTable;

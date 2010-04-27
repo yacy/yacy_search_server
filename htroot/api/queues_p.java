@@ -31,11 +31,10 @@ public class queues_p {
         //wikiCode wikiTransformer = new wikiCode(switchboard);
         final serverObjects prop = new serverObjects();
         Segment segment = null;
-        if (post == null || !post.containsKey("html")) {
-            prop.setLocalized(false);
-            if (post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
-                segment = sb.indexSegments.segment(post.get("segment"));
-            }
+        boolean html = post != null && post.containsKey("html");
+        prop.setLocalized(html);
+        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
+            segment = sb.indexSegments.segment(post.get("segment"));
         }
         if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         prop.put("rejected", "0");
@@ -48,8 +47,8 @@ public class queues_p {
         prop.putNum("rwipublictextSize", segment.termIndex().sizesMax());
 
         // loader queue
-        prop.put("loaderSize", Integer.toString(sb.crawlQueues.workerSize()));        
-        prop.put("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
+        prop.putNum("loaderSize", sb.crawlQueues.workerSize());        
+        prop.putNum("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
         if (sb.crawlQueues.workerSize() == 0) {
             prop.put("list-loader", "0");
         } else {
@@ -68,18 +67,18 @@ public class queues_p {
         }
         
         //local crawl queue
-        prop.putNum("localCrawlSize", Integer.toString(sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount()));
+        prop.putNum("localCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
         prop.put("localCrawlState", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         int stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
         addNTable(sb, prop, "list-local", sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
 
         //global crawl queue
-        prop.putNum("limitCrawlSize", Integer.toString(sb.crawlQueues.limitCrawlJobSize()));
+        prop.putNum("limitCrawlSize", sb.crawlQueues.limitCrawlJobSize());
         prop.put("limitCrawlState", STATE_RUNNING);
         stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
 
         //global crawl queue
-        prop.putNum("remoteCrawlSize", Integer.toString(sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount()));
+        prop.putNum("remoteCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
         prop.put("remoteCrawlState", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
         stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
 

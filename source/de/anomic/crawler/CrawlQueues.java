@@ -181,7 +181,10 @@ public class CrawlQueues {
         synchronized (workers) {
             final Request[] e = new Request[workers.size()];
             int i = 0;
-            for (final crawlWorker w: workers.values()) e[i++] = w.request;
+            for (final crawlWorker w: workers.values()) {
+                if (i >= e.length) break;
+                e[i++] = w.request;
+            }
             return e;
         }
     }

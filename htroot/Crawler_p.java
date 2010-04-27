@@ -74,8 +74,6 @@ public class Crawler_p {
         // inital values for AJAX Elements (without JavaScript) 
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
-        prop.put("indexingSize", 0);
-        prop.put("indexingMax", 0);
         prop.put("urlpublictextSize", 0);
         prop.put("rwipublictextSize", 0);
         prop.put("list", "0");

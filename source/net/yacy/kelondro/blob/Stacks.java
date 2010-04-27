@@ -68,36 +68,22 @@ public class Stacks {
     }
     
     private class StackInstance {
-        String name;
-        private final File location;
-        Stack stack;
+        public String name;
+        public Stack stack;
         
         public StackInstance(final File location) throws IOException {
             String filename = location.getName();
             assert filename.startsWith(stacksPrefix + "_");
             assert filename.endsWith(".bstack");
             this.name = filename.substring(stacksPrefix.length() + 1, filename.length() - 7);
-            this.location = location;
             this.stack = new Stack(location);
         }
         
         public StackInstance(final String stack) throws IOException {
-            this.location = new File(stacksLocation, stacksPrefix + "_" + stack + ".bstack");
             this.name = stack;
-            this.stack = new Stack(location);
+            this.stack = new Stack(new File(stacksLocation, stacksPrefix + "_" + stack + ".bstack"));
         }
         
-        public String name() {
-            return this.name;
-        }
-        
-        public Stack stack() {
-            return this.stack;
-        }
-        
-        public File location() {
-            return this.location;
-        }
     }
     
     private Stack getStack(final String stack) {
@@ -107,13 +93,13 @@ public class Stacks {
             try {
                 si = new StackInstance(stack);
                 this.stacks.put(stack, si);
-                return si.stack();
+                return si.stack;
             } catch (IOException e) {
                 Log.logException(e);
                 return null;
             }
         }
-        return si.stack();
+        return si.stack;
     }
     
     /**

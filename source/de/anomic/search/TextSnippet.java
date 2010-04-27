@@ -25,7 +25,6 @@
 package de.anomic.search;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -40,7 +39,6 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
 import net.yacy.kelondro.index.HandleSet;
@@ -48,7 +46,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
-import net.yacy.kelondro.util.SetTools;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.retrieval.Response;

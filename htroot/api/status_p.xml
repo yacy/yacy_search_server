@@ -3,6 +3,20 @@
   <ppm>#[ppm]#</ppm>
   <wordCacheSize>#[wordCacheSize]#</wordCacheSize>
   <wordCacheMaxSize>#[wordCacheMaxSize]#</wordCacheMaxSize>
+  
+  <loaderqueue>
+    <size>#[loaderSize]#</size>
+    <max>#[loaderMax]#</max>
+  </loaderqueue>
+  <localcrawlerqueue>
+    <size>#[localCrawlSize]#</size>
+  </localcrawlerqueue>
+  <limitcrawlerqueue>
+    <size>#[limitCrawlSize]#</size>
+  </limitcrawlerqueue>
+  <remotecrawlerqueue>
+    <size>#[remoteCrawlSize]#</size>
+  </remotecrawlerqueue>
 
   <memory>
     <free>#[freeMemory]#</free>

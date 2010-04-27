@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.yacy.kelondro.index.BufferedObjectIndex;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
