@@ -507,8 +507,10 @@ public class Balancer {
     	count = Math.min(count, top.size());
     	final ArrayList<Request> cel = new ArrayList<Request>();
     	if (count == 0) return cel;
+    	byte[][] ta = new byte[count][];
+        ta = top.toArray(ta);
     	synchronized (this) {
-	    	for (byte[] n: top) {
+	    	for (byte[] n: ta) {
 	    		try {
 					final Row.Entry rowEntry = urlFileIndex.get(n);
 					if (rowEntry == null) continue;
