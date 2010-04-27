@@ -220,11 +220,12 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     
     public synchronized byte[] exportCollection() {
         // returns null if the collection is empty
-        trim(false);
         sort(); // experimental; supervise CPU load
+        //uniq();
+        //trim();
         assert this.sortBound == this.chunkcount; // on case the collection is sorted
-        assert this.size() * this.rowdef.objectsize == this.chunkcache.length : "this.size() = " + this.size() + ", objectsize = " + this.rowdef.objectsize + ", chunkcache.length = " + this.chunkcache.length;
-        final Row row = exportRow(chunkcache.length);
+        assert this.size() * this.rowdef.objectsize <= this.chunkcache.length : "this.size() = " + this.size() + ", objectsize = " + this.rowdef.objectsize + ", chunkcache.length = " + this.chunkcache.length;
+        final Row row = exportRow(this.size() * this.rowdef.objectsize);
         final Row.Entry entry = row.newEntry();
         assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         assert (this.chunkcount <= chunkcache.length / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcache.length = " + chunkcache.length + ", rowdef.objectsize = " + rowdef.objectsize;
@@ -296,10 +297,10 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return neededSpaceForEnsuredSize(chunkcount + 1, false);
     }
     
-    protected synchronized void trim(final boolean plusGrowFactor) {
+    protected synchronized void trim() {
         if (chunkcache.length == 0) return;
         long needed = chunkcount * rowdef.objectsize;
-        if (plusGrowFactor) needed = neededSpaceForEnsuredSize(chunkcount, false);
+        assert needed <= chunkcache.length;
         if (needed >= chunkcache.length)
             return; // in case that the growfactor causes that the cache would
                     // grow instead of shrink, simply ignore the growfactor
@@ -308,8 +309,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
                     // This is not critical. Otherwise we provoke a serious
                     // problem with OOM
         final byte[] newChunkcache = new byte[(int) needed];
-        System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(
-                chunkcache.length, newChunkcache.length));
+        System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(chunkcache.length, newChunkcache.length));
         chunkcache = newChunkcache;
     }
     
@@ -945,7 +945,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
                     collection.addUnique(get(i + 1, false));
                     removeRow(i + 1, false);
                     if (i + 1 < chunkcount - 1) u = false;
-                    collection.trim(false);
+                    collection.trim();
                     report.add(collection);
                     collection = new RowSet(this.rowdef, 2);
                 }

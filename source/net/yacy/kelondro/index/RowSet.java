@@ -515,7 +515,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         System.out.println("SORTED        : " + d.toString());
         d.uniq();
         System.out.println("UNIQ          : " + d.toString());
-        d.trim(false);
+        d.trim();
         System.out.println("TRIM          : " + d.toString());
         
         

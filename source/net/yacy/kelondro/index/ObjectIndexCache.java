@@ -92,7 +92,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
             // finish initialization phase
             index0.sort();
             index0.uniq();
-            index0.trim(false);
+            index0.trim();
             index1 = new RowSet(rowdef); //new RowSetArray(rowdef, spread);
         }
     }
