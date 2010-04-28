@@ -328,7 +328,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * and is composed of the current date and the cell salt
      */
     public synchronized void close() {
-        if (!this.ram.isEmpty()) this.ram.dump(this.array.newContainerBLOBFile(), (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+        if (!this.ram.isEmpty()) this.ram.dump(this.array.newContainerBLOBFile(), (int) Math.min(MemoryControl.available() / 3, writeBufferSize), true);
         // close all
         this.ram.close();
         this.array.close();

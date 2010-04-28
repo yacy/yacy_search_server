@@ -324,7 +324,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         if (index >= chunkcount) return null;
         if ((index + 1) * rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
-        final byte[] b = new byte[this.rowdef.width(0)];
+        final byte[] b = new byte[this.rowdef.primaryKeyLength];
         System.arraycopy(chunkcache, index * rowdef.objectsize, b, 0, b.length);
         return b;
     }
@@ -348,7 +348,10 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     public synchronized final void set(final int index, final Row.Entry a) throws RowSpaceExceededException {
         assert (index >= 0) : "set: access with index " + index + " is below zero";
         ensureSize(index + 1);
-        final boolean sameKey = match(a.bytes(), 0, a.cellwidth(0), index);
+        byte[] column = a.bytes();
+        assert a.cellwidth(0) == this.rowdef.primaryKeyLength;
+        assert column.length >= this.rowdef.primaryKeyLength;
+        final boolean sameKey = match(column, 0, index);
         //if (sameKey) System.out.print("$");
         a.writeToArray(chunkcache, index * rowdef.objectsize);
         if (index >= this.chunkcount) this.chunkcount = index + 1;
@@ -1000,10 +1003,11 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return c;
     }
 
-    protected synchronized int compare(final byte[] a, final int astart, final int alength, final int chunknumber) {
+    protected synchronized int compare(final byte[] a, final int astart, final int chunknumber) {
         assert (chunknumber < chunkcount);
-        final int l = Math.min(this.rowdef.primaryKeyLength, Math.min(a.length - astart, alength));
-        return rowdef.objectOrder.compare(a, astart, chunkcache, chunknumber * this.rowdef.objectsize, l);
+        assert a.length - astart >= this.rowdef.primaryKeyLength;
+        final int len = Math.min(a.length - astart, this.rowdef.primaryKeyLength);
+        return rowdef.objectOrder.compare(a, astart, chunkcache, chunknumber * this.rowdef.objectsize, len);
     }
     
     protected final boolean match(final int i, final int j) {
@@ -1023,10 +1027,11 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return true;
     }
     
-    protected synchronized boolean match(final byte[] a, int astart, final int alength, final int chunknumber) {
+    protected synchronized boolean match(final byte[] a, int astart, final int chunknumber) {
         if (chunknumber >= chunkcount) return false;
         int p = chunknumber * this.rowdef.objectsize;
-        int len = Math.min(this.rowdef.primaryKeyLength, Math.min(alength, a.length - astart));
+        assert a.length - astart >= this.rowdef.primaryKeyLength;
+        int len = Math.min(a.length - astart, this.rowdef.primaryKeyLength);
         while (len-- != 0) {
             if (a[astart++] != chunkcache[p++]) return false;
         }

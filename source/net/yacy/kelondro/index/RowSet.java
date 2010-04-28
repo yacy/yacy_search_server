@@ -101,12 +101,14 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
 	}
    
     public final synchronized boolean has(final byte[] key) {
-        final int index = find(key, 0, key.length);
+        assert key.length == this.rowdef.primaryKeyLength;
+        final int index = find(key, 0);
         return index >= 0;
     }
     
     public final synchronized Row.Entry get(final byte[] key) {
-        final int index = find(key, 0, key.length);
+        assert key.length == this.rowdef.primaryKeyLength;
+        final int index = find(key, 0);
         if (index < 0) return null;
         return get(index, true);
     }
@@ -118,7 +120,8 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
             sort();
         }
-        final int index = find(entry.bytes(), 0, super.rowdef.primaryKeyLength);
+        assert entry.bytes().length >= this.rowdef.primaryKeyLength;
+        final int index = find(entry.bytes(), 0);
         if (index < 0) {
             super.addUnique(entry);
         } else {
@@ -137,7 +140,8 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
             sort();
         }
-        index = find(entry.bytes(), 0, super.rowdef.primaryKeyLength);
+        assert entry.bytes().length >= this.rowdef.primaryKeyLength;
+        index = find(entry.bytes(), 0);
         if (index < 0) {
             super.addUnique(entry);
         } else {
@@ -150,7 +154,8 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     }
 
     public final synchronized long inc(final byte[] key, final int col, final long add, final Row.Entry initrow) throws RowSpaceExceededException {
-        final int index = find(key, 0, key.length);
+        assert key.length == this.rowdef.primaryKeyLength;
+        final int index = find(key, 0);
         if (index >= 0) {
             // the entry existed before
             final Row.Entry entry = get(index, false); // no clone necessary
@@ -176,8 +181,9 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     public final synchronized boolean delete(final byte[] a) {
         boolean exists = false;
         int index;
+        assert a.length == this.rowdef.primaryKeyLength;
         while (true) {
-            index = find(a, 0, a.length);
+            index = find(a, 0);
             if (index < 0) {
                 return exists;
             } else {
@@ -190,8 +196,9 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     public final synchronized Row.Entry remove(final byte[] a) {
         Row.Entry entry = null;
         int index;
+        assert a.length == this.rowdef.primaryKeyLength;
         while (true) {
-            index = find(a, 0, a.length);
+            index = find(a, 0);
             if (index < 0) {
                 return entry;
             } else {
@@ -201,10 +208,10 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         }
     }
 
-    private final int find(final byte[] a, final int astart, final int alength) {
+    private final int find(final byte[] a, final int astart) {
         // returns the chunknumber; -1 if not found
         
-        if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
+        if (rowdef.objectOrder == null) return iterativeSearch(a, astart, 0, this.chunkcount);
         
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
             sort();
@@ -212,26 +219,27 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         
         if (this.rowdef.objectOrder != null && this.rowdef.objectOrder instanceof Base64Order) {
             // first try to find in sorted area
-            assert this.rowdef.objectOrder.wellformed(a, astart, alength) : "not wellformed: " + new String(a, astart, alength);
+            assert this.rowdef.objectOrder.wellformed(a, astart, this.rowdef.primaryKeyLength) : "not wellformed: " + new String(a, astart, this.rowdef.primaryKeyLength);
         }
         
         // first try to find in sorted area
-        final int p = binarySearch(a, astart, alength);
+        final int p = binarySearch(a, astart);
         if (p >= 0) return p;
     
         // then find in unsorted area
-        return iterativeSearch(a, astart, alength, this.sortBound, this.chunkcount);
+        return iterativeSearch(a, astart, this.sortBound, this.chunkcount);
     }
     
-    private final int iterativeSearch(final byte[] key, final int astart, final int alength, final int leftBorder, final int rightBound) {
+    private final int iterativeSearch(final byte[] key, final int astart, final int leftBorder, final int rightBound) {
         // returns the chunknumber        
         for (int i = leftBorder; i < rightBound; i++) {
-            if (match(key, astart, alength, i)) return i;
+            assert key.length - astart >= this.rowdef.primaryKeyLength;
+            if (match(key, astart, i)) return i;
         }
         return -1;
     }
     
-    private final int binarySearch(final byte[] key, final int astart, final int alength) {
+    private final int binarySearch(final byte[] key, final int astart) {
         // returns the exact position of the key if the key exists,
         // or -1 if the key does not exist
         assert (rowdef.objectOrder != null);
@@ -240,15 +248,16 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         int p = 0;
         int d;
         while (l < rbound) {
-            p = l + ((rbound - l) >> 1);
-            d = compare(key, astart, alength, p);
+            p = (l + rbound) >> 1;
+            assert key.length - astart >= this.rowdef.primaryKeyLength;
+            d = compare(key, astart, p);
             if (d == 0) return p;
             if (d < 0) rbound = p; else l = p + 1;
         }
         return -1;
     }
 
-    protected final int binaryPosition(final byte[] key, final int astart, final int alength) {
+    protected final int binaryPosition(final byte[] key, final int astart) {
         // returns the exact position of the key if the key exists,
         // or a position of an entry that is greater than the key if the
         // key does not exist
@@ -258,8 +267,9 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         int p = 0;
         int d;
         while (l < rbound) {
-            p = l + ((rbound - l) >> 1);
-            d = compare(key, astart, alength, p);
+            p = (l + rbound) >> 1;
+            assert key.length - astart >= this.rowdef.primaryKeyLength;
+            d = compare(key, astart, p);
             if (d == 0) return p;
             if (d < 0) rbound = p; else l = p + 1;
         }
@@ -291,7 +301,8 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             if (first == null) {
                 p = 0;
             } else {
-                p = binaryPosition(first, 0, first.length); // check this to find bug in DHT selection enumeration
+                assert first.length == rowdef.primaryKeyLength;
+                p = binaryPosition(first, 0); // check this to find bug in DHT selection enumeration
             }
         }
         
@@ -350,7 +361,8 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             if (first == null) {
                 p = 0;
             } else {
-                p = binaryPosition(first, 0, first.length); // check this to find bug in DHT selection enumeration
+                assert first.length == rowdef.primaryKeyLength;
+                p = binaryPosition(first, 0); // check this to find bug in DHT selection enumeration
             }
         }
         

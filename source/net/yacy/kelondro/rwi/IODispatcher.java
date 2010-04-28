@@ -83,7 +83,7 @@ public class IODispatcher extends Thread {
     protected synchronized void dump(ReferenceContainerCache<? extends Reference> cache, File file, ReferenceContainerArray<? extends Reference> array) {
         if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
-             if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+             if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize), true);
         } else {
             DumpJob<? extends Reference> job = (DumpJob<? extends Reference>)new DumpJob(cache, file, array);
             try {
@@ -98,7 +98,7 @@ public class IODispatcher extends Thread {
                 }
             } catch (InterruptedException e) {
                 Log.logException(e);
-                cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+                cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize), true);
             }
         }
     }
@@ -224,7 +224,7 @@ public class IODispatcher extends Thread {
         }
         private void dump() {
             try {
-                if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+                if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize), true);
                 array.mountBLOBFile(file);
             } catch (IOException e) {
                 Log.logException(e);

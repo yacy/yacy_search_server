@@ -520,68 +520,12 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
                 i++;
                 continue;
             }
-            //acc = ahpla[ac];
-            //assert (acc >= 0) : "acc = " + acc + ", a = " + NaturalOrder.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + NaturalOrder.table(a, 16, aoffset);
-            //bcc = ahpla[bc];
-            //assert (bcc >= 0) : "bcc = " + bcc + ", b = " + NaturalOrder.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + NaturalOrder.table(b, 16, boffset);
-            //if (acc > bcc) c = 1;
-            //if (acc < bcc) c = -1;
-            //assert c != 0;
-            //assert ab[(ac << 7) | bc] == c;
-            //return c;
             return ab[(ac << 7) | bc];
         }
         // they are equal
         return 0;
     }
-    /*
-    public final int comparePivot(final byte[] compiledPivot, final byte[] b, final int boffset, final int blength) {
-        assert zero == null;
-        assert asc;
-        assert (boffset + blength <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + blength;
-        int i = 0;
-        final int bl = Math.min(blength, b.length - boffset);
-        byte acc, bcc;
-        assert boffset >= 0;
-        assert boffset < b.length;
-        assert boffset + Math.min(bl, compiledPivot.length) - 1 >= 0;
-        assert boffset + Math.min(bl, compiledPivot.length) - 1 < b.length;
-        byte bb;
-        while ((i < compiledPivot.length) && (i < bl)) {
-            acc = compiledPivot[i];
-            assert boffset + i >= 0;
-            assert boffset + i < b.length;
-            bb = b[boffset + i];
-            assert bb >= 0;
-            assert bb < 128;
-            bcc = ahpla[bb];
-            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + NaturalOrder.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + NaturalOrder.table(b, 16, boffset);
-            if (acc > bcc) return 1;
-            if (acc < bcc) return -1;
-            // else the bytes are equal and it may go on yet undecided
-            i++;
-        }
-        // compare length
-        if (compiledPivot.length > bl) return 1;
-        if (compiledPivot.length < bl) return -1;
-        // they are equal
-        return 0;
-    }
     
-    public final byte[] compilePivot(final byte[] a, final int aoffset, final int alength) {
-        assert (aoffset + alength <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + alength;
-        final byte[] cp = new byte[Math.min(alength, a.length - aoffset)];
-        byte aa;
-        for (int i = cp.length - 1; i >= 0; i--) {
-            aa = a[aoffset + i];
-            assert aa >= 0;
-            assert aa < 128;
-            cp[i] = ahpla[aa];
-            assert cp[i] != -1;
-        }
-        return cp;
-    }
-*/
     public static void main(final String[] s) {
         // java -classpath classes de.anomic.kelondro.kelondroBase64Order
         final Base64Order b64 = new Base64Order(true, true);

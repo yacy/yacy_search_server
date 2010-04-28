@@ -89,7 +89,16 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     	this.cache = null;
     }
     
-    public void dump(final File heapFile, int writeBuffer) {
+    /**
+     * dump the cache to a file. This method can be used in a destructive way
+     * which means that memory can be freed during the dump. This may be important
+     * because the dump is done in such situations when memory gets low. To get more
+     * memory during the dump helps to solve tight memory situations.
+     * @param heapFile
+     * @param writeBuffer
+     * @param destructive - if true then the cache is cleaned during the dump causing to free memory
+     */
+    public void dump(final File heapFile, int writeBuffer, boolean destructive) {
         assert this.cache != null;
         Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
@@ -127,6 +136,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 } catch (RowSpaceExceededException e) {
                     Log.logException(e);
                 }
+                if (destructive) container.clear(); // this memory is not needed any more
                 urlcount += container.size();
             }
             wordcount++;
