@@ -2005,6 +2005,8 @@ public final class Switchboard extends serverSwitch {
             log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
         } else if (Client.connectionCount() > 25) {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + Client.connectionCount());
+            // close unused connections
+            Client.cleanup();
         } else {
             byte[] startHash = null, limitHash = null;
             int tries = 10;
@@ -2035,6 +2037,8 @@ public final class Switchboard extends serverSwitch {
         	log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());
         } else if (Client.connectionCount() > 25) {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + Client.connectionCount());
+            // close unused connections
+            Client.cleanup();
         } else {
         	boolean dequeued = this.dhtDispatcher.dequeueContainer();
         	hasDoneSomething = hasDoneSomething | dequeued;
