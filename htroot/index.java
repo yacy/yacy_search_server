@@ -120,12 +120,13 @@ public class index {
         prop.put("depth", "0");
         prop.put("display", display);
         prop.putHTML("constraint", constraint);
+        prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchoptions_display", display);
-        prop.put("searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
-        prop.put("searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
-        prop.put("searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
-        prop.put("searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
-        prop.put("searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchtext_check", (contentdom == ContentDomain.TEXT) ? "1" : "0");
         prop.put("searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
         prop.put("searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");

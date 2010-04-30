@@ -32,6 +32,7 @@
         <input name="query" id="search" type="text" size="52" maxlength="80" value="#[former]#" />
         <input type="submit" name="Enter" value="Search" />
         <input type="hidden" name="verify" value="true" />
+        #(searchdomswitches)#::
         <div class="yacysearch">
 	        #(searchtext)#::<input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# /><label for="text">Text</label>&nbsp;&nbsp;#(/searchtext)#
 	        #(searchimage)#::<input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# /><label for="image">Images</label>&nbsp;&nbsp;#(/searchimage)#
@@ -39,6 +40,7 @@
 	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# /><label for="video">Video</label>&nbsp;&nbsp;#(/searchvideo)#
 	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# /><label for="app">Applications</label>#(/searchapp)#
         </div>
+        #(/searchdomswitches)#
         <input type="hidden" name="nav" value="all" />
       #(searchoptions)#
         <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />

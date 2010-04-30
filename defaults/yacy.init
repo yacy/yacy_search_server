@@ -698,7 +698,7 @@ stacker.slots = 2000
 
 # search domains. If set to false then that search is not available
 search.text = true
-search.images = true
+search.image = true
 search.audio = true
 search.video = true
 search.app = true
