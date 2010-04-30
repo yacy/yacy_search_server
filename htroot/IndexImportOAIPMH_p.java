@@ -24,9 +24,13 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Random;
+import java.util.TreeSet;
 
 import net.yacy.document.importer.OAIPMHImporter;
-import net.yacy.document.importer.OAIPMHReader;
+import net.yacy.document.importer.OAIPMHLoader;
 import net.yacy.document.importer.ResumptionToken;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -55,7 +59,7 @@ public class IndexImportOAIPMH_p {
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl, null);
-                    OAIPMHReader r = new OAIPMHReader(sb.loader, url, sb.surrogatesInPath, "oaipmh-one");
+                    OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, "oaipmh-one");
                     ResumptionToken rt = r.getResumptionToken();
                     prop.put("import-one", 1);
                     prop.put("import-one_count", (rt == null) ? "not available" : Integer.toString(rt.getRecordCounter()));
@@ -83,8 +87,8 @@ public class IndexImportOAIPMH_p {
                 }
             }
             
-            if (post.containsKey("importroot")) {
-                String oaipmhurl = post.get("urlstartall", "");
+            if (post.get("urlstart", "").length() > 0) {
+                String oaipmhurl = post.get("urlstart", "");
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl, null);
@@ -97,6 +101,38 @@ public class IndexImportOAIPMH_p {
                     Log.logException(e);
                     prop.put("status", 2);
                     prop.put("status_message", e.getMessage());
+                }
+            }
+            
+            
+            if (post.get("loadrows", "").length() > 0) {
+                // create a time-ordered list of events to execute
+                TreeSet<String> sources = new TreeSet<String>();
+                for (Map.Entry<String, String> entry: post.entrySet()) {
+                    if (entry.getValue().startsWith("mark_")) {
+                        sources.add(entry.getValue().substring(5));
+                    }
+                }
+                prop.put("status", 1);
+                prop.put("optiongetlist", 1);
+                prop.put("iframetype", 1);
+                
+                // prepare the set for random read from it (to protect the servers at the beginning of the list)
+                ArrayList<String> sourceList = new ArrayList<String>(sources.size());
+                for (String oaipmhurl: sources) sourceList.add(oaipmhurl);
+                Random r = new Random(System.currentTimeMillis());
+                
+                // start jobs for the sources
+                DigestURI url = null;
+                while (sourceList.size() > 0) {
+                    String oaipmhurl = sourceList.remove(r.nextInt(sourceList.size()));
+                    try {
+                        url = new DigestURI(oaipmhurl, null);
+                        OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
+                        job.start();
+                    } catch (MalformedURLException e) {
+                        Log.logException(e);
+                    }
                 }
             }
             

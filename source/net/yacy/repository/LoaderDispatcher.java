@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -452,6 +453,31 @@ public final class LoaderDispatcher {
             e = i.next();
             if (System.currentTimeMillis() > timeout) break;
             if (System.currentTimeMillis() - e.getValue().longValue() > minDelay) i.remove();
+        }
+    }
+    
+    public void loadIfNotExistBackground(String url, File cache) {
+        new Loader(url, cache).start();
+    }
+    
+    private class Loader extends Thread {
+
+        private String url;
+        private File cache;
+        
+        public Loader(String url, File cache) {
+            this.url = url;
+            this.cache = cache;
+        }
+        
+        public void run() {
+            if (this.cache.exists()) return;
+            try {
+                // load from the net
+                Response response = load(new DigestURI(this.url), false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
+                byte[] b = response.getContent();
+                FileUtils.copy(b, this.cache);
+            } catch (MalformedURLException e) {} catch (IOException e) {}
         }
     }
 }

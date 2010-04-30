@@ -25,6 +25,7 @@
 import java.util.ArrayList;
 import java.util.Set;
 
+import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.importer.OAIPMHImporter;
 
 import de.anomic.http.server.RequestHeader;
@@ -43,39 +44,42 @@ public class IndexImportOAIPMHList_p {
         prop.put("source", 0);
         
         if (post != null && post.containsKey("source")) {
-            Set<String> oaiRoots = OAIPMHImporter.getAllListedOAIServer(sb.loader);
+            Set<String> oaiRoots = OAIListFriendsLoader.load(sb.loader).keySet();
             
             boolean dark = false;
-            int cnt = 0;
+            int count = 0;
             for (String root: oaiRoots) {
-                prop.put("source_table_" + cnt + "_dark", (dark) ? "1" : "0");
-                prop.put("source_table_" + cnt + "_source", "<a href=\"/IndexImportOAIPMH_p.html?importroot=&urlstartall=" + root + "\" target=\"_top\">" + root+ "</a>");
+                prop.put("source_table_" + count + "_dark", (dark) ? "1" : "0");
+                prop.put("source_table_" + count + "_count", count);
+                prop.put("source_table_" + count + "_source", root);
+                prop.put("source_table_" + count + "_loadurl", "<a href=\"/IndexImportOAIPMH_p.html?urlstart=" + root + "\" target=\"_top\">" + root + "</a>");
                 dark = !dark;
-                cnt++;
+                count++;
             }
-            prop.put("source_table", cnt);
+            prop.put("source_table", count);
+            prop.put("source_num", count);
             prop.put("source", 1);
         }
         
         if (post != null && post.containsKey("import")) {
             ArrayList<OAIPMHImporter> jobs = new ArrayList<OAIPMHImporter>();
-            for (OAIPMHImporter job: OAIPMHImporter.runningJobs) jobs.add(job);
-            for (OAIPMHImporter job: OAIPMHImporter.startedJobs) jobs.add(job);
-            for (OAIPMHImporter job: OAIPMHImporter.finishedJobs) jobs.add(job);
+            for (OAIPMHImporter job: OAIPMHImporter.runningJobs.keySet()) jobs.add(job);
+            for (OAIPMHImporter job: OAIPMHImporter.startedJobs.keySet()) jobs.add(job);
+            for (OAIPMHImporter job: OAIPMHImporter.finishedJobs.keySet()) jobs.add(job);
             
             boolean dark = false;
-            int cnt = 0;
+            int count = 0;
             for (OAIPMHImporter job: jobs) {
-                prop.put("import_table_" + cnt + "_dark", (dark) ? "1" : "0");
-                prop.put("import_table_" + cnt + "_thread", (job.isAlive()) ? "<img src=\"/env/grafics/loading.gif\" alt=\"running\" />" : "finished");
-                prop.put("import_table_" + cnt + "_source", job.source());
-                prop.put("import_table_" + cnt + "_chunkCount", job.chunkCount());
-                prop.put("import_table_" + cnt + "_recordsCount", job.count());
-                prop.put("import_table_" + cnt + "_speed", job.speed());
+                prop.put("import_table_" + count + "_dark", (dark) ? "1" : "0");
+                prop.put("import_table_" + count + "_thread", (job.isAlive()) ? "<img src=\"/env/grafics/loading.gif\" alt=\"running\" />" : "finished");
+                prop.put("import_table_" + count + "_source", job.source());
+                prop.put("import_table_" + count + "_chunkCount", job.chunkCount());
+                prop.put("import_table_" + count + "_recordsCount", job.count());
+                prop.put("import_table_" + count + "_speed", job.speed());
                 dark = !dark;
-                cnt++;
+                count++;
             }
-            prop.put("import_table", cnt);
+            prop.put("import_table", count);
             prop.put("import", 1);
             prop.put("refresh", 1);
         }

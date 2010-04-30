@@ -1,72 +1,55 @@
-// OAIPMHImporter
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 30.09.2009 on http://yacy.net
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate: 2009-09-23 23:26:14 +0200 (Mi, 23 Sep 2009) $
-// $LastChangedRevision: 6340 $
-// $LastChangedBy: low012 $
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  OAIPMHImporter
+ *  Copyright 2009 by Michael Peter Christen
+ *  First released 30.09.2009 at http://yacy.net
+ *  
+ *  This is a part of YaCy, a peer-to-peer based web search engine
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file COPYING.LESSER.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.document.importer;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.document.parser.csvParser;
 
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.Switchboard;
 
-
-// get one server with
-// http://roar.eprints.org/index.php?action=csv
-// or
-// http://www.openarchives.org/Register/BrowseSites
-// or
-// http://www.openarchives.org/Register/ListFriends
-//
 // list records from oai-pmh like
 // http://opus.bsz-bw.de/fhhv/oai2/oai2.php?verb=ListRecords&metadataPrefix=oai_dc
-
 
 public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPMHImporter> {
 
     private static int importerCounter = Integer.MAX_VALUE;
+    private static Object N = new Object();
     
-    public static TreeSet<OAIPMHImporter> startedJobs = new TreeSet<OAIPMHImporter>();
-    public static TreeSet<OAIPMHImporter> runningJobs = new TreeSet<OAIPMHImporter>();
-    public static TreeSet<OAIPMHImporter> finishedJobs = new TreeSet<OAIPMHImporter>();
+    public static ConcurrentHashMap<OAIPMHImporter, Object> startedJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
+    public static ConcurrentHashMap<OAIPMHImporter, Object> runningJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
+    public static ConcurrentHashMap<OAIPMHImporter, Object> finishedJobs = new ConcurrentHashMap<OAIPMHImporter, Object>();
     
     private final LoaderDispatcher loader;
     private DigestURI source;
@@ -95,7 +78,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
             // this should never happen
             Log.logException(e);
         }
-        startedJobs.add(this);
+        startedJobs.put(this, N);
     }
 
     public int count() {
@@ -131,23 +114,23 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     }
     
     public void run() {
-        while (runningJobs.size() > 10) {
-            try {Thread.sleep(1000 + 1000 * System.currentTimeMillis() % 6);} catch (InterruptedException e) {}
+        while (runningJobs.size() > 50) {
+            try {Thread.sleep(10000 + 3000 * (System.currentTimeMillis() % 6));} catch (InterruptedException e) {}
         }
         startedJobs.remove(this);
-        runningJobs.add(this);
+        runningJobs.put(this, N);
         this.message = "loading first part of records";
         while (true) {
             try {
-                OAIPMHReader reader = new OAIPMHReader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, filenamePrefix);
+                OAIPMHLoader loader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, filenamePrefix);
                 this.chunkCount++;
-                this.recordsCount += reader.getResumptionToken().getRecordCounter();
-                this.source = reader.getResumptionToken().resumptionURL(this.source);
+                this.recordsCount += loader.getResumptionToken().getRecordCounter();
+                this.source = loader.getResumptionToken().resumptionURL(this.source);
                 if (this.source == null) {
                     this.message = "import terminated with source = null";
                     break;
                 }
-                this.message = "loading next resumption fragment, cursor = " + reader.getResumptionToken().getCursor();
+                this.message = "loading next resumption fragment, cursor = " + loader.getResumptionToken().getCursor();
             } catch (IOException e) {
                 this.message = e.getMessage();
                 break;
@@ -155,7 +138,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         }
         this.finishTime = System.currentTimeMillis();
         runningJobs.remove(this);
-        finishedJobs.add(this);
+        finishedJobs.put(this, N);
     }
     
     
@@ -185,54 +168,13 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
             File surrogatesIn,
             File surrogatesOut,
             long staleLimit) {
-        Set<String> plainList = getAllListedOAIServer(loader);
+        Set<String> plainList = OAIListFriendsLoader.load(loader).keySet();
         Map<String, Date> loaded = getLoadedOAIServer(surrogatesIn, surrogatesOut);
         long limit = System.currentTimeMillis() - staleLimit;
         for (Map.Entry<String, Date> a: loaded.entrySet()) {
             if (a.getValue().getTime() > limit) plainList.remove(a.getKey());
         }
         return plainList;
-    }
-    
-    /**
-     * use the list server at http://roar.eprints.org/index.php?action=csv
-     * to produce a list of OAI-PMH sources
-     * @param loader
-     * @return the list of oai-pmh sources
-     */
-    public static Set<String> getAllListedOAIServer(LoaderDispatcher loader) {
-        TreeSet<String> list = new TreeSet<String>();
-
-        // read roar
-        File roar = new File(Switchboard.getSwitchboard().dictionariesPath, "harvesting/roar.csv");
-        DigestURI roarSource;
-        try {
-            roarSource = new DigestURI("http://roar.eprints.org/index.php?action=csv", null);
-        } catch (MalformedURLException e) {
-            Log.logException(e);
-            roarSource = null;
-        }
-        if (!roar.exists()) try {
-            // load the file from the net
-            loader.load(roarSource, CrawlProfile.CACHE_STRATEGY_NOCACHE, roar);
-        } catch (IOException e) {
-            Log.logException(e);
-        }
-        if (roar.exists()) {
-            csvParser parser = new csvParser();
-            try {
-                List<String[]> table = parser.getTable(roarSource, "", "UTF-8", new FileInputStream(roar));
-                for (String[] row: table) {
-                    if (row.length > 2 && (row[2].startsWith("http://") || row[2].startsWith("https://"))) {
-                        list.add(row[2]);
-                    }
-                }
-            } catch (FileNotFoundException e) {
-                Log.logException(e);
-            }
-        }
-        
-        return list;
     }
 
     /**

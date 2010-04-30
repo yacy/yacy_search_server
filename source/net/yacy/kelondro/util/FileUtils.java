@@ -171,6 +171,8 @@ public final class FileUtils {
      * @see #copy(File source, File dest)
      */
     public static void copy(final InputStream source, final File dest, final long count) throws IOException {
+        String path = dest.getParent();
+        if (path != null && path.length() > 0) new File(path).mkdirs();
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(dest);

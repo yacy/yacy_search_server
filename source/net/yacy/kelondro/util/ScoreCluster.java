@@ -84,7 +84,7 @@ public final class ScoreCluster<E> {
     public synchronized void shrinkToMinScore(int minScore) {
         int score;
         Long key;
-        while (true) {
+        while (keyrefDB.size() > 0) {
             // find and remove objects where their score is smaller than the demanded minimum score
             key = keyrefDB.firstKey();
             if (key == null) break;

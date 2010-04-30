@@ -4,20 +4,49 @@
     <title>YaCy '#[clientname]#': OAI-PMH source import list</title>
     #%env/templates/metas.template%#
     #(refresh)#::<meta http-equiv="REFRESH" content="6" />#(/refresh)#
+    <script>
+    <!--
+    function setall(name, check){
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        if (check) for(i = 0; i < count; i++) {
+            if (selectForm.elements["item_" + i].checked) {
+                check = false;
+                break;
+            }
+        }
+        for(i = 0; i < count; i++){
+    	    selectForm.elements["item_" + i].checked = check;
+        }
+    }
+    -->
+    </script>
+    <script src="/js/sorttable.js"></script>
   </head>
   <body>
     #(source)#::
-    <h3>OAI Source List</h3>
+    <h3>List of #[num]# OAI-PMH Servers</h3>
+    <form action="IndexImportOAIPMH_p.html" target="_top" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="oaipmhimport">
+    <p>
+    <input type="hidden" name="num" value="#[num]#" />
+    <input type="submit" name="loadrows" value="Load Selected Sources" />
+    </p>
     <table cellpadding="2" cellspacing="1" >
       <tr class="TableHeader">
+        <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
         <td>Source</td>
       </tr>
       #{table}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-        <td>#[source]#</td>
+        <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[source]#" /></td>
+        <td>#[loadurl]#</td>
       </tr>
       #{/table}#
     </table>
+    <p>
+    <input type="submit" name="loadrows" value="Load Selected Sources" />
+    </p>
+    </form>
     #(/source)#
     
     #(import)#::

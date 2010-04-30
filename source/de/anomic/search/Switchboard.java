@@ -37,9 +37,16 @@
 package de.anomic.search;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
@@ -60,6 +67,10 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -68,6 +79,7 @@ import net.yacy.document.ParserException;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.RSSMessage;
 import net.yacy.document.content.SurrogateReader;
+import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -474,6 +486,7 @@ public final class Switchboard extends serverSwitch {
         // start a loader
         log.logConfig("Starting Crawl Loader");
         this.loader = new LoaderDispatcher(this);
+        OAIListFriendsLoader.init(this.loader);
         this.crawlQueues = new CrawlQueues(this, queuesRoot);
         this.crawlQueues.noticeURL.setMinimumDelta(
                 this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
@@ -1236,58 +1249,106 @@ public final class Switchboard extends serverSwitch {
     }
     
     public boolean processSurrogate(final String s) {
-        File surrogateFile = new File(this.surrogatesInPath, s);
+        File infile = new File(this.surrogatesInPath, s);
+        if (!infile.exists() || !infile.canWrite() || !infile.canRead()) return false;
         File outfile = new File(this.surrogatesOutPath, s);
-        if (!surrogateFile.exists() || !surrogateFile.canWrite() || !surrogateFile.canRead()) return false;
         if (outfile.exists()) return false;
         boolean moved = false;
-        try {
-            SurrogateReader reader = new SurrogateReader(new BufferedInputStream(new FileInputStream(surrogateFile)), 3);
-            Thread readerThread = new Thread(reader, "Surrogate-Reader " + surrogateFile.getAbsolutePath());
-            readerThread.start();
-            DCEntry surrogate;
-            Response response;
-            while ((surrogate = reader.take()) != DCEntry.poison) {
-                // check if url is in accepted domain
-                assert surrogate != null;
-                assert crawlStacker != null;
-                final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.getIdentifier());
-                if (urlRejectReason != null) {
-                    if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.getIdentifier() + "': " + urlRejectReason);
-                    continue;
+        if (s.endsWith("xml.zip")) {
+            // open the zip file with all the xml files in it
+            try {
+                InputStream is = new BufferedInputStream(new FileInputStream(infile));
+                ZipInputStream zis = new ZipInputStream(is);
+                ZipEntry entry;
+                while ((entry = zis.getNextEntry()) != null) {
+                    int size;
+                    byte[] buffer = new byte[2048];
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    while ((size = zis.read(buffer, 0, buffer.length)) != -1) {
+                        baos.write(buffer, 0, size);
+                    }
+                    baos.flush();
+                    processSurrogate(new ByteArrayInputStream(baos.toByteArray()), entry.getName());
+                    baos.close();
                 }
-                
-                // create a queue entry
-                Document document = surrogate.document();
-                Request request = new Request(
-                        peers.mySeed().hash.getBytes(), 
-                        surrogate.getIdentifier(), 
-                        null, 
-                        "", 
-                        new Date(),
-                        new Date(),
-                        this.crawler.defaultSurrogateProfile.handle(),
-                        0, 
-                        0, 
-                        0        
-                );
-                response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
-                indexingQueueEntry queueEntry = new indexingQueueEntry(Segments.Process.SURROGATES, response, document, null);
-                
-                // place the queue entry into the concurrent process of the condenser (document analysis)
-                try {
-                    indexingCondensementProcessor.enQueue(queueEntry);
-                } catch (InterruptedException e) {
-                    Log.logException(e);
-                    break;
+            } catch (IOException e) {
+                Log.logException(e);
+            } finally {
+                moved = infile.renameTo(outfile);
+            }
+            return moved;
+        } else {
+            try {
+                InputStream is = new BufferedInputStream(new FileInputStream(infile));
+                if (s.endsWith(".gz")) is = new GZIPInputStream(is);
+                processSurrogate(is, infile.getName());
+            } catch (IOException e) {
+                Log.logException(e);
+            } finally {
+                moved = infile.renameTo(outfile);
+                if (moved) {
+                    // check if this file is already compressed, if not, compress now
+                    if (!outfile.getName().endsWith(".gz")) {
+                        String gzname = outfile.getName() + ".gz";
+                        File gzfile = new File(outfile.getParentFile(), gzname);
+                        try {
+                            OutputStream os = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile)));
+                            FileUtils.copy(new BufferedInputStream(new FileInputStream(outfile)), os);
+                            os.close();
+                            if (gzfile.exists()) FileUtils.deletedelete(outfile);
+                        } catch (FileNotFoundException e) {
+                            Log.logException(e);
+                        } catch (IOException e) {
+                            Log.logException(e);
+                        }
+                    }
                 }
             }
-        } catch (IOException e) {
-            Log.logException(e);
-        } finally {
-            moved = surrogateFile.renameTo(outfile);
+            return moved;
         }
-        return moved;
+    }
+    
+    public void processSurrogate(final InputStream is, String name) throws IOException {
+        SurrogateReader reader = new SurrogateReader(is, 3);
+        Thread readerThread = new Thread(reader, name);
+        readerThread.start();
+        DCEntry surrogate;
+        Response response;
+        while ((surrogate = reader.take()) != DCEntry.poison) {
+            // check if url is in accepted domain
+            assert surrogate != null;
+            assert crawlStacker != null;
+            final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.getIdentifier());
+            if (urlRejectReason != null) {
+                if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.getIdentifier() + "': " + urlRejectReason);
+                continue;
+            }
+            
+            // create a queue entry
+            Document document = surrogate.document();
+            Request request = new Request(
+                    peers.mySeed().hash.getBytes(), 
+                    surrogate.getIdentifier(), 
+                    null, 
+                    "", 
+                    new Date(),
+                    new Date(),
+                    this.crawler.defaultSurrogateProfile.handle(),
+                    0, 
+                    0, 
+                    0        
+            );
+            response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
+            indexingQueueEntry queueEntry = new indexingQueueEntry(Segments.Process.SURROGATES, response, document, null);
+            
+            // place the queue entry into the concurrent process of the condenser (document analysis)
+            try {
+                indexingCondensementProcessor.enQueue(queueEntry);
+            } catch (InterruptedException e) {
+                Log.logException(e);
+                break;
+            }
+        }
     }
 
     public int surrogateQueueSize() {
@@ -1326,7 +1387,7 @@ public final class Switchboard extends serverSwitch {
                     // check for interruption
                     checkInterruption();
 
-                    if (surrogate.endsWith(".xml")) {
+                    if (surrogate.endsWith(".xml") || surrogate.endsWith(".xml.gz") || surrogate.endsWith(".xml.zip")) {
                         // read the surrogate file and store entry in index
                         if (processSurrogate(surrogate)) return true;
                     }

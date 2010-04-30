@@ -187,8 +187,8 @@ public class CrawlResults {
                 entry = i.next();
                 try {
                     urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(entry.getKey().getBytes(), null, 0);
-                    if(urle == null) {
-                        Log.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ entry.getKey());
+                    if (urle == null) {
+                        Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash "+ entry.getKey());
                         urlstr = null;
                         urltxt = null;
                         metadata = null;
