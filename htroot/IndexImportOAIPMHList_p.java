@@ -75,6 +75,7 @@ public class IndexImportOAIPMHList_p {
                 prop.put("import_table_" + count + "_source", job.source());
                 prop.put("import_table_" + count + "_chunkCount", job.chunkCount());
                 prop.put("import_table_" + count + "_recordsCount", job.count());
+                prop.put("import_table_" + count + "_completeListSize", job.getCompleteListSize());
                 prop.put("import_table_" + count + "_speed", job.speed());
                 dark = !dark;
                 count++;

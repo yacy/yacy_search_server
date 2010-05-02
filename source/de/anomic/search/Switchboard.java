@@ -1318,9 +1318,9 @@ public final class Switchboard extends serverSwitch {
             // check if url is in accepted domain
             assert surrogate != null;
             assert crawlStacker != null;
-            final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.getIdentifier());
+            final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.getIdentifier(true));
             if (urlRejectReason != null) {
-                if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.getIdentifier() + "': " + urlRejectReason);
+                if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.getIdentifier(true) + "': " + urlRejectReason);
                 continue;
             }
             
@@ -1328,7 +1328,7 @@ public final class Switchboard extends serverSwitch {
             Document document = surrogate.document();
             Request request = new Request(
                     peers.mySeed().hash.getBytes(), 
-                    surrogate.getIdentifier(), 
+                    surrogate.getIdentifier(true), 
                     null, 
                     "", 
                     new Date(),

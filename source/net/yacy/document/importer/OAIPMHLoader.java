@@ -50,7 +50,8 @@ public class OAIPMHLoader {
         // load the file from the net
         Response response = loader.load(source, false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
         byte[] b = response.getContent();
-        this.resumptionToken = new ResumptionToken(b);
+        this.resumptionToken = new ResumptionToken(source, b);
+        //System.out.println("*** ResumptionToken = " + this.resumptionToken.toString());
         File f1 = new File(targetDir, OAIPMHImporter.filename4Source(source));
         File f0 = new File(targetDir, f1.getName() + ".tmp");
         

@@ -53,7 +53,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     
     private final LoaderDispatcher loader;
     private DigestURI source;
-    private int recordsCount, chunkCount;
+    private int recordsCount, chunkCount, completeListSize;
     private final long startTime;
     private long finishTime;
     private final ResumptionToken resumptionToken;
@@ -65,6 +65,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         this.loader = loader;
         this.recordsCount = 0;
         this.chunkCount = 0;
+        this.completeListSize = 0;
         this.startTime = System.currentTimeMillis();
         this.finishTime = 0;
         this.resumptionToken = null;
@@ -97,6 +98,10 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         return this.resumptionToken;
     }
 
+    public int getCompleteListSize() {
+        return this.completeListSize;
+    }
+    
     public long remainingTime() {
         return (this.isAlive()) ? Long.MAX_VALUE : 0; // we don't know
     }
@@ -123,9 +128,10 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         while (true) {
             try {
                 OAIPMHLoader loader = new OAIPMHLoader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, filenamePrefix);
+                this.completeListSize = Math.max(this.completeListSize, loader.getResumptionToken().getCompleteListSize());
                 this.chunkCount++;
                 this.recordsCount += loader.getResumptionToken().getRecordCounter();
-                this.source = loader.getResumptionToken().resumptionURL(this.source);
+                this.source = loader.getResumptionToken().resumptionURL();
                 if (this.source == null) {
                     this.message = "import terminated with source = null";
                     break;

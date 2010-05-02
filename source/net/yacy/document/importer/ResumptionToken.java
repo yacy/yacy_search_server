@@ -56,19 +56,25 @@ public class ResumptionToken extends TreeMap<String, String> {
     
     int recordCounter;
     
-    public ResumptionToken(final byte[] b) throws IOException {
+    private DigestURI source;
+    
+    public ResumptionToken(DigestURI source, final byte[] b) throws IOException {
         super((Collator) insensitiveCollator.clone());
+        this.source = source;
         this.recordCounter = 0;
         new Parser(b);
     }
     
+    /*
     public ResumptionToken(
+            DigestURI source, 
             Date expirationDate,
             int completeListSize,
             int cursor,
             String token
             ) {
         super((Collator) insensitiveCollator.clone());
+        this.source = source;
         this.recordCounter = 0;
         this.put("expirationDate", DateFormatter.formatISO8601(expirationDate));
         this.put("completeListSize", Integer.toString(completeListSize));
@@ -77,18 +83,21 @@ public class ResumptionToken extends TreeMap<String, String> {
     }
     
     public ResumptionToken(
+            DigestURI source, 
             String expirationDate,
             int completeListSize,
             int cursor,
             String token
             ) {
         super((Collator) insensitiveCollator.clone());
+        this.source = source;
         this.recordCounter = 0;
         this.put("expirationDate", expirationDate);
         this.put("completeListSize", Integer.toString(completeListSize));
         this.put("cursor", Integer.toString(cursor));
         this.put("token", token);
     }
+    */
     
     /**
      * truncate the given url at the '?'
@@ -116,12 +125,13 @@ public class ResumptionToken extends TreeMap<String, String> {
      * @return
      * @throws IOException in case that no follow-up url can be generated; i.e. if the expiration date is exceeded
      */
-    public DigestURI resumptionURL(DigestURI givenURL) throws IOException {
-        // decide which kind of encoding stratgy was used to get a resumptionToken:
+    public DigestURI resumptionURL() throws IOException {
+        // decide which kind of encoding strategy was used to get a resumptionToken:
 
         String token = this.getToken();
-        if (token == null || token.length() == 0) throw new IOException("end of resumption reached");
-        String url = truncatedURL(givenURL);
+        if (token == null) throw new IOException("end of resumption reached - token == null");
+        if (token.length() == 0) throw new IOException("end of resumption reached - token.length() == 0");
+        String url = truncatedURL(this.source);
         
         // encoded state
         if (token.indexOf("from=") >= 0) {
@@ -135,8 +145,40 @@ public class ResumptionToken extends TreeMap<String, String> {
             if (expiration.before(new Date())) throw new IOException("the resumption is expired at " + DateFormatter.formatISO8601(expiration) + " (now: " + DateFormatter.formatISO8601(new Date()));
             // the resumption token is still fresh
         }
-
-        return new DigestURI(url + "verb=ListRecords&resumptionToken=" + token, null);
+        String u = url + "verb=ListRecords&resumptionToken=" + escape(token);
+        return new DigestURI(u, null);
+    }
+    
+    public static StringBuilder escape(final String s) {
+        final int len = s.length();
+        final StringBuilder sbuf = new StringBuilder(len + 10);
+        for (int i = 0; i < len; i++) {
+            final int ch = s.charAt(i);
+            if (ch == '/') {
+                sbuf.append("%2F");
+            } else if (ch == '?') {
+                sbuf.append("%3F");
+            } else if (ch == '#') {
+                sbuf.append("%23");
+            } else if (ch == '=') {
+                sbuf.append("%3D");
+            } else if (ch == '&') {
+                sbuf.append("%26");
+            } else if (ch == ':') {
+                sbuf.append("%3A");
+            } else if (ch == ';') {
+                sbuf.append("%3B");
+            } else if (ch == ' ') {
+                sbuf.append("%20");
+            } else if (ch == '%') {
+                sbuf.append("%25");
+            } else if (ch == '+') {
+                sbuf.append("%2B");
+            } else {
+                sbuf.append((char)ch);
+            }
+        }
+        return sbuf;
     }
     
     /**
@@ -199,7 +241,7 @@ public class ResumptionToken extends TreeMap<String, String> {
     }
     
     public String toString() {
-        return "expirationDate=" + DateFormatter.formatISO8601(this.getExpirationDate()) + ", completeListSize=" + getCompleteListSize() +
+        return "source = " +  this.source + ", expirationDate=" + DateFormatter.formatISO8601(this.getExpirationDate()) + ", completeListSize=" + getCompleteListSize() +
         ", cursor=" + this.getCursor() + ", token=" + this.getToken();
     }
     
@@ -224,13 +266,13 @@ public class ResumptionToken extends TreeMap<String, String> {
                 this.saxParser.parse(this.stream, this);
             } catch (SAXException e) {
                 Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed:\n" + new String(b));
+                Log.logWarning("ResumptionToken", "token was not parsed (1):\n" + new String(b));
             } catch (IOException e) {
                 Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed:\n" + new String(b));
+                Log.logWarning("ResumptionToken", "token was not parsed (2):\n" + new String(b));
             } catch (ParserConfigurationException e) {
                 Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed:\n" + new String(b));
+                Log.logWarning("ResumptionToken", "token was not parsed (3):\n" + new String(b));
                 throw new IOException(e.getMessage());
             } finally {
                 try {
@@ -246,7 +288,13 @@ public class ResumptionToken extends TreeMap<String, String> {
          completeListSize="226"
          cursor="0">688</resumptionToken>
          */
-        
+
+        /*
+         <resumptionToken expirationDate="2010-05-03T19:30:43Z"
+         completeListSize="578"
+         cursor="0">1518323588</resumptionToken>
+        */
+
         public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
             if ("record".equals(tag)) {
                 recordCounter++;

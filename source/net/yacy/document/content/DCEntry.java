@@ -104,9 +104,30 @@ public class DCEntry extends TreeMap<String, String> {
         }
     }
     
-    public DigestURI getIdentifier() {
+    public DigestURI getIdentifier(boolean useRelationAsAlternative) {
         String u = this.get("url");
         if (u == null) u = this.get("dc:identifier");
+        if (u == null) return useRelationAsAlternative ? getRelation() : null;
+        String[] urls = u.split(";");
+        if (urls.length > 1) {
+            // select one that fits
+            u = bestU(urls);
+        }
+        try {
+            return new DigestURI(u, null);
+        } catch (MalformedURLException e) {
+            if (useRelationAsAlternative) {
+                DigestURI relation = this.getRelation();
+                if (relation != null) return relation;
+                Log.logWarning("DCEntry", "getIdentifier: url is bad, relation also: " + e.getMessage());
+            }
+            Log.logWarning("DCEntry", "getIdentifier: url is bad: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    public DigestURI getRelation() {
+        String u = this.get("dc:relation");
         if (u == null) return null;
         String[] urls = u.split(";");
         if (urls.length > 1) {
@@ -116,7 +137,7 @@ public class DCEntry extends TreeMap<String, String> {
         try {
             return new DigestURI(u, null);
         } catch (MalformedURLException e) {
-            Log.logException(e);
+            Log.logWarning("DCEntry", "getRelation: url is bad: " + e.getMessage());
             return null;
         }
     }
@@ -139,7 +160,7 @@ public class DCEntry extends TreeMap<String, String> {
     public String getLanguage() {
         String l = this.get("language");
         if (l == null) l = this.get("dc:language");
-        if (l == null) return getIdentifier().language();
+        if (l == null) return getIdentifier(true).language();
         return l;
     }
     
@@ -220,7 +241,7 @@ public class DCEntry extends TreeMap<String, String> {
         
         try {
             return new Document(
-                getIdentifier(),
+                getIdentifier(true),
                 "text/html",
                 "UTF-8",
                 languages,

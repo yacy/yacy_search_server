@@ -29,8 +29,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.zip.GZIPInputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -170,21 +172,20 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         File f = new File(args[0]);
         SurrogateReader sr;
         try {
-            sr = new SurrogateReader(new BufferedInputStream(new FileInputStream(f)), 1);
+            InputStream is = new BufferedInputStream(new FileInputStream(f));
+            if (f.getName().endsWith(".gz")) is = new GZIPInputStream(is);
+            sr = new SurrogateReader(is, 1);
 
             Thread t = new Thread(sr, "Surrogate-Reader " + f.getAbsolutePath());
             t.start();
             DCEntry s;
-            System.out.println("1");
             while ((s = sr.take()) != DCEntry.poison) {
                 System.out.println("Title: " + s.getTitle());
                 System.out.println("Date: " + s.getDate());
-                System.out.println("URL: " + s.getIdentifier());
+                System.out.println("URL: " + s.getIdentifier(true));
                 System.out.println("Language: " + s.getLanguage());
                 System.out.println("Body: " + s.getDescription());
-                System.out.println("Categories: " + s.getSubject());
             }
-            System.out.println("2");
         } catch (IOException e) {
             Log.logException(e);
         }
