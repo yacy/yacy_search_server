@@ -46,14 +46,14 @@ public class yacydoc {
         final Switchboard sb = (Switchboard) env;
         
         final serverObjects prop = new serverObjects();
-        Segment segment = null;
-        if (post == null || !post.containsKey("html")) {
-            if (post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
-                segment = sb.indexSegments.segment(post.get("segment"));
-            }
+        final Segment segment;
+        boolean html = post != null && post.containsKey("html");
+        prop.setLocalized(html);
+        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
+            segment = sb.indexSegments.segment(post.get("segment"));
+        } else {
+            segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
-        if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        
         
         prop.put("dc_title", "");
         prop.put("dc_creator", "");
@@ -74,7 +74,8 @@ public class yacydoc {
 
         if (urlstring.length() > 0 && urlhash.length() == 0) {
             try {
-                urlhash = new String((new DigestURI(urlstring, null)).hash());
+                DigestURI url = new DigestURI(urlstring, null);
+                urlhash = new String(url.hash());
             } catch (MalformedURLException e) {
                 Log.logException(e);
             }
@@ -94,11 +95,11 @@ public class yacydoc {
         prop.putXML("dc_creator", metadata.dc_creator());
         prop.putXML("dc_description", "");
         prop.putXML("dc_subject", metadata.dc_subject());
-        prop.putXML("dc_publisher", metadata.url().toNormalform(false, true));
+        prop.putXML("dc_publisher", "");
         prop.putXML("dc_contributor", "");
         prop.putXML("dc_date", entry.moddate().toString());
         prop.putXML("dc_type", String.valueOf(entry.doctype()));
-        prop.putXML("dc_identifier", urlhash);
+        prop.putXML("dc_identifier", metadata.url().toNormalform(false, true));
         prop.putXML("dc_language", entry.language());
 
         prop.putXML("yacy_loaddate", entry.loaddate().toString());

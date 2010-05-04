@@ -40,7 +40,6 @@ import de.anomic.search.ContentDomain;
 import de.anomic.search.MediaSnippet;
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
-import de.anomic.search.RankingProcess;
 import de.anomic.search.ResultEntry;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
@@ -131,7 +130,7 @@ public class yacysearchitem {
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
             prop.put("content_date", Switchboard.dateString(result.modified()));
             prop.put("content_date822", Switchboard.dateString822(result.modified()));
-            prop.put("content_ybr", RankingProcess.ybr(result.hash()));
+            //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
             prop.putHTML("content_host", result.url().getHost());

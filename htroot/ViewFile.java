@@ -46,7 +46,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;
@@ -226,7 +225,13 @@ public class ViewFile {
                     return prop;
                 }
 
-                responseHeader = Client.whead(url.toString());
+                try {
+                    Response response = sb.loader.load(url, true, false);
+                    responseHeader = response.getResponseHeader();
+                    resource = response.getContent();
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
                 if (responseHeader == null) {
                     prop.put("error", "4");
                     prop.put("error_errorText", "Unable to load resource metadata.");
@@ -272,7 +277,7 @@ public class ViewFile {
             // parsing the resource content
             Document document = null;
             try {
-                document = LoaderDispatcher.parseDocument(url, resource.length, new ByteArrayInputStream(resource), null);
+                document = LoaderDispatcher.parseDocument(url, resource.length, new ByteArrayInputStream(resource), responseHeader);
                 if (document == null) {
                     prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");
