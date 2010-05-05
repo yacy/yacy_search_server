@@ -56,11 +56,11 @@ public class compare_yacy {
         searchengines.put("romso.de", "http://romso.de/?q=");
         searchengines.put("Wikipedia English", "http://en.wikipedia.org/wiki/");
         searchengines.put("Wikipedia Deutsch", "http://de.wikipedia.org/wiki/");
-        searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?display=2&verify=true&resource=global&query=");
+        searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?verify=true&resource=global&nav=all&display=2&meanCount=5&query=");
         searchengines.put("dbpedia", "http://dbpedia.neofonie.de/browse/~:");
         searchengines.put("wolfram alpha", "http://www.wolframalpha.com/input/?i=");
         searchengines.put("OAIster@OCLC", "http://oaister.worldcat.org/search?q=");
-        searchengines.put("oai.yacy.net", "http://oai.yacy.net/yacysearch.html?display=2&query=");
+        searchengines.put("oai.yacy.net", "http://oai.yacy.net/yacysearch.html?verify=true&resource=local&nav=all&display=2&meanCount=5&query=");
     }
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
