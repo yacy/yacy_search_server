@@ -1,0 +1,20 @@
+# Network definition file for the oanet network
+
+network.unit.name = oanet
+network.unit.description = Open Access Community
+network.unit.domain = global
+network.unit.search.time = 4
+network.unit.dht = false
+network.unit.dhtredundancy.junior = 1
+network.unit.dhtredundancy.senior = 1
+network.unit.dht.partitionExponent = 0
+network.unit.remotecrawl.speed = 6
+network.unit.bootstrap.seedlist0 = http://yacy.dyndns.org:1519/www/seed.txt
+
+network.unit.update.location0 = http://yacy.net/index.html
+network.unit.update.location1 = http://latest.yacy.de
+
+network.unit.protocol.control = uncontrolled
+
+network.unit.access.whitelist = 10\..*,127.*,172.(1[6-9]|2[0-9]|3[0-1])\..*,169.254.*,192.168.*,localhost
+network.unit.access.blacklist =
