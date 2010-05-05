@@ -90,15 +90,12 @@ public class ViewFile {
         
         // get segment
         Segment indexSegment = null;
-        if (post.containsKey("segment")) {
-            String segmentName = post.get("segment");
-            if (sb.indexSegments.segmentExist(segmentName)) {
-                indexSegment = sb.indexSegments.segment(segmentName);
-            }
+        boolean authorized = sb.verifyAuthentication(header, false);
+        if (post != null && post.containsKey("segment") && authorized) {
+            indexSegment = sb.indexSegments.segment(post.get("segment"));
         } else {
-            // take default segment
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
-        }
+        }        
         
         prop.put("display", display);
         prop.put("error_display", display);
@@ -180,7 +177,20 @@ public class ViewFile {
             Log.logException(e);
             resource = null;
         }
-        responseHeader = Cache.getResponseHeader(url);
+        
+        if (resource == null && authorized) {
+            // load resource from net
+            Response response = null;
+            try {
+                response = sb.loader.load(url, true, false);
+            } catch (IOException e) {
+                Log.logException(e);
+            }
+            if (response != null) resource = response.getContent();
+            responseHeader = response.getResponseHeader();
+        }
+        
+        if (responseHeader == null) responseHeader = Cache.getResponseHeader(url);
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {

@@ -15,8 +15,8 @@ you can validate it with http://www.stg.brown.edu/service/xmlvalid/
   <dc:publisher.URL>#[dc_publisher]#</dc:publisher.URL>
   <dc:date>#[dc_date]#</dc:date>
   <dc:type>yacy:doctype:#[dc_type]#</dc:type>
-  <dc:identifier SCHEME="yacy:urlhash">yacy:urlhash:#[dc_identifier]#</dc:identifier>
-  <dc:identifier SCHEME="URL">#[dc_publisher]#</dc:identifier>
+  <dc:identifier SCHEME="yacy:urlhash">yacy:urlhash:#[yacy_urlhash]#</dc:identifier>
+  <dc:identifier SCHEME="URL">#[dc_identifier]#</dc:identifier>
   <dc:format.extent>#[yacy_size]#</dc:format.extent>
   <dc:language SCHEME="ISO639-2">#[dc_language]#</dc:language>
   <yacy:loaddate>#[yacy_loaddate]#</yacy:loaddate>

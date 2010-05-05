@@ -49,7 +49,8 @@ public class yacydoc {
         final Segment segment;
         boolean html = post != null && post.containsKey("html");
         prop.setLocalized(html);
-        if (post != null && post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
+        boolean authorized = sb.verifyAuthentication(header, false);
+        if (post != null && post.containsKey("segment") && authorized) {
             segment = sb.indexSegments.segment(post.get("segment"));
         } else {
             segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
@@ -68,7 +69,7 @@ public class yacydoc {
 
         if (post == null) return prop;
         
-        String urlstring = post.get("urlstring", "").trim();
+        String urlstring = post.get("url", "").trim();
         String urlhash = post.get("urlhash", "").trim();
         if (urlstring.length() == 0 && urlhash.length() == 0) return prop;
 
@@ -93,7 +94,7 @@ public class yacydoc {
         
         prop.putXML("dc_title", metadata.dc_title());
         prop.putXML("dc_creator", metadata.dc_creator());
-        prop.putXML("dc_description", "");
+        prop.putXML("dc_description", ""); // this is the fulltext part in the surrogate
         prop.putXML("dc_subject", metadata.dc_subject());
         prop.putXML("dc_publisher", "");
         prop.putXML("dc_contributor", "");
@@ -102,6 +103,7 @@ public class yacydoc {
         prop.putXML("dc_identifier", metadata.url().toNormalform(false, true));
         prop.putXML("dc_language", entry.language());
 
+        prop.put("yacy_urlhash", metadata.url().hash());
         prop.putXML("yacy_loaddate", entry.loaddate().toString());
         prop.putXML("yacy_referrer_hash", (le == null) ? "" : new String(le.hash()));
         prop.putXML("yacy_referrer_url", (le == null) ? "" : le.metadata().url().toNormalform(false, true));

@@ -79,7 +79,7 @@ public class CrawlResults {
             tabletype == EventOrigin.LOCAL_CRAWLING &&
             sb.crawlResults.getStackSize(EventOrigin.LOCAL_CRAWLING) == 0) {
             // the main menu does a request to the local crawler page, but in case this table is empty, the overview page is shown
-            tabletype = EventOrigin.UNKNOWN;
+            tabletype = (sb.crawlResults.getStackSize(EventOrigin.SURROGATES) == 0) ? EventOrigin.UNKNOWN : EventOrigin.SURROGATES;
         }
         
         // check if authorization is needed and/or given
@@ -100,7 +100,7 @@ public class CrawlResults {
             }
         }
 
-        if(post != null) {
+        if (post != null) {
         // custom number of lines
         if (post.containsKey("count")) {
             lines = Integer.parseInt(post.get("count", "500"));
