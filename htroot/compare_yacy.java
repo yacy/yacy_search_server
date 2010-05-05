@@ -40,7 +40,7 @@ public class compare_yacy {
         "google.de", "google.com", "scroogle.org",
         "metager.de", "metager2.de (web)", "metager2.de (international)",
         "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch",
-        "Sciencenet", "dbpedia", "wolfram alpha"};
+        "Sciencenet", "dbpedia", "wolfram alpha", "OAIster@OCLC", "oai.yacy.net"};
     private static final Map<String, String> searchengines = new HashMap<String, String>();
     static {
         searchengines.put(defaultsearch, "yacysearch.html?display=2&verify=true&resource=global&query=");
@@ -59,6 +59,8 @@ public class compare_yacy {
         searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?display=2&verify=true&resource=global&query=");
         searchengines.put("dbpedia", "http://dbpedia.neofonie.de/browse/~:");
         searchengines.put("wolfram alpha", "http://www.wolframalpha.com/input/?i=");
+        searchengines.put("OAIster@OCLC", "http://oaister.worldcat.org/search?q=");
+        searchengines.put("oai.yacy.net", "http://oai.yacy.net/yacysearch.html?display=2&query=");
     }
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
