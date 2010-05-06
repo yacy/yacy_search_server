@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+  <comment>Sources for OAI ListFriends entries. The Key is the URL to the ListFriends Source, the Value is the Path to the local file where the ListFriends file is stored</comment>
+  <entry key="http://roar.eprints.org/cgi/roar_search/advanced/export_roar_ROAR::ListFriends.xml?_action_export=1&amp;output=ROAR%3A%3AListFriends">DATA/DICTIONARIES/harvesting/export_roar_ROAR_ListFriends.xml</entry>
+  <entry key="http://www.openarchives.org/Register/ListFriends">DATA/DICTIONARIES/harvesting/ListFriends.xml</entry>
+</properties>

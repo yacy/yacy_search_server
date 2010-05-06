@@ -24,10 +24,14 @@ package net.yacy.document.importer;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -48,63 +52,50 @@ import de.anomic.crawler.retrieval.Response;
 public class OAIListFriendsLoader {
 
     private static final long serialVersionUID = -8705115274655024604L;
+  
+    private static final HashMap<String, File> listFriends = new HashMap<String, File>();
     
-    //private static String url10 = "http://roar.eprints.org/cgi/roar_search/advanced/export_roar_ROAR::ListFriends.xml?screen=ROAR%3A%3AFacetSearch&_action_export=1&output=ROAR%3A%3AListFriends&exp=1|1|-recordcount%2F-date|archive|-|-|eprint_status%3Aeprint_status%3AALL%3AEQ%3Aarchive|metadata_visibility%3Ametadata_visibility%3AALL%3AEX%3Ashow";
-    private static String url10 = "http://roar.eprints.org/cgi/roar_search/advanced/export_roar_ROAR::ListFriends.xml?_action_export=1&output=ROAR%3A%3AListFriends";
-    private static File cache10 = new File("DATA/DICTIONARIES/harvesting/export_roar_ROAR_ListFriends.xml");
-    private static String url20 = "http://www.openarchives.org/Register/ListFriends";
-    private static File cache20 = new File("DATA/DICTIONARIES/harvesting/ListFriends.xml");
-    
-    public static void init(LoaderDispatcher loader) {
-        loader.loadIfNotExistBackground(url10, cache10);
-        loader.loadIfNotExistBackground(url20, cache20);
+    public static void init(LoaderDispatcher loader, Map<String, File> moreFriends) {
+        listFriends.putAll(moreFriends);
+        if (loader != null) for (Map.Entry<String, File> oaiFriend: listFriends.entrySet()) {
+            loader.loadIfNotExistBackground(oaiFriend.getKey(), oaiFriend.getValue());
+        }
     }
     
-    public static Map<String, String> load(LoaderDispatcher loader) {
-        Map<String, String> map10;
+    public static Map<String, File> loadListFriendsSources(File initFile) {
+        Properties p = new Properties();
+        Map<String, File> m = new HashMap<String, File>();
         try {
-            map10 = load(null, null, new File("DATA/DICTIONARIES/harvesting/export_roar_ROAR_ListFriends.xml"));
+            p.loadFromXML(new FileInputStream(initFile));
         } catch (IOException e) {
-            map10 = new TreeMap<String, String>();
+            Log.logException(e);
+            return m;
         }
-        
-        Map<String, String> map20;
-        try {
-            map20 = load(null, null, new File("DATA/DICTIONARIES/harvesting/ListFriends.xml"));
-        } catch (IOException e) {
-            map20 = new TreeMap<String, String>();
-        }
-        
-        map10.putAll(map20);
-        return map10;
+        for (Entry<Object, Object> e: p.entrySet()) m.put((String) e.getKey(), new File((String) e.getValue()));
+        return m;
     }
     
-    /**
-     * load a OAI ListFriends file from the net or from a cache location
-     * If the given file does exist, the OAI ListFriends File is loaded and parsed.
-     * The resulting map is a mapping from OAI-PMH start url to a loaction description
-     * @param loader a LoaderDispatcher that loads the file if targetFile does not exist
-     * @param source the source URL for the OAI ListFriends file
-     * @param targetFile the file where the loaded content is stored if it does not exist, the source othervise
-     * @return a Map from OAI-PMH source to source description (which is usually also a URL)
-     * @throws IOException
-     */
-    private static Map<String, String> load(LoaderDispatcher loader, DigestURI source, File targetFile) throws IOException {
-        
-        byte[] b;
-        if (targetFile.exists()) {
-            // load file
-            b = FileUtils.read(targetFile);
-        } else {
-            // load from the net
-            Response response = loader.load(source, false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
-            b = response.getContent();
-            FileUtils.copy(b, targetFile);
-        }
-               
-        return new Parser(b).map;
-    }
     
+    public static Map<String, String> getListFriends(LoaderDispatcher loader) {
+        Map<String, String> map = new TreeMap<String, String>();
+        Map<String, String> m;
+        for (Map.Entry<String, File> oaiFriend: listFriends.entrySet()) try {
+            if (!oaiFriend.getValue().exists()) {
+                Response response = loader == null ? null : loader.load(new DigestURI(oaiFriend.getKey(), null), false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
+                if (response != null) FileUtils.copy(response.getContent(), oaiFriend.getValue());
+            }
+            
+            if (oaiFriend.getValue().exists()) {
+                byte[] b = FileUtils.read(oaiFriend.getValue());
+                if (b != null) {
+                    m = new Parser(b).map;
+                    if (m != null) map.putAll(m);
+                }
+            }
+            
+        } catch (IOException e) {}
+        return map;
+    }
     
     // get a resumption token using a SAX xml parser from am input stream
     private static class Parser extends DefaultHandler {
@@ -180,24 +171,6 @@ public class OAIListFriendsLoader {
             }
         }
 
-    }
-    
-    public static void main(String[] args) {
-        try {
-            Map<String, String> map1 = load(null, null, new File("DATA/DICTIONARIES/harvesting/export_roar_ROAR_ListFriends.xml"));
-            int count1 = map1.size();
-            
-            Map<String, String> map2 = load(null, null, new File("DATA/DICTIONARIES/harvesting/ListFriends.xml"));
-            int count2 = map2.size();
-            
-            map1.putAll(map2);
-            System.out.println("count1 = " + count1 + ", count2 = " + count2 + ", all = " + map1.size());
-            
-            for (Map.Entry<String, String> entry: map1.entrySet()) System.out.println(entry.getKey());            
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
     }
 
 }

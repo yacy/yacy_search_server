@@ -486,7 +486,8 @@ public final class Switchboard extends serverSwitch {
         // start a loader
         log.logConfig("Starting Crawl Loader");
         this.loader = new LoaderDispatcher(this);
-        OAIListFriendsLoader.init(this.loader);
+        Map<String, File> oaiFriends = OAIListFriendsLoader.loadListFriendsSources(new File("defaults/oaiListFriendsSource.xml"));
+        OAIListFriendsLoader.init(this.loader, oaiFriends);
         this.crawlQueues = new CrawlQueues(this, queuesRoot);
         this.crawlQueues.noticeURL.setMinimumDelta(
                 this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),

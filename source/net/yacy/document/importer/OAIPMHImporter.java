@@ -174,7 +174,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
             File surrogatesIn,
             File surrogatesOut,
             long staleLimit) {
-        Set<String> plainList = OAIListFriendsLoader.load(loader).keySet();
+        Set<String> plainList = OAIListFriendsLoader.getListFriends(loader).keySet();
         Map<String, Date> loaded = getLoadedOAIServer(surrogatesIn, surrogatesOut);
         long limit = System.currentTimeMillis() - staleLimit;
         for (Map.Entry<String, Date> a: loaded.entrySet()) {

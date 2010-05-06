@@ -44,7 +44,7 @@ public class IndexImportOAIPMHList_p {
         prop.put("source", 0);
         
         if (post != null && post.containsKey("source")) {
-            Set<String> oaiRoots = OAIListFriendsLoader.load(sb.loader).keySet();
+            Set<String> oaiRoots = OAIListFriendsLoader.getListFriends(sb.loader).keySet();
             
             boolean dark = false;
             int count = 0;
