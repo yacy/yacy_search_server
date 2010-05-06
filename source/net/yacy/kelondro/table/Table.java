@@ -602,7 +602,13 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                 while (file.size() > 0) {
                     file.cleanLast(p, 0);
                     final Row.Entry lr = rowdef.newEntry(p);
-                    if (lr == null) continue; // in case that p is not well-formed lr may be null
+                    if (lr == null) {
+                        // in case that p is not well-formed lr may be null
+                        // drop table copy because that becomes too complicated here
+                        table.clear();
+                        table = null;
+                        continue;
+                    }
                     file.put(i, p, 0);
                     index.put(lr.getPrimaryKeyBytes(), i);
                     break;
