@@ -599,10 +599,14 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                     table = null;
                 }
 
-                file.cleanLast(p, 0);
-                file.put(i, p, 0);
-                final Row.Entry lr = rowdef.newEntry(p);
-                index.put(lr.getPrimaryKeyBytes(), i);
+                while (file.size() > 0) {
+                    file.cleanLast(p, 0);
+                    final Row.Entry lr = rowdef.newEntry(p);
+                    if (lr == null) continue; // in case that p is not well-formed lr may be null
+                    file.put(i, p, 0);
+                    index.put(lr.getPrimaryKeyBytes(), i);
+                    break;
+                }
             }
         }
     }
