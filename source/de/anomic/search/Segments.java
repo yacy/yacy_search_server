@@ -204,7 +204,8 @@ public class Segments implements Iterable<Segment> {
             final String segmentName,
             final DigestURI url,
             final DigestURI referrerURL,
-            final Date docDate,
+            final Date modDate,
+            final Date loadDate,
             final long sourcesize,
             final Document document,
             final Condenser condenser
@@ -212,7 +213,8 @@ public class Segments implements Iterable<Segment> {
         return segment(segmentName).storeDocument(
                 url,
                 referrerURL,
-                docDate,
+                modDate,
+                loadDate,
                 sourcesize,
                 document,
                 condenser

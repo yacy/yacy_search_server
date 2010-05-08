@@ -105,7 +105,7 @@ public class queues_p {
                 prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());
-                prop.put(tableName + "_" + showNum + "_modified", daydate(urle.loaddate()));
+                prop.put(tableName + "_" + showNum + "_modified", daydate(urle.appdate()));
                 prop.putXML(tableName + "_" + showNum + "_anchor", urle.name());
                 prop.putXML(tableName + "_" + showNum + "_url", urle.url().toNormalform(false, true));
                 prop.put(tableName + "_" + showNum + "_hash", urle.url().hash());

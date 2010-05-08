@@ -68,7 +68,7 @@ public final class Row {
             os+= this.row[i].cellwidth;
         }
         this.objectsize = os;
-        this.primaryKeyLength = row[0].cellwidth;
+        this.primaryKeyLength = this.row[0].cellwidth;
     }
 
     public Row(final String structure, final ByteOrder objectOrder) {
@@ -102,7 +102,7 @@ public final class Row {
             os += this.row[i].cellwidth;
         }
         this.objectsize = os;
-        this.primaryKeyLength = row[0].cellwidth;
+        this.primaryKeyLength = this.row[0].cellwidth;
     }
     
     public final ByteOrder getOrdering() {
@@ -150,8 +150,8 @@ public final class Row {
     public final Entry newEntry(final byte[] rowinstance) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
-        if (!(this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth))) {
-            Log.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + new String(rowinstance, 0, row[0].cellwidth) + " / " + NaturalOrder.arrayList(rowinstance, 0, row[0].cellwidth));
+        if (!(this.objectOrder.wellformed(rowinstance, 0, this.primaryKeyLength))) {
+            Log.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + new String(rowinstance, 0, this.primaryKeyLength) + " / " + NaturalOrder.arrayList(rowinstance, 0, this.primaryKeyLength));
             return null;
         }
         return new Entry(rowinstance, false);
@@ -160,14 +160,14 @@ public final class Row {
     public final Entry newEntry(final Entry oldrow, final int fromColumn) {
         if (oldrow == null) return null;
         assert (oldrow.getColBytes(0, false)[0] != 0);
-        assert (this.objectOrder.wellformed(oldrow.getColBytes(0, false), 0, row[0].cellwidth));
+        assert (this.objectOrder.wellformed(oldrow.getColBytes(0, false), 0, this.primaryKeyLength));
         return new Entry(oldrow, fromColumn, false);
     }
     
     public final Entry newEntry(final byte[] rowinstance, final int start, final boolean clone) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
-        assert (this.objectOrder.wellformed(rowinstance, start, row[0].cellwidth)) : "rowinstance = " + new String(rowinstance);
+        assert (this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength)) : "rowinstance = " + new String(rowinstance);
         // this method offers the option to clone the content
         // this is necessary if it is known that the underlying byte array may change and therefore
         // the reference to the byte array does not contain the original content
@@ -177,7 +177,7 @@ public final class Row {
     public final Entry newEntry(final byte[][] cells) {
         if (cells == null) return null;
         assert (cells[0][0] != 0);
-        assert (this.objectOrder.wellformed(cells[0], 0, row[0].cellwidth));
+        assert (this.objectOrder.wellformed(cells[0], 0, this.primaryKeyLength));
         return new Entry(cells);
     }
     
@@ -189,7 +189,7 @@ public final class Row {
     public final EntryIndex newEntryIndex(final byte[] rowinstance, final int index) {
         if (rowinstance == null) return null;
         assert (rowinstance[0] != 0);
-        assert (this.objectOrder.wellformed(rowinstance, 0, row[0].cellwidth));
+        assert (this.objectOrder.wellformed(rowinstance, 0, this.primaryKeyLength));
         return new EntryIndex(rowinstance, index);
     }
     

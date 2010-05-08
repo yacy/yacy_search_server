@@ -151,7 +151,6 @@ public final class LoaderDispatcher {
                     null, 
                     "", 
                     new Date(),
-                    new Date(),
                     (forText) ?
                         ((global) ?
                             sb.crawler.defaultTextSnippetGlobalProfile.handle() :

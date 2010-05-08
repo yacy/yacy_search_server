@@ -134,6 +134,7 @@ public class DocumentIndex extends Segment {
                 url,
                 null,
                 new Date(url.lastModified()),
+                new Date(),
                 url.length(),
                 document,
                 condenser

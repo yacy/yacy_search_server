@@ -186,8 +186,10 @@ public class ViewFile {
             } catch (IOException e) {
                 Log.logException(e);
             }
-            if (response != null) resource = response.getContent();
-            responseHeader = response.getResponseHeader();
+            if (response != null) {
+                resource = response.getContent();
+                responseHeader = response.getResponseHeader();
+            }
         }
         
         if (responseHeader == null) responseHeader = Cache.getResponseHeader(url);

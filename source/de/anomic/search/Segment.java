@@ -241,7 +241,8 @@ public class Segment {
     public URIMetadataRow storeDocument(
             final DigestURI url,
             final DigestURI referrerURL,
-            final Date docDate,
+            final Date modDate,
+            final Date loadDate,
             final long sourcesize,
             final Document document,
             final Condenser condenser
@@ -295,16 +296,16 @@ public class Segment {
         }
         
         // create a new loaded URL db entry
-        final long ldate = System.currentTimeMillis();
+        assert modDate.getTime() <= loadDate.getTime() : "modDate = " + modDate + ", loadDate = " + loadDate;
         final URIMetadataRow newEntry = new URIMetadataRow(
                 url,                                       // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author
                 document.dc_subject(' '),                  // tags
                 "",                                        // ETag
-                docDate,                                   // modification date
-                new Date(),                                // loaded date
-                new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
+                modDate,                                   // modification date
+                loadDate,                                  // loaded date
+                new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
                 (referrerURL == null) ? null : new String(referrerURL.hash()),            // referer hash
                 new byte[0],                               // md5
                 (int) sourcesize,                          // size
@@ -328,7 +329,7 @@ public class Segment {
         // STORE PAGE INDEX INTO WORD INDEX DB
         final int words = addPageIndex(
                 url,                                          // document url
-                docDate,                                      // document mod date
+                modDate,                                      // document mod date
                 document,                                     // document content
                 condenser,                                    // document condenser
                 language,                                     // document language

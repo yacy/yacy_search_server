@@ -282,7 +282,6 @@ public class SitemapParser extends DefaultHandler {
                     null, // this.siteMapURL.toString(),
                     this.nextURL,
                     new Date(),
-                    null,
                     this.crawlingProfile.handle(),
                     0,
                     0,

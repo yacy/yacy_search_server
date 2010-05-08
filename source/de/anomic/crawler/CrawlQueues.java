@@ -448,7 +448,6 @@ public class CrawlQueues {
                         url,
                         (referrer == null) ? null : referrer.hash(),
                         item.getDescription(),
-                        null,
                         loaddate,
                         sb.crawler.defaultRemoteProfile.handle(),
                         0,

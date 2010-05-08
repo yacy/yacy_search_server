@@ -780,7 +780,6 @@ public class yacySeed implements Cloneable {
         // name
         final String peerName = this.dna.get(yacySeed.NAME);
         if (peerName == null) return "no peer name given";
-        if (peerName.equalsIgnoreCase("VegaYacyB")) return "bad peer VegaYacyB [ " + this.hash + " ]"; // hack for wrong "VegaYacyB" peers
         dna.put(yacySeed.NAME, checkPeerName(peerName));
 
         // type

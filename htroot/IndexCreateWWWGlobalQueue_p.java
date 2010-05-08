@@ -106,7 +106,7 @@ public class IndexCreateWWWGlobalQueue_p {
                     prop.putHTML("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
-                    prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
+                    prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.appdate()) );
                     prop.putHTML("crawler-queue_list_"+showNum+"_anchor", urle.name());
                     prop.putHTML("crawler-queue_list_"+showNum+"_url", urle.url().toNormalform(false, true));
                     prop.put("crawler-queue_list_"+showNum+"_hash", urle.url().hash());

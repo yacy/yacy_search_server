@@ -55,8 +55,8 @@ public class Response {
 
     // the class objects
     private final  Request            request;
-    private final  RequestHeader  requestHeader;
-    private final  ResponseHeader responseHeader;
+    private final  RequestHeader      requestHeader;
+    private final  ResponseHeader     responseHeader;
     private final  String             responseStatus;
     private final  CrawlProfile.entry profile;
     private        byte[]             content;
@@ -201,6 +201,7 @@ public class Response {
             docDate = responseHeader.lastModified();
             if (docDate == null) docDate = responseHeader.date();
         }
+        if (docDate == null && request != null) docDate = request.appdate();
         if (docDate == null) docDate = new Date(DateFormatter.correctedUTCTime());   
         
         return docDate;

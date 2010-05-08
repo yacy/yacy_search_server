@@ -127,7 +127,7 @@ public class IndexCreateWWWLocalQueue_p {
                                     case INITIATOR:
                                         value = (entry.initiator() == null || entry.initiator().length == 0) ? "proxy" : new String(entry.initiator());
                                         break;
-                                    case MODIFIED:  value = daydate(entry.loaddate()); break;
+                                    case MODIFIED:  value = daydate(entry.appdate()); break;
                                     default: value = null;
                                 }
                                 
@@ -177,7 +177,7 @@ public class IndexCreateWWWLocalQueue_p {
                     prop.putHTML("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
                     prop.put("crawler-queue_list_"+showNum+"_depth", urle.depth());
-                    prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.loaddate()) );
+                    prop.put("crawler-queue_list_"+showNum+"_modified", daydate(urle.appdate()) );
                     prop.putHTML("crawler-queue_list_"+showNum+"_anchor", urle.name());
                     prop.putHTML("crawler-queue_list_"+showNum+"_url", urle.url().toNormalform(false, true));
                     prop.put("crawler-queue_list_"+showNum+"_hash", urle.url().hash());

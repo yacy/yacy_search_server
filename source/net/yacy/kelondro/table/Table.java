@@ -574,16 +574,22 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
     private void removeInFile(final int i) throws IOException, RowSpaceExceededException {
         assert i >= 0;
         
-        final byte[] p = new byte[rowdef.objectsize];
-        if (table == null) {
-            if (i == index.size() - 1) {
-                file.cleanLast();
+        final byte[] p = new byte[this.rowdef.objectsize];
+        if (this.table == null) {
+            if (i == this.index.size() - 1) {
+                this.file.cleanLast();
             } else {
-                file.cleanLast(p, 0);
-                file.put(i, p, 0);
-                final byte[] k = new byte[rowdef.primaryKeyLength];
-                System.arraycopy(p, 0, k, 0, rowdef.primaryKeyLength);
-                index.put(k, i);
+                while (this.file.size() > 0) {
+                    this.file.cleanLast(p, 0);
+                    if (!(this.rowdef.objectOrder.wellformed(p, 0, this.rowdef.primaryKeyLength))) {
+                        continue;
+                    }
+                    this.file.put(i, p, 0);
+                    final byte[] k = new byte[this.rowdef.primaryKeyLength];
+                    System.arraycopy(p, 0, k, 0, this.rowdef.primaryKeyLength);
+                    this.index.put(k, i);
+                    break;
+                }
             }
         } else {
             if (i == index.size() - 1) {

@@ -1332,8 +1332,7 @@ public final class Switchboard extends serverSwitch {
                     surrogate.getIdentifier(true), 
                     null, 
                     "", 
-                    new Date(),
-                    new Date(),
+                    surrogate.getDate(),
                     this.crawler.defaultSurrogateProfile.handle(),
                     0, 
                     0, 
@@ -1670,7 +1669,7 @@ public final class Switchboard extends serverSwitch {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
         
         // debug
-        if (log.isFinest()) log.logFinest("PARSE "+ in.queueEntry.toString());
+        if (log.isFinest()) log.logFinest("PARSE "+ in.queueEntry);
         
         Document document = null;
         try {
@@ -1731,10 +1730,7 @@ public final class Switchboard extends serverSwitch {
             return null;
         }
         
-        final long parsingEndTime = System.currentTimeMillis();            
-        
-        // get the document date
-        final Date docDate = response.lastModified();
+        final long parsingEndTime = System.currentTimeMillis();
         
         // put anchors on crawl stack
         final long stackStartTime = System.currentTimeMillis();
@@ -1767,8 +1763,7 @@ public final class Switchboard extends serverSwitch {
                             new DigestURI(u, null),
                             response.url().hash(),
                             nextEntry.getValue(),
-                            null,
-                            docDate,
+                            new Date(),
                             response.profile().handle(),
                             response.depth() + 1,
                             0,
@@ -1860,6 +1855,7 @@ public final class Switchboard extends serverSwitch {
                     queueEntry.url(),
                     referrerURL,
                     queueEntry.lastModified(),
+                    new Date(),
                     queueEntry.size(),
                     document,
                     condenser);
@@ -2124,7 +2120,6 @@ public final class Switchboard extends serverSwitch {
                 referrerHash, 
                 (name == null) ? "" : name, 
                 new Date(),
-                null,
                 null,
                 0, 
                 0, 

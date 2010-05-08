@@ -81,42 +81,24 @@ public class URIMetadataRow implements URIMetadata {
     /* ===========================================================================
      * Constants to access the various columns of an URL entry
      * =========================================================================== */
-    /** the url's hash */
-    private static final int col_hash     =  0;
-    /** components: the url, description, author and tags. As 5th element, an ETag is possible */
-    private static final int col_comp     =  1;
-    /** components: the url, description, author and tags. As 5th element, an ETag is possible */
-    private static final int col_mod      =  2;
-    /** time when the url was loaded */
-    private static final int col_load     =  3;
-    /** time until this url is fresh */
-    private static final int col_fresh    =  4;
-    /** time when the url was loaded */
-    private static final int col_referrer =  5;
-    /** the md5 of the url content (to identify changes) */
-    private static final int col_md5      =  6;
-    /** size of file in bytes */
-    private static final int col_size     =  7;
-    /** size of file by number of words; for video and audio: seconds */
-    private static final int col_wc       =  8;
-    /** doctype, taken from extension or any other heuristic */
-    private static final int col_dt       =  9;
-    /** flags; any stuff (see Word-Entity definition) */
-    private static final int col_flags    = 10;
-    /** language */
-    private static final int col_lang     = 11;
-    /** of outlinks to same domain; for video and image: width */
-    private static final int col_llocal   = 12;
-    /** of outlinks to outside domain; for video and image: height */
-    private static final int col_lother   = 13;
-    /** of embedded image links */
-    private static final int col_limage   = 14;
-    /** of embedded audio links; for audio: track number; for video: number of audio tracks */
-    private static final int col_laudio   = 15;
-    /** of embedded video links */
-    private static final int col_lvideo   = 16;
-    /** of embedded links to applications */
-    private static final int col_lapp     = 17;
+    private static final int col_hash     =  0; // the url's hash
+    private static final int col_comp     =  1; // components: the url, description, author and tags. As 5th element, an ETag is possible
+    private static final int col_mod      =  2; // the modifed-date time from the server (servertime in row)
+    private static final int col_load     =  3; // time when the url was loaded
+    private static final int col_fresh    =  4; // time until this url is fresh
+    private static final int col_referrer =  5; // a referrer of the url (there may be several, but this is the one that was acually referring to this one)
+    private static final int col_md5      =  6; // the md5 of the url content (to identify changes)
+    private static final int col_size     =  7; // size of file in bytes
+    private static final int col_wc       =  8; // size of file by number of words; for video and audio: seconds
+    private static final int col_dt       =  9; // doctype, taken from extension or any other heuristic
+    private static final int col_flags    = 10; // flags; any stuff (see Word-Entity definition)
+    private static final int col_lang     = 11; // language
+    private static final int col_llocal   = 12; // # of outlinks to same domain; for video and image: width
+    private static final int col_lother   = 13; // # of outlinks to outside domain; for video and image: height
+    private static final int col_limage   = 14; // # of embedded image links
+    private static final int col_laudio   = 15; // # of embedded audio links; for audio: track number; for video: number of audio tracks
+    private static final int col_lvideo   = 16; // # of embedded video links
+    private static final int col_lapp     = 17; // # of embedded links to applications
     
     private final Row.Entry entry;
     private final String snippet;
@@ -522,8 +504,7 @@ public class URIMetadataRow implements URIMetadata {
                 metadata().url(), 
                 referrerHash(), 
                 metadata().dc_title(),
-                null,
-                loaddate(), 
+                moddate(),
                 null,
                 0, 
                 0, 

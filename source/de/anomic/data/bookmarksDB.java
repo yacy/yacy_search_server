@@ -269,7 +269,6 @@ public class bookmarksDB {
                                 null,
                                 "CRAWLING-ROOT",
                                 new Date(),
-                                null,
                                 pe.handle(),
                                 0,
                                 0,
