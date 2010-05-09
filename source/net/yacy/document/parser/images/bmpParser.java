@@ -186,7 +186,7 @@ public class bmpParser {
             int n = 0;
             int b;
             for (int rows = 0; rows < height; rows++) {
-                for (int columns = 0; columns < width; columns = columns + 2) {
+                for (int columns = 0; columns < width - 1; columns = columns + 2) {
                     if (offset + n >= s.length) return; // emergency break
                     b = (s[offset + n] & 0xff);
                     n++;
