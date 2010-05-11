@@ -190,8 +190,8 @@ public final class search {
         int indexabstractContainercount = 0;
         int joincount = 0;
         QueryParams theQuery = null;
-        ArrayList<SortStack<ResultEntry>.stackElement> accu = null;
         SearchEvent theSearch = null;
+        ArrayList<SortStack<ResultEntry>.stackElement> accu = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
             Segment indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);

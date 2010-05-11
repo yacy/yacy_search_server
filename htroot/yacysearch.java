@@ -166,7 +166,7 @@ public class yacysearch {
         // collect search attributes
         boolean newsearch = post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
         
-        int itemsPerPage = Math.min((authenticated) ? 1000 : 20, post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
+        int itemsPerPage = Math.min((authenticated) ? (fetchSnippets ? 100 : 1000) : (fetchSnippets ? 10 : 100), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
         int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
         
         boolean global = post.get("resource", "local").equals("global");
