@@ -185,12 +185,16 @@ public final class DateFormatter {
     public static Date parseISO8601(String s) throws ParseException {
         // do some lazy checks here
         s = s.trim();
+        while (s.length() > 0 && s.endsWith("?")) s = s.substring(0, s.length() - 1); // sometimes used if write is not sure about date
         if (s.startsWith("{")) s = s.substring(1);
         if (s.endsWith("}")) s = s.substring(0, s.length() - 1);
         if (s.startsWith("[")) s = s.substring(1);
         if (s.endsWith("]")) s = s.substring(0, s.length() - 1);
-        while (s.charAt(0) > '9' || s.charAt(0) < '0') s = s.substring(1);
+        while (s.length() > 0 && (s.charAt(0) > '9' || s.charAt(0) < '0')) s = s.substring(1);
         if (s.endsWith("--")) s = s.substring(0, s.length() - 2) + "00";
+        int p = s.indexOf(';'); if (p >= 0) s = s.substring(0, p); // a semicolon may be used to separate two dates from each other; then we take the first
+        p = s.indexOf(','); if (p >= 0) s = s.substring(0, p); // a comma may be used to separate two dates from each other; then we take the first
+        while (s.length() > 0 && s.endsWith("?")) s = s.substring(0, s.length() - 1); // sometimes used if write is not sure about date
         
         // no go for exact parsing
         final Calendar cal = Calendar.getInstance(TZ_GMT, Locale.US);

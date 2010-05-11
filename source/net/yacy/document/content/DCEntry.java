@@ -96,6 +96,7 @@ public class DCEntry extends TreeMap<String, String> {
         String d = this.get("docdatetime");
         if (d == null) d = this.get("dc:date");
         if (d == null) return null;
+        if (d.length() == 0) return null;
         try {
             return DateFormatter.parseISO8601(d);
         } catch (ParseException e) {

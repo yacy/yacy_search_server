@@ -42,6 +42,7 @@ import net.yacy.kelondro.logging.Log;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 
@@ -78,6 +79,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public void run() {
         try {
             this.saxParser.parse(this.stream, this);
+        } catch (SAXParseException e) {
+            Log.logException(e);
         } catch (SAXException e) {
             Log.logException(e);
         } catch (IOException e) {
