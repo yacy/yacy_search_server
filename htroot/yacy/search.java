@@ -146,14 +146,16 @@ public final class search {
         TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
         if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
         boolean block = false;
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
-            block = true;
-        }
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) {
-            block = true;
-        }
-        if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) {
-            block = true;
+        synchronized (trackerHandles) {
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
+                block = true;
+            }
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) {
+                block = true;
+            }
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) {
+                block = true;
+            }
         }
         if (block) {
             prop.put("links", "");
@@ -386,9 +388,12 @@ public final class search {
         sb.remoteSearches.add(theQuery);
         
         // update the search tracker
-        trackerHandles.add(theQuery.handle);
+        synchronized (trackerHandles) {
+            trackerHandles.add(theQuery.handle); // thats the time when the handle was created
+            // we don't need too much entries in the list; remove superfluous
+            while (trackerHandles.size() > 36) if (!trackerHandles.remove(trackerHandles.first())) break;
+        }
         sb.remoteSearchTracker.put(client, trackerHandles);
-        
         
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +
