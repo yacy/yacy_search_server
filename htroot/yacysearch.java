@@ -560,7 +560,7 @@ public class yacysearch {
             }
             
             // find geographic info
-            Set<Location> coordinates = LibraryProvider.geoDB.find(originalquerystring, false);
+            Set<Location> coordinates = LibraryProvider.geoDB.find(originalquerystring, true, false, true, true, true);
             if (coordinates == null || coordinates.isEmpty() || offset > 0) {
                 prop.put("geoinfo", "0");
             } else {

@@ -52,14 +52,12 @@ import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -1908,24 +1906,6 @@ public final class Switchboard extends serverSwitch {
         }
         public void run() {
             yacyClient.crawlReceipt(peers.mySeed(), initiatorPeer, "crawl", "fill", "indexed", reference, "");
-        }
-    }
-    
-    private static SimpleDateFormat DateFormat1 = new SimpleDateFormat("EEE, dd MMM yyyy", Locale.US);
-    public static String dateString(final Date date) {
-        if (date == null) return "";
-        return DateFormat1.format(date);
-    }
-    
-    // we need locale independent RFC-822 dates at some places
-    private static SimpleDateFormat DateFormatter822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
-    public static String dateString822(final Date date) {
-        if (date == null) return "";
-        try {
-        	return DateFormatter822.format(date);
-        } catch (Exception e) {
-            Log.logException(e);
-        	return DateFormatter822.format(new Date());
         }
     }
     

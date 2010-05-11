@@ -173,20 +173,22 @@ public class OpenGeoDB {
      * @param anyname
      * @return
      */
-    public HashSet<Location> find(String anyname, boolean exact) {
+    public HashSet<Location> find(String anyname, boolean location, boolean locationexact, boolean kfz, boolean predial, boolean zip) {
         HashSet<Integer> r = new HashSet<Integer>();
         List<Integer> c;
-        if (exact) {
-            c = this.locationName2ids.get(anyname); if (c != null) r.addAll(c);
-        } else {
-            SortedMap<String, List<Integer>> cities = this.locationName2ids.tailMap(anyname);
-            for (Map.Entry<String, List<Integer>> e: cities.entrySet()) {
-            	if (e.getKey().toLowerCase().startsWith(anyname.toLowerCase())) r.addAll(e.getValue()); else break;
+        if (location) {
+            if (locationexact) {
+                c = this.locationName2ids.get(anyname); if (c != null) r.addAll(c);
+            } else {
+                SortedMap<String, List<Integer>> cities = this.locationName2ids.tailMap(anyname);
+                for (Map.Entry<String, List<Integer>> e: cities.entrySet()) {
+                	if (e.getKey().toLowerCase().startsWith(anyname.toLowerCase())) r.addAll(e.getValue()); else break;
+                }
             }
         }
-        c = this.kfz2ids.get(anyname); if (c != null) r.addAll(c);
-        c = this.predial2ids.get(anyname); if (c != null) r.addAll(c);
-        Integer i = this.zip2id.get(anyname); if (i != null) r.add(i);
+        if (kfz) {c = this.kfz2ids.get(anyname); if (c != null) r.addAll(c);}
+        if (predial) {c = this.predial2ids.get(anyname); if (c != null) r.addAll(c);}
+        if (zip) {Integer i = this.zip2id.get(anyname); if (i != null) r.add(i);}
         HashSet<Location> a = new HashSet<Location>();
         for (Integer e: r) {
             Location w = this.id2loc.get(e);

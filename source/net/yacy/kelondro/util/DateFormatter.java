@@ -45,6 +45,7 @@ public final class DateFormatter {
     
     /** default HTTP 1.1 header date format pattern */
     public static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
+    public static final String PATTERN_RFC1123_SHORT = "EEE, dd MMM yyyy";
     
     /** date pattern used in older HTTP implementations */
     public static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
@@ -74,7 +75,9 @@ public final class DateFormatter {
     private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
     private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US); 
     private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US); 
-
+    
+    private static final SimpleDateFormat FORMAT_RFC1123_SHORT = new SimpleDateFormat(PATTERN_RFC1123_SHORT, Locale.US);
+    
     /**
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
      * formats. All times MUST be in GMT/UTC, but ...
@@ -161,7 +164,13 @@ public final class DateFormatter {
         lastRFC1123string = s;
         return s;
     }
-
+    
+    public static String formatRFC1123_short(final Date date) {
+        if (date == null) return "";
+        return FORMAT_RFC1123_SHORT.format(date);
+    }
+    
+    
     /**
      * Parse dates as defined in {@linkplain http://www.w3.org/TR/NOTE-datetime}.
      * This format (also specified in ISO8601) allows different "precisions".

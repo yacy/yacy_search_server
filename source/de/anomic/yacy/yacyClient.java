@@ -517,7 +517,8 @@ public final class yacyClient {
         
         // send request
         try {
-            final byte[] result = wput(urlBase, uri.getHost(), post, (int) timeout); 
+            final byte[] result = wput(urlBase, uri.getHost(), post, (int) timeout);
+            //String debug = new String(result); System.out.println("*** DEBUG: " + debug);
             final RSSReader reader = RSSReader.parse(result);
             if (reader == null) {
                 yacyCore.log.logWarning("yacyClient.search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (1), reader == null");

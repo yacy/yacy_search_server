@@ -3,9 +3,9 @@
 <link>#[link]#</link>
 <description>#[description-xml]#</description>
 <pubDate>#[date822]#</pubDate>
-<dc:publisher>#[publisher]#</dc:publisher>
-<dc:creator>#[creator]#</dc:creator>
-<dc:subject>#[subject]#</dc:subject>
+<dc:publisher><![CDATA[#[publisher]#]]></dc:publisher>
+<dc:creator><![CDATA[#[creator]#]]></dc:creator>
+<dc:subject><![CDATA[#[subject]#]]></dc:subject>
 <yacy:size>#[size]#</yacy:size>
 <yacy:sizename>#[sizename]#</yacy:sizename>
 <yacy:host>#[host]#</yacy:host>

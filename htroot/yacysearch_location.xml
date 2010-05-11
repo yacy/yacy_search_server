@@ -1,0 +1,20 @@
+#(kml)#::<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  #{placemark}#
+  <Placemark>
+    <name>#[name]#</name>
+    <description><![CDATA[<p>Location: #[location]#</p><p>Author: #[author]#</p><p>Publisher: #[copyright]#</p><p>Subject: #[subject]#</p><p>Abstract: #[description]#</p><p>Source: <a href="#[url]#">#[url]#</a></p>]]></description>
+    #{point}#
+    <Point>
+      <name>#[name]#</name>
+      <coordinates>#[lon]#,#[lat]#</coordinates>
+    </Point>
+    #{/point}#
+    <TimeStamp>
+      <when>#[date]#</when>
+    </TimeStamp>
+  </Placemark>
+  #{/placemark}#
+</Document>
+</kml>#(/kml)#

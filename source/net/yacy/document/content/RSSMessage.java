@@ -161,4 +161,8 @@ public class RSSMessage {
         for (String s: map.values()) sb.append(s).append(" ");
         return sb.toString();
     }
+    
+    public String toString() {
+        return this.map.toString();
+    }
 }
