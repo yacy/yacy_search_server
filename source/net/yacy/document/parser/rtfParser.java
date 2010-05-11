@@ -85,6 +85,7 @@ public class rtfParser extends AbstractParser implements Idiom {
                         replaceAll("\r"," ").
                         replaceAll("\t"," "),
                     "", // TODO: AUTHOR
+                    "", // TODO: publisher
                     null,
                     null,
                     bodyText.getBytes("UTF-8"),

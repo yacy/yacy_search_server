@@ -173,13 +173,17 @@ public class OpenGeoDB {
      * @param anyname
      * @return
      */
-    public HashSet<Location> find(String anyname) {
+    public HashSet<Location> find(String anyname, boolean exact) {
         HashSet<Integer> r = new HashSet<Integer>();
-        SortedMap<String, List<Integer>> cities = this.locationName2ids.tailMap(anyname);
-        for (Map.Entry<String, List<Integer>> e: cities.entrySet()) {
-        	if (e.getKey().toLowerCase().startsWith(anyname.toLowerCase())) r.addAll(e.getValue()); else break;
-        }
         List<Integer> c;
+        if (exact) {
+            c = this.locationName2ids.get(anyname); if (c != null) r.addAll(c);
+        } else {
+            SortedMap<String, List<Integer>> cities = this.locationName2ids.tailMap(anyname);
+            for (Map.Entry<String, List<Integer>> e: cities.entrySet()) {
+            	if (e.getKey().toLowerCase().startsWith(anyname.toLowerCase())) r.addAll(e.getValue()); else break;
+            }
+        }
         c = this.kfz2ids.get(anyname); if (c != null) r.addAll(c);
         c = this.predial2ids.get(anyname); if (c != null) r.addAll(c);
         Integer i = this.zip2id.get(anyname); if (i != null) r.add(i);

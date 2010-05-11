@@ -443,7 +443,7 @@ public final class HTTPDFileHandler {
                     File f;
                     String size;
                     long sz;
-                    String headline, author, description;
+                    String headline, author, description, publisher;
                     int images, links;
                     ContentScraper scraper;
                     for (int i = 0; i < list.length; i++) {
@@ -455,12 +455,14 @@ public final class HTTPDFileHandler {
                                 scraper = ContentScraper.parseResource(f);
                                 headline = scraper.getTitle();
                                 author = scraper.getAuthor();
+                                publisher = scraper.getPublisher();
                                 description = scraper.getDescription();
                                 images = scraper.getImages().size();
                                 links = scraper.getAnchors().size();
                             } else {
                                 headline = null;
                                 author = null;
+                                publisher = null;
                                 description = null;
                                 images = 0;
                                 links = 0;
@@ -474,10 +476,11 @@ public final class HTTPDFileHandler {
                                 size = (sz / 1024 / 1024) + " MB";
                             }
                             aBuffer.append("    <li>");
-                            if ((headline != null) && (headline.length() > 0)) aBuffer.append("<a href=\"" + list[i] + "\"><b>" + headline + "</b></a><br>");
+                            if (headline != null && headline.length() > 0) aBuffer.append("<a href=\"" + list[i] + "\"><b>" + headline + "</b></a><br>");
                             aBuffer.append("<a href=\"" + path + list[i] + "\">" + list[i] + "</a><br>");
-                            if ((author != null) && (author.length() > 0)) aBuffer.append("Author: " + author + "<br>");
-                            if ((description != null) && (description.length() > 0)) aBuffer.append("Description: " + description + "<br>");
+                            if (author != null && author.length() > 0) aBuffer.append("Author: " + author + "<br>");
+                            if (publisher != null && publisher.length() > 0) aBuffer.append("Publisher: " + publisher + "<br>");
+                            if (description != null && description.length() > 0) aBuffer.append("Description: " + description + "<br>");
                             aBuffer.append(DateFormatter.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br></li>\n");
                         }
                     }
@@ -514,6 +517,7 @@ public final class HTTPDFileHandler {
                 try {
                     requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                     requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
+                    requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "png");
                     // in case that there are no args given, args = null or empty hashmap
                     img = invokeServlet(targetClass, requestHeader, args);
                 } catch (final InvocationTargetException e) {
@@ -707,6 +711,7 @@ public final class HTTPDFileHandler {
                 // call rewrite-class
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
+                requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "stream");
                 //requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
                 //requestHeader.put(httpHeader.CONNECTION_PROP_OUTPUTSTREAM, out);
              
@@ -732,6 +737,7 @@ public final class HTTPDFileHandler {
                         path.endsWith("pac") ||
                         path.endsWith("src") ||
                         path.endsWith("vcf") ||
+                        path.endsWith("kml") ||
                         path.endsWith("/") ||
                         path.equals("/robots.txt")) {
                             
@@ -750,6 +756,8 @@ public final class HTTPDFileHandler {
                         try {
                             requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                             requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
+                            int ep = path.lastIndexOf(".");
+                            requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, path.substring(ep + 1));
                             // in case that there are no args given, args = null or empty hashmap
                             final Object tmp = invokeServlet(targetClass, requestHeader, args);
                             if (tmp == null) {
@@ -760,7 +768,7 @@ public final class HTTPDFileHandler {
                             } else {
                                 templatePatterns = new servletProperties((serverObjects) tmp);
                             }
-                            // check if the servlets requests authentification
+                            // check if the servlets requests authentication
                             if (templatePatterns.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
                                 if (authorization != null) {

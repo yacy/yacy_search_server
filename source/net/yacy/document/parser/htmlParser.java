@@ -148,6 +148,7 @@ public class htmlParser extends AbstractParser implements Idiom {
                 scraper.getKeywords(),
                 scraper.getTitle(),
                 scraper.getAuthor(),
+                scraper.getPublisher(),
                 sections,
                 scraper.getDescription(),
                 scraper.getText(),

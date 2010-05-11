@@ -41,6 +41,7 @@ import net.yacy.kelondro.util.MapTools;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
+import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -62,7 +63,7 @@ public class Network {
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        prop.setLocalized(!(requestHeader.get("PATH")).endsWith(".xml"));
+        prop.setLocalized(!(requestHeader.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml"));
         prop.putHTML("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
         prop.putHTML("page_networkName", sb.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));

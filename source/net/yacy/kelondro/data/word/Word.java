@@ -91,6 +91,12 @@ public class Word {
         return phrases.iterator();
     }
     
+    public String toString() {
+        // this is here for debugging
+        return "{count=" + count + ", posInText=" + posInText + ", posInPhrase=" + posInPhrase + ", numOfPhrase=" + numOfPhrase + "}";
+    }
+    
+    
     // static methods
 
     // create a word hash

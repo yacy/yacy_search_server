@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.zip.GZIPInputStream;
@@ -97,7 +96,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
     
-    public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
+    public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
+        if (tag == null) return;
+        tag = tag.toLowerCase();
         if ("record".equals(tag) || "document".equals(tag)) {
             this.surrogate = new DCEntry();
         } else if ("element".equals(tag)) {
@@ -112,8 +113,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
 
-    public void endElement(final String uri, final String name, final String tag) {
+    public void endElement(final String uri, final String name, String tag) {
         if (tag == null) return;
+        tag = tag.toLowerCase();
         if ("record".equals(tag) || "document".equals(tag)) {
             //System.out.println("A Title: " + this.surrogate.title());
             try {
@@ -139,7 +141,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             this.parsingValue = false;
         } else if (tag.startsWith("dc:")) {
             final String value = buffer.toString().trim();
-            if (this.elementName != null) {
+            if (this.elementName != null && tag.equals(this.elementName)) {
                 value.replaceAll(";", ",");
                 String oldcontent = this.surrogate.get(this.elementName);
                 if (oldcontent == null) {
@@ -182,6 +184,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             while ((s = sr.take()) != DCEntry.poison) {
                 System.out.println("Title: " + s.getTitle());
                 System.out.println("Date: " + s.getDate());
+                System.out.println("Creator: " + s.getCreator());
+                System.out.println("Publisher: " + s.getPublisher());
                 System.out.println("URL: " + s.getIdentifier(true));
                 System.out.println("Language: " + s.getLanguage());
                 System.out.println("Body: " + s.getDescription());

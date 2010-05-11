@@ -53,28 +53,28 @@ public class yacyNetwork {
 			return false;
 		}
         
-		// check authentification method
-		final String authentificationControl = env.getConfig("network.unit.protocol.control", "uncontrolled");
-		if (authentificationControl.equals("uncontrolled")) return true;
-		final String authentificationMethod = env.getConfig("network.unit.protocol.request.authentification.method", "");
-		if (authentificationMethod.length() == 0) {
+		// check authentication method
+		final String authenticationControl = env.getConfig("network.unit.protocol.control", "uncontrolled");
+		if (authenticationControl.equals("uncontrolled")) return true;
+		final String authenticationMethod = env.getConfig("network.unit.protocol.request.authentication.method", "");
+		if (authenticationMethod.length() == 0) {
 			return false;
 		}
-		if (authentificationMethod.equals("salted-magic-sim")) {
-            // authentify the peer using the md5-magic
+		if (authenticationMethod.equals("salted-magic-sim")) {
+            // authorize the peer using the md5-magic
             final String salt = post.get("key", "");
             final String iam = post.get("iam", "");
-            final String magic = env.getConfig("network.unit.protocol.request.authentification.essentials", "");
+            final String magic = env.getConfig("network.unit.protocol.request.authentication.essentials", "");
             final String md5 = Digest.encodeMD5Hex(salt + iam + magic);
 			return post.get("magicmd5", "").equals(md5);
 		}
 		
-		// unknown authentification method
+		// unknown authentication method
 		return false;
 	}
 	
 	public static final List<Part> basicRequestPost(final Switchboard sb, final String targetHash, final String salt) {
-        // put in all the essentials for routing and network authentification
+        // put in all the essentials for routing and network authentication
 		// generate a session key
         final ArrayList<Part> post = new ArrayList<Part>();
         post.add(new DefaultCharsetStringPart("key", salt));
@@ -90,13 +90,13 @@ public class yacyNetwork {
         // network identification
         post.add(new DefaultCharsetStringPart(SwitchboardConstants.NETWORK_NAME, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT)));
 
-        // authentification essentials
-        final String authentificationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");
-        final String authentificationMethod = sb.getConfig("network.unit.protocol.request.authentification.method", "");
-        if ((authentificationControl.equals("controlled")) && (authentificationMethod.length() > 0)) {
-            if (authentificationMethod.equals("salted-magic-sim")) {
-                // generate an authentification essential using the salt, the iam-hash and the network magic
-                final String magic = sb.getConfig("network.unit.protocol.request.authentification.essentials", "");
+        // authentication essentials
+        final String authenticationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");
+        final String authenticationMethod = sb.getConfig("network.unit.protocol.request.authentication.method", "");
+        if ((authenticationControl.equals("controlled")) && (authenticationMethod.length() > 0)) {
+            if (authenticationMethod.equals("salted-magic-sim")) {
+                // generate an authentication essential using the salt, the iam-hash and the network magic
+                final String magic = sb.getConfig("network.unit.protocol.request.authentication.essentials", "");
                 final String md5 = Digest.encodeMD5Hex(salt + sb.peers.mySeed().hash + magic);
                 post.add(new DefaultCharsetStringPart("magicmd5", md5));
             }

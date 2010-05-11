@@ -54,10 +54,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 
+import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.document.parser.xml.RSSReader;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -422,6 +426,122 @@ public final class yacyClient {
         }
     }
 
+
+    public static BlockingQueue<RSSMessage> search(String urlBase, String query, boolean verify, boolean global, long timeout, int maximumRecords) {
+        if (urlBase == null) {
+            urlBase = "http://localhost:" + Switchboard.getSwitchboard().getConfig("port", "8080") + "/yacysearch.rss";
+        }
+        BlockingQueue<RSSMessage> queue = new LinkedBlockingQueue<RSSMessage>();
+        searchJob job = new searchJob(urlBase, query, verify, global, timeout, maximumRecords, queue);
+        job.start();
+        return queue;
+    }
+    
+    private final static int recordsPerSession = 10;
+    
+    public static class searchJob extends Thread {
+
+        String urlBase, query;
+        boolean verify, global;
+        long timeout;
+        int startRecord,  maximumRecords;
+        BlockingQueue<RSSMessage> queue;
+
+        public searchJob(String urlBase, String query, boolean verify, boolean global, long timeout, int maximumRecords, BlockingQueue<RSSMessage> queue) {
+            this.urlBase = urlBase;
+            this.query = query;
+            this.verify = verify;
+            this.global = global;
+            this.timeout = timeout;
+            this.startRecord = 0;
+            this.maximumRecords = maximumRecords;
+            this.queue = queue;
+        }
+
+        public void run() {
+            RSSMessage message;
+            while (timeout > 0 && maximumRecords > 0) {
+                long st = System.currentTimeMillis();
+                RSSFeed feed = search(urlBase, query, verify, global, timeout, startRecord, recordsPerSession);
+                if (feed == null || feed.isEmpty()) {
+                    try { queue.put(RSSMessage.POISON); } catch (InterruptedException e) {}
+                    return;
+                }
+                maximumRecords -= feed.size();
+                loop: while (!feed.isEmpty()) {
+                    message = feed.pollMessage();
+                    if (message == null) break loop;
+                    try {
+                        queue.put(message);
+                    } catch (InterruptedException e) {
+                        break loop;
+                    }
+                }
+                startRecord += recordsPerSession;
+                timeout -= System.currentTimeMillis() - st;
+            }
+        }
+    }
+    
+    /**
+     * send a query to a yacy public search interface
+     * @param urlBase the target url base (everything before the ? that follows the SRU request syntax properties). can null, then the local peer is used
+     * @param query the query as string
+     * @param startRecord number of first record
+     * @param maximumRecords maximum number of records
+     * @param verify if true, result entries are verified using the snippet fetch (slow); if false simply the result is returned
+     * @param global if true also search results from other peers are included
+     * @param timeout milliseconds that are waited at maximum for a search result
+     * @return
+     */
+    public static RSSFeed search(String urlBase, String query, boolean verify, boolean global, long timeout, int startRecord, int maximumRecords) {
+        // returns a search result from a peer
+        if (urlBase == null) {
+            urlBase = "http://localhost:" + Switchboard.getSwitchboard().getConfig("port", "8080") + "/yacysearch.rss";
+        }
+        DigestURI uri = null;
+        try {
+            uri = new DigestURI(urlBase, null);
+        } catch (MalformedURLException e) {
+            yacyCore.log.logWarning("yacyClient.search failed asking peer '" + urlBase + "': bad url, " + e.getMessage());
+            return null;
+        }
+        
+        // prepare request
+        final List<Part> post = new ArrayList<Part>();
+        post.add(new DefaultCharsetStringPart("query", query.replaceAll(" ", "+")));
+        post.add(new DefaultCharsetStringPart("startRecord", Integer.toString(startRecord)));
+        post.add(new DefaultCharsetStringPart("maximumRecords", Long.toString(maximumRecords)));
+        post.add(new DefaultCharsetStringPart("verify", verify ? "true" : "false"));
+        post.add(new DefaultCharsetStringPart("resource", global ? "global" : "local"));
+        
+        // send request
+        try {
+            final byte[] result = wput(urlBase, uri.getHost(), post, (int) timeout); 
+            final RSSReader reader = RSSReader.parse(result);
+            if (reader == null) {
+                yacyCore.log.logWarning("yacyClient.search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (1), reader == null");
+                return null;
+            }
+            final RSSFeed feed = reader.getFeed();
+            if (feed == null) {
+                // case where the rss reader does not understand the content
+                yacyCore.log.logWarning("yacyClient.search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (2)");
+                return null;
+            }
+            return feed;
+        } catch (final IOException e) {
+            yacyCore.log.logSevere("yacyClient.search error asking peer '" + uri.getHost() + "':" + e.toString());
+            return null;
+        }
+    }
+    
+    public static RSSFeed search(final yacySeed targetSeed, String query, boolean verify, boolean global, long timeout, int startRecord, int maximumRecords) {
+        String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8080") : targetSeed.getClusterAddress();
+        String urlBase = "http://" + address + "/yacysearch.rss";
+        return search(urlBase, query, verify, global, timeout, startRecord, maximumRecords);
+    }
+    
     @SuppressWarnings("unchecked")
     public static String[] search(
             final yacySeed mySeed,

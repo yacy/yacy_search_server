@@ -101,6 +101,7 @@ public class pptParser extends AbstractParser implements Idiom {
                     null,
                     title,
                     "", // TODO: AUTHOR
+                    pptExtractor.getDocSummaryInformation().getCompany(),
                     null,
                     null,
                     contents.getBytes("UTF-8"),

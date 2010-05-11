@@ -224,13 +224,14 @@ public class vcfParser extends AbstractParser implements Idiom {
             final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
             final byte[] text = parsedDataText.toString().getBytes();
             final Document theDoc = new Document(
-                    url,                   // url of the source document
+                    url,                        // url of the source document
                     mimeType,                   // the documents mime type
-                    null,
+                    null,                       // charset
+                    null,                       // set of languages
                     null,                       // a list of extracted keywords
-                    null,                       // the language
                     parsedTitle.toString(),     // a long document title
                     "",                         // TODO: AUTHOR
+                    "",                         // the publisher
                     sections,                   // an array of section headlines
                     "vCard",                    // an abstract
                     text,                       // the parsed document text

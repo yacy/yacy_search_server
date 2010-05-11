@@ -30,7 +30,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -43,8 +43,8 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.kelondro.util.MapTools;
 
@@ -58,7 +58,7 @@ public class URIMetadataRow implements URIMetadata {
     
     public static final Row rowdef = new Row(
         "String hash-12, " +            // the url's hash
-        "String comp-360, " +           // components: the url, description, author and tags. As 5th element, an ETag is possible
+        "String comp-360, " +           // components: the url, description, author, tags and publisher
         "Cardinal mod-4 {b256}, " +     // last-modified from the httpd
         "Cardinal load-4 {b256}, " +    // time when the url was loaded
         "Cardinal fresh-4 {b256}, " +   // time until this url is fresh
@@ -120,7 +120,7 @@ public class URIMetadataRow implements URIMetadata {
             final String dc_title,
             final String dc_creator,
             final String dc_subject,
-            final String ETag,
+            final String dc_publisher,
             final Date mod,
             final Date load,
             final Date fresh,
@@ -140,7 +140,7 @@ public class URIMetadataRow implements URIMetadata {
         // create new entry
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash());
-        this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, ETag));
+        this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, dc_publisher));
         encodeDate(col_mod, mod);
         encodeDate(col_load, load);
         encodeDate(col_fresh, fresh);
@@ -187,13 +187,13 @@ public class URIMetadataRow implements URIMetadata {
         */
     }
     
-    public static byte[] encodeComp(final DigestURI url, final String dc_title, final String dc_creator, final String dc_subject, final String ETag) {
-        final CharBuffer s = new CharBuffer(200);
+    public static byte[] encodeComp(final DigestURI url, final String dc_title, final String dc_creator, final String dc_subject, final String dc_publisher) {
+        final CharBuffer s = new CharBuffer(360);
         s.append(url.toNormalform(false, true)).append(10);
         s.append(dc_title).append(10);
         s.append(dc_creator).append(10);
         s.append(dc_subject).append(10);
-        s.append(ETag).append(10);
+        s.append(dc_publisher).append(10);
         try {
 			return s.toString().getBytes("UTF-8");
 		} catch (UnsupportedEncodingException e) {
@@ -222,11 +222,11 @@ public class URIMetadataRow implements URIMetadata {
         String descr = crypt.simpleDecode(prop.getProperty("descr", ""), null); if (descr == null) descr = "";
         String dc_creator = crypt.simpleDecode(prop.getProperty("author", ""), null); if (dc_creator == null) dc_creator = "";
         String tags = crypt.simpleDecode(prop.getProperty("tags", ""), null); if (tags == null) tags = "";
-        String ETag = crypt.simpleDecode(prop.getProperty("ETag", ""), null); if (ETag == null) ETag = "";
+        String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", ""), null); if (dc_publisher == null) dc_publisher = "";
         
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
-        this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, ETag));
+        this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher));
         try {
             encodeDate(col_mod, DateFormatter.parseShortDay(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
@@ -303,7 +303,7 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",tags=").append(crypt.simpleEncode(metadata.dc_subject()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",ETag=").append(crypt.simpleEncode(metadata.ETag()));
+            s.append(",publisher=").append(crypt.simpleEncode(metadata.dc_publisher()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",mod=").append(DateFormatter.formatShortDay(moddate()));
             assert (s.toString().indexOf(0) < 0);
@@ -373,15 +373,16 @@ public class URIMetadataRow implements URIMetadata {
     public Components metadata() {
         // avoid double computation of metadata elements
         if (this.comp != null) return this.comp;
-        // parse elements from comp string;
-        final Iterator<String> cl = FileUtils.strings(this.entry.getColBytes(col_comp, true));
+        // parse elements from comp field;
+        byte[] c = this.entry.getColBytes(col_comp, true);
+        List<byte[]> cl = ByteBuffer.split(c, (byte) 10);
         this.comp = new Components(
-                    (cl.hasNext()) ? cl.next() : "",
+                    (cl.size() > 0) ? new String(cl.get(0)) : "",
                     hash(),
-                    (cl.hasNext()) ? cl.next() : "",
-                    (cl.hasNext()) ? cl.next() : "",
-                    (cl.hasNext()) ? cl.next() : "",
-                    (cl.hasNext()) ? cl.next() : "");
+                    (cl.size() > 1) ? new String(cl.get(1)) : "",
+                    (cl.size() > 2) ? new String(cl.get(2)) : "",
+                    (cl.size() > 3) ? new String(cl.get(3)) : "",
+                    (cl.size() > 4) ? new String(cl.get(4)) : "");
         return this.comp;
     }
     
@@ -532,25 +533,16 @@ public class URIMetadataRow implements URIMetadata {
         private DigestURI url;
         private String urlRaw;
         private byte[] urlHash;
-        private final String dc_title, dc_creator, dc_subject, ETag;
+        private final String dc_title, dc_creator, dc_subject, dc_publisher;
         
-        public Components(final String urlRaw, final byte[] urlhash, final String title, final String author, final String tags, final String ETag) {
+        public Components(final String urlRaw, final byte[] urlhash, final String title, final String author, final String tags, final String publisher) {
             this.url = null;
             this.urlRaw = urlRaw;
             this.urlHash = urlhash;
             this.dc_title = title;
             this.dc_creator = author;
             this.dc_subject = tags;
-            this.ETag = ETag;
-        }
-        public Components(final DigestURI url, final String descr, final String author, final String tags, final String ETag) {
-            this.url = url;
-            this.urlRaw = null;
-            this.urlHash = null;
-            this.dc_title = descr;
-            this.dc_creator = author;
-            this.dc_subject = tags;
-            this.ETag = ETag;
+            this.dc_publisher = publisher;
         }
         public boolean matches(Pattern matcher) {
             if (this.urlRaw != null) return matcher.matcher(this.urlRaw).matches();
@@ -571,8 +563,8 @@ public class URIMetadataRow implements URIMetadata {
         }
         public String  dc_title()  { return this.dc_title; }
         public String  dc_creator() { return this.dc_creator; }
+        public String  dc_publisher() { return this.dc_publisher; }
         public String  dc_subject()   { return this.dc_subject; }
-        public String  ETag()   { return this.ETag; }
         
     }
 }

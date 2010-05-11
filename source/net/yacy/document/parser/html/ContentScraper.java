@@ -406,8 +406,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public String getAuthor() {
         String s = metas.get("author");
-        if (s == null) s = metas.get("copyright");
         if (s == null) s = metas.get("dc.creator");
+        if (s == null) return "";
+        return s;
+    }
+    
+    public String getPublisher() {
+        String s = metas.get("copyright");
+        if (s == null) s = metas.get("dc.publisher");
         if (s == null) return "";
         return s;
     }

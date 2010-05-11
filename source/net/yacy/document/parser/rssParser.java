@@ -96,6 +96,8 @@ public class rssParser extends AbstractParser implements Idiom {
         
         String feedTitle = "";
         String feedDescription = "";
+        String feedPublisher = "";
+        String[] feedSubject = {""};
         if (feed.getChannel() != null) {//throw new ParserException("no channel in document",location);
             
             // get the rss feed title and description
@@ -107,6 +109,12 @@ public class rssParser extends AbstractParser implements Idiom {
             
             // get the feed description
             feedDescription = feed.getChannel().getDescription();
+            
+            // the feed publisher
+            feedPublisher = feed.getChannel().getCopyright();
+            
+            // the feed subject
+            feedSubject = feed.getChannel().getSubject();
         }
         
         if (feed.getImage() != null) {
@@ -129,7 +137,7 @@ public class rssParser extends AbstractParser implements Idiom {
                     continue;
                 }
     			final String itemDescr = item.getDescription();
-    			final String itemCreator = item.getCreator();
+    			final String itemCreator = item.getAuthor();
     			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);
                 
                 feedSections.add(itemTitle);
@@ -180,9 +188,10 @@ public class rssParser extends AbstractParser implements Idiom {
                 mimeType,
                 "UTF-8",
                 null,
-                null,
+                feedSubject,
                 feedTitle,
                 (authors.length() > 0)?authors.toString(1,authors.length()):"",
+                feedPublisher,
                 feedSections.toArray(new String[feedSections.size()]),
                 feedDescription,
                 text.getBytes(),

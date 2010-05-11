@@ -174,6 +174,7 @@ public class zipParser extends AbstractParser implements Idiom {
                     docKeywords.toString().split(" |,"),
                     docLongTitle.toString(),
                     "", // TODO: AUTHOR
+                    "", // TODO: Publisher
                     docSections.toArray(new String[docSections.size()]),
                     docAbstrct.toString(),
                     ((ByteBuffer)docText).getBytes(),
@@ -189,6 +190,7 @@ public class zipParser extends AbstractParser implements Idiom {
                         docKeywords.toString().split(" |,"),
                         docLongTitle.toString(),
                         "", // TODO: AUTHOR
+                        "", // TODO: Publisher
                         docSections.toArray(new String[docSections.size()]),
                         docAbstrct.toString(),
                         outputFile,

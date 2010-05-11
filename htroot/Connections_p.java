@@ -30,7 +30,6 @@
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
-import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.kelondro.logging.Log;
@@ -39,12 +38,9 @@ import net.yacy.kelondro.workflow.WorkflowThread;
 
 import de.anomic.http.client.ConnectionInfo;
 import de.anomic.http.client.Client;
-import de.anomic.http.server.HTTPDemon;
-import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCore.Session;
@@ -100,24 +96,8 @@ public final class Connections_p {
             final int userPort = s.getUserPort();
             if (userAddress == null) continue;
             
-            final boolean isSSL = s.isSSL();
-            
             String dest = null;
             String prot = null;
-            final serverHandler cmdObj = s.getCommandObj();
-            if (cmdObj instanceof HTTPDemon) {
-                prot = isSSL ? "https":"http";
-                
-                // get the http command object
-                final HTTPDemon currentHttpd =  (HTTPDemon)cmdObj;
-                
-                // get the connection properties of this session
-                final Properties conProp = (Properties) currentHttpd.getConProp().clone();
-                
-                // get the destination host
-                dest = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
-                if (dest==null)continue;
-            }            
             
             if ((dest != null) && (dest.equals(virtualHost))) dest = sb.peers.mySeed().getName() + ".yacy";
             

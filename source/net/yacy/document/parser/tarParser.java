@@ -187,6 +187,7 @@ public class tarParser extends AbstractParser implements Idiom {
                     docKeywords.toString().split(" |,"),
                     docLongTitle.toString(),
                     "", // TODO: AUTHOR
+                    "", // TODO: publisher
                     docSections.toArray(new String[docSections.size()]),
                     docAbstrct.toString(),
                     ((ByteBuffer)docText).getBytes(),
@@ -202,6 +203,7 @@ public class tarParser extends AbstractParser implements Idiom {
                         docKeywords.toString().split(" |,"),
                         docLongTitle.toString(),
                         "", // TODO: AUTHOR
+                        "", // TODO: publisher
                         docSections.toArray(new String[docSections.size()]),
                         docAbstrct.toString(),
                         outputFile,

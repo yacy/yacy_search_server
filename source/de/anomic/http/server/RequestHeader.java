@@ -125,29 +125,13 @@ public class RequestHeader extends HeaderFramework {
                 ((get(ACCEPT_ENCODING)).toUpperCase().indexOf("GZIP")) != -1);        
     }
     
-    public static Properties parseRequestLine(final String s, final Properties prop, final String virtualHost) {
-        final int p = s.indexOf(' ');
-        if (p >= 0) {
-            final String cmd = s.substring(0,p);
-            final String args = s.substring(p+1);
-            return parseRequestLine(cmd,args, prop,virtualHost);
-        }
-        return prop;
-    }
-    
-    public static Properties parseRequestLine(final String cmd, String args, final Properties prop, final String virtualHost) {
+    public static Properties parseRequestLine(final String cmd, String args, final String virtualHost) {
         
-        // getting the last request line for debugging purposes
-        final String prevRequestLine = prop.containsKey(CONNECTION_PROP_REQUESTLINE)?
-                prop.getProperty(CONNECTION_PROP_REQUESTLINE) : "";
+        final Properties prop = new Properties();
         
-        // reset property from previous run   
-        prop.clear();
-
         // storing informations about the request
         prop.setProperty(CONNECTION_PROP_METHOD, cmd);
         prop.setProperty(CONNECTION_PROP_REQUESTLINE, cmd + " " + args);
-        prop.setProperty(CONNECTION_PROP_PREV_REQUESTLINE, prevRequestLine);
         
         // this parses a whole URL
         if (args.length() == 0) {

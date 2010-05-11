@@ -96,7 +96,7 @@ public class yacydoc {
         prop.putXML("dc_creator", metadata.dc_creator());
         prop.putXML("dc_description", ""); // this is the fulltext part in the surrogate
         prop.putXML("dc_subject", metadata.dc_subject());
-        prop.putXML("dc_publisher", "");
+        prop.putXML("dc_publisher", metadata.dc_publisher());
         prop.putXML("dc_contributor", "");
         prop.putXML("dc_date", entry.moddate().toString());
         prop.putXML("dc_type", String.valueOf(entry.doctype()));

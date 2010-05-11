@@ -77,6 +77,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverCore.Session;
 
 
 /**
@@ -90,7 +91,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     
     /**
      * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
-     * <p>Name of the setting holding the authentification hash for the static <code>admin</code>-account. It is calculated
+     * <p>Name of the setting holding the authentication hash for the static <code>admin</code>-account. It is calculated
      * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
      */
     public static final String ADMIN_ACCOUNT_B64MD5 = "adminAccountBase64MD5";
@@ -126,20 +127,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     private static HashMap<String, Long> YaCyHopAccessRequester = new HashMap<String, Long>();
     private static HashMap<String, Long> YaCyHopAccessTargets = new HashMap<String, Long>();
     
-    // class objects
-    private serverCore.Session session;  // holds the session object of the calling class
-    private InetAddress userAddress;     // the address of the client
-    
     // for authentication
     private boolean use_proxyAccounts = false;
     private boolean proxyAccounts_init = false; // is use_proxyAccounts set?
-    private String clientIP;
-    private boolean allowProxy;
-    private boolean allowServer;
-    private boolean allowYaCyHop;
-    
-    // the connection properties
-    private final Properties prop = new Properties();
     
     private int emptyRequestCount = 0;
     private int keepAliveRequestCount = 0;
@@ -155,14 +145,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         
         // authentication: by default none
         this.proxyAccounts_init = false;
-        this.clientIP = null;
         
         // configuring keep alive support
         keepAliveSupport = Boolean.parseBoolean(switchboard.getConfig("connectionKeepAliveSupport","false"));
-    }
-    
-    public Properties getConProp() {
-        return this.prop;
     }
     
     /**
@@ -171,48 +156,26 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      * @see de.anomic.server.serverHandler#reset()
      */
     public void reset()  {
-        this.session = null;
-        this.userAddress = null;
-        this.allowProxy = false;
-        this.allowServer = false;
-        this.allowYaCyHop = false;
         this.proxyAccounts_init = false;
-        this.clientIP = null;
-        this.prop.clear();
         
         this.emptyRequestCount = 0;
         this.keepAliveRequestCount = 0;
-    }    
-
-
-    /**
-     * Must be called at least once, but can be called again to re-use the object.
-     * @see de.anomic.server.serverHandler#initSession(de.anomic.server.serverCore.Session)
-     */
-    public void initSession(final serverCore.Session newsession) throws IOException {
-        this.session = newsession;
-        this.userAddress = session.userAddress; // client InetAddress
-        this.clientIP = this.userAddress.getHostAddress();
-        if (this.userAddress.isAnyLocalAddress()) this.clientIP = "localhost";
-        if (this.clientIP.startsWith("0:0:0:0:0:0:0:1")) this.clientIP = "localhost";
-        if (this.clientIP.startsWith("127.")) this.clientIP = "localhost";
-        final String proxyClient = switchboard.getConfig("proxyClient", "*");
-        final String serverClient = switchboard.getConfig("serverClient", "*");
-
-        this.allowProxy = (proxyClient.equals("*")) ? true : match(this.clientIP, proxyClient);
-        this.allowServer = (serverClient.equals("*")) ? true : match(this.clientIP, serverClient);
-        this.allowYaCyHop = switchboard.getConfigBool("YaCyHop", false);
-
-        // check if we want to allow this socket to connect us
-        if (!(this.allowProxy || this.allowServer || this.allowYaCyHop)) {
-            final String errorMsg = "CONNECTION FROM " + this.clientIP + " FORBIDDEN";
-            log.logWarning(errorMsg);
-            throw new IOException(errorMsg);
-        }
-
-        this.proxyAccounts_init = false;
     }
-
+    
+    private static boolean allowProxy(Session session) {
+        final String proxyClient = switchboard.getConfig("proxyClient", "*");
+        return (proxyClient.equals("*")) ? true : match(session.userAddress.getHostAddress(), proxyClient);
+    }
+    
+    private static boolean allowServer(Session session) {
+        final String serverClient = switchboard.getConfig("serverClient", "*");
+        return (serverClient.equals("*")) ? true : match(session.userAddress.getHostAddress(), serverClient);
+    }
+    
+    private static boolean allowYaCyHop(Session session) {
+        return switchboard.getConfigBool("YaCyHop", false);
+    }
+    
     private static boolean match(final String key, final String latch) {
         // the latch is a comma-separated list of patterns
         // each pattern may contain one wildcard-character '*' which matches anything
@@ -256,15 +219,15 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      * @param header the received http-headers
      * @return <code>true</code> if a persistent connection was requested or <code>false</code> otherwise
      */
-    private boolean handlePersistentConnection(final RequestHeader header) {
+    private boolean handlePersistentConnection(final RequestHeader header, Properties prop) {
         
         if (!keepAliveSupport) {
-            this.prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
+            prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
             return false;
         }
         
         // getting the http version that is used by the client
-        final String httpVersion = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
         
         // managing keep-alive: in HTTP/0.9 and HTTP/1.0 every connection is closed
         // afterwards. In HTTP/1.1 (and above, in the future?) connections are
@@ -277,15 +240,15 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }        
         
         final String transferEncoding = header.get(HeaderFramework.TRANSFER_ENCODING, "identity");
-        final boolean isPostRequest = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_METHOD).equals(HeaderFramework.METHOD_POST);
+        final boolean isPostRequest = prop.getProperty(HeaderFramework.CONNECTION_PROP_METHOD).equals(HeaderFramework.METHOD_POST);
         final boolean hasContentLength = header.containsKey(HeaderFramework.CONTENT_LENGTH);
         final boolean hasTransferEncoding = header.containsKey(HeaderFramework.TRANSFER_ENCODING) && !transferEncoding.equalsIgnoreCase("identity");
         
         // if the request does not contain a content-length we have to close the connection
         // independently of the value of the connection header
         if (persistent && isPostRequest && !(hasContentLength || hasTransferEncoding)) 
-        	  this.prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
-        else  this.prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,persistent?"keep-alive":"close");
+        	  prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
+        else  prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,persistent?"keep-alive":"close");
         
         return persistent;
     }
@@ -300,14 +263,14 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return 1;
     }
     
-    private boolean handleYaCyHopAuthentication(final RequestHeader header) {
+    private boolean handleYaCyHopAuthentication(final RequestHeader header, Properties prop, Session session) {
         // check if the user has allowed that his/her peer is used for hops
-        if (!this.allowYaCyHop) return false;
+        if (!allowYaCyHop(session)) return false;
         
         // proxy hops must identify with 4 criteria:
         
         // the accessed port must not be port 80
-        final String host = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
+        final String host = prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
         if (host == null) return false;
         int pos;
         if ((pos = host.indexOf(':')) < 0) {
@@ -317,7 +280,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         if (Integer.parseInt(host.substring(pos + 1)) == 80) return false;
         
         // the access path must be into the yacy protocol path; it must start with 'yacy'
-        if (!(this.prop.getProperty(HeaderFramework.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) return false;
+        if (!(prop.getProperty(HeaderFramework.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) return false;
 
         // the accessing client must identify with user:password, where
         // user = addressed peer name
@@ -334,7 +297,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // furthermore, YaCy hops must not exceed a specific access frequency
         
         // check access requester frequency: protection against DoS against this peer
-        final String requester = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+        final String requester = prop.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP);
         if (requester == null) return false;
         if (lastAccessDelta(YaCyHopAccessRequester, requester) < 10000) return false;
         YaCyHopAccessRequester.put(requester, Long.valueOf(System.currentTimeMillis()));
@@ -353,9 +316,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return System.currentTimeMillis() - lastAccess.longValue();
     }
     
-    private boolean handleProxyAuthentication(final RequestHeader header) throws IOException {
+    private boolean handleProxyAuthentication(final RequestHeader header, Properties prop, Session session) throws IOException {
         // getting the http version that is used by the client
-        final String httpVersion = this.prop.getProperty("HTTP", "HTTP/0.9");            
+        final String httpVersion = prop.getProperty("HTTP", "HTTP/0.9");            
         
         // reading the authentication settings from switchboard
         if (!this.proxyAccounts_init) {
@@ -365,9 +328,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         
         if (this.use_proxyAccounts) {
             final String auth = header.get(RequestHeader.PROXY_AUTHORIZATION,"xxxxxx");    
-            userDB.Entry entry=switchboard.userDB.ipAuth(this.clientIP);
+            userDB.Entry entry=switchboard.userDB.ipAuth(session.userAddress.getHostAddress());
 			if(entry == null){
-				entry=switchboard.userDB.proxyAuth(auth, this.clientIP);
+				entry=switchboard.userDB.proxyAuth(auth, session.userAddress.getHostAddress());
 			}
             if(entry != null){
                 final int returncode=entry.surfRight();
@@ -378,27 +341,33 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 if(returncode==userDB.Entry.PROXY_TIMELIMIT_REACHED){
                     tp.put("limit", "1");//time per day
                     tp.put("limit_timelimit", entry.getTimeLimit());
-                    sendRespondError(this.prop, this.session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
+                    sendRespondError(prop, session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
                 }else if(returncode==userDB.Entry.PROXY_NORIGHT){
                     tp.put("limit", "0");
-                    sendRespondError(this.prop, this.session.out, 403, "Proxy use forbidden", new File("proxymsg/proxylimits.inc"), tp, null);
+                    sendRespondError(prop, session.out, 403, "Proxy use forbidden", new File("proxymsg/proxylimits.inc"), tp, null);
                 }
                 return false;
 			}
             // ask for authenticate
-            this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.CRLF_STRING +
+            session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.CRLF_STRING +
                                     RequestHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING).getBytes());
-            this.session.out.write((HeaderFramework.CONTENT_LENGTH + ": 0\r\n").getBytes());
-            this.session.out.write("\r\n".getBytes());                   
-            this.session.out.flush();
+            session.out.write((HeaderFramework.CONTENT_LENGTH + ": 0\r\n").getBytes());
+            session.out.write("\r\n".getBytes());                   
+            session.out.flush();
             return false;
         }
         
         return true;
     }
     
-    public Boolean UNKNOWN(final String requestLine) throws IOException {
-        
+    public Boolean EMPTY(final String arg, Session session) throws IOException {
+        if (++this.emptyRequestCount > 10) return serverCore.TERMINATE_CONNECTION;
+        return serverCore.RESUME_CONNECTION;
+    }
+    
+    public Boolean UNKNOWN(final String requestLine, Session session) throws IOException {
+
+        Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, requestLine, session);
         int pos;
         String unknownCommand = null, args = null;
         if ((pos = requestLine.indexOf(' ')) > 0) {
@@ -409,116 +378,100 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             args = "";
         }
         
-        parseRequestLine(unknownCommand, args);
+        parseRequestLine(unknownCommand, args, session);
         
-        sendRespondError(this.prop,this.session.out,4,501,null,unknownCommand + " method not implemented",null);
+        sendRespondError(prop, session.out, 4, 501, null, unknownCommand + " method not implemented", null);
         return serverCore.TERMINATE_CONNECTION;
     }
-    
-    public Boolean EMPTY(final String arg) throws IOException {
-        if (++this.emptyRequestCount > 10) return serverCore.TERMINATE_CONNECTION;
-        return serverCore.RESUME_CONNECTION;
-    }
-    
-    public Boolean TRACE() throws IOException {
-        sendRespondError(this.prop,this.session.out,4,501,null,"TRACE method not implemented",null);
-        return serverCore.TERMINATE_CONNECTION;
-    }
-    
-    public Boolean OPTIONS() throws IOException {
-        sendRespondError(this.prop,this.session.out,4,501,null,"OPTIONS method not implemented",null);
-        return serverCore.TERMINATE_CONNECTION;
-    }    
-    
-    
-    public Boolean GET(final String arg) {
+
+    public Boolean GET(final String arg, Session session) {
         try {
             // parsing the http request line
-            parseRequestLine(HeaderFramework.METHOD_GET,arg);
+            Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header            
-            final String httpVersion = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+            final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
             final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9)) 
             			      ? new RequestHeader(reverseMappingCache) 
-                              : RequestHeader.readHeader(this.prop,this.session);                  
+                              : RequestHeader.readHeader(prop, session);                  
             
             // handling transparent proxy support
-            HeaderFramework.handleTransparentProxySupport(header, this.prop, virtualHost, HTTPDProxyHandler.isTransparentProxy); 
+            HeaderFramework.handleTransparentProxySupport(header, prop, virtualHost, HTTPDProxyHandler.isTransparentProxy); 
             
             // determines if the connection should be kept alive
-            handlePersistentConnection(header);
+            handlePersistentConnection(header, prop);
             
-            if (this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
+            if (prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
-                if (this.allowServer) {
-                    HTTPDFileHandler.doGet(this.prop, header, this.session.out);
+                if (allowServer(session)) {
+                    HTTPDFileHandler.doGet(prop, header, session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using a non-granted IP. allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING).getBytes());
+                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using a non-granted IP. allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             } else {
                 // pass to proxy
-                if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
-                    ((this.allowProxy) && (handleProxyAuthentication(header)))) {
-                    HTTPDProxyHandler.doGet(this.prop, header, this.session.out);
+                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                    ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
+                    HTTPDProxyHandler.doGet(prop, header, session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using a non-granted IP. allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
+                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using a non-granted IP. allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
             
-            return this.prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
-            logUnexpectedError(e);
+            logUnexpectedError(e, session.userAddress.getHostAddress());
             return serverCore.TERMINATE_CONNECTION;
         }
     }
     
-    private void logUnexpectedError(final Exception e) {
+    private void logUnexpectedError(final Exception e, String address) {
         if (e instanceof InterruptedException) {
             log.logInfo("Interruption detected");
         } else {
             final String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.startsWith("Socket closed")) {
-                    log.logInfo("httpd shutdown detected ... (" + e.getMessage() + "), client = " + userAddress.getHostAddress());
+                    log.logInfo("httpd shutdown detected ... (" + e.getMessage() + "), client = " +address);
                 } else if ((errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
                     // client closed the connection, so we just end silently
-                    log.logInfo("Client unexpectedly closed connection... (" + e.getMessage() + "), client = " + userAddress.getHostAddress());
+                    log.logInfo("Client unexpectedly closed connection... (" + e.getMessage() + "), client = " + address);
                 } else if (errorMsg.equals("400 Bad request")) {
-                	log.logInfo("Bad client request ... (" + e.getMessage() + "), client = " + userAddress.getHostAddress());
+                	log.logInfo("Bad client request ... (" + e.getMessage() + "), client = " + address);
                 } else {
-                    log.logSevere("Unexpected Error ... (" + e.getMessage() + "), client = " + userAddress.getHostAddress(),e);
+                    log.logSevere("Unexpected Error ... (" + e.getMessage() + "), client = " + address,e);
                 }
             } else {
-                log.logSevere("Unexpected Error ... (" + e.getMessage() + "), client = " + userAddress.getHostAddress(),e);
+                log.logSevere("Unexpected Error ... (" + e.getMessage() + "), client = " + address,e);
             }
         }        
     }
 
-    public Boolean HEAD(final String arg) {
+    public Boolean HEAD(final String arg, Session session) {
         try {
-            parseRequestLine(HeaderFramework.METHOD_HEAD,arg);
+            Properties prop = parseRequestLine(HeaderFramework.METHOD_HEAD, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header
             RequestHeader header;
-            final String httpVersion = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+            final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
             if (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9)) header = new RequestHeader(reverseMappingCache);
-            else  header = RequestHeader.readHeader(this.prop,this.session);
+            else  header = RequestHeader.readHeader(prop,session);
             
             // handle transparent proxy support
-            HeaderFramework.handleTransparentProxySupport(header, this.prop, virtualHost, HTTPDProxyHandler.isTransparentProxy);
+            HeaderFramework.handleTransparentProxySupport(header, prop, virtualHost, HTTPDProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
-            handlePersistentConnection(header);
+            handlePersistentConnection(header, prop);
             
             // return multi-line message
-            if (this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
+            if (prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
-                if (allowServer) {
-                    HTTPDFileHandler.doHead(prop, header, this.session.out);
+                if (allowServer(session)) {
+                    HTTPDFileHandler.doHead(prop, header, session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" +
@@ -527,9 +480,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 }
             } else {
                 // pass to proxy
-                if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
-                    ((this.allowProxy) && (handleProxyAuthentication(header)))) {
-                    HTTPDProxyHandler.doHead(prop, header, this.session.out);
+                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                    ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
+                    HTTPDProxyHandler.doHead(prop, header, session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" +
@@ -537,22 +490,22 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
-            return this.prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
-            logUnexpectedError(e);
+            logUnexpectedError(e, session.userAddress.getHostAddress());
             return serverCore.TERMINATE_CONNECTION;
         }
     }
     
-    public Boolean POST(final String arg) {
+    public Boolean POST(final String arg, Session session) {
         try {
-            parseRequestLine(HeaderFramework.METHOD_POST,arg);
+            Properties prop = parseRequestLine(HeaderFramework.METHOD_POST, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header
             RequestHeader header;
-            final String httpVersion = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+            final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
             if (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))  header = new RequestHeader(reverseMappingCache);
-            else header = RequestHeader.readHeader(this.prop,this.session);
+            else header = RequestHeader.readHeader(prop, session);
             
             // handle transfer-coding
             final InputStream sessionIn;
@@ -562,7 +515,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     log.logWarning("client "+ session.getName() +" uses transfer-coding with HTTP version "+ httpVersion +"!");
                 }
                 if("chunked".equalsIgnoreCase(header.get(HeaderFramework.TRANSFER_ENCODING))) {
-                    sessionIn = new ChunkedInputStream(this.session.in);
+                    sessionIn = new ChunkedInputStream(session.in);
                 } else {
                     // "A server which receives an entity-body with a transfer-coding it does
                     // not understand SHOULD return 501 (Unimplemented), and close the
@@ -571,47 +524,47 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     return serverCore.TERMINATE_CONNECTION;
                 }
             } else {
-                sessionIn = this.session.in;
+                sessionIn = session.in;
             }
             
             // handle transparent proxy support
-            HeaderFramework.handleTransparentProxySupport(header, this.prop, virtualHost, HTTPDProxyHandler.isTransparentProxy);
+            HeaderFramework.handleTransparentProxySupport(header, prop, virtualHost, HTTPDProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
-            handlePersistentConnection(header);
+            handlePersistentConnection(header, prop);
             
             // return multi-line message
             if (prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
-                if (allowServer) {
-                    HTTPDFileHandler.doPost(prop, header, this.session.out, sessionIn);
+                if (allowServer(session)) {
+                    HTTPDFileHandler.doPost(prop, header, session.out, sessionIn);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING).getBytes());
+                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             } else {
                 // pass to proxy
-                if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
-                    ((this.allowProxy) && (handleProxyAuthentication(header)))) {
-                    HTTPDProxyHandler.doPost(prop, header, this.session.out, sessionIn);
+                if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+                    ((allowProxy(session)) && (handleProxyAuthentication(header, prop, session)))) {
+                    HTTPDProxyHandler.doPost(prop, header, session.out, sessionIn);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
-                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
+                    session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
             if (sessionIn instanceof ChunkedInputStream) sessionIn.close(); // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
             //return serverCore.RESUME_CONNECTION;
-            return this.prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
-            logUnexpectedError(e);
+            logUnexpectedError(e, session.userAddress.getHostAddress());
             return serverCore.TERMINATE_CONNECTION;
         }
     }
     
     
-    public Boolean CONNECT(String arg) throws IOException {
+    public Boolean CONNECT(String arg, Session session) throws IOException {
         // establish a ssh-tunneled http connection
         // this is to support https   
         
@@ -622,6 +575,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             httpVersion = arg.substring(pos + 1);
             arg = arg.substring(0, pos);
         }
+        Properties prop = new Properties();
         prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, httpVersion);
         
         // parse hostname and port
@@ -634,18 +588,18 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }       
         
         // setting other connection properties
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, this.clientIP);
+        prop.setProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, session.userAddress.isAnyLocalAddress() ? "localhost" : session.userAddress.getHostAddress());
         prop.setProperty(HeaderFramework.CONNECTION_PROP_METHOD, HeaderFramework.METHOD_CONNECT);
         prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, "/");
         prop.setProperty(HeaderFramework.CONNECTION_PROP_EXT, "");
         prop.setProperty(HeaderFramework.CONNECTION_PROP_URL, "");        
         
         // parse remaining lines
-        final RequestHeader header = RequestHeader.readHeader(this.prop,this.session);               
+        final RequestHeader header = RequestHeader.readHeader(prop,session);               
         
-        if (!(allowProxy)) {
+        if (!(allowProxy(session))) {
             // not authorized through firewall blocking (ip does not match filter)          
-            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
+            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
             return serverCore.TERMINATE_CONNECTION;
         }        
         
@@ -658,35 +612,37 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
         
         // pass to proxy
-        if (((this.allowYaCyHop) && (handleYaCyHopAuthentication(header))) ||
-            ((this.allowProxy) && (this.handleProxyAuthentication(header)))) {
-            HTTPDProxyHandler.doConnect(prop, header, this.session.in, this.session.out);
+        if (((allowYaCyHop(session)) && (handleYaCyHopAuthentication(header, prop, session))) ||
+            ((allowProxy(session)) && (this.handleProxyAuthentication(header, prop, session)))) {
+            HTTPDProxyHandler.doConnect(prop, header, session.in, session.out);
         } else {
             // not authorized through firewall blocking (ip does not match filter)
-            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
+            session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this proxy, because you are using the non-granted IP " + session.userAddress.getHostAddress() + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("proxyClient", "*") + serverCore.CRLF_STRING).getBytes());
         }
         
         return serverCore.TERMINATE_CONNECTION;
     }
     
-    private final void parseRequestLine(final String cmd, final String s) {
+    private final Properties parseRequestLine(final String cmd, final String s, Session session) {
         
         // parsing the header
-        RequestHeader.parseRequestLine(cmd,s,this.prop,virtualHost);
+        Properties p = RequestHeader.parseRequestLine(cmd, s, virtualHost);
         
         // track the request
-        final String path = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_URL);
-        final String args = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_ARGS, "");
-        switchboard.track(this.userAddress.getHostAddress(), (args.length() > 0) ? path + "?" + args : path);
+        final String path = p.getProperty(HeaderFramework.CONNECTION_PROP_URL);
+        final String args = p.getProperty(HeaderFramework.CONNECTION_PROP_ARGS, "");
+        switchboard.track(session.userAddress.getHostAddress(), (args.length() > 0) ? path + "?" + args : path);
 
         // reseting the empty request counter
         this.emptyRequestCount = 0;
         
         // counting the amount of received requests within this permanent connection
-        this.prop.setProperty(HeaderFramework.CONNECTION_PROP_KEEP_ALIVE_COUNT, Integer.toString(++this.keepAliveRequestCount));
+        p.setProperty(HeaderFramework.CONNECTION_PROP_KEEP_ALIVE_COUNT, Integer.toString(++this.keepAliveRequestCount));
         
         // setting the client-IP
-        this.prop.setProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, this.clientIP);
+        p.setProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, session.userAddress.getHostAddress());
+        
+        return p;
     }
     
     // some static methods that needs to be used from any CGI
@@ -1305,7 +1261,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 // adding some yacy specific headers
                 responseHeader.put(HeaderFramework.X_YACY_KEEP_ALIVE_REQUEST_COUNT,conProp.getProperty(HeaderFramework.CONNECTION_PROP_KEEP_ALIVE_COUNT));
                 responseHeader.put(HeaderFramework.X_YACY_ORIGINAL_REQUEST_LINE,conProp.getProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE));
-                responseHeader.put(HeaderFramework.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(HeaderFramework.CONNECTION_PROP_PREV_REQUESTLINE));
+                //responseHeader.put(HeaderFramework.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(HeaderFramework.CONNECTION_PROP_PREV_REQUESTLINE));
                   
                 //read custom headers
                 /*

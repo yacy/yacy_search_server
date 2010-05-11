@@ -90,6 +90,7 @@ public class csvParser extends AbstractParser implements Idiom {
                     null,
                     concatRow(table.get(0)),
                     "",
+                    "",
                     null,
                     null,
                     sb.toString().getBytes(charset),

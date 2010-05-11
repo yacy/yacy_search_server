@@ -185,7 +185,8 @@ public class genericImageParser extends AbstractParser implements Idiom {
              languages,
              keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords
              title, // title
-             author == null ? location.getHost() : author, // author
+             author == null ? "" : author, // author
+             location.getHost(), // Publisher
              new String[]{}, // sections
              description == null ? "" : description, // description
              infoString.getBytes(), // content text

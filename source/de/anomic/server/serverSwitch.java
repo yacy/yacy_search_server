@@ -468,7 +468,7 @@ public class serverSwitch {
         return workerThreads.keySet().iterator();
     }
 
-    // authentification routines:
+    // authentication routines:
     
     public void setAuthentify(final InetAddress host, final String user, final String rights) {
         // sets access attributes according to host addresses
@@ -501,10 +501,10 @@ public class serverSwitch {
     public void addAuthentifyRight(final InetAddress host, final String right) {
 	final String rights = getAuthentifyRights(host);
 	if (rights == null) {
-	    // create new authentification
+	    // create new authentication
 	    setAuthentify(host, "unknown", right);
 	} else {
-	    // add more authentification
+	    // add more authentication
 	    final String user = getAuthentifyUser(host);
 	    setAuthentify(host, user, rights + right);
 	}	

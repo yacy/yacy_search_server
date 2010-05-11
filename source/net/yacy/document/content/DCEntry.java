@@ -144,6 +144,9 @@ public class DCEntry extends TreeMap<String, String> {
     
     private String bestU(String[] urls) {
         for (String uu: urls) {
+            if (uu.startsWith("http://") && (uu.endsWith(".html") || uu.endsWith(".htm") || uu.endsWith(".pdf") || uu.endsWith(".doc") || uu.endsWith(".rss") || uu.endsWith(".xml"))) return uu;
+        }
+        for (String uu: urls) {
             if (uu.startsWith("http://")) return uu;
         }
         for (String uu: urls) {
@@ -248,6 +251,7 @@ public class DCEntry extends TreeMap<String, String> {
                 getSubject(),
                 getTitle(),
                 getCreator(),
+                getPublisher(),
                 null,
                 "",
                 getDescription().getBytes("UTF-8"),

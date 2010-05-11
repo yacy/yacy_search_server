@@ -182,7 +182,17 @@ public final class DateFormatter {
      * @return
      * @throws ParseException
      */
-    public static Date parseISO8601(final String s) throws ParseException {
+    public static Date parseISO8601(String s) throws ParseException {
+        // do some lazy checks here
+        s = s.trim();
+        if (s.startsWith("{")) s = s.substring(1);
+        if (s.endsWith("}")) s = s.substring(0, s.length() - 1);
+        if (s.startsWith("[")) s = s.substring(1);
+        if (s.endsWith("]")) s = s.substring(0, s.length() - 1);
+        while (s.charAt(0) > '9' || s.charAt(0) < '0') s = s.substring(1);
+        if (s.endsWith("--")) s = s.substring(0, s.length() - 2) + "00";
+        
+        // no go for exact parsing
         final Calendar cal = Calendar.getInstance(TZ_GMT, Locale.US);
         cal.clear();
         
@@ -265,8 +275,8 @@ public final class DateFormatter {
         // in case we couldn't even parse a year
         if (!cal.isSet(Calendar.YEAR))
             throw new ParseException("parseISO8601: Cannot parse '" + s + "'", 0);
-        
-        return cal.getTime();
+        Date d = cal.getTime();
+        return d;
     }
 
     /**

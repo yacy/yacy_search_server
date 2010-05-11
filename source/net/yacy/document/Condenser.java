@@ -134,15 +134,18 @@ public final class Condenser {
             // phrase   2 is <not used>
             // phrase   3 is the Document Abstract
             // phrase   4 is the Document Author
-            // phrase   5 are the tags specified in document
+            // phrase   5 is the Document Publisher
+            // phrase   6 are the tags specified in document
             // phrase  10 and above are the section headlines/titles (88 possible)
             // phrase  98 is taken from the embedded anchor/hyperlinks description (REMOVED!)
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.dc_title(),    1, WordReferenceRow.flag_app_dc_title, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_title(),       1, WordReferenceRow.flag_app_dc_title, RESULT_FLAGS, true);
             insertTextToWords(document.dc_description(), 3, WordReferenceRow.flag_app_dc_description, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_creator(),   4, WordReferenceRow.flag_app_dc_creator, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_creator(),     4, WordReferenceRow.flag_app_dc_creator, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_publisher(),   5, WordReferenceRow.flag_app_dc_creator, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_subject(' '),  6, WordReferenceRow.flag_app_dc_description, RESULT_FLAGS, true);
             // missing: tags!
             final String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
@@ -236,7 +239,7 @@ public final class Condenser {
         while (wordenum.hasMoreElements()) {
             word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH);
             if (useForLanguageIdentification) languageIdentificator.add(word);
-            if (word.length() < 3) continue;
+            if (word.length() < 2) continue;
             wprop = words.get(word);
             if (wprop == null) wprop = new Word(0, pip, phrase);
             if (wprop.flags == null) wprop.flags = flagstemplate.clone();
@@ -584,6 +587,10 @@ public final class Condenser {
                     } else {
                         sb = sb.append(c);
                     }
+                }
+                if (sb.length() > 0) {
+                    s.add(sb);
+                    sb = null;
                 }
             }
             r = s.get(sIndex++);

@@ -35,6 +35,7 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
+import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
@@ -115,7 +116,7 @@ public class PerformanceQueues_p {
         String threadName;
         BusyThread thread;
         
-        final boolean xml = (header.get("PATH")).endsWith(".xml");
+        final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
         prop.setLocalized(!xml);
         
         // calculate totals

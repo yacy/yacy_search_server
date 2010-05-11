@@ -129,6 +129,18 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public String title() {
         return urlcomps.dc_title();
     }
+    public String publisher() {
+        // dc:publisher
+        return urlcomps.dc_publisher();
+    }
+    public String creator() {
+        // dc:creator, the author
+        return urlcomps.dc_creator();
+    }
+    public String subject() {
+        // dc:subject, keywords
+        return urlcomps.dc_subject();
+    }
     public TextSnippet textSnippet() {
         return this.textSnippet;
     }

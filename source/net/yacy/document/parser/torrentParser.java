@@ -118,6 +118,7 @@ public class torrentParser extends AbstractParser implements Idiom {
                     null,
                     name, // title
                     comment, // author 
+                    location.getHost(),
                     null,
                     null,
                     filenames.toString().getBytes(charset),

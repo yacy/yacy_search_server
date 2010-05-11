@@ -106,7 +106,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     
     public static final String X_FORWARDED_FOR = "X-Forwarded-For";
     public static final String X_YACY_INDEX_CONTROL = "X-YACY-Index-Control";
-    public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
+    //public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
     public static final String X_YACY_KEEP_ALIVE_REQUEST_COUNT = "X-Keep-Alive-Request-Count";
     public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
     
@@ -196,7 +196,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_PERSISTENT = "PERSISTENT";
     public static final String CONNECTION_PROP_KEEP_ALIVE_COUNT = "KEEP-ALIVE_COUNT";
     public static final String CONNECTION_PROP_REQUESTLINE = "REQUESTLINE";
-    public static final String CONNECTION_PROP_PREV_REQUESTLINE = "PREVREQUESTLINE";
+    //public static final String CONNECTION_PROP_PREV_REQUESTLINE = "PREVREQUESTLINE";
     public static final String CONNECTION_PROP_REQUEST_START = "REQUEST_START";
     public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
     //public static final String CONNECTION_PROP_INPUTSTREAM = "INPUTSTREAM";

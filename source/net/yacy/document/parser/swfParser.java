@@ -131,6 +131,7 @@ public class swfParser extends AbstractParser implements Idiom {
                           replaceAll("\r"," ").
                           replaceAll("\t"," "), // title
                     "", // TODO: AUTHOR
+                    "",
                     sections,     // an array of section headlines
                     abstrct,     // an abstract
                     contents.getBytes("UTF-8"),     // the parsed document text

@@ -65,7 +65,7 @@ public class Request extends WorkflowJob {
     private byte[]   refhash;       // the url's referrer hash
     private DigestURI url;          // the url as string
     private String   name;          // the name of the url, from anchor tag <a>name</a>     
-    private long     appdate;       // the time when the url was first time appeared
+    private long     appdate;       // the time when the url was first time appeared. may be negative in case that the date is before epoch (1970)!
     private long     imsdate;       // the time of a ifModifiedSince request
     private String   profileHandle; // the name of the fetch profile
     private int      depth;         // the prefetch depth so far, starts at 0

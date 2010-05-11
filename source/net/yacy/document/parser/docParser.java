@@ -105,6 +105,7 @@ public class docParser extends AbstractParser implements Idiom {
                       null,
                       title,
                       "", // TODO: AUTHOR
+                      extractor.getDocSummaryInformation().getCompany(), // publisher
                       null,
                       null,
                       contents.toString().getBytes("UTF-8"),

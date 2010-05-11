@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,6 +61,7 @@ public class Document {
     private final List<String> keywords;        // most resources provide a keyword field
     private       StringBuilder title;          // a document title, taken from title or h1 tag; shall appear as headline of search result
     private final StringBuilder creator;        // author or copyright
+    private final String publisher;             // publisher
     private final List<String>  sections;       // if present: more titles/headlines appearing in the document
     private final StringBuilder description;    // an abstract, if present: short content description
     private Object text;                        // the clear text, all that is visible
@@ -78,7 +80,7 @@ public class Document {
     private boolean indexingDenied;
     
     public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
-                    final String[] keywords, final String title, final String author,
+                    final String[] keywords, final String title, final String author, final String publisher,
                     final String[] sections, final String abstrct,
                     final Object text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images,
                     boolean indexingDenied) {
@@ -92,6 +94,7 @@ public class Document {
         this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
         this.anchors = (anchors == null) ? new HashMap<DigestURI, String>(0) : anchors;
         this.images =  (images == null) ? new HashMap<String, ImageEntry>() : images;
+        this.publisher = publisher;
         this.hyperlinks = null;
         this.audiolinks = null;
         this.videolinks = null;
@@ -193,8 +196,7 @@ dc_rights
     }
     
     public String dc_publisher() {
-        // if we don't have a publisher, simply return the host/domain name
-        return this.source.getHost();
+        return this.publisher;
     }
     
     public String dc_format() {
@@ -536,32 +538,39 @@ dc_rights
     public void writeXML(OutputStreamWriter os, Date date) throws IOException {
         os.write("<record>\n");
         String title = this.dc_title();
-        if (title != null && title.length() > 0) os.write("<dc:Title><![CDATA[" + this.dc_title() + "]]></dc:Title>\n");
-        os.write("<dc:Identifier>" + this.dc_identifier() + "</dc:Identifier>\n");
+        if (title != null && title.length() > 0) os.write("<dc:title><![CDATA[" + title + "]]></dc:title>\n");
+        os.write("<dc:identifier>" + this.dc_identifier() + "</dc:identifier>\n");
         String creator = this.dc_creator();
-        if (creator != null && creator.length() > 0) os.write("<dc:Creator><![CDATA[" + this.dc_creator() + "]]></dc:Creator>\n");
+        if (creator != null && creator.length() > 0) os.write("<dc:creator><![CDATA[" + creator + "]]></dc:creator>\n");
+        String publisher = this.dc_publisher();
+        if (publisher != null && publisher.length() > 0) os.write("<dc:publisher><![CDATA[" + publisher + "]]></dc:publisher>\n");
+        String subject = this.dc_subject(';');
+        if (subject != null && subject.length() > 0) os.write("<dc:subject><![CDATA[" + subject + "]]></dc:subject>\n");
         if (this.text != null) {
-            os.write("<dc:Description><![CDATA[");
+            os.write("<dc:description><![CDATA[");
             byte[] buffer = new byte[1000];
             int c = 0;
             InputStream is = this.getText();
             while ((c = is.read(buffer)) > 0) os.write(new String(buffer, 0, c));
             is.close();
-            os.write("]]></dc:Description>\n");
+            os.write("]]></dc:description>\n");
         }
         String language = this.dc_language();
-        if (language != null && language.length() > 0) os.write("<dc:Language>" + this.dc_language() + "</dc:Language>\n");
-        os.write("<dc:Date>" + DateFormatter.formatISO8601(date) + "</dc:Date>\n");
+        if (language != null && language.length() > 0) os.write("<dc:language>" + this.dc_language() + "</dc:language>\n");
+        os.write("<dc:date>" + DateFormatter.formatISO8601(date) + "</dc:date>\n");
         os.write("</record>\n");
     }
     
     public String toString() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        OutputStreamWriter osw = new OutputStreamWriter(baos);
+        OutputStreamWriter osw;
         try {
+            osw = new OutputStreamWriter(baos, "UTF-8");
             writeXML(osw, new Date());
             osw.close();
             return new String(baos.toByteArray(), "UTF-8");
+        } catch (UnsupportedEncodingException e1) {
+            return "";
         } catch (IOException e) {
             return "";
         }

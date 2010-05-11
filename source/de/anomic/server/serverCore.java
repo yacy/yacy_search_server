@@ -91,7 +91,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     public    static final byte[] CRLF = {CR, LF};
     public    static final String CRLF_STRING = new String(CRLF);
     public    static final String LF_STRING = new String(new byte[]{LF});
-    public    static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
+    public    static final Class<?>[] sessionCallType = {String.class, Session.class}; //  set up some reflection
     public    static final long startupTime = System.currentTimeMillis();
     static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
     static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
@@ -663,7 +663,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 boolean terminate = false;
                 String reqCmd;
                 String reqProtocol = "HTTP";
-                final Object[] stringParameter = new String[1];
                 long situationDependentKeepAliveTimeout = keepAliveTimeout;
                 while (this.in != null &&
                        this.controlSocket != null &&
@@ -682,15 +681,18 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         // of the commandObject
                         if (this.request.trim().length() == 0) this.request = "EMPTY";
                         
-                        // getting the rest of the request parameters
+                        final Object[] parameter = new Object[2];
+                        
+                        // get the rest of the request parameters
                         final int pos = this.request.indexOf(' ');
                         if (pos < 0) {
                             reqCmd = this.request.trim().toUpperCase();
-                            stringParameter[0] = "";
+                            parameter[0] = "";
                         } else {
                             reqCmd = this.request.substring(0, pos).trim().toUpperCase();
-                            stringParameter[0] = this.request.substring(pos).trim();
+                            parameter[0] = this.request.substring(pos).trim();
                         }
+                        parameter[1] = this;
                         
                         // now we need to initialize the session
                         if (this.commandCounter == 0) {
@@ -702,9 +704,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                             if (reqProtocol.equals("HTTP")) {
                                 this.commandObj = handlerPrototype.clone();
                             }
-                            
-                            // initializing the session
-                            this.commandObj.initSession(this); 
                         }
                         
                         // count the amount of requests that were processed by this session until yet
@@ -717,15 +716,15 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         Object commandMethod = commandObjMethodCache.get(reqProtocol + "_" + reqCmd);
                         if (commandMethod == null) {
                             try {
-                                commandMethod = this.commandObj.getClass().getMethod(reqCmd, stringType);
+                                commandMethod = this.commandObj.getClass().getMethod(reqCmd, sessionCallType);
                                 commandObjMethodCache.put(reqProtocol + "_" + reqCmd, commandMethod);
                             } catch (final NoSuchMethodException noMethod) {
-                                commandMethod = this.commandObj.getClass().getMethod("UNKNOWN", stringType);
-                                stringParameter[0] = this.request.trim();
+                                commandMethod = this.commandObj.getClass().getMethod("UNKNOWN", sessionCallType);
+                                parameter[0] = this.request.trim();
                             }
                         }
                         //long commandStart = System.currentTimeMillis();
-                        Object result = ((Method)commandMethod).invoke(this.commandObj, stringParameter);
+                        Object result = ((Method)commandMethod).invoke(this.commandObj, parameter);
                         //announceMoreExecTime(commandStart - System.currentTimeMillis()); // shall be negative!
                         //this.log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                         this.out.flush();

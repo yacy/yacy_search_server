@@ -146,6 +146,7 @@ public class xlsParser extends AbstractParser implements Idiom {
                         null,
                         location.getFile(),
                         "", // TODO: AUTHOR
+                        "", // TODO: publisher
                         null,
                         null,
                         contents.getBytes("UTF-8"),

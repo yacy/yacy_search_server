@@ -120,19 +120,20 @@ public class psParser extends AbstractParser implements Idiom {
             
             // return result
             final Document theDoc = new Document(
-                    location,
-                    mimeType,
-                    "UTF-8",
-                    null,
-                    null,
-                    null,
-                    "",
-                    null,
-                    null,
-                    outputFile,
-                    null,
-                    null,
-                    false);         
+                    location, // url
+                    mimeType, // mime
+                    "UTF-8",  // charset
+                    null,     // languages
+                    null,     // keywords
+                    null,     // title
+                    "",       // author
+                    "",       // publisher
+                    null,     // sections
+                    null,     // abstract
+                    outputFile, // fulltext
+                    null,     // anchors
+                    null,     // images
+                    false);   // indexingdenied
             
             return theDoc;
         } catch (final Exception e) {            

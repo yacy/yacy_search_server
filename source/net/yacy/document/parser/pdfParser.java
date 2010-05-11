@@ -123,11 +123,12 @@ public class pdfParser extends AbstractParser implements Idiom {
         
         // extracting some metadata
         final PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
-        String docTitle = null, docSubject = null, docAuthor = null, docKeywordStr = null;
+        String docTitle = null, docSubject = null, docAuthor = null, docPublisher = null, docKeywordStr = null;
         if (theDocInfo != null) {
             docTitle = theDocInfo.getTitle();
             docSubject = theDocInfo.getSubject();
             docAuthor = theDocInfo.getAuthor();
+            docPublisher = theDocInfo.getProducer();
             docKeywordStr = theDocInfo.getKeywords();
         }            
         
@@ -171,6 +172,7 @@ public class pdfParser extends AbstractParser implements Idiom {
                     docKeywords,
                     (docTitle == null) ? docSubject : docTitle,
                     docAuthor,
+                    docPublisher,
                     null,
                     null,
                     contentBytes,
@@ -186,6 +188,7 @@ public class pdfParser extends AbstractParser implements Idiom {
                     docKeywords,
                     (docTitle == null) ? docSubject : docTitle,
                     docAuthor,
+                    docPublisher,
                     null,
                     null,
                     writerFile,

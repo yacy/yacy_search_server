@@ -45,6 +45,7 @@ import net.yacy.repository.Blacklist;
 
 import de.anomic.data.WorkTables;
 import de.anomic.data.listManager;
+import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
@@ -525,7 +526,7 @@ public class Blacklist_p {
         }
 
         if (newEntry == null || newEntry.length() == 0) {
-            return header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse;
+            return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
         }
 
         addBlacklistEntry(listManager.listsPath, blacklistToUse, newEntry, supportedBlacklistTypes);
@@ -553,7 +554,7 @@ public class Blacklist_p {
         }
 
         if (oldEntry == null || oldEntry.length() == 0) {
-            return header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse;
+            return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
         }
 
         deleteBlacklistEntry(listManager.listsPath, blacklistToUse, oldEntry, supportedBlacklistTypes);

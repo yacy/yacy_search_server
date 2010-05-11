@@ -137,7 +137,9 @@ public class yacysearchitem {
             prop.putHTML("content_file", result.url().getFile());
             prop.putHTML("content_path", result.url().getPath());
             prop.put("content_nl", (item == 0) ? 0 : 1);
-            
+            prop.putHTML("content_publisher", result.publisher());
+            prop.putHTML("content_creator", result.creator());// author
+            prop.putHTML("content_subject", result.subject());
             final TreeSet<String>[] query = theQuery.queryWords();
             try {
                 prop.putHTML("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));

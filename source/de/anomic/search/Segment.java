@@ -241,7 +241,7 @@ public class Segment {
     public URIMetadataRow storeDocument(
             final DigestURI url,
             final DigestURI referrerURL,
-            final Date modDate,
+            Date modDate,
             final Date loadDate,
             final long sourcesize,
             final Document document,
@@ -296,13 +296,13 @@ public class Segment {
         }
         
         // create a new loaded URL db entry
-        assert modDate.getTime() <= loadDate.getTime() : "modDate = " + modDate + ", loadDate = " + loadDate;
+        if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         final URIMetadataRow newEntry = new URIMetadataRow(
                 url,                                       // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author
                 document.dc_subject(' '),                  // tags
-                "",                                        // ETag
+                document.dc_publisher(),                   // publisher (may be important to get location data)
                 modDate,                                   // modification date
                 loadDate,                                  // loaded date
                 new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 

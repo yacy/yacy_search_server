@@ -27,7 +27,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Properties;
 
 public final class ByteBuffer extends OutputStream {
@@ -510,6 +512,32 @@ public final class ByteBuffer extends OutputStream {
             if (equals(v, key)) return true;
         }
         return false;
+    }
+    
+    public static List<byte[]> split(byte[] b, byte s) {
+        ArrayList<byte[]> a = new ArrayList<byte[]>();
+        int c = 0;
+        loop: while (c < b.length) {
+            int i = c;
+            search: while (i < b.length) {
+                if (b[i] == s) break search;
+                i++;
+            }
+            if (i >= b.length) {
+                // nothing found; this is the end of the search
+                byte[] bb = new byte[b.length - c];
+                System.arraycopy(b, c, bb, 0, bb.length);
+                a.add(bb);
+                break loop;
+            } else {
+                // found a separator
+                byte[] bb = new byte[i - c];
+                System.arraycopy(b, c, bb, 0, bb.length);
+                a.add(bb);
+                c = i + 1;
+            }
+        }
+        return a;
     }
         
 }

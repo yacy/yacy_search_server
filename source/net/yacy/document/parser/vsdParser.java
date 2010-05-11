@@ -128,6 +128,7 @@ public class vsdParser extends AbstractParser implements Idiom {
                     keywords,
                     title,
                     author,
+                    "",
                     null,         // an array of section headlines
                     abstrct,      // an abstract
                     contents.getBytes("UTF-8"),     // the parsed document text

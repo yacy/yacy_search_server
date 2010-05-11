@@ -30,30 +30,57 @@ package net.yacy.document.content;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class RSSMessage {
 
     // statics for item generation and automatic categorization
     private static int guidcount = 0;
-    private static final String[] tagsDef = new String[] {
-        "author",      //
-        "copyright",   //
-        "category",    //
-        "title",       //
-        "link",        //
-        "referrer",    //
-        "language",    //
-        "description", //
-        "creator",     //
-        "pubDate",     //
-        "guid",        //
-        "docs"         //
-    };
 
+    public static enum Token {
+
+        title("title"),
+        link("link"),
+        description("description"),
+        pubDate("pubDate"),
+        copyright("copyright,dc:publisher,publisher"),
+        author("author,dc:creator,creator"),
+        subject("subject,dc:subject"),
+        category("category"),
+        referrer("referrer,referer"),
+        language("language"),
+        guid("guid"),
+        docs("docs");
+        
+        private Set<String> keys;
+        
+        private Token(String keylist) {
+            String[] k = keylist.split(",");
+            this.keys = new HashSet<String>();
+            for (String s: k) this.keys.add(s);
+        }
+        
+        public String valueFrom(Map<String, String> map) {
+            String value;
+            for (String key: this.keys) {
+                value = map.get(key);
+                if (value != null) return value;
+            }
+            return "";
+        }
+        
+        public Set<String> keys() {
+            return this.keys;
+        }
+    }
+    
+    public static final RSSMessage POISON = new RSSMessage("", "", "");
+    
     public static final HashSet<String> tags = new HashSet<String>();
     static {
-        for (int i = 0; i < tagsDef.length; i++) {
-            tags.add(tagsDef[i]);
+        for (Token token: Token.values()) {
+            tags.addAll(token.keys());
         }
     }
     
@@ -77,72 +104,61 @@ public class RSSMessage {
         map.put(name, value);
     }
     
-    public String getAuthor() {
-        final String s =  map.get("author");
-        return emptyStringOnNull(s);
-    }
-    
-    public String getCopyright() {
-        final String s =  map.get("copyright");
-        return emptyStringOnNull(s);
-    }
-    
-    public String getCategory() {
-        final String s = map.get("category");
-        return emptyStringOnNull(s);
-    }
-    
     public String getTitle() {
-        final String s = map.get("title");
-        return emptyStringOnNull(s);
+        return Token.title.valueFrom(this.map);
     }
     
     public String getLink() {
-        final String s =  map.get("link");
-        return emptyStringOnNull(s);
-    }
-    
-    public String getReferrer() {
-        final String s = map.get("referrer");
-        return emptyStringOnNull(s);
-    }
-    
-    public String getLanguage() {
-        final String s =  map.get("language");
-        return emptyStringOnNull(s);
+        return Token.link.valueFrom(this.map);
     }
     
     public String getDescription() {
-        final String s =  map.get("description");
-        return emptyStringOnNull(s);
+        return Token.description.valueFrom(this.map);
     }
     
-    public String getCreator() {
-        final String s =  map.get("creator");
-        return emptyStringOnNull(s);
+    public String getAuthor() {
+        return Token.author.valueFrom(this.map);
+    }
+    
+    public String getCopyright() {
+        return Token.copyright.valueFrom(this.map);
+    }
+    
+    public String getCategory() {
+        return Token.category.valueFrom(this.map);
+    }
+    
+    public String[] getSubject() {
+        String subject = Token.subject.valueFrom(this.map);
+        if (subject.indexOf(',') >= 0) return subject.split(",");
+        if (subject.indexOf(';') >= 0) return subject.split(";");
+        if (subject.indexOf('|') >= 0) return subject.split("|");
+        return subject.split(" ");
+    }
+    
+    public String getReferrer() {
+        return Token.referrer.valueFrom(this.map);
+    }
+    
+    public String getLanguage() {
+        return Token.language.valueFrom(this.map);
     }
     
     public String getPubDate() {
-        final String s =  map.get("pubDate");
-        return emptyStringOnNull(s);
+        return Token.pubDate.valueFrom(this.map);
     }
     
     public String getGuid() {
-        final String s =  map.get("guid");
-        return emptyStringOnNull(s);
+        return Token.guid.valueFrom(this.map);
     }
     
     public String getDocs() {
-        final String s =  map.get("docs");
-        return emptyStringOnNull(s);
+        return Token.docs.valueFrom(this.map);
     }
-
-    /**
-     * @param s
-     * @return
-     */
-    private String emptyStringOnNull(final String s) {
-        if (s == null) return "";
-        return s;
+    
+    public String getFulltext() {
+        StringBuilder sb = new StringBuilder(300);
+        for (String s: map.values()) sb.append(s).append(" ");
+        return sb.toString();
     }
 }

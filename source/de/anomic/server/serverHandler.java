@@ -63,20 +63,10 @@ package de.anomic.server;
 
 import java.io.IOException;
 
+import de.anomic.server.serverCore.Session;
+
 
 public interface serverHandler {
-
-    // init method for static variables of the handler
-    // this method shall be called only once
-    // information that is passed here is cloned for every new instance
-    //public void initHandler(serverSwitch switchboard) throws java.io.IOException;
-    
-    // an init method that the server calls to provide hooks and
-    // information to the session's sockets and information
-    // the Switchboard allowes to trigger events through all sessions
-    // and an supervision process.
-    // this method shall be called only once
-    public void initSession(serverCore.Session session) throws java.io.IOException;
 
     // a response line upon connection is send to client
     // if no response line is wanted, return "" or null
@@ -103,12 +93,12 @@ public interface serverHandler {
      * if the whole request line is empty and therefore no function of this
      * serverHandlerClass can be called because of the missing command name
      */
-    public Boolean EMPTY(String arg) throws IOException;
+    public Boolean EMPTY(String arg, Session session) throws IOException;
     
     /** 
      * This function will be called by the {@link serverCore}.listen() function
      * if no corresponding funktion of the serverHandler class can be
      * found for the received command.
      */
-    public Boolean UNKNOWN(String requestLine) throws IOException;    
+    public Boolean UNKNOWN(String requestLine, Session session) throws IOException;    
 }

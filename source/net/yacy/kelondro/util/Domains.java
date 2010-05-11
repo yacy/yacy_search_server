@@ -612,5 +612,4 @@ public class Domains {
         // the address must be a global address
         return false;
     }
-    
 }

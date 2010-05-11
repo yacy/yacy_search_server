@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.text.SimpleDateFormat;
 
+import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;
 import de.anomic.search.QueryParams;
@@ -64,7 +65,7 @@ public class AccessTracker_p {
      
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        prop.setLocalized(!(header.get("PATH")).endsWith(".xml"));
+        prop.setLocalized(!(header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml"));
         int page = 0;
         if (post != null) page = post.getInt("page", 0);
         prop.put("page", page);
