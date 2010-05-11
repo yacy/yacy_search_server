@@ -3,14 +3,12 @@
 <Document>
   #{placemark}#
   <Placemark>
-    <name>#[name]#</name>
+    <name><![CDATA[#[name]#]]></name>
     <description><![CDATA[<p>Location: #[location]#</p><p>Author: #[author]#</p><p>Publisher: #[copyright]#</p><p>Subject: #[subject]#</p><p>Abstract: #[description]#</p><p>Source: <a href="#[url]#">#[url]#</a></p>]]></description>
-    #{point}#
     <Point>
-      <name>#[name]#</name>
+      <name>#[pointname]#</name>
       <coordinates>#[lon]#,#[lat]#</coordinates>
     </Point>
-    #{/point}#
     <TimeStamp>
       <when>#[date]#</when>
     </TimeStamp>

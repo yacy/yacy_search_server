@@ -580,9 +580,9 @@ public class yacysearch {
             try {
                 synchronized (trackerHandles) {
                 	trackerHandles.add(theQuery.handle);
-                	if (trackerHandles.size() > 1000) trackerHandles.remove(trackerHandles.first());
-                	sb.localSearchTracker.put(client, trackerHandles);
+                	while (trackerHandles.size() > 600) if (!trackerHandles.remove(trackerHandles.first())) break;
                 }
+                sb.localSearchTracker.put(client, trackerHandles);
             	if (sb.localSearchTracker.size() > 1000) sb.localSearchTracker.remove(sb.localSearchTracker.keys().nextElement());
             } catch (Exception e) {
                 Log.logException(e);
@@ -691,11 +691,11 @@ public class yacysearch {
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
         prop.put("searchdomswitches_searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
         prop.put("searchdomswitches_searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
-        prop.put("searchtext_check", (contentdom == ContentDomain.TEXT) ? "1" : "0");
-        prop.put("searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
-        prop.put("searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
-        prop.put("searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
-        prop.put("searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
+        prop.put("searchdomswitches_searchtext_check", (contentdom == ContentDomain.TEXT) ? "1" : "0");
+        prop.put("searchdomswitches_searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
+        prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
+        prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
+        prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
         
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);

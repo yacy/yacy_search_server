@@ -126,12 +126,12 @@ public class index {
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
         prop.put("searchdomswitches_searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
         prop.put("searchdomswitches_searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
+        prop.put("searchdomswitches_searchtext_check", (contentdom == ContentDomain.TEXT) ? "1" : "0");
+        prop.put("searchdomswitches_searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
+        prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
+        prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
+        prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
         prop.put("searchoptions_display", display);
-        prop.put("searchtext_check", (contentdom == ContentDomain.TEXT) ? "1" : "0");
-        prop.put("searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
-        prop.put("searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
-        prop.put("searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
-        prop.put("searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
         // online caution timing
         sb.localSearchLastAccess = System.currentTimeMillis();
         

@@ -62,11 +62,12 @@ public class yacysearch_location {
                     for (String s: message.getSubject()) subject += " " + s;
                     words += subject;
                     for (String word: words.split(" ")) if (word.length() >= 3) locations.addAll(LibraryProvider.geoDB.find(word, true, true, false, false, false));
+
+                    String locnames = "";
+                    for (Location location: locations) locnames += ", " + location.getName();
+                    if (locations.size() > 0) locnames = locnames.substring(2);
                     
-                    if (locations.size() > 0) {
-                        String locnames = "";
-                        for (Location location: locations) locnames += ", " + location.getName();
-                        locnames = locnames.substring(2);
+                    for (Location location: locations) {
                         // write for all locations a point to this message
                         prop.put("kml_placemark_" + placemarkCounter + "_location", locnames);
                         prop.put("kml_placemark_" + placemarkCounter + "_name", message.getTitle());
@@ -76,14 +77,9 @@ public class yacysearch_location {
                         prop.put("kml_placemark_" + placemarkCounter + "_description", message.getDescription());
                         prop.put("kml_placemark_" + placemarkCounter + "_date", message.getPubDate());
                         prop.put("kml_placemark_" + placemarkCounter + "_url", message.getLink());
-                        int pc = 0;
-                        for (Location location: locations) {
-                            prop.put("kml_placemark_" + placemarkCounter + "_point_" + pc + "_name", location.getName());
-                            prop.put("kml_placemark_" + placemarkCounter + "_point_" + pc + "_lon", location.lon());
-                            prop.put("kml_placemark_" + placemarkCounter + "_point_" + pc + "_lat", location.lat());
-                            pc++;
-                        }
-                        prop.put("kml_placemark_" + placemarkCounter + "_point", pc);
+                        prop.put("kml_placemark_" + placemarkCounter + "_pointname", location.getName());
+                        prop.put("kml_placemark_" + placemarkCounter + "_lon", location.lon());
+                        prop.put("kml_placemark_" + placemarkCounter + "_lat", location.lat());
                         placemarkCounter++;
                         if (placemarkCounter >= maximumRecords) break loop;
                     }
