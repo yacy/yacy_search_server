@@ -219,7 +219,7 @@ public class yacysearch {
         }
         
         // find search domain
-        final ContentDomain contentdom = ContentDomain.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
+        final ContentDomain contentdom = ContentDomain.contentdomParser(post == null ? "text" : post.get("contentdom", "text"));
         
         // patch until better search profiles are available
         if ((contentdom != ContentDomain.TEXT) && (itemsPerPage <= 32)) itemsPerPage = 64;
@@ -229,12 +229,12 @@ public class yacysearch {
         if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
         boolean block = false;
         if (Domains.matchesList(client, sb.networkBlacklist)) {
-        	global = false;
+            global = false;
             fetchSnippets = false;
             block = true;
             Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
         } else if (Domains.matchesList(client, sb.networkWhitelist)) {
-        	Log.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
+            Log.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
         } else if (global || fetchSnippets) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized (trackerHandles) {
@@ -674,7 +674,6 @@ public class yacysearch {
         
         prop.put("searchagain", global ? "1" : "0");
         prop.put("display", display);
-        prop.put("display", display);
         prop.putHTML("former", originalquerystring);
         prop.put("count", itemsPerPage);
         prop.put("offset", offset);
@@ -696,7 +695,18 @@ public class yacysearch {
         prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
         prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
         prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
-        
+
+        // copy properties for "more options" link
+        prop.put("searchdomswitches_display", prop.get("display"));
+        prop.put("searchdomswitches_count", prop.get("count"));
+        prop.put("searchdomswitches_urlmaskfilter", prop.get("urlmaskfilter"));
+        prop.put("searchdomswitches_prefermaskfilter", prop.get("prefermaskfilter"));
+        prop.put("searchdomswitches_cat", prop.get("cat"));
+        prop.put("searchdomswitches_constraint", prop.get("constraint"));
+        prop.put("searchdomswitches_contentdom", prop.get("contentdom"));
+        prop.put("searchdomswitches_former", prop.get("former"));
+        prop.put("searchdomswitches_meanCount", prop.get("meanCount"));
+
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);
         prop.put("rss_queryenc", originalquerystring.replace(' ', '+'));
