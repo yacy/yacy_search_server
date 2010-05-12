@@ -29,6 +29,7 @@ eps     = application/postscript
 exe     = application/octet-stream
 gif     = image/gif
 gz      = application/gzip
+gpx     = text/xml
 hqx     = application/mac-binhex40
 htm     = text/html
 html    = text/html

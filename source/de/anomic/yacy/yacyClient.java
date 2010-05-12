@@ -460,26 +460,24 @@ public final class yacyClient {
 
         public void run() {
             RSSMessage message;
-            while (timeout > 0 && maximumRecords > 0) {
+            mainloop: while (timeout > 0 && maximumRecords > 0) {
                 long st = System.currentTimeMillis();
                 RSSFeed feed = search(urlBase, query, verify, global, timeout, startRecord, recordsPerSession);
-                if (feed == null || feed.isEmpty()) {
-                    try { queue.put(RSSMessage.POISON); } catch (InterruptedException e) {}
-                    return;
-                }
+                if (feed == null || feed.isEmpty()) break mainloop;
                 maximumRecords -= feed.size();
-                loop: while (!feed.isEmpty()) {
+                innerloop: while (!feed.isEmpty()) {
                     message = feed.pollMessage();
-                    if (message == null) break loop;
+                    if (message == null) break innerloop;
                     try {
                         queue.put(message);
                     } catch (InterruptedException e) {
-                        break loop;
+                        break innerloop;
                     }
                 }
                 startRecord += recordsPerSession;
                 timeout -= System.currentTimeMillis() - st;
             }
+            try { queue.put(RSSMessage.POISON); } catch (InterruptedException e) {}
         }
     }
     

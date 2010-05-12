@@ -20,6 +20,7 @@
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import net.yacy.document.content.RSSMessage;
 import net.yacy.document.geolocalization.Location;
@@ -54,7 +55,7 @@ public class yacysearch_location {
             RSSMessage message;
             int placemarkCounter = 0;
             try {
-                loop: while ((message = results.take()) != RSSMessage.POISON) {
+                loop: while ((message = results.poll(maximumTime, TimeUnit.MILLISECONDS)) != RSSMessage.POISON) {
                     // find all associated locations
                     Set<Location> locations = new HashSet<Location>();
                     String words = message.getTitle() + " " + message.getCopyright() + " " + message.getAuthor();
