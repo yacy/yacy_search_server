@@ -917,7 +917,7 @@ public final class yacy {
             final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 final File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
+                final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null);
                 
                 MapDataMining.mapIterator it;
                 it = db.maps(true, false);

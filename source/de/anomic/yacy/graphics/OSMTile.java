@@ -80,12 +80,7 @@ public class OSMTile {
             return null;
         }
         //System.out.println("*** DEBUG: fetching OSM tile: " + tileURL.toNormalform(true, true));
-        byte[] tileb = null;
-        try {
-            tileb = Cache.getContent(tileURL);
-        } catch (IOException e1) {
-            Log.logException(e1);
-        }
+        byte[] tileb = Cache.getContent(tileURL);
         if (tileb == null) {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;

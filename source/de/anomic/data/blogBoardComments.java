@@ -111,7 +111,7 @@ public class blogBoardComments {
     public String write(final CommentEntry page) {
         // writes a new page and returns key
     	try {
-    	    database.put(page.key, page.record);
+    	    database.put(page.key.getBytes(), page.record);
     	    return page.key;
     	} catch (final Exception e) {
     	    Log.logException(e);
@@ -128,7 +128,7 @@ public class blogBoardComments {
         copyOfKey = copyOfKey.substring(0, Math.min(copyOfKey.length(), KEY_LENGTH));
         Map<String, String> record;
         try {
-            record = base.get(copyOfKey);
+            record = base.get(copyOfKey.getBytes());
         } catch (final IOException e) {
             record = null;
         }
@@ -226,7 +226,7 @@ public class blogBoardComments {
 
     public void delete(final String key) {
     	try {
-            database.remove(normalize(key));
+            database.remove(normalize(key).getBytes());
         }
         catch (final IOException e) { }
     }

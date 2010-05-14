@@ -516,13 +516,13 @@ public final class Heap extends HeapModifier implements BLOB {
         try {
             //f.delete();
             final MapHeap heap = new MapHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512, 500, '_');
-            heap.put("aaaaaaaaaaaa", map("aaaaaaaaaaaa", "eins zwei drei"));
-            heap.put("aaaaaaaaaaab", map("aaaaaaaaaaab", "vier fuenf sechs"));
-            heap.put("aaaaaaaaaaac", map("aaaaaaaaaaac", "sieben acht neun"));
-            heap.put("aaaaaaaaaaad", map("aaaaaaaaaaad", "zehn elf zwoelf"));
-            heap.remove("aaaaaaaaaaab");
-            heap.remove("aaaaaaaaaaac");
-            heap.put("aaaaaaaaaaaX", map("aaaaaaaaaaad", "WXYZ"));
+            heap.put("aaaaaaaaaaaa".getBytes(), map("aaaaaaaaaaaa", "eins zwei drei"));
+            heap.put("aaaaaaaaaaab".getBytes(), map("aaaaaaaaaaab", "vier fuenf sechs"));
+            heap.put("aaaaaaaaaaac".getBytes(), map("aaaaaaaaaaac", "sieben acht neun"));
+            heap.put("aaaaaaaaaaad".getBytes(), map("aaaaaaaaaaad", "zehn elf zwoelf"));
+            heap.remove("aaaaaaaaaaab".getBytes());
+            heap.remove("aaaaaaaaaaac".getBytes());
+            heap.put("aaaaaaaaaaaX".getBytes(), map("aaaaaaaaaaad", "WXYZ"));
             heap.close();
         } catch (final IOException e) {
             Log.logException(e);

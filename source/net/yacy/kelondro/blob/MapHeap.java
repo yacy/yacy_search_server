@@ -128,21 +128,20 @@ public class MapHeap {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public void put(String key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
+    public void put(byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
         assert key != null;
-        assert key.length() > 0;
+        assert key.length > 0;
         assert newMap != null;
         key = normalizeKey(key);
-        byte[] keyb = key.getBytes();
         String s = map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ");
         assert s != null;
         byte[] sb = s.getBytes();
         synchronized (this) {
             // write entry
-        	if (blob != null) blob.put(keyb, sb);
+        	if (blob != null) blob.put(key, sb);
     
             // write map to cache
-            if (cache != null) cache.put(key, newMap);
+            if (cache != null) cache.put(new String(key), newMap);
         }
     }
 
@@ -164,26 +163,6 @@ public class MapHeap {
             blob.remove(key);
         }
     }
-
-    /**
-     * remove a Map
-     * @param key  the primary key
-     * @throws IOException
-     */
-    public void remove(String key) throws IOException {
-        // update elementCount
-        if (key == null) return;
-        key = normalizeKey(key);
-        byte[] keyb = key.getBytes();
-        
-        synchronized (this) {
-            // remove from cache
-            cache.remove(key);
-    
-            // remove from file
-            blob.remove(keyb);
-        }
-    }
     
     /**
      * check if a specific key is in the database
@@ -191,17 +170,6 @@ public class MapHeap {
      * @return
      * @throws IOException
      */
-    public boolean has(String key) throws IOException {
-        assert key != null;
-        if (cache == null) return false; // case may appear during shutdown
-        key = normalizeKey(key);
-        byte[] keyb = key.getBytes();
-        boolean h;
-        synchronized (this) {
-            h = this.cache.containsKey(key) || this.blob.has(keyb);
-        }
-        return h;
-    }
     
     public boolean has(byte[] key) {
         assert key != null;
@@ -220,24 +188,9 @@ public class MapHeap {
      * @return
      * @throws IOException
      */
-    public Map<String, String> get(final String key) throws IOException {
+    public Map<String, String> get(final byte[] key) throws IOException {
         if (key == null) return null;
         return get(key, true);
-    }
-    
-    private String normalizeKey(String key) {
-        if (blob == null || key == null) return key;
-        if (key.length() > blob.keylength()) {
-            return key.substring(0, blob.keylength());
-        }
-        if (key.length() < blob.keylength()) {
-            byte[] k = key.getBytes();
-            byte[] b = new byte[blob.keylength()];
-            System.arraycopy(k, 0, b, 0, k.length);
-            for (int i = k.length; i < b.length; i++) b[i] = (byte) fillchar;
-            return new String(b);
-        }
-        return key;
     }
 
     private byte[] normalizeKey(byte[] key) {
@@ -256,21 +209,21 @@ public class MapHeap {
         return key;
     }
 
-    protected Map<String, String> get(String key, final boolean storeCache) throws IOException {
+    protected Map<String, String> get(byte[] key, final boolean storeCache) throws IOException {
         // load map from cache
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
         key = normalizeKey(key);
-        byte[] keyb = key.getBytes();
         
         Map<String, String> map;
         if (storeCache) {
             synchronized (this) {
-                map = cache.get(key);
+                String keys = new String(key);
+                map = cache.get(keys);
                 if (map != null) return map;
     
                 // read object
-                final byte[] b = blob.get(keyb);
+                final byte[] b = blob.get(key);
                 if (b == null) return null;
                 try {
                     map = bytes2map(b);
@@ -279,7 +232,7 @@ public class MapHeap {
                 }
         
                 // write map to cache
-                cache.put(key, map);
+                cache.put(keys, map);
             }
             
             // return value
@@ -287,9 +240,9 @@ public class MapHeap {
         } else {
             byte[] b;
             synchronized (this) {
-                map = cache.get(key);
+                map = cache.get(new String(key));
                 if (map != null) return map;
-                b = blob.get(keyb);
+                b = blob.get(key);
             }
             if (b == null) return null;
             try {
@@ -390,7 +343,7 @@ public class MapHeap {
                 return null;
             }
             try {
-                final Map<String, String> obj = get(new String(nextKey));
+                final Map<String, String> obj = get(nextKey);
                 if (obj == null) throw new kelondroException("no more elements available");
                 return obj;
             } catch (final IOException e) {
@@ -413,9 +366,9 @@ public class MapHeap {
             MapHeap map = new MapHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024, 1024, '_');
             // put some values into the map
             Map<String, String> m = new HashMap<String, String>();
-            m.put("k", "000"); map.put("123", m);
-            m.put("k", "111"); map.put("456", m);
-            m.put("k", "222"); map.put("789", m);
+            m.put("k", "000"); map.put("123".getBytes(), m);
+            m.put("k", "111"); map.put("456".getBytes(), m);
+            m.put("k", "222"); map.put("789".getBytes(), m);
             // iterate over keys
             Iterator<byte[]> i = map.keys(true, false);
             while (i.hasNext()) {

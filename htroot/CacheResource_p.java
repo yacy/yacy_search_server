@@ -22,8 +22,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
-import java.io.IOException;
 import java.net.MalformedURLException;
 
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -52,13 +50,7 @@ public class CacheResource_p {
         }
         
         byte[] resource = null;
-        // trying to load the resource body
-        try {
-            resource = Cache.getContent(url);
-        } catch (IOException e) {
-            Log.logException(e);
-            return prop;
-        }
+        resource = Cache.getContent(url);
         if (resource == null) return prop;
         //ResponseHeader responseHeader = Cache.getResponseHeader(url);
         //String resMime = responseHeader.mime();

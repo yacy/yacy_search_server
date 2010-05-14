@@ -59,7 +59,7 @@ public final class Cache {
     private static Compressor fileDB = null;
     private static ArrayStack fileDBunbuffered = null;
     
-    private static long maxCacheSize = 0l;
+    private static long maxCacheSize = Long.MAX_VALUE;
     private static File cachePath = null;
     private static String prefix;
     public static final Log log = new Log("HTCACHE");
@@ -111,13 +111,14 @@ public final class Cache {
     public static void store(final DigestURI url, final ResponseHeader responseHeader, final byte[] file) throws IOException {
         if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
         if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");
+        log.logInfo("storing content of url " + url.toString() + ", " + file.length + " bytes");
         
         // store the response header into the header database
         final HashMap<String, String> hm = new HashMap<String, String>();
         hm.putAll(responseHeader);
         hm.put("@@URL", url.toNormalform(true, false));
         try {
-            responseHeaderDB.put(new String(url.hash()), hm);
+            responseHeaderDB.put(url.hash(), hm);
         } catch (Exception e) {
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
@@ -140,20 +141,17 @@ public final class Cache {
      */
     public static boolean has(final DigestURI url) {
         boolean headerExists;
-        try {
-            headerExists = responseHeaderDB.has(new String(url.hash()));
-        } catch (IOException e1) {
-            try {
-                fileDB.remove(url.hash());
-            } catch (IOException e) {}
-            return false;
-        }
+        headerExists = responseHeaderDB.has(url.hash());
         boolean fileExists = fileDB.has(url.hash());
         if (headerExists && fileExists) return true;
+        if (!headerExists && !fileExists) return false;
+        // if not both is there then we do a clean-up
         if (headerExists) try {
-            responseHeaderDB.remove(new String(url.hash()));
+            log.logWarning("header but not content of url " + url.toString() + " in cache; cleaned up");
+            responseHeaderDB.remove(url.hash());
         } catch (IOException e) {}
         if (fileExists) try {
+            log.logWarning("content but not header of url " + url.toString() + " in cache; cleaned up");
             fileDB.remove(url.hash());
         } catch (IOException e) {}
         return false;
@@ -173,8 +171,9 @@ public final class Cache {
         // loading data from database
         Map<String, String> hdb;
         try {
-            hdb = responseHeaderDB.get(new String(url.hash()));
+            hdb = responseHeaderDB.get(url.hash());
         } catch (final IOException e) {
+            Log.logException(e);
             return null;
         }
         if (hdb == null) return null;
@@ -191,16 +190,21 @@ public final class Cache {
      * is returned.
      * @throws IOException 
      */
-    public static byte[] getContent(final DigestURI url) throws IOException {
+    public static byte[] getContent(final DigestURI url) {
         // load the url as resource from the cache
         try {
-            return fileDB.get(url.hash());
+            byte[] b = fileDB.get(url.hash());
+            if (b == null) return null;
+            log.logInfo("cache hit for url " + url.toString() + ", " + b.length + " bytes");
+            return b;
         } catch (UnsupportedEncodingException e) {
+            Log.logException(e);
+            return null;
+        } catch (IOException e) {
             Log.logException(e);
             return null;
         }
     }
-    
     
     /**
      * removed response header and cached content from the database
@@ -208,7 +212,7 @@ public final class Cache {
      * @throws IOException
      */
     public static void delete(final DigestURI url) throws IOException {
-        responseHeaderDB.remove(new String(url.hash()));
+        responseHeaderDB.remove(url.hash());
         fileDB.remove(url.hash());
     }
 }

@@ -265,9 +265,9 @@ public class wikiBoard {
             //System.out.println("key = " + page.key);
             //System.out.println("oldDate = " + oldDate);
             //System.out.println("record = " + oldEntry.record.toString());
-            bkpbase.put(page.key + dateString(oldDate), oldEntry.record);
+            bkpbase.put((page.key + dateString(oldDate)).getBytes(), oldEntry.record);
             // write the new page
-            datbase.put(page.key, page.record);
+            datbase.put(page.key.getBytes(), page.record);
             return page.key;
         } catch (final Exception e) {
             Log.logException(e);
@@ -283,7 +283,7 @@ public class wikiBoard {
         try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);
-            final Map<String, String> record = base.get(key);
+            final Map<String, String> record = base.get(key.getBytes());
             if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
             return new entry(key, record);
         } catch (final IOException e) {

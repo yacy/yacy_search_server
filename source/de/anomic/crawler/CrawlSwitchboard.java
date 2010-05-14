@@ -188,7 +188,7 @@ public final class CrawlSwitchboard {
         if (this.defaultMediaSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
             defaultMediaSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_BAD_URL, 0,
-                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, false, false, false, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
+                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, false, true, false, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
         }
         if (this.defaultMediaSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling

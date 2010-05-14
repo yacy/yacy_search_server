@@ -29,14 +29,11 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.ScoreCluster;
@@ -61,7 +58,6 @@ public class MapDataMining extends MapHeap {
             final String[] sortfields,
             final String[] longaccfields,
             final String[] doubleaccfields,
-            final Method externalInitializer,
             final Object externalHandler) throws IOException {
         super(heapFile, keylength, ordering, buffermax, cachesize, '_');
         
@@ -103,19 +99,19 @@ public class MapDataMining extends MapHeap {
         // fill cluster and accumulator with values
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
             final CloneableIterator<byte[]> it = super.keys(true, false);
-            String mapname;
+            byte[] mapnameb;
             String cell;
             long valuel;
             double valued;
             Map<String, String> map;
             while (it.hasNext()) {
-                mapname = new String(it.next());
-                map = super.get(mapname);
+                mapnameb = it.next();
+                map = super.get(mapnameb);
                 if (map == null) break;
                 
                 if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) {
                     cell = map.get(sortfields[i]);
-                    if (cell != null) cluster[i].setScore(mapname, ScoreCluster.object2score(cell));
+                    if (cell != null) cluster[i].setScore(new String(mapnameb), ScoreCluster.object2score(cell));
                 }
 
                 if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) {
@@ -134,18 +130,6 @@ public class MapDataMining extends MapHeap {
                         valued = Double.parseDouble(cell);
                         doubleaccumulator[i] = new Double(doubleaccumulator[i].doubleValue() + valued);
                     } catch (final NumberFormatException e) {}
-                }
-                
-                if ((externalHandler != null) && (externalInitializer != null)) {
-                    try {
-                        externalInitializer.invoke(externalHandler, new Object[]{mapname, map});
-                    } catch (final IllegalArgumentException e) {
-                        Log.logException(e);
-                    } catch (final IllegalAccessException e) {
-                        Log.logException(e);
-                    } catch (final InvocationTargetException e) {
-                        Log.logException(e);
-                    }
                 }
             }
         } catch (final IOException e) {}
@@ -187,9 +171,9 @@ public class MapDataMining extends MapHeap {
     }
     
     @Override
-    public synchronized void put(final String key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
+    public synchronized void put(final byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
         assert (key != null);
-        assert (key.length() > 0);
+        assert (key.length > 0);
         assert (newMap != null);
 
         // update elementCount
@@ -207,7 +191,7 @@ public class MapDataMining extends MapHeap {
         super.put(key, newMap);
         
         // update sortCluster
-        if (sortClusterMap != null) updateSortCluster(key, newMap);
+        if (sortClusterMap != null) updateSortCluster(new String(key), newMap);
     }
     
     private void updateAcc(final Map<String, String> map, final boolean add) {
@@ -260,7 +244,7 @@ public class MapDataMining extends MapHeap {
     }
 
     @Override
-    public synchronized void remove(final String key) throws IOException {
+    public synchronized void remove(final byte[] key) throws IOException {
         if (key == null) return;
         
         // update elementCount
@@ -272,7 +256,7 @@ public class MapDataMining extends MapHeap {
                 if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(map, false);
 
                 // remove from sortCluster
-                if (sortfields != null) deleteSortCluster(key);
+                if (sortfields != null) deleteSortCluster(new String(key));
             }
         }
         super.remove(key);
@@ -390,10 +374,10 @@ public class MapDataMining extends MapHeap {
         
         private Map<String, String> next0() {
             if (keyIterator == null) return null;
-            String nextKey;
+            byte[] nextKey;
             Map<String, String> map;
             while (keyIterator.hasNext()) {
-                nextKey = new String(keyIterator.next());
+                nextKey = keyIterator.next();
                 try {
                     map = get(nextKey);
                 } catch (final IOException e) {
@@ -401,7 +385,7 @@ public class MapDataMining extends MapHeap {
                 }
                 assert map != null;
                 if (map == null) continue; // circumvention of a modified exception
-                map.put("key", nextKey);
+                map.put("key", new String(nextKey));
                 return map;
             }
             return null;

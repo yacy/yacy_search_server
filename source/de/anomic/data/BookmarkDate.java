@@ -54,7 +54,7 @@ public class BookmarkDate {
     public Entry getDate(final String date) {
         Map<String, String> map;
         try {
-            map = datesTable.get(date);
+            map = datesTable.get(date.getBytes());
         } catch (final IOException e) {
             map = null;
         }
@@ -141,13 +141,13 @@ public class BookmarkDate {
         public void setDatesTable() {
             if (this.size() >0) {
                 try {
-                    datesTable.put(getDateString(), mem);
+                    datesTable.put(getDateString().getBytes(), mem);
                 } catch (Exception e) {
                     Log.logException(e);
                 }
             } else {
                 try {
-                    datesTable.remove(getDateString());
+                    datesTable.remove(getDateString().getBytes());
                 } catch (IOException e) {
                     Log.logException(e);
                 }

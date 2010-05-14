@@ -190,13 +190,7 @@ public final class LoaderDispatcher {
             // now see if there is a cache entry
         
             ResponseHeader cachedResponse = (request.url().isLocal()) ? null : Cache.getResponseHeader(request.url());
-            byte[] content = null;
-            try {
-                content = (cachedResponse == null) ? null : Cache.getContent(request.url());
-            } catch (IOException e) {
-                Log.logException(e);
-                content = null;
-            }
+            byte[] content = (cachedResponse == null) ? null : Cache.getContent(request.url());
             if (cachedResponse != null && content != null) {
                 // yes we have the content
                 

@@ -167,16 +167,9 @@ public class ViewFile {
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url) ? 1 : 0);
         
-        byte[] resource = null;
         ResponseHeader responseHeader = null;
         String resMime = null;
-        // trying to load the resource body
-        try {
-            resource = Cache.getContent(url);
-        } catch (IOException e) {
-            Log.logException(e);
-            resource = null;
-        }
+        byte[] resource = Cache.getContent(url);
         
         if (resource == null && authorized) {
             // load resource from net

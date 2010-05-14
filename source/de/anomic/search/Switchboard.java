@@ -1700,7 +1700,7 @@ public final class Switchboard extends serverSwitch {
         final long parsingStartTime = System.currentTimeMillis();
         // fetch the document from the response
         byte[] b = response.getContent();
-        if (b == null) try {
+        if (b == null) {
             // fetch the document from cache
             b = Cache.getContent(response.url());
             if (b == null) {
@@ -1708,10 +1708,6 @@ public final class Switchboard extends serverSwitch {
                 addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), "missing");
                 return null;
             }
-        } catch (IOException e) {
-            this.log.logWarning("Unable fetch the resource '" + response.url() + "'. from the cache: " + e.getMessage());
-            addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), e.getMessage());
-            return null;
         }
         
         try {

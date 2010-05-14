@@ -147,11 +147,11 @@ public class CrawlProfile {
     public entry newEntry(final Map<String, String> mem) {
         final entry ne = new entry(mem);
         try {
-            profileTable.put(ne.handle(), ne.map());
+            profileTable.put(ne.handle().getBytes(), ne.map());
         } catch (final Exception e) {
             clear();
             try {
-                profileTable.put(ne.handle(), ne.map());
+                profileTable.put(ne.handle().getBytes(), ne.map());
             } catch (final Exception ee) {
                 Log.logException(e);
                 System.exit(0);
@@ -184,11 +184,11 @@ public class CrawlProfile {
                              xsstopw, xdstopw, xpstopw,
                              cacheStrategy);
         try {
-            profileTable.put(ne.handle(), ne.map());
+            profileTable.put(ne.handle().getBytes(), ne.map());
         } catch (final Exception e) {
             clear();
             try {
-                profileTable.put(ne.handle(), ne.map());
+                profileTable.put(ne.handle().getBytes(), ne.map());
             } catch (final Exception ee) {
                 Log.logException(e);
                 System.exit(0);
@@ -198,19 +198,14 @@ public class CrawlProfile {
     }
     
     public boolean hasEntry(final String handle) {
-        try {
-            return profileTable.has(handle);
-        } catch (final IOException e) {
-            Log.logException(e);
-            return false;
-        }
+        return profileTable.has(handle.getBytes());
     }
 
     public entry getEntry(final String handle) {
         if (profileTable == null) return null;
         Map<String, String> m;
         try {
-            m = profileTable.get(handle);
+            m = profileTable.get(handle.getBytes());
         } catch (final IOException e) {
             Log.logException(e);
             return null;
@@ -222,7 +217,7 @@ public class CrawlProfile {
     public void changeEntry(final entry e, final String propName, final String newValue) throws IOException, RowSpaceExceededException {
         e.mem.put(propName,  newValue);
         assert e.handle() != null;
-        profileTable.put(e.handle(), e.mem);
+        profileTable.put(e.handle().getBytes(), e.mem);
     }
     
     public long getRecrawlDate(final long oldTimeMinutes) {
@@ -305,7 +300,7 @@ public class CrawlProfile {
                      final boolean xsstopw, final boolean xdstopw, final boolean xpstopw,
                      final CacheStrategy cacheStrategy) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
-            final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, Word.commonHashLength) : new String(startURL.hash());
+            final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength) : new String(startURL.hash());
             mem = new HashMap<String, String>(40);
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);

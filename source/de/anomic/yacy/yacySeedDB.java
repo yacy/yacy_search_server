@@ -268,9 +268,9 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (seedActiveDB.isEmpty() && seedPassiveDB.isEmpty() && seedPotentialDB.isEmpty()) return; // avoid that the own seed is initialized too early
         if (this.mySeed == null) initMySeed();
         try {
-            seedActiveDB.remove(mySeed.hash);
-            seedPassiveDB.remove(mySeed.hash);
-            seedPotentialDB.remove(mySeed.hash);
+            seedActiveDB.remove(mySeed.hash.getBytes());
+            seedPassiveDB.remove(mySeed.hash.getBytes());
+            seedPotentialDB.remove(mySeed.hash.getBytes());
         } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
     
@@ -292,12 +292,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
 				Log.logWarning("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
 		}
         try {
-            return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, null, this);
+            return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, this);
         } catch (final Exception e) {
             // try again
             FileUtils.deletedelete(seedDBFile);
             try {
-                return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, null, this);
+                return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, this);
             } catch (IOException e1) {
                 Log.logException(e1);
                 System.exit(-1);
@@ -442,10 +442,10 @@ public final class yacySeedDB implements AlternativeDomainNames {
             nameLookupCache.put(seed.getName(), seed.hash);
             final Map<String, String> seedPropMap = seed.getMap();
             synchronized (seedPropMap) {
-                seedActiveDB.put(seed.hash, seedPropMap);
+                seedActiveDB.put(seed.hash.getBytes(), seedPropMap);
             }
-            seedPassiveDB.remove(seed.hash);
-            seedPotentialDB.remove(seed.hash);
+            seedPassiveDB.remove(seed.hash.getBytes());
+            seedPotentialDB.remove(seed.hash.getBytes());
         } catch (final Exception e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
             resetActiveTable();
@@ -456,14 +456,14 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (seed.isProper(false) != null) return;
         try {
             nameLookupCache.remove(seed.getName());
-            seedActiveDB.remove(seed.hash);
-            seedPotentialDB.remove(seed.hash);
+            seedActiveDB.remove(seed.hash.getBytes());
+            seedPotentialDB.remove(seed.hash.getBytes());
         } catch (final Exception e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             final Map<String, String> seedPropMap = seed.getMap();
             synchronized (seedPropMap) {
-                seedPassiveDB.put(seed.hash, seedPropMap);
+                seedPassiveDB.put(seed.hash.getBytes(), seedPropMap);
             }
         } catch (final Exception e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
@@ -475,14 +475,14 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (seed.isProper(false) != null) return;
         try {
             nameLookupCache.remove(seed.getName());
-            seedActiveDB.remove(seed.hash);
-            seedPassiveDB.remove(seed.hash);
+            seedActiveDB.remove(seed.hash.getBytes());
+            seedPassiveDB.remove(seed.hash.getBytes());
         } catch (final Exception e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
         //seed.put(yacySeed.LASTSEEN, yacyCore.shortFormatter.format(new Date(yacyCore.universalTime())));
         try {
             final Map<String, String> seedPropMap = seed.getMap();
             synchronized (seedPropMap) {
-                seedPotentialDB.put(seed.hash, seedPropMap);
+                seedPotentialDB.put(seed.hash.getBytes(), seedPropMap);
             }
         } catch (final Exception e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
@@ -493,14 +493,14 @@ public final class yacySeedDB implements AlternativeDomainNames {
     public synchronized void removeDisconnected(final String peerHash) {
     	if(peerHash == null) return;
     	try {
-			seedPassiveDB.remove(peerHash);
+			seedPassiveDB.remove(peerHash.getBytes());
 		} catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
     
     public synchronized void removePotential(final String peerHash) {
     	if(peerHash == null) return;
     	try {
-			seedPotentialDB.remove(peerHash);
+			seedPotentialDB.remove(peerHash.getBytes());
 		} catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
         
@@ -521,7 +521,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
         ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
         try {
-            Map<String, String> map = database.get(hash);
+            Map<String, String> map = database.get(hash.getBytes());
             if (map == null) return null;
             entry.putAll(map);
         } catch (final IOException e) {
@@ -558,13 +558,13 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
         
         yacySeed s = get(hash, seedActiveDB);
-        if (s != null) try { seedActiveDB.put(hash, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
+        if (s != null) try { seedActiveDB.put(hash.getBytes(), seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
         
         s = get(hash, seedPassiveDB);
-        if (s != null) try { seedPassiveDB.put(hash, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
+        if (s != null) try { seedPassiveDB.put(hash.getBytes(), seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
         
         s = get(hash, seedPotentialDB);
-        if (s != null) try { seedPotentialDB.put(hash, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
+        if (s != null) try { seedPotentialDB.put(hash.getBytes(), seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
     }
     
     public yacySeed lookupByName(String peerName) {
