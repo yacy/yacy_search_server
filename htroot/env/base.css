@@ -124,6 +124,12 @@ tt, *.tt {
 
 .error {
   font-weight:bold;
+  color:red;
+}
+
+.info {
+  font-weight:bold;
+  color:yellow;
 }
 
 .commit {

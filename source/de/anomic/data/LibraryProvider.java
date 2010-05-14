@@ -47,11 +47,33 @@ public class LibraryProvider {
     private static final String path_to_source_dictionaries = "source";
     private static final String path_to_did_you_mean_dictionaries = "didyoumean";
     
+    public static final String disabledExtension = ".disabled";
+    
     public static DidYouMeanLibrary dymLib = new DidYouMeanLibrary(null);
     public static OpenGeoDB geoDB = new OpenGeoDB(null);
     private static File dictSource = null;
     private static File dictRoot = null;
     
+    public static enum Dictionary {
+        GEO0("geo0",
+             "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz",
+             "opengeodb-0.2.5a-UTF8-sql.gz");
+
+        public String nickname, url, filename;
+        private Dictionary(String nickname, String url, String filename) {
+            this.nickname = nickname;
+            this.url = url;
+            this.filename = filename;
+        }
+
+        public File file() {
+            return new File(dictSource, filename);
+        }
+        public File fileDisabled() {
+            return new File(dictSource, filename + disabledExtension);
+        }
+    }
+
     /**
      * initialize the LibraryProvider as static class.
      * This assigns default paths, and initializes the dictionary classes
