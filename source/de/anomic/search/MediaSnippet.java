@@ -116,7 +116,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             return new ArrayList<MediaSnippet>();
         }
         
-        final Document document = LoaderDispatcher.retrieveDocument(url, fetchOnline, timeout, false, reindexing);
+        final Document document = LoaderDispatcher.retrieveDocument(url, fetchOnline, timeout, false, reindexing, Long.MAX_VALUE);
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
             if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.AUDIO));

@@ -50,14 +50,17 @@ public class LibraryProvider {
     public static final String disabledExtension = ".disabled";
     
     public static DidYouMeanLibrary dymLib = new DidYouMeanLibrary(null);
-    public static OpenGeoDB geoDB = new OpenGeoDB(null);
+    public static OpenGeoDB geoDB = new OpenGeoDB(null, true);
     private static File dictSource = null;
     private static File dictRoot = null;
     
     public static enum Dictionary {
         GEO0("geo0",
              "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz",
-             "opengeodb-0.2.5a-UTF8-sql.gz");
+             "opengeodb-0.2.5a-UTF8-sql.gz"),
+        GEO1("geo1",
+             "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02621_2010-03-16.sql.gz",
+             "opengeodb-02621_2010-03-16.sql.gz");
 
         public String nickname, url, filename;
         private Dictionary(String nickname, String url, String filename) {
@@ -95,20 +98,16 @@ public class LibraryProvider {
     }
     
     public static void integrateOpenGeoDB() {
-        File ogdb = new File(dictSource, "opengeodb-0.2.5a-UTF8-sql.gz");
-        if (ogdb.exists()) {
-        	geoDB = new OpenGeoDB(ogdb);
-        	return;
+        File geo1 = Dictionary.GEO1.file();
+        File geo0 = Dictionary.GEO0.file();
+        if (geo1.exists()) {
+            if (geo0.exists()) geo0.renameTo(Dictionary.GEO0.fileDisabled());
+            geoDB = new OpenGeoDB(geo1, false);
+            return;
         }
-        ogdb = new File(dictSource, "opengeodb-02513_2007-10-02.sql.gz");
-        if (ogdb.exists()) {
-        	geoDB = new OpenGeoDB(ogdb);
-        	return;
-        }
-        ogdb = new File(dictSource, "opengeodb-02513_2007-10-02.sql");
-        if (ogdb.exists()) {
-        	geoDB = new OpenGeoDB(ogdb);
-        	return;
+        if (geo0.exists()) {
+            geoDB = new OpenGeoDB(geo0, true);
+            return;
         }
     }
     

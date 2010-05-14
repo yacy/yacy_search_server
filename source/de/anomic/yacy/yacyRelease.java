@@ -235,7 +235,7 @@ public final class yacyRelease extends yacyVersion {
         // returns the version info if successful, null otherwise
         ContentScraper scraper;
         try {
-            scraper = LoaderDispatcher.parseResource(Switchboard.getSwitchboard().loader, location.getLocationURL(), CrawlProfile.CACHE_STRATEGY_NOCACHE);
+            scraper = LoaderDispatcher.parseResource(Switchboard.getSwitchboard().loader, location.getLocationURL(), CrawlProfile.CacheStrategy.NOCACHE);
         } catch (final IOException e) {
             return null;
         }

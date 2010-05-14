@@ -52,14 +52,16 @@ public class ClientGetMethod extends GetMethod {
     protected void readResponseHeaders(HttpState state, HttpConnection conn) throws IOException, HttpException {
 		super.readResponseHeaders(state, conn);
 		
-		// already processing the header to be able to throw an exception
-        Header contentlengthHeader = getResponseHeader("content-length");
-        long contentlength = 0;
-        if (contentlengthHeader != null) {
-        	try { contentlength = Long.parseLong(contentlengthHeader.getValue()); } catch (NumberFormatException e) {	}
-        }
-        if (contentlength > maxfilesize) {
-            throw new IOException("Content-Length " + contentlength + " larger than maxfilesize " + maxfilesize);
+		if (this.maxfilesize < Long.MAX_VALUE) {
+    		// already processing the header to be able to throw an exception
+            Header contentlengthHeader = getResponseHeader("content-length");
+            long contentlength = 0;
+            if (contentlengthHeader != null) {
+            	try { contentlength = Long.parseLong(contentlengthHeader.getValue()); } catch (NumberFormatException e) {	}
+            }
+            if (contentlength > maxfilesize) {
+                throw new IOException("Content-Length " + contentlength + " larger than maxfilesize " + maxfilesize);
+    		}
 		}
     }	
 }

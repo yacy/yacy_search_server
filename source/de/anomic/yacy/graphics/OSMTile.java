@@ -90,7 +90,7 @@ public class OSMTile {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;
             try {
-                entry = Switchboard.getSwitchboard().loader.load(tileURL, false, false, CrawlProfile.CACHE_STRATEGY_IFEXIST);
+                entry = Switchboard.getSwitchboard().loader.load(tileURL, false, false, CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
             } catch (IOException e) {
                 Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
                 return null;

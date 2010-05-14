@@ -76,7 +76,7 @@ public class OpenGeoDB {
     private final HashMap<String, List<Integer>> predial2ids;
     private final HashMap<String, Integer>       zip2id;
     
-    public OpenGeoDB(final File file) {
+    public OpenGeoDB(final File file, boolean lonlat) {
 
         this.locTypeHash2locType = new HashMap<Integer, String>();
         this.id2loc              = new HashMap<Integer, Location>();
@@ -98,6 +98,7 @@ public class OpenGeoDB {
             String[] v;
             Integer id;
             String h;
+            double lon, lat;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (!line.startsWith("INSERT INTO ")) continue;
@@ -107,7 +108,14 @@ public class OpenGeoDB {
                 if (line.startsWith("geodb_coordinates ")) {
                     line = line.substring(18 + 7);v = line.split(",");
                     v = line.split(",");
-                    id2loc.put(Integer.parseInt(v[0]), new Location(Double.parseDouble(v[2]), Double.parseDouble(v[3])));
+                    if (lonlat) {
+                        lon = Double.parseDouble(v[2]);
+                        lat = Double.parseDouble(v[3]);
+                    } else {
+                        lat = Double.parseDouble(v[2]);
+                        lon = Double.parseDouble(v[3]);
+                    }
+                    id2loc.put(Integer.parseInt(v[0]), new Location(lon, lat));
                 }
                 if (line.startsWith("geodb_textdata ")) {
                     line = line.substring(15 + 7);

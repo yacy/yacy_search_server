@@ -45,7 +45,7 @@ public final class HTTPLoader {
     private static final String DEFAULT_ENCODING = "gzip,deflate";
     private static final String DEFAULT_LANGUAGE = "en-us,en;q=0.5";
     private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
-    private static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
+    public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
     public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
     public  static final String crawlerUserAgent = "yacybot (" + Client.getSystemOST() +") http://yacy.net/bot.html";
     public  static final String yacyUserAgent = "yacy (" + Client.getSystemOST() +") yacy.net";
@@ -74,14 +74,14 @@ public final class HTTPLoader {
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 10000);
     }  
    
-    public Response load(final Request entry, final boolean acceptOnlyParseable) throws IOException {
+    public Response load(final Request entry, final boolean acceptOnlyParseable, long maxFileSize) throws IOException {
         long start = System.currentTimeMillis();
-        Response doc = load(entry, acceptOnlyParseable, DEFAULT_CRAWLING_RETRY_COUNT);
+        Response doc = load(entry, acceptOnlyParseable, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize);
         Latency.update(new String(entry.url().hash()).substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
         return doc;
     }
     
-    private Response load(final Request request, boolean acceptOnlyParseable, final int retryCount) throws IOException {
+    private Response load(final Request request, boolean acceptOnlyParseable, final int retryCount, final long maxFileSize) throws IOException {
 
         if (retryCount < 0) {
             sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection counter exceeded");
@@ -113,8 +113,7 @@ public final class HTTPLoader {
         
         // take a file from the net
         Response response = null;
-        final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
-
+        
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, crawlerUserAgent);
@@ -202,7 +201,7 @@ public final class HTTPLoader {
                     
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
-                    return load(request, acceptOnlyParseable, retryCount - 1);
+                    return load(request, acceptOnlyParseable, retryCount - 1, maxFileSize);
                 }
             } else {
                 // if the response has not the right response type then reject file

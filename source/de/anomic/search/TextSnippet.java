@@ -359,7 +359,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     // if not found try to download it
                     
                     // download resource using the crawler and keep resource in memory if possible
-                    final Response entry = loader.load(url, true, reindexing);
+                    final Response entry = loader.load(url, true, reindexing, Long.MAX_VALUE);
                     
                     // get resource metadata (e.g. the http headers for http resources)
                     if (entry != null) {

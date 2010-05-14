@@ -20,37 +20,38 @@
         <legend>Geolocalization</legend>
         The geolocalization file will enable YaCy to present locations from OpenStreetMap according to given search words.
         With this file it is possible to find locations using the location (city) name, a zip code, a car sign or a telephone pre-dial number.
+        
         <dl>
           <dt><label>Download from</label></dt>
-          <dd>#[geo0URL]#</dd>
+          <dd>#[geo1URL]#</dd>
           <dt><label>Storage location</label></dt>
-          <dd>#[geo0Storage]#</dd>
+          <dd>#[geo1Storage]#</dd>
           <dt><label>Status</label></dt>
-          <dd>#(geo0Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::de-activated#(/geo0Status)#</dd>
+          <dd>#(geo1Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::de-activated#(/geo1Status)#</dd>
           <dt></dt>
-          <dd>#(geo0Status)#
-          <input type="submit" name="geo0Load" value="Load" />::
-          <input type="submit" name="geo0Deactivate" value="de-Activate" />
-          <input type="submit" name="geo0Remove" value="Remove" />::
-          <input type="submit" name="geo0Activate" value="Activate" />
-          <input type="submit" name="geo0Remove" value="Remove" />
-          #(/geo0Status)#</dd>
-          #(geo0ActionLoaded)#::
+          <dd>#(geo1Status)#
+          <input type="submit" name="geo1Load" value="Load" />::
+          <input type="submit" name="geo1Deactivate" value="de-Activate" />
+          <input type="submit" name="geo1Remove" value="Remove" />::
+          <input type="submit" name="geo1Activate" value="Activate" />
+          <input type="submit" name="geo1Remove" value="Remove" />
+          #(/geo1Status)#</dd>
+          #(geo1ActionLoaded)#::
           <dt></dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
           <dt></dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
-          #(/geo0ActionLoaded)#
-          #(geo0ActionRemoved)#::
+          #(/geo1ActionLoaded)#
+          #(geo1ActionRemoved)#::
           <dt></dt><dd><div class="commit">de-activated and removed dictionary file</div></dd>::
           <dt></dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
-          #(/geo0ActionRemoved)#
-          #(geo0ActionDeactivated)#::
+          #(/geo1ActionRemoved)#
+          #(geo1ActionDeactivated)#::
           <dt></dt><dd><div class="commit">de-activated dictionary file</div></dd>::
           <dt></dt><dd><div class="error">cannot de-activate dictionary file: #[error]#</div></dd>
-          #(/geo0ActionDeactivated)#
-          #(geo0ActionActivated)#::
+          #(/geo1ActionDeactivated)#
+          #(geo1ActionActivated)#::
           <dt></dt><dd><div class="commit">activated dictionary file</div></dd>::
           <dt></dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
-          #(/geo0ActionActivated)#        
+          #(/geo1ActionActivated)#        
         </dl>
       </fieldset>
     </form>

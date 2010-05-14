@@ -54,11 +54,11 @@ public class getpageinfo_p {
                 }
                 ContentScraper scraper = null;
                 if (u != null) try {
-                    scraper = LoaderDispatcher.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFFRESH);
+                    scraper = LoaderDispatcher.parseResource(sb.loader, u, CrawlProfile.CacheStrategy.IFFRESH);
                 } catch (final IOException e) {
                     // try again, try harder
                     try {
-                        scraper = LoaderDispatcher.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFEXIST);
+                        scraper = LoaderDispatcher.parseResource(sb.loader, u, CrawlProfile.CacheStrategy.IFEXIST);
                     } catch (final IOException ee) {
                         // now thats a fail, do nothing                            
                     }

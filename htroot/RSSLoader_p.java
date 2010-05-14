@@ -63,7 +63,7 @@ public class RSSLoader_p {
         // if the resource body was not cached we try to load it from web
         Response entry = null;
         try {
-            entry = sb.loader.load(url, true, false);
+            entry = sb.loader.load(url, true, false, Long.MAX_VALUE);
         } catch (final Exception e) {
             return prop;
         }

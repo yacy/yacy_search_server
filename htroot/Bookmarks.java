@@ -189,7 +189,7 @@ public class Bookmarks {
                         Document document = null;
                         if (urlentry != null) {
                             final URIMetadataRow.Components metadata = urlentry.metadata();
-                            document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false);
+                            document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false, Long.MAX_VALUE);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", metadata.url().toNormalform(false, true));
                             prop.putHTML("mode_title", metadata.dc_title());

@@ -161,7 +161,7 @@ public class bookmarksDB {
                                 Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]),
                                 Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]),
                                 Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]),
-                                Boolean.parseBoolean(parser[12]), CrawlProfile.CACHE_STRATEGY_IFFRESH
+                                Boolean.parseBoolean(parser[12]), CrawlProfile.CacheStrategy.IFFRESH
                                 );
                     }
                     if (parser.length == 14) {
@@ -169,7 +169,7 @@ public class bookmarksDB {
                                 Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]),
                                 Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]),
                                 Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]),
-                                Boolean.parseBoolean(parser[12]), Integer.parseInt(parser[13])
+                                Boolean.parseBoolean(parser[12]), CrawlProfile.CacheStrategy.decode(Integer.parseInt(parser[13]))
                                 );
                     }
                 }
@@ -206,7 +206,7 @@ public class bookmarksDB {
     
     public void folderReCrawl(long schedule, String folder, String crawlingfilter, int newcrawlingdepth, long crawlingIfOlder, 
     		int crawlingDomFilterDepth, int crawlingDomMaxPages, boolean crawlingQ, boolean indexText, boolean indexMedia, 
-    		boolean crawlOrder, boolean xsstopw, boolean storeHTCache, int cacheStrategy) {
+    		boolean crawlOrder, boolean xsstopw, boolean storeHTCache, CrawlProfile.CacheStrategy cacheStrategy) {
 
         final Switchboard sb = Switchboard.getSwitchboard();
         final Iterator<String> bit = getBookmarksIterator(folder, true);

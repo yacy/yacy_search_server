@@ -430,7 +430,7 @@ public class yacysearch {
                 if (urlentry != null) {
                     final URIMetadataRow.Components metadata = urlentry.metadata();
                     Document document;
-                    document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false);
+                    document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false, Long.MAX_VALUE);
                     if (document != null) {
                         // create a news message
                         final HashMap<String, String> map = new HashMap<String, String>();

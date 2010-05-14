@@ -163,7 +163,7 @@ public class QuickCrawlLink_p {
                         xsstopw,
                         xdstopw,
                         xpstopw,
-                        CrawlProfile.CACHE_STRATEGY_IFFRESH
+                        CrawlProfile.CacheStrategy.IFFRESH
                 );
             } catch (final Exception e) {
                 // mist

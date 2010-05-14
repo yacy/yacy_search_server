@@ -334,6 +334,6 @@ public class SitemapParser extends DefaultHandler {
                 false,
                 // exclude stop-words
                 true, true, true,
-                CrawlProfile.CACHE_STRATEGY_IFFRESH);
+                CrawlProfile.CacheStrategy.IFFRESH);
     }
 }

@@ -182,7 +182,7 @@ public class ViewFile {
             // load resource from net
             Response response = null;
             try {
-                response = sb.loader.load(url, true, false);
+                response = sb.loader.load(url, true, false, Long.MAX_VALUE);
             } catch (IOException e) {
                 Log.logException(e);
             }
@@ -198,7 +198,7 @@ public class ViewFile {
         if (resource == null) {
             Response entry = null;
             try {
-                entry = sb.loader.load(url, true, false);
+                entry = sb.loader.load(url, true, false, Long.MAX_VALUE);
             } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
@@ -238,7 +238,7 @@ public class ViewFile {
                 }
 
                 try {
-                    Response response = sb.loader.load(url, true, false);
+                    Response response = sb.loader.load(url, true, false, Long.MAX_VALUE);
                     responseHeader = response.getResponseHeader();
                     resource = response.getContent();
                 } catch (IOException e) {

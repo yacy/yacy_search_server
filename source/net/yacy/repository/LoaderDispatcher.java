@@ -99,8 +99,9 @@ public final class LoaderDispatcher {
     public Response load(
             final DigestURI url,
             final boolean forText,
-            final boolean global) throws IOException {
-        return load(request(url, forText, global), forText);
+            final boolean global,
+            final long maxFileSize) throws IOException {
+        return load(request(url, forText, global), forText, maxFileSize);
     }
     
     /**
@@ -116,13 +117,14 @@ public final class LoaderDispatcher {
             final DigestURI url,
             final boolean forText,
             final boolean global,
-            int cacheStratgy) throws IOException {
-        return load(request(url, forText, global), forText, cacheStratgy);
+            CrawlProfile.CacheStrategy cacheStratgy,
+            long maxFileSize) throws IOException {
+        return load(request(url, forText, global), forText, cacheStratgy, maxFileSize);
     }
     
-    public void load(final DigestURI url, int cacheStratgy, File targetFile) throws IOException {
+    public void load(final DigestURI url, CrawlProfile.CacheStrategy cacheStratgy, long maxFileSize, File targetFile) throws IOException {
 
-        byte[] b = load(request(url, false, true), false, cacheStratgy).getContent();
+        byte[] b = load(request(url, false, true), false, cacheStratgy, maxFileSize).getContent();
         if (b == null) throw new IOException("load == null");
         File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
         
@@ -164,14 +166,14 @@ public final class LoaderDispatcher {
                     0);
     }
     
-    public Response load(final Request request, final boolean acceptOnlyParseable) throws IOException {
+    public Response load(final Request request, final boolean acceptOnlyParseable, long maxFileSize) throws IOException {
         CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
-        int cacheStrategy = CrawlProfile.CACHE_STRATEGY_IFEXIST;
+        CrawlProfile.CacheStrategy cacheStrategy = CrawlProfile.CacheStrategy.IFEXIST;
         if (crawlProfile != null) cacheStrategy = crawlProfile.cacheStrategy();
-        return load(request, acceptOnlyParseable, cacheStrategy);
+        return load(request, acceptOnlyParseable, cacheStrategy, maxFileSize);
     }
     
-    public Response load(final Request request, final boolean acceptOnlyParseable, int cacheStrategy) throws IOException {
+    public Response load(final Request request, final boolean acceptOnlyParseable, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
         // get the protocol of the next URL
         final String protocol = request.url().getProtocol();
         final String host = request.url().getHost();
@@ -183,7 +185,7 @@ public final class LoaderDispatcher {
         // check if we have the page in the cache
 
         CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
-        if (crawlProfile != null && cacheStrategy != CrawlProfile.CACHE_STRATEGY_NOCACHE) {
+        if (crawlProfile != null && cacheStrategy != CrawlProfile.CacheStrategy.NOCACHE) {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry
         
@@ -214,14 +216,14 @@ public final class LoaderDispatcher {
                         content);
                 
                 // check which caching strategy shall be used
-                if (cacheStrategy == CrawlProfile.CACHE_STRATEGY_IFEXIST || cacheStrategy == CrawlProfile.CACHE_STRATEGY_CACHEONLY) {
+                if (cacheStrategy == CrawlProfile.CacheStrategy.IFEXIST || cacheStrategy == CrawlProfile.CacheStrategy.CACHEONLY) {
                     // well, just take the cache and don't care about freshness of the content
                     log.logInfo("cache hit/useall for: " + request.url().toNormalform(true, false));
                     return response;
                 }
                 
                 // now the cacheStrategy must be CACHE_STRATEGY_IFFRESH, that means we should do a proxy freshness test
-                assert cacheStrategy == CrawlProfile.CACHE_STRATEGY_IFFRESH : "cacheStrategy = " + cacheStrategy;
+                assert cacheStrategy == CrawlProfile.CacheStrategy.IFFRESH : "cacheStrategy = " + cacheStrategy;
                 if (response.isFreshForProxy()) {
                     log.logInfo("cache hit/fresh for: " + request.url().toNormalform(true, false));
                     return response;
@@ -232,7 +234,7 @@ public final class LoaderDispatcher {
         }
         
         // check case where we want results from the cache exclusively, and never from the internet (offline mode)
-        if (cacheStrategy == CrawlProfile.CACHE_STRATEGY_CACHEONLY) {
+        if (cacheStrategy == CrawlProfile.CacheStrategy.CACHEONLY) {
             // we had a chance to get the content from the cache .. its over. We don't have it.
             return null;
         }
@@ -259,7 +261,7 @@ public final class LoaderDispatcher {
         
         // load resource from the internet
         Response response = null;
-        if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, acceptOnlyParseable);
+        if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, acceptOnlyParseable, maxFileSize);
         if (protocol.equals("ftp")) response = ftpLoader.load(request, true);
         if (protocol.equals("smb")) response = smbLoader.load(request, true);
         if (response != null) {
@@ -302,7 +304,8 @@ public final class LoaderDispatcher {
         if (!fetchOnline) return null;
         
         // try to download the resource using the loader
-        final Response entry = load(url, forText, reindexing);
+        final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+        final Response entry = load(url, forText, reindexing, maxFileSize);
         if (entry == null) return null; // not found in web
         
         // read resource body (if it is there)
@@ -321,7 +324,7 @@ public final class LoaderDispatcher {
      * @param global the domain of the search. If global == true then the content is re-indexed
      * @return the parsed document as {@link Document}
      */
-    public static Document retrieveDocument(final DigestURI url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global) {
+    public static Document retrieveDocument(final DigestURI url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global, long maxFileSize) {
 
         // load resource
         byte[] resContent = null;
@@ -336,7 +339,7 @@ public final class LoaderDispatcher {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final Response entry = Switchboard.getSwitchboard().loader.load(url, forText, global);
+                final Response entry = Switchboard.getSwitchboard().loader.load(url, forText, global, maxFileSize);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -431,9 +434,10 @@ public final class LoaderDispatcher {
         }
     }
 
-    public static ContentScraper parseResource(final LoaderDispatcher loader, final DigestURI location, int cachePolicy) throws IOException {
+    public static ContentScraper parseResource(final LoaderDispatcher loader, final DigestURI location, CrawlProfile.CacheStrategy cachePolicy) throws IOException {
         // load page
-        Response r = loader.load(location, true, false, cachePolicy);
+        final long maxFileSize = loader.sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+        Response r = loader.load(location, true, false, cachePolicy, maxFileSize);
         byte[] page = (r == null) ? null : r.getContent();
         if (page == null) throw new IOException("no response from url " + location.toString());
         
@@ -455,25 +459,27 @@ public final class LoaderDispatcher {
         }
     }
     
-    public void loadIfNotExistBackground(String url, File cache) {
-        new Loader(url, cache).start();
+    public void loadIfNotExistBackground(String url, File cache, long maxFileSize) {
+        new Loader(url, cache, maxFileSize).start();
     }
     
     private class Loader extends Thread {
 
         private String url;
         private File cache;
+        private long maxFileSize;
         
-        public Loader(String url, File cache) {
+        public Loader(String url, File cache, long maxFileSize) {
             this.url = url;
             this.cache = cache;
+            this.maxFileSize = maxFileSize;
         }
         
         public void run() {
             if (this.cache.exists()) return;
             try {
                 // load from the net
-                Response response = load(new DigestURI(this.url), false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
+                Response response = load(new DigestURI(this.url), false, true, CrawlProfile.CacheStrategy.NOCACHE, this.maxFileSize);
                 byte[] b = response.getContent();
                 FileUtils.copy(b, this.cache);
             } catch (MalformedURLException e) {} catch (IOException e) {}

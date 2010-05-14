@@ -45,6 +45,7 @@ import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
 
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Client;
@@ -561,7 +562,8 @@ public class CrawlQueues {
                     // returns null if everything went fine, a fail reason string if a problem occurred
                     try {
                         request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
-                        Response response = sb.loader.load(request, true);
+                        final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+                        Response response = sb.loader.load(request, true, maxFileSize);
                         if (response == null) {
                             request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (log.isFine()) log.logFine("problem loading " + request.url().toString() + ": no content (possibly caused by cache policy)");

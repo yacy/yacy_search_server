@@ -170,7 +170,7 @@ public class CrawlProfile {
                            final boolean storeHTCache, final boolean storeTXCache,
                            final boolean remoteIndexing,
                            final boolean xsstopw, final boolean xdstopw, final boolean xpstopw,
-                           final int cacheStrategy) {
+                           final CacheStrategy cacheStrategy) {
         
         final entry ne = new entry(
                              name, startURL,
@@ -246,10 +246,23 @@ public class CrawlProfile {
         
     }
     
-    public final static int CACHE_STRATEGY_NOCACHE = 0;    // never use the cache, all content from fresh internet source
-    public final static int CACHE_STRATEGY_IFFRESH = 1;    // use the cache if the cache exists and is fresh using the proxy-fresh rules
-    public final static int CACHE_STRATEGY_IFEXIST = 2;    // use the cache if the cache exist. Do no check freshness. Otherwise use online source.
-    public final static int CACHE_STRATEGY_CACHEONLY = 3;  // never go online, use all content from cache. If no cache exist, treat content as unavailable
+    public static enum CacheStrategy {
+        NOCACHE(0),    // never use the cache, all content from fresh internet source
+        IFFRESH(1),    // use the cache if the cache exists and is fresh using the proxy-fresh rules
+        IFEXIST(2),    // use the cache if the cache exist. Do no check freshness. Otherwise use online source.
+        CACHEONLY(3);  // never go online, use all content from cache. If no cache exist, treat content as unavailable
+        public int code;
+        private CacheStrategy(int code) {
+            this.code = code;
+        }
+        public String toString() {
+            return Integer.toString(this.code);
+        }
+        public static CacheStrategy decode(int code) {
+            for (CacheStrategy strategy: CacheStrategy.values()) if (strategy.code == code) return strategy;
+            return NOCACHE;
+        }
+    }
     
     public static class entry {
         // this is a simple record structure that hold all properties of a single crawl start
@@ -290,7 +303,7 @@ public class CrawlProfile {
                      final boolean storeHTCache, final boolean storeTXCache,
                      final boolean remoteIndexing,
                      final boolean xsstopw, final boolean xdstopw, final boolean xpstopw,
-                     final int cacheStrategy) {
+                     final CacheStrategy cacheStrategy) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
             final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, Word.commonHashLength) : new String(startURL.hash());
             mem = new HashMap<String, String>(40);
@@ -312,7 +325,7 @@ public class CrawlProfile {
             mem.put(XSSTOPW,          Boolean.toString(xsstopw)); // exclude static stop-words
             mem.put(XDSTOPW,          Boolean.toString(xdstopw)); // exclude dynamic stop-word
             mem.put(XPSTOPW,          Boolean.toString(xpstopw)); // exclude parent stop-words
-            mem.put(CACHE_STRAGEGY, Integer.toString(cacheStrategy));
+            mem.put(CACHE_STRAGEGY,   cacheStrategy.toString());
             doms = new ConcurrentHashMap<String, DomProfile>();
         }
         
@@ -376,14 +389,14 @@ public class CrawlProfile {
                 return 0;
             }
         }
-        public int cacheStrategy() {
+        public CacheStrategy cacheStrategy() {
             final String r = mem.get(CACHE_STRAGEGY);
-            if (r == null) return CACHE_STRATEGY_IFFRESH;
+            if (r == null) return CacheStrategy.IFFRESH;
             try {
-                return Integer.parseInt(r);
+                return CacheStrategy.decode(Integer.parseInt(r));
             } catch (final NumberFormatException e) {
                 Log.logException(e);
-                return CACHE_STRATEGY_IFFRESH;
+                return CacheStrategy.IFFRESH;
             }
         }
         public long recrawlIfOlder() {

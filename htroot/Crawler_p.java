@@ -194,11 +194,11 @@ public class Crawler_p {
                     env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
                     
                     final String cachePolicyString = post.get("cachePolicy", "iffresh");
-                    int cachePolicy = CrawlProfile.CACHE_STRATEGY_IFFRESH;
-                    if (cachePolicyString.equals("nocache")) cachePolicy = CrawlProfile.CACHE_STRATEGY_NOCACHE;
-                    if (cachePolicyString.equals("iffresh")) cachePolicy = CrawlProfile.CACHE_STRATEGY_IFFRESH;
-                    if (cachePolicyString.equals("ifexist")) cachePolicy = CrawlProfile.CACHE_STRATEGY_IFEXIST;
-                    if (cachePolicyString.equals("cacheonly")) cachePolicy = CrawlProfile.CACHE_STRATEGY_CACHEONLY;
+                    CrawlProfile.CacheStrategy cachePolicy = CrawlProfile.CacheStrategy.IFFRESH;
+                    if (cachePolicyString.equals("nocache")) cachePolicy = CrawlProfile.CacheStrategy.NOCACHE;
+                    if (cachePolicyString.equals("iffresh")) cachePolicy = CrawlProfile.CacheStrategy.IFFRESH;
+                    if (cachePolicyString.equals("ifexist")) cachePolicy = CrawlProfile.CacheStrategy.IFEXIST;
+                    if (cachePolicyString.equals("cacheonly")) cachePolicy = CrawlProfile.CacheStrategy.CACHEONLY;
                     
                     final boolean xsstopw = post.get("xsstopw", "off").equals("on");
                     env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
