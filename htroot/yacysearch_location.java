@@ -27,9 +27,16 @@ import net.yacy.document.geolocalization.Location;
 import de.anomic.data.LibraryProvider;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.SearchEvent;
+import de.anomic.search.SearchEventCache;
+import de.anomic.search.SwitchboardConstants;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
+import java.util.Date;
+import java.util.Formatter;
+import net.yacy.kelondro.util.DateFormatter;
 
 public class yacysearch_location {
     
@@ -40,7 +47,10 @@ public class yacysearch_location {
         prop.put("kml", 0);
         if (post == null) return prop;
         
-        if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("kml") || header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("xml")) {
+        if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("kml") ||
+                header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("xml") ||
+                header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("rss")
+                ) {
             // generate a kml output page
             prop.put("kml", 1);
             String query = post.get("query", "");
@@ -77,7 +87,7 @@ public class yacysearch_location {
                         prop.put("kml_placemark_" + placemarkCounter + "_subject", subject.trim());
                         prop.put("kml_placemark_" + placemarkCounter + "_description", message.getDescription());
                         prop.put("kml_placemark_" + placemarkCounter + "_date", message.getPubDate());
-                        prop.put("kml_placemark_" + placemarkCounter + "_url", message.getLink());
+                        prop.putXML("kml_placemark_" + placemarkCounter + "_url", message.getLink());
                         prop.put("kml_placemark_" + placemarkCounter + "_pointname", location.getName());
                         prop.put("kml_placemark_" + placemarkCounter + "_lon", location.lon());
                         prop.put("kml_placemark_" + placemarkCounter + "_lat", location.lat());
@@ -87,7 +97,28 @@ public class yacysearch_location {
                 }
                 prop.put("kml_placemark", placemarkCounter);
             } catch (InterruptedException e) {}
+        } if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("rss")) {
+            
+            String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
+            if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
+            String hostName = header.get("Host", "localhost");
+            if (hostName.indexOf(':') == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
+            final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
+            final boolean global = post.get("kml_resource", "local").equals("global");
+
+            prop.put("kml_date822", DateFormatter.formatRFC1123(new Date()));
+            prop.put("kml_promoteSearchPageGreeting", promoteSearchPageGreeting);
+            prop.put("kml_rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
+            prop.put("kml_searchBaseURL", "http://" + hostName + "/yacysearch_location.rss");
+            prop.putXML("kml_rss_query", originalquerystring);
+            prop.put("kml_rss_queryenc", originalquerystring.replace(' ', '+'));
+            prop.put("kml_resource", global ? "global" : "local");
+            prop.put("kml_contentdom", (post == null ? "text" : post.get("contentdom", "text")));
+            prop.put("kml_verify", (post == null) ? "true" : post.get("verify", "true"));
+
         }
+        
+
         // return rewrite properties
         return prop;
     }
