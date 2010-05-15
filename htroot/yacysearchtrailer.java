@@ -61,7 +61,7 @@ public class yacysearchtrailer {
         // compose search navigation
 
         // namespace navigators
-        ArrayList<Navigator.Item> namespaceNavigator = theSearch.getNamespaceNavigator(10);
+        List<Navigator.Item> namespaceNavigator = theSearch.getNamespaceNavigator(10);
         if (namespaceNavigator == null || namespaceNavigator.isEmpty()) {
             prop.put("nav-namespace", 0);
         } else {

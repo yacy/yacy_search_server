@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>
 <rss version="2.0"
-	xmlns:yacy="http://www.yacy.net/"
-	xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
+    xmlns:yacy="http://www.yacy.net/"
+    xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
     xmlns:media="http://search.yahoo.com/mrss/"
-    xmlns:atom="http://www.w3.org/2005/Atom">
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+>
 	<!-- YaCy Search Engine; http://yacy.net -->
 	<channel>
 		<title>#[promoteSearchPageGreeting]#</title>
