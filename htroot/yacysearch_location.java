@@ -27,15 +27,12 @@ import net.yacy.document.geolocalization.Location;
 import de.anomic.data.LibraryProvider;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.search.SearchEvent;
-import de.anomic.search.SearchEventCache;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import java.util.Date;
-import java.util.Formatter;
 import net.yacy.kelondro.util.DateFormatter;
 
 public class yacysearch_location {
