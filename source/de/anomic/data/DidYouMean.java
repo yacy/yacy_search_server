@@ -221,7 +221,7 @@ public class DidYouMean {
 	
     public void test(final String s) throws InterruptedException {
         Set<String> libr = LibraryProvider.dymLib.recommend(s);
-        libr.addAll(LibraryProvider.geoDB.recommend(s));
+        libr.addAll(LibraryProvider.geoLoc.recommend(s));
         if (!libr.isEmpty()) createGen = false;
         for (final String t: libr) {
             guessLib.put(t);

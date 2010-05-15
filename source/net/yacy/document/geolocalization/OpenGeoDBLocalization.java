@@ -1,28 +1,24 @@
-// OpenGeoDB.java
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 04.10.2009 on http://yacy.net
-//
-// This is a part of YaCy
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  OpenGeoDBLocalization
+ *  Copyright 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  first published 04.10.2009 on http://yacy.net
+ *  
+ *  This file is part of YaCy Content Integration
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file COPYING.LESSER.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.document.geolocalization;
 
@@ -59,9 +55,9 @@ import net.yacy.kelondro.logging.Log;
  * This class will provide a super-fast access to the OpenGeoDB,
  * since all request are evaluated using data in the RAM.
  */
-public class OpenGeoDB {
+public class OpenGeoDBLocalization implements Localization {
     
- // use a collator to relax when distinguishing between lowercase und uppercase letters
+    // use a collator to relax when distinguishing between lowercase und uppercase letters
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     static {
         insensitiveCollator.setStrength(Collator.SECONDARY);
@@ -71,17 +67,19 @@ public class OpenGeoDB {
     private final HashMap<Integer, String>       locTypeHash2locType;
     private final HashMap<Integer, Location>     id2loc;
     private final HashMap<Integer, Integer>      id2locTypeHash;
-    private final TreeMap<String, List<Integer>> locationName2ids;
+    private final TreeMap<String, List<Integer>> name2ids;
     private final TreeMap<String, List<Integer>> kfz2ids;
     private final HashMap<String, List<Integer>> predial2ids;
     private final HashMap<String, Integer>       zip2id;
+    private final File file;
     
-    public OpenGeoDB(final File file, boolean lonlat) {
+    public OpenGeoDBLocalization(final File file, boolean lonlat) {
 
+        this.file                = file;
         this.locTypeHash2locType = new HashMap<Integer, String>();
         this.id2loc              = new HashMap<Integer, Location>();
         this.id2locTypeHash      = new HashMap<Integer, Integer>();
-        this.locationName2ids    = new TreeMap<String, List<Integer>>(insensitiveCollator);
+        this.name2ids            = new TreeMap<String, List<Integer>>(insensitiveCollator);
         this.kfz2ids             = new TreeMap<String, List<Integer>>(insensitiveCollator);
         this.predial2ids         = new HashMap<String, List<Integer>>();
         this.zip2id              = new HashMap<String, Integer>();
@@ -123,10 +121,10 @@ public class OpenGeoDB {
                     if (v[1].equals("500100000")) { // Ortsname
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
-                        List<Integer> l = this.locationName2ids.get(h);
+                        List<Integer> l = this.name2ids.get(h);
                         if (l == null) l = new ArrayList<Integer>(1);
                         l.add(id);
-                        this.locationName2ids.put(h, l);
+                        this.name2ids.put(h, l);
                         Location loc = this.id2loc.get(id);
                         if (loc != null) loc.setName(h);
                     } else if (v[1].equals("500400000")) { // Vorwahl
@@ -181,22 +179,20 @@ public class OpenGeoDB {
      * @param anyname
      * @return
      */
-    public HashSet<Location> find(String anyname, boolean location, boolean locationexact, boolean kfz, boolean predial, boolean zip) {
+    public HashSet<Location> find(String anyname, boolean locationexact) {
         HashSet<Integer> r = new HashSet<Integer>();
         List<Integer> c;
-        if (location) {
-            if (locationexact) {
-                c = this.locationName2ids.get(anyname); if (c != null) r.addAll(c);
-            } else {
-                SortedMap<String, List<Integer>> cities = this.locationName2ids.tailMap(anyname);
-                for (Map.Entry<String, List<Integer>> e: cities.entrySet()) {
-                	if (e.getKey().toLowerCase().startsWith(anyname.toLowerCase())) r.addAll(e.getValue()); else break;
-                }
+        if (locationexact) {
+            c = this.name2ids.get(anyname); if (c != null) r.addAll(c);
+        } else {
+            SortedMap<String, List<Integer>> cities = this.name2ids.tailMap(anyname);
+            for (Map.Entry<String, List<Integer>> e: cities.entrySet()) {
+            	if (e.getKey().toLowerCase().startsWith(anyname.toLowerCase())) r.addAll(e.getValue()); else break;
             }
+            c = this.kfz2ids.get(anyname); if (c != null) r.addAll(c);
+            c = this.predial2ids.get(anyname); if (c != null) r.addAll(c);
+            Integer i = this.zip2id.get(anyname); if (i != null) r.add(i);
         }
-        if (kfz) {c = this.kfz2ids.get(anyname); if (c != null) r.addAll(c);}
-        if (predial) {c = this.predial2ids.get(anyname); if (c != null) r.addAll(c);}
-        if (zip) {Integer i = this.zip2id.get(anyname); if (i != null) r.add(i);}
         HashSet<Location> a = new HashSet<Location>();
         for (Integer e: r) {
             Location w = this.id2loc.get(e);
@@ -213,10 +209,23 @@ public class OpenGeoDB {
     public Set<String> recommend(String s) {
         Set<String> a = new HashSet<String>();
         s = s.trim().toLowerCase();
-        SortedMap<String, List<Integer>> t = this.locationName2ids.tailMap(s);
+        SortedMap<String, List<Integer>> t = this.name2ids.tailMap(s);
         for (String r: t.keySet()) {
             if (r.startsWith(s)) a.add(r); else break;
         }
         return a;
+    }
+    
+    public String nickname() {
+        return this.file.getName();
+    }
+    
+    public int hashCode() {
+        return this.nickname().hashCode();
+    }
+    
+    public boolean equals(Object other) {
+        if (!(other instanceof Localization)) return false;
+        return this.nickname().equals(((Localization) other).nickname()); 
     }
 }

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+1<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
   <title>YaCy '#[clientname]#': Dictionary Loader</title>
@@ -18,8 +18,46 @@
     <form action="DictionaryLoader_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
         <legend>Geolocalization</legend>
-        The geolocalization file will enable YaCy to present locations from OpenStreetMap according to given search words.
-        With this file it is possible to find locations using the location (city) name, a zip code, a car sign or a telephone pre-dial number.
+        Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.
+        
+        <h4>GeoNames</h4>
+	    <p>With this file it is possible to find cities with a population > 1000 all over the world.</p>
+        
+        <dl>
+          <dt><label>Download from</label></dt>
+          <dd>#[geon0URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[geon0Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(geon0Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::de-activated#(/geon0Status)#</dd>
+          <dt></dt>
+          <dd>#(geon0Status)#
+          <input type="submit" name="geon0Load" value="Load" />::
+          <input type="submit" name="geon0Deactivate" value="de-Activate" />
+          <input type="submit" name="geon0Remove" value="Remove" />::
+          <input type="submit" name="geon0Activate" value="Activate" />
+          <input type="submit" name="geon0Remove" value="Remove" />
+          #(/geon0Status)#</dd>
+          #(geon0ActionLoaded)#::
+          <dt></dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt></dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
+          #(/geon0ActionLoaded)#
+          #(geon0ActionRemoved)#::
+          <dt></dt><dd><div class="commit">de-activated and removed dictionary file</div></dd>::
+          <dt></dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geon0ActionRemoved)#
+          #(geon0ActionDeactivated)#::
+          <dt></dt><dd><div class="commit">de-activated dictionary file</div></dd>::
+          <dt></dt><dd><div class="error">cannot de-activate dictionary file: #[error]#</div></dd>
+          #(/geon0ActionDeactivated)#
+          #(geon0ActionActivated)#::
+          <dt></dt><dd><div class="commit">activated dictionary file</div></dd>::
+          <dt></dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
+          #(/geon0ActionActivated)#        
+        </dl>
+        
+        <h4>OpenGeoDB</h4>
+	    <p>With this file it is possible to find locations in Germany using the location (city) name, a zip code, a car sign or a telephone pre-dial number.</p>
         
         <dl>
           <dt><label>Download from</label></dt>

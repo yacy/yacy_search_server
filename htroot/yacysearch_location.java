@@ -69,7 +69,7 @@ public class yacysearch_location {
                     String subject = "";
                     for (String s: message.getSubject()) subject += " " + s;
                     words += subject;
-                    for (String word: words.split(" ")) if (word.length() >= 3) locations.addAll(LibraryProvider.geoDB.find(word, true, true, false, false, false));
+                    for (String word: words.split(" ")) if (word.length() >= 3) locations.addAll(LibraryProvider.geoLoc.find(word, true));
 
                     String locnames = "";
                     for (Location location: locations) locnames += ", " + location.getName();

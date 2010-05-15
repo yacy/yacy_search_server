@@ -21,7 +21,8 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import net.yacy.document.geolocalization.OpenGeoDB;
+import net.yacy.document.geolocalization.GeonamesLocalization;
+import net.yacy.document.geolocalization.OpenGeoDBLocalization;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -58,15 +59,56 @@ public class DictionaryLoader_p {
         
         if (post == null) return prop;
         
+        // GEON0
+        if (post.containsKey("geon0Load")) {
+            // load from the net
+            try {
+                Response response = sb.loader.load(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true, CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+                byte[] b = response.getContent();
+                FileUtils.copy(b, LibraryProvider.Dictionary.GEON0.file());
+                LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocalization(LibraryProvider.Dictionary.GEON0.file()));
+                prop.put("geon0Status", LibraryProvider.Dictionary.GEON0.file().exists() ? 1 : 0);
+                prop.put("geon0ActionLoaded", 1);
+            } catch (MalformedURLException e) {
+                Log.logException(e);
+                prop.put("geon0ActionLoaded", 2);
+                prop.put("geon0ActionLoaded_error", e.getMessage());
+            } catch (IOException e) {
+                Log.logException(e);
+                prop.put("geon0ActionLoaded", 2);
+                prop.put("geon0ActionLoaded_error", e.getMessage());
+            }
+        }
+        
+        if (post.containsKey("geon0Remove")) {
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON0.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEON0.fileDisabled());
+            LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEON0.nickname);
+            prop.put("geon0ActionRemoved", 1);
+        }
+        
+        if (post.containsKey("geon0Deactivate")) {
+            LibraryProvider.Dictionary.GEON0.file().renameTo(LibraryProvider.Dictionary.GEON0.fileDisabled());
+            LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEON0.nickname);
+            prop.put("geon0ActionDeactivated", 1);
+        }
+        
+        if (post.containsKey("geon0Activate")) {
+            LibraryProvider.Dictionary.GEON0.fileDisabled().renameTo(LibraryProvider.Dictionary.GEON0.file());
+            LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocalization(LibraryProvider.Dictionary.GEON0.file()));
+            prop.put("geon0ActionActivated", 1);
+        }
+        
         // GEO1
         if (post.containsKey("geo1Load")) {
             // load from the net
             try {
-                Response response = sb.loader.load(new DigestURI(LibraryProvider.Dictionary.GEO1.url), false, true, CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+                Response response = sb.loader.load(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true, CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
                 byte[] b = response.getContent();
-                FileUtils.copy(b, LibraryProvider.Dictionary.GEO1.file());
-                LibraryProvider.geoDB = new OpenGeoDB(LibraryProvider.Dictionary.GEO1.file(), false);
-                prop.put("geo1Status", LibraryProvider.Dictionary.GEO1.file().exists() ? 1 : 0);
+                FileUtils.copy(b, LibraryProvider.Dictionary.GEODB1.file());
+                LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEODB0.nickname);
+                LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(LibraryProvider.Dictionary.GEODB1.file(), false));
+                prop.put("geo1Status", LibraryProvider.Dictionary.GEODB1.file().exists() ? 1 : 0);
                 prop.put("geo1ActionLoaded", 1);
             } catch (MalformedURLException e) {
                 Log.logException(e);
@@ -80,24 +122,23 @@ public class DictionaryLoader_p {
         }
         
         if (post.containsKey("geo1Remove")) {
-            FileUtils.deletedelete(LibraryProvider.Dictionary.GEO1.file());
-            FileUtils.deletedelete(LibraryProvider.Dictionary.GEO1.fileDisabled());
-            LibraryProvider.geoDB = new OpenGeoDB(null, true);
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEODB1.file());
+            FileUtils.deletedelete(LibraryProvider.Dictionary.GEODB1.fileDisabled());
+            LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
             prop.put("geo1ActionRemoved", 1);
         }
         
         if (post.containsKey("geo1Deactivate")) {
-            LibraryProvider.Dictionary.GEO1.file().renameTo(LibraryProvider.Dictionary.GEO1.fileDisabled());
-            LibraryProvider.geoDB = new OpenGeoDB(null, true);
+            LibraryProvider.Dictionary.GEODB1.file().renameTo(LibraryProvider.Dictionary.GEODB1.fileDisabled());
+            LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEODB1.nickname);
             prop.put("geo1ActionDeactivated", 1);
         }
         
         if (post.containsKey("geo1Activate")) {
-            LibraryProvider.Dictionary.GEO1.fileDisabled().renameTo(LibraryProvider.Dictionary.GEO1.file());
-            LibraryProvider.geoDB = new OpenGeoDB(LibraryProvider.Dictionary.GEO1.file(), false);
+            LibraryProvider.Dictionary.GEODB1.fileDisabled().renameTo(LibraryProvider.Dictionary.GEODB1.file());
+            LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(LibraryProvider.Dictionary.GEODB1.file(), false));
             prop.put("geo1ActionActivated", 1);
         }
-        
         
         // check status again
         for (LibraryProvider.Dictionary dictionary: LibraryProvider.Dictionary.values()) {

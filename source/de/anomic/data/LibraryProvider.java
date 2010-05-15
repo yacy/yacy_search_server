@@ -1,28 +1,24 @@
-// LibraryProvider.java
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 01.10.2009 on http://yacy.net
-//
-// This is a part of YaCy
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  LibraryProvider.java
+ *  Copyright 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  first published 01.10.2009 on http://yacy.net
+ *  
+ *  This file is part of YaCy Content Integration
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file COPYING.LESSER.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package de.anomic.data;
 
@@ -39,7 +35,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import net.yacy.document.geolocalization.OpenGeoDB;
+import net.yacy.document.geolocalization.GeonamesLocalization;
+import net.yacy.document.geolocalization.OpenGeoDBLocalization;
+import net.yacy.document.geolocalization.OverarchingLocalization;
 import net.yacy.kelondro.logging.Log;
 
 public class LibraryProvider {
@@ -50,17 +48,20 @@ public class LibraryProvider {
     public static final String disabledExtension = ".disabled";
     
     public static DidYouMeanLibrary dymLib = new DidYouMeanLibrary(null);
-    public static OpenGeoDB geoDB = new OpenGeoDB(null, true);
+    public static OverarchingLocalization geoLoc = new OverarchingLocalization();
     private static File dictSource = null;
     private static File dictRoot = null;
     
     public static enum Dictionary {
-        GEO0("geo0",
+        GEODB0("geo0",
              "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz",
              "opengeodb-0.2.5a-UTF8-sql.gz"),
-        GEO1("geo1",
+        GEODB1("geo1",
              "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02621_2010-03-16.sql.gz",
-             "opengeodb-02621_2010-03-16.sql.gz");
+             "opengeodb-02621_2010-03-16.sql.gz"),
+        GEON0("geon0",
+              "http://download.geonames.org/export/dump/cities1000.zip",
+              "cities1000.zip");
 
         public String nickname, url, filename;
         private Dictionary(String nickname, String url, String filename) {
@@ -95,18 +96,27 @@ public class LibraryProvider {
     	integrateDeReWo();
     	initDidYouMean();
     	integrateOpenGeoDB();
+    	integrateGeonames();
     }
     
     public static void integrateOpenGeoDB() {
-        File geo1 = Dictionary.GEO1.file();
-        File geo0 = Dictionary.GEO0.file();
+        File geo1 = Dictionary.GEODB1.file();
+        File geo0 = Dictionary.GEODB0.file();
         if (geo1.exists()) {
-            if (geo0.exists()) geo0.renameTo(Dictionary.GEO0.fileDisabled());
-            geoDB = new OpenGeoDB(geo1, false);
+            if (geo0.exists()) geo0.renameTo(Dictionary.GEODB0.fileDisabled());
+            geoLoc.addLocalization(Dictionary.GEODB1.nickname, new OpenGeoDBLocalization(geo1, false));
             return;
         }
         if (geo0.exists()) {
-            geoDB = new OpenGeoDB(geo0, true);
+            geoLoc.addLocalization(Dictionary.GEODB0.nickname, new OpenGeoDBLocalization(geo0, false));
+            return;
+        }
+    }
+    
+    public static void integrateGeonames() {
+        File geon = Dictionary.GEON0.file();
+        if (geon.exists()) {
+            geoLoc.addLocalization(Dictionary.GEON0.nickname, new GeonamesLocalization(geon));
             return;
         }
     }
