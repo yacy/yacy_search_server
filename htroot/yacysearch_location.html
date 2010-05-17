@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>#[former]# - YaCy '#[clientname]#': Search Page</title>
+  #%env/templates/metas.template%#
+  <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
+  <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="opensearchdescription.xml" /> 
+  <link rel="stylesheet" type="text/css" media="screen" href="/env/highslide.css" />
+  <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
+
+  <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
+<script type="text/javascript">
+
+    var map;
+
+    function init() {
+        map = new OpenLayers.Map('map', {maxResolution:'auto'});
+        layer = new OpenLayers.Layer.WMS( "OpenLayers WMS",
+            "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
+        map.addLayer(layer);
+        map.setCenter(new OpenLayers.LonLat(0, 0), 0);
+        map.addControl(new OpenLayers.Control.LayerSwitcher());
+    }
+
+    function search() {
+        var query = document.getElementById('query').value.replace(' ', '+');
+        var newl = new OpenLayers.Layer.GeoRSS( 'GeoRSS', 'http://localhost:8080/yacysearch_location.rss?query=' + query);
+        map.addLayer(newl);
+    }
+</script>
+
+</head>
+<body id="yacysearch_location" onload="init()">
+#(display)#
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#
+    ::
+    #%env/templates/embeddedheader.template%#
+#(/display)#
+    <div style="float:left; width:70%;">
+    <div id="map" style="width: 600px; height: 300px"></div>
+    <br/>
+    <form onsubmit="return false;" class="search small" accept-charset="UTF-8">
+        <fieldset class="yacys">
+           <input type="text" id="query" size="42" />
+           <input type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;" />
+        </fieldset>
+    </form>
+    </div>
+</body>
+</html>

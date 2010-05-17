@@ -27,6 +27,7 @@ import net.yacy.document.geolocalization.Location;
 import de.anomic.data.LibraryProvider;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -113,9 +114,14 @@ public class yacysearch_location {
             prop.put("kml_contentdom", (post == null ? "text" : post.get("contentdom", "text")));
             prop.put("kml_verify", (post == null) ? "true" : post.get("verify", "true"));
 
+        } else if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("html")) {
+            final Switchboard sb = (Switchboard) env;
+            final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+            int display = (post == null) ? 0 : post.getInt("display", 0);
+            if (!authenticated) display = 2;
+            prop.put("display", display);
         }
         
-
         // return rewrite properties
         return prop;
     }

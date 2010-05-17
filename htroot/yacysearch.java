@@ -121,7 +121,6 @@ public class yacysearch {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
             prop.put("display", display);
-            prop.put("display", display);
             prop.put("former", "");
             prop.put("count", "10");
             prop.put("offset", "0");
