@@ -9,8 +9,7 @@
   <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
 
   <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
-<script type="text/javascript">
-
+  <script type="text/javascript">
     var map;
 
     function init() {
@@ -24,10 +23,10 @@
 
     function search() {
         var query = document.getElementById('query').value.replace(' ', '+');
-        var newl = new OpenLayers.Layer.GeoRSS( 'GeoRSS', 'http://localhost:8080/yacysearch_location.rss?query=' + query);
+        var newl = new OpenLayers.Layer.GeoRSS( 'GeoRSS', 'yacysearch_location.rss?query=' + query);
         map.addLayer(newl);
     }
-</script>
+  </script>
 
 </head>
 <body id="yacysearch_location" onload="init()">
