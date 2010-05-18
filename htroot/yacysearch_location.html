@@ -1,35 +1,54 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <title>#[former]# - YaCy '#[clientname]#': Search Page</title>
+  <title>YaCy '#[clientname]#': Location Search</title>
   #%env/templates/metas.template%#
-  <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
-  <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="opensearchdescription.xml" /> 
-  <link rel="stylesheet" type="text/css" media="screen" href="/env/highslide.css" />
-  <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
-
   <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
+  <script type="text/javascript" src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
   <script type="text/javascript">
     var map;
-
+    var searchLayer = null;
+    
     function init() {
-        map = new OpenLayers.Map('map', {maxResolution:'auto'});
-        layer = new OpenLayers.Layer.WMS( "OpenLayers WMS",
-            "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
-        map.addLayer(layer);
-        map.setCenter(new OpenLayers.LonLat(0, 0), 0);
-        map.addControl(new OpenLayers.Control.LayerSwitcher());
+        map = new OpenLayers.Map('map', {
+                maxResolution:'auto',
+				controls:[
+					new OpenLayers.Control.Navigation(),
+					new OpenLayers.Control.PanZoomBar(),
+					new OpenLayers.Control.LayerSwitcher(),
+					new OpenLayers.Control.Attribution()]
+        });
+        
+		layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
+		layerWMS = new OpenLayers.Layer.WMS( "OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
+        layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
+		layerTilesAtHome = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
+		layerCycleMap = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
+		map.addLayer(layerCycleMap);
+		map.addLayer(layerMaplint);
+		map.addLayer(layerWMS);
+        map.addLayer(layerMapnik);
+	    map.addLayer(layerTilesAtHome);
+		map.addControl(new OpenLayers.Control.LayerSwitcher());
+        map.setCenter(new OpenLayers.LonLat(0,0) // Center of the map
+          .transform(
+            new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
+            new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
+          ), 2 // Zoom level
+        );
+        
     }
 
     function search() {
         var query = document.getElementById('query').value.replace(' ', '+');
-        var newl = new OpenLayers.Layer.GeoRSS( 'GeoRSS', 'yacysearch_location.rss?query=' + query);
-        map.addLayer(newl);
+        if (searchLayer != null) searchLayer.destroy();
+        searchLayer = new OpenLayers.Layer.GeoRSS('GeoRSS', 'yacysearch_location.rss?query=' + query);
+        map.addLayer(searchLayer);
     }
   </script>
 
 </head>
-<body id="yacysearch_location" onload="init()">
+<body id="yacysearch_location" onload="init();">
 #(display)#
     #%env/templates/simpleheader.template%#
     ::
@@ -37,15 +56,14 @@
     ::
     #%env/templates/embeddedheader.template%#
 #(/display)#
-    <div style="float:left; width:70%;">
-    <div id="map" style="width: 600px; height: 300px"></div>
-    <br/>
-    <form onsubmit="return false;" class="search small" accept-charset="UTF-8">
-        <fieldset class="yacys">
-           <input type="text" id="query" size="42" />
-           <input type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;" />
-        </fieldset>
-    </form>
-    </div>
+<form class="search small" onsubmit="return false;" class="search small" accept-charset="UTF-8">
+  <h2>#[promoteSearchPageGreeting]#</h2>
+  <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
+  <fieldset class="yacys">
+     <input type="text" id="query" size="42" />
+     <input type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;" />
+  </fieldset>
+</form><br/>
+<div id="map" style="width:800px; height:600px"></div>
 </body>
 </html>

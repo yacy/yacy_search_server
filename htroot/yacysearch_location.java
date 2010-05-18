@@ -43,14 +43,14 @@ public class yacysearch_location {
         final serverObjects prop = new serverObjects();
         
         prop.put("kml", 0);
-        if (post == null) return prop;
         
         if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("kml") ||
-                header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("xml") ||
-                header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("rss")
-                ) {
+            header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("xml") ||
+            header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("rss")
+           ) {
             // generate a kml output page
             prop.put("kml", 1);
+            if (post == null) return prop;
             String query = post.get("query", "");
             long maximumTime = post.getLong("maximumTime", 1000);
             int maximumRecords = post.getInt("maximumRecords", 100);
@@ -95,8 +95,9 @@ public class yacysearch_location {
                 }
                 prop.put("kml_placemark", placemarkCounter);
             } catch (InterruptedException e) {}
-        } if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("rss")) {
-            
+        }
+        if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("rss")) {
+            if (post == null) return prop;
             String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
             if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
             String hostName = header.get("Host", "localhost");
@@ -114,12 +115,16 @@ public class yacysearch_location {
             prop.put("kml_contentdom", (post == null ? "text" : post.get("contentdom", "text")));
             prop.put("kml_verify", (post == null) ? "true" : post.get("verify", "true"));
 
-        } else if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("html")) {
+        }
+        if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("html")) {
             final Switchboard sb = (Switchboard) env;
             final boolean authenticated = sb.adminAuthenticated(header) >= 2;
             int display = (post == null) ? 0 : post.getInt("display", 0);
             if (!authenticated) display = 2;
             prop.put("display", display);
+            prop.put("promoteSearchPageGreeting", sb.getConfig(SwitchboardConstants.GREETING, ""));
+            prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+            prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         }
         
         // return rewrite properties
