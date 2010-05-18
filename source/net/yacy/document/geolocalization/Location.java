@@ -47,7 +47,8 @@ public class Location extends Coordinates {
     
     public boolean equals(Object loc) {
         if (!(loc instanceof Location)) return false;
-        return super.equals(loc) && this.name.equals((Location) loc);
+        if (this.name == null || ((Location) loc).name == null) return super.equals(loc);
+        return super.equals(loc) && this.name.toLowerCase().equals(((Location) loc).name.toLowerCase());
     }
 
 }

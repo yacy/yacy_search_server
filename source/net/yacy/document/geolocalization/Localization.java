@@ -54,7 +54,7 @@ public interface Localization {
     public String nickname();
     
     /**
-     * hashCode that must be used to distinuguish localization services in hash sets
+     * hashCode that must be used to distinguish localization services in hash sets
      * @return the hash code, may be derived from the nickname
      */
     public int hashCode();
