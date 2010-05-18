@@ -5,9 +5,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-04-17 16:52:42 +0200 (Fr, 17. Apr 2009) $
-// $LastChangedRevision: 5828 $
-// $LastChangedBy: f1ori $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -64,7 +64,6 @@ import de.anomic.server.serverCore;
 import de.anomic.tools.CryptoLib;
 import de.anomic.tools.SignatureOutputStream;
 import de.anomic.tools.tarTools;
-import de.anomic.yacy.yacyBuildProperties;
 
 public final class yacyRelease extends yacyVersion {
 
