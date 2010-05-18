@@ -26,7 +26,9 @@
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -41,6 +43,19 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class CrawlProfileEditor_p {
+    
+    private static final Set<String> ignoreNames = new HashSet<String>();
+    static {
+        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_PROXY);
+        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_REMOTE);
+        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
+        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
+        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
+        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
+        ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE);
+        ignoreNames.add(CrawlSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
+        ignoreNames.add(CrawlSwitchboard.DBFILE_PASSIVE_CRAWL_PROFILES);
+    }
     
     public static class eentry {
         public static final int BOOLEAN = 0;
@@ -120,21 +135,7 @@ public class CrawlProfileEditor_p {
         entry selentry;
         while (it.hasNext()) {
             selentry = it.next();
-            if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE) ||
-                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE) ||
-                selentry.name().equals(CrawlSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES) ||
-                selentry.name().equals(CrawlSwitchboard.DBFILE_PASSIVE_CRAWL_PROFILES))
-                continue;
+            if (ignoreNames.contains(selentry.name())) continue;
             prop.put("profiles_" + count + "_name", selentry.name());
             prop.put("profiles_" + count + "_handle", selentry.handle());
             if (handle.equals(selentry.handle()))
@@ -256,10 +257,7 @@ public class CrawlProfileEditor_p {
         prop.put("crawlProfiles_" + count + "_indexText", (profile.indexText()) ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_indexMedia", (profile.indexMedia()) ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_remoteIndexing", (profile.remoteIndexing()) ? "1" : "0");
-        prop.put("crawlProfiles_" + count + "_terminateButton", ((!active) || (profile.name().equals("remote")) ||
-                                                           (profile.name().equals("proxy")) ||
-                                                           (profile.name().equals("snippetText")) ||
-                                                           (profile.name().equals("snippetMedia"))) ? "0" : "1");
+        prop.put("crawlProfiles_" + count + "_terminateButton", (!active || ignoreNames.contains(profile.name())) ? "0" : "1");
         prop.put("crawlProfiles_" + count + "_terminateButton_handle", profile.handle());
         prop.put("crawlProfiles_" + count + "_deleteButton", (active) ? "0" : "1");
         prop.put("crawlProfiles_" + count + "_deleteButton_handle", profile.handle());
