@@ -37,6 +37,10 @@
           ), 2 // Zoom level
         );
         
+        #(initsearch)#::
+        searchLayer = new OpenLayers.Layer.GeoRSS('GeoRSS', 'yacysearch_location.rss?query=#[query]#');
+        map.addLayer(searchLayer);
+        #(/initsearch)#
     }
 
     function search() {
@@ -60,7 +64,7 @@
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
   <fieldset class="yacys">
-     <input type="text" id="query" size="42" />
+     <input type="text" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" />
      <input type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;" />
   </fieldset>
 </form><br/>

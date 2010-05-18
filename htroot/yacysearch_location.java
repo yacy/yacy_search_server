@@ -125,6 +125,12 @@ public class yacysearch_location {
             prop.put("promoteSearchPageGreeting", sb.getConfig(SwitchboardConstants.GREETING, ""));
             prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
             prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+            if (post == null || post.get("query") == null) {
+                prop.put("initsearch", 0);
+            } else {
+                prop.put("initsearch", 1);
+                prop.put("initsearch_query", post.get("query"));
+            }
         }
         
         // return rewrite properties

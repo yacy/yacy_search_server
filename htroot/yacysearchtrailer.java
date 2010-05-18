@@ -169,6 +169,10 @@ public class yacysearchtrailer {
             prop.put("nav-about_body", aboutBody);
         }
         
+        // location search
+        prop.put("query", theQuery.queryString);
+        prop.put("display", display);
+        
         EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false, 30000, ProfilingGraph.maxTime);
         
         return prop;
