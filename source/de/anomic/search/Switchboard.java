@@ -149,8 +149,8 @@ import de.anomic.tools.CryptoLib;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacySeedDB;
@@ -1607,7 +1607,7 @@ public final class Switchboard extends serverSwitch {
                 if ((homepage != null) && (homepage.length() > 10)) {
                     final Properties news = new Properties();
                     news.put("homepage", profile.get("homepage"));
-                    this.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(peers.mySeed(), yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
+                    this.peers.newsPool.publishMyNews(yacyNewsDB.newRecord(peers.mySeed(), yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
                 }
             }
             

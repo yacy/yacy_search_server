@@ -168,6 +168,10 @@ public class OpenGeoDBLocalization implements Localization {
         s = s.substring(1, s.length() - 1);
         return s;
     }
+
+    public int locations() {
+        return id2loc.size();
+    }
     
     /**
      * check database tables against occurrences of this entity

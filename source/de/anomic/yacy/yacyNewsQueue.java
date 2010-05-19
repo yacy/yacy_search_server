@@ -67,7 +67,7 @@ public class yacyNewsQueue {
     private final yacyNewsDB newsDB;
     
     public static final Row rowdef = new Row(new Column[]{
-            new Column("newsid", Column.celltype_string, Column.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
+            new Column("newsid", Column.celltype_string, Column.encoder_bytes, yacyNewsDB.idLength, "id = created + originator"),
             new Column("last touched", Column.celltype_string, Column.encoder_bytes, DateFormatter.PATTERN_SHORT_SECOND.length(), "")
         },
         NaturalOrder.naturalOrder
@@ -83,20 +83,20 @@ public class yacyNewsQueue {
             this.queueStack = null;
         }
     }
-
-    private void resetDB() {
-        try {close();} catch (final Exception e) {}
-        if (path.exists()) FileUtils.deletedelete(path);
-        try {
-            this.queueStack = new Table(path, rowdef, 10, 0, false, false);
-        } catch (RowSpaceExceededException e) {
-            Log.logException(e);
-            this.queueStack = null;
-        }
-    }
-
+    
     public void clear() {
-        resetDB();
+        try {
+            this.queueStack.clear();
+        } catch (IOException e) {
+            try {close();} catch (final Exception ee) {}
+            if (path.exists()) FileUtils.deletedelete(path);
+            try {
+                this.queueStack = new Table(path, rowdef, 10, 0, false, false);
+            } catch (RowSpaceExceededException ee) {
+                Log.logException(e);
+                this.queueStack = null;
+            }
+        }
     }
 
     public void close() {
@@ -116,28 +116,18 @@ public class yacyNewsQueue {
         return queueStack.isEmpty();
     }
 
-    public synchronized void push(final yacyNewsRecord entry) throws IOException, RowSpaceExceededException {
+    public synchronized void push(final yacyNewsDB.Record entry) throws IOException, RowSpaceExceededException {
         queueStack.addUnique(r2b(entry, true));
     }
 
-    public synchronized yacyNewsRecord pop() throws IOException {
+    public synchronized yacyNewsDB.Record pop() throws IOException {
         if (queueStack.isEmpty()) return null;
         return b2r(queueStack.removeOne());
     }
 
-    public synchronized yacyNewsRecord topInc() throws IOException, RowSpaceExceededException {
-        if (queueStack.isEmpty()) return null;
-        final yacyNewsRecord entry = pop();
-        if (entry != null) {
-            entry.incDistribution();
-            push(entry);
-        }
-        return entry;
-    }
-
-    public synchronized yacyNewsRecord get(final String id) {
-        yacyNewsRecord record;
-        final Iterator<yacyNewsRecord> i = records(true);
+    public synchronized yacyNewsDB.Record get(final String id) {
+        yacyNewsDB.Record record;
+        final Iterator<yacyNewsDB.Record> i = records(true);
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) return record;
@@ -145,9 +135,9 @@ public class yacyNewsQueue {
         return null;
     }
 
-    public synchronized yacyNewsRecord remove(final String id) {
-        yacyNewsRecord record;
-        final Iterator<yacyNewsRecord> i = records(true);
+    public synchronized yacyNewsDB.Record remove(final String id) {
+        yacyNewsDB.Record record;
+        final Iterator<yacyNewsDB.Record> i = records(true);
         while (i.hasNext()) {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) {
@@ -162,19 +152,19 @@ public class yacyNewsQueue {
         return null;
     }
 
-    yacyNewsRecord b2r(final Row.Entry b) throws IOException {
+    yacyNewsDB.Record b2r(final Row.Entry b) throws IOException {
         if (b == null) return null;
         final String id = b.getColString(0, null);
         //Date touched = yacyCore.parseUniversalDate(new String(b[1]));
         return newsDB.get(id);
     }
 
-    private Row.Entry r2b(final yacyNewsRecord r, final boolean updateDB) throws IOException, RowSpaceExceededException {
+    private Row.Entry r2b(final yacyNewsDB.Record r, final boolean updateDB) throws IOException, RowSpaceExceededException {
         if (r == null) return null;
         if (updateDB) {
             newsDB.put(r);
         } else {
-            final yacyNewsRecord r1 = newsDB.get(r.id());
+            final yacyNewsDB.Record r1 = newsDB.get(r.id());
             if (r1 == null) newsDB.put(r);
         }
         final Row.Entry b = queueStack.row().newEntry(new byte[][]{
@@ -183,13 +173,13 @@ public class yacyNewsQueue {
         return b;
     }
     
-    public Iterator<yacyNewsRecord> records(final boolean up) {
+    public Iterator<yacyNewsDB.Record> records(final boolean up) {
         // iterates yacyNewsRecord-type objects
-        if (queueStack == null) return new HashSet<yacyNewsRecord>().iterator();
+        if (queueStack == null) return new HashSet<yacyNewsDB.Record>().iterator();
         return new newsIterator(up);
     }
     
-    public class newsIterator implements Iterator<yacyNewsRecord> {
+    public class newsIterator implements Iterator<yacyNewsDB.Record> {
         // iterates yacyNewsRecord-type objects
         
         Iterator<Row.Entry> stackNodeIterator;
@@ -207,7 +197,7 @@ public class yacyNewsQueue {
             return stackNodeIterator.hasNext();
         }
 
-        public yacyNewsRecord next() {
+        public yacyNewsDB.Record next() {
             final Row.Entry row = stackNodeIterator.next();
             try {
                 return b2r(row);

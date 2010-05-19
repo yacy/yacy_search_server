@@ -50,8 +50,8 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
 public class ViewProfile {
@@ -99,7 +99,7 @@ public class ViewProfile {
             } else {
                 // process news if existent
                 try {
-                    final yacyNewsRecord record = sb.peers.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
+                    final yacyNewsDB.Record record = sb.peers.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
                     if (record != null) sb.peers.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
                 } catch (final Exception e) {
                     Log.logException(e);

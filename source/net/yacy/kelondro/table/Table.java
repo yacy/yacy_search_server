@@ -814,7 +814,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         }
         
         public void remove() {
-            throw new UnsupportedOperationException("no remove in row iterator");
+            ri.remove();
         }
         
     }
@@ -871,7 +871,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         }
 
         public void remove() {
-            throw new UnsupportedOperationException("no remove in TABLE");
+            throw new UnsupportedOperationException("no remove in Table.rowIterator");
         }
         
     }

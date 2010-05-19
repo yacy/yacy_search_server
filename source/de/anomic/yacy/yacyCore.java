@@ -346,7 +346,7 @@ public class yacyCore {
 
             // include a YaCyNews record to my seed
             try {
-                final yacyNewsRecord record = sb.peers.newsPool.myPublication();
+                final yacyNewsDB.Record record = sb.peers.newsPool.myPublication();
                 if (record == null) {
                     sb.peers.mySeed().put("news", "");
                 } else {

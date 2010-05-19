@@ -45,8 +45,8 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
+import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
 public class Surftips {
@@ -87,7 +87,7 @@ public class Surftips {
                 map.put("urlhash", hash);
                 map.put("vote", "negative");
                 map.put("refid", post.get("refid", ""));
-                sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header, false)) {
@@ -103,7 +103,7 @@ public class Surftips {
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
                 map.put("comment", post.get("comment", ""));
-                sb.peers.newsPool.publishMyNews(new yacyNewsRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
         
             // create surftips
@@ -179,8 +179,8 @@ public class Surftips {
     
     private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
-        yacyNewsRecord record;
-        final Iterator<yacyNewsRecord> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        yacyNewsDB.Record record;
+        final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
@@ -209,8 +209,8 @@ public class Surftips {
             final HashMap<String, Entry> surftips, final ScoreCluster<String> ranking, final Row rowdef,
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
-        yacyNewsRecord record;
-        final Iterator<yacyNewsRecord> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
+        yacyNewsDB.Record record;
+        final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
         int j = 0;
         String url = "", urlhash;
         Row.Entry entry;

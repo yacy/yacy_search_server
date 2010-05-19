@@ -30,8 +30,8 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
 public class CrawlMonitorRemoteStart {
@@ -44,9 +44,9 @@ public class CrawlMonitorRemoteStart {
         boolean dark = true;   
         
         // create other peer crawl table using YaCyNews
-        Iterator<yacyNewsRecord> recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+        Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
         int showedCrawl = 0;
-        yacyNewsRecord record;
+        yacyNewsDB.Record record;
         yacySeed peer;
         String peername;
         while (recordIterator.hasNext()) {

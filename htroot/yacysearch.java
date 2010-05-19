@@ -68,8 +68,8 @@ import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class yacysearch {
@@ -413,7 +413,7 @@ public class yacysearch {
                 map.put("urlhash", delHash);
                 map.put("vote", "negative");
                 map.put("refid", "");
-                sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             } catch (IOException e) {
                 Log.logException(e);
             }
@@ -438,7 +438,7 @@ public class yacysearch {
                         map.put("description", document.dc_title().replace(',', ' '));
                         map.put("author", document.dc_creator());
                         map.put("tags", document.dc_subject(' '));
-                        sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
+                        sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                         document.close();
                     }
                 }

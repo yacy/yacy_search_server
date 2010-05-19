@@ -99,6 +99,6 @@ public class ChunkIterator implements Iterator<byte[]> {
     }
     
     public void remove() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("no remove in ChunkIterator possible");
     }
 }

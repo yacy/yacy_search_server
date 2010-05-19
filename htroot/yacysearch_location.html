@@ -7,7 +7,13 @@
   <script type="text/javascript" src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
   <script type="text/javascript">
     var map;
-    var searchLayer = null;
+    var searchLayer_md = null;
+    var searchLayer_co = null;
+    var path_mdsearch = 'yacysearch_location.rss?dom=title,publisher,creator,subject&query=';
+    var path_cosearch = 'yacysearch_location.rss?dom=query&query=';
+    var marker_md = new OpenLayers.Icon("/env/grafics/marker_red.png", new OpenLayers.Size(11,16));
+    var marker_co = new OpenLayers.Icon("/env/grafics/star_yellow.png", new OpenLayers.Size(25,25));
+    // possible values for dom: query,mdall,title,publisher,creator,subject
     
     function init() {
         map = new OpenLayers.Map('map', {
@@ -22,14 +28,14 @@
 		layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
 		layerWMS = new OpenLayers.Layer.WMS( "OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
         layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
-		layerTilesAtHome = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
+		layerOsmarender = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
 		layerCycleMap = new OpenLayers.Layer.OSM.CycleMap("CycleMap");
+		map.addLayer(layerMapnik);
+	    map.addLayer(layerOsmarender);
 		map.addLayer(layerCycleMap);
 		map.addLayer(layerMaplint);
 		map.addLayer(layerWMS);
-        map.addLayer(layerMapnik);
-	    map.addLayer(layerTilesAtHome);
-		map.addControl(new OpenLayers.Control.LayerSwitcher());
+        map.addControl(new OpenLayers.Control.LayerSwitcher());
         map.setCenter(new OpenLayers.LonLat(0,0) // Center of the map
           .transform(
             new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
@@ -38,16 +44,21 @@
         );
         
         #(initsearch)#::
-        searchLayer = new OpenLayers.Layer.GeoRSS('GeoRSS', 'yacysearch_location.rss?query=#[query]#');
-        map.addLayer(searchLayer);
+        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_cosearch + '#[query]#', {'icon':marker_co});
+        map.addLayer(searchLayer_co);
+        searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + '#[query]#', {'icon':marker_md});
+        map.addLayer(searchLayer_md);
         #(/initsearch)#
     }
 
     function search() {
         var query = document.getElementById('query').value.replace(' ', '+');
-        if (searchLayer != null) searchLayer.destroy();
-        searchLayer = new OpenLayers.Layer.GeoRSS('GeoRSS', 'yacysearch_location.rss?query=' + query);
-        map.addLayer(searchLayer);
+        if (searchLayer_md != null) searchLayer_md.destroy();
+        if (searchLayer_co != null) searchLayer_co.destroy();
+        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_cosearch + query, {'icon':marker_co});
+        map.addLayer(searchLayer_co);
+        searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
+        map.addLayer(searchLayer_md);
     }
   </script>
 

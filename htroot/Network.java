@@ -48,8 +48,8 @@ import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
+import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
@@ -244,8 +244,8 @@ public class Network {
                     final HashMap<String, Map<String, String>> updatedWiki = new HashMap<String, Map<String, String>>();
                     final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
                     final HashMap<String, String> isCrawling = new HashMap<String, String>();
-                    yacyNewsRecord record;
-                    final Iterator<yacyNewsRecord> recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+                    yacyNewsDB.Record record;
+                    final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
                     while (recordIterator.hasNext()) {
                         record = recordIterator.next();
                         if (record == null) {

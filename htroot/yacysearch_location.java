@@ -33,13 +33,16 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
+
 import java.util.Date;
 import net.yacy.kelondro.util.DateFormatter;
 
 public class yacysearch_location {
     
+    private static final String space = " ";
+    
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        //final Switchboard sb = (Switchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         prop.put("kml", 0);
@@ -52,33 +55,61 @@ public class yacysearch_location {
             prop.put("kml", 1);
             if (post == null) return prop;
             String query = post.get("query", "");
+            boolean search_all = !post.containsKey("dom") || post.get("dom", "").equals("all");
+            boolean search_query = search_all || post.get("dom", "").indexOf("query") >= 0;
+            boolean search_mdall = search_all || post.get("dom", "").indexOf("mdall") >= 0;
+            boolean search_title = search_mdall || post.get("dom", "").indexOf("title") >= 0;
+            boolean search_publisher = search_mdall || post.get("dom", "").indexOf("publisher") >= 0;
+            boolean search_creator = search_mdall || post.get("dom", "").indexOf("creator") >= 0;
+            boolean search_subject = search_mdall || post.get("dom", "").indexOf("subject") >= 0;
             long maximumTime = post.getLong("maximumTime", 1000);
             int maximumRecords = post.getInt("maximumRecords", 100);
             //i.e. http://localhost:8080/yacysearch_location.kml?query=berlin&maximumTime=2000&maximumRecords=100
             
-            // get a queue of search results
-            BlockingQueue<RSSMessage> results = yacyClient.search(null, query, false, false, maximumTime, Integer.MAX_VALUE);
-            
-            // take the results and compute some locations
-            RSSMessage message;
             int placemarkCounter = 0;
-            try {
+            if (search_query) {
+                Set<Location> locations = LibraryProvider.geoLoc.find(query, true);
+                for (Location location: locations) {
+                    // write for all locations a point to this message
+                    prop.put("kml_placemark_" + placemarkCounter + "_location", location.getName());
+                    prop.put("kml_placemark_" + placemarkCounter + "_name", location.getName());
+                    prop.put("kml_placemark_" + placemarkCounter + "_author", "");
+                    prop.put("kml_placemark_" + placemarkCounter + "_copyright", "");
+                    prop.put("kml_placemark_" + placemarkCounter + "_subject", "");
+                    prop.put("kml_placemark_" + placemarkCounter + "_description", "");
+                    prop.put("kml_placemark_" + placemarkCounter + "_date", "");
+                    prop.putXML("kml_placemark_" + placemarkCounter + "_url", "http://" + sb.peers.mySeed().getPublicAddress() + "/yacysearch.html?query=" + location.getName());
+                    prop.put("kml_placemark_" + placemarkCounter + "_pointname", location.getName());
+                    prop.put("kml_placemark_" + placemarkCounter + "_lon", location.lon());
+                    prop.put("kml_placemark_" + placemarkCounter + "_lat", location.lat());
+                    placemarkCounter++;
+                }
+            }
+            
+            if (search_title || search_publisher || search_creator || search_subject) try {
+                // get a queue of search results
+                BlockingQueue<RSSMessage> results = yacyClient.search(null, query, false, false, maximumTime, Integer.MAX_VALUE);
+                
+                // take the results and compute some locations
+                RSSMessage message;
                 loop: while ((message = results.poll(maximumTime, TimeUnit.MILLISECONDS)) != RSSMessage.POISON) {
                     // find all associated locations
                     Set<Location> locations = new HashSet<Location>();
-                    String words = message.getTitle() + " " + message.getCopyright() + " " + message.getAuthor();
+                    StringBuilder words = new StringBuilder(120);
+                    if (search_title) words.append(message.getTitle().trim()).append(space);
+                    if (search_publisher) words.append(message.getCopyright().trim()).append(space);
+                    if (search_creator) words.append(message.getAuthor().trim()).append(space);
                     String subject = "";
-                    for (String s: message.getSubject()) subject += " " + s;
-                    words += subject;
-                    for (String word: words.split(" ")) if (word.length() >= 3) locations.addAll(LibraryProvider.geoLoc.find(word, true));
-
-                    String locnames = "";
-                    for (Location location: locations) locnames += ", " + location.getName();
-                    if (locations.size() > 0) locnames = locnames.substring(2);
+                    for (String s: message.getSubject()) subject += s.trim() + space;
+                    if (search_subject) words.append(subject).append(space);
+                    String[] wordlist = words.toString().trim().split(space);
+                    for (String word: wordlist) if (word.length() >= 3) locations.addAll(LibraryProvider.geoLoc.find(word, true));
+                    for (int i = 0; i < wordlist.length - 1; i++) locations.addAll(LibraryProvider.geoLoc.find(wordlist[i] + space + wordlist[i + 1], true));
+                    for (int i = 0; i < wordlist.length - 2; i++) locations.addAll(LibraryProvider.geoLoc.find(wordlist[i] + space + wordlist[i + 1] + space + wordlist[i + 2], true));
                     
                     for (Location location: locations) {
                         // write for all locations a point to this message
-                        prop.put("kml_placemark_" + placemarkCounter + "_location", locnames);
+                        prop.put("kml_placemark_" + placemarkCounter + "_location", location.getName());
                         prop.put("kml_placemark_" + placemarkCounter + "_name", message.getTitle());
                         prop.put("kml_placemark_" + placemarkCounter + "_author", message.getAuthor());
                         prop.put("kml_placemark_" + placemarkCounter + "_copyright", message.getCopyright());
@@ -93,8 +124,8 @@ public class yacysearch_location {
                         if (placemarkCounter >= maximumRecords) break loop;
                     }
                 }
-                prop.put("kml_placemark", placemarkCounter);
             } catch (InterruptedException e) {}
+            prop.put("kml_placemark", placemarkCounter);
         }
         if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("rss")) {
             if (post == null) return prop;
@@ -117,7 +148,6 @@ public class yacysearch_location {
 
         }
         if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("html")) {
-            final Switchboard sb = (Switchboard) env;
             final boolean authenticated = sb.adminAuthenticated(header) >= 2;
             int display = (post == null) ? 0 : post.getInt("display", 0);
             if (!authenticated) display = 2;

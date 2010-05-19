@@ -35,8 +35,8 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 
 public class News {
@@ -103,8 +103,8 @@ public class News {
             
             if (sb.peers != null) {
                 final int maxCount = Math.min(1000, sb.peers.newsPool.size(tableID));
-                final Iterator<yacyNewsRecord> recordIterator = sb.peers.newsPool.recordIterator(tableID, false);
-                yacyNewsRecord record;
+                final Iterator<yacyNewsDB.Record> recordIterator = sb.peers.newsPool.recordIterator(tableID, false);
+                yacyNewsDB.Record record;
                 yacySeed seed;
                 int i = 0;
                 while ((recordIterator.hasNext()) && (i < maxCount)) {

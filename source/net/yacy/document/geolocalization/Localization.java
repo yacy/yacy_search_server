@@ -33,6 +33,12 @@ import java.util.Set;
 public interface Localization {
    
     /**
+     * the number of locations that this localization stores
+     * @return the number of locations
+     */
+    public int locations();
+    
+    /**
      * find a location by name
      * @param anyname - a name of a location
      * @param locationexact - if true, then only exact matched with the location are returned. if false also partially matching names

@@ -10,8 +10,8 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
 
 
 public class add_p {
@@ -83,6 +83,6 @@ public class add_p {
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));
     	map.put("tags", tagsString.replace(',', ' '));
-    	sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
+    	sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
     }
 }

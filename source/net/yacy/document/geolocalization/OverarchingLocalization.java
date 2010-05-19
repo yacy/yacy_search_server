@@ -54,6 +54,14 @@ public class OverarchingLocalization implements Localization {
     public void removeLocalization(String nickname) {
         this.services.remove(nickname);
     }
+
+    public int locations() {
+        int locations = 0;
+        for (Localization service: this.services.values()) {
+            locations += service.locations();
+        }
+        return locations;
+    }
     
     /**
      * find (a set of) locations

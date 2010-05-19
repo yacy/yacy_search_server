@@ -30,6 +30,7 @@ import java.util.List;
 
 import net.yacy.kelondro.util.EventTracker;
 
+import de.anomic.data.LibraryProvider;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Navigator;
 import de.anomic.search.QueryParams;
@@ -169,9 +170,16 @@ public class yacysearchtrailer {
             prop.put("nav-about_body", aboutBody);
         }
         
-        // location search
-        prop.put("query", theQuery.queryString);
-        prop.put("display", display);
+        // category: location search
+        // show only if there is a location database present and if there had been any search results
+        if (LibraryProvider.geoLoc.locations() == 0 ||
+            theSearch.getRankingResult().getLocalIndexCount() == 0) {
+            prop.put("cat-location", 0);
+        } else {
+            prop.put("cat-location", 1);
+            prop.put("cat-location_query", theQuery.queryString);
+            prop.put("cat-location_display", display);
+        }
         
         EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false, 30000, ProfilingGraph.maxTime);
         

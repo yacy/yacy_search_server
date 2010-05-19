@@ -124,6 +124,10 @@ public class GeonamesLocalization implements Localization {
             Log.logException(e);
         }
     }
+
+    public int locations() {
+        return id2loc.size();
+    }
     
     public Set<Location> find(String anyname, boolean locationexact) {
         HashSet<Integer> r = new HashSet<Integer>();
