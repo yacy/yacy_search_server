@@ -601,32 +601,36 @@ public class yacysearch {
             final StringBuilder resnav = new StringBuilder();
             final int thispage = offset / theQuery.displayResults();
             if (thispage == 0) {
-            	resnav.append("<img src=\"env/grafics/navdl.gif\" width=\"16\" height=\"16\">&nbsp;");
+            	resnav.append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
             } else {
             	resnav.append("<a href=\"");
                 resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, originalUrlMask, null, navigation));
-            	resnav.append("\"><img src=\"env/grafics/navdl.gif\" width=\"16\" height=\"16\"></a>&nbsp;");
+            	resnav.append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
             final int numberofpages = Math.min(10, Math.max(1 + thispage, 1 + ((theSearch.getRankingResult().getLocalIndexCount() < 11) ? Math.max(30, theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize()) : theSearch.getRankingResult().getLocalIndexCount()) / theQuery.displayResults()));
             for (int i = 0; i < numberofpages; i++) {
                 if (i == thispage) {
                     resnav.append("<img src=\"env/grafics/navs");
                     resnav.append(i + 1);
-                    resnav.append(".gif\" width=\"16\" height=\"16\">&nbsp;");
+                    resnav.append(".gif\" alt=\"page");
+					resnav.append(i + 1);
+					resnav.append("\" width=\"16\" height=\"16\" />&nbsp;");
                 } else {
                     resnav.append("<a href=\"");
                     resnav.append(QueryParams.navurl("html", i, display, theQuery, originalUrlMask, null, navigation));
                     resnav.append("\"><img src=\"env/grafics/navd");
                 	resnav.append(i + 1);
-                	resnav.append(".gif\" width=\"16\" height=\"16\"></a>&nbsp;");
+                	resnav.append(".gif\" alt=\"page");
+					resnav.append(i + 1);
+					resnav.append("\" width=\"16\" height=\"16\" /></a>&nbsp;");
                 }
             }
             if (thispage >= numberofpages) {
-            	resnav.append("<img src=\"env/grafics/navdr.gif\" width=\"16\" height=\"16\">");
+            	resnav.append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
             } else {
                 resnav.append("<a href=\"");
                 resnav.append(QueryParams.navurl("html", thispage + 1, display, theQuery, originalUrlMask, null, navigation));
-                resnav.append("\"><img src=\"env/grafics/navdr.gif\" width=\"16\" height=\"16\"></a>");
+                resnav.append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }
             String resnavs = resnav.toString();
             prop.put("num-results_resnav", resnavs);

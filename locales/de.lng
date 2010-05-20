@@ -2887,6 +2887,7 @@ Pictures==Bilder
 >Name Space Navigator==>Namespace Navigator
 >Author Navigator==>Autoren Navigator
 >Topic Navigator==>Themen Navigator
+Show search results for "#\[query\]#" on map!==Zeige die Suchergebnisse für "#[query]#" auf der Karte!
 #-----------------------------
 
 ### Subdirectory api ###
@@ -3162,6 +3163,12 @@ Welcome to your own web page<br />in the <strong>YaCy Network==Willkommen auf Ih
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==DIES IST EINE DEMONSTRATIONSSEITE FÜR IHREN EIGENEN WEB SERVER!
 PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSETZEN SIE DIESE SEITE, INDEM SIE EINE DATEI MIT DEM NAMEN index.html IM VERZEICHNIS
 &lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
+#-----------------------------
+
+#File: js/Crawler.js
+#---------------------------
+"Continue this queue"=="Diese Queue weiter abarbeiten"
+"Pause this queue"=="Diese Queue anhalten"
 #-----------------------------
 
 #File: yacy/ui/js/jquery-flexigrid.js
