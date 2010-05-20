@@ -1,4 +1,13 @@
 <div style="float:right;width:25%;">
+
+#(cat-location)#::
+<div style="float: right; margin-top:5px; width: 220px;">
+<div><a href="yacysearch_location.html?query=#[queryenc]#&display=#[display]#">
+<img src="/env/grafics/earthsearch.png" width="48" heigth="34" alt="earthsearchlogo" /></a></div>
+<div><a href="yacysearch_location.html?query=#[queryenc]#&display=#[display]#">Show search results for '"#[query]#"' on map!</a></div>
+</div>
+#(/cat-location)#
+
 #(nav-domains)#::
 <div id="sidebar1" style="float: right; margin-top:5px; width: 220px;">
 <h3 style="padding-left:25px;">Domain Navigator</h3>
@@ -44,10 +53,4 @@
 </div>
 #(/nav-about)#
 
-#(cat-location)#::
-<div id="sidebar4" style="float: right; margin-top:5px; width: 220px;">
-<div><a href="yacysearch_location.html?query=#[query]#&display=#[display]#">
-<img src="/env/grafics/earthsearch.png" width="48" heigth="34" alt="earthsearchlogo" /></a></div>
-<div><a href="yacysearch_location.html?query=#[query]#&display=#[display]#">Show search results for "#[query]#" on map!</a></div>
 </div>
-#(/cat-location)#

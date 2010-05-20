@@ -371,7 +371,7 @@ public final class QueryParams {
     public static String navurl(String ext, final int page, final int display, final QueryParams theQuery, final String originalUrlMask, String addToQuery, String nav) {
         return
         "/yacysearch." + ext + "?display=" + display +
-        "&search=" + theQuery.queryString(true) + ((addToQuery == null) ? "" : "+" + addToQuery) +
+        "&query=" + theQuery.queryString(true).replace(' ', '+') + ((addToQuery == null) ? "" : "+" + addToQuery) +
         "&maximumRecords="+ theQuery.displayResults() +
         "&startRecord=" + (page * theQuery.displayResults()) +
         "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +

@@ -43,7 +43,7 @@ public class ynetSearch {
     			    	k = it.next();
     			    	s = s + "&" + k.getKey() + "=" + k.getValue();    			    	
     			    }
-    				// final String s = searchaddress+"&search="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");    				   				
+    				// final String s = searchaddress+"&query="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");    				   				
     				final URL url = new URL(s);     				
     				is = url.openStream(); 
     				final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();    				

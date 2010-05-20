@@ -77,7 +77,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
       <InputEncoding>UTF-8</InputEncoding>
       <AdultContent>true</AdultContent>
       <Description>YaCy is an open-source GPL-licensed software that can be used for stand-alone search engine installations or as a client for a multi-user P2P-based web indexing cluster. This is the access to peer '#[clientname]#'.</Description>
-      <Url type="application/rss+xml" method="GET" template="http://#[thisaddress]#/yacysearch.rss?search={searchTerms}&amp;Enter=Search" />
+      <Url type="application/rss+xml" method="GET" template="http://#[thisaddress]#/yacysearch.rss?query={searchTerms}&amp;Enter=Search" />
       <Developer>See http://developer.berlios.de/projects/yacy/</Developer>
       <Query role="example" searchTerms="yacy" />
       <Tags>YaCy P2P Web Search</Tags>

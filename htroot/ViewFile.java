@@ -411,9 +411,16 @@ public class ViewFile {
     private static final String[] wordArray(String words) {
         String[] w = new String[0];
         if (words == null || words.length() == 0) return w;
+        if (words.length() > 1 && words.charAt(0) == '[' && words.charAt(words.length() - 1) == ']') {
+            words = words.substring(1, words.length() - 1);
+        }
         try {
             words = URLDecoder.decode(words, "UTF-8");
-            w = words.substring(1, words.length() - 1).split(",");
+            if (words.indexOf(' ') >= 0) return words.split(" ");
+            if (words.indexOf(',') >= 0) return words.split(",");
+            if (words.indexOf('+') >= 0) return words.split("+");
+            w = new String[1];
+            w[0] = words;
         } catch (final UnsupportedEncodingException e) {}
         return w;
     }

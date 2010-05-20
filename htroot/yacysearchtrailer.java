@@ -177,7 +177,8 @@ public class yacysearchtrailer {
             prop.put("cat-location", 0);
         } else {
             prop.put("cat-location", 1);
-            prop.put("cat-location_query", theQuery.queryString);
+            prop.put("cat-location_query", theQuery.queryString(true));
+            prop.put("cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));
             prop.put("cat-location_display", display);
         }
         
