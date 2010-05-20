@@ -69,6 +69,9 @@ public class yacysearch_location {
             int placemarkCounter = 0;
             if (search_query) {
                 Set<Location> locations = LibraryProvider.geoLoc.find(query, true);
+                for (String qp: query.split(" ")) {
+                    locations.addAll(LibraryProvider.geoLoc.find(qp, true));
+                }
                 for (Location location: locations) {
                     // write for all locations a point to this message
                     prop.put("kml_placemark_" + placemarkCounter + "_location", location.getName());

@@ -44,9 +44,10 @@
         );
         
         #(initsearch)#::
-        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_cosearch + '#[query]#', {'icon':marker_co});
+        var query = '#[query]#'.replace(' ', '+');
+        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_cosearch + query, {'icon':marker_co});
         map.addLayer(searchLayer_co);
-        searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + '#[query]#', {'icon':marker_md});
+        searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
         map.addLayer(searchLayer_md);
         #(/initsearch)#
     }

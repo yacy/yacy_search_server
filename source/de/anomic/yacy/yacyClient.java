@@ -507,7 +507,7 @@ public final class yacyClient {
         
         // prepare request
         final List<Part> post = new ArrayList<Part>();
-        post.add(new DefaultCharsetStringPart("query", query.replaceAll(" ", "+")));
+        post.add(new DefaultCharsetStringPart("query", query));
         post.add(new DefaultCharsetStringPart("startRecord", Integer.toString(startRecord)));
         post.add(new DefaultCharsetStringPart("maximumRecords", Long.toString(maximumRecords)));
         post.add(new DefaultCharsetStringPart("verify", verify ? "true" : "false"));

@@ -19,7 +19,7 @@
           <title><![CDATA[#[location]#]]></title>
           <link>#[url]#</link>
           <pubDate>#[date]#</pubDate>
-          <summary><![CDATA[#[subject]#]]></summary>
+          <summary><![CDATA[<a href="#[url]#">#[url]#</a><br/><br/>#[name]#<br/><br/><a href="ViewFile.html?url=#[url]#">[metadata]</a>]]></summary>
           <geo:long>#[lon]#</geo:long>
           <geo:lat>#[lat]#</geo:lat>
         </item>
