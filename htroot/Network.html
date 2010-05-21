@@ -142,10 +142,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td colspan=4>Online Peers</td>
-        <td rowspan=2>#Links</td>
-        <td rowspan=2>#Words</td>
-        <td rowspan=2>Indexing Speed</td>
-        <td rowspan=2>Query Frequency</td>
+        <td rowspan=2>Number<br/>of Documents</td>
+        <td rowspan=2>Indexing Speed:<br/>Pages Per Minute (PPM)</td>
+        <td rowspan=2>Query Frequency:<br/>Queries Per Hour (QPH)</td>
       </tr>
       <tr class="TableHeader">
         <td>Last Week</td>
@@ -158,21 +157,24 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td align="left">Active</td>
         <td align="right">#[active-count]#</td>
         <td align="right">#[active-links]#</td>
-        <td align="right">#[active-words]#</td>
-        <td align="right" rowspan=3>#[gppm]# Pages Per Minute (PPM)</td>
-        <td align="right" rowspan=3>#[gqph]# Queries Per Hour (QPH)</td>
+        <td align="right" rowspan=3>#[gppm]#</td>
+        <td align="right" rowspan=3>#[gqph]#</td>
       </tr>
       <tr class="TableCellDark">
         <td align="left">Passive</td>
         <td align="right">#[passive-count]#</td>
         <td align="right">#[passive-links]#</td>
-        <td align="right">#[passive-words]#</td>
       </tr>
       <tr class="TableCellDark">
         <td align="left">Potential</td>
         <td align="right">#[potential-count]#</td>
         <td align="right">#[potential-links]#</td>
-        <td align="right">#[potential-words]#</td>
+      </tr>
+      <tr class="TableCellSummary">
+        <td align="left" colspan="4">This Peer</td>
+        <td align="right">#[my-LCount]#</td>
+        <td align="right">#[my-ppm]#</td>
+        <td align="right">#[my-qph]#</td>
       </tr>
     </table>
     </div>
@@ -191,17 +193,16 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td>Uptime</td>
         <td>Links</td>
         <td>RWIs</td>
-        <td>URLs for<br />Remote Crawl</td>
-        <td>Sent<br />Words</td>
-        <td>Sent<br />URLs</td>
-        <td>Received<br />Words</td>
-        <td>Received<br />URLs</td>
-        <td>Known Seeds</td>
-        <td>Connects<br />per hour</td>
-        <td>Indexing PPM</td>
-        <td>QPH<br />(public&nbsp;local+remote)</td>
-        <td>QPH<br />(public&nbsp;local)</td>
-        <td>QPH<br />(remote)</td>
+        <td>URLs for<br/>Remote Crawl</td>
+        <td>Sent<br/>Words</td>
+        <td>Sent<br/>URLs</td>
+        <td>Received<br/>Words</td>
+        <td>Received<br/>URLs</td>
+        <td>Known<br/>Seeds</td>
+        <td>Connects<br/>per hour</td>
+        <td>Indexing<br/>PPM</td>
+        <td>QPH<br/>(public&nbsp;local)</td>
+        <td>QPH<br/>(remote)</td>
       </tr>
       <tr class="TableCellDark">
         <td>#[my-name]#</td>
@@ -219,7 +220,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td align="right">#[my-seeds]#</td>
         <td align="right">#[my-connects]#</td>
         <td align="right">#[my-ppm]#</td>
-        <td align="right">#[my-qph]#</td>
         <td align="right">#[my-qph-publocal]#</td>
         <td align="right">#[my-qph-pubremote]#</td>
       </tr>
