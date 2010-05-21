@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -112,6 +113,7 @@ public class GeonamesLocalization implements Localization {
                 locnames.add(fields[2]);
                 for (String s: fields[3].split(",")) locnames.add(s);
                 Location c = new Location(Double.parseDouble(fields[5]), Double.parseDouble(fields[4]), fields[1]);
+                c.setPopulation((int) Long.parseLong(fields[14]));
                 this.id2loc.put(id, c);
                 for (String name: locnames) {
                     List<Integer> locs = this.name2ids.get(name);
@@ -129,8 +131,8 @@ public class GeonamesLocalization implements Localization {
         return id2loc.size();
     }
     
-    public Set<Location> find(String anyname, boolean locationexact) {
-        HashSet<Integer> r = new HashSet<Integer>();
+    public TreeSet<Location> find(String anyname, boolean locationexact) {
+        Set<Integer> r = new HashSet<Integer>();
         List<Integer> c;
         if (locationexact) {
             c = this.name2ids.get(anyname); if (c != null) r.addAll(c);
@@ -140,7 +142,7 @@ public class GeonamesLocalization implements Localization {
                 if (e.getKey().toLowerCase().startsWith(anyname.toLowerCase())) r.addAll(e.getValue()); else break;
             }
         }
-        HashSet<Location> a = new HashSet<Location>();
+        TreeSet<Location> a = new TreeSet<Location>();
         for (Integer e: r) {
             Location w = this.id2loc.get(e);
             if (w != null) a.add(w);

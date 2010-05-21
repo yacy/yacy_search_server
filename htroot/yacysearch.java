@@ -30,7 +30,6 @@
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.document.Condenser;
@@ -559,7 +558,7 @@ public class yacysearch {
             }
             
             // find geographic info
-            Set<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
+            TreeSet<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
             if (coordinates == null || coordinates.isEmpty() || offset > 0) {
                 prop.put("geoinfo", "0");
             } else {
@@ -569,7 +568,7 @@ public class yacysearch {
                     prop.put("geoinfo_loc_" + i + "_lat", Math.round(c.lat() * 10000.0) / 10000.0);
                     prop.put("geoinfo_loc_" + i + "_name", c.getName());
                     i++;
-                    if (i >= 5) break;
+                    if (i >= 10) break;
                 }
                 prop.put("geoinfo_loc", i);
                 prop.put("geoinfo", "1");

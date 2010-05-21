@@ -24,6 +24,7 @@
 package net.yacy.document.geolocalization;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * localization interface
@@ -42,9 +43,9 @@ public interface Localization {
      * find a location by name
      * @param anyname - a name of a location
      * @param locationexact - if true, then only exact matched with the location are returned. if false also partially matching names
-     * @return a set of locations
+     * @return a set of locations, ordered by population (if this information is given)
      */
-    public Set<Location> find(String anyname, boolean locationexact);
+    public TreeSet<Location> find(String anyname, boolean locationexact);
 
     /**
      * recommend a set of names according to a given name

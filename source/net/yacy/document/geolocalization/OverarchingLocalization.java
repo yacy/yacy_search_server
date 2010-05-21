@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class OverarchingLocalization implements Localization {
 
@@ -66,8 +67,8 @@ public class OverarchingLocalization implements Localization {
     /**
      * find (a set of) locations
      */
-    public Set<Location> find(String anyname, boolean locationexact) {
-        Set<Location> locations = new HashSet<Location>();
+    public TreeSet<Location> find(String anyname, boolean locationexact) {
+        TreeSet<Location> locations = new TreeSet<Location>();
         for (Localization service: this.services.values()) {
             locations.addAll(service.find(anyname, locationexact));
         }

@@ -22,14 +22,18 @@
 
 package net.yacy.document.geolocalization;
 
+import java.util.Comparator;
 
-public class Location extends Coordinates {
+
+public class Location extends Coordinates implements Comparable<Location>, Comparator<Location> {
 
     private String name;
+    private int population;
     
     public Location(double lon, double lat) {
         super(lon, lat);
         this.name = null;
+        this.population = 0;
     }
     
     public Location(double lon, double lat, String name) {
@@ -45,10 +49,42 @@ public class Location extends Coordinates {
         return this.name;
     }
     
+    public void setPopulation(int population) {
+        this.population = population;
+    }
+    
+    public int getPopulation() {
+        return this.population;
+    }
+    
     public boolean equals(Object loc) {
         if (!(loc instanceof Location)) return false;
         if (this.name == null || ((Location) loc).name == null) return super.equals(loc);
         return super.equals(loc) && this.name.toLowerCase().equals(((Location) loc).name.toLowerCase());
     }
 
+    /**
+     * comparator that is needed to use the object inside TreeMap/TreeSet
+     * a Location is smaller than another if it has a _greater_ population
+     * this order is used to get sorted lists of locations where the first elements
+     * have the greatest population
+     */
+    public int compareTo(Location o) {
+        if (this.equals(o)) return 0;
+        long s = (ph(this.getPopulation()) << 30) + this.hashCode();
+        long t = (ph(o.getPopulation()) << 30) + o.hashCode();
+        if (s > t) return -1;
+        if (s < t) return  1;
+        return 0;
+    }
+    
+    private long ph(int population) {
+        if (population > 10000) population -= 10000;
+        return (long) population;
+    }
+    
+    public int compare(Location o1, Location o2) {
+        return o1.compareTo(o2);
+    }
+    
 }

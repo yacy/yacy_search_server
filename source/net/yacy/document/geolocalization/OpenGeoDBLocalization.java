@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.kelondro.logging.Log;
@@ -183,7 +184,7 @@ public class OpenGeoDBLocalization implements Localization {
      * @param anyname
      * @return
      */
-    public HashSet<Location> find(String anyname, boolean locationexact) {
+    public TreeSet<Location> find(String anyname, boolean locationexact) {
         HashSet<Integer> r = new HashSet<Integer>();
         List<Integer> c;
         if (locationexact) {
@@ -197,7 +198,7 @@ public class OpenGeoDBLocalization implements Localization {
             c = this.predial2ids.get(anyname); if (c != null) r.addAll(c);
             Integer i = this.zip2id.get(anyname); if (i != null) r.add(i);
         }
-        HashSet<Location> a = new HashSet<Location>();
+        TreeSet<Location> a = new TreeSet<Location>();
         for (Integer e: r) {
             Location w = this.id2loc.get(e);
             if (w != null) a.add(w);

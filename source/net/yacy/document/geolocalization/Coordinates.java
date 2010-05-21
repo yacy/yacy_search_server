@@ -22,9 +22,7 @@
 
 package net.yacy.document.geolocalization;
 
-import java.util.Comparator;
-
-public class Coordinates implements Comparable<Coordinates>, Comparator<Coordinates> {
+public class Coordinates {
 
 	private static final double tenmeter = 90.0 / 1.0e6;
 	
@@ -47,7 +45,7 @@ public class Coordinates implements Comparable<Coordinates>, Comparator<Coordina
     private static final double upscale = bits30 / 360.0;
     
     private static final int coord2int(double coord) {
-        return (int) ((coord + 180.0) * upscale);
+        return (int) ((180.0 - coord) * upscale);
     }
     
     /**
@@ -55,27 +53,7 @@ public class Coordinates implements Comparable<Coordinates>, Comparator<Coordina
      * this produces identical hash codes for locations that are close to each other
      */
     public int hashCode() {
-        int lon1 = coord2int(this.lon) >> 15;
-        int lat1 = coord2int(this.lat) >> 15;
-        int h = (lon1 << 15) + lat1;
-        //System.out.println("lon=" + this.lon + ", lat=" + this.lat + ", hash=" + h);
-        return h;
-    }
-    
-    /**
-     * comparator that is needed to use the class inside TreeMap/TreeSet
-     */
-    public int compareTo(Coordinates o) {
-    	if (this.equals(o)) return 0;
-		int s = this.hashCode();
-		int t = o.hashCode();
-		if (s > t) return 1;
-		if (s < t) return -1;
-		return 0;
-	}
-    
-    public int compare(Coordinates o1, Coordinates o2) {
-        return o1.compareTo(o2);
+        return coord2int(this.lon) + (coord2int(this.lat) >> 15);
     }
     
     /**
