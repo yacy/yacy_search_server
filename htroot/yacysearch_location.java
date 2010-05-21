@@ -62,8 +62,8 @@ public class yacysearch_location {
             boolean search_publisher = search_mdall || post.get("dom", "").indexOf("publisher") >= 0;
             boolean search_creator = search_mdall || post.get("dom", "").indexOf("creator") >= 0;
             boolean search_subject = search_mdall || post.get("dom", "").indexOf("subject") >= 0;
-            long maximumTime = post.getLong("maximumTime", 1000);
-            int maximumRecords = post.getInt("maximumRecords", 100);
+            long maximumTime = post.getLong("maximumTime", 3000);
+            int maximumRecords = post.getInt("maximumRecords", 200);
             //i.e. http://localhost:8080/yacysearch_location.kml?query=berlin&maximumTime=2000&maximumRecords=100
             
             int placemarkCounter = 0;
