@@ -49,8 +49,8 @@ public class NetworkPicture {
         if (post != null) {
             width = post.getInt("width", 768);
             height = post.getInt("height", 576);
-            passiveLimit = post.getInt("pal", 720);
-            potentialLimit = post.getInt("pol", 720);
+            passiveLimit = post.getInt("pal", 1440);
+            potentialLimit = post.getInt("pol", 1440);
             maxCount = post.getInt("max", 1000);
             corona = post.get("corona", "true").equals("true");
             bgcolor = post.get("bgcolor", bgcolor);
@@ -63,7 +63,7 @@ public class NetworkPicture {
         if (height > 1920) height = 1920;
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
-        if (maxCount > 1000) maxCount = 1000;
+        if (maxCount > 10000) maxCount = 10000;
         return NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
     }
     

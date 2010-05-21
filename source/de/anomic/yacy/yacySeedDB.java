@@ -414,7 +414,34 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return e.next();
     }
 
-    public int sizeConnected() {
+    /**
+     * count the number of peers that had been seed within the time limit
+     * @param limit the time limit in minutes. 1440 minutes is a day
+     * @return the number of peers seen in the given time
+     */
+    public int sizeActiveSince(long limit) {
+        int c = seedActiveDB.size();
+        yacySeed seed;
+        Iterator<yacySeed> i = seedsSortedDisconnected(false, yacySeed.LASTSEEN);
+        while (i.hasNext()) {
+            seed = i.next();
+            if (seed != null) {
+                if (Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60) > limit) break;
+                c++;
+            }
+        }
+        i = seedsSortedPotential(false, yacySeed.LASTSEEN);
+        while (i.hasNext()) {
+            seed = i.next();
+            if (seed != null) {
+                if (Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60) > limit) break;
+                c++;
+            }
+        }
+        return c;
+    }
+    
+     public int sizeConnected() {
         return seedActiveDB.size();
     }
     

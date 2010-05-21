@@ -121,7 +121,7 @@ public class NetworkGraph {
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
-        final RasterPlotter eventPicture = getNetworkPicture(seedDB, 120000, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), Switchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
+        final RasterPlotter eventPicture = getNetworkPicture(seedDB, 120000, 640, 480, 300, 300, 1000, true, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), Switchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
         //if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
         
@@ -162,10 +162,6 @@ public class NetworkGraph {
         }
 
         return eventPicture;
-    }
-
-    public static RasterPlotter getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final String networkName, final String networkTitle, final String bgcolor) {
-        return getNetworkPicture(seedDB, maxAge, 640, 480, 300, 300, 1000, true, networkName, networkTitle, bgcolor);
     }
 
     public static RasterPlotter getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final boolean corona, final String networkName, final String networkTitle, final String bgcolor) {

@@ -153,6 +153,8 @@ public class Network {
 
             // overall results: Network statistics
             if (iAmActive) conCount++; else if (mySeedType.equals(yacySeed.PEERTYPE_JUNIOR)) potCount++;
+            prop.putNum("table_active-last-week", sb.peers.sizeActiveSince(7 * 1440));
+            prop.putNum("table_active-last-day", sb.peers.sizeActiveSince(1440));
             prop.putNum("table_active-count", conCount);
             prop.putNum("table_active-links", accActLinks);
             prop.putNum("table_active-words", accActWords);

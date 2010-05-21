@@ -141,86 +141,47 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <div class="left">
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
-        <td>Branch</td>
-        <td>#Peers</td>
-        <td>#All Links</td>
-        <td>#All Words</td>
+        <td colspan=4>Online Peers</td>
+        <td rowspan=2>#Links</td>
+        <td rowspan=2>#Words</td>
+        <td rowspan=2>Indexing Speed</td>
+        <td rowspan=2>Query Frequency</td>
+      </tr>
+      <tr class="TableHeader">
+        <td>Last Week</td>
+        <td>Today</td>
+        <td colspan=2>Now</td>
       </tr>
       <tr class="TableCellDark">
-        <td align="left">Active (connected Senior and Principal)</td>
+        <td align="right" rowspan=3>#[active-last-week]#</td>
+        <td align="right" rowspan=3>#[active-last-day]#</td>
+        <td align="left">Active</td>
         <td align="right">#[active-count]#</td>
         <td align="right">#[active-links]#</td>
         <td align="right">#[active-words]#</td>
+        <td align="right" rowspan=3>#[gppm]# Pages Per Minute (PPM)</td>
+        <td align="right" rowspan=3>#[gqph]# Queries Per Hour (QPH)</td>
       </tr>
       <tr class="TableCellDark">
-        <td align="left">Passive (disconnected Senior and Principal)</td>
+        <td align="left">Passive</td>
         <td align="right">#[passive-count]#</td>
         <td align="right">#[passive-links]#</td>
         <td align="right">#[passive-words]#</td>
       </tr>
       <tr class="TableCellDark">
-        <td align="left">Potential (Junior)</td>
+        <td align="left">Potential</td>
         <td align="right">#[potential-count]#</td>
         <td align="right">#[potential-links]#</td>
         <td align="right">#[potential-words]#</td>
       </tr>
-      <tr class="TableCellSummary">
-        <td align="left">Network Total</td>
-        <td align="right">#[all-count]#</td>
-        <td align="right">#[all-links]#</td>
-        <td align="right">#[all-words]#</td>
-      </tr>
     </table>
     </div>
-    <div class="left">
-    <ul>
-    <li>Indexing Speed: #[gppm]# Pages Per Minute (PPM)</li>
-    <li>Query Frequency: #[gqph]# Queries Per Hour (QPH)</li>
-    </ul>
-    </div>
     
-    <div class="left">
-    </div>
-    
-    <div class="left">
+    <div class="left"><p>
     <a href="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF"><img src="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF" alt="The yacy Network" /></a>
-    </div>
+    </p></div>
 	<div class="left">
-    <table border="0">
-            <tr>
-                <td>&nbsp;</td>
-                    <td><strong>Network legend:</strong></td>
-                    <td></td>
-                    <td></td>
-            </tr>
-            <tr>
-                    <td style="background-color:#000000">&nbsp;</td>
-                    <td>dark font</td>
-                    <td>:</td>
-                    <td>senior/principal peers</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#E7B7AF">&nbsp;</td>
-                    <td>lightred font</td>
-                    <td>:</td>
-                    <td>passiv peers ( &lt; 5 hour passive time)</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#A7A75F">&nbsp;</td>
-                    <td>turquoise font</td>
-                    <td>:</td>
-                    <td>junior peers</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#C1A77F">&nbsp;</td>
-                    <td>red point</td>
-                    <td>:</td>
-                    <td>this peer</td>
-            </tr>
-    </table>
-    </div>
-    <div class="left">
-    <p>Your Peer:</p>
+    Your Peer:
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
         <td>Name</td>
@@ -263,6 +224,40 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td align="right">#[my-qph-pubremote]#</td>
       </tr>
     </table>
+    </div>
+    <div class="left"><p>
+    <table border="0">
+            <tr>
+                <td>&nbsp;</td>
+                    <td><strong>Network legend:</strong></td>
+                    <td></td>
+                    <td></td>
+            </tr>
+            <tr>
+                    <td style="background-color:#000000">&nbsp;</td>
+                    <td>dark font</td>
+                    <td>:</td>
+                    <td>senior/principal peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#E7B7AF">&nbsp;</td>
+                    <td>lightred font</td>
+                    <td>:</td>
+                    <td>passiv peers ( &lt; 5 hour passive time)</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#A7A75F">&nbsp;</td>
+                    <td>turquoise font</td>
+                    <td>:</td>
+                    <td>junior peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#C1A77F">&nbsp;</td>
+                    <td>red point</td>
+                    <td>:</td>
+                    <td>this peer</td>
+            </tr>
+    </table></p>
     </div>
     
     ::
