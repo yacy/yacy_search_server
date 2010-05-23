@@ -1037,7 +1037,8 @@ public class DigestURI implements Serializable {
      */
     public SmbFile getSmbFile() throws MalformedURLException {
         if (!isSMB()) throw new UnsupportedOperationException();
-        return new SmbFile(this.toNormalform(false, true));
+        String url = this.toNormalform(false, true);
+        return new SmbFile(url);
     }
     
     // some methods that let the DigestURI look like a java.io.File object
@@ -1162,10 +1163,13 @@ public class DigestURI implements Serializable {
     public String[] list() {
         if (isFile()) return getFSFile().list();
         if (isSMB()) try {
-            return getSmbFile().list();
-        } catch (SmbException e) {
-            Log.logWarning("DigestURI", "SMB.list SmbException for " + this.toString() + ": " + e.getMessage());
-            return null;
+            SmbFile sf = getSmbFile();
+            try {
+                return sf.list();
+            } catch (SmbException e) {
+                Log.logWarning("DigestURI", "SMB.list SmbException for " + sf.toString() + ": " + e.getMessage());
+                return null;
+            }
         } catch (MalformedURLException e) {
             Log.logWarning("DigestURI", "SMB.list MalformedURLException for " + this.toString() + ": " + e.getMessage());
             return null;

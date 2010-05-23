@@ -29,9 +29,15 @@ package de.anomic.crawler.retrieval;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileInputStream;
 
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
@@ -72,8 +78,6 @@ public class SMBLoader {
         
         // process directories: transform them to html with meta robots=noindex (using the ftpc lib)
         if (url.isDirectory()) {
-            List<String> list = new ArrayList<String>();
-            String u = url.toNormalform(true, true);
             String[] l = url.list();
             if (l == null) {
                 // this can only happen if there is no connection or the directory does not exist
@@ -81,7 +85,16 @@ public class SMBLoader {
                 sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, "directory listing not available. URL = " + request.url().toString());
                 throw new IOException("directory listing not available. URL = " + request.url().toString());
             }
-            for (String s: l) list.add(u + s);
+            String u = url.toNormalform(true, true);
+            List<String> list = new ArrayList<String>();
+            for (String s: l) {
+                if (!s.endsWith("/") && !s.endsWith("\\")) {
+                    // check if this is a directory
+                    SmbFile sf = new SmbFile(u + s);
+                    if (sf.isDirectory()) s = s + "/";
+                }
+                list.add(u + s);
+            }
          
             StringBuilder content = ftpc.dirhtml(u, null, null, null, list, true);
             
@@ -147,5 +160,32 @@ public class SMBLoader {
                 b);
         return response;
     }
-    
+ 
+    public static void main(String[] args) {
+        //jcifs.Config.setProperty( "jcifs.netbios.wins", "192.168.1.220" );
+        //NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication("domain", "username", "password");
+        SmbFileInputStream in;
+        try {
+            SmbFile sf = new SmbFile(args[0]);
+            if (sf.isDirectory()) {
+                String[] s = sf.list();
+                for (String t: s) System.out.println(t);
+            } else {
+                in = new SmbFileInputStream(sf);
+                byte[] b = new byte[8192];
+                int n;
+                while(( n = in.read( b )) > 0 ) {
+                    System.out.write( b, 0, n );
+                }
+            }
+        } catch (SmbException e) {
+            e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -1749,7 +1749,7 @@ public final class Switchboard extends serverSwitch {
                 // process the next hyperlink
                 nextUrl = nextEntry.getKey();
                 String u = nextUrl.toNormalform(true, true, true);
-                if (!(u.startsWith("http") || u.startsWith("ftp"))) continue;
+                if (!(u.startsWith("http") || u.startsWith("ftp") || u.startsWith("smb"))) continue;
                 // enqueue the hyperlink into the pre-notice-url db
                 try {
                     crawlStacker.enqueueEntry(new Request(
@@ -1829,13 +1829,13 @@ public final class Switchboard extends serverSwitch {
 
         if (condenser == null || document.indexingDenied()) {
             if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by rule in document");
             return;
         }
         
         if (!queueEntry.profile().indexText() && !queueEntry.profile().indexMedia()) {
             if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by profile rule");
             return;
         }
         

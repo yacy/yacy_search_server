@@ -2665,7 +2665,7 @@ public class ftpc {
         entryInfo info;
         for (final String line : list) {
             info = parseListData(line);
-            if(info != null) {
+            if (info != null) {
                 // with link
                 nameStart = line.indexOf(info.name);
                 page.append(line.substring(0, nameStart));
@@ -2674,9 +2674,11 @@ public class ftpc {
                 if (line.length() > nameEnd) {
                     page.append(line.substring(nameEnd));
                 }
+            } else if (line.startsWith("http://") || line.startsWith("ftp://") || line.startsWith("smb://")) {
+                page.append("<a href=\"" + line + "\">" + line + "</a>");
             } else {
-                // raw
-                page.append(line);
+               // raw
+               page.append(line);
             }
             page.append('\n');
         }
