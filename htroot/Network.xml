@@ -35,6 +35,13 @@
   </peer>
 #{/list}#
 ::
+  <history>
+  #(active-switch)#::
+    <month>0</month><week>0</week><day>#[last-day]#</day>::
+    <month>0</month><week>#[last-week]#</week><day>#[last-day]#</day>::
+    <month>#[last-month]#</month><week>#[last-week]#</week><day>#[last-day]#</day>
+  #(/active-switch)#
+  </history>
   <active>
     <count>#[active-count]#</count>
     <links>#[active-links]#</links>

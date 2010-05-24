@@ -141,19 +141,26 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <div class="left">
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
-        <td colspan=4>Online Peers</td>
-        <td rowspan=2>Number<br/>of Documents</td>
+        <td rowspan=5 class="TableHeader">Network</td>
+        <td colspan=#(active-switch)#2::3::4::5#(/active-switch)#>Online Peers</td>
+        <td rowspan=2>Number of<br/>Documents</td>
         <td rowspan=2>Indexing Speed:<br/>Pages Per Minute (PPM)</td>
         <td rowspan=2>Query Frequency:<br/>Queries Per Hour (QPH)</td>
       </tr>
       <tr class="TableHeader">
-        <td>Last Week</td>
-        <td>Today</td>
+        #(active-switch)#::
+        <td>Today</td>::
+        <td>Last Week</td><td>Today</td>::
+        <td>Last Month</td><td>Last Week</td><td>Today</td>
+        #(/active-switch)#
         <td colspan=2>Now</td>
       </tr>
       <tr class="TableCellDark">
-        <td align="right" rowspan=3>#[active-last-week]#</td>
-        <td align="right" rowspan=3>#[active-last-day]#</td>
+        #(active-switch)#::
+        <td align="right" rowspan=3>#[last-day]#</td>::
+        <td align="right" rowspan=3>#[last-week]#</td><td align="right" rowspan=3>#[last-day]#</td>::
+        <td align="right" rowspan=3>#[last-month]#</td><td align="right" rowspan=3>#[last-week]#</td><td align="right" rowspan=3>#[last-day]#</td>
+        #(/active-switch)#
         <td align="left">Active</td>
         <td align="right">#[active-count]#</td>
         <td align="right">#[active-links]#</td>
@@ -171,7 +178,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td align="right">#[potential-links]#</td>
       </tr>
       <tr class="TableCellSummary">
-        <td align="left" colspan="4">This Peer</td>
+        <td align="left" colspan="#(active-switch)#3::4::5::6#(/active-switch)#">This Peer</td>
         <td align="right">#[my-LCount]#</td>
         <td align="right">#[my-ppm]#</td>
         <td align="right">#[my-qph]#</td>

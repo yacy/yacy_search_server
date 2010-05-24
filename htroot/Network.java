@@ -153,8 +153,17 @@ public class Network {
 
             // overall results: Network statistics
             if (iAmActive) conCount++; else if (mySeedType.equals(yacySeed.PEERTYPE_JUNIOR)) potCount++;
-            prop.putNum("table_active-last-week", sb.peers.sizeActiveSince(7 * 1440));
-            prop.putNum("table_active-last-day", sb.peers.sizeActiveSince(1440));
+            int activeLastMonth = sb.peers.sizeActiveSince(30 * 1440);
+            int activeLastWeek = sb.peers.sizeActiveSince(7 * 1440);
+            int activeLastDay = sb.peers.sizeActiveSince(1440);
+            int activeSwitch =
+                (activeLastDay <= conCount) ? 0 :
+                (activeLastWeek <= activeLastDay) ? 1 :
+                (activeLastMonth <= activeLastWeek) ? 2 : 3;
+            prop.putNum("table_active-switch", activeSwitch);
+            prop.putNum("table_active-switch_last-month", activeLastMonth);
+            prop.putNum("table_active-switch_last-week", activeLastWeek);
+            prop.putNum("table_active-switch_last-day", activeLastDay);
             prop.putNum("table_active-count", conCount);
             prop.putNum("table_active-links", accActLinks);
             prop.putNum("table_active-words", accActWords);
