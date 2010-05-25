@@ -30,9 +30,9 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 
 public class ResultImages {
@@ -48,18 +48,17 @@ public class ResultImages {
     // we also check all links for a double-check so we don't get the same image more than once in any queue
     // image links may appear double here even if the pages where the image links are embedded already are checked for double-occurrence:
     // the same images may be linked from different pages
-    private static final ConcurrentHashMap<String, Long> doubleCheck = new ConcurrentHashMap<String, Long>(); // (url-hash, time) when the url appeared first
+    private static final ConcurrentHashMap<MultiProtocolURI, Long> doubleCheck = new ConcurrentHashMap<MultiProtocolURI, Long>(); // (url, time) when the url appeared first
     
     public static void registerImages(final Document document, final boolean privateEntry) {
         if (document == null) return;
         if (document.dc_source() == null) return;
         
-        final HashMap<String, ImageEntry> images = document.getImages();
+        final HashMap<MultiProtocolURI, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
-            String hashstring = new String(image.url().hash());
-            if (doubleCheck.containsKey(hashstring)) continue;
-            doubleCheck.put(hashstring, System.currentTimeMillis());
+            if (doubleCheck.containsKey(image.url())) continue;
+            doubleCheck.put(image.url(), System.currentTimeMillis());
             
             final String name = image.url().getFile();
             boolean good = false;
@@ -144,8 +143,8 @@ public class ResultImages {
     
     public static class OriginEntry {
         public ImageEntry imageEntry;
-        public DigestURI baseURL;
-        public OriginEntry(final ImageEntry imageEntry, final DigestURI baseURL) {
+        public MultiProtocolURI baseURL;
+        public OriginEntry(final ImageEntry imageEntry, final MultiProtocolURI baseURL) {
             this.imageEntry = imageEntry;
             this.baseURL = baseURL;
         }

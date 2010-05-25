@@ -44,8 +44,8 @@ import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.htmlParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -79,8 +79,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     // class variables: collectors for links
-    private HashMap<DigestURI, String> anchors;
-    private HashMap<String, ImageEntry> images; // urlhash/image relation
+    private HashMap<MultiProtocolURI, String> anchors;
+    private HashMap<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
     private final HashMap<String, String> metas;
     private String title;
     //private String headline;
@@ -89,23 +89,23 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final EventListenerList htmlFilterEventListeners;
     
     /**
-     * {@link DigestURI} to the favicon that belongs to the document
+     * {@link MultiProtocolURI} to the favicon that belongs to the document
      */
-    private DigestURI favicon;
+    private MultiProtocolURI favicon;
     
     /**
-     * The document root {@link DigestURI} 
+     * The document root {@link MultiProtocolURI} 
      */
-    private DigestURI root;
+    private MultiProtocolURI root;
 
     @SuppressWarnings("unchecked")
-    public ContentScraper(final DigestURI root) {
+    public ContentScraper(final MultiProtocolURI root) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         this.root = root;
-        this.anchors = new HashMap<DigestURI, String>();
-        this.images = new HashMap<String, ImageEntry>();
+        this.anchors = new HashMap<MultiProtocolURI, String>();
+        this.images = new HashMap<MultiProtocolURI, ImageEntry>();
         this.metas = new HashMap<String, String>();
         this.title = "";
         this.headlines = new ArrayList[4];
@@ -133,9 +133,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (b.length() != 0) content.append(b).append(32);
     }
 
-    private DigestURI absolutePath(final String relativePath) {
+    private MultiProtocolURI absolutePath(final String relativePath) {
         try {
-            return DigestURI.newURL(root, relativePath);
+            return MultiProtocolURI.newURL(root, relativePath);
         } catch (final Exception e) {
             return null;
         }
@@ -149,7 +149,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 if (width > 15 && height > 15) {
                     final float ratio = (float) Math.min(width, height) / Math.max(width, height);
                     if (ratio > 0.4) {
-                        final DigestURI url = absolutePath(tagopts.getProperty("src", ""));
+                        final MultiProtocolURI url = absolutePath(tagopts.getProperty("src", ""));
                         final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", ""), width, height, -1);
                         addImage(images, ie);
                     }
@@ -162,7 +162,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final NumberFormatException e) {}
         }
         if (tagname.equalsIgnoreCase("base")) try {
-            root = new DigestURI(tagopts.getProperty("href", ""), null);
+            root = new MultiProtocolURI(tagopts.getProperty("href", ""));
         } catch (final MalformedURLException e) {}
         if (tagname.equalsIgnoreCase("frame")) {
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
@@ -185,7 +185,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
         }
         if (tagname.equalsIgnoreCase("link")) {
-            final DigestURI newLink = absolutePath(tagopts.getProperty("href", ""));
+            final MultiProtocolURI newLink = absolutePath(tagopts.getProperty("href", ""));
 
             if (newLink != null) {
                 final String type = tagopts.getProperty("rel", "");
@@ -193,7 +193,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
                 if (type.equalsIgnoreCase("shortcut icon")) {
                     final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
-                    images.put(new String(ie.url().hash()), ie);    
+                    images.put(ie.url(), ie);    
                     this.favicon = newLink;
                 } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
                     anchors.put(newLink, linktitle);
@@ -220,7 +220,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if (tagname.equalsIgnoreCase("a") && text.length < 2048) {
             final String href = tagopts.getProperty("href", "");
-            DigestURI url;
+            MultiProtocolURI url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 final String f = url.getFile();
                 final int p = f.lastIndexOf('.');
@@ -350,7 +350,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
-    public Map<DigestURI, String> getAnchors() {
+    public Map<MultiProtocolURI, String> getAnchors() {
         // returns a url (String) / name (String) relation
         return anchors;
     }
@@ -359,7 +359,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * get all images
      * @return a map of <urlhash, ImageEntry>
      */
-    public HashMap<String, ImageEntry> getImages() {
+    public HashMap<MultiProtocolURI, ImageEntry> getImages() {
         // this resturns a String(absolute url)/htmlFilterImageEntry - relation
         return images;
     }
@@ -369,9 +369,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     /**
-     * @return the {@link DigestURI} to the favicon that belongs to the document
+     * @return the {@link MultiProtocolURI} to the favicon that belongs to the document
      */    
-    public DigestURI getFavicon() {
+    public MultiProtocolURI getFavicon() {
         return this.favicon;
     }
 
@@ -442,7 +442,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s == null) s = metas.get("dc.description");
         if (s == null) s = "";
         if (s.length() == 0) {
-            return DigestURI.splitpattern.split(getTitle().toLowerCase());
+            return MultiProtocolURI.splitpattern.split(getTitle().toLowerCase());
         }
         if (s.contains(",")) return s.split(" |,");
         if (s.contains(";")) return s.split(" |;");
@@ -536,32 +536,32 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (page == null) throw new IOException("no content in file " + file.toString());
         
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8",new DigestURI("http://localhost", null),null,false);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8", new MultiProtocolURI("http://localhost"),null,false);
         final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         
         // scrape content
-        final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost", null));
+        final ContentScraper scraper = new ContentScraper(new MultiProtocolURI("http://localhost"));
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         
         return scraper;
     }
     
-    public static void addAllImages(final HashMap<String, ImageEntry> a, final HashMap<String, ImageEntry> b) {
-        final Iterator<Map.Entry<String, ImageEntry>> i = b.entrySet().iterator();
-        Map.Entry<String, ImageEntry> ie;
+    public static void addAllImages(final HashMap<MultiProtocolURI, ImageEntry> a, final HashMap<MultiProtocolURI, ImageEntry> b) {
+        final Iterator<Map.Entry<MultiProtocolURI, ImageEntry>> i = b.entrySet().iterator();
+        Map.Entry<MultiProtocolURI, ImageEntry> ie;
         while (i.hasNext()) {
             ie = i.next();
             addImage(a, ie.getValue());
         }
     }
     
-    public static void addImage(final HashMap<String, ImageEntry> a, final ImageEntry ie) {
-        if (a.containsKey(new String(ie.url().hash()))) {
+    public static void addImage(final HashMap<MultiProtocolURI, ImageEntry> a, final ImageEntry ie) {
+        if (a.containsKey(ie.url())) {
             // in case of a collision, take that image that has the better image size tags
-            if ((ie.height() > 0) && (ie.width() > 0)) a.put(new String(ie.url().hash()), ie);
+            if ((ie.height() > 0) && (ie.width() > 0)) a.put(ie.url(), ie);
         } else {
-            a.put(new String(ie.url().hash()), ie);
+            a.put(ie.url(), ie);
         }
     }
     

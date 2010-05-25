@@ -2,8 +2,8 @@
 
 import java.util.Date;
 
-import net.yacy.document.content.RSSMessage;
-import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSMessage;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;

@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -234,7 +235,7 @@ public class Crawler_p {
                             // stack url
                             sb.crawler.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
                             final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
-                                    crawlingStartURL.getHost(),
+                                    (crawlingStartURL.getHost() == null) ? Long.toHexString(System.currentTimeMillis()) : crawlingStartURL.getHost(),
                                     crawlingStartURL,
                                     newcrawlingMustMatch,
                                     newcrawlingMustNotMatch,
@@ -345,7 +346,7 @@ public class Crawler_p {
                                 writer.close();
                                 
                                 //String headline = scraper.getHeadline();
-                                final Map<DigestURI, String> hyperlinks = scraper.getAnchors();
+                                final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
                                 
                                 // creating a crawler profile
                                 final DigestURI crawlURL = new DigestURI("file://" + file.toString(), null);
@@ -370,11 +371,12 @@ public class Crawler_p {
                                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                                 
                                 // loop through the contained links
-                                final Iterator<Map.Entry<DigestURI, String>> linkiterator = hyperlinks.entrySet().iterator();
+                                final Iterator<Map.Entry<MultiProtocolURI, String>> linkiterator = hyperlinks.entrySet().iterator();
                                 DigestURI nexturl;
                                 while (linkiterator.hasNext()) {
-                                    final Map.Entry<DigestURI, String> e = linkiterator.next();
-                                    nexturl = e.getKey();
+                                    final Map.Entry<MultiProtocolURI, String> e = linkiterator.next();
+                                    if (e.getKey() == null) continue;
+                                    nexturl = new DigestURI(e.getKey());
                                     if (nexturl == null) continue;
                                     
                                     // enqueuing the url for crawling

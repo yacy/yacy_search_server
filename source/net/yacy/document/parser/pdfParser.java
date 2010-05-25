@@ -44,11 +44,11 @@ import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.apache.pdfbox.util.PDFTextStripper;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -84,7 +84,7 @@ public class pdfParser extends AbstractParser implements Idiom {
         return SUPPORTED_EXTENSIONS;
     }
     
-    public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         // create a pdf parser
         final PDDocument theDocument;

@@ -48,8 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
-import net.yacy.document.content.RSSMessage;
-import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;

@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
@@ -45,7 +46,6 @@ import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -81,7 +81,7 @@ public class tarParser extends AbstractParser implements Idiom {
         return SUPPORTED_EXTENSIONS;
     }
     
-    public Document parse(final DigestURI location, final String mimeType, final String charset, InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, InputStream source) throws ParserException, InterruptedException {
         
         long docTextLength = 0;
         OutputStream docText = null;
@@ -106,8 +106,8 @@ public class tarParser extends AbstractParser implements Idiom {
             final LinkedList<String> docSections = new LinkedList<String>();
             final StringBuilder docAbstrct = new StringBuilder();
 
-            final Map<DigestURI, String> docAnchors = new HashMap<DigestURI, String>();
-            final HashMap<String, ImageEntry> docImages = new HashMap<String, ImageEntry>(); 
+            final Map<MultiProtocolURI, String> docAnchors = new HashMap<MultiProtocolURI, String>();
+            final HashMap<MultiProtocolURI, ImageEntry> docImages = new HashMap<MultiProtocolURI, ImageEntry>(); 
                         
             // looping through the contained files
             TarEntry entry;
@@ -143,7 +143,7 @@ public class tarParser extends AbstractParser implements Idiom {
                     checkInterruption();
                     
                     // parsing the content                    
-                    subDoc = TextParser.parseSource(DigestURI.newURL(location,"#" + entryName),entryMime,null,subDocTempFile);
+                    subDoc = TextParser.parseSource(MultiProtocolURI.newURL(location,"#" + entryName),entryMime,null,subDocTempFile);
                 } catch (final ParserException e) {
                     this.theLogger.logInfo("Unable to parse tar file entry '" + entryName + "'. " + e.getMessage());
                 } finally {

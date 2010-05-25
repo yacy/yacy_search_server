@@ -405,7 +405,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         /* ===========================================================================
          * COMPUTE SNIPPET
          * =========================================================================== */    
-        final DigestURI resFavicon = document.getFavicon();
+        final DigestURI resFavicon = (document.getFavicon() == null) ? null : new DigestURI(document.getFavicon());
         if (resFavicon != null) faviconCache.put(new String(url.hash()), resFavicon);
         // we have found a parseable non-empty file: use the lines
 

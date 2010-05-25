@@ -52,8 +52,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
@@ -369,9 +369,9 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         if (this.size() == 0) return "";
         StringBuilder param = new StringBuilder();
         for (Map.Entry<String, String> entry: this.entrySet()) {
-            param.append(DigestURI.escape(entry.getKey()));
+            param.append(MultiProtocolURI.escape(entry.getKey()));
             param.append('=');
-            param.append(DigestURI.escape(entry.getValue()));
+            param.append(MultiProtocolURI.escape(entry.getValue()));
             param.append('&');
         }
         param.setLength(param.length() - 1);

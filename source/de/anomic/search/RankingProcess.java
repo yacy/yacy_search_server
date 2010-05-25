@@ -39,6 +39,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -631,7 +632,7 @@ public final class RankingProcess extends Thread {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
-        final String[] descrcomps = DigestURI.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
+        final String[] descrcomps = MultiProtocolURI.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
         
         // add references
         //addTopic(urlcomps);

@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.ParserException;
@@ -372,7 +373,7 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
                 
-                final HashMap<String, ImageEntry> ts = document.getImages();
+                final HashMap<MultiProtocolURI, ImageEntry> ts = document.getImages();
                 final Iterator<ImageEntry> tsi = ts.values().iterator();
                 ImageEntry entry;
                 while (tsi.hasNext()) {
@@ -439,9 +440,9 @@ public class ViewFile {
         return message;
     }
     
-    private static int putMediaInfo(final serverObjects prop, final String[] wordArray, int c, final Map<DigestURI, String> media, final String name, boolean dark) {
-        final Iterator<Map.Entry<DigestURI, String>> mi = media.entrySet().iterator();
-        Map.Entry<DigestURI, String> entry;
+    private static int putMediaInfo(final serverObjects prop, final String[] wordArray, int c, final Map<MultiProtocolURI, String> media, final String name, boolean dark) {
+        final Iterator<Map.Entry<MultiProtocolURI, String>> mi = media.entrySet().iterator();
+        Map.Entry<MultiProtocolURI, String> entry;
         int i = 0;
         while (mi.hasNext()) {
             entry = mi.next();

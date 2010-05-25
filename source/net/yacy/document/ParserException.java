@@ -24,10 +24,10 @@
 
 package net.yacy.document;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 
 public class ParserException extends Exception {
-    private DigestURI url = null;
+    private MultiProtocolURI url = null;
     
 	private static final long serialVersionUID = 1L;
 
@@ -35,12 +35,12 @@ public class ParserException extends Exception {
         super();
     }
 
-    public ParserException(final String message, final DigestURI url) {
+    public ParserException(final String message, final MultiProtocolURI url) {
         super(message + "; url = " + url.toNormalform(true, false));
         this.url = url;
     }
     
-    public DigestURI getURL() {
+    public MultiProtocolURI getURL() {
         return this.url;
     }
 }

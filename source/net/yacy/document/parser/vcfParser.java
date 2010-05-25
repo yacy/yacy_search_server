@@ -37,11 +37,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.order.Base64Order;
 
 /**
@@ -80,13 +80,13 @@ public class vcfParser extends AbstractParser implements Idiom {
         return SUPPORTED_EXTENSIONS;
     }
     
-    public Document parse(final DigestURI url, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         try {
             final StringBuilder parsedTitle = new StringBuilder();
             final StringBuilder parsedDataText = new StringBuilder();
             final HashMap<String, String> parsedData = new HashMap<String, String>();
-            final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
+            final HashMap<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
             
             boolean useLastLine = false;
@@ -195,7 +195,7 @@ public class vcfParser extends AbstractParser implements Idiom {
                         parsedData.clear();
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
-                            final DigestURI newURL = new DigestURI(value, null);
+                            final MultiProtocolURI newURL = new MultiProtocolURI(value);
                             anchors.put(newURL, newURL.toString());   
                             //parsedData.put(key,value);
                         } catch (final MalformedURLException ex) {/* ignore this */}                                                

@@ -37,6 +37,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -95,11 +96,11 @@ public class WebStructureGraph {
     }
     
     public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final Document document, final Condenser condenser, final Date docDate) {
-        final DigestURI url = document.dc_source();
+        final DigestURI url = new DigestURI(document.dc_source());
         
         // generate citation reference
-        final Map<DigestURI, String> hl = document.getHyperlinks();
-        final Iterator<DigestURI> it = hl.keySet().iterator();
+        final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
+        final Iterator<MultiProtocolURI> it = hl.keySet().iterator();
         byte[] nexturlhashb;
         String nexturlhash;
         final StringBuilder cpg = new StringBuilder(12 * (hl.size() + 1) + 1);
@@ -109,7 +110,7 @@ public class WebStructureGraph {
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
-            nexturlhashb = it.next().hash();
+            nexturlhashb = new DigestURI(it.next()).hash();
             if (nexturlhashb != null) {
                 nexturlhash = new String(nexturlhashb);
                 assert nexturlhash.length() == 12 : "nexturlhash.length() = " + nexturlhash.length() + ", nexturlhash = " + nexturlhash;

@@ -2645,7 +2645,7 @@ public class ftpc {
         page.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n");
         page.append("<html><head>\n");
         page.append("  <title>" + title + "</title>\n");
-        page.append("  <meta name=\"generator\" content=\"YaCy ftpc dirlisting\">\n");
+        page.append("  <meta name=\"generator\" content=\"YaCy directory listing\">\n");
         if (metaRobotNoindex) {
             page.append("  <meta name=\"robots\" content=\"noindex\">\n");
         }
@@ -2674,7 +2674,7 @@ public class ftpc {
                 if (line.length() > nameEnd) {
                     page.append(line.substring(nameEnd));
                 }
-            } else if (line.startsWith("http://") || line.startsWith("ftp://") || line.startsWith("smb://")) {
+            } else if (line.startsWith("http://") || line.startsWith("ftp://") || line.startsWith("smb://") || line.startsWith("file://")) {
                 page.append("<a href=\"" + line + "\">" + line + "</a>");
             } else {
                // raw

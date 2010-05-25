@@ -51,6 +51,7 @@ import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.FTPLoader;
+import de.anomic.crawler.retrieval.FileLoader;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
@@ -73,17 +74,19 @@ public final class LoaderDispatcher {
     private final HTTPLoader httpLoader;
     private final FTPLoader ftpLoader;
     private final SMBLoader smbLoader;
+    private final FileLoader fileLoader;
     private final Log log;
     
     public LoaderDispatcher(final Switchboard sb) {
         this.sb = sb;
-        this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp","smb"}));
+        this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp","smb","file"}));
         
         // initiate loader objects
         this.log = new Log("LOADER");
         httpLoader = new HTTPLoader(sb, log);
         ftpLoader = new FTPLoader(sb, log);
         smbLoader = new SMBLoader(sb, log);
+        fileLoader = new FileLoader(sb, log);
     }
     
     public boolean isSupportedProtocol(final String protocol) {
@@ -251,13 +254,14 @@ public final class LoaderDispatcher {
         }
 
         // now it's for sure that we will access the target. Remember the access time
-        accessTime.put(host, System.currentTimeMillis());
+        if (host != null) accessTime.put(host, System.currentTimeMillis());
         
         // load resource from the internet
         Response response = null;
         if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, acceptOnlyParseable, maxFileSize);
         if (protocol.equals("ftp")) response = ftpLoader.load(request, true);
         if (protocol.equals("smb")) response = smbLoader.load(request, true);
+        if (protocol.equals("file")) response = fileLoader.load(request, true);
         if (response != null) {
             // we got something. Now check if we want to store that to the cache
             // first check looks if we want to store the content to the cache

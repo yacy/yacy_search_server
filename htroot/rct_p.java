@@ -30,8 +30,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
 
-import net.yacy.document.content.RSSMessage;
-import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.Hit;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -57,7 +57,7 @@ public class rct_p {
                 final yacySeed seed = (peerhash == null) ? null : sb.peers.getConnected(peerhash);
                 final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.peers, seed, 20, 60000);
                 if (feed != null) {
-                    for (final RSSMessage item: feed) {
+                    for (final Hit item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
                         
                         // put url on remote crawl stack

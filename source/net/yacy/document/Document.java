@@ -45,9 +45,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
@@ -55,7 +55,7 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class Document {
     
-    private final DigestURI source;             // the source url
+    private final MultiProtocolURI source;             // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
@@ -65,24 +65,24 @@ public class Document {
     private final List<String>  sections;       // if present: more titles/headlines appearing in the document
     private final StringBuilder description;    // an abstract, if present: short content description
     private Object text;                        // the clear text, all that is visible
-    private final Map<DigestURI, String> anchors; // all links embedded as clickeable entities (anchor tags)
-    private final HashMap<String, ImageEntry> images; // all visible pictures in document
+    private final Map<MultiProtocolURI, String> anchors; // all links embedded as clickeable entities (anchor tags)
+    private final HashMap<MultiProtocolURI, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private Map<DigestURI, String> hyperlinks, audiolinks, videolinks, applinks;
+    private Map<MultiProtocolURI, String> hyperlinks, audiolinks, videolinks, applinks;
     private Map<String, String> emaillinks;
-    private DigestURI favicon;
+    private MultiProtocolURI favicon;
     private boolean resorted;
     private InputStream textStream;
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     private Set<String> languages;
     private boolean indexingDenied;
     
-    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
+    public Document(final MultiProtocolURI location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author, final String publisher,
                     final String[] sections, final String abstrct,
-                    final Object text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images,
+                    final Object text, final Map<MultiProtocolURI, String> anchors, final HashMap<MultiProtocolURI, ImageEntry> images,
                     boolean indexingDenied) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
@@ -92,8 +92,8 @@ public class Document {
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
         this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
-        this.anchors = (anchors == null) ? new HashMap<DigestURI, String>(0) : anchors;
-        this.images =  (images == null) ? new HashMap<String, ImageEntry>() : images;
+        this.anchors = (anchors == null) ? new HashMap<MultiProtocolURI, String>(0) : anchors;
+        this.images =  (images == null) ? new HashMap<MultiProtocolURI, ImageEntry>() : images;
         this.publisher = publisher;
         this.hyperlinks = null;
         this.audiolinks = null;
@@ -159,7 +159,7 @@ dc_rights
      */
     
     public String dc_title() {
-        return title.toString();
+        return (title == null) ? "" : title.toString();
     }
 
     public void setTitle(String title) {
@@ -167,9 +167,7 @@ dc_rights
     }
     
     public String dc_creator() {
-        if (creator == null)
-            return "";
-        return creator.toString();
+        return (creator == null) ? "" : creator.toString();
     }
     
     public String dc_subject(final char separator) {
@@ -196,7 +194,7 @@ dc_rights
     }
     
     public String dc_publisher() {
-        return this.publisher;
+        return this.publisher == null ? "" : this.publisher;
     }
     
     public String dc_format() {
@@ -207,7 +205,7 @@ dc_rights
         return this.source.toNormalform(true, false);
     }
     
-    public DigestURI dc_source() {
+    public MultiProtocolURI dc_source() {
         return this.source;
     }
     
@@ -282,7 +280,7 @@ dc_rights
         return this.keywords;
     }
     
-    public Map<DigestURI, String> getAnchors() {
+    public Map<MultiProtocolURI, String> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return anchors;
@@ -291,30 +289,30 @@ dc_rights
     
     // the next three methods provide a calculated view on the getAnchors/getImages:
     
-    public Map<DigestURI, String> getHyperlinks() {
+    public Map<MultiProtocolURI, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!resorted) resortLinks();
         return hyperlinks;
     }
     
-    public Map<DigestURI, String> getAudiolinks() {
+    public Map<MultiProtocolURI, String> getAudiolinks() {
         if (!resorted) resortLinks();
         return this.audiolinks;
     }
     
-    public Map<DigestURI, String> getVideolinks() {
+    public Map<MultiProtocolURI, String> getVideolinks() {
         if (!resorted) resortLinks();
         return this.videolinks;
     }
     
-    public HashMap<String, ImageEntry> getImages() {
+    public HashMap<MultiProtocolURI, ImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!resorted) resortLinks();
         return images;
     }
     
-    public Map<DigestURI, String> getApplinks() {
+    public Map<MultiProtocolURI, String> getApplinks() {
         if (!resorted) resortLinks();
         return this.applinks;
     }
@@ -329,18 +327,18 @@ dc_rights
         if (this.resorted) return;
         
         // extract hyperlinks, medialinks and emaillinks from anchorlinks
-        DigestURI url;
+        MultiProtocolURI url;
         String u;
         int extpos, qpos;
         String ext = null;
-        final Iterator<Map.Entry<DigestURI, String>> i = anchors.entrySet().iterator();
-        hyperlinks = new HashMap<DigestURI, String>();
-        videolinks = new HashMap<DigestURI, String>();
-        audiolinks = new HashMap<DigestURI, String>();
-        applinks   = new HashMap<DigestURI, String>();
+        final Iterator<Map.Entry<MultiProtocolURI, String>> i = anchors.entrySet().iterator();
+        hyperlinks = new HashMap<MultiProtocolURI, String>();
+        videolinks = new HashMap<MultiProtocolURI, String>();
+        audiolinks = new HashMap<MultiProtocolURI, String>();
+        applinks   = new HashMap<MultiProtocolURI, String>();
         emaillinks = new HashMap<String, String>();
-        final HashMap<String, ImageEntry> collectedImages = new HashMap<String, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-        Map.Entry<DigestURI, String> entry;
+        final HashMap<MultiProtocolURI, ImageEntry> collectedImages = new HashMap<MultiProtocolURI, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+        Map.Entry<MultiProtocolURI, String> entry;
         while (i.hasNext()) {
             entry = i.next();
             url = entry.getKey();
@@ -393,21 +391,21 @@ dc_rights
         this.resorted = true;
     }
     
-    public static Map<DigestURI, String> allSubpaths(final Collection<?> links) {
+    public static Map<MultiProtocolURI, String> allSubpaths(final Collection<?> links) {
         // links is either a Set of Strings (urls) or a Set of
         // htmlFilterImageEntries
         final HashSet<String> h = new HashSet<String>();
         Iterator<?> i = links.iterator();
         Object o;
-        DigestURI url;
+        MultiProtocolURI url;
         String u;
         int pos;
         int l;
         while (i.hasNext())
             try {
                 o = i.next();
-                if (o instanceof DigestURI) url = (DigestURI) o;
-                else if (o instanceof String) url = new DigestURI((String) o, null);
+                if (o instanceof MultiProtocolURI) url = (MultiProtocolURI) o;
+                else if (o instanceof String) url = new MultiProtocolURI((String) o);
                 else if (o instanceof ImageEntry) url = ((ImageEntry) o).url();
                 else {
                     assert false;
@@ -428,11 +426,11 @@ dc_rights
             } catch (final MalformedURLException e) { }
         // now convert the strings to yacyURLs
         i = h.iterator();
-        final HashMap<DigestURI, String> v = new HashMap<DigestURI, String>();
+        final HashMap<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
         while (i.hasNext()) {
             u = (String) i.next();
             try {
-                url = new DigestURI(u, null);
+                url = new MultiProtocolURI(u);
                 v.put(url, "sub");
             } catch (final MalformedURLException e) {
             }
@@ -440,23 +438,23 @@ dc_rights
         return v;
     }
     
-    public static Map<DigestURI, String> allReflinks(final Collection<?> links) {
+    public static Map<MultiProtocolURI, String> allReflinks(final Collection<?> links) {
         // links is either a Set of Strings (with urls) or
         // htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
-        final HashMap<DigestURI, String> v = new HashMap<DigestURI, String>();
+        final HashMap<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
         final Iterator<?> i = links.iterator();
         Object o;
-        DigestURI url;
+        MultiProtocolURI url;
         String u;
         int pos;
         loop: while (i.hasNext())
             try {
                 o = i.next();
-                if (o instanceof DigestURI)
-                    url = (DigestURI) o;
+                if (o instanceof MultiProtocolURI)
+                    url = (MultiProtocolURI) o;
                 else if (o instanceof String)
-                    url = new DigestURI((String) o, null);
+                    url = new MultiProtocolURI((String) o);
                 else if (o instanceof ImageEntry)
                     url = ((ImageEntry) o).url();
                 else {
@@ -469,7 +467,7 @@ dc_rights
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
                         u = u.substring(pos);
-                    url = new DigestURI(u, null);
+                    url = new MultiProtocolURI(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -479,7 +477,7 @@ dc_rights
                     u = "http:/" + u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
                         u = "http:/" + u.substring(pos);
-                    url = new DigestURI(u, null);
+                    url = new MultiProtocolURI(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -512,14 +510,14 @@ dc_rights
     /**
      * @return the {@link URL} to the favicon that belongs to the document
      */
-    public DigestURI getFavicon() {
+    public MultiProtocolURI getFavicon() {
     	return this.favicon;
     }
     
     /**
      * @param faviconURL the {@link URL} to the favicon that belongs to the document
      */
-    public void setFavicon(final DigestURI faviconURL) {
+    public void setFavicon(final MultiProtocolURI faviconURL) {
     	this.favicon = faviconURL;
     }
     

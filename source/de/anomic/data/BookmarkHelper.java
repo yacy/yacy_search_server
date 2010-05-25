@@ -52,6 +52,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.data.bookmarksDB.Bookmark;
 import de.anomic.data.bookmarksDB.Tag;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -128,9 +129,9 @@ public class BookmarkHelper {
             
         int importCount = 0;
         
-        Map<DigestURI, String> links = new HashMap<DigestURI, String>();
+        Map<MultiProtocolURI, String> links = new HashMap<MultiProtocolURI, String>();
         String title;
-        DigestURI url;
+        MultiProtocolURI url;
         Bookmark bm;
         final Set<String> tags=listManager.string2set(tag); //this allow multiple default tags
         try {
@@ -142,14 +143,14 @@ public class BookmarkHelper {
             writer.close();
             links = scraper.getAnchors();           
         } catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-        for (Entry<DigestURI, String> link: links.entrySet()) {
-            url= link.getKey();
-            title=link.getValue();
+        for (Entry<MultiProtocolURI, String> link: links.entrySet()) {
+            url = link.getKey();
+            title = link.getValue();
             Log.logInfo("BOOKMARKS", "links.get(url)");
-            if(title.equals("")){//cannot be displayed
-                title=url.toString();
+            if (title.equals("")) {//cannot be displayed
+                title = url.toString();
             }
-            bm=db.new Bookmark(url.toString());
+            bm = db.new Bookmark(url.toString());
             bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
             bm.setTags(tags);
             bm.setPublic(importPublic);

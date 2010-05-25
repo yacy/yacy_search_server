@@ -27,6 +27,7 @@ package de.anomic.crawler.retrieval;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -180,7 +181,7 @@ public final class HTTPLoader {
                     }
                     
                     // normalizing URL
-                    final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
+                    final DigestURI redirectionUrl = new DigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
 
                     // restart crawling with new url
                     this.log.logInfo("CRAWLER Redirection detected ('" + res.getStatusLine() + "') for URL " + request.url().toString());
@@ -289,7 +290,7 @@ public final class HTTPLoader {
                     }
                     
                     // normalizing URL
-                    final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
+                    final DigestURI redirectionUrl = new DigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
 
                     
                     // if we are already doing a shutdown we don't need to retry crawling

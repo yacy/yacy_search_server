@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -317,7 +318,7 @@ public class RobotsTxt {
         reqHeaders.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
         
         // adding referer
-        reqHeaders.put(RequestHeader.REFERER, (DigestURI.newURL(robotsURL,"/")).toNormalform(true, true));
+        reqHeaders.put(RequestHeader.REFERER, (MultiProtocolURI.newURL(robotsURL,"/")).toNormalform(true, true));
         
         if (entry != null) {
             oldEtag = entry.getETag();
@@ -380,7 +381,7 @@ public class RobotsTxt {
                     redirectionUrlString = redirectionUrlString.trim();
                     
                     // generating the new URL object
-                    final DigestURI redirectionUrl = DigestURI.newURL(robotsURL, redirectionUrlString);      
+                    final DigestURI redirectionUrl = new DigestURI(MultiProtocolURI.newURL(robotsURL, redirectionUrlString));      
                     
                     // following the redirection
                     if (log.isFinest()) log.logFinest("Redirection detected for robots.txt with URL '" + robotsURL + "'." + 

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -124,7 +125,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return (alternative_urlstring == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlstring;
     }
     public String urlname() {
-        return (alternative_urlname == null) ? DigestURI.unescape(urlcomps.url().toNormalform(false, true)) : alternative_urlname;
+        return (alternative_urlname == null) ? MultiProtocolURI.unescape(urlcomps.url().toNormalform(false, true)) : alternative_urlname;
     }
     public String title() {
         return urlcomps.dc_title();

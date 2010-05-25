@@ -33,11 +33,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import pt.tumba.parser.swf.SWF2HTML;
@@ -74,7 +74,7 @@ public class swfParser extends AbstractParser implements Idiom {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         try {
             final SWF2HTML swf2html = new SWF2HTML();
@@ -97,7 +97,7 @@ public class swfParser extends AbstractParser implements Idiom {
             final String[] sections =  null;
             final String abstrct = null;
             //TreeSet images = null;
-            final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
+            final HashMap<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
@@ -114,7 +114,7 @@ public class swfParser extends AbstractParser implements Idiom {
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
                 urlnr = (Integer.valueOf(++urls)).toString();
-                anchors.put(new DigestURI(url, null), urlnr);
+                anchors.put(new MultiProtocolURI(url), urlnr);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
 

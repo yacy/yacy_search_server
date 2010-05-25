@@ -37,11 +37,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 /**
  * a parser for comma-separated values
@@ -73,7 +73,7 @@ public class csvParser extends AbstractParser implements Idiom {
     }
     
     @Override
-    public Document parse(DigestURI location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public Document parse(MultiProtocolURI location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         // construct a document using all cells of the document
         // the first row is used as headline
         // all lines are artificially terminated by a '.' to separate them as sentence for the condenser.
@@ -112,7 +112,7 @@ public class csvParser extends AbstractParser implements Idiom {
         return sb.toString();
     }
     
-    public List<String[]> getTable(DigestURI location, String mimeType, String charset, InputStream source) {
+    public List<String[]> getTable(MultiProtocolURI location, String mimeType, String charset, InputStream source) {
         ArrayList<String[]> rows = new ArrayList<String[]>();
         BufferedReader reader;
         try {

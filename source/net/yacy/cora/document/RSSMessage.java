@@ -1,31 +1,24 @@
-// RSSMessage.java
-// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 16.07.2007 on http://yacy.net
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  RSSMessage
+ *  Copyright 2007 by Michael Peter Christen
+ *  First released 16.7.2007 at http://yacy.net
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file COPYING.LESSER.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-
-package net.yacy.document.content;
+package net.yacy.cora.document;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -33,7 +26,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class RSSMessage {
+public class RSSMessage implements Hit {
 
     // statics for item generation and automatic categorization
     private static int guidcount = 0;
@@ -164,5 +157,75 @@ public class RSSMessage {
     
     public String toString() {
         return this.map.toString();
+    }
+    
+    public void setAuthor(String title) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setCategory(String title) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setCopyright(String title) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setCreator(String pubdate) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setDescription(String description) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setDocs(String guid) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setGuid(String guid) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setLanguage(String title) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setLink(String link) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setPubDate(String pubdate) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setReferrer(String title) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setSize(long size) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setSizename(String sizename) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setTitle(String title) {
+        // TODO Auto-generated method stub
+        
     }
 }

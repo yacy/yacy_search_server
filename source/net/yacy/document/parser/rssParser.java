@@ -40,18 +40,18 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.document.Hit;
+import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSReader;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
-import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.html.TransformerWriter;
-import net.yacy.document.parser.xml.RSSFeed;
-import net.yacy.document.parser.xml.RSSReader;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
@@ -78,11 +78,11 @@ public class rssParser extends AbstractParser implements Idiom {
 		super("Rich Site Summary/Atom Feed Parser"); 
 	}
 
-	public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+	public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         final LinkedList<String> feedSections = new LinkedList<String>();
-        final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
-        final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
+        final HashMap<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
+        final HashMap<MultiProtocolURI, ImageEntry> images  = new HashMap<MultiProtocolURI, ImageEntry>();
         final ByteBuffer text = new ByteBuffer();
         final CharBuffer authors = new CharBuffer();
         
@@ -119,20 +119,20 @@ public class rssParser extends AbstractParser implements Idiom {
         
         if (feed.getImage() != null) {
             try {
-                DigestURI imgURL = new DigestURI(feed.getImage(), null);
-                images.put(new String(imgURL.hash()), new ImageEntry(imgURL, feedTitle, -1, -1, -1));
+                MultiProtocolURI imgURL = new MultiProtocolURI(feed.getImage());
+                images.put(imgURL, new ImageEntry(imgURL, feedTitle, -1, -1, -1));
             } catch (MalformedURLException e) {}
         }            
         
         // loop through the feed items
-        for (final RSSMessage item: feed) {
+        for (final Hit item: feed) {
                 // check for interruption
                 checkInterruption();
                 
     			final String itemTitle = item.getTitle();
-                DigestURI itemURL = null;
+    			MultiProtocolURI itemURL = null;
                 try {
-                    itemURL = new DigestURI(item.getLink(), null);
+                    itemURL = new MultiProtocolURI(item.getLink());
                 } catch (MalformedURLException e) {
                     continue;
                 }
@@ -164,12 +164,12 @@ public class rssParser extends AbstractParser implements Idiom {
                         feedSections.add(itemHeadline);
                     }
                     
-                    final Map<DigestURI, String> itemLinks = scraper.getAnchors();
+                    final Map<MultiProtocolURI, String> itemLinks = scraper.getAnchors();
                     if (itemLinks != null && !itemLinks.isEmpty()) {
                         anchors.putAll(itemLinks);
                     }
                     
-                    final HashMap<String, ImageEntry> itemImages = scraper.getImages();
+                    final HashMap<MultiProtocolURI, ImageEntry> itemImages = scraper.getImages();
                     if (itemImages != null && !itemImages.isEmpty()) {
                         ContentScraper.addAllImages(images, itemImages);
                     }

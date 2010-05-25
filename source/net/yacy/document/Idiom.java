@@ -29,7 +29,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Set;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 
 
 /**
@@ -51,7 +51,7 @@ public interface Idiom {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */
-    public Document parse(DigestURI location, String mimeType, String charset, byte[] source)
+    public Document parse(MultiProtocolURI location, String mimeType, String charset, byte[] source)
     throws ParserException, InterruptedException;
     
     /**
@@ -65,7 +65,7 @@ public interface Idiom {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */    
-    public Document parse(DigestURI location, String mimeType, String charset, File sourceFile)
+    public Document parse(MultiProtocolURI location, String mimeType, String charset, File sourceFile)
     throws ParserException, InterruptedException;
     
     /**
@@ -79,7 +79,7 @@ public interface Idiom {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */    
-    public Document parse(DigestURI location, String mimeType, String charset, InputStream source) 
+    public Document parse(MultiProtocolURI location, String mimeType, String charset, InputStream source) 
     throws ParserException, InterruptedException;
             
     /**

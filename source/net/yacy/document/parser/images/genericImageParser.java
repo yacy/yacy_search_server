@@ -50,13 +50,13 @@ import com.sun.image.codec.jpeg.JPEGCodec;
 import com.sun.image.codec.jpeg.JPEGDecodeParam;
 import com.sun.image.codec.jpeg.JPEGImageDecoder;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -88,7 +88,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
     @SuppressWarnings("unchecked")
     @Override
     public Document parse(
-            final DigestURI location, 
+            final MultiProtocolURI location, 
             final String mimeType, 
             final String documentCharset, 
             final InputStream sourceStream) throws ParserException, InterruptedException {
@@ -170,11 +170,11 @@ public class genericImageParser extends AbstractParser implements Idiom {
         }        
         
         final HashSet<String> languages = new HashSet<String>();
-        final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
-        final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
+        final HashMap<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
+        final HashMap<MultiProtocolURI, ImageEntry> images  = new HashMap<MultiProtocolURI, ImageEntry>();
         // add this image to the map of images
         String infoString = ii.info.toString();
-        images.put(infoString, new ImageEntry(location, "", ii.width, ii.height, -1));
+        images.put(ii.location, new ImageEntry(location, "", ii.width, ii.height, -1));
         
         if (title == null) title = location.toNormalform(true, true);
         
@@ -204,7 +204,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
     }
     
     public static ImageInfo parseJavaImage(
-                            final DigestURI location,
+                            final MultiProtocolURI location,
                             final InputStream sourceStream) throws ParserException {
         BufferedImage image = null;
         try {
@@ -222,7 +222,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
     }
     
     public static ImageInfo parseJavaImage(
-                            final DigestURI location,
+                            final MultiProtocolURI location,
                             final BufferedImage image) {
         ImageInfo ii = new ImageInfo(location);
         ii.image = image;
@@ -259,12 +259,12 @@ public class genericImageParser extends AbstractParser implements Idiom {
     }
     
     public static class ImageInfo {
-        public DigestURI location;
+        public MultiProtocolURI location;
         public BufferedImage image;
         public StringBuilder info;
         public int height;
         public int width;
-        public ImageInfo(final DigestURI location) {
+        public ImageInfo(final MultiProtocolURI location) {
             this.location = location;
             this.image = null;
             this.info = new StringBuilder();
@@ -278,9 +278,9 @@ public class genericImageParser extends AbstractParser implements Idiom {
     public static void main(final String[] args) {
         File image = new File(args[0]);
         genericImageParser parser = new genericImageParser();
-        DigestURI uri;
+        MultiProtocolURI uri;
         try {
-            uri = new DigestURI("http://localhost/" + image.getName());
+            uri = new MultiProtocolURI("http://localhost/" + image.getName());
             Document document = parser.parse(uri, "image/" + uri.getFileExtension(), "UTF-8", new FileInputStream(image));
             System.out.println(document.toString());
         } catch (MalformedURLException e) {

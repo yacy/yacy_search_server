@@ -29,8 +29,8 @@
 import java.io.IOException;
 import java.text.ParseException;
 
-import net.yacy.document.content.RSSMessage;
-import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;

@@ -354,6 +354,7 @@ public final class CrawlStacker {
         // returns true if the url can be accepted accoring to network.unit.domain
         if (url == null) return "url is null";
         final String host = url.getHost();
+        if (this.acceptLocalURLs && host == null && url.getProtocol().equals("file")) return null;
         if (host == null) return "url.host is null";
         if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
         // check if this is a local address and we are allowed to index local pages:

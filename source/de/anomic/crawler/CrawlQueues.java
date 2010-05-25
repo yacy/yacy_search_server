@@ -36,8 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.document.content.RSSMessage;
-import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.cora.document.Hit;
+import net.yacy.cora.document.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -421,7 +421,7 @@ public class CrawlQueues {
         // parse the rss
         DigestURI url, referrer;
         Date loaddate;
-        for (final RSSMessage item: feed) {
+        for (final Hit item: feed) {
             //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
             
             // put url on remote crawl stack

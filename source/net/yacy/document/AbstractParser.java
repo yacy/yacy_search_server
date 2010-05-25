@@ -33,7 +33,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
@@ -108,7 +108,7 @@ public abstract class AbstractParser implements Idiom {
         return tempFile;
     }
     
-    public int parseDir(final DigestURI location, final String prefix, final File dir, final Document doc)
+    public int parseDir(final MultiProtocolURI location, final String prefix, final File dir, final Document doc)
             throws ParserException, InterruptedException, IOException {
         if (!dir.isDirectory())
             throw new ParserException("tried to parse ordinary file " + dir + " as directory", location);
@@ -122,7 +122,7 @@ public abstract class AbstractParser implements Idiom {
             if (file.isDirectory()) {
                 result += parseDir(location, prefix, file, doc);
             } else try {
-                final DigestURI url = DigestURI.newURL(location, "/" + prefix + "/"
+                final MultiProtocolURI url = MultiProtocolURI.newURL(location, "/" + prefix + "/"
                         // XXX: workaround for relative paths within document
                         + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
                         + "/" + file.getName());
@@ -151,7 +151,7 @@ public abstract class AbstractParser implements Idiom {
 	 * @see net.yacy.document.Idiom#parse(de.anomic.net.URL, java.lang.String, byte[])
 	 */
 	public Document parse(
-            final DigestURI location, 
+            final MultiProtocolURI location, 
             final String mimeType,
             final String charset,
             final byte[] source
@@ -186,7 +186,7 @@ public abstract class AbstractParser implements Idiom {
 	 * @see net.yacy.document.Idiom#parse(de.anomic.net.URL, java.lang.String, java.io.File)
 	 */
 	public Document parse(
-            final DigestURI location, 
+            final MultiProtocolURI location, 
             final String mimeType,
             final String charset,
 			final File sourceFile
@@ -220,7 +220,7 @@ public abstract class AbstractParser implements Idiom {
      * 
      * @see net.yacy.document.Idiom#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
      */
-    public abstract Document parse(DigestURI location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
+    public abstract Document parse(MultiProtocolURI location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
     
     /**
      * Return the name of the parser

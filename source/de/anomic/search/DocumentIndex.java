@@ -146,7 +146,7 @@ public class DocumentIndex extends Segment {
      * If the given file is a path to a directory, the complete sub-tree is indexed
      * @param start
      */
-    public void addConcurrent(DigestURI start) {
+    public void addConcurrent(DigestURI start) throws IOException {
         assert (start != null);
         assert (start.canRead()) : start.toString();
         if (!start.isDirectory()) {

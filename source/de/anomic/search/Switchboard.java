@@ -70,16 +70,17 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSMessage;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.document.content.DCEntry;
-import net.yacy.document.content.RSSMessage;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
@@ -291,7 +292,7 @@ public final class Switchboard extends serverSwitch {
         // init sessionid name file
         final String sessionidNamesFile = getConfig("sessionidNamesFile","");
         this.log.logConfig("Loading sessionid file " + sessionidNamesFile);
-        DigestURI.initSessionIDNames(new File(getRootPath(), sessionidNamesFile));
+        MultiProtocolURI.initSessionIDNames(FileUtils.loadList(new File(getRootPath(), sessionidNamesFile)));
 
         // init tables
         this.tables = new WorkTables(this.workPath);
@@ -1733,7 +1734,7 @@ public final class Switchboard extends serverSwitch {
                 ((response.profile() == null) || (response.depth() < response.profile().depth()))
         ) {
             // get the hyperlinks
-            final Map<DigestURI, String> hl = document.getHyperlinks();
+            final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
             
             // add all images also to the crawl stack
             for (ImageEntry imageReference : document.getImages().values()) {
@@ -1741,15 +1742,15 @@ public final class Switchboard extends serverSwitch {
             }
             
             // insert those hyperlinks to the crawler
-            DigestURI nextUrl;
-            for (Map.Entry<DigestURI, String> nextEntry : hl.entrySet()) {
+            MultiProtocolURI nextUrl;
+            for (Map.Entry<MultiProtocolURI, String> nextEntry : hl.entrySet()) {
                 // check for interruption
                 checkInterruption();
                 
                 // process the next hyperlink
                 nextUrl = nextEntry.getKey();
                 String u = nextUrl.toNormalform(true, true, true);
-                if (!(u.startsWith("http") || u.startsWith("ftp") || u.startsWith("smb"))) continue;
+                if (!(u.startsWith("http://") || u.startsWith("ftp://") || u.startsWith("smb://") || u.startsWith("file://"))) continue;
                 // enqueue the hyperlink into the pre-notice-url db
                 try {
                     crawlStacker.enqueueEntry(new Request(

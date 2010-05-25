@@ -22,7 +22,8 @@ import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import net.yacy.document.content.RSSMessage;
+import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.services.Search;
 import net.yacy.document.geolocalization.Location;
 import de.anomic.data.LibraryProvider;
 import de.anomic.http.server.HeaderFramework;
@@ -32,7 +33,6 @@ import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyClient;
 
 import java.util.Date;
 import net.yacy.kelondro.util.DateFormatter;
@@ -91,7 +91,8 @@ public class yacysearch_location {
             
             if (search_title || search_publisher || search_creator || search_subject) try {
                 // get a queue of search results
-                BlockingQueue<RSSMessage> results = yacyClient.search(null, query, false, false, maximumTime, Integer.MAX_VALUE);
+                String rssSearchServiceURL = "http://localhost:" + sb.getConfig("port", "8080") + "/yacysearch.rss";
+                BlockingQueue<RSSMessage> results = Search.search(rssSearchServiceURL, query, false, false, maximumTime, Integer.MAX_VALUE);
                 
                 // take the results and compute some locations
                 RSSMessage message;

@@ -36,12 +36,12 @@ import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -69,7 +69,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         super("7zip Archive Parser");
     }
     
-    public Document parse(final DigestURI location, final String mimeType, final String charset, final IInStream source) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final IInStream source) throws ParserException, InterruptedException {
         final Document doc = new Document(location, mimeType, charset, null, null, null, null, null, null, null, (Object)null, null, null, false);
         Handler archive;
         super.theLogger.logFine("opening 7zip archive...");
@@ -99,13 +99,13 @@ public class sevenzipParser extends AbstractParser implements Idiom {
     }
     
     @Override
-    public Document parse(final DigestURI location, final String mimeType, final String charset,
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset,
             final byte[] source) throws ParserException, InterruptedException {
         return parse(location, mimeType, charset, new ByteArrayIInStream(source));
     }
     
     @Override
-    public Document parse(final DigestURI location, final String mimeType, final String charset,
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset,
             final File sourceFile) throws ParserException, InterruptedException {
         try {
             return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"));
@@ -114,7 +114,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         }
     }
     
-    public Document parse(final DigestURI location, final String mimeType, final String charset,
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset,
             final InputStream source) throws ParserException, InterruptedException {
         try {
             final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
@@ -189,7 +189,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
                      Document theDoc;
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
-                     final DigestURI url = DigestURI.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
+                     final MultiProtocolURI url = MultiProtocolURI.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      theDoc = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
                      

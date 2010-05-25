@@ -25,9 +25,9 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import net.yacy.document.content.RSSMessage;
-import net.yacy.document.parser.xml.RSSFeed;
-import net.yacy.document.parser.xml.RSSReader;
+import net.yacy.cora.document.Hit;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSReader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
@@ -69,7 +69,7 @@ public class FeedReader_p {
                 prop.putHTML("page_description", feed.getChannel().getDescription());
     
                 int i = 0;
-                for (final RSSMessage item: feed) {
+                for (final Hit item: feed) {
                     prop.putHTML("page_items_" + i + "_author", item.getAuthor());
                     prop.putHTML("page_items_" + i + "_title", item.getTitle());
                     prop.putHTML("page_items_" + i + "_link", item.getLink());

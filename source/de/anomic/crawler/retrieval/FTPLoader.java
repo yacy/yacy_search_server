@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -272,8 +273,8 @@ public class FTPLoader {
      * @param entryUrl
      * @return
      */
-    private String getPath(final DigestURI entryUrl) {
-        return DigestURI.unescape(entryUrl.getPath()).replace("\"", "\"\"");
+    private String getPath(final MultiProtocolURI entryUrl) {
+        return MultiProtocolURI.unescape(entryUrl.getPath()).replace("\"", "\"\"");
     }
 
 }

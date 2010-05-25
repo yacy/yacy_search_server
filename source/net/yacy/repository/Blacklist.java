@@ -283,7 +283,7 @@ public class Blacklist {
     }
 
     public boolean isListed(final String blacklistType, final DigestURI url) {
-
+        if (url.getHost() == null) return false;
         final HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);        
         if (!urlHashCache.has(url.hash())) {
             final boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());

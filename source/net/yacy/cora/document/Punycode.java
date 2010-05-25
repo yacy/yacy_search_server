@@ -21,19 +21,19 @@
  * USA
  */
 
-package net.yacy.kelondro.util;
+package net.yacy.cora.document;
 
 
 public class Punycode {
   /* Punycode parameters */
-  final static int TMIN = 1;
-  final static int TMAX = 26;
-  final static int BASE = 36;
-  final static int INITIAL_N = 128;
-  final static int INITIAL_BIAS = 72;
-  final static int DAMP = 700;
-  final static int SKEW = 38;
-  final static char DELIMITER = '-';
+  private final static int TMIN = 1;
+  private final static int TMAX = 26;
+  private final static int BASE = 36;
+  private final static int INITIAL_N = 128;
+  private final static int INITIAL_BIAS = 72;
+  private final static int DAMP = 700;
+  private final static int SKEW = 38;
+  private final static char DELIMITER = '-';
 
   /**
    * Punycodes a unicode string.

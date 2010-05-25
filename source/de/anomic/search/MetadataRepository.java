@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -516,7 +517,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                         if (format == 2) {
                             pw.println("<item>");
                             pw.println("<title>" + CharacterCoding.unicode2xml(metadata.dc_title(), true) + "</title>");
-                            pw.println("<link>" + DigestURI.escape(url) + "</link>");
+                            pw.println("<link>" + MultiProtocolURI.escape(url) + "</link>");
                             if (metadata.dc_creator().length() > 0) pw.println("<author>" + CharacterCoding.unicode2xml(metadata.dc_creator(), true) + "</author>");
                             if (metadata.dc_subject().length() > 0) pw.println("<description>" + CharacterCoding.unicode2xml(metadata.dc_subject(), true) + "</description>");
                             pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");

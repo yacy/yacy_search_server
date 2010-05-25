@@ -2,13 +2,14 @@ package de.anomic.yacy;
 
 import java.net.MalformedURLException;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import junit.framework.TestCase;
 
 public class yacyURLTest extends TestCase {
 
-	public void testResolveBackpath() throws MalformedURLException {
+	public void testResolveBackpath() {
 		String[][] testStrings = new String[][] {
 				new String[]{"/..home","/..home"},
 				new String[]{"/test/..home/test.html","/test/..home/test.html"},
@@ -23,14 +24,13 @@ public class yacyURLTest extends TestCase {
 				new String[]{"/home/..test/../hallo/../","/home/"}
 		};		
 		
-		DigestURI urlObj = new DigestURI("http://yacy.net");
 		for (int i=0; i < testStrings.length; i++) {
 			// desired conversion result
 			System.out.print("testResolveBackpath: " + testStrings[i][0]);
 			String shouldBe = testStrings[i][1];
 			
 			// conversion result
-			String resolvedURL = urlObj.resolveBackpath(testStrings[i][0]);
+			String resolvedURL = MultiProtocolURI.resolveBackpath(testStrings[i][0]);
 			
 			// test if equal
 			assertEquals(shouldBe,resolvedURL);

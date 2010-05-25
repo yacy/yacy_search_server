@@ -32,6 +32,7 @@ import java.util.TreeSet;
 
 import de.anomic.data.MimeTable;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -130,25 +131,25 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     public static ArrayList<MediaSnippet> computeMediaSnippets(final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
-        Map<DigestURI, String> media = null;
+        Map<MultiProtocolURI, String> media = null;
         if (mediatype == ContentDomain.AUDIO) media = document.getAudiolinks();
         else if (mediatype == ContentDomain.VIDEO) media = document.getVideolinks();
         else if (mediatype == ContentDomain.APP) media = document.getApplinks();
         if (media == null) return null;
         
-        final Iterator<Map.Entry<DigestURI, String>> i = media.entrySet().iterator();
-        Map.Entry<DigestURI, String> entry;
+        final Iterator<Map.Entry<MultiProtocolURI, String>> i = media.entrySet().iterator();
+        Map.Entry<MultiProtocolURI, String> entry;
         DigestURI url;
         String desc;
         final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             entry = i.next();
-            url = entry.getKey();
+            url = new DigestURI(entry.getKey());
             desc = entry.getValue();
             int ranking = TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
                            TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
-                result.add(new MediaSnippet(mediatype, url, MimeTable.url2mime(url), desc, document.getTextLength(), null, ranking, document.dc_source()));
+                result.add(new MediaSnippet(mediatype, url, MimeTable.url2mime(url), desc, document.getTextLength(), null, ranking, new DigestURI(document.dc_source())));
             }
         }
         return result;
@@ -167,7 +168,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             ientry = i.next();
-            url = ientry.url();
+            url = new DigestURI(ientry.url());
             String u = url.toString();
             if (u.indexOf(".ico") >= 0 || u.indexOf("favicon") >= 0) continue;
             if (ientry.height() > 0 && ientry.height() < 64) continue;
@@ -177,7 +178,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
                            TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
                            TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
             final int ranking = Integer.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);  
-            result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, document.dc_source()));
+            result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, new DigestURI(document.dc_source())));
         }
         return result;
     }

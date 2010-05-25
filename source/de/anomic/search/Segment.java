@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.ParserException;
@@ -198,7 +199,7 @@ public class Segment {
     private int addPageIndex(final DigestURI url, final Date urlModified, final Document document, final Condenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
-        final int urlComps = DigestURI.urlComps(url.toString()).length;
+        final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
         
         // iterate over all words of context text
         final Iterator<Map.Entry<String, Word>> i = condenser.words().entrySet().iterator();
@@ -273,10 +274,10 @@ public class Segment {
                     if (!u.contains("/" + language + "/") && !u.contains("/" + ISO639.country(language).toLowerCase() + "/")) {
                         // no confirmation using the url, use the TLD
                         language = url.language();
-                        System.out.println(error + ", corrected using the TLD");
+                        log.logWarning(error + ", corrected using the TLD");
                     } else {
                         // this is a strong hint that the statistics was in fact correct
-                        System.out.println(error + ", but the url proves that the statistic is correct");
+                        log.logWarning(error + ", but the url proves that the statistic is correct");
                     }
                 }
             } else {

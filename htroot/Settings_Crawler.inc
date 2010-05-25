@@ -26,6 +26,22 @@
   </tr>
   <tr><td colspan="3"><hr /></td></tr>
   
+  <tr><td colspan="3"><p><strong>SMB Crawler Settings</strong>:</p></td></tr>
+  <tr valign="top">
+    <td>Maximum Filesize:</td>
+    <td><input name="crawler.smb.maxFileSize" type="text" size="16" maxlength="16" value="#[crawler.smb.maxFileSize]#" /></td>
+    <td><em>Maximum allowed file size in bytes that should be downloaded. Larger files will be skipped. <code>-1</code> means unlimited.</em></td>
+  </tr>
+  <tr><td colspan="3"><hr /></td></tr>
+  
+  <tr><td colspan="3"><p><strong>Local File Crawler Settings</strong>:</p></td></tr>
+  <tr valign="top">
+    <td>Maximum Filesize:</td>
+    <td><input name="crawler.file.maxFileSize" type="text" size="16" maxlength="16" value="#[crawler.file.maxFileSize]#" /></td>
+    <td><em>Maximum allowed file size in bytes that should be downloaded. Larger files will be skipped. <code>-1</code> means unlimited.</em></td>
+  </tr>
+  <tr><td colspan="3"><hr /></td></tr>
+  
   <tr valign="top">
     <td>&nbsp;</td>
     <td><input type="submit" name="crawlerSettings" value="Submit" /></td>

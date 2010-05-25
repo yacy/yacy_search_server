@@ -1,30 +1,24 @@
-// RSSReader.java
-// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 16.07.2007 on http://yacy.net
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  RSSReader
+ *  Copyright 2007 by Michael Peter Christen
+ *  First released 16.7.2007 at http://yacy.net
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file COPYING.LESSER.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package net.yacy.document.parser.xml;
+package net.yacy.cora.document;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -33,10 +27,6 @@ import java.io.InputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
-import net.yacy.document.content.RSSMessage;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -86,25 +76,21 @@ public class RSSReader extends DefaultHandler {
         }
     }
     
-    public static RSSReader parse(final byte[] a) {
+    public static RSSReader parse(final byte[] a) throws IOException {
 
         // check integrity of array
         if ((a == null) || (a.length == 0)) {
-            Log.logWarning("rssReader", "response=null");
-            return null;
+            throw new IOException("response=null");
         }
         if (a.length < 100) {
-            Log.logWarning("rssReader", "response=" + new String(a));
-            return null;
+            throw new IOException("response=" + new String(a));
         }
-        if (!ByteBuffer.equals(a, "<?xml".getBytes())) {
-            Log.logWarning("rssReader", "response does not contain valid xml");
-            return null;
+        if (!equals(a, "<?xml".getBytes())) {
+            throw new IOException("response does not contain valid xml");
         }
         final String end = new String(a, a.length - 10, 10);
         if (end.indexOf("rss") < 0) {
-            Log.logWarning("rssReader", "response incomplete");
-            return null;
+            throw new IOException("response incomplete");
         }
         
         // make input stream
@@ -115,12 +101,17 @@ public class RSSReader extends DefaultHandler {
         try {
             reader = new RSSReader(bais);
         } catch (final Exception e) {
-            Log.logException(e);
-            Log.logWarning("rssReader", "parse exception: " + e.getMessage(), e);
-            return null;
+            throw new IOException("parse exception: " + e.getMessage(), e);
         }
         try { bais.close(); } catch (final IOException e) {}
         return reader;
+    }
+    
+    private final static boolean equals(final byte[] buffer, final byte[] pattern) {
+        // compares two byte arrays: true, if pattern appears completely at offset position
+        if (buffer.length < pattern.length) return false;
+        for (int i = 0; i < pattern.length; i++) if (buffer[i] != pattern[i]) return false;
+        return true;
     }
 
     @Override

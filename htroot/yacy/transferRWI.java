@@ -30,8 +30,8 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import net.yacy.document.content.RSSMessage;
-import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleSet;

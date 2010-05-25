@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.bzipParser;
 import net.yacy.document.parser.csvParser;
 import net.yacy.document.parser.docParser;
@@ -61,7 +62,6 @@ import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
 import net.yacy.document.parser.images.genericImageParser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -138,7 +138,7 @@ public final class TextParser {
     }
     
     public static Document parseSource(
-            final DigestURI location,
+            final MultiProtocolURI location,
             final String mimeType,
             final String charset,
             final File sourceFile
@@ -167,7 +167,7 @@ public final class TextParser {
     }
     
     public static Document parseSource(
-            final DigestURI location,
+            final MultiProtocolURI location,
             String mimeType,
             final String charset,
             final byte[] content
@@ -176,7 +176,7 @@ public final class TextParser {
     }
     
     public static Document parseSource(
-            final DigestURI location,
+            final MultiProtocolURI location,
             String mimeType,
             final String charset,
             final long contentLength,
@@ -211,7 +211,7 @@ public final class TextParser {
     }
 
     private static Document parseSource(
-            final DigestURI location,
+            final MultiProtocolURI location,
             String mimeType,
             Idiom idiom,
             final String charset,
@@ -233,7 +233,7 @@ public final class TextParser {
     }
 
     private static Document parseSource(
-            final DigestURI location,
+            final MultiProtocolURI location,
             String mimeType,
             List<Idiom> idioms,
             final String charset,
@@ -280,7 +280,7 @@ public final class TextParser {
      * @param mimeType
      * @return returns null if the content is supported. If the content is not supported, return a error string.
      */
-    public static String supports(final DigestURI url, String mimeType) {
+    public static String supports(final MultiProtocolURI url, String mimeType) {
         try {
             // try to get a parser. If this works, we don't need the parser itself, we just return null to show that everything is ok.
             List<Idiom> idioms = idiomParser(url, mimeType);
@@ -304,7 +304,7 @@ public final class TextParser {
      * @return a list of Idiom parsers that may be appropriate for the given criteria
      * @throws ParserException
      */
-    private static List<Idiom> idiomParser(final DigestURI url, String mimeType1) throws ParserException {
+    private static List<Idiom> idiomParser(final MultiProtocolURI url, String mimeType1) throws ParserException {
         List<Idiom> idioms = new ArrayList<Idiom>(2);
         
         // check extension
@@ -345,7 +345,7 @@ public final class TextParser {
         return null;
     }
     
-    public static String supportsExtension(final DigestURI url) {
+    public static String supportsExtension(final MultiProtocolURI url) {
         String ext = url.getFileExtension().toLowerCase();
         if (ext == null || ext.length() == 0) return null;
         if (denyExtensionx.containsKey(ext)) return "file extension '" + ext + "' is denied (2)";
@@ -357,7 +357,7 @@ public final class TextParser {
         return null;
     }
     
-    public static String mimeOf(DigestURI url) {
+    public static String mimeOf(MultiProtocolURI url) {
         return mimeOf(url.getFileExtension());
     }
     

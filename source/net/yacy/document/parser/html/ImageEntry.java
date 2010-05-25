@@ -26,16 +26,16 @@ package net.yacy.document.parser.html;
 
 import java.util.Comparator;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 
 public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry> {
 
-    private final DigestURI url;
+    private final MultiProtocolURI url;
     private final String alt;
     private final int width, height;
     private final long fileSize;
     
-    public ImageEntry(final DigestURI url, final String alt, final int width, final int height, long fileSize) {
+    public ImageEntry(final MultiProtocolURI url, final String alt, final int width, final int height, long fileSize) {
         this.url = url;
         this.alt = alt;
         this.width = width;
@@ -43,7 +43,7 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
         this.fileSize = fileSize;
     }
 
-    public DigestURI url() {
+    public MultiProtocolURI url() {
         return this.url;
     }
     

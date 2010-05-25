@@ -32,11 +32,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
@@ -65,7 +65,7 @@ public class docParser extends AbstractParser implements Idiom {
 		super("Word Document Parser");
 	}
 
-	public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+	public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         final WordExtractor extractor;
 

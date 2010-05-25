@@ -36,12 +36,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.BDecoder;
 import net.yacy.kelondro.util.FileUtils;
@@ -75,7 +75,7 @@ public class torrentParser extends AbstractParser implements Idiom {
     }
     
     @Override
-    public Document parse(DigestURI location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public Document parse(MultiProtocolURI location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
         byte[] b = null;
         try {
             b = FileUtils.read(source);
@@ -141,7 +141,7 @@ public class torrentParser extends AbstractParser implements Idiom {
         try {
             byte[] b = FileUtils.read(new File(args[0]));
             torrentParser parser = new torrentParser();
-            Document d = parser.parse(new DigestURI("http://localhost/test.torrent", null), null, "utf-8", b);
+            Document d = parser.parse(new MultiProtocolURI("http://localhost/test.torrent"), null, "utf-8", b);
             Condenser c = new Condenser(d, true, true);
             Map<String, Word> w = c.words();
             for (Map.Entry<String, Word> e: w.entrySet()) System.out.println("Word: " + e.getKey() + " - " + e.getValue().posInText);

@@ -54,14 +54,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
 
-import net.yacy.document.content.RSSMessage;
-import net.yacy.document.parser.xml.RSSFeed;
-import net.yacy.document.parser.xml.RSSReader;
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSReader;
+import net.yacy.cora.protocol.HttpConnector;
+import net.yacy.cora.services.Search;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -86,10 +84,8 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.DefaultCharsetFilePart;
 import de.anomic.http.client.DefaultCharsetStringPart;
 import de.anomic.http.client.Client;
-import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.Segment;
@@ -101,6 +97,22 @@ import de.anomic.tools.crypt;
 
 public final class yacyClient {
 
+
+    /**
+     * @see wput
+     * @param target
+     * @param filename
+     * @param post
+     * @return
+     * @throws IOException
+     */
+    private static byte[] postToFile(final yacySeed target, final String filename, final List<Part> post, final int timeout) throws IOException {
+        return HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/" + filename, target.getHexHash() + ".yacyh", post, timeout, false);
+    }
+    private static byte[] postToFile(final yacySeedDB seedDB, final String targetHash, final String filename, final List<Part> post, final int timeout) throws IOException {
+        return HttpConnector.wput("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", post, timeout, false);
+    }
+    
     /**
      * this is called to enrich the seed information by
      * - own address (if peer is behind a nat/router)
@@ -134,7 +146,7 @@ public final class yacyClient {
             post.add(new DefaultCharsetStringPart("seed", mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
-            final byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 30000, false);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 30000, false);
             yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = FileUtils.table(content);
             break;
@@ -237,82 +249,6 @@ public final class yacyClient {
         return count;
     }
 
-    /**
-     * send data to the server named by vhost
-     * 
-     * @param address address of the server
-     * @param vhost name of the server at address which should respond
-     * @param post data to send (name-value-pairs)
-     * @param gzipBody send with content gzip encoded
-     * @return response body
-     * @throws IOException
-     */
-    /*
-    private static byte[] wput(final String url, String vhost, final List<Part> post, boolean gzipBody) throws IOException {
-        return wput(url, vhost, post, 10000, gzipBody);
-    }
-    */
-    /**
-     * send data to the server named by vhost
-     * 
-     * @param address address of the server
-     * @param vhost name of the server at address which should respond
-     * @param post data to send (name-value-pairs)
-     * @param timeout in milliseconds
-     * @return response body
-     * @throws IOException
-     */
-    private static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout) throws IOException {
-        return wput(url, vhost, post, timeout, false);
-    }
-    /**
-     * send data to the server named by vhost
-     * 
-     * @param address address of the server
-     * @param vhost name of the server at address which should respond
-     * @param post data to send (name-value-pairs)
-     * @param timeout in milliseconds
-     * @param gzipBody send with content gzip encoded
-     * @return response body
-     * @throws IOException
-     */
-    private static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout, final boolean gzipBody) throws IOException {
-        final RequestHeader header = new RequestHeader();
-        header.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-        header.put(HeaderFramework.HOST, vhost);
-        final Client client = new Client(timeout, header);
-        client.setProxy(proxyConfig());
-        
-        ResponseContainer res = null;
-        byte[] content = null;
-        try {
-            // send request/data
-            res = client.POST(url, post, gzipBody);
-            content = res.getData();
-        } finally {
-            if(res != null) {
-                // release connection
-                res.closeStream();
-            }
-        }
-        return content;
-    }
-
-    /**
-     * @see wput
-     * @param target
-     * @param filename
-     * @param post
-     * @return
-     * @throws IOException
-     */
-    private static byte[] postToFile(final yacySeed target, final String filename, final List<Part> post, final int timeout) throws IOException {
-        return wput("http://" + target.getClusterAddress() + "/yacy/" + filename, target.getHexHash() + ".yacyh", post, timeout, false);
-    }
-    private static byte[] postToFile(final yacySeedDB seedDB, final String targetHash, final String filename, final List<Part> post, final int timeout) throws IOException {
-        return wput("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", post, timeout, false);
-    }
-
     public static yacySeed querySeed(final yacySeed target, final String seedHash) {
         // prepare request
         final String salt = crypt.randomSalt();
@@ -400,7 +336,7 @@ public final class yacyClient {
         // send request
         try {
             /* a long time-out is needed */
-            final byte[] result = wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, (int) maxTime); 
+            final byte[] result = HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, (int) maxTime); 
             final RSSReader reader = RSSReader.parse(result);
             if (reader == null) {
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
@@ -425,120 +361,11 @@ public final class yacyClient {
             return null;
         }
     }
-
-
-    public static BlockingQueue<RSSMessage> search(String urlBase, String query, boolean verify, boolean global, long timeout, int maximumRecords) {
-        if (urlBase == null) {
-            urlBase = "http://localhost:" + Switchboard.getSwitchboard().getConfig("port", "8080") + "/yacysearch.rss";
-        }
-        BlockingQueue<RSSMessage> queue = new LinkedBlockingQueue<RSSMessage>();
-        searchJob job = new searchJob(urlBase, query, verify, global, timeout, maximumRecords, queue);
-        job.start();
-        return queue;
-    }
     
-    private final static int recordsPerSession = 10;
-    
-    public static class searchJob extends Thread {
-
-        String urlBase, query;
-        boolean verify, global;
-        long timeout;
-        int startRecord,  maximumRecords;
-        BlockingQueue<RSSMessage> queue;
-
-        public searchJob(String urlBase, String query, boolean verify, boolean global, long timeout, int maximumRecords, BlockingQueue<RSSMessage> queue) {
-            this.urlBase = urlBase;
-            this.query = query;
-            this.verify = verify;
-            this.global = global;
-            this.timeout = timeout;
-            this.startRecord = 0;
-            this.maximumRecords = maximumRecords;
-            this.queue = queue;
-        }
-
-        public void run() {
-            RSSMessage message;
-            mainloop: while (timeout > 0 && maximumRecords > 0) {
-                long st = System.currentTimeMillis();
-                RSSFeed feed = search(urlBase, query, verify, global, timeout, startRecord, recordsPerSession);
-                if (feed == null || feed.isEmpty()) break mainloop;
-                maximumRecords -= feed.size();
-                innerloop: while (!feed.isEmpty()) {
-                    message = feed.pollMessage();
-                    if (message == null) break innerloop;
-                    try {
-                        queue.put(message);
-                    } catch (InterruptedException e) {
-                        break innerloop;
-                    }
-                }
-                startRecord += recordsPerSession;
-                timeout -= System.currentTimeMillis() - st;
-            }
-            try { queue.put(RSSMessage.POISON); } catch (InterruptedException e) {}
-        }
-    }
-    
-    /**
-     * send a query to a yacy public search interface
-     * @param urlBase the target url base (everything before the ? that follows the SRU request syntax properties). can null, then the local peer is used
-     * @param query the query as string
-     * @param startRecord number of first record
-     * @param maximumRecords maximum number of records
-     * @param verify if true, result entries are verified using the snippet fetch (slow); if false simply the result is returned
-     * @param global if true also search results from other peers are included
-     * @param timeout milliseconds that are waited at maximum for a search result
-     * @return
-     */
-    public static RSSFeed search(String urlBase, String query, boolean verify, boolean global, long timeout, int startRecord, int maximumRecords) {
-        // returns a search result from a peer
-        if (urlBase == null) {
-            urlBase = "http://localhost:" + Switchboard.getSwitchboard().getConfig("port", "8080") + "/yacysearch.rss";
-        }
-        DigestURI uri = null;
-        try {
-            uri = new DigestURI(urlBase, null);
-        } catch (MalformedURLException e) {
-            yacyCore.log.logWarning("yacyClient.search failed asking peer '" + urlBase + "': bad url, " + e.getMessage());
-            return null;
-        }
-        
-        // prepare request
-        final List<Part> post = new ArrayList<Part>();
-        post.add(new DefaultCharsetStringPart("query", query));
-        post.add(new DefaultCharsetStringPart("startRecord", Integer.toString(startRecord)));
-        post.add(new DefaultCharsetStringPart("maximumRecords", Long.toString(maximumRecords)));
-        post.add(new DefaultCharsetStringPart("verify", verify ? "true" : "false"));
-        post.add(new DefaultCharsetStringPart("resource", global ? "global" : "local"));
-        
-        // send request
-        try {
-            final byte[] result = wput(urlBase, uri.getHost(), post, (int) timeout);
-            //String debug = new String(result); System.out.println("*** DEBUG: " + debug);
-            final RSSReader reader = RSSReader.parse(result);
-            if (reader == null) {
-                yacyCore.log.logWarning("yacyClient.search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (1), reader == null");
-                return null;
-            }
-            final RSSFeed feed = reader.getFeed();
-            if (feed == null) {
-                // case where the rss reader does not understand the content
-                yacyCore.log.logWarning("yacyClient.search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (2)");
-                return null;
-            }
-            return feed;
-        } catch (final IOException e) {
-            yacyCore.log.logSevere("yacyClient.search error asking peer '" + uri.getHost() + "':" + e.toString());
-            return null;
-        }
-    }
-    
-    public static RSSFeed search(final yacySeed targetSeed, String query, boolean verify, boolean global, long timeout, int startRecord, int maximumRecords) {
+    public static RSSFeed search(final yacySeed targetSeed, String query, boolean verify, boolean global, long timeout, int startRecord, int maximumRecords) throws IOException {
         String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8080") : targetSeed.getClusterAddress();
         String urlBase = "http://" + address + "/yacysearch.rss";
-        return search(urlBase, query, verify, global, timeout, startRecord, maximumRecords);
+        return Search.search(urlBase, query, verify, global, timeout, startRecord, maximumRecords);
     }
     
     @SuppressWarnings("unchecked")
@@ -607,7 +434,7 @@ public final class yacyClient {
         // send request
         HashMap<String, String> result = null;
         try {
-          	result = FileUtils.table(wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000));
+          	result = FileUtils.table(HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000));
         } catch (final IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore);
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
@@ -878,7 +705,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 10000);
+            final byte[] content = HttpConnector.wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 10000);
             final HashMap<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
@@ -902,7 +729,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 20000);
+            final byte[] content = HttpConnector.wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 20000);
             final HashMap<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
@@ -977,7 +804,7 @@ public final class yacyClient {
             
         // send request
         try {
-            final byte[] content = wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post, 10000);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post, 10000);
             return FileUtils.table(content);
         } catch (final Exception e) {
             // most probably a network time-out exception
@@ -1127,7 +954,7 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("entryc", Integer.toString(indexcount)));
         post.add(new DefaultCharsetStringPart("indexes", entrypost.toString()));  
         try {
-            final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
             final Iterator<String> v = FileUtils.strings(content);
             // this should return a list of urlhashes that are unknown
             
@@ -1171,7 +998,7 @@ public final class yacyClient {
         }
         post.add(new DefaultCharsetStringPart("urlc", Integer.toString(urlc)));
         try {
-            final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
             final Iterator<String> v = FileUtils.strings(content);
             
             final HashMap<String, String> result = FileUtils.table(v);
@@ -1193,7 +1020,7 @@ public final class yacyClient {
         String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
-            final byte[] content = wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post, 5000);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post, 5000);
             return FileUtils.table(content);
         } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.getProfile error:" + e.getMessage());
@@ -1201,14 +1028,6 @@ public final class yacyClient {
         }
     }
     
-    /**
-     * proxy for "to YaCy connections"
-     * @return
-     */
-    private static final RemoteProxyConfig proxyConfig() {
-        final RemoteProxyConfig p = RemoteProxyConfig.getRemoteProxyConfig();
-        return ((p != null) && (p.useProxy()) && (p.useProxy4Yacy())) ? p : null;
-    }
 
     public static void main(final String[] args) {
         if(args.length > 1) {
@@ -1262,7 +1081,7 @@ public final class yacyClient {
             //post.add(new FilePart("filename", new ByteArrayPartSource(filename, file)));
             // do it!
             try {
-                final byte[] response = wput(url.toString(), vhost, post, timeout, gzipBody);
+                final byte[] response = HttpConnector.wput(url.toString(), vhost, post, timeout, gzipBody);
                 System.out.println(new String(response));
             } catch (final IOException e) {
                 Log.logException(e);

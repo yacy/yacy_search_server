@@ -34,12 +34,12 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -74,7 +74,7 @@ public class gzipParser extends AbstractParser implements Idiom {
         return SUPPORTED_EXTENSIONS;
     }
     
-    public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         File tempFile = null;
         try {           

@@ -46,10 +46,10 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.logging.Log;
@@ -125,7 +125,7 @@ public final class Condenser {
         this.languageIdentificator = new Identificator();
         
         
-        Map.Entry<DigestURI, String> entry;
+        Map.Entry<MultiProtocolURI, String> entry;
         if (indexText) {
             createCondensement(document.getText());        
             // the phrase counter:
@@ -179,7 +179,7 @@ public final class Condenser {
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
             // audio
-            Iterator<Map.Entry<DigestURI, String>> i = document.getAudiolinks().entrySet().iterator();
+            Iterator<Map.Entry<MultiProtocolURI, String>> i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
                 insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasaudio, RESULT_FLAGS, false);

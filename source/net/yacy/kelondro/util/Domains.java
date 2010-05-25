@@ -595,7 +595,7 @@ public class Domains {
     }
      
     public static boolean isLocal(final String host) {
-        assert (host != null);
+        if (host == null) return true;
 
         // FIXME IPv4 only
         // check local ip addresses

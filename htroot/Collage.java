@@ -24,7 +24,7 @@
 
 import java.util.Random;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.util.Domains;
 
 import de.anomic.crawler.ResultImages;
@@ -90,8 +90,8 @@ public class Collage {
             final int yOffset = embed ? 0 : 70;
             for (int i = 0; i < fifoSize; i++) {
              
-                final DigestURI baseURL = origins[i].baseURL;
-                final DigestURI imageURL = origins[i].imageEntry.url();
+                final MultiProtocolURI baseURL = origins[i].baseURL;
+                final MultiProtocolURI imageURL = origins[i].imageEntry.url();
                 
                 // check if this loads a page from localhost, which must be prevented to protect the server
                 // against attacks to the administration interface when localhost access is granted

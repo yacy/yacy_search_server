@@ -39,13 +39,13 @@ import java.util.zip.ZipFile;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
 import net.yacy.document.parser.xml.ODContentHandler;
 import net.yacy.document.parser.xml.ODMetaHandler;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -106,7 +106,7 @@ public class odtParser extends AbstractParser implements Idiom {
     }
     
     @Override
-    public Document parse(final DigestURI location, final String mimeType, final String charset, final File dest) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final File dest) throws ParserException, InterruptedException {
         
         Writer writer = null;
         File writerFile = null;
@@ -228,7 +228,7 @@ public class odtParser extends AbstractParser implements Idiom {
         }
     }
     
-    public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile

@@ -45,8 +45,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -74,17 +74,17 @@ public final class yacyRelease extends yacyVersion {
     private static Map<yacyUpdateLocation, DevAndMainVersions> latestReleases = new HashMap<yacyUpdateLocation, DevAndMainVersions>();
     public final static List<yacyUpdateLocation> latestReleaseLocations = new ArrayList<yacyUpdateLocation>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
     
-    private DigestURI url;
+    private MultiProtocolURI url;
     private File releaseFile;
     
     private PublicKey publicKey;
     
-    public yacyRelease(final DigestURI url) {
+    public yacyRelease(final MultiProtocolURI url) {
         super(url.getFileName());
         this.url = url;
     }
     
-    public yacyRelease(final DigestURI url, PublicKey publicKey) {
+    public yacyRelease(final MultiProtocolURI url, PublicKey publicKey) {
         this(url);
         this.publicKey = publicKey;
     }
@@ -94,7 +94,7 @@ public final class yacyRelease extends yacyVersion {
         this.releaseFile = releaseFile;
     }
 
-    public DigestURI getUrl() {
+    public MultiProtocolURI getUrl() {
         return url;
     }
     
@@ -241,10 +241,10 @@ public final class yacyRelease extends yacyVersion {
         }
         
         // analyse links in scraper resource, and find link to latest release in it
-        final Map<DigestURI, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
+        final Map<MultiProtocolURI, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
         final TreeSet<yacyRelease> mainReleases = new TreeSet<yacyRelease>();
         final TreeSet<yacyRelease> devReleases = new TreeSet<yacyRelease>();
-        for(DigestURI url : anchors.keySet()) {
+        for (MultiProtocolURI url : anchors.keySet()) {
             try {
                 yacyRelease release = new yacyRelease(url, location.getPublicKey());
                 //System.out.println("r " + release.toAnchor());

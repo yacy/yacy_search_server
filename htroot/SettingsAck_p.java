@@ -503,10 +503,23 @@ public class SettingsAck_p {
             long maxSmbSize;
             try {
                 maxSmbSize = Integer.parseInt(maxSizeStr);
-                env.setConfig("crawler.smb.maxFileSize", Long.toString(maxFtpSize));
+                env.setConfig("crawler.smb.maxFileSize", Long.toString(maxSmbSize));
             } catch (final NumberFormatException e) {
                 prop.put("info", "31");
                 prop.putHTML("info_crawler.smb.maxFileSize",post.get("crawler.smb.maxFileSize"));
+                return prop;
+            }                        
+            
+            maxSizeStr = post.get("crawler.file.maxFileSize");
+            if (maxSizeStr==null||maxSizeStr.length()==0) maxSizeStr = "-1";
+            
+            long maxFileSize;
+            try {
+                maxFileSize = Integer.parseInt(maxSizeStr);
+                env.setConfig("crawler.file.maxFileSize", Long.toString(maxFileSize));
+            } catch (final NumberFormatException e) {
+                prop.put("info", "31");
+                prop.putHTML("info_crawler.file.maxFileSize",post.get("crawler.file.maxFileSize"));
                 return prop;
             }                        
             
@@ -514,7 +527,8 @@ public class SettingsAck_p {
             prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :DateFormatter.formatInterval(crawlerTimeout));
             prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":Formatter.bytesToString(maxHttpSize));
             prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxFtpSize));
-            prop.put("info_crawler.smb.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxSmbSize));
+            prop.put("info_crawler.smb.maxFileSize", (maxSmbSize==-1) ? "-1":Formatter.bytesToString(maxSmbSize));
+            prop.put("info_crawler.file.maxFileSize", (maxFileSize==-1) ? "-1":Formatter.bytesToString(maxFileSize));
             prop.put("info", "28");
             return prop;
         }

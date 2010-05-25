@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Properties;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 
 public class MimeTable {
 
@@ -42,11 +42,11 @@ public class MimeTable {
         return mimeTable.getProperty(ext, dfltMime);
     }
     
-    public static String url2mime(final DigestURI url, final String dfltMime) {
+    public static String url2mime(final MultiProtocolURI url, final String dfltMime) {
         return ext2mime(url.getFileExtension(), dfltMime);
     }
     
-    public static String url2mime(final DigestURI url) {
+    public static String url2mime(final MultiProtocolURI url) {
         return ext2mime(url.getFileExtension());
     }
 }

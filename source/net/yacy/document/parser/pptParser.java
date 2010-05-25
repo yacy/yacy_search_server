@@ -32,11 +32,11 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
@@ -70,7 +70,7 @@ public class pptParser extends AbstractParser implements Idiom {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */ 
-    public Document parse(final DigestURI location, final String mimeType,
+    public Document parse(final MultiProtocolURI location, final String mimeType,
             final String charset, final InputStream source) throws ParserException,
             InterruptedException {
         try {
