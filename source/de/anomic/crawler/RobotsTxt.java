@@ -37,7 +37,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.blob.BEncodedHeap;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
@@ -79,7 +78,7 @@ public class RobotsTxt {
         return this.robotsTable.size();
     }
     
-    private RobotsEntry getEntry(final DigestURI theURL, final boolean fetchOnlineIfNotAvailableOrNotFresh) throws IOException {
+    private RobotsEntry getEntry(final MultiProtocolURI theURL, final boolean fetchOnlineIfNotAvailableOrNotFresh) throws IOException {
         // this method will always return a non-null value
         String urlHostPort = getHostPort(theURL);
         RobotsEntry robotsTxt4Host = null;
@@ -115,9 +114,9 @@ public class RobotsTxt {
                 }
                 
                 // generating the proper url to download the robots txt
-                DigestURI robotsURL = null;
+                MultiProtocolURI robotsURL = null;
                 try {                 
-                    robotsURL = new DigestURI("http://" + urlHostPort + "/robots.txt", null);
+                    robotsURL = new MultiProtocolURI("http://" + urlHostPort + "/robots.txt");
                 } catch (final MalformedURLException e) {
                     log.logSevere("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.");
                     robotsURL = null;
@@ -191,7 +190,7 @@ public class RobotsTxt {
     }
     
     private RobotsEntry addEntry(
-    		final DigestURI theURL, 
+    		final MultiProtocolURI theURL, 
     		final ArrayList<String> allowPathList, 
     		final ArrayList<String> denyPathList, 
             final Date loadedDate, 
@@ -226,7 +225,7 @@ public class RobotsTxt {
     public static final int DOWNLOAD_ETAG = 2;
     public static final int DOWNLOAD_MODDATE = 3;
     
-    static final String getHostPort(final DigestURI theURL) {
+    static final String getHostPort(final MultiProtocolURI theURL) {
         String urlHostPort = null;
         final int port = getPort(theURL);
         urlHostPort = theURL.getHost() + ":" + port;
@@ -235,7 +234,7 @@ public class RobotsTxt {
         return urlHostPort;
     }
     
-    private static final int getPort(final DigestURI theURL) {
+    private static final int getPort(final MultiProtocolURI theURL) {
         int port = theURL.getPort();
         if (port == -1) {
             if (theURL.getProtocol().equalsIgnoreCase("http")) {
@@ -248,10 +247,10 @@ public class RobotsTxt {
         return port;
     }
    
-    public DigestURI getSitemapURL(final DigestURI theURL) {
+    public MultiProtocolURI getSitemapURL(final MultiProtocolURI theURL) {
         if (theURL == null) throw new IllegalArgumentException();
         if (!theURL.getProtocol().startsWith("http")) return null;
-        DigestURI sitemapURL = null;
+        MultiProtocolURI sitemapURL = null;
         
         // generating the hostname:poart string needed to do a DB lookup
         RobotsEntry robotsTxt4Host;
@@ -263,13 +262,13 @@ public class RobotsTxt {
                        
         try {
             final String sitemapUrlStr = robotsTxt4Host.getSitemap();
-            if (sitemapUrlStr != null) sitemapURL = new DigestURI(sitemapUrlStr, null);
+            if (sitemapUrlStr != null) sitemapURL = new MultiProtocolURI(sitemapUrlStr);
         } catch (final MalformedURLException e) {/* ignore this */}
         
         return sitemapURL;
     }
     
-    public long getCrawlDelayMillis(final DigestURI theURL) {
+    public long getCrawlDelayMillis(final MultiProtocolURI theURL) {
         if (theURL == null) throw new IllegalArgumentException();
         if (!theURL.getProtocol().startsWith("http")) return 0;
         
@@ -283,7 +282,7 @@ public class RobotsTxt {
         return robotsEntry.getCrawlDelayMillis();
     }
     
-    public boolean isDisallowed(final DigestURI nexturl) {
+    public boolean isDisallowed(final MultiProtocolURI nexturl) {
         if (nexturl == null) throw new IllegalArgumentException();
         if (!nexturl.getProtocol().startsWith("http")) return false;
         
@@ -298,7 +297,7 @@ public class RobotsTxt {
         return robotsTxt4Host.isDisallowed(nexturl.getFile());
     }
     
-    private static Object[] downloadRobotsTxt(final DigestURI robotsURL, int redirectionCount, final RobotsEntry entry) throws Exception {
+    private static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsEntry entry) throws Exception {
         if (robotsURL == null || !robotsURL.getProtocol().startsWith("http")) return null;
         
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
@@ -381,7 +380,7 @@ public class RobotsTxt {
                     redirectionUrlString = redirectionUrlString.trim();
                     
                     // generating the new URL object
-                    final DigestURI redirectionUrl = new DigestURI(MultiProtocolURI.newURL(robotsURL, redirectionUrlString));      
+                    final MultiProtocolURI redirectionUrl = MultiProtocolURI.newURL(robotsURL, redirectionUrlString);      
                     
                     // following the redirection
                     if (log.isFinest()) log.logFinest("Redirection detected for robots.txt with URL '" + robotsURL + "'." + 

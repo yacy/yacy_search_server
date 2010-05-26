@@ -155,7 +155,7 @@ public class FTPLoader {
             throw new IOException("FTPLoader: Unable to download URL " + request.url().toString() + detail);
         }
         
-        Latency.update(new String(request.url().hash()).substring(6), request.url().getHost(), System.currentTimeMillis() - start);
+        Latency.update(request.url(), System.currentTimeMillis() - start);
         return response;
     }
 

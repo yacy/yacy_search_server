@@ -23,11 +23,11 @@ package de.anomic.tools;
 
 import java.util.Hashtable;
 
+import net.yacy.cora.protocol.ProxySettings;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
-import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 
@@ -37,7 +37,7 @@ public class loaderThreads {
     protected int timeout;
     protected String user;
     protected String password;
-    protected RemoteProxyConfig remoteProxyConfig;
+    protected ProxySettings remoteProxyConfig;
 
     // management objects for collection of threads
     Hashtable<String, Thread> threads;

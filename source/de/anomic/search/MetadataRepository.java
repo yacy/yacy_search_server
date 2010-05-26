@@ -55,7 +55,6 @@ import net.yacy.kelondro.util.ScoreCluster;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.http.client.Client;
-import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.server.ResponseContainer;
 
 public final class MetadataRepository implements Iterable<byte[]> {
@@ -249,7 +248,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
      * 
      * @param proxyConfig 
      */
-    public void deadlinkCleaner(final RemoteProxyConfig proxyConfig) {
+    public void deadlinkCleaner() {
         final Log log = new Log("URLDBCLEANUP");
         final HashSet<String> damagedURLS = new HashSet<String>();
         try {
@@ -290,7 +289,6 @@ public final class MetadataRepository implements Iterable<byte[]> {
 
                         // doing a http head request to test if the url is correct
                         final Client client = new Client(10000);
-                        client.setProxy(proxyConfig);
                         ResponseContainer res = null;
                         try {
                             res = client.HEAD(newUrl.toString());

@@ -52,7 +52,7 @@ public class Balancer {
     private static final int objectIndexBufferSize = 1000;
 
     // class variables
-    private final ConcurrentHashMap<String, LinkedList<byte[]>> domainStacks;    // a map from domain name part to Lists with url hashs
+    private final ConcurrentHashMap<String, LinkedList<byte[]>> domainStacks;    // a map from domain name hash part to Lists with url hashs
     private final ConcurrentLinkedQueue<byte[]> top;
     private final TreeMap<Long, byte[]> delayed;
     private BufferedObjectIndex  urlFileIndex;
@@ -433,7 +433,7 @@ public class Balancer {
                 try {synchronized(this) { this.wait(3000); }} catch (final InterruptedException e) {}
             }
         }
-        Latency.update(new String(crawlEntry.url().hash()).substring(6), crawlEntry.url().getHost());
+        Latency.update(crawlEntry.url());
         return crawlEntry;
     }
     
@@ -452,7 +452,7 @@ public class Balancer {
     	// iterate over the domain stacks
     	final Iterator<Map.Entry<String, LinkedList<byte[]>>> i = this.domainStacks.entrySet().iterator();
     	Map.Entry<String, LinkedList<byte[]>> entry;
-    	long smallestWaiting = Long.MAX_VALUE;
+    	//long smallestWaiting = Long.MAX_VALUE;
     	byte[] besthash = null;
     	while (i.hasNext()) {
     		entry = i.next();
@@ -465,6 +465,7 @@ public class Balancer {
     		
     		byte[] n = entry.getValue().getFirst();
     		if (n == null) continue;
+    		/*
     		if (delay) {
     			final long w = Latency.waitingRemainingGuessed(n, minimumLocalDelta, minimumGlobalDelta);
     			if (w > maximumwaiting) {
@@ -476,6 +477,7 @@ public class Balancer {
     			}
     			//System.out.println("*** accepting " + n + " : " + w);
     		}
+    		*/
     		n = entry.getValue().removeFirst();
     		this.top.add(n);
     		if (entry.getValue().isEmpty()) i.remove();

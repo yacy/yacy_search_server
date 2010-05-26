@@ -30,13 +30,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
-import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
+import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ProxySettings;
 import net.yacy.kelondro.order.Base64Order;
 
 import org.apache.commons.httpclient.ConnectMethod;
@@ -165,8 +164,6 @@ public class Client {
     private static long lastCleanup = 0;
 
     private Header[] headers = new Header[0];
-    private RemoteProxyConfig proxyConfig = null;
-    private boolean useGlobalProxyConfig = true;
     private boolean followRedirects = true;
     //private boolean ignoreCookies = true;
 
@@ -189,33 +186,6 @@ public class Client {
         super();
         setTimeout(timeout);
         setHeader(header);
-    }
-
-    /**
-     * creates a new JakartaCommonsHttpClient with given timeout and requestHeader using given remoteProxyConfig
-     * 
-     * if proxyConfig is null, then no proxy is used
-     * 
-     * @param timeout in milliseconds
-     * @param header header options to send
-     * @param proxyConfig
-     */
-    public Client(final int timeout, final RequestHeader header, final RemoteProxyConfig proxyConfig) {
-        super();
-        setTimeout(timeout);
-        setHeader(header);
-        setProxy(proxyConfig);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see de.anomic.http.HttpClient#setProxy(de.anomic.http.httpRemoteProxyConfig)
-     */
-    public void setProxy(final RemoteProxyConfig proxyConfig) {
-        if (proxyConfig != null) {
-            this.useGlobalProxyConfig = false;
-            this.proxyConfig = proxyConfig;
-        }
     }
 
     /*
@@ -457,16 +427,13 @@ public class Client {
         assert method != null : "precondition violated: method != null";
         setHeader(method);
 
-        final RemoteProxyConfig hostProxyConfig = setProxy(method);
-        final HostConfiguration hostConfig = getProxyHostConfig(hostProxyConfig);
+        setProxy(method);
+        final HostConfiguration hostConfig = ProxySettings.getProxyHostConfig(apacheHttpClient);
 
         // statistics
         ConnectionInfo.addConnection(generateConInfo(method));
 
         // execute (send request)
-        if (Log.isFine("HTTPC")) Log.logFine("HTTPC", "executing " + method.hashCode() + " " + method.getName() + " " + method.getURI());
-        if (Log.isFinest("HTTPC")) Log.logFinest("HTTPC", "->" + method.hashCode() + " request headers " +
-                Arrays.toString(method.getRequestHeaders()));
         try {
             if (hostConfig == null) {
                 apacheHttpClient.executeMethod(method);
@@ -475,28 +442,26 @@ public class Client {
             }
         } catch (final IllegalThreadStateException e) {
         	// cleanUp statistics
-            DigestURI url = new DigestURI(method.getURI().toString(), null);
-            if (url.hash() != null) Latency.slowdown(new String(url.hash()).substring(6), url.getHost());
+            MultiProtocolURI url = new MultiProtocolURI(method.getURI().toString());
+            Latency.slowdown(url);
             ConnectionInfo.removeConnection(generateConInfo(method));
             throw new IOException(e.getMessage());
         } catch (final IOException e) {
             // cleanUp statistics
-            DigestURI url = new DigestURI(method.getURI().toString(), null);
-            if (url.hash() != null) Latency.slowdown(new String(url.hash()).substring(6), url.getHost());
+            MultiProtocolURI url = new MultiProtocolURI(method.getURI().toString());
+            Latency.slowdown(url);
             ConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         } catch (final IllegalStateException e) {
             // cleanUp statistics
-            DigestURI url = new DigestURI(method.getURI().toString(), null);
-            if (url.hash() != null) Latency.slowdown(new String(url.hash()).substring(6), url.getHost());
+            MultiProtocolURI url = new MultiProtocolURI(method.getURI().toString());
+            Latency.slowdown(url);
             ConnectionInfo.removeConnection(generateConInfo(method));
             throw new IOException(e.getMessage());
         } finally {
             // cleanUp statistics
             ConnectionInfo.removeConnection(generateConInfo(method));
         }
-        if (Log.isFinest("HTTPC")) Log.logFinest("HTTPC", "<-" + method.hashCode() + " response headers " +
-                Arrays.toString(method.getResponseHeaders()));
 
         // return response
         return new ResponseContainer(method);
@@ -507,25 +472,18 @@ public class Client {
      * @return
      * @throws URIException
      */
-    private RemoteProxyConfig setProxy(final HttpMethod method) throws URIException {
+    private void setProxy(final HttpMethod method) throws URIException {
         String host = null;
         // set proxy
-        try {
-            host  = method.getURI().getHost();
-        } catch (final URIException e) {
-            Log.logWarning("HTTPC", "could not extract host of uri: "+ e.getMessage());
-            throw e;
-        }
-        final RemoteProxyConfig hostProxyConfig = getProxyConfig(host);
-        if(hostProxyConfig != null) {
+        host  = method.getURI().getHost();
+        if (ProxySettings.useForHost(host)) {
             final String scheme = method.getURI().getScheme();
-            if(scheme != null && scheme.toLowerCase().startsWith("https") && !hostProxyConfig.useProxy4SSL()) {
+            if(scheme != null && scheme.toLowerCase().startsWith("https") && !ProxySettings.use4ssl) {
                 // do not use proxy for HTTPS
-                return null;
+                return;
             }
-            addProxyAuth(method, hostProxyConfig);
+            addProxyAuth(method);
         }
-        return hostProxyConfig;
     }
 
     /**
@@ -564,59 +522,18 @@ public class Client {
      * @param method
      * @param hostProxyConfig
      */
-    private void addProxyAuth(final HttpMethod method, final RemoteProxyConfig hostProxyConfig) {
-        if (hostProxyConfig != null && hostProxyConfig.useProxy()) {
-            final String remoteProxyUser = hostProxyConfig.getProxyUser();
+    private void addProxyAuth(final HttpMethod method) {
+        if (ProxySettings.use) {
+            final String remoteProxyUser = ProxySettings.user;
             if (remoteProxyUser != null && remoteProxyUser.length() > 0) {
-                if (remoteProxyUser.contains(":")) {
-                    Log.logWarning("HTTPC", "Proxy authentication contains invalid characters, trying anyway");
-                }
-                final String remoteProxyPwd = hostProxyConfig.getProxyPwd();
-                final String credentials = Base64Order.standardCoder.encodeString(
-                                        remoteProxyUser.replace(":", "") + ":" + remoteProxyPwd);
+                assert !remoteProxyUser.contains(":"): "Proxy authentication contains invalid characters: " + remoteProxyUser;
+                final String remoteProxyPwd = ProxySettings.password;
+                final String credentials = Base64Order.standardCoder.encodeString(remoteProxyUser.replace(":", "") + ":" + remoteProxyPwd);
                 method.setRequestHeader(RequestHeader.PROXY_AUTHORIZATION, "Basic " + credentials);
             }
         }
     }
 
-    /**
-     * 
-     * @param hostname
-     * @return null if no proxy should be used
-     */
-    private RemoteProxyConfig getProxyConfig(final String hostname) {
-        final RemoteProxyConfig hostProxyConfig;
-        if (useGlobalProxyConfig) {
-            // default settings
-            hostProxyConfig = RemoteProxyConfig.getProxyConfigForHost(hostname);
-        } else {
-            // client specific
-            if (proxyConfig == null) {
-                hostProxyConfig = null;
-            } else {
-                hostProxyConfig = proxyConfig.useForHost(hostname) ? proxyConfig : null;
-            }
-        }
-        return hostProxyConfig;
-    }
-
-    /**
-     * @param hostProxyConfig
-     * @return current host-config with additional proxy set or null if no proxy should be used
-     */
-    private HostConfiguration getProxyHostConfig(final RemoteProxyConfig hostProxyConfig) {
-        final HostConfiguration hostConfig;
-        // generate http-configuration
-        if (hostProxyConfig != null && hostProxyConfig.useProxy()) {
-            // new config based on client (default)
-            hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
-            // add proxy
-            hostConfig.setProxy(hostProxyConfig.getProxyHost(), hostProxyConfig.getProxyPort());
-        } else {
-            hostConfig = null;
-        }
-        return hostConfig;
-    }
 
     /**
      * close all connections
@@ -673,7 +590,7 @@ public class Client {
                 System.out.println(new String(wget(url, null, 10000)));
             }
         } catch (final IOException e) {
-            Log.logException(e);
+            e.printStackTrace();
         } finally {
             if (resp != null) {
                 // release connection
@@ -758,34 +675,26 @@ public class Client {
      * @param vhost
      * @param timeout in milliseconds
      * @return
+     * @throws IOException 
      */
-    public static byte[] wget(final String uri) {
+    public static byte[] wget(final String uri) throws IOException {
         return wget(uri, new RequestHeader(), 10000, null);
     }
     
-    public static byte[] wget(final String uri, final RequestHeader header, final int timeout) {
+    public static byte[] wget(final String uri, final RequestHeader header, final int timeout) throws IOException {
         return wget(uri, header, timeout, null);
     }
     
-    public static byte[] wget(final String uri, final RequestHeader header, final int timeout, final String vhost) {
+    public static byte[] wget(final String uri, final RequestHeader header, final int timeout, final String vhost) throws IOException {
         assert uri != null : "precondition violated: uri != null";
         addHostHeader(header, vhost);
         final Client client = new Client(timeout, header);
 
         // do the request
-        ResponseContainer response = null;
-        try {
-            response = client.GET(uri);
-            return response.getData();
-        } catch (final IOException e) {
-            Log.logWarning("HTTPC", "wget(" + uri + ") failed: " + e.getMessage());
-        } finally {
-            // release connection
-            if (response != null) {
-                response.closeStream();
-            }
-        }
-        return null;
+        ResponseContainer response = client.GET(uri);
+        byte[] data = response.getData();
+        response.closeStream();
+        return data;
     }
 
     /**
@@ -810,8 +719,9 @@ public class Client {
      * 
      * @param uri
      * @return
+     * @throws IOException 
      */
-    public static ResponseHeader whead(final String uri) {
+    public static ResponseHeader whead(final String uri) throws IOException {
         return whead(uri, null);
     }
 
@@ -822,19 +732,11 @@ public class Client {
      * @param header request header
      * @return null on error
      */
-    public static ResponseHeader whead(final String uri, final RequestHeader header) {
+    public static ResponseHeader whead(final String uri, final RequestHeader header) throws IOException {
         final Client client = new Client(10000, header);
-        ResponseContainer response = null;
-        try {
-            response = client.HEAD(uri);
-            return response.getResponseHeader();
-        } catch (final IOException e) {
-            Log.logWarning("HTTPC", "whead(" + uri + ") failed: " + e.getMessage());
-            return null;
-        } finally {
-            if (response != null) {
-                response.closeStream();
-            }
-        }
+        ResponseContainer response = client.HEAD(uri);
+        ResponseHeader rh = response.getResponseHeader();
+        response.closeStream();
+        return rh;
     }
 }

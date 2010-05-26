@@ -73,6 +73,7 @@ import java.util.zip.ZipInputStream;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.ProxySettings;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.TextParser;
@@ -134,7 +135,6 @@ import de.anomic.data.wiki.wikiBoard;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.http.client.Client;
-import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HeaderFramework;
@@ -266,7 +266,7 @@ public final class Switchboard extends serverSwitch {
         Tray.init(this);
         
         // remote proxy configuration
-        RemoteProxyConfig.init(this);
+        initRemoteProxy();
         
         // memory configuration
         this.useTailCache = getConfigBool("ramcopy", true);
@@ -2236,6 +2236,49 @@ public final class Switchboard extends serverSwitch {
         yacyCore.log.logInfo("BOOTSTRAP: " + (peers.sizeConnected() - sc) + " new seeds while bootstraping.");
     }
 
+    public void initRemoteProxy() {
+        // reading the proxy host name
+        final String host = getConfig("remoteProxyHost", "").trim();
+        // reading the proxy host port
+        int port;
+        try {
+            port = Integer.parseInt(getConfig("remoteProxyPort", "3128"));
+        } catch (final NumberFormatException e) {
+            port = 3128;
+        }
+        // create new config
+        ProxySettings.use  = true;
+        ProxySettings.use4ssl = true;
+        ProxySettings.use4YaCy = true;
+        ProxySettings.port = port;
+        ProxySettings.host = host;
+        if ((ProxySettings.host == null) || (ProxySettings.host.length() == 0)) {
+            ProxySettings.use = false;
+        }
+        
+        // determining if remote proxy usage is enabled
+        ProxySettings.use = getConfigBool("remoteProxyUse", false);
+        
+        // determining if remote proxy should be used for yacy -> yacy communication
+        ProxySettings.use4YaCy = getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true");
+        
+        // determining if remote proxy should be used for ssl connections
+        ProxySettings.use4ssl = getConfig("remoteProxyUse4SSL", "true").equalsIgnoreCase("true");        
+        
+        ProxySettings.user = getConfig("remoteProxyUser", "").trim();
+        ProxySettings.password = getConfig("remoteProxyPwd", "").trim();
+        
+        // determining addresses for which the remote proxy should not be used
+        final String remoteProxyNoProxy = getConfig("remoteProxyNoProxy","").trim();
+        ProxySettings.noProxy = remoteProxyNoProxy.split(",");
+        // trim split entries
+        int i = 0;
+        for (final String pattern: ProxySettings.noProxy) {
+            ProxySettings.noProxy[i] = pattern.trim();
+            i++;
+        }
+    }
+    
     public void checkInterruption() throws InterruptedException {
         final Thread curThread = Thread.currentThread();
         if ((curThread instanceof WorkflowThread) && ((WorkflowThread)curThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");

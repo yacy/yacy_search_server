@@ -71,6 +71,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.protocol.ProxySettings;
 import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ContentTransformer;
 import net.yacy.document.parser.html.Transformer;
@@ -87,7 +88,6 @@ import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.MultiOutputStream;
 import de.anomic.http.client.Client;
-import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -1071,8 +1071,6 @@ public final class HTTPDProxyHandler {
         // setup HTTP-client
         final Client client = new Client(timeout, requestHeader);
         client.setFollowRedirects(false);
-        // cookies are handled by the user's browser
-        client.setProxy(RemoteProxyConfig.getProxyConfigForURI(connectHost));
         return client;
     }
 
@@ -1126,7 +1124,6 @@ public final class HTTPDProxyHandler {
      */
     private static void prepareResponseHeader(final ResponseHeader responseHeader, final String httpVer) {
         modifyProxyHeaders(responseHeader, httpVer);
-        
         correctContentEncoding(responseHeader);
     }
 
@@ -1242,13 +1239,8 @@ public final class HTTPDProxyHandler {
         }
     
         // possibly branch into PROXY-PROXY connection
-        final RemoteProxyConfig proxyConfig = RemoteProxyConfig.getRemoteProxyConfig();
-        if (
-                (proxyConfig != null) &&
-                (proxyConfig.useProxy()) &&
-                (proxyConfig.useProxy4SSL())
-        ) {
-            final Client remoteProxy = new Client(timeout, requestHeader, proxyConfig);
+        if (ProxySettings.use && ProxySettings.use4ssl) {
+            final Client remoteProxy = new Client(timeout, requestHeader);
             remoteProxy.setFollowRedirects(false); // should not be needed, but safe is safe 
     
             ResponseContainer response = null;
@@ -1260,8 +1252,8 @@ public final class HTTPDProxyHandler {
                 final boolean success = response.getStatusCode() >= 200 && response.getStatusCode() <= 399;
                 if (success) {
                     // replace connection details
-                    host = proxyConfig.getProxyHost();
-                    port = proxyConfig.getProxyPort();
+                    host = ProxySettings.host;
+                    port = ProxySettings.port;
                     // go on (see below)
                 } else {
                     // pass error response back to client

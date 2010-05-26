@@ -78,7 +78,7 @@ public final class HTTPLoader {
     public Response load(final Request entry, final boolean acceptOnlyParseable, long maxFileSize) throws IOException {
         long start = System.currentTimeMillis();
         Response doc = load(entry, acceptOnlyParseable, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize);
-        Latency.update(new String(entry.url().hash()).substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
+        Latency.update(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
     

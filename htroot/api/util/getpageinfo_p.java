@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.LoaderDispatcher;
@@ -96,8 +97,8 @@ public class getpageinfo_p {
                 	prop.put("robots-allowed", sb.robots.isDisallowed(theURL) ? "0" : "1");
                     
                     // get the sitemap URL of the domain
-                    final DigestURI sitemapURL = sb.robots.getSitemapURL(theURL);
-                    prop.putXML("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
+                    final MultiProtocolURI sitemapURL = sb.robots.getSitemapURL(theURL);
+                    prop.putXML("sitemap", (sitemapURL==null) ? "" : sitemapURL.toString());
                 } catch (final MalformedURLException e) {}
             }
             

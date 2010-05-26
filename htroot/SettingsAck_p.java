@@ -41,7 +41,6 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
 
-import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HTTPDProxyHandler;
 import de.anomic.http.server.RequestHeader;
@@ -323,7 +322,7 @@ public class SettingsAck_p {
             /* ====================================================================
              * Enabling settings
              * ==================================================================== */
-            RemoteProxyConfig.init(sb);            
+            sb.initRemoteProxy();            
             
             prop.put("info", "15"); // The remote-proxy setting has been changed
             return prop;

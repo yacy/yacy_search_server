@@ -1,0 +1,74 @@
+/**
+ *  ProxySettings
+ *  Copyright 2010 by Michael Peter Christen
+ *  First released 25.05.2010 at http://yacy.net
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Lesser General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file COPYING.LESSER.
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.yacy.cora.protocol;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.apache.commons.httpclient.HostConfiguration;
+import org.apache.commons.httpclient.HttpClient;
+
+/**
+ * settings for a remote proxy
+ *
+ */
+public final class ProxySettings {
+
+    public static       boolean     use = false, use4YaCy = false, use4ssl = false;
+    public static       String      host = null, user = "", password = "";
+    public static       int         port = 0;
+    public static       String[]    noProxy  = null;
+    public static final Set<String> allowProxy    = new HashSet<String>();
+    public static final Set<String> disallowProxy = new HashSet<String>();
+    
+    /**
+     * produce a HostConfiguration (apache object) with the proxy access information included
+     * @param apacheHttpClient
+     * @return a host configuration with proxy config if the proxy shall be used; a cloned configuration otherwise
+     */
+    public static HostConfiguration getProxyHostConfig(HttpClient apacheHttpClient) {
+        final HostConfiguration hostConfig;
+        if (!use) return null;
+        hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
+        hostConfig.setProxy(host, port);
+        return hostConfig;
+    }
+    
+    /**
+     * tell if a remote proxy will be used for the given host
+     * @param host
+     * @return true, if the proxy shall be used for the given host
+     */
+    public static boolean useForHost(final String host) {
+        if (!use) return false;
+        if (allowProxy.contains(host)) return true;
+        if (disallowProxy.contains(host)) return false;
+        for (String pattern: noProxy) {
+            if (host.matches(pattern)) {
+                disallowProxy.add(host);
+                return false;
+            }
+        }
+        allowProxy.add(host);
+        return true;
+    }
+
+}

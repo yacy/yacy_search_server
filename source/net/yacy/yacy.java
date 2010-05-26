@@ -834,7 +834,7 @@ public final class yacy {
         final File indexroot = new File(root, "DATA/INDEX");
         try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
         final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexroot, networkName), "TEXT"), "text.urlmd", false, false);
-        currentUrlDB.deadlinkCleaner(null);
+        currentUrlDB.deadlinkCleaner();
         currentUrlDB.close();
     }
     

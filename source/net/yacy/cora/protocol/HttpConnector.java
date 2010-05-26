@@ -28,7 +28,6 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
-import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseContainer;
@@ -65,7 +64,6 @@ public class HttpConnector {
         header.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
         header.put(HeaderFramework.HOST, vhost);
         final Client client = new Client(timeout, header);
-        client.setProxy(proxyConfig());
         
         ResponseContainer res = null;
         byte[] content = null;
@@ -82,9 +80,4 @@ public class HttpConnector {
         return content;
     }
 
-
-    private static final RemoteProxyConfig proxyConfig() {
-        final RemoteProxyConfig p = RemoteProxyConfig.getRemoteProxyConfig();
-        return ((p != null) && (p.useProxy()) && (p.useProxy4Yacy())) ? p : null;
-    }
 }

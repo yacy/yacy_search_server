@@ -27,55 +27,51 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 
 import de.anomic.search.Switchboard;
 
 public class Latency {
 
+    // the map is a mapping from host names to host configurations
     private static final ConcurrentHashMap<String, Host> map = new ConcurrentHashMap<String, Host>();
     
-    public static void update(String hosthash, String host, long time) {
-        assert hosthash.length() == 6;
-        Host h = map.get(hosthash);
+    public static void update(MultiProtocolURI url, long time) {
+        Host h = map.get(url.getHost());
         if (h == null) {
-            h = new Host(host, time);
-            map.put(hosthash, h);
+            h = new Host(url.getHost(), time);
+            map.put(url.getHost(), h);
         } else {
             h.update(time);
         }
     }
     
-    public static void update(String hosthash, String host) {
-        assert hosthash.length() == 6;
-        Host h = map.get(hosthash);
+    public static void update(MultiProtocolURI url) {
+        Host h = map.get(url.getHost());
         if (h == null) {
-            h = new Host(host, 3000);
-            map.put(hosthash, h);
+            h = new Host(url.getHost(), 3000);
+            map.put(url.getHost(), h);
         } else {
             h.update();
         }
     }
     
-    public static void slowdown(String hosthash, String host) {
-        assert hosthash.length() == 6;
-        Host h = map.get(hosthash);
+    public static void slowdown(MultiProtocolURI url) {
+        Host h = map.get(url.getHost());
         if (h == null) {
-            h = new Host(host, 3000);
-            map.put(hosthash, h);
+            h = new Host(url.getHost(), 3000);
+            map.put(url.getHost(), h);
         } else {
             h.slowdown();
         }
     }
     
-    public static Host host(String hosthash) {
-        assert hosthash.length() == 6;
-        return map.get(hosthash);
+    public static Host host(MultiProtocolURI url) {
+        return map.get(url.getHost());
     }
     
-    public static int average(String hosthash) {
-        assert hosthash.length() == 6;
-        Host h = map.get(hosthash);
+    public static int average(MultiProtocolURI url) {
+        Host h = map.get(url.getHost());
         if (h == null) return 1000;
         return h.average();
     }
@@ -90,9 +86,8 @@ public class Latency {
      * @param urlhash
      * @return a time in milliseconds since last access of the domain or Long.MAX_VALUE if the domain was not accessed before
      */
-    public static long lastAccessDelta(final String urlhash) {
-        assert urlhash.length() == 12 || urlhash.length() == 6;
-        final Latency.Host host = Latency.host((urlhash.length() == 6) ? urlhash : urlhash.substring(6));
+    public static long lastAccessDelta(MultiProtocolURI url) {
+        final Latency.Host host = Latency.host(url);
         if (host == null) return Long.MAX_VALUE; // never accessed
         return System.currentTimeMillis() - host.lastacc();
     }
@@ -109,16 +104,15 @@ public class Latency {
      * @return the remaining waiting time in milliseconds. The return value may be negative
      *         which expresses how long the time is over the minimum waiting time.
      */
-    public static long waitingRemainingGuessed(byte[] hosthash, final long minimumLocalDelta, final long minimumGlobalDelta) {
-        assert hosthash.length == 12 || hosthash.length == 6;
-        Host host = Latency.host((hosthash.length == 6) ? new String(hosthash) : new String(hosthash).substring(6));
+    public static long waitingRemainingGuessed(String hostname, final long minimumLocalDelta, final long minimumGlobalDelta) {
+        Host host = map.get(hostname);
         if (host == null) return Long.MIN_VALUE;
         
         // the time since last access to the domain is the basis of the remaining calculation
         final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
         
         // find the minimum waiting time based on the network domain (local or global)
-        final boolean local = DigestURI.isLocal(hosthash);
+        final boolean local = MultiProtocolURI.isLocal(hostname);
         long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
         
         // if we have accessed the domain many times, get slower (the flux factor)
@@ -149,11 +143,10 @@ public class Latency {
      * @param minimumGlobalDelta
      * @return the remaining waiting time in milliseconds
      */
-    public static long waitingRemaining(DigestURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static long waitingRemaining(MultiProtocolURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
-        String hosthash = new String(url.hash()).substring(6);
-        Host host = host(hosthash);
+        Host host = host(url);
         if (host == null) return Long.MIN_VALUE; // no delay if host is new
         
         // find the minimum waiting time based on the network domain (local or global)
@@ -190,12 +183,11 @@ public class Latency {
     }
     
     
-    public static String waitingRemainingExplain(DigestURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static String waitingRemainingExplain(MultiProtocolURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
         
         // first check if the domain was _ever_ accessed before
-        String hosthash = new String(url.hash()).substring(6);
-        Host host = host(hosthash);
-        if (host == null) return "host " + hosthash + "/" + url.getHost() + " never accessed before -> 0"; // no delay if host is new
+        Host host = host(url);
+        if (host == null) return "host " + url.getHost() + " never accessed before -> 0"; // no delay if host is new
         
         StringBuilder s = new StringBuilder(50);
         

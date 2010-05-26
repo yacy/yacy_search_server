@@ -35,7 +35,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
+
 
 public class RobotsEntry {
     
@@ -86,7 +87,7 @@ public class RobotsEntry {
     }  
     
     public RobotsEntry(
-            final DigestURI theURL, 
+            final MultiProtocolURI theURL, 
             final List<String> allowPathList, 
             final List<String> disallowPathList, 
             final Date loadedDate,

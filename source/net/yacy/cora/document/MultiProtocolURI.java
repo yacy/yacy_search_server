@@ -776,7 +776,11 @@ public class MultiProtocolURI implements Serializable {
 
     // checks for local/global IP range and local IP
     public boolean isLocal() {
-        return (this.host.startsWith("127.") || this.host.equals("localhost") || this.host.startsWith("0:0:0:0:0:0:0:1"));
+        return isLocal(this.host);
+    }
+    
+    public static boolean isLocal(String host) {
+        return host.startsWith("127.") || host.equals("localhost") || host.startsWith("0:0:0:0:0:0:0:1");
     }
 
     // language calculation

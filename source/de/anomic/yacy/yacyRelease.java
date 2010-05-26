@@ -291,18 +291,18 @@ public final class yacyRelease extends yacyVersion {
         byte[] signatureBytes = null;
         
         // download signature first, if public key is available
-        if (this.publicKey != null) {
-            final byte[] signatureData = Client.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
-            if (signatureData == null) {
-                Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
-            } else try {
-                signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8").trim());
-            } catch (UnsupportedEncodingException e) {
-                Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed: unsupported encoding");
-            }
-            // in case that the download of a signature file failed (can be caused by bad working http servers), then it is assumed that no signature exists
-        }
         try {
+            if (this.publicKey != null) {
+                final byte[] signatureData = Client.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
+                if (signatureData == null) {
+                    Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
+                } else try {
+                    signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8").trim());
+                } catch (UnsupportedEncodingException e) {
+                    Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed: unsupported encoding");
+                }
+                // in case that the download of a signature file failed (can be caused by bad working http servers), then it is assumed that no signature exists
+            }
             final Client client = new Client(120000, reqHeader);
             res = client.GET(this.getUrl().toString());
 
