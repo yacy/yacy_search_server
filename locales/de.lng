@@ -1541,7 +1541,7 @@ Bad input data:==Ungültige Eingabedaten:
 #File: IndexImportOAIPMHList_p.html
 #---------------------------
 OAI-PMH source import list==OAI-PMH Quellen Import Liste
-OAI Source List==OAI Quellen Liste
+#OAI Source List==OAI Quellen Liste
 >Source<==>Quelle<
 Import List==Importierte Liste
 #>Thread<==>Thread<
@@ -2887,7 +2887,7 @@ Pictures==Bilder
 >Name Space Navigator==>Namespace Navigator
 >Author Navigator==>Autoren Navigator
 >Topic Navigator==>Themen Navigator
-Show search results for "#\[query\]#" on map!==Zeige die Suchergebnisse für "#[query]#" auf der Karte!
+#Show search results for "#\[query\]#" on map!==Zeige die Suchergebnisse für "#[query]#" auf der Karte!
 #-----------------------------
 
 ### Subdirectory api ###
