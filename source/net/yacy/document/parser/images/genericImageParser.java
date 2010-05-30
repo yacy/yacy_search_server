@@ -122,10 +122,8 @@ public class genericImageParser extends AbstractParser implements Idiom {
             try {
                 image = jpegDecoder.decodeAsBufferedImage();
             } catch (ImageFormatException e) {
-                Log.logException(e);
                 throw new ParserException(e.getMessage(), location);
             } catch (IOException e) {
-                Log.logException(e);
                 throw new ParserException(e.getMessage(), location);
             }
             JPEGDecodeParam decodeParam = jpegDecoder.getJPEGDecodeParam();
