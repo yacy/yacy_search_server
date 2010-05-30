@@ -98,7 +98,7 @@ public class Latency {
      * guess a minimum waiting time
      * the time is not correct, because if the domain was not checked yet by the robots.txt delay value, it is too low
      * also the 'isCGI' property is missing, because the full text of the domain is unknown here
-     * @param urlhash
+     * @param hostname
      * @param minimumLocalDelta
      * @param minimumGlobalDelta
      * @return the remaining waiting time in milliseconds. The return value may be negative
