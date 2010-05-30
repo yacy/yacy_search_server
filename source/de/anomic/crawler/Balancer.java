@@ -50,9 +50,10 @@ public class Balancer {
     private static final String indexSuffix = "9.db";
     private static final int EcoFSBufferSize = 1000;
     private static final int objectIndexBufferSize = 1000;
+    private static final String localhost = "localhost";
 
     // class variables
-    private final ConcurrentHashMap<String, LinkedList<byte[]>> domainStacks;    // a map from host name to lists with url hashs
+    private final ConcurrentHashMap<String, LinkedList<byte[]>> domainStacks; // a map from host name to lists with url hashs
     private final ConcurrentLinkedQueue<byte[]> top;
     private final TreeMap<Long, byte[]> delayed;
     private BufferedObjectIndex  urlFileIndex;
@@ -259,8 +260,9 @@ public class Balancer {
         }
     }
     
-    private void pushHashToDomainStacks(final String host, final byte[] urlhash, final int maxstacksize) {
+    private void pushHashToDomainStacks(String host, final byte[] urlhash, final int maxstacksize) {
         // extend domain stack
+        if (host == null) host = localhost;
         LinkedList<byte[]> domainList = domainStacks.get(host);
         if (domainList == null) {
             // create new list
@@ -273,8 +275,9 @@ public class Balancer {
         }
     }
     
-    private void removeHashFromDomainStacks(final String host, final byte[] urlhash) {
+    private void removeHashFromDomainStacks(String host, final byte[] urlhash) {
         // extend domain stack
+        if (host == null) host = localhost;
         final LinkedList<byte[]> domainList = domainStacks.get(host);
         if (domainList == null) return;
         final Iterator<byte[]> i = domainList.iterator();
@@ -400,7 +403,9 @@ public class Balancer {
 		            }
 		        	try {
                         this.urlFileIndex.put(rowEntry);
-                        this.domainStacks.remove(crawlEntry.url().getHost());
+                        String host = crawlEntry.url().getHost();
+                        if (host == null) host = localhost;
+                        this.domainStacks.remove(host);
                         failhash = nexthash;
                     } catch (RowSpaceExceededException e) {
                         Log.logException(e);

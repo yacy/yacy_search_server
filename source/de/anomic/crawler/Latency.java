@@ -37,42 +37,52 @@ public class Latency {
     private static final ConcurrentHashMap<String, Host> map = new ConcurrentHashMap<String, Host>();
     
     public static void update(MultiProtocolURI url, long time) {
-        Host h = map.get(url.getHost());
+        String host = url.getHost();
+        if (host == null) return;
+        Host h = map.get(host);
         if (h == null) {
-            h = new Host(url.getHost(), time);
-            map.put(url.getHost(), h);
+            h = new Host(host, time);
+            map.put(host, h);
         } else {
             h.update(time);
         }
     }
     
     public static void update(MultiProtocolURI url) {
-        Host h = map.get(url.getHost());
+        String host = url.getHost();
+        if (host == null) return;
+        Host h = map.get(host);
         if (h == null) {
-            h = new Host(url.getHost(), 3000);
-            map.put(url.getHost(), h);
+            h = new Host(host, 3000);
+            map.put(host, h);
         } else {
             h.update();
         }
     }
     
     public static void slowdown(MultiProtocolURI url) {
-        Host h = map.get(url.getHost());
+        String host = url.getHost();
+        if (host == null) return;
+        Host h = map.get(host);
         if (h == null) {
-            h = new Host(url.getHost(), 3000);
-            map.put(url.getHost(), h);
+            h = new Host(host, 3000);
+            map.put(host, h);
         } else {
             h.slowdown();
         }
     }
     
     public static Host host(MultiProtocolURI url) {
-        return map.get(url.getHost());
+        String host = url.getHost();
+        if (host == null) return null;
+        return map.get(host);
     }
     
     public static int average(MultiProtocolURI url) {
-        Host h = map.get(url.getHost());
-        if (h == null) return 1000;
+        String host = url.getHost();
+        if (host == null) return 0;
+        Host h = map.get(host);
+        if (h == null) return 0;
         return h.average();
     }
     
@@ -105,8 +115,9 @@ public class Latency {
      *         which expresses how long the time is over the minimum waiting time.
      */
     public static long waitingRemainingGuessed(String hostname, final long minimumLocalDelta, final long minimumGlobalDelta) {
+        if (hostname == null) return 0;
         Host host = map.get(hostname);
-        if (host == null) return Long.MIN_VALUE;
+        if (host == null) return 0;
         
         // the time since last access to the domain is the basis of the remaining calculation
         final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
@@ -187,7 +198,7 @@ public class Latency {
         
         // first check if the domain was _ever_ accessed before
         Host host = host(url);
-        if (host == null) return "host " + url.getHost() + " never accessed before -> 0"; // no delay if host is new
+        if (host == null) return "host " + host + " never accessed before -> 0"; // no delay if host is new
         
         StringBuilder s = new StringBuilder(50);
         
