@@ -534,6 +534,10 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return entry;
     }
 
+    public synchronized List<Row.Entry> top(int count) throws IOException {
+        return this.index.top(count);
+    }
+
     public final synchronized Row row() {
         return index.row();
     }

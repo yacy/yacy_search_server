@@ -24,6 +24,7 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -235,6 +236,15 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         	return index0.removeOne();
         }
         return null;
+    }
+    
+    public synchronized List<Row.Entry> top(int count) throws IOException {
+        List<Row.Entry> list = new ArrayList<Row.Entry>();
+        List<Row.Entry> list0 = index1.top(count);
+        list.addAll(list0);
+        list0 = index0.top(count - list.size());
+        list.addAll(list0);
+        return list;
     }
     
     public final synchronized int size() {

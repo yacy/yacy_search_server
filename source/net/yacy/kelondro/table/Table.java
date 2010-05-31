@@ -733,6 +733,20 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         return lr;
     }
+    
+    public List<Row.Entry> top(int count) throws IOException {
+        ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
+        if ((file == null) || (index == null)) return list;
+        long i = file.size() - 1;
+        while (count > 0 && i >= 0) {
+            byte[] b = new byte[rowdef.objectsize];
+            file.get(i, b, 0);
+            list.add(rowdef.newEntry(b));
+            i--;
+            count--;
+        }
+        return list;
+    }
 
     public synchronized void clear() throws IOException {
         final File f = file.filename();

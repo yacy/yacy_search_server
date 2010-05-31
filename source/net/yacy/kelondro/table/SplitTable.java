@@ -416,6 +416,23 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return maxtable.removeOne();
     }
     
+    public List<Row.Entry> top(int count) throws IOException {
+        final Iterator<ObjectIndex> i = tables.values().iterator();
+        ObjectIndex table, maxtable = null;
+        int maxcount = -1;
+        while (i.hasNext()) {
+            table = i.next();
+            if (table.size() > maxcount) {
+                maxtable = table;
+                maxcount = table.size();
+            }
+        }
+        if (maxtable == null) {
+            return null;
+        }
+        return maxtable.top(count);
+    }
+    
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(tables.size());
         final Iterator<ObjectIndex> i = tables.values().iterator();

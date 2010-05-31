@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -515,41 +516,46 @@ public class Balancer {
     }
 
     public ArrayList<Request> top(int count) {
-    	count = Math.min(count, top.size());
     	final ArrayList<Request> cel = new ArrayList<Request>();
     	if (count == 0) return cel;
-    	byte[][] ta = new byte[count][];
+    	byte[][] ta = new byte[Math.min(count, top.size())][];
         ta = top.toArray(ta);
-    	synchronized (this) {
-	    	for (byte[] n: ta) {
-	    		try {
-					final Row.Entry rowEntry = urlFileIndex.get(n);
-					if (rowEntry == null) continue;
-					final Request crawlEntry = new Request(rowEntry);
-					cel.add(crawlEntry);
-					count--;
-					if (count <= 0) break;
-				} catch (IOException e) {}
-	    	}
-	    	
-	    	int depth = 0;
-	    	loop: while (count > 0) {
-    	    	// iterate over the domain stacks
-    	        for (LinkedList<byte[]> list: this.domainStacks.values()) {
-    	            if (list.size() <= depth) continue loop;
-    	            byte[] n = list.get(depth);
-                    try {
-                        Row.Entry rowEntry = urlFileIndex.get(n);
-                        if (rowEntry == null) continue;
-                        final Request crawlEntry = new Request(rowEntry);
-                        cel.add(crawlEntry);
-                        count--;
-                        if (count <= 0) break loop;
-                    } catch (IOException e) {}
-    	        }
-	    	}
-	    	
+    	for (byte[] n: ta) {
+    	    if (n == null) break;
+    		try {
+				final Row.Entry rowEntry = urlFileIndex.get(n);
+				if (rowEntry == null) continue;
+				final Request crawlEntry = new Request(rowEntry);
+				cel.add(crawlEntry);
+				count--;
+				if (count <= 0) break;
+			} catch (IOException e) {}
     	}
+    	
+    	int depth = 0;
+    	loop: while (count > 0) {
+	    	// iterate over the domain stacks
+    	    int celsize = cel.size();
+	        ll: for (LinkedList<byte[]> list: this.domainStacks.values()) {
+	            if (list.size() <= depth) continue ll;
+	            byte[] n = list.get(depth);
+                try {
+                    Row.Entry rowEntry = urlFileIndex.get(n);
+                    if (rowEntry == null) continue;
+                    final Request crawlEntry = new Request(rowEntry);
+                    cel.add(crawlEntry);
+                    count--;
+                    if (count <= 0) break loop;
+                } catch (IOException e) {}
+	        }
+    	    if (cel.size() == celsize) break loop;
+	        depth++;
+    	}
+    	
+    	if (cel.size() < count) try {
+            List<Row.Entry> list = urlFileIndex.top(count - cel.size());
+            for (Row.Entry entry: list) cel.add(new Request(entry));
+        } catch (IOException e) { }
     	return cel;
     }
     

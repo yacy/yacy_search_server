@@ -34,6 +34,7 @@ package net.yacy.kelondro.index;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import net.yacy.kelondro.order.CloneableIterator;
 
@@ -55,6 +56,7 @@ public interface ObjectIndex extends Iterable<Row.Entry> {
     public boolean delete(byte[] key) throws IOException;
     public Row.Entry remove(byte[] key) throws IOException;
     public Row.Entry removeOne() throws IOException;
+    public List<Row.Entry> top(int count) throws IOException;
     public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key
     public CloneableIterator<Row.Entry> rows(boolean up, byte[] firstKey) throws IOException; // iterates the whole row using the order of the keys
     public CloneableIterator<Row.Entry> rows() throws IOException; // iterates the whole row without any order

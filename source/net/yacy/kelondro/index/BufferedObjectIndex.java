@@ -25,6 +25,7 @@ package net.yacy.kelondro.index;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
@@ -170,6 +171,17 @@ public class BufferedObjectIndex implements ObjectIndex, Iterable<Row.Entry> {
             flushBuffer();
             return this.backend.removeDoubles();
         }
+    }
+
+    public List<Row.Entry> top(int count) throws IOException {
+        List<Row.Entry> list = new ArrayList<Row.Entry>();
+        synchronized (this.backend) {
+            List<Row.Entry> list0 = buffer.top(count);
+            list.addAll(list0);
+            list0 = backend.top(count - list.size());
+            list.addAll(list0);
+        }
+        return list;
     }
 
     public Entry removeOne() throws IOException {

@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -248,6 +249,15 @@ public final class HandleMap implements Iterable<Row.Entry> {
             report.add(is);
         }
         return report;
+    }
+    
+    public final synchronized ArrayList<byte[]> top(int count) {
+        List<Row.Entry> list0 = index.top(count);
+        ArrayList<byte[]> list = new ArrayList<byte[]>();
+        for (Row.Entry entry: list0) {
+            list.add(entry.getPrimaryKeyBytes());
+        }
+        return list;
     }
     
     public final synchronized long remove(final byte[] key) {

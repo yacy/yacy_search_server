@@ -487,6 +487,20 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return r;
     }
     
+    public synchronized List<Row.Entry> top(int count) {
+        ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
+        if (chunkcount == 0) return list;
+        Row.Entry entry;
+        int cursor = chunkcount - 1;
+        while (count > 0 && cursor >= 0) {
+            entry = get(cursor, true);
+            list.add(entry);
+            count--;
+            cursor--;
+        }
+        return list;
+    }
+    
     public synchronized byte[] smallestKey() {
         if (chunkcount == 0) return null;
         this.sort();

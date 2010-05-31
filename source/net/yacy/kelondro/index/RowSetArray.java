@@ -21,6 +21,7 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -205,6 +206,24 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
         return null;
     }
 
+    public List<Row.Entry> top(int count) {
+        List<Row.Entry> list = new ArrayList<Row.Entry>();
+        synchronized (this.array) {
+            for (int i = 0; i < this.array.length; i++) {
+                if (this.array[i] != null) {
+                    try {
+                        List<Row.Entry> list0 = this.array[i].top(count - list.size());
+                        list.addAll(list0);
+                    } catch (IOException e) {
+                        continue;
+                    }
+                }
+                if (list.size() >= count) return list;
+            }
+        }
+        return list;
+    }
+    
     public final Entry replace(final Entry row) throws RowSpaceExceededException {
         final int i = indexFor(row);
         if (i < 0) return null;

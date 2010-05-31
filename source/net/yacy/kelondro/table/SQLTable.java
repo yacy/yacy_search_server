@@ -281,6 +281,10 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
         return null;
     }
     
+    public List<Row.Entry> top(int count) throws IOException {
+        return null;
+    }
+    
     public CloneableIterator<Row.Entry> rows(final boolean up, final byte[] startKey) throws IOException {
         // Objects are of type kelondroRow.Entry
         return null;
