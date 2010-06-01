@@ -35,6 +35,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
@@ -103,7 +104,7 @@ public class MapHeap {
 
     private static Map<String, String> bytes2map(byte[] b) throws IOException, RowSpaceExceededException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new ConcurrentHashMap<String, String>();
         String line;
         int pos;
         try {

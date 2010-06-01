@@ -24,7 +24,8 @@
 
 package de.anomic.yacy;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -36,14 +37,14 @@ import net.yacy.kelondro.util.MapTools;
 public class yacyPeerActions {
    
     private final yacySeedDB seedDB;
-    private HashMap<String, String> userAgents;
+    private Map<String, String> userAgents;
     public  long disconnects;
     private final yacyNewsPool newsPool;
     
     public yacyPeerActions(final yacySeedDB seedDB, final yacyNewsPool newsPool) {
         this.seedDB = seedDB;
         this.newsPool = newsPool;
-        this.userAgents = new HashMap<String, String>();
+        this.userAgents = new ConcurrentHashMap<String, String>();
         this.disconnects = 0;
     }
 

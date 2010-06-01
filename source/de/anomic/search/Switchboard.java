@@ -208,7 +208,7 @@ public final class Switchboard extends serverSwitch {
     public  boolean                        rankingOn;
     public  CRDistribution                 rankingOwnDistribution;
     public  CRDistribution                 rankingOtherDistribution;
-    public  HashMap<String, Object[]>      outgoingCookies, incomingCookies;
+    public  Map<String, Object[]>      outgoingCookies, incomingCookies;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
     public  ResourceObserver               observer;
@@ -510,8 +510,8 @@ public final class Switchboard extends serverSwitch {
         
         // init cookie-Monitor
         this.log.logConfig("Starting Cookie Monitor");
-        this.outgoingCookies = new HashMap<String, Object[]>();
-        this.incomingCookies = new HashMap<String, Object[]>();
+        this.outgoingCookies = new ConcurrentHashMap<String, Object[]>();
+        this.incomingCookies = new ConcurrentHashMap<String, Object[]>();
         
         // init search history trackers
         this.localSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>(); // String:TreeSet - IP:set of Long(accessTime)
@@ -735,7 +735,7 @@ public final class Switchboard extends serverSwitch {
             netload: for (String netdef: netdefs) {
                 netdef = netdef.trim();
                 try {
-                    netdefmap = Switchboard.loadHashMap(new DigestURI(netdef, null));
+                    netdefmap = Switchboard.loadFileAsMap(new DigestURI(netdef, null));
                     if (netdefmap == null || netdefmap.size() == 0) continue netload;
                     setConfig(netdefmap);
                     break netload;
@@ -750,7 +750,7 @@ public final class Switchboard extends serverSwitch {
         }
         if (networkGroupDefinition.startsWith("http://")) {
             try {
-            	setConfig(Switchboard.loadHashMap(new DigestURI(networkGroupDefinition, null)));
+            	setConfig(Switchboard.loadFileAsMap(new DigestURI(networkGroupDefinition, null)));
             } catch (final MalformedURLException e) { }
         } else {
             final File networkGroupDefinitionFile = new File(getRootPath(), networkGroupDefinition);
@@ -2314,12 +2314,16 @@ public final class Switchboard extends serverSwitch {
      * @param url
      * @return
      */
-    public static Map<String, String> loadHashMap(final DigestURI url) {
+    /**
+     * @param url
+     * @return
+     */
+    public static Map<String, String> loadFileAsMap(final DigestURI url) {
         try {
             // sending request
             final RequestHeader reqHeader = new RequestHeader();
             reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-            final HashMap<String, String> result = FileUtils.table(Client.wget(url.toString(), reqHeader, 10000));
+            final Map<String, String> result = FileUtils.table(Client.wget(url.toString(), reqHeader, 10000));
             if (result == null) return new HashMap<String, String>();
             return result;
         } catch (final Exception e) {

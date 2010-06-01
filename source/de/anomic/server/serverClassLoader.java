@@ -23,7 +23,8 @@ package de.anomic.server;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.util.FileUtils;
 
@@ -32,17 +33,17 @@ public final class serverClassLoader extends ClassLoader {
     /**
      * directory of class files
      */
-    private final HashMap<File, Class<?>> classes;
+    private final Map<File, Class<?>> classes;
 
     public serverClassLoader() {
         //super(ClassLoader.getSystemClassLoader());
     	super(Thread.currentThread().getContextClassLoader());
-        this.classes = new HashMap<File, Class<?>>(100);
+        this.classes = new ConcurrentHashMap<File, Class<?>>(100);
     }
 
     public serverClassLoader(final ClassLoader parent) {
         super(parent);
-        classes = new HashMap<File, Class<?>>(100);
+        classes = new ConcurrentHashMap<File, Class<?>>(100);
     }
 
     public Package[] packages() {

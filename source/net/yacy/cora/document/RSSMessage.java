@@ -21,10 +21,10 @@
 package net.yacy.cora.document;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class RSSMessage implements Hit {
 
@@ -77,7 +77,7 @@ public class RSSMessage implements Hit {
         }
     }
     
-    private final HashMap<String, String> map;
+    private final Map<String, String> map;
 
     public RSSMessage(final String title, final String description, final String link) {
         this();
@@ -89,7 +89,7 @@ public class RSSMessage implements Hit {
     }
     
     public RSSMessage() {
-        this.map = new HashMap<String, String>();
+        this.map = new ConcurrentHashMap<String, String>();
         this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
     }
     

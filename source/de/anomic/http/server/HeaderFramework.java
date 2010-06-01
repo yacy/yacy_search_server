@@ -42,13 +42,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.Collator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
@@ -132,8 +132,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     /* =============================================================
      * defining default http status messages
      * ============================================================= */
-    public static final HashMap<String, String> http0_9 = new HashMap<String, String>();
-    public static final HashMap<String, String> http1_0 = new HashMap<String, String>();
+    public static final Map<String, String> http0_9 = new ConcurrentHashMap<String, String>();
+    public static final Map<String, String> http1_0 = new ConcurrentHashMap<String, String>();
     static {
         http1_0.putAll(http0_9);
         http1_0.put("200","OK");
@@ -153,7 +153,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         http1_0.put("502","Bad Gateway");
         http1_0.put("503","Service Unavailable");        
     }
-    public static final HashMap<String, String> http1_1 = new HashMap<String, String>(); 
+    public static final Map<String, String> http1_1 = new ConcurrentHashMap<String, String>(); 
     static {
         http1_1.putAll(http1_0);
         http1_1.put("100","Continue");
@@ -211,7 +211,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_PROXY_RESPOND_HEADER = "PROXY_RESPOND_HEADER";
     public static final String CONNECTION_PROP_PROXY_RESPOND_SIZE = "PROXY_REQUEST_SIZE";    
 
-    private final HashMap<String, String> reverseMappingCache;
+    private final Map<String, String> reverseMappingCache;
 
     
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
@@ -224,7 +224,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         this(null);
     }
 
-    public HeaderFramework(final HashMap<String, String> reverseMappingCache) {
+    public HeaderFramework(final Map<String, String> reverseMappingCache) {
         // this creates a new TreeMap with a case insensitive mapping
         // to provide a put-method that translates given keys into their
         // 'proper' appearance, a translation cache is needed.
@@ -234,7 +234,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         this.reverseMappingCache = reverseMappingCache;
     }
 
-    public HeaderFramework(final HashMap<String, String> reverseMappingCache, final Map<String, String> othermap)  {
+    public HeaderFramework(final Map<String, String> reverseMappingCache, final Map<String, String> othermap)  {
         // creates a case insensitive map from another map
         super((Collator) insensitiveCollator.clone());
         this.reverseMappingCache = reverseMappingCache;

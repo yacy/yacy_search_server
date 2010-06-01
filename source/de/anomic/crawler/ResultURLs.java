@@ -27,10 +27,10 @@ package de.anomic.crawler;
 
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -43,7 +43,7 @@ import de.anomic.crawler.retrieval.EventOrigin;
 
 public final class ResultURLs {
 
-    private final Map<EventOrigin, LinkedHashMap<String, InitExecEntry>> resultStacks; // a mapping from urlHash to Entries
+    private final Map<EventOrigin, Map<String, InitExecEntry>> resultStacks; // a mapping from urlHash to Entries
     private final Map<EventOrigin, ScoreCluster<String>> resultDomains;
 
     public class InitExecEntry {
@@ -56,8 +56,8 @@ public final class ResultURLs {
     
     public ResultURLs(int initialStackCapacity) {
         // init result stacks
-        resultStacks = new HashMap<EventOrigin, LinkedHashMap<String, InitExecEntry>>(initialStackCapacity);
-        resultDomains = new HashMap<EventOrigin, ScoreCluster<String>>(initialStackCapacity);
+        resultStacks = new ConcurrentHashMap<EventOrigin, Map<String, InitExecEntry>>(initialStackCapacity);
+        resultDomains = new ConcurrentHashMap<EventOrigin, ScoreCluster<String>>(initialStackCapacity);
         for (EventOrigin origin: EventOrigin.values()) {
             resultStacks.put(origin, new LinkedHashMap<String, InitExecEntry>());
             resultDomains.put(origin, new ScoreCluster<String>());
@@ -73,7 +73,7 @@ public final class ResultURLs {
         assert executorHash != null;
         if (e == null) { return; }
         try {
-            final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stackType);
+            final Map<String, InitExecEntry> resultStack = getStack(stackType);
             if (resultStack != null) {
                 resultStack.put(new String(e.hash()), new InitExecEntry(initiatorHash, executorHash));
             }
@@ -92,20 +92,20 @@ public final class ResultURLs {
         }
     }
     
-    public synchronized int getStackSize(final EventOrigin stack) {
-        final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stack);
+    public int getStackSize(final EventOrigin stack) {
+        final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack == null) return 0;
         return resultStack.size();
     }
     
-    public synchronized int getDomainListSize(final EventOrigin stack) {
+    public int getDomainListSize(final EventOrigin stack) {
         final ScoreCluster<String> domains = getDomains(stack);
         if (domains == null) return 0;
         return domains.size();
     }
     
-    public synchronized Iterator<Map.Entry<String, InitExecEntry>> results(final EventOrigin stack) {
-        final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stack);
+    public Iterator<Map.Entry<String, InitExecEntry>> results(final EventOrigin stack) {
+        final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack == null) return new LinkedHashMap<String, InitExecEntry>().entrySet().iterator();
         return new ReverseMapIterator<String, InitExecEntry>(resultStack);
     }
@@ -152,7 +152,7 @@ public final class ResultURLs {
      * @param stack id of resultStack
      * @return null if stack does not exist (id is unknown or stack is null (which should not occur and an error is logged))
      */
-    private LinkedHashMap<String, InitExecEntry> getStack(final EventOrigin stack) {
+    private Map<String, InitExecEntry> getStack(final EventOrigin stack) {
         return resultStacks.get(stack);
     }
     private ScoreCluster<String> getDomains(final EventOrigin stack) {
@@ -160,7 +160,7 @@ public final class ResultURLs {
     }
 
     public synchronized void clearStack(final EventOrigin stack) {
-        final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stack);
+        final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();
         final ScoreCluster<String> resultDomains = getDomains(stack);
         if (resultDomains != null) {
@@ -172,7 +172,7 @@ public final class ResultURLs {
 
     public synchronized boolean remove(final String urlHash) {
         if (urlHash == null) return false;
-        LinkedHashMap<String, InitExecEntry> resultStack;
+        Map<String, InitExecEntry> resultStack;
         for (EventOrigin origin: EventOrigin.values()) {
             resultStack = getStack(origin);
             if (resultStack != null) resultStack.remove(urlHash);

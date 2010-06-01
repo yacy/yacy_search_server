@@ -47,8 +47,8 @@ import java.security.KeyStore;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.HandshakeCompletedEvent;
@@ -88,13 +88,13 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     /**
      * Line End of HTTP/ICAP headers
      */
-    public    static final byte[] CRLF = {CR, LF};
-    public    static final String CRLF_STRING = new String(CRLF);
-    public    static final String LF_STRING = new String(new byte[]{LF});
-    public    static final Class<?>[] sessionCallType = {String.class, Session.class}; //  set up some reflection
-    public    static final long startupTime = System.currentTimeMillis();
-    static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
+    public  static final byte[] CRLF = {CR, LF};
+    public  static final String CRLF_STRING = new String(CRLF);
+    public  static final String LF_STRING = new String(new byte[]{LF});
+    public  static final Class<?>[] sessionCallType = {String.class, Session.class}; //  set up some reflection
+    public  static final long startupTime = System.currentTimeMillis();
+    private static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+    private static final Map<String, Object> commandObjMethodCache = new ConcurrentHashMap<String, Object>(5);
     
     /**
      * will be increased with each session and is used to return a hash code
@@ -102,14 +102,14 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     static int sessionCounter = 0;
     
     // static variables
-    private  static final long keepAliveTimeout = 60000; // time that a connection is kept alive if requested with a keepAlive statement
-    public   static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
-    public   static final Boolean RESUME_CONNECTION = Boolean.TRUE;
+    private static final long    keepAliveTimeout     = 60000; // time that a connection is kept alive if requested with a keepAlive statement
+    public  static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
+    public  static final Boolean RESUME_CONNECTION    = Boolean.TRUE;
     
     /**
      * for brute-force prevention
      */
-    public static final ConcurrentHashMap<String, Integer> bfHost = new ConcurrentHashMap<String, Integer>();
+    public static final Map<String, Integer> bfHost = new ConcurrentHashMap<String, Integer>();
     
     // class variables
     /**
@@ -133,7 +133,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     serverHandler handlerPrototype;        // the command class (a serverHandler) 
 
     private final serverSwitch switchboard;   // the command class switchboard
-    HashMap<String, String> denyHost;
+    private Map<String, String> denyHost;
     int commandMaxLength;
     private int maxBusySessions;
     private long lastAutoTermination;
@@ -185,7 +185,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         this.timeout = timeout;
         
         this.commandMaxLength = commandMaxLength;
-        this.denyHost = (blockAttack) ? new HashMap<String, String>() : null;
+        this.denyHost = (blockAttack) ? new ConcurrentHashMap<String, String>() : null;
         this.handlerPrototype = handlerPrototype;
         this.switchboard = switchboard;
         

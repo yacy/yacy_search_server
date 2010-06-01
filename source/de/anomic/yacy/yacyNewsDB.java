@@ -216,7 +216,7 @@ public class yacyNewsDB {
     
     public static Record newRecord(final yacySeed mySeed, final String category, final Properties attributes) {
         try {
-            final HashMap<String, String> m = new HashMap<String, String>();
+            final Map<String, String> m = new HashMap<String, String>();
             final Iterator<Entry<Object, Object>> e = attributes.entrySet().iterator();
             Map.Entry<Object, Object> entry;
             while (e.hasNext()) {

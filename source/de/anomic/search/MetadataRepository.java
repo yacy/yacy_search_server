@@ -558,8 +558,8 @@ public final class MetadataRepository implements Iterable<byte[]> {
         
     }
     
-    private HashMap<String, hashStat> domainSampleCollector() throws IOException {
-        HashMap<String, hashStat> map = new HashMap<String, hashStat>();
+    private Map<String, hashStat> domainSampleCollector() throws IOException {
+        Map<String, hashStat> map = new HashMap<String, hashStat>();
         // first collect all domains and calculate statistics about it
         CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
         String urlhash, hosthash;
@@ -580,7 +580,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     
     public TreeSet<String> domainNameCollector(int count) throws IOException {
         // collect hashes from all domains
-        HashMap<String, hashStat> map = domainSampleCollector();
+        Map<String, hashStat> map = domainSampleCollector();
         
         // fetch urls from the database to determine the host in clear text
         URIMetadataRow urlref;
@@ -603,7 +603,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         if (statsDump != null && count <= statsDump.size()) return statsDump.iterator();
         
         // collect hashes from all domains
-        HashMap<String, hashStat> map = domainSampleCollector();
+        Map<String, hashStat> map = domainSampleCollector();
         
         // order elements by size
         ScoreCluster<String> s = new ScoreCluster<String>();

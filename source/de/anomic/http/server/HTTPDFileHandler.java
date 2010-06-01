@@ -73,7 +73,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -353,7 +352,7 @@ public final class HTTPDFileHandler {
                     if ((requestHeader.containsKey(HeaderFramework.CONTENT_TYPE)) &&
                             (requestHeader.get(HeaderFramework.CONTENT_TYPE).toLowerCase().startsWith("multipart"))) {
                         // parse multipart
-                        final HashMap<String, byte[]> files = HTTPDemon.parseMultipart(requestHeader, args, body);
+                        final Map<String, byte[]> files = HTTPDemon.parseMultipart(requestHeader, args, body);
                         // integrate these files into the args
                         if (files != null) {
                             final Iterator<Map.Entry<String, byte[]>> fit = files.entrySet().iterator();

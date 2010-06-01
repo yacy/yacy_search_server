@@ -73,7 +73,7 @@ public class ViewProfile {
         prop.put("hash", hash);
         
         // get the profile
-        HashMap profile = null;
+        Map profile = null;
         if (hash.equals("localhash")) {
             // read the profile from local peer
             final Properties p = new Properties();

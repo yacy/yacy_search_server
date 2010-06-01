@@ -33,7 +33,7 @@ public class ObjectSpace {
     private static final int minSize = 10;
     private static final int maxSize = 256;
     
-    private static HashMap<Integer, ArrayList<byte[]>> objHeap = new HashMap<Integer, ArrayList<byte[]>>();
+    private static Map<Integer, ArrayList<byte[]>> objHeap = new HashMap<Integer, ArrayList<byte[]>>();
     private static TreeMap<Integer, Integer> aliveNow = new TreeMap<Integer, Integer>();
     //private static TreeMap aliveMax = new TreeMap();
     

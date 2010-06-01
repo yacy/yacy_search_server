@@ -70,7 +70,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     // the thread pool for the keeperOf executor service
     private ExecutorService executor;
     
-    private HashMap<String, ObjectIndex> tables; // a map from a date string to a kelondroIndex object
+    private Map<String, ObjectIndex> tables; // a map from a date string to a kelondroIndex object
     private final Row rowdef;
     private final File path;
     private final String prefix;

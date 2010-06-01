@@ -25,11 +25,11 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Domains;
@@ -51,8 +51,8 @@ public class serverSwitch {
     protected       int     serverJobs;
     private         Map<String, String>                  configProps;
     private   final Map<String, String>                  configRemoved;
-    private   final HashMap<InetAddress, String>         authorization;
-    private   final TreeMap<String, BusyThread>    workerThreads;
+    private   final Map<InetAddress, String>             authorization;
+    private   final TreeMap<String, BusyThread>          workerThreads;
     private   final TreeMap<String, serverSwitchAction>  switchActions;
     private   final serverAccessTracker                  accessTracker;
     
@@ -75,7 +75,7 @@ public class serverSwitch {
         if (initFile.exists())
             initProps = FileUtils.loadMap(initFile);
         else
-            initProps = new HashMap<String, String>();
+            initProps = new ConcurrentHashMap<String, String>();
         
         // if 'pro'-version is selected, overload standard settings with 'pro'-settings
         Iterator<String> i;
@@ -94,10 +94,10 @@ public class serverSwitch {
         if (configFile.exists())
             configProps = FileUtils.loadMap(configFile);
         else
-            configProps = new HashMap<String, String>();
+            configProps = new ConcurrentHashMap<String, String>();
 
         // remove all values from config that do not appear in init
-        configRemoved = new HashMap<String, String>();
+        configRemoved = new ConcurrentHashMap<String, String>();
         synchronized (configProps) {
             i = configProps.keySet().iterator();
             String key;
@@ -124,7 +124,7 @@ public class serverSwitch {
         }
 
         // other settings
-        authorization = new HashMap<InetAddress, String>();
+        authorization = new ConcurrentHashMap<InetAddress, String>();
 
         // init thread control
         workerThreads = new TreeMap<String, BusyThread>();

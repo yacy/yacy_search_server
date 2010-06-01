@@ -307,7 +307,7 @@ public class Tables {
     }
 
     public byte[] createRow(String table) throws IOException {
-        return this.insert(table, new HashMap<String, byte[]>());
+        return this.insert(table, new ConcurrentHashMap<String, byte[]>());
     }
     
     public Row select(final String table, byte[] pk) throws IOException {
@@ -490,7 +490,7 @@ public class Tables {
         public Row(final byte[] pk, String k0, byte[] v0) {
             assert k0 != null;
             assert v0 != null;
-            HashMap<String, byte[]> map = new HashMap<String, byte[]>();
+            Map<String, byte[]> map = new ConcurrentHashMap<String, byte[]>();
             map.put(k0, v0);
             this.pk = pk;
             this.map = map;

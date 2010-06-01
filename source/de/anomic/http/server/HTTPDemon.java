@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.document.parser.html.CharacterCoding;
@@ -119,13 +120,13 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public static final String copyright = "[ HTTP SERVER: AnomicHTTPD v" + vDATE + " by Michael Christen / www.anomic.de ]";
     public static final String hline = "-------------------------------------------------------------------------------";
     
-    public static final HashMap<String, String> reverseMappingCache = new HashMap<String, String>();
+    public static final Map<String, String> reverseMappingCache = new ConcurrentHashMap<String, String>();
     private static volatile Switchboard switchboard = null;
     private static String virtualHost = null;
     
     public static boolean keepAliveSupport = false;
-    private static HashMap<String, Long> YaCyHopAccessRequester = new HashMap<String, Long>();
-    private static HashMap<String, Long> YaCyHopAccessTargets = new HashMap<String, Long>();
+    private static Map<String, Long> YaCyHopAccessRequester = new ConcurrentHashMap<String, Long>();
+    private static Map<String, Long> YaCyHopAccessTargets = new ConcurrentHashMap<String, Long>();
     
     // for authentication
     private boolean use_proxyAccounts = false;
@@ -310,7 +311,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return true;
     }
 
-    private static long lastAccessDelta(final HashMap<String, Long> accessTable, final String domain) {
+    private static long lastAccessDelta(final Map<String, Long> accessTable, final String domain) {
         final Long lastAccess = accessTable.get(domain);
         if (lastAccess == null) return Long.MAX_VALUE; // never accessed
         return System.currentTimeMillis() - lastAccess.longValue();
@@ -798,7 +799,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    public static HashMap<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in)
+    public static Map<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in)
             throws IOException {
         final InputStream body = prepareBody(header, in);
         

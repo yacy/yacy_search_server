@@ -32,9 +32,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -52,7 +52,7 @@ public class Compressor implements BLOB {
     static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
     
     private final BLOB backend;
-    private HashMap<String, byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
+    private Map<String, byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
     private BlockingQueue<Entity> writeQueue;
     private long bufferlength;
     private final long maxbufferlength;
@@ -128,7 +128,7 @@ public class Compressor implements BLOB {
     }
     
     private void initBuffer() {
-        this.buffer = new HashMap<String, byte[]>();
+        this.buffer = new ConcurrentHashMap<String, byte[]>();
         this.bufferlength = 0;
     }
 

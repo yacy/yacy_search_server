@@ -29,7 +29,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -357,7 +356,7 @@ public class Domains {
          "INT=International"
      };
 
-    private static HashMap<String, Integer> TLDID = new HashMap<String, Integer>(32);
+    private static Map<String, Integer> TLDID = new ConcurrentHashMap<String, Integer>(32);
     //private static HashMap<String, String> TLDName = new HashMap<String, String>();
 
     private static void insertTLDProps(final String[] TLDList, final int id) {

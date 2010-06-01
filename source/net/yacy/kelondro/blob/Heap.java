@@ -506,7 +506,7 @@ public final class Heap extends HeapModifier implements BLOB {
     }
 
     private static Map<String, String> map(final String a, final String b) {
-        HashMap<String, String> m = new HashMap<String, String>();
+        Map<String, String> m = new HashMap<String, String>();
         m.put(a, b);
         return m;
     }

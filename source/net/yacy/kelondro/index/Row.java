@@ -30,11 +30,11 @@ package net.yacy.kelondro.index;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.AbstractOrder;
@@ -111,7 +111,7 @@ public final class Row {
     
     protected final void genNickRef() {
         if (nickref != null) return;
-        nickref = new HashMap<String, Object[]>(row.length);
+        nickref = new ConcurrentHashMap<String, Object[]>(row.length);
         for (int i = 0; i < row.length; i++) nickref.put(row[i].nickname, new Object[]{row[i], Integer.valueOf(colstart[i])});
     }
     

@@ -57,6 +57,7 @@ import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.Map;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -181,7 +182,7 @@ public final class TemplateEngine {
         return false;
     }
 
-    public final static void writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt) throws IOException {
+    public final static void writeTemplate(final InputStream in, final OutputStream out, final Map<String, String> pattern, final byte[] dflt) throws IOException {
         if (pattern == null) {
             FileUtils.copy(in, out);
         } else {
@@ -192,7 +193,7 @@ public final class TemplateEngine {
     /**
      * Reads a input stream, and writes the data with replaced templates on a output stream
      */
-    private final static byte[] writeTemplate(final InputStream in, final OutputStream out, final HashMap<String, String> pattern, final byte[] dflt, final byte[] prefix) throws IOException {
+    private final static byte[] writeTemplate(final InputStream in, final OutputStream out, final Map<String, String> pattern, final byte[] dflt, final byte[] prefix) throws IOException {
         final PushbackInputStream pis = new PushbackInputStream(in, 100);
         ByteArrayOutputStream keyStream = new ByteArrayOutputStream(512);
         byte[] key;
@@ -415,7 +416,7 @@ public final class TemplateEngine {
         return structure.getBytes();
     }
 
-    private final static byte[] replacePattern(final String key, final HashMap<String, String> pattern, final byte dflt[]) {
+    private final static byte[] replacePattern(final String key, final Map<String, String> pattern, final byte dflt[]) {
         byte[] replacement;
         Object value;
         if (pattern.containsKey(key)) {
@@ -496,7 +497,7 @@ public final class TemplateEngine {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
             final InputStream i = new ByteArrayInputStream(args[0].getBytes("UTF-8"));
-            final HashMap<String, String> h = new HashMap<String, String>();
+            final Map<String, String> h = new HashMap<String, String>();
             h.put("test", args[1]);
             writeTemplate(new PushbackInputStream(i, 100), System.out, h, args[2].getBytes("UTF-8"));
             System.out.flush();

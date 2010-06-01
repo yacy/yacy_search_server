@@ -499,7 +499,7 @@ public final class FileUtils {
     }
 
 
-    public static HashMap<String, String> table(Iterator<String> li) {
+    public static Map<String, String> table(Iterator<String> li) {
     	int pos;
     	String line;
     	final HashMap<String, String> props = new HashMap<String, String>();
@@ -511,7 +511,7 @@ public final class FileUtils {
     	return props;
 	}
     
-    public static HashMap<String, String> table(final byte[] a) {
+    public static Map<String, String> table(final byte[] a) {
         return table(strings(a));
     }
     
@@ -527,7 +527,7 @@ public final class FileUtils {
      * @param list
      * @return
      */
-    public static HashMap<String, String> table(final ArrayList<String> list) {
+    public static Map<String, String> table(final ArrayList<String> list) {
         if (list == null) return new HashMap<String, String>();
         final Iterator<String> i = list.iterator();
         int pos;

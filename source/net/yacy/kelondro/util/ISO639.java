@@ -26,7 +26,8 @@
 
 package net.yacy.kelondro.util;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ISO639 {
 
@@ -168,7 +169,7 @@ public class ISO639 {
         "zh-Chinese",
         "zu-Zulu"};
 
-    static HashMap<String, String> mapping = new HashMap<String, String>(codes.length);
+    static Map<String, String> mapping = new ConcurrentHashMap<String, String>(codes.length);
 
     static {
         for (int i = 0; i < codes.length; i++) {

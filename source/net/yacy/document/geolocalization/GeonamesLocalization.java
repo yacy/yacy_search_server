@@ -76,7 +76,7 @@ public class GeonamesLocalization implements Localization {
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
     
-    private final HashMap<Integer, Location>  id2loc;
+    private final Map<Integer, Location>  id2loc;
     private final TreeMap<String, List<Integer>> name2ids;
     private final File file;
     

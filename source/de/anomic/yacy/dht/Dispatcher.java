@@ -28,8 +28,8 @@ package de.anomic.yacy.dht;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
@@ -105,7 +105,7 @@ public class Dispatcher {
             final boolean gzipBody, 
             final int timeout
             ) {
-        this.transmissionCloud = new LinkedHashMap<ByteArray, Transmission.Chunk>();
+        this.transmissionCloud = new ConcurrentHashMap<ByteArray, Transmission.Chunk>();
         this.segment = segment;
         this.seeds = seeds;
         this.log = new Log("INDEX-TRANSFER-DISPATCHER");
@@ -318,7 +318,7 @@ public class Dispatcher {
         }
     }
 
-    public synchronized boolean selectContainersEnqueueToCloud(
+    public boolean selectContainersEnqueueToCloud(
             final byte[] hash,
             final byte[] limitHash,
             final int maxContainerCount,

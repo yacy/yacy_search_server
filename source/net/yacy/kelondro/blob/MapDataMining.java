@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.order.ByteOrder;
@@ -45,9 +46,9 @@ public class MapDataMining extends MapHeap {
     private final static Double DOUBLE0 = Double.valueOf(0.0);
 
     private final String[] sortfields, longaccfields, doubleaccfields;
-    private HashMap<String, ScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
-    private HashMap<String, Long>   accLong; // to store accumulations of Long cells
-    private HashMap<String, Double> accDouble; // to store accumulations of Double cells
+    private Map<String, ScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
+    private Map<String, Long>   accLong; // to store accumulations of Long cells
+    private Map<String, Double> accDouble; // to store accumulations of Double cells
     
 	@SuppressWarnings("unchecked")
 	public MapDataMining(final File heapFile,
@@ -68,7 +69,7 @@ public class MapDataMining extends MapHeap {
 
         ScoreCluster<String>[] cluster = null;
         if (sortfields == null) sortClusterMap = null; else {
-            sortClusterMap = new HashMap<String, ScoreCluster<String>>();
+            sortClusterMap = new ConcurrentHashMap<String, ScoreCluster<String>>();
             cluster = new ScoreCluster[sortfields.length];
             for (int i = 0; i < sortfields.length; i++) {
                 cluster[i] = new ScoreCluster<String>();   
@@ -80,7 +81,7 @@ public class MapDataMining extends MapHeap {
         if (longaccfields == null) {
         	accLong = null;
         } else {
-            accLong = new HashMap<String, Long>();
+            accLong = new ConcurrentHashMap<String, Long>();
             longaccumulator = new Long[longaccfields.length];
             for (int i = 0; i < longaccfields.length; i++) {
                 longaccumulator[i] = LONG0;   
@@ -89,7 +90,7 @@ public class MapDataMining extends MapHeap {
         if (doubleaccfields == null) {
             accDouble = null;
         } else {
-            accDouble = new HashMap<String, Double>();
+            accDouble = new ConcurrentHashMap<String, Double>();
             doubleaccumulator = new Double[doubleaccfields.length];
             for (int i = 0; i < doubleaccfields.length; i++) {
                 doubleaccumulator[i] = DOUBLE0;   

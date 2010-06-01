@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.document.RSSFeed;
@@ -70,7 +71,7 @@ public class yacyCore {
     public static long lastOnlineTime = 0;
     /** pseudo-random key derived from a time-interval while YaCy startup*/
     public static long speedKey = 0;
-    public static final Map<String, yacyAccessible> amIAccessibleDB = Collections.synchronizedMap(new HashMap<String, yacyAccessible>()); // Holds PeerHash / yacyAccessible Relations
+    public static final Map<String, yacyAccessible> amIAccessibleDB = new ConcurrentHashMap<String, yacyAccessible>(); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behavior
     private static final int PING_INITIAL = 10;
     private static final int PING_MAX_RUNNING = 3;

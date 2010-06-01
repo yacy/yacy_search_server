@@ -28,8 +28,8 @@
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -68,7 +68,7 @@ public class MessageSend_p {
 
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
-            final HashMap<String, String> result = yacyClient.permissionMessage(sb.peers, hash);
+            final Map<String, String> result = yacyClient.permissionMessage(sb.peers, hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
             String peerName;
             yacySeed targetPeer = null;
@@ -132,7 +132,7 @@ public class MessageSend_p {
                 } catch (final UnsupportedEncodingException e) {
                     mb = message.getBytes();
                 }
-                final HashMap<String, String> result = yacyClient.postMessage(sb.peers, hash, subject, mb);
+                final Map<String, String> result = yacyClient.postMessage(sb.peers, hash, subject, mb);
 
                 //message has been sent
                 prop.put("mode_status_response", result.get("response"));

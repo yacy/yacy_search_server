@@ -65,13 +65,13 @@ public class OpenGeoDBLocalization implements Localization {
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
     
-    private final HashMap<Integer, String>       locTypeHash2locType;
-    private final HashMap<Integer, Location>     id2loc;
-    private final HashMap<Integer, Integer>      id2locTypeHash;
+    private final Map<Integer, String>       locTypeHash2locType;
+    private final Map<Integer, Location>     id2loc;
+    private final Map<Integer, Integer>      id2locTypeHash;
     private final TreeMap<String, List<Integer>> name2ids;
-    private final TreeMap<String, List<Integer>> kfz2ids;
-    private final HashMap<String, List<Integer>> predial2ids;
-    private final HashMap<String, Integer>       zip2id;
+    private final Map<String, List<Integer>> kfz2ids;
+    private final Map<String, List<Integer>> predial2ids;
+    private final Map<String, Integer>       zip2id;
     private final File file;
     
     public OpenGeoDBLocalization(final File file, boolean lonlat) {

@@ -27,6 +27,7 @@ package de.anomic.yacy.dht;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
@@ -333,7 +334,7 @@ public class PeerSelection {
      * @param count number of wanted peers
      * @return a hash map of peer hashes to seed object
      */
-    public static HashMap<String, yacySeed> seedsByAge(yacySeedDB seedDB, final boolean up, int count) {
+    public static Map<String, yacySeed> seedsByAge(yacySeedDB seedDB, final boolean up, int count) {
         
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
 
@@ -354,7 +355,7 @@ public class PeerSelection {
             }
             
             // result is now in the score object; create a result vector
-            final HashMap<String, yacySeed> result = new HashMap<String, yacySeed>();
+            final Map<String, yacySeed> result = new HashMap<String, yacySeed>();
             final Iterator<String> it = seedScore.scores(up);
             int c = 0;
             while ((c < count) && (it.hasNext())) {

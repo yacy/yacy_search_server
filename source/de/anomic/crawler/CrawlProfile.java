@@ -24,7 +24,6 @@ package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,7 +48,7 @@ public class CrawlProfile {
     public static final String MATCH_NEVER = "";
     public static final String MATCH_BAD_URL = ".*memberlist.*|.*previous.*|.*next.*|.*p=.*";
     
-    static HashMap<String, ConcurrentHashMap<String, DomProfile>> domsCache = new HashMap<String, ConcurrentHashMap<String, DomProfile>>();
+    static ConcurrentHashMap<String, Map<String, DomProfile>> domsCache = new ConcurrentHashMap<String, Map<String, DomProfile>>();
     
     MapHeap profileTable;
     private final File profileTableFile;
@@ -282,8 +281,8 @@ public class CrawlProfile {
         public static final String XPSTOPW          = "xpstopw";
         public static final String CACHE_STRAGEGY   = "cacheStrategy";
         
-        Map<String, String> mem;
-        private ConcurrentHashMap<String, DomProfile> doms;
+        private Map<String, String> mem;
+        private Map<String, DomProfile> doms;
         private Pattern mustmatch = null, mustnotmatch = null;
         
         
@@ -301,7 +300,7 @@ public class CrawlProfile {
                      final CacheStrategy cacheStrategy) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
             final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength) : new String(startURL.hash());
-            mem = new HashMap<String, String>(40);
+            mem = new ConcurrentHashMap<String, String>(40);
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);
             mem.put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));

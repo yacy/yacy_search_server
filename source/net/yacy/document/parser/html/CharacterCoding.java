@@ -25,6 +25,7 @@
 package net.yacy.document.parser.html;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class CharacterCoding {
 
@@ -175,10 +176,10 @@ public class CharacterCoding {
         "\u00FF","&yuml;"
     };
     
-    private final static HashMap<String, Character> html2unicode4xml = new HashMap<String, Character>(mapping4xml.length * 2);
-    private final static HashMap<String, Character> html2unicode4html = new HashMap<String, Character>(mapping4html.length * 2);
-    private final static HashMap<Character, String> unicode2html4xml = new HashMap<Character, String>(mapping4xml.length * 2);
-    private final static HashMap<Character, String> unicode2html4html = new HashMap<Character, String>(mapping4html.length * 2);
+    private final static Map<String, Character> html2unicode4xml = new HashMap<String, Character>(mapping4xml.length * 2);
+    private final static Map<String, Character> html2unicode4html = new HashMap<String, Character>(mapping4html.length * 2);
+    private final static Map<Character, String> unicode2html4xml = new HashMap<Character, String>(mapping4xml.length * 2);
+    private final static Map<Character, String> unicode2html4html = new HashMap<Character, String>(mapping4html.length * 2);
     static {
         Character c;
         for (int i = 0; i < mapping4html.length; i += 2) {

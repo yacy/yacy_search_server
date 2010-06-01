@@ -37,7 +37,7 @@ public final class Identificator {
 
     private static final LanguageStatisticsHolder languages = LanguageStatisticsHolder.getInstance();
     
-    private final HashMap<Character, Integer> letter;
+    private final Map<Character, Integer> letter;
     private int letters;
     private String language;
     

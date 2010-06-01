@@ -26,7 +26,6 @@ package de.anomic.http.server;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -77,11 +76,11 @@ public class RequestHeader extends HeaderFramework {
         super();
     }
     
-    public RequestHeader(final HashMap<String, String> reverseMappingCache) {
+    public RequestHeader(final Map<String, String> reverseMappingCache) {
         super(reverseMappingCache);
     }
     
-    public RequestHeader(final HashMap<String, String> reverseMappingCache, final Map<String, String> othermap)  {
+    public RequestHeader(final Map<String, String> reverseMappingCache, final Map<String, String> othermap)  {
         super(reverseMappingCache, othermap);
     }
     

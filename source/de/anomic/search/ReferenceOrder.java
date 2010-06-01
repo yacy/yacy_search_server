@@ -132,7 +132,7 @@ public class ReferenceOrder {
         
         public void run() {
             
-            HashMap<String, Integer> doms0 = new HashMap<String, Integer>();
+            Map<String, Integer> doms0 = new HashMap<String, Integer>();
             Integer int1 = 1;
             
             WordReferenceVars iEntry;

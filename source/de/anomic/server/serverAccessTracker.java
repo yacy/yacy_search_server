@@ -20,7 +20,6 @@
 
 package de.anomic.server;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -151,7 +150,7 @@ public class serverAccessTracker {
     
     public Iterator<String> accessHosts() {
         // returns an iterator of hosts in tracker (String)
-        final HashMap<String, List<Track>> accessTrackerClone = new HashMap<String, List<Track>>();
+        final Map<String, List<Track>> accessTrackerClone = new ConcurrentHashMap<String, List<Track>>();
         accessTrackerClone.putAll(accessTracker);
         return accessTrackerClone.keySet().iterator();
     }

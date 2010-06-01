@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -68,7 +69,7 @@ public class Segments implements Iterable<Segment> {
     private final File segmentsPath;
     private final int entityCacheMaxSize;
     private final long maxFileSize;
-    private HashMap<String, Segment> segments;
+    private       Map<String, Segment> segments;
     private final HashMap<Process, String> process_assignment;
     private final boolean useTailCache;
     private final boolean exceed134217727;

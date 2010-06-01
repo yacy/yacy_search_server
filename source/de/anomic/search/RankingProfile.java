@@ -123,7 +123,7 @@ public class RankingProfile {
         this(ContentDomain.TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
-            final HashMap<String, Integer> coeff = new HashMap<String, Integer>(40);
+            final Map<String, Integer> coeff = new HashMap<String, Integer>(40);
             final String[] elts;
             if (profile.length() > 0 && profile.charAt(0) == '{' && profile.endsWith("}")) {
                 profile = profile.substring(1, profile.length() - 1);
@@ -182,7 +182,7 @@ public class RankingProfile {
         }
     }
     
-    private static int parseMap(final HashMap<String, Integer> coeff, final String attr, final int dflt) {
+    private static int parseMap(final Map<String, Integer> coeff, final String attr, final int dflt) {
         if (!coeff.containsKey(attr))
             return dflt;
         return (coeff.get(attr)).intValue();

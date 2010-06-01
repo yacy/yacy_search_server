@@ -39,11 +39,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
@@ -71,7 +71,7 @@ public final class yacyRelease extends yacyVersion {
     // information about latest release, retrieved from download pages
     // this static information should be overwritten by network-specific locations
     // for details see defaults/yacy.network.freeworld.unit
-    private static Map<yacyUpdateLocation, DevAndMainVersions> latestReleases = new HashMap<yacyUpdateLocation, DevAndMainVersions>();
+    private static Map<yacyUpdateLocation, DevAndMainVersions> latestReleases = new ConcurrentHashMap<yacyUpdateLocation, DevAndMainVersions>();
     public final static List<yacyUpdateLocation> latestReleaseLocations = new ArrayList<yacyUpdateLocation>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
     
     private MultiProtocolURI url;
