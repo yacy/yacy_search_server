@@ -134,6 +134,9 @@ public class Client {
         localHostConfiguration.setHost("127.0.0.1");
         conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
         conManager.getParams().setReceiveBufferSize(16 * 1024 * 1024); // set this high to avoid storage in temporary files
+        conManager.getParams().setStaleCheckingEnabled(true);
+        conManager.getParams().setSoTimeout(30000);
+        conManager.getParams().setTcpNoDelay(true); // there is enough bandwith these days
         
         apacheHttpClient = new HttpClient(conManager);
         // only one retry
@@ -200,12 +203,11 @@ public class Client {
      * (non-Javadoc)
      * @see de.anomic.http.HttpClient#setTimeout(int)
      */
-    @SuppressWarnings("deprecation")
 	public void setTimeout(final int timeout) {
         apacheHttpClient.getParams().setIntParameter(HttpMethodParams.SO_TIMEOUT, timeout);
         apacheHttpClient.getParams().setIntParameter(HttpMethodParams.HEAD_BODY_CHECK_TIMEOUT, timeout);
-        apacheHttpClient.setConnectionTimeout(timeout);
-        apacheHttpClient.setTimeout(60000);
+        conManager.getParams().setConnectionTimeout(timeout); 
+        conManager.getParams().setSoTimeout(timeout);
     }
     
     /**
