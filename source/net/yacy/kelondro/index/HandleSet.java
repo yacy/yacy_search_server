@@ -164,9 +164,23 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         return indexentry != null;
     }
 
-    public final synchronized byte[] removeone() {
+    public final synchronized byte[] removeOne() {
         Row.Entry indexentry;
         indexentry = index.removeOne();
+        if (indexentry == null) return null;
+        return indexentry.getColBytes(0, true);
+    }
+    
+    /**
+     * get one entry; objects are taken from the end of the list
+     * a getOne(0) would return the same object as removeOne() would remove
+     * @param idx
+     * @return entry from the end of the list
+     */
+    public final synchronized byte[] getOne(int idx) {
+        if (idx >= this.size()) return null;
+        Row.Entry indexentry;
+        indexentry = index.get(this.size() - 1 - idx, true);
         if (indexentry == null) return null;
         return indexentry.getColBytes(0, true);
     }
