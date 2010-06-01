@@ -95,7 +95,7 @@ public class yacysearch {
         final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
-        String originalquerystring = (post == null) ? "" : post.get("query", "").trim();
+        String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring =  originalquerystring.replace('+', ' ');
         boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();

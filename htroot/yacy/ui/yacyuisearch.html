@@ -15,8 +15,7 @@
 			$(document).ready(function() {
 				
 				var height = document.documentElement.clientHeight - 240;
-				var query = $.query.get('search');
-				if (query == '') query = $.query.get('query');
+				var query = $.query.get('query');
 														    			
 		 		$(".yresult").flexigrid({
 			 		url: '/yacysearch.json',
