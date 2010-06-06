@@ -41,9 +41,9 @@
           <fieldset>
           <table border="0">
           <tr>
-            <td width="33%"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>
-          	<td width="33%"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /><label for="usecasePortal">Search portal for your own web pages</label></td>
-          	<td width="33%"><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /><label for="usecaseIntranet">Intranet Indexing</label></td>
+            <td width="256"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>
+          	<td width="256"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /><label for="usecasePortal">Search portal for your own web pages</label></td>
+          	<td width="100%"><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /><label for="usecaseIntranet">Intranet Indexing</label></td>
           </tr>
           <tr>
             <td><label for="usecaseFreeworld"><img src="/env/grafics/usecase_freeworld.png" /></label></td>
@@ -51,10 +51,13 @@
             <td><label for="usecaseIntranet"><img src="/env/grafics/usecase_intranet.png" /></label></td>
           </tr>
           <tr>
-            <td><label for="usecaseFreeworld">join and support the global network 'freeworld', search the web with an uncensored user-owned search network</label></td>
-            <td><label for="usecasePortal">your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.</label></td>
-            <td><label for="usecaseIntranet">create a search portal for your intranet web pages, or pages that are placed at DATA/HTDOCS/repository and can be accessed at <a href="http://localhost:#[port]#/repository/">http://localhost:#[port]#/repository</a></label>
-            <input type="text" name="repositoryPath" size="37" value="#[repositoryPath]#" /></td>
+            <td valign="top"><label for="usecaseFreeworld">Join and support the global network 'freeworld', search the web with an uncensored user-owned search network</label></td>
+            <td valign="top"><label for="usecasePortal">Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.</label></td>
+            <td valign="top"><label for="usecaseIntranet">Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt/&lt;path&gt<br/>
+            Files may also be shared with the YaCy server, assign a path here:
+            <input type="text" name="repositoryPath" size="37" value="#[repositoryPath]#" /><br/>
+            This Path cann be accessed at <a href="http://localhost:#[port]#/repository/">http://localhost:#[port]#/repository</a></label>. Use that path as crawl start point.
+            </td>
           </tr>
           </table>
           </fieldset>
