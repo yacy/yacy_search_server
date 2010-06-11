@@ -382,11 +382,16 @@ Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer b
 Select a language for the interface==Wählen Sie eine Sprache für das Interface
 Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
 Community-based web search==Gemeinschafts-basierte Web Suche
-join and support the global network 'freeworld', search the web with an uncensored user-owned search network==treten Sie dem globalen Netzwerk 'freeworld' bei und unterstützen Sie es, durchsuchen Sie das Internet mit einem unzensierten, von den Benutzern gestalteten Suchnetzwerk
+Join and support the global network \'freeworld\', search the web with an uncensored user-owned search network==Treten Sie dem globalen Netzwerk 'freeworld' bei und unterstützen Sie es, durchsuchen Sie das Internet mit einem unzensierten, von den Benutzern gestalteten Suchnetzwerk
 Search portal for your own web pages==Suchportal für Ihre eigene Internetseiten
-your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ihre YaCy Installation verhält sich unabhängig von den anderen Peers und Sie können Ihren eigenen Index bestimmen, indem Sie einen eigenen Web-Crawl starten. Dies kann benutzt werden, um Ihre eigenen Internetseiten zu durchsuchen oder ein Themen-basiertes Portal aufzubauen.
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Ihre YaCy Installation verhält sich unabhängig von den anderen Peers und Sie können Ihren eigenen Index bestimmen, indem Sie einen eigenen Web-Crawl starten. Dies kann benutzt werden, um Ihre eigenen Internetseiten zu durchsuchen oder ein Themen-basiertes Portal aufzubauen.
+Files may also be shared with the YaCy server, assign a path here:==Dateien können auch mit dem YaCy Server unter folgendem Pfad zugänglich gemacht werden:
+This path can be accessed at ==Der Pfad ist erreichbar unter 
+Use that path as crawl start point.==Verwenden Sie diesen Pfad als den Startpunkt für den Crawl.
 Intranet Indexing==Intranet Indexierung
-create a search portal for your intranet web pages, or pages that are placed at DATA/HTDOCS/repository and can be accessed at <a href="http://localhost:#\[port\]#/repository/">http://localhost:#\[port\]#/repository</a>==erstellt ein Suchportal für Ihre Intranet Webseiten, oder Seiten, die unter DATA/HTDOCS/repository gespeichert und unter <a href="http://localhost:#[port]#/repository/">http://localhost:#[port]#/repository</a> erreichbar sind.
+Create a search portal for your intranet or web pages or your \(shared\) file system.==Ein Suchportal für Ihre Intranet oder öffentlichen Webseiten oder ihr (verteiltes) Dateisystem.
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLs mit folgenden Protokollen (HTTP/HTPPS/FTP) und einem lokalen Domainnamen oder einer IP oder folgende URLs können verwendet werden
+or smb:==oder smb:
 Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
 You may change your peer name==Sie können Ihren Peernamen ändern
 Peer Name:==Peername:
@@ -1657,22 +1662,22 @@ Passive&nbsp;Peers==Passive Peers
 Potential&nbsp;Peers==Potenzielle Peers
 Overview of \'\#\[networkName\]\#\' Network==Überblick des '#[networkName]#' Netzwerks
 Active Peers in \'\#\[networkName\]\#\' Network==Aktive Peers im '#[networkName]#' Netzwerk
-Passive Peers in \'\#\[networkName\]\#\' Network==Passive Peers Peers im '#[networkName]#' Netzwerk
-Potential Peers in \'\#\[networkName\]\#\' Network==Potentielle Peers Peers im '#[networkName]#' Netzwerk
+Passive Peers in \'\#\[networkName\]\#\' Network==Passive Peers im '#[networkName]#' Netzwerk
+Potential Peers in \'\#\[networkName\]\#\' Network==Potentielle Peers im '#[networkName]#' Netzwerk
 Manually contacting Peer==Kontaktiere Peer manuell
 no remote \#\[peertype\]\# peer for this list known==Kein remote Peer #[peertype]# bekannt oder online.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Gezeigt werden #[num]# Einträge von insgesamt #[total]# Peers.
-send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki/<br />browse&nbsp;<strong>B</strong>log==Sende Nachricht (<strong>m</strong>)/<br />Zeige Profil (<strong>p</strong>)/<br />Ändere Wiki (<strong>w</strong>)/<br />Durchsuche Blog (<strong>b</strong>)
+send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==Sende Nachricht (<strong>m</strong>)/<br/>Zeige Profil (<strong>p</strong>)/<br/>Ändere Wiki (<strong>w</strong>)/<br/>Durchsuche Blog (<strong>b</strong>)
 Search for a peername \(RegExp allowed\)==Suche nach Peernamen (RegExp erlaubt)
 "Search"=="Suche"
 Name==Name
 Address==Adresse
 Hash==Hash
 Type==Typ
-Release/<br />SVN==YaCy Version/<br />SVN
-Last<br />Seen==Zuletzt<br />online
+Release/<br/>SVN==YaCy Version/<br/>SVN
+Last<br/>Seen==Zuletzt<br/>online
 Location==Ort
->URLs for<br />Remote<br />Crawl<==>URLs zum<br />Remote<br />Crawlen<
+>URLs for<br/>Remote<br/>Crawl<==>URLs zum<br/>Remote<br/>Crawlen<
 Offset==Versatz
 Send message to peer==Sende Nachricht an Peer
 View profile of peer==Zeige Profil des Peers
@@ -1685,6 +1690,7 @@ Browse blog of peer==Durchsuche den Blog von Peer
 "DHT Receive: yes"=="DHT Empfang: ja"
 "DHT receive enabled"=="DHT Empfang aktiv"
 "DHT Receive: no; \#\[peertags\]\#"=="DHT Empfang: nein; #[peertags]#"
+"DHT Receive: no"=="DHT Empfang: nein"
 "no DHT receive"=="kein DHT Empfang"
 "Accept Crawl: no"=="Akzeptiert Crawl: nein"
 "no crawl"=="kein Crawl"
@@ -1694,19 +1700,30 @@ Contact: passive==Kontakt: passiv
 Contact: direct==Kontakt: direkt
 Seed download: possible==Seed Download: möglich
 runtime:==Laufzeit:
-Branch==Typ
 #Peers==Peers
-All Links==Alle Links
-All Words==Alle Wörter
-Active \(connected Senior and Principal\)==Aktiv (verbundene Senior und Principal)
-Passive \(disconnected Senior and Principal\)==Passiv (nicht verbundene Senior und Principal)
-Potential \(Junior\)==Potenziell (Junior)
-Network Total==Netzwerk insgesamt
 #YaCy Cluster==YaCy Cluster
-Indexing Speed: \#\[gppm\]\# Pages Per Minute \(PPM\)==Indexier Geschwindigkeit: #[gppm]# Seiten pro Minute (PPM)
-Query Frequency: \#\[gqph\]\# Queries Per Hour \(QPH\)==Suchfrequenz: #[gqph]# Suchanfragen pro Stunde (QPH) 
-Your Peer:==Ihr Peer:
 
+>Network<==>Netzwerk<
+#>Online Peers<==>Online Peers<
+>Number of<br/>Documents<==>Anzahl der<br/>Dokumente<
+Indexing Speed:==Indexiergeschwindigkeit:
+Pages Per Minute \(PPM\)==Seiten pro Minute (PPM)
+Query Frequency:==Abfragegeschwindigkeit:
+Queries Per Hour \(QPH\)==Abfragen pro Stunde (QPH)
+>Today<==>Heute<
+>Last Week<==>Letzte Woche<
+>Last Month<==>Letzten Monat<
+>Now<==>Jetzt<
+>Active<==>Aktiv<
+>Passive<==>Passiv<
+>Potential<==>Potentiell<
+>This Peer<==>Dieser Peer<
+URLs for<br/>Remote Crawl==URLs zum<br/>Remote Crawlen
+
+Indexing<br/>PPM==Indexier<br/>PPM
+\(public&nbsp;local\)==öffentlich&nbsp;lokal
+\(remote\)==(extern)
+Your Peer:==Ihr Peer:
 #>Name<==>Name<
 #>Info<==>Info<
 #>Version<==>Version<
@@ -1714,17 +1731,12 @@ Your Peer:==Ihr Peer:
 >Uptime<==>Laufzeit<
 #>Links<==>Links<
 #>RWIs<==>RWIs<
->URLs for<br />Remote Crawl<==>URLs zum<br />Remote Crawlen<
-Sent<br />Words==Gesendete<br />Wörter
-Sent<br />URLs==Gesendete<br />URLs
-Received<br />Words==Empfangene<br />Wörter
-Received<br />URLs==Empfangene<br />URLs
->Known Seeds<==>Bekannte Seeds<
-Connects<br />per hour==Verbindungen<br />pro Stunde
->Indexing PPM<==>Indexierte PPM<
->QPH<br />\(public\&nbsp;local\+remote\)<==>QPH<br />(öffentlich&nbsp;lokal+entfernt)<
->QPH<br />\(public\&nbsp;local\)<==>QPH<br />(öffentlich&nbsp;lokal)<
->QPH<br />\(remote\)<==>QPH<br />(entfernt)<
+Sent<br/>Words==Gesendete<br/>Wörter
+Sent<br/>URLs==Gesendete<br/>URLs
+Received<br/>Words==Empfangene<br/>Wörter
+Received<br/>URLs==Empfangene<br/>URLs
+Known<br/>Seeds==Bekannte<br/>Seeds
+Connects<br/>per hour==Verbindungen<br/>pro Stunde
 
 Version==Version
 Own/Other==Eigene/Andere
@@ -2686,6 +2698,7 @@ View this profile as==Zeige dieses Profil als
 #---------------------------
 Crawler Queues==Crawler Puffer
 PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)
+#Traffic \(Crawler\)==Traffic (Crawler)
 RWI RAM \(Word Cache\)==RWI RAM (Wörter Zwischenspeicher)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==Fehler im Profil Management. Bitte stoppen Sie YaCy, löschen Sie die Datei DATA/PLASMADB/crawlProfiles0.db
 and restart.==und starten Sie YaCy neu.
@@ -2719,7 +2732,7 @@ See a access timing <a href="/api/latency_p.xml">here</a>==<a href="/api/latency
 Queue</th>==Puffer</th>
 >Size==>Größe
 #Max==Max
-Indexing</td>==Indexieren</td>
+#Indexing</td>==Indexieren</td>
 Loader==Lader
 Local Crawler==Lokaler Crawler
 unlimited==uneingeschränkt
