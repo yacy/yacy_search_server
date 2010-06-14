@@ -84,13 +84,12 @@ public class PerformanceQueues_p {
 	            }
         	}
             if (post.containsKey("Xmx")) {
-                int xmx = 180; // default maximum heap size
-                try { xmx = Integer.parseInt(post.get("Xmx", Integer.toString(xmx))); } catch (final NumberFormatException e){}
-                if (!(OS.isWin32 && xmx >= 2000)){
-	                sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
-	                sb.setConfig("javastart_Xms", "Xms" + xmx + "m");
-	                prop.put("setStartupCommit", "1");
-                }
+                int xmx = post.getInt("Xmx", 500); // default maximum heap size
+                if (OS.isWin32) xmx = Math.min(2000, xmx);
+                int xms = xmx / 4;
+	            sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
+	            sb.setConfig("javastart_Xms", "Xms" + xms + "m");
+	            prop.put("setStartupCommit", "1");
             }
             if(post.containsKey("diskFree")) {
             	int diskFree = 3000; // default
@@ -354,9 +353,9 @@ public class PerformanceQueues_p {
         prop.put("priority_low",(curr_prio==20) ? "1" : "0");
         
         // parse initialization memory settings
-        final String Xmx = sb.getConfig("javastart_Xmx", "Xmx120m").substring(3);
+        final String Xmx = sb.getConfig("javastart_Xmx", "Xmx500m").substring(3);
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
-        final String Xms = sb.getConfig("javastart_Xms", "Xms120m").substring(3);
+        final String Xms = sb.getConfig("javastart_Xms", "Xms500m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
         
         final String diskFree = sb.getConfig(SwitchboardConstants.DISK_FREE, "3000");

@@ -26,7 +26,6 @@
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -35,17 +34,17 @@ public class CrawlStart_p {
     
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-	    final Switchboard sb = (Switchboard) env;
+	    //final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         // define visible variables
-        String a = sb.peers.mySeed().getPublicAddress();
-        boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
-        String repository = "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/";
-        prop.put("starturl", (intranet) ? repository : "http://");
+        //String a = sb.peers.mySeed().getPublicAddress();
+        //boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
+        //String repository = "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/";
+        prop.put("starturl", /*(intranet) ? repository :*/ "http://");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
         prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
-        prop.put("mustmatch", (intranet) ? repository + ".*" : CrawlProfile.MATCH_ALL);
+        prop.put("mustmatch", /*(intranet) ? repository + ".*" :*/ CrawlProfile.MATCH_ALL);
         prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER);
         
         prop.put("crawlingIfOlderCheck", "0");

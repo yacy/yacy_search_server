@@ -45,6 +45,9 @@
  * on behalf of SuperBonBon Industries. For more information on 
  * SuperBonBon Industries, please see <http://www.sbbi.net/>.
  */
+
+// [MC] (C) (also) by Michael Christen: added timeout for discovery
+
 package net.sbbi.upnp;
 
 import java.io.IOException;
@@ -104,8 +107,14 @@ public final class DiscoveryAdvertisement implements Runnable {
   
   private java.net.MulticastSocket skt;
   private DatagramPacket input;
-  
+  private int timeout; 
+
   private DiscoveryAdvertisement() {
+      this.timeout = 3000;
+  }
+  
+  private DiscoveryAdvertisement(int timeout) {
+      this.timeout = timeout;
   }
   
   public final static DiscoveryAdvertisement getInstance() {
@@ -231,7 +240,7 @@ public final class DiscoveryAdvertisement implements Runnable {
     inService = true;
     while ( inService ) {
       try {
-        listenBroadCast();
+        listenBroadCast(this.timeout);
       } catch ( SocketTimeoutException ex ) {
         // ignoring
       } catch ( IOException ioEx ) {
@@ -253,8 +262,9 @@ public final class DiscoveryAdvertisement implements Runnable {
     }
   }
 
-  private void listenBroadCast() throws IOException {
-    
+  private void listenBroadCast(int timeout) throws IOException {
+      
+     skt.setSoTimeout(timeout); // added by [MC]
      skt.receive( input );
      InetAddress from = input.getAddress();
      String received = new String( input.getData(), input.getOffset(), input.getLength() );

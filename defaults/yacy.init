@@ -603,7 +603,7 @@ cleanup.deletionPublishedNews = true
 # -Xmx<size> and -Xms<size> maximum/init Java heap size
 # both values should be equal,
 # othervise the YaCy-internal memory supervision does not work
-javastart_Xmx=Xmx180m
+javastart_Xmx=Xmx600m
 javastart_Xms=Xms180m
 
 # YaCy is able to use RAM copies of database tables. This needs a lot of RAM
