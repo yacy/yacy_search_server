@@ -46,7 +46,6 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
 import java.util.List;
 import java.util.Map;
@@ -175,7 +174,7 @@ public class Blog {
             map.put("page", pagename);
             map.put("subject", StrSubject.replace(',', ' '));
             map.put("author", StrAuthor.replace(',', ' '));
-            sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map));
+            sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map);
         }
 
         page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"

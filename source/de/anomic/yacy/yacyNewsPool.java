@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -271,7 +272,7 @@ public class yacyNewsPool {
     		final File yacyDBPath,
             final boolean useTailCache,
             final boolean exceed134217727) {
-        newsDB = new yacyNewsDB(new File(yacyDBPath, "news.db"), useTailCache, exceed134217727);
+        newsDB = new yacyNewsDB(new File(yacyDBPath, "news1024.db"), 1024, useTailCache, exceed134217727);
         outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut.table"), newsDB);
         publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished.table"), newsDB);
         incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn.table"), newsDB);
@@ -295,6 +296,18 @@ public class yacyNewsPool {
         // returns an iterator of yacyNewsRecord-type objects
         final yacyNewsQueue queue = switchQueue(dbKey);
         return queue.records(up);
+    }
+    
+    public yacyNewsDB.Record parseExternal(String external) {
+        return newsDB.newRecord(external);
+    }
+    
+    public void publishMyNews(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
+        publishMyNews(newsDB.newRecord(mySeed, category, attributes));
+    }
+    
+    public void publishMyNews(final yacySeed mySeed, final String category, final Properties attributes) {
+        publishMyNews(newsDB.newRecord(mySeed, category, attributes));
     }
     
     public void publishMyNews(final yacyNewsDB.Record record) {

@@ -412,7 +412,7 @@ public class yacysearch {
                 map.put("urlhash", delHash);
                 map.put("vote", "negative");
                 map.put("refid", "");
-                sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
             } catch (IOException e) {
                 Log.logException(e);
             }
@@ -437,7 +437,7 @@ public class yacysearch {
                         map.put("description", document.dc_title().replace(',', ' '));
                         map.put("author", document.dc_creator());
                         map.put("tags", document.dc_subject(' '));
-                        sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
+                        sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map);
                         document.close();
                     }
                 }

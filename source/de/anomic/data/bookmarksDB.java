@@ -56,7 +56,6 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
 
 public class bookmarksDB {
@@ -291,7 +290,7 @@ public class bookmarksDB {
                         m.remove("generalFilter");
                         m.remove("specificFilter");
                         m.put("intention", "Automatic ReCrawl!");
-                        sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
+                        sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m);	                      
                     }
                 } catch (MalformedURLException e1) {}
             } // if

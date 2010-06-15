@@ -71,33 +71,32 @@ import net.yacy.kelondro.util.MapTools;
 public class yacyNewsDB {
 
     private final File path;
+    private final Row rowdef;
+    protected final int attributesMaxLength;
     protected ObjectIndex news;
 
-    private static final int maxNewsRecordLength  = 512;
     private  static final int categoryStringLength = 8;
     public  static final int idLength = DateFormatter.PATTERN_SHORT_SECOND.length() + Word.commonHashLength;
 
-    private static final int attributesMaxLength =
-        maxNewsRecordLength
+    public yacyNewsDB(
+    		final File path,
+    		final int maxNewsRecordLength,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
+        this.path = path;
+        this.attributesMaxLength = maxNewsRecordLength
             - idLength
             - categoryStringLength
             - DateFormatter.PATTERN_SHORT_SECOND.length()
             - 2;
-
-    private static final Row rowdef = new Row(
-            "String idx-" + idLength + " \"id = created + originator\"," +
-            "String cat-" + categoryStringLength + "," +
-            "String rec-" + DateFormatter.PATTERN_SHORT_SECOND.length() + "," +
-            "short  dis-2 {b64e}," +
-            "String att-" + attributesMaxLength,
-            NaturalOrder.naturalOrder
-    );
-
-    public yacyNewsDB(
-    		final File path,
-            final boolean useTailCache,
-            final boolean exceed134217727) {
-        this.path = path;
+        this.rowdef = new Row(
+                "String idx-" + idLength + " \"id = created + originator\"," +
+                "String cat-" + categoryStringLength + "," +
+                "String rec-" + DateFormatter.PATTERN_SHORT_SECOND.length() + "," +
+                "short  dis-2 {b64e}," +
+                "String att-" + attributesMaxLength,
+                NaturalOrder.naturalOrder
+            );
         try {
             this.news = new Table(path, rowdef, 10, 0, useTailCache, exceed134217727);
         } catch (RowSpaceExceededException e) {
@@ -185,7 +184,7 @@ public class yacyNewsDB {
         }
     }
 
-    protected final static Record b2r(final Row.Entry b) {
+    protected Record b2r(final Row.Entry b) {
         if (b == null) return null;
         return new yacyNewsDB.Record(
             b.getColString(0, null),
@@ -199,8 +198,11 @@ public class yacyNewsDB {
     protected final Row.Entry r2b(final Record r) {
         if (r == null) return null;
         try {
-            final String attributes = r.attributes().toString();
-            if (attributes.length() > attributesMaxLength) throw new IllegalArgumentException("attribute length=" + attributes.length() + " exceeds maximum size=" + attributesMaxLength);
+            String attributes = r.attributes().toString();
+            if (attributes.length() > attributesMaxLength) {
+                Log.logWarning("yacyNewsDB", "attribute length=" + attributes.length() + " exceeds maximum size=" + attributesMaxLength);
+                attributes = new HashMap<String, String>().toString();
+            }
             final Row.Entry entry = this.news.row().newEntry();
             entry.setCol(0, r.id().getBytes());
             entry.setCol(1, r.category().getBytes("UTF-8"));
@@ -214,7 +216,7 @@ public class yacyNewsDB {
         }
     }
     
-    public static Record newRecord(final yacySeed mySeed, final String category, final Properties attributes) {
+    public Record newRecord(final yacySeed mySeed, final String category, final Properties attributes) {
         try {
             final Map<String, String> m = new HashMap<String, String>();
             final Iterator<Entry<Object, Object>> e = attributes.entrySet().iterator();
@@ -225,24 +227,42 @@ public class yacyNewsDB {
             }
             return new Record(mySeed, category, m);
         } catch (final IllegalArgumentException e) {
-            yacyCore.log.logWarning("rejected bad yacy news record: " + e.getMessage());
+            yacyCore.log.logWarning("rejected bad yacy news record (1): " + e.getMessage());
             return null;
         }
     }
 
-    public static class Record {
+    public Record newRecord(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
+        try {
+            return new Record(mySeed, category, attributes);
+        } catch (final IllegalArgumentException e) {
+            yacyCore.log.logWarning("rejected bad yacy news record (2): " + e.getMessage());
+            return null;
+        }
+    }
+
+    public Record newRecord(String external) {
+        try {
+            return new Record(external);
+        } catch (final IllegalArgumentException e) {
+            yacyCore.log.logWarning("rejected bad yacy news record (3): " + e.getMessage());
+            return null;
+        }
+    }
+
+    public class Record {
 
         private final String originator;  // hash of originating peer
         private final Date   created;     // Date when news was created by originator
         private final Date   received;    // Date when news was received here at this peer
-        private final String category;    // keyword that adresses possible actions
+        private final String category;    // keyword that addresses possible actions
         private       int    distributed; // counter that counts number of distributions of this news record
-        private final Map<String, String> attributes;  // elemets of the news for a special category
+        private final Map<String, String> attributes;  // elements of the news for a special category
 
         
         public Record(final String newsString) {
             this.attributes = MapTools.string2map(newsString, ",");
-            if (attributes.toString().length() > yacyNewsDB.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + yacyNewsDB.attributesMaxLength + ")");
+            if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.category = (attributes.containsKey("cat")) ? attributes.get("cat") : "";
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
             this.received = (attributes.containsKey("rec")) ? DateFormatter.parseShortSecond(attributes.get("rec"), DateFormatter.UTCDiffString()) : new Date();
@@ -254,7 +274,7 @@ public class yacyNewsDB {
 
         public Record(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
-            if (attributes.toString().length() > yacyNewsDB.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + yacyNewsDB.attributesMaxLength + ")");
+            if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.attributes = attributes;
             this.received = null;
             this.created = new Date();
@@ -266,7 +286,7 @@ public class yacyNewsDB {
 
         protected Record(final String id, final String category, final Date received, final int distributed, final Map<String, String> attributes) {
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
-            if (attributes.toString().length() > yacyNewsDB.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + yacyNewsDB.attributesMaxLength + ")");
+            if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.attributes = attributes;
             this.received = received;
             this.created = DateFormatter.parseShortSecond(id.substring(0, DateFormatter.PATTERN_SHORT_SECOND.length()), DateFormatter.UTCDiffString());
@@ -333,10 +353,6 @@ public class yacyNewsDB {
             final String s = attributes.get(key);
             if ((s == null) || (s.length() == 0)) return dflt;
             return s;
-        }
-
-        public static void main(final String[] args) {
-            System.out.println((new yacyNewsDB.Record(args[0])).toString());
         }
     }
 

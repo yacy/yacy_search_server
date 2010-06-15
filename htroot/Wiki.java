@@ -45,7 +45,6 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
 
 public class Wiki {
@@ -121,7 +120,7 @@ public class Wiki {
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
-                sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map);
             page = newEntry;
             prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);
         }

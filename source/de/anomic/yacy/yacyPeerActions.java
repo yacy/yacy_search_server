@@ -228,7 +228,7 @@ public class yacyPeerActions {
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
         if ((recordString == null) || (recordString.length() == 0)) return;
         final String decodedString = de.anomic.tools.crypt.simpleDecode(recordString, "");
-        final yacyNewsDB.Record record = new yacyNewsDB.Record(decodedString);
+        final yacyNewsDB.Record record = this.newsPool.parseExternal(decodedString);
         if (record != null) {
             //System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
             final String cre1 = MapTools.string2map(decodedString, ",").get("cre");

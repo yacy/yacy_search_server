@@ -57,7 +57,6 @@ import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
 
 public class Crawler_p {
@@ -289,7 +288,7 @@ public class Crawler_p {
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
                                     m.put("intention", post.get("intention", "").replace(',', '/'));
-                                    sb.peers.newsPool.publishMyNews(new yacyNewsDB.Record(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
+                                    sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m);
                                 }                                
                             } else {
                                 prop.put("info", "5"); //Crawling failed
