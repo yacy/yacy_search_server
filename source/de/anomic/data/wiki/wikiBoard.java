@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import net.yacy.kelondro.blob.MapHeap;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -287,6 +288,10 @@ public class wikiBoard {
             if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
             return new entry(key, record);
         } catch (final IOException e) {
+            Log.logException(e);
+            return null;
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
             return null;
         }
     }

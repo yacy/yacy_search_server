@@ -46,6 +46,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
@@ -332,6 +333,10 @@ public class bookmarksDB {
             final Map<String, String> map = bookmarks.get(urlHash.getBytes());
             return (map == null) ? null : new Bookmark(map);
         } catch (final IOException e) {
+            Log.logException(e);
+            return null;
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
             return null;
         }
     }

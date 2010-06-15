@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.data.WorkTables;
@@ -78,6 +79,8 @@ public class Table_API_p {
                         l.put(url, result.getStatusCode());
                     }
                 } catch (IOException e) {
+                    Log.logException(e);
+                } catch (RowSpaceExceededException e) {
                     Log.logException(e);
                 }
             }

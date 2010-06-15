@@ -208,6 +208,9 @@ public class CrawlProfile {
         } catch (final IOException e) {
             Log.logException(e);
             return null;
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+            return null;
         }
         if (m == null) return null;
         return new entry(m);

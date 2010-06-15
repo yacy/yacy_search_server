@@ -118,7 +118,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
     public void put(
             byte[] pk,
             String key, byte[] value
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         byte[] b = BEncoder.encodeMap(key, value);
         this.table.put(pk, b);
         this.columnames.add(key);
@@ -127,7 +127,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
             byte[] pk,
             String key0, byte[] value0,
             String key1, byte[] value1
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         byte[] b = BEncoder.encodeMap(
                 key0, value0,
                 key1, value1
@@ -141,7 +141,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
             String key0, byte[] value0,
             String key1, byte[] value1,
             String key2, byte[] value2
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         byte[] b = BEncoder.encodeMap(
                 key0, value0,
                 key1, value1,
@@ -158,7 +158,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
             String key1, byte[] value1,
             String key2, byte[] value2,
             String key3, byte[] value3
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         byte[] b = BEncoder.encodeMap(
                 key0, value0,
                 key1, value1,
@@ -178,13 +178,13 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
      * @return the map if one found or NULL if no entry exists or the entry is corrupt
      * @throws IOException
      */
-    public Map<String, byte[]> get(byte[] pk) throws IOException {
+    public Map<String, byte[]> get(byte[] pk) throws IOException, RowSpaceExceededException {
         byte[] b = this.table.get(pk);
         if (b == null) return null;
         return b2m(b);
     }
 
-    public byte[] getProp(byte[] pk, String key) throws IOException {
+    public byte[] getProp(byte[] pk, String key) throws IOException, RowSpaceExceededException {
         byte[] b = this.table.get(pk);
         if (b == null) return null;
         Map<String, byte[]> map = b2m(b);

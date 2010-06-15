@@ -178,8 +178,9 @@ public class Stacks {
      * @return the object that belongs to the handle
      *         or null if no such element exists
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public byte[] get(final String stack, final long handle) throws IOException {
+    public byte[] get(final String stack, final long handle) throws IOException, RowSpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.get(handle);
@@ -191,8 +192,9 @@ public class Stacks {
      * @param handle
      * @return the removed element
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public byte[] remove(final String stack, final long handle) throws IOException {
+    public byte[] remove(final String stack, final long handle) throws IOException, RowSpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.remove(handle);

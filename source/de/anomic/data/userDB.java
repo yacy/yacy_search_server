@@ -97,6 +97,10 @@ public final class userDB {
         try {
             record = userTable.get(userName.getBytes());
         } catch (final IOException e) {
+            Log.logException(e);
+            return null;
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
             return null;
         }
         if (record == null) return null;

@@ -344,7 +344,7 @@ public class HeapReader {
      * @return the entry which key is the smallest in the heap
      * @throws IOException
      */
-    protected byte[] first() throws IOException {
+    protected byte[] first() throws IOException, RowSpaceExceededException {
         synchronized (this.index) {
             byte[] key = index.smallestKey();
             if (key == null) return null;
@@ -372,7 +372,7 @@ public class HeapReader {
      * @return the entry which key is the smallest in the heap
      * @throws IOException
      */
-    protected byte[] last() throws IOException {
+    protected byte[] last() throws IOException, RowSpaceExceededException {
         synchronized (this.index) {
             byte[] key = index.largestKey();
             if (key == null) return null;
@@ -386,7 +386,7 @@ public class HeapReader {
      * @return
      * @throws IOException
      */
-    public byte[] get(byte[] key) throws IOException {
+    public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
         key = normalizeKey(key);
        
         synchronized (this.index) {
@@ -398,7 +398,7 @@ public class HeapReader {
             file.seek(pos);
             final int len = file.readInt() - index.row().primaryKeyLength;
             if (MemoryControl.available() < len * 2 + keepFreeMem) {
-                if (!MemoryControl.request(len * 2 + keepFreeMem, true)) return null; // not enough memory available for this blob
+                if (!MemoryControl.request(len * 2 + keepFreeMem, true)) throw new RowSpaceExceededException(len * 2 + keepFreeMem, "HeapReader.get()"); // not enough memory available for this blob
             }
             
             // read the key

@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.server.RequestHeader;
@@ -146,12 +147,16 @@ public class Tables_p {
                     }
                 } catch (IOException e) {
                     Log.logException(e);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
                 }
             } else if (post.containsKey("addrow")) try {
                 // get a new key
                 String pk = new String(sb.tables.createRow(table));
                 setEdit(sb, prop, table, pk, columns);
             } catch (IOException e) {
+                Log.logException(e);
+            } catch (RowSpaceExceededException e) {
                 Log.logException(e);
             } else {
                 prop.put("showtable", 1);
@@ -209,7 +214,7 @@ public class Tables_p {
         return prop;
     }
     
-    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, List<String> columns) throws IOException {
+    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, List<String> columns) throws IOException, RowSpaceExceededException {
         prop.put("showedit", 1);
         prop.put("showedit_table", table);
         prop.put("showedit_pk", pk);

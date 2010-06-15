@@ -137,15 +137,19 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    private void add(byte[] key, final byte[] blob) throws IOException, RowSpaceExceededException {
+    private void add(byte[] key, final byte[] blob) throws IOException {
         assert blob.length > 0;
         if ((blob == null) || (blob.length == 0)) return;
         final int pos = (int) file.length();
-        index.put(key, pos);
-        file.seek(pos);
-        file.writeInt(this.keylength + blob.length);
-        file.write(key);
-        file.write(blob, 0, blob.length);
+        try {
+            index.put(key, pos);
+            file.seek(pos);
+            file.writeInt(this.keylength + blob.length);
+            file.write(key);
+            file.write(blob, 0, blob.length);
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage()); // should never occur;
+        }
     }
     
     /**
@@ -154,7 +158,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    private void flushBuffer() throws IOException, RowSpaceExceededException {
+    private void flushBuffer() throws IOException {
         // check size of buffer
         Iterator<Map.Entry<byte[], byte[]>> i = this.buffer.entrySet().iterator();
         int l = 0;
@@ -181,11 +185,17 @@ public final class Heap extends HeapModifier implements BLOB {
         posBuffer = 0;
         byte[] ba = new byte[l + (4 + this.keylength) * this.buffer.size()];
         byte[] b;
-        while (i.hasNext()) {
+        TreeMap<byte[], byte[]> nextBuffer = new TreeMap<byte[], byte[]>(ordering);
+        flush: while (i.hasNext()) {
             entry = i.next();
             key = normalizeKey(entry.getKey());
             blob = entry.getValue();
-            index.put(key, posFile);
+            try {
+                index.put(key, posFile);
+            } catch (RowSpaceExceededException e) {
+                nextBuffer.put(entry.getKey(), blob);
+                continue flush;
+            }
             b = AbstractWriter.int2array(this.keylength + blob.length);
             assert b.length == 4;
             assert posBuffer + 4 < ba.length : "posBuffer = " + posBuffer + ", ba.length = " + ba.length;
@@ -202,7 +212,7 @@ public final class Heap extends HeapModifier implements BLOB {
         assert ba.length == posBuffer; // must fit exactly
         this.file.seek(pos);
         this.file.write(ba);
-        this.buffer.clear();
+        this.buffer = nextBuffer;
         this.buffersize = 0;
     }
     
@@ -213,7 +223,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public byte[] get(byte[] key) throws IOException {
+    public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
         key = normalizeKey(key);
         
         synchronized (this) {
@@ -265,8 +275,6 @@ public final class Heap extends HeapModifier implements BLOB {
                 flushBuffer();
             } catch (IOException e) {
                 Log.logException(e);
-            } catch (RowSpaceExceededException e) {
-                Log.logException(e);
             }
         }
     	this.buffer = null;
@@ -294,9 +302,10 @@ public final class Heap extends HeapModifier implements BLOB {
      * @param b
      * @throws IOException
      * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException 
      */
     @Override
-    public void put(byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
+    public void put(byte[] key, final byte[] b) throws IOException {
         key = normalizeKey(key);
         
         // we do not write records of length 0 into the BLOB
@@ -308,7 +317,9 @@ public final class Heap extends HeapModifier implements BLOB {
             this.remove(key);
             
             // then look if we can use a free entry
-            if (putToGap(key, b)) return; 
+            try {
+                if (putToGap(key, b)) return;
+            } catch (RowSpaceExceededException e) {} // too less space can be ignored, we have a second try
             
             // if there is not enough space in the buffer, flush all
             if (this.buffersize + b.length > buffermax) {
@@ -446,11 +457,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
-        try {
-            this.flushBuffer();
-        } catch (RowSpaceExceededException e) {
-            Log.logException(e);
-        }
+        this.flushBuffer();
         return super.keys(up, rotating);
     }
 
@@ -463,11 +470,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        try {
-            this.flushBuffer();
-        } catch (RowSpaceExceededException e) {
-            Log.logException(e);
-        }
+        this.flushBuffer();
         return super.keys(up, firstKey);
     }
 
@@ -499,8 +502,6 @@ public final class Heap extends HeapModifier implements BLOB {
             heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
-            Log.logException(e);
-        } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }
     }

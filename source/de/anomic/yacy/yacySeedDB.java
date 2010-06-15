@@ -554,6 +554,9 @@ public final class yacySeedDB implements AlternativeDomainNames {
         } catch (final IOException e) {
             Log.logException(e);
             return null;
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+            return null;
         }
         return new yacySeed(hash, entry);
     }

@@ -35,12 +35,16 @@ import java.util.Iterator;
  * latest return value of next0()
  * To use this class just implement the next0() method
  */
-public abstract class LookAheadIterator<A> implements Iterator<A> {
+public abstract class LookAheadIterator<A> implements Iterator<A>, Iterable<A> {
 
     private boolean fresh = true;
     private A next = null;
     
     public LookAheadIterator() {
+    }
+
+    public Iterator<A> iterator() {
+        return this;
     }
     
     /**

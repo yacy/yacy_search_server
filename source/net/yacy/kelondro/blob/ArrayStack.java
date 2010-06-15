@@ -60,6 +60,7 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.ReferenceIterator;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
@@ -574,7 +575,7 @@ public class ArrayStack implements BLOB {
      * @return
      * @throws IOException
      */
-    public synchronized byte[] get(byte[] key) throws IOException {
+    public synchronized byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
     	//blobItem bi = keeperOf(key);
     	//return (bi == null) ? null : bi.blob.get(key);
         
@@ -595,65 +596,36 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      */
     public Iterable<byte[]> getAll(byte[] key) throws IOException {
-        /*
-        byte[] b;
-        ArrayList<byte[]> l = new ArrayList<byte[]>(blobs.size());
-        for (blobItem bi: blobs) {
-            b = bi.blob.get(key);
-            if (b != null) l.add(b);
-        }
-        return l;
-        */
         return new BlobValues(key);
     }
     
-    public class BlobValues implements Iterator<byte[]>, Iterable<byte[]> {
+    public class BlobValues extends LookAheadIterator<byte[]> {
 
         private final Iterator<blobItem> bii;
         private final byte[] key;
-        private byte[] next;
         
         public BlobValues(byte[] key) {
             this.bii = blobs.iterator();
             this.key = key;
-            this.next = null;
             next0();
         }
         
-        private void next0() {
+        protected byte[] next0() {
             while (this.bii.hasNext()) {
                 BLOB b = this.bii.next().blob;
                 if (b == null) continue;
                 try {
-                    this.next = b.get(key);
-                    if (this.next != null) return;
+                    byte[] n = b.get(key);
+                    if (n != null) return n;
                 } catch (IOException e) {
                     Log.logSevere("ArrayStack", "", e);
-                    this.next = null;
-                    return;
+                    return null;
+                } catch (RowSpaceExceededException e) {
+                    continue;
                 }
             }
-            this.next = null;
-        }
-        
-        public Iterator<byte[]> iterator() {
-            return this;
-        }
-
-        public boolean hasNext() {
-            return this.next != null;
-        }
-
-        public byte[] next() {
-            byte[] n = this.next;
-            next0();
-            return n;
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException("no remove in BlobValues");
-        }
-        
+            return null;
+        }        
     }
     
     /**
@@ -692,7 +664,7 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public synchronized void put(byte[] key, byte[] b) throws IOException, RowSpaceExceededException {
+    public synchronized void put(byte[] key, byte[] b) throws IOException {
         blobItem bi = (blobs.isEmpty()) ? null : blobs.get(blobs.size() - 1);
         if (bi == null)
             System.out.println("bi == null");
@@ -714,8 +686,9 @@ public class ArrayStack implements BLOB {
      * replace a BLOB entry with another which must be smaller or same size
      * @param key  the primary key
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public synchronized int replace(byte[] key, Rewriter rewriter) throws IOException {
+    public synchronized int replace(byte[] key, Rewriter rewriter) throws IOException, RowSpaceExceededException {
         int d = 0;
         for (blobItem bi: blobs) {
             d += bi.blob.replace(key, rewriter);
@@ -1012,8 +985,6 @@ public class ArrayStack implements BLOB {
             heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
-            Log.logException(e);
-        } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }
     }

@@ -103,7 +103,7 @@ public interface BLOB {
      * @return
      * @throws IOException
      */
-    public byte[] get(byte[] key) throws IOException;
+    public byte[] get(byte[] key) throws IOException, RowSpaceExceededException;
     
     /**
      * retrieve the size of the database
@@ -128,7 +128,7 @@ public interface BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public void put(byte[] key, byte[] b) throws IOException, RowSpaceExceededException;
+    public void put(byte[] key, byte[] b) throws IOException;
     
     /**
      * replace an existing entry in the BLOB with a new entry
@@ -142,8 +142,9 @@ public interface BLOB {
      * @param b
      * @return the number of bytes that the rewriter reduced the BLOB
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public int replace(byte[] key, Rewriter rewriter) throws IOException;
+    public int replace(byte[] key, Rewriter rewriter) throws IOException, RowSpaceExceededException;
     
     /**
      * remove a BLOB

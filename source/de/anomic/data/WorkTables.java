@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.server.serverObjects;
@@ -65,6 +66,8 @@ public class WorkTables extends Tables {
                     TABLE_API_COL_URL, apiurl.getBytes()
                     );
         } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }
         Log.logInfo("APICALL", apiurl);

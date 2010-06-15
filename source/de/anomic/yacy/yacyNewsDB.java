@@ -260,7 +260,7 @@ public class yacyNewsDB {
         private final Map<String, String> attributes;  // elements of the news for a special category
 
         
-        public Record(final String newsString) {
+        protected Record(final String newsString) {
             this.attributes = MapTools.string2map(newsString, ",");
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.category = (attributes.containsKey("cat")) ? attributes.get("cat") : "";
@@ -272,7 +272,7 @@ public class yacyNewsDB {
             removeStandards();
         }
 
-        public Record(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
+        protected Record(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.attributes = attributes;

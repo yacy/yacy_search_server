@@ -43,6 +43,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.kelondro.blob.MapHeap;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -130,6 +131,10 @@ public class blogBoardComments {
         try {
             record = base.get(copyOfKey.getBytes());
         } catch (final IOException e) {
+            Log.logException(e);
+            record = null;
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
             record = null;
         }
         return (record == null) ?

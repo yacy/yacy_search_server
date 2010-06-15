@@ -103,9 +103,6 @@ public class Compressor implements BLOB {
                 while ((entry = writeQueue.take()) != poisonWorkerEntry) {
                     try {
                         Compressor.this.backend.put(entry.getKey().getBytes(), compress(entry.getValue()));
-                    } catch (RowSpaceExceededException e) {
-                        Log.logException(e);
-                        buffer.put(entry.getKey(), entry.getValue());
                     } catch (IOException e) {
                         Log.logException(e);
                         buffer.put(entry.getKey(), entry.getValue());
@@ -223,7 +220,7 @@ public class Compressor implements BLOB {
         }
     }
 
-    public synchronized byte[] get(byte[] key) throws IOException {
+    public synchronized byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
         // depending on the source of the result, we additionally do entry compression
         // because if a document was read once, we think that it will not be retrieved another time again soon
         byte[] b = buffer.remove(new String(key));
@@ -266,10 +263,14 @@ public class Compressor implements BLOB {
     public synchronized long length(byte[] key) throws IOException {
         byte[] b = buffer.get(new String(key));
         if (b != null) return b.length;
-        b = this.backend.get(key);
-        if (b == null) return 0;
-        b = decompress(b);
-        return (b == null) ? 0 : b.length;
+        try {
+            b = this.backend.get(key);
+            if (b == null) return 0;
+            b = decompress(b);
+            return (b == null) ? 0 : b.length;
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
     }
     
     private int removeFromQueues(byte[] key) {
@@ -350,7 +351,7 @@ public class Compressor implements BLOB {
         }
     }
 
-    public int replace(byte[] key, Rewriter rewriter) throws IOException {
+    public int replace(byte[] key, Rewriter rewriter) throws IOException, RowSpaceExceededException {
         byte[] b = get(key);
         if (b == null) return 0;
         byte[] c = rewriter.rewrite(b);

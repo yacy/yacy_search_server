@@ -45,6 +45,7 @@ import net.yacy.kelondro.blob.Compressor;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -175,6 +176,9 @@ public final class Cache {
         } catch (final IOException e) {
             Log.logException(e);
             return null;
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+            return null;
         }
         if (hdb == null) return null;
         
@@ -201,6 +205,9 @@ public final class Cache {
             Log.logException(e);
             return null;
         } catch (IOException e) {
+            Log.logException(e);
+            return null;
+        } catch (RowSpaceExceededException e) {
             Log.logException(e);
             return null;
         }

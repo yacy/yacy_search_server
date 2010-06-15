@@ -189,7 +189,7 @@ public class MapHeap {
      * @return
      * @throws IOException
      */
-    public Map<String, String> get(final byte[] key) throws IOException {
+    public Map<String, String> get(final byte[] key) throws IOException, RowSpaceExceededException {
         if (key == null) return null;
         return get(key, true);
     }
@@ -210,7 +210,7 @@ public class MapHeap {
         return key;
     }
 
-    protected Map<String, String> get(byte[] key, final boolean storeCache) throws IOException {
+    protected Map<String, String> get(byte[] key, final boolean storeCache) throws IOException, RowSpaceExceededException {
         // load map from cache
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
@@ -348,6 +348,9 @@ public class MapHeap {
                 if (obj == null) throw new kelondroException("no more elements available");
                 return obj;
             } catch (final IOException e) {
+                finish = true;
+                return null;
+            } catch (final RowSpaceExceededException e) {
                 finish = true;
                 return null;
             }

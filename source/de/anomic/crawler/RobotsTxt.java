@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.blob.BEncodedHeap;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
@@ -82,7 +83,13 @@ public class RobotsTxt {
         // this method will always return a non-null value
         String urlHostPort = getHostPort(theURL);
         RobotsEntry robotsTxt4Host = null;
-        Map<String, byte[]> record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
+        Map<String, byte[]> record;
+        try {
+            record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+            record = null;
+        }
         if (record != null) robotsTxt4Host = new RobotsEntry(urlHostPort, record);
         
         if (fetchOnlineIfNotAvailableOrNotFresh && (
@@ -105,7 +112,12 @@ public class RobotsTxt {
                 
                 // check the robots table again for all threads that come here because they waited for another one
                 // to complete a download
-                record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
+                try {
+                    record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                    record = null;
+                }
                 if (record != null) robotsTxt4Host = new RobotsEntry(urlHostPort, record);
                 if (robotsTxt4Host != null &&
                     robotsTxt4Host.getLoadedDate() != null &&

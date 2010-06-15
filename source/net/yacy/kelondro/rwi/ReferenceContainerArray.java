@@ -247,7 +247,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	array.remove(termHash);
     }
     
-    public int replace(final byte[] termHash, ContainerRewriter<ReferenceType> rewriter) throws IOException {
+    public int replace(final byte[] termHash, ContainerRewriter<ReferenceType> rewriter) throws IOException, RowSpaceExceededException {
         return array.replace(termHash, new BLOBRewriter(termHash, rewriter));
     }
     

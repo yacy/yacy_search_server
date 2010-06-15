@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 
 
@@ -116,8 +117,9 @@ public class Stack {
      * @return the object that belongs to the handle
      *         or null if no such element exists
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public synchronized byte[] get(final long handle) throws IOException {
+    public synchronized byte[] get(final long handle) throws IOException, RowSpaceExceededException {
         byte[] k = NaturalOrder.encodeLong(handle, 8);
         byte[] b = this.stack.get(k);
         if (b == null) return null;
@@ -129,8 +131,9 @@ public class Stack {
      * @param handle
      * @return the removed element
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public synchronized byte[] remove(final long handle) throws IOException {
+    public synchronized byte[] remove(final long handle) throws IOException, RowSpaceExceededException {
         byte[] k = NaturalOrder.encodeLong(handle, 8);
         byte[] b = this.stack.get(k);
         if (b == null) return null;
@@ -181,7 +184,13 @@ public class Stack {
     private Entry po(final byte[] k, final boolean remove) throws IOException {
         if (k == null) return null;
         assert k.length == 8;
-        byte[] b = this.stack.get(k);
+        byte[] b;
+        try {
+            b = this.stack.get(k);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+            b = null;
+        }
         assert b != null;
         if (b == null) return null;
         if (remove) this.stack.remove(k);

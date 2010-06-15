@@ -142,6 +142,10 @@ public class blogBoard {
         try {
             record = base.get(normalized.substring(0, Math.min(normalized.length(), KEY_LENGTH)).getBytes());
         } catch (final IOException e) {
+            Log.logException(e);
+            record = null;
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
             record = null;
         }
         return (record == null) ?

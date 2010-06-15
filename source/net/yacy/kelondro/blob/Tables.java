@@ -130,7 +130,7 @@ public class Tables {
         return heap.size();
     }
     
-    private byte[] ukey(String tablename) throws IOException {
+    private byte[] ukey(String tablename) throws IOException, RowSpaceExceededException {
         Row row = select(system_table_pkcounter, tablename.getBytes());
         if (row == null) {
             // table counter entry in pkcounter table does not exist: make a new table entry
@@ -166,15 +166,16 @@ public class Tables {
      * @param map
      * @throws RowSpaceExceededException
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public byte[] insert(final String tablename, Map<String, byte[]> map) throws IOException {
+    public byte[] insert(final String tablename, Map<String, byte[]> map) throws IOException, RowSpaceExceededException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk, map);
         insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
         return uk;
     }
 
-    public byte[] insert(final String tablename, String key, byte[] value) throws IOException {
+    public byte[] insert(final String tablename, String key, byte[] value) throws IOException, RowSpaceExceededException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk, key, value);
         insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
@@ -184,7 +185,7 @@ public class Tables {
     public byte[] insert(final String tablename,
             String key0, byte[] value0,
             String key1, byte[] value1
-            ) throws IOException {
+            ) throws IOException, RowSpaceExceededException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk,
             key0, value0,
@@ -198,7 +199,7 @@ public class Tables {
             String key0, byte[] value0,
             String key1, byte[] value1,
             String key2, byte[] value2
-            ) throws IOException {
+            ) throws IOException, RowSpaceExceededException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk,
             key0, value0,
@@ -214,7 +215,7 @@ public class Tables {
             String key1, byte[] value1,
             String key2, byte[] value2,
             String key3, byte[] value3
-            ) throws IOException {
+            ) throws IOException, RowSpaceExceededException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk,
             key0, value0,
@@ -230,11 +231,7 @@ public class Tables {
             String key, byte[] value
             ) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        try {
-            heap.put(pk, key, value);
-        } catch (RowSpaceExceededException e) {
-            throw new IOException(e.getMessage());
-        }
+        heap.put(pk, key, value);
     }
 
     public void insert(final String table, byte[] pk,
@@ -242,14 +239,10 @@ public class Tables {
             String key1, byte[] value1
             ) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        try {
-            heap.put(pk,
-                key0, value0,
-                key1, value1
-                );
-        } catch (RowSpaceExceededException e) {
-            throw new IOException(e.getMessage());
-        }
+        heap.put(pk,
+            key0, value0,
+            key1, value1
+            );
     }
     
     public void insert(final String table, byte[] pk,
@@ -258,15 +251,11 @@ public class Tables {
             String key2, byte[] value2
             ) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        try {
-            heap.put(pk,
-                key0, value0,
-                key1, value1,
-                key2, value2
-                );
-        } catch (RowSpaceExceededException e) {
-            throw new IOException(e.getMessage());
-        }
+        heap.put(pk,
+            key0, value0,
+            key1, value1,
+            key2, value2
+            );
     }
     
     public void insert(final String table, byte[] pk,
@@ -276,16 +265,12 @@ public class Tables {
             String key3, byte[] value3
             ) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        try {
-            heap.put(pk,
-                key0, value0,
-                key1, value1,
-                key2, value2,
-                key3, value3
-                );
-        } catch (RowSpaceExceededException e) {
-            throw new IOException(e.getMessage());
-        }
+        heap.put(pk,
+            key0, value0,
+            key1, value1,
+            key2, value2,
+            key3, value3
+            );
     }
 
     public void insert(final String table, byte[] pk, Map<String, byte[]> map) throws IOException {
@@ -306,11 +291,11 @@ public class Tables {
         }
     }
 
-    public byte[] createRow(String table) throws IOException {
+    public byte[] createRow(String table) throws IOException, RowSpaceExceededException {
         return this.insert(table, new ConcurrentHashMap<String, byte[]>());
     }
     
-    public Row select(final String table, byte[] pk) throws IOException {
+    public Row select(final String table, byte[] pk) throws IOException, RowSpaceExceededException {
         BEncodedHeap heap = getHeap(table);
         if (heap.has(pk)) return new Row(pk, heap.get(pk));
         return null;

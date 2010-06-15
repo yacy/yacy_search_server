@@ -248,13 +248,25 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     public int remove(byte[] termHash, HandleSet urlHashes) throws IOException {
         int removed = this.ram.remove(termHash, urlHashes);
-        int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
+        int reduced;
+        try {
+            reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
+        } catch (RowSpaceExceededException e) {
+            reduced = 0;
+            Log.logWarning("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
+        }
         return removed + (reduced / this.array.rowdef().objectsize);
     }
 
     public boolean remove(byte[] termHash, byte[] urlHashBytes) throws IOException {
         boolean removed = this.ram.remove(termHash, urlHashBytes);
-        int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashBytes));
+        int reduced;
+        try {
+            reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashBytes));
+        } catch (RowSpaceExceededException e) {
+            reduced = 0;
+            Log.logWarning("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
+        }
         return removed || (reduced > 0);
     }
 

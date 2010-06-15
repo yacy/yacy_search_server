@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.ScoreCluster;
@@ -107,7 +108,12 @@ public class MapDataMining extends MapHeap {
             Map<String, String> map;
             while (it.hasNext()) {
                 mapnameb = it.next();
-                map = super.get(mapnameb);
+                try {
+                    map = super.get(mapnameb);
+                } catch (RowSpaceExceededException e) {
+                    Log.logWarning("MapDataMining", e.getMessage());
+                    break;
+                }
                 if (map == null) break;
                 
                 if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) {
@@ -250,14 +256,20 @@ public class MapDataMining extends MapHeap {
         
         // update elementCount
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) {
-            final Map<String, String> map = super.get(key);
-            if (map != null) {
+            Map<String, String> map;
+            try {
+                map = super.get(key);
+                if (map != null) {
 
-                // update accumulators (subtract)
-                if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(map, false);
+                    // update accumulators (subtract)
+                    if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(map, false);
 
-                // remove from sortCluster
-                if (sortfields != null) deleteSortCluster(new String(key));
+                    // remove from sortCluster
+                    if (sortfields != null) deleteSortCluster(new String(key));
+                }
+            } catch (RowSpaceExceededException e) {
+                map = null;
+                Log.logException(e);
             }
         }
         super.remove(key);
@@ -383,6 +395,9 @@ public class MapDataMining extends MapHeap {
                     map = get(nextKey);
                 } catch (final IOException e) {
                     break;
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                    continue;
                 }
                 assert map != null;
                 if (map == null) continue; // circumvention of a modified exception
