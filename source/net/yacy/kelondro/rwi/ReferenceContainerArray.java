@@ -211,14 +211,16 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, payloadrow));
     	if (System.currentTimeMillis() > timeout) {
     	    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
-    	    timeout = Long.MAX_VALUE; // to prevent that the warning is shown again
+    	    return c;
+    	    // timeout = Long.MAX_VALUE; // to prevent that the warning is shown again
     	}
     	while (entries.hasNext()) {
     		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), payloadrow)));
     		k++;
     		if (System.currentTimeMillis() > timeout) {
     		    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
-    		    timeout = Long.MAX_VALUE; // to prevent that the warning is shown again
+    		    return c;
+    		    // timeout = Long.MAX_VALUE; // to prevent that the warning is shown again
             }
     	}
     	return c;
