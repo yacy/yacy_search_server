@@ -42,6 +42,7 @@ import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.document.parser.html.TransformerWriter;
@@ -260,6 +261,7 @@ public class htmlParser extends AbstractParser implements Idiom {
             Document document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
             String title = document.dc_title();
             System.out.println(title);
+            System.out.println(CharacterCoding.unicode2html(title, false));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {

@@ -376,13 +376,23 @@ public class URIMetadataRow implements URIMetadata {
         // parse elements from comp field;
         byte[] c = this.entry.getColBytes(col_comp, true);
         List<byte[]> cl = ByteBuffer.split(c, (byte) 10);
-        this.comp = new Components(
+        try {
+            this.comp = new Components(
+                        (cl.size() > 0) ? new String(cl.get(0), "UTF-8") : "",
+                        hash(),
+                        (cl.size() > 1) ? new String(cl.get(1), "UTF-8") : "",
+                        (cl.size() > 2) ? new String(cl.get(2), "UTF-8") : "",
+                        (cl.size() > 3) ? new String(cl.get(3), "UTF-8") : "",
+                        (cl.size() > 4) ? new String(cl.get(4), "UTF-8") : "");
+        } catch (UnsupportedEncodingException e) {
+            this.comp = new Components(
                     (cl.size() > 0) ? new String(cl.get(0)) : "",
                     hash(),
                     (cl.size() > 1) ? new String(cl.get(1)) : "",
                     (cl.size() > 2) ? new String(cl.get(2)) : "",
                     (cl.size() > 3) ? new String(cl.get(3)) : "",
                     (cl.size() > 4) ? new String(cl.get(4)) : "");
+        }
         return this.comp;
     }
     
