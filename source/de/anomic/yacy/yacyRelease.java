@@ -195,8 +195,8 @@ public final class yacyRelease extends yacyVersion {
         for (yacyUpdateLocation updateLocation : latestReleaseLocations) {
             if(!onlySigned || updateLocation.getPublicKey() != null) {
                 DevAndMainVersions versions = getReleases(updateLocation, force);
-                if ((versions != null) && (versions.dev != null)) alldev.addAll(versions.dev);
-                if ((versions != null) && (versions.main != null)) allmain.addAll(versions.main);
+                if (versions != null && versions.dev != null) alldev.addAll(versions.dev);
+                if (versions != null && versions.main != null) allmain.addAll(versions.main);
             }
         }
         return new DevAndMainVersions(alldev, allmain);
@@ -218,7 +218,7 @@ public final class yacyRelease extends yacyVersion {
              (latestRelease[2].isEmpty()) &&
              (latestRelease[3].isEmpty()) )*/) {
             locLatestRelease = allReleaseFrom(location);
-            latestReleases.put(location, locLatestRelease);
+            if (locLatestRelease != null) latestReleases.put(location, locLatestRelease);
         }
         return locLatestRelease;
     }
