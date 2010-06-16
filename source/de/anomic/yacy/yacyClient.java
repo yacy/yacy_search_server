@@ -140,22 +140,21 @@ public final class yacyClient {
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), null, salt);
-        for (int retry = 0; retry < 4; retry++) try {
+        try {
             // generate request
             post.add(new DefaultCharsetStringPart("count", "20"));
             post.add(new DefaultCharsetStringPart("seed", mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
-            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 30000, false);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 10000, false);
             yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = FileUtils.table(content);
-            break;
         } catch (final Exception e) {
             if (Thread.currentThread().isInterrupted()) {
                 yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return -1;
             }
-            yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "', peer " +  address + "; exception: " + e.getMessage() + "; retry = " + retry);
+            yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "', peer " +  address + "; exception: " + e.getMessage());
             // try again (go into loop)
             result = null;
         }
