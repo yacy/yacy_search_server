@@ -1073,7 +1073,7 @@ public final class HTTPDFileHandler {
                 errorMessage.append("\nSession: ").append(Thread.currentThread().getName())
                             .append("\nQuery:   ").append(path)
                             .append("\nClient:  ").append(conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP,"unknown")) 
-                            .append("\nReason:  ").append(e.toString());    
+                            .append("\nReason:  ").append(e.getMessage());    
                 
                 if (!conProp.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     // sending back an error message to the client 

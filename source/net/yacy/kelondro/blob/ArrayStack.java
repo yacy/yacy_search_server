@@ -607,7 +607,6 @@ public class ArrayStack implements BLOB {
         public BlobValues(byte[] key) {
             this.bii = blobs.iterator();
             this.key = key;
-            next0();
         }
         
         protected byte[] next0() {

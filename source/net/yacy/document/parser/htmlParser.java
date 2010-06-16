@@ -26,8 +26,10 @@
 
 package net.yacy.document.parser;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
@@ -35,6 +37,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.HttpConnector;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
@@ -103,7 +106,7 @@ public class htmlParser extends AbstractParser implements Idiom {
             charset = patchCharsetEncoding(charset);
         }
         
-        if (!documentCharset.equalsIgnoreCase(charset)) {
+        if (documentCharset == null || !documentCharset.equalsIgnoreCase(charset)) {
             theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
         }
         
@@ -247,4 +250,25 @@ public class htmlParser extends AbstractParser implements Idiom {
     public boolean indexingDenied() {
         return false;
     }
+    
+    public static void main(String[] args) {
+        // test parsing of a url
+        MultiProtocolURI url;
+        try {
+            url = new MultiProtocolURI(args[0]);
+            byte[] content = HttpConnector.wget(url, 3000);
+            Document document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
+            String title = document.dc_title();
+            System.out.println(title);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ParserException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
 }

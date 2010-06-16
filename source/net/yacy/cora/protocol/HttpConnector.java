@@ -24,6 +24,8 @@ package net.yacy.cora.protocol;
 import java.io.IOException;
 import java.util.List;
 
+import net.yacy.cora.document.MultiProtocolURI;
+
 import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -70,6 +72,31 @@ public class HttpConnector {
         try {
             // send request/data
             res = client.POST(url, post, gzipBody);
+            content = res.getData();
+        } finally {
+            if(res != null) {
+                // release connection
+                res.closeStream();
+            }
+        }
+        return content;
+    }
+    
+    public static byte[] wget(final MultiProtocolURI url, final int timeout) throws IOException {
+        return wget(url.toNormalform(false, false), url.getHost(), timeout);
+    }
+    
+    public static byte[] wget(final String url, final String vhost, final int timeout) throws IOException {
+        final RequestHeader header = new RequestHeader();
+        header.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+        header.put(HeaderFramework.HOST, vhost);
+        final Client client = new Client(timeout, header);
+        
+        ResponseContainer res = null;
+        byte[] content = null;
+        try {
+            // send request/data
+            res = client.GET(url);
             content = res.getData();
         } finally {
             if(res != null) {

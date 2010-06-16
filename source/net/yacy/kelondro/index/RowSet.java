@@ -292,16 +292,17 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         private int p;
         final int bound;
         
-        public keyIterator(final boolean up, final byte[] firstKey) {
+        public keyIterator(final boolean up, byte[] firstKey) {
             // see that all elements are sorted
             sort();
             this.up = up;
+            if (firstKey != null && firstKey.length == 0) firstKey = null;
             this.first = firstKey;
             this.bound = sortBound;
             if (first == null) {
                 p = 0;
             } else {
-                assert first.length == rowdef.primaryKeyLength;
+                assert first.length == rowdef.primaryKeyLength : "first.length = " + first.length + ", rowdef.primaryKeyLength = " + rowdef.primaryKeyLength;
                 p = binaryPosition(first, 0); // check this to find bug in DHT selection enumeration
             }
         }

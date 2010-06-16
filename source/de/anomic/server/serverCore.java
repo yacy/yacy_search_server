@@ -775,7 +775,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         // wrong parameters: this can only be an internal problem
                         writeLine(this.commandObj.error(e));
                         break;
-                    } catch (final java.lang.ClassCastException e) {
+                    } catch (final ClassCastException e) {
                         log.logSevere("command execution, cast exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // ??
                         writeLine(this.commandObj.error(e));
