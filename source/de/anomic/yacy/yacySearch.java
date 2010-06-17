@@ -56,7 +56,7 @@ public class yacySearch extends Thread {
     final private Map<String, TreeMap<String, String>> abstractCache;
     final private Blacklist blacklist;
     final private yacySeed targetPeer;
-    private String[] urls;
+    private int urls;
     private final int count, maxDistance;
     final private RankingProfile rankingProfile;
     final private Pattern prefer, filter;
@@ -103,7 +103,7 @@ public class yacySearch extends Thread {
         this.abstractCache = abstractCache;
         this.blacklist = blacklist;
         this.targetPeer = targetPeer;
-        this.urls = null;
+        this.urls = -1;
         this.count = count;
         this.maxDistance = maxDistance;
         this.rankingProfile = rankingProfile;
@@ -119,13 +119,11 @@ public class yacySearch extends Thread {
                         count, maxDistance, global, partitions,
                         targetPeer, indexSegment, crawlResults, containerCache, abstractCache,
                         blacklist, rankingProfile, constraint);
-            if (urls != null) {
+            if (urls >= 0) {
                 // urls is an array of url hashes. this is only used for log output
-                final StringBuilder urllist = new StringBuilder(this.urls.length * 13);
-                for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
-                yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
-                peers.mySeed().incRI(urls.length);
-                peers.mySeed().incRU(urls.length);
+                //yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
+                peers.mySeed().incRI(urls);
+                peers.mySeed().incRU(urls);
             } else {
                 yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
             }
@@ -144,7 +142,7 @@ public class yacySearch extends Thread {
     }
 
     public int links() {
-        return this.urls.length;
+        return this.urls;
     }
     
     public int count() {
@@ -218,7 +216,8 @@ public class yacySearch extends Thread {
         	seed = dhtEnum.next();
             if (seed == null) continue;
             if (seed.matchPeerTags(wordhashes)) {
-                Log.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + seed.getPeerTags().toString());
+                String specialized = seed.getPeerTags().toString();
+                if (!specialized.equals("[*]")) Log.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + specialized);
                 regularSeeds.remove(seed.hash);
                 ranking.deleteScore(seed.hash);
                 matchingSeeds.put(seed.hash, seed);
@@ -335,7 +334,7 @@ public class yacySearch extends Thread {
     public static int collectedLinks(final yacySearch[] searchThreads) {
         int links = 0;
         for (int i = 0; i < searchThreads.length; i++) {
-            if (!(searchThreads[i].isAlive())) links += searchThreads[i].urls.length;
+            if (!(searchThreads[i].isAlive()) && searchThreads[i].urls > 0) links += searchThreads[i].urls;
         }
         return links;
     }

@@ -367,7 +367,7 @@ public final class Switchboard extends serverSwitch {
                 indexSegments.segment(Segments.Process.LOCALCRAWLING),
                 peers,
                 true, 
-                30000);
+                10000);
         
         // set up local robots.txt
         this.robotstxtConfig = RobotsTxtConfig.init(this);
@@ -894,7 +894,7 @@ public final class Switchboard extends serverSwitch {
                     indexSegments.segment(Segments.Process.LOCALCRAWLING),
                     peers,
                     true, 
-                    30000);
+                    10000);
 
             // create new web structure
             this.webStructure = new WebStructureGraph(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", CRDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));

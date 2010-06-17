@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
@@ -75,14 +74,14 @@ public final class HTTPLoader {
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 10000);
     }  
    
-    public Response load(final Request entry, final boolean acceptOnlyParseable, long maxFileSize) throws IOException {
+    public Response load(final Request entry, long maxFileSize) throws IOException {
         long start = System.currentTimeMillis();
-        Response doc = load(entry, acceptOnlyParseable, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize);
+        Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize);
         Latency.update(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
     
-    private Response load(final Request request, boolean acceptOnlyParseable, final int retryCount, final long maxFileSize) throws IOException {
+    private Response load(final Request request, final int retryCount, final long maxFileSize) throws IOException {
 
         if (retryCount < 0) {
             sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection counter exceeded");
@@ -95,15 +94,6 @@ public final class HTTPLoader {
         int port = request.url().getPort();
         final boolean ssl = request.url().getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
-        
-        // if not the right file type then reject file
-        if (acceptOnlyParseable) {
-            String supportError = TextParser.supportsExtension(request.url());
-            if (supportError != null) {
-                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, supportError);
-                throw new IOException("REJECTED WRONG EXTENSION TYPE: " + supportError);
-            }
-        }
         
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
@@ -137,15 +127,6 @@ public final class HTTPLoader {
 
             if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
                 // the transfer is ok
-                
-                if (acceptOnlyParseable) {
-                	// if the response has not the right file type then reject file
-                    String supportError = TextParser.supports(request.url(), res.getResponseHeader().mime());
-                    if (supportError != null) {
-                    	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, supportError);
-                        throw new IOException("REJECTED WRONG MIME TYPE, mime = " + res.getResponseHeader().mime() + ": " + supportError);
-                    }
-                }
                 
                 // we write the new cache entry to file system directly
                 res.setAccountingName("CRAWLER");
@@ -202,7 +183,7 @@ public final class HTTPLoader {
                     
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
-                    return load(request, acceptOnlyParseable, retryCount - 1, maxFileSize);
+                    return load(request, retryCount - 1, maxFileSize);
                 }
             } else {
                 // if the response has not the right response type then reject file

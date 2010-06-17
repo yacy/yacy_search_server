@@ -368,7 +368,7 @@ public final class yacyClient {
     }
     
     @SuppressWarnings("unchecked")
-    public static String[] search(
+    public static int search(
             final yacySeed mySeed,
             final String wordhashes,
             final String excludehashes,
@@ -392,7 +392,6 @@ public final class yacyClient {
             final Bitfield constraint
     ) {
         // send a search request to peer with remote Hash
-        // this mainly converts the words into word hashes
 
         // INPUT:
         // iam        : complete seed of the requesting peer
@@ -437,7 +436,7 @@ public final class yacyClient {
         } catch (final IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore);
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
-            return null;
+            return -1;
         }
 
         if (result == null || result.isEmpty()) {
@@ -447,7 +446,7 @@ public final class yacyClient {
 					+ target.getName()
 					+ " (zero response), score="
 					+ target.selectscore);
-			return null;
+			return -1;
 		}
 
 		// compute all computation times
@@ -468,14 +467,14 @@ public final class yacyClient {
 		// now create a plasmaIndex out of this result
 		// System.out.println("yacyClient: " + ((urlhashes.length() == 0) ? "primary" : "secondary")+ " search result = " + result.toString()); // debug
 		
-		int results = 0, joincount = 0;
+		int urlcount = 0, joincount = 0;
         try {
-            results = Integer.parseInt(result.get("count"));
-            joincount = Integer.parseInt(result.get("joincount"));
+            joincount = Integer.parseInt(result.get("joincount")); // the complete number of hits at remote site
+            urlcount = Integer.parseInt(result.get("count"));      // the number of hits that are returned in the result list
         } catch (final NumberFormatException e) {
             yacyCore.log.logInfo("SEARCH failed FROM " + target.hash + ":" + target.getName() + ", wrong output format: " + e.getMessage());
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created number format exception");
-            return null;
+            return -1;
         }
 		// System.out.println("***result count " + results);
 
@@ -488,14 +487,13 @@ public final class yacyClient {
                 container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes(), count);
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
-                return null;
+                return -1;
             }
 		}
 
 		// insert results to containers
 		URIMetadataRow urlEntry;
-		final String[] urls = new String[results];
-		for (int n = 0; n < results; n++) {
+		for (int n = 0; n < urlcount; n++) {
 			// get one single search result
 			urlEntry = URIMetadataRow.importEntry(result.get("resource" + n));
 			if (urlEntry == null) continue;
@@ -504,27 +502,26 @@ public final class yacyClient {
 			final URIMetadataRow.Components metadata = urlEntry.metadata();
 			if (metadata == null) continue;
 			if (blacklist.isListed(Blacklist.BLACKLIST_SEARCH, metadata.url())) {
-			    if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
+			    if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search: filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
 				continue; // block with backlist
 			}
             
 			final String urlRejectReason = Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(metadata.url());
             if (urlRejectReason != null) {
-                if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search (client): rejected url '" + metadata.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
+                if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search: rejected url '" + metadata.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
                 continue; // reject url outside of our domain
             }
 
 			// save the url entry
-			Reference entry;
-			if (urlEntry.word() == null) {
-			    if (yacyCore.log.isWarning()) yacyCore.log.logWarning("remote search (client): no word attached from peer " + target.getName() + ", version " + target.getVersion());
+            Reference entry = urlEntry.word();
+			if (entry == null) {
+			    if (yacyCore.log.isWarning()) yacyCore.log.logWarning("remote search: no word attached from peer " + target.getName() + ", version " + target.getVersion());
 				continue; // no word attached
 			}
 
 			// the search-result-url transports all the attributes of word indexes
-			entry = urlEntry.word();
 			if (!Base64Order.enhancedCoder.equal(entry.metadataHash(), urlEntry.hash())) {
-				if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search (client): url-hash " + new String(urlEntry.hash()) + " does not belong to word-attached-hash " + new String(entry.metadataHash()) + "; url = " + metadata.url() + " from peer " + target.getName());
+				yacyCore.log.logInfo("remote search: url-hash " + new String(urlEntry.hash()) + " does not belong to word-attached-hash " + new String(entry.metadataHash()) + "; url = " + metadata.url() + " from peer " + target.getName());
 				continue; // spammed
 			}
 
@@ -554,23 +551,30 @@ public final class yacyClient {
                     break;
                 }
 			}
-            
-			// store url hash for statistics
-			urls[n] = new String(urlEntry.hash());
 		}
 
         // store remote result to local result container
         synchronized (containerCache) {
             // insert one container into the search result buffer
-            containerCache.add(container[0], false, joincount); // one is enough
-            
-            // integrate remote topwords
-            final String references = result.get("references");
-            yacyCore.log.logInfo("remote search (client): peer " + target.getName() + " sent references " + references);
-            if (references != null) {
-                // add references twice, so they can be counted (must have at least 2 entries)
-                containerCache.addTopic(references.split(","));
-                containerCache.addTopic(references.split(","));
+            containerCache.add(container[0], false, joincount); // one is enough, only the references are used, not the word
+        }
+        // insert the containers to the index
+        for (ReferenceContainer<WordReference> c: container) try {
+            indexSegment.termIndex().add(c);
+        } catch (Exception e) {
+            Log.logException(e);
+        }
+        yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + container[0].size() + "/" + joincount + " references for joined word queries");
+
+        // integrate remote top-words/topics
+        final String references = result.get("references");
+        if (references != null && references.length() > 0) {
+            yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent topics: " + references);
+            // add references twice, so they can be counted (must have at least 2 entries)
+            String[] rs = references.split(",");
+            synchronized (containerCache) {
+                containerCache.addTopic(rs);
+                containerCache.addTopic(rs);
             }
         }
         
@@ -592,7 +596,7 @@ public final class yacyClient {
 							ci = new ByteBuffer(entry.getValue().getBytes("UTF-8"));
 						} catch (UnsupportedEncodingException e) {
 						    Log.logException(e);
-							return null;
+							return -1;
 						}
 						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
 						ReferenceContainer.decompressIndex(singleAbstract, ci, target.hash);
@@ -600,14 +604,8 @@ public final class yacyClient {
 					}
 				}
 			}
+			if (abstractCache.size() > 0) yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + abstractCache.size() + " index abstracts");
 		}
-
-		// insert the containers to the index
-        for (int m = 0; m < words; m++) try {
-                indexSegment.termIndex().add(container[m]);
-            } catch (Exception e) {
-                Log.logException(e);
-            }
         
         // generate statistics
 		long searchtime;
@@ -617,7 +615,7 @@ public final class yacyClient {
 			searchtime = totalrequesttime;
 		}
 		if (yacyCore.log.isFine()) yacyCore.log.logFine("SEARCH "
-				+ results
+				+ urlcount
 				+ " URLS FROM "
 				+ target.hash
 				+ ":"
@@ -627,7 +625,7 @@ public final class yacyClient {
 				+ ", searchtime=" + searchtime + ", netdelay="
 				+ (totalrequesttime - searchtime) + ", references="
 				+ result.get("references"));
-		return urls;
+		return urlcount;
 	}
 
     public static Map<String, String> permissionMessage(final yacySeedDB seedDB, final String targetHash) {

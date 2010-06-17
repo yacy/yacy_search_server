@@ -104,7 +104,7 @@ public final class LoaderDispatcher {
             final boolean forText,
             final boolean global,
             final long maxFileSize) throws IOException {
-        return load(request(url, forText, global), forText, maxFileSize);
+        return load(request(url, forText, global), maxFileSize);
     }
     
     /**
@@ -122,12 +122,12 @@ public final class LoaderDispatcher {
             final boolean global,
             CrawlProfile.CacheStrategy cacheStratgy,
             long maxFileSize) throws IOException {
-        return load(request(url, forText, global), forText, cacheStratgy, maxFileSize);
+        return load(request(url, forText, global), cacheStratgy, maxFileSize);
     }
     
     public void load(final DigestURI url, CrawlProfile.CacheStrategy cacheStratgy, long maxFileSize, File targetFile) throws IOException {
 
-        byte[] b = load(request(url, false, true), false, cacheStratgy, maxFileSize).getContent();
+        byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize).getContent();
         if (b == null) throw new IOException("load == null");
         File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
         
@@ -169,14 +169,14 @@ public final class LoaderDispatcher {
                     0);
     }
     
-    public Response load(final Request request, final boolean acceptOnlyParseable, long maxFileSize) throws IOException {
+    public Response load(final Request request, long maxFileSize) throws IOException {
         CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
         CrawlProfile.CacheStrategy cacheStrategy = CrawlProfile.CacheStrategy.IFEXIST;
         if (crawlProfile != null) cacheStrategy = crawlProfile.cacheStrategy();
-        return load(request, acceptOnlyParseable, cacheStrategy, maxFileSize);
+        return load(request, cacheStrategy, maxFileSize);
     }
     
-    public Response load(final Request request, final boolean acceptOnlyParseable, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
+    public Response load(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
         // get the protocol of the next URL
         final String protocol = request.url().getProtocol();
         final String host = request.url().getHost();
@@ -258,7 +258,7 @@ public final class LoaderDispatcher {
         
         // load resource from the internet
         Response response = null;
-        if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, acceptOnlyParseable, maxFileSize);
+        if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, maxFileSize);
         if (protocol.equals("ftp")) response = ftpLoader.load(request, true);
         if (protocol.equals("smb")) response = smbLoader.load(request, true);
         if (protocol.equals("file")) response = fileLoader.load(request, true);

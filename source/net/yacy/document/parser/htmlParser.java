@@ -69,6 +69,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         SUPPORTED_EXTENSIONS.add("cfm");
         SUPPORTED_EXTENSIONS.add("asp");
         SUPPORTED_EXTENSIONS.add("aspx");
+        SUPPORTED_EXTENSIONS.add("tex");
         SUPPORTED_EXTENSIONS.add("txt");
         SUPPORTED_EXTENSIONS.add("jsp");
         SUPPORTED_EXTENSIONS.add("pl");
@@ -77,6 +78,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
         SUPPORTED_MIME_TYPES.add("application/xhtml+xml");
         SUPPORTED_MIME_TYPES.add("application/x-httpd-php");
+        SUPPORTED_MIME_TYPES.add("application/x-tex");
         SUPPORTED_MIME_TYPES.add("text/plain");
         SUPPORTED_MIME_TYPES.add("text/sgml");
         SUPPORTED_MIME_TYPES.add("text/csv");
