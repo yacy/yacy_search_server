@@ -1376,6 +1376,37 @@ Import successful!==Import erfolgreich!
 Import failed:==Import fehlgeschlagen:
 #-----------------------------
 
+#File: DictionaryLoader_p.html
+#---------------------------
+Dictionary Loader==Wörterbuch Download
+YaCy can use external libraries to enable or enhance some functions. These libraries are not==YaCy kann externe Bibliotheken zum Erweitern oder Aktivieren bestimmter Funktionen verwenden. Diese Bibliotheken sind nicht
+included in the main release of YaCy because they would increase the application file too much.==im Standard Release von YaCy enthalten weil diese die Anwendungsdatei zu stark vergrößern würden.
+You can download additional files here.==Sie können zusätzliche Dateien hier herunterladen.
+>Geolocalization<==>Geolokalisierung<
+Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.==Geolokalisierung erlaubt es YaCy bestimmte Orte auf OpenStreetMap zu bestimmten Suchbegriffen zu präsentieren.
+>GeoNames<==>Geografische Namen<
+With this file it is possible to find cities with a population > 1000 all over the world.==Mit dieser Datei ist es möglich Städte überall auf der Erde zu finden die mehr als 1000 Einwohner haben.
+>Download from<==>Download von<
+>Storage location<==>Speicherort<
+#>Status<==>Status<
+>not loaded<==>nicht geladen<
+>loaded<==>geladen<
+"Load"=="Laden"
+"Deactivate"=="Deaktivieren"
+"Remove"=="Entfernen"
+"Activate"=="Aktivieren"
+>loaded and activated dictionary file<==>Wörterbuch Datei geladen und aktiviert<
+>loading of dictionary file failed: \#\[error\]\#<==>Laden der Wörterbuch Datei ist fehlgeschlagen: #[error]#<
+>deactivated and removed dictionary file<==>Wörterbuch Datei deaktiviert und entfernt<
+>cannot remove dictionary file: \#\[error\]\#<==>Wörterbuch Datei kann nicht entfernt werden: #[error]#<
+>deactivated dictionary file<==>Wörterbuch Datei deaktiviert<
+>cannot deactivate dictionary file: \#\[error\]\#<==>Wörterbuch Datei kann nicht deaktiviert werden: #[error]#<
+>activated dictionary file<==>Wörterbuch Datei aktiviert<
+>cannot activate dictionary file: \#\[error\]\#<==>Wörterbuch Datei kann nicht aktiviert werden: #[error]#<
+#>OpenGeoDB<==>OpenGeoDB<
+>With this file it is possible to find locations in Germany using the location \(city\) name, a zip code, a car sign or a telephone pre-dial number.<==>Mit dieser Datei ist es möglich, Orte in Deutschland anhand des (Stadt)Namens, der Postleitzahl, eines Autokennzeichens oder einer Telefonvorwahl zu finden.<
+#-----------------------------
+
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
 Global Crawl Queue==Globaler Crawl-Puffer
@@ -3024,6 +3055,7 @@ Peer Administration Console==Peer Administrations Konsole
 Basic Configuration==Eingangskonfiguration
 >Accounts==>Konten
 Network Configuration==Netzwerk Konfiguration
+Dictionary Loader==Wörterbuch Download
 System Update==System Aktualisierung
 >Performance==>Leistung
 Advanced Settings==Erweiterte Einstellungen
