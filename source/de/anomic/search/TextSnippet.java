@@ -348,7 +348,6 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 // try to create the snippet from information given in the subject metadata
                 return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(new String(url.hash())));
             } else {
-                        
                 // trying to load the resource from the cache
                 resContent = Cache.getContent(url);
                 responseHeader = Cache.getResponseHeader(url);
@@ -373,11 +372,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     }
                     
                     // if it is still not available, report an error
-                    if (resContent == null) return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource, plasmaHTCache.Entry cache is NULL");                
-                    
+                    if (resContent == null) return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource from net, no cache entry");
                     source = SOURCE_WEB;
-                } else {
-                    return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "no resource available");
                 }
             }
         } catch (final Exception e) {
