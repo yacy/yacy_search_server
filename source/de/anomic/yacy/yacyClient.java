@@ -88,6 +88,7 @@ import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.SearchEvent;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -386,7 +387,7 @@ public final class yacyClient {
             final Segment indexSegment,
             final ResultURLs crawlResults,
             final RankingProcess containerCache,
-            final Map<String, TreeMap<String, String>> abstractCache,
+            final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
             final Blacklist blacklist,
             final RankingProfile rankingProfile,
             final Bitfield constraint
@@ -426,7 +427,7 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("maxdist", Integer.toString(maxDistance)));
         post.add(new DefaultCharsetStringPart("profile", crypt.simpleEncode(rankingProfile.toExternalString())));
         post.add(new DefaultCharsetStringPart("constraint", (constraint == null) ? "" : constraint.exportB64()));
-        if (abstractCache != null) post.add(new DefaultCharsetStringPart("abstracts", "auto"));
+        if (secondarySearchSuperviser != null) post.add(new DefaultCharsetStringPart("abstracts", "auto"));
         final long timestamp = System.currentTimeMillis();
 
         // send request
@@ -579,32 +580,31 @@ public final class yacyClient {
         }
         
 		// read index abstract
-		if (abstractCache != null) {
+		if (secondarySearchSuperviser != null) {
 			final Iterator<Map.Entry<String, String>> i = result.entrySet().iterator();
 			Map.Entry<String, String> entry;
-			TreeMap<String, String> singleAbstract;
 			String wordhash;
+			String whacc = "";
 			ByteBuffer ci;
-			while (i.hasNext()) {
+			int ac = 0;
+			abstractparser: while (i.hasNext()) {
 				entry = i.next();
 				if (entry.getKey().startsWith("indexabstract.")) {
 					wordhash = entry.getKey().substring(14);
-					synchronized (abstractCache) {
-						singleAbstract = abstractCache.get(wordhash); // a mapping from url-hashes to a string of peer-hashes
-						if (singleAbstract == null) singleAbstract = new TreeMap<String, String>();
-						try {
-							ci = new ByteBuffer(entry.getValue().getBytes("UTF-8"));
-						} catch (UnsupportedEncodingException e) {
-						    Log.logException(e);
-							return -1;
-						}
-						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
-						ReferenceContainer.decompressIndex(singleAbstract, ci, target.hash);
-						abstractCache.put(wordhash, singleAbstract);
+					if (wordhash.charAt(0) == '[') break abstractparser;
+					whacc += wordhash;
+					try {
+						ci = new ByteBuffer(entry.getValue().getBytes("UTF-8"));
+					} catch (UnsupportedEncodingException e) {
+					    Log.logException(e);
+						return -1;
 					}
+					//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
+					secondarySearchSuperviser.addAbstract(wordhash, ReferenceContainer.decompressIndex(ci, target.hash));
+					ac++;
 				}
 			}
-			if (abstractCache.size() > 0) yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + abstractCache.size() + " index abstracts");
+			if (ac > 0) yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words "+ whacc);
 		}
         
         // generate statistics

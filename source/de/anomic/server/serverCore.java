@@ -701,7 +701,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                             else                                            reqProtocol = null;                            
                             
                             if (this.request == null) break;
-                            if (reqProtocol.equals("HTTP")) {
+                            if (reqProtocol != null && reqProtocol.equals("HTTP")) {
                                 this.commandObj = handlerPrototype.clone();
                             }
                         }

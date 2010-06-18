@@ -41,6 +41,7 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.SearchEvent;
 import de.anomic.search.Segment;
 import de.anomic.yacy.dht.PeerSelection;
 
@@ -53,7 +54,7 @@ public class yacySearch extends Thread {
     final private int partitions;
     final private Segment indexSegment;
     final private RankingProcess containerCache;
-    final private Map<String, TreeMap<String, String>> abstractCache;
+    final private SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
     final private yacySeed targetPeer;
     private int urls;
@@ -79,7 +80,7 @@ public class yacySearch extends Thread {
               final yacySeedDB peers,
               final ResultURLs crawlResults,
               final RankingProcess containerCache,
-              final Map<String, TreeMap<String, String>> abstractCache,
+              final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
               final Blacklist blacklist,
               final RankingProfile rankingProfile,
               final Bitfield constraint) {
@@ -100,7 +101,7 @@ public class yacySearch extends Thread {
         this.peers = peers;
         this.crawlResults = crawlResults;
         this.containerCache = containerCache;
-        this.abstractCache = abstractCache;
+        this.secondarySearchSuperviser = secondarySearchSuperviser;
         this.blacklist = blacklist;
         this.targetPeer = targetPeer;
         this.urls = -1;
@@ -117,7 +118,7 @@ public class yacySearch extends Thread {
                         wordhashes, excludehashes, urlhashes, prefer, filter, language,
                         sitehash, authorhash,
                         count, maxDistance, global, partitions,
-                        targetPeer, indexSegment, crawlResults, containerCache, abstractCache,
+                        targetPeer, indexSegment, crawlResults, containerCache, secondarySearchSuperviser,
                         blacklist, rankingProfile, constraint);
             if (urls >= 0) {
                 // urls is an array of url hashes. this is only used for log output
@@ -260,7 +261,7 @@ public class yacySearch extends Thread {
             final yacySeedDB peers,
             final ResultURLs crawlResults,
             final RankingProcess containerCache,
-            final Map<String, TreeMap<String, String>> abstractCache,
+            final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
             int targets,
             final Blacklist blacklist,
             final RankingProfile rankingProfile,
@@ -290,7 +291,7 @@ public class yacySearch extends Thread {
                     wordhashes, excludehashes, urlhashes, prefer, filter, language,
                     sitehash, authorhash,
                     count, maxDist, true, targets, targetPeers[i],
-                    indexSegment, peers, crawlResults, containerCache, abstractCache, blacklist, rankingProfile, constraint);
+                    indexSegment, peers, crawlResults, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
             searchThreads[i].start();
         }
         return searchThreads;
@@ -316,7 +317,7 @@ public class yacySearch extends Thread {
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash.getBytes()));
         final yacySearch searchThread = new yacySearch(
                 wordhashes, excludehashes, urlhashes, Pattern.compile(""), Pattern.compile(".*"), "", "", "", 0, 9999, true, 0, targetPeer,
-                indexSegment, peers, crawlResults, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
+                indexSegment, peers, crawlResults, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;
     }

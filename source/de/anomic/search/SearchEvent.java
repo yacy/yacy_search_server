@@ -70,8 +70,7 @@ public final class SearchEvent {
     private RankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     private ResultFetcher results;
     
-    // class variables for search abstracts
-    private final IndexAbstracts rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
+    private final SecondarySearchSuperviser secondarySearchSuperviser; 
 
     // class variables for remote searches
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
@@ -93,7 +92,8 @@ public final class SearchEvent {
         this.peers = peers;
         this.crawlResults = crawlResults;
         this.query = query;
-        this.rcAbstracts = (query.queryHashes.size() > 1) ? new IndexAbstracts() : null; // generate abstracts only for combined searches
+        this.secondarySearchSuperviser = (query.queryHashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
+        //if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
@@ -134,7 +134,7 @@ public final class SearchEvent {
                     peers,
                     crawlResults,
                     rankedCache,
-                    rcAbstracts,
+                    secondarySearchSuperviser,
                     fetchpeers,
                     Switchboard.urlBlacklist,
                     query.ranking,
@@ -331,25 +331,91 @@ public final class SearchEvent {
     
     boolean secondarySearchStartet = false;
     
-    void prepareSecondarySearch() {
-        if (secondarySearchStartet) return; // don't do this twice
+    public class SecondarySearchSuperviser extends Thread {
         
-        if ((rcAbstracts == null) || (rcAbstracts.size() != query.queryHashes.size())) return; // secondary search not possible (yet)
-        this.secondarySearchStartet = true;
+        // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
+        // this relation contains the information where specific urls can be found in specific peers
+        TreeMap<String, TreeMap<String, String>> abstractsCache;
         
-        /*        
-        // catch up index abstracts and join them; then call peers again to submit their urls
-        System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references caught, " + query.queryHashes.size() + " needed");
-
-        Iterator i = rcAbstracts.entrySet().iterator();
-        Map.Entry entry;
-        while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            System.out.println("DEBUG-INDEXABSTRACT: hash " + (String) entry.getKey() + ": " + ((query.queryHashes.contains((String) entry.getKey())) ? "NEEDED" : "NOT NEEDED") + "; " + ((TreeMap) entry.getValue()).size() + " entries");
+        public SecondarySearchSuperviser() {
+            this.abstractsCache = new TreeMap<String, TreeMap<String, String>>();
         }
+        
+        /**
+         * add a single abstract to the existing set of abstracts
+         * @param wordhash
+         * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */
-        final TreeMap<String, String> abstractJoin = (rcAbstracts.size() == query.queryHashes.size()) ? SetTools.joinConstructive(rcAbstracts.values(), true) : new TreeMap<String, String>();
-        if (!abstractJoin.isEmpty()) {
+        public void addAbstract(String wordhash, TreeMap<String, String> singleAbstract) {
+            synchronized (abstractsCache) {
+                TreeMap<String, String> oldAbstract = abstractsCache.get(wordhash); 
+                if (oldAbstract == null) {
+                    // new abstracts in the cache
+                    abstractsCache.put(wordhash, singleAbstract);
+                } else {
+                    // extend the abstracts in the cache: join the single abstracts
+                    for (Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
+                        String urlhash = oneref.getKey();
+                        String peerlistNew = oneref.getValue();
+                        String peerlistOld = oldAbstract.get(urlhash);
+                        if (peerlistOld == null) {
+                            oldAbstract.put(urlhash, peerlistNew);
+                        } else {
+                            oldAbstract.put(urlhash, peerlistOld + peerlistNew);
+                        }
+                    }
+                    // abstractsCache.put(wordhash, oldAbstract);
+                }
+            }
+        }
+        
+        private String wordsFromPeer(final String peerhash, final String urls) {
+            Map.Entry<String, TreeMap<String, String>> entry;
+            String word, peerlist, url, wordlist = "";
+            TreeMap<String, String> urlPeerlist;
+            int p;
+            boolean hasURL;
+            synchronized (this) {
+                final Iterator<Map.Entry <String, TreeMap<String, String>>> i = this.abstractsCache.entrySet().iterator();
+                while (i.hasNext()) {
+                    entry = i.next();
+                    word = entry.getKey();
+                    urlPeerlist = entry.getValue();
+                    hasURL = true;
+                    for (int j = 0; j < urls.length(); j = j + 12) {
+                        url = urls.substring(j, j + 12);
+                        peerlist = urlPeerlist.get(url);
+                        p = (peerlist == null) ? -1 : peerlist.indexOf(peerhash);
+                        if ((p < 0) || (p % 12 != 0)) {
+                            hasURL = false;
+                            break;
+                        }
+                    }
+                    if (hasURL) wordlist += word;
+                }
+            }
+            return wordlist;
+        }
+        
+        public void run() {
+            try {Thread.sleep(5000);} catch (InterruptedException e) {}
+            prepareSecondarySearch();
+        }
+        
+        private void prepareSecondarySearch() {
+            
+            if (abstractsCache == null || abstractsCache.size() != query.queryHashes.size()) return; // secondary search not possible (yet)
+            
+            
+            // catch up index abstracts and join them; then call peers again to submit their urls
+            System.out.println("DEBUG-INDEXABSTRACT: " + abstractsCache.size() + " word references caught, " + query.queryHashes.size() + " needed");
+            for (Map.Entry<String, TreeMap<String, String>> entry: abstractsCache.entrySet()) {
+                System.out.println("DEBUG-INDEXABSTRACT: hash " + entry.getKey() + ": " + ((query.queryHashes.has(entry.getKey().getBytes()) ? "NEEDED" : "NOT NEEDED") + "; " + entry.getValue().size() + " entries"));
+            }
+            
+            final TreeMap<String, String> abstractJoin = (abstractsCache.size() == query.queryHashes.size()) ? SetTools.joinConstructive(abstractsCache.values(), true) : new TreeMap<String, String>();
+            if (abstractJoin.isEmpty()) return;
+            
             //System.out.println("DEBUG-INDEXABSTRACT: index abstracts delivered " + abstractJoin.size() + " additional results for secondary search");
             // generate query for secondary search
             final TreeMap<String, String> secondarySearchURLs = new TreeMap<String, String>(); // a (peerhash:urlhash-liststring) mapping
@@ -363,7 +429,7 @@ public final class SearchEvent {
                 entry1 = i1.next();
                 url = entry1.getKey();
                 ps = entry1.getValue();
-                //System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peers);
+                System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peers);
                 mypeercount = 0;
                 for (int j = 0; j < ps.length(); j = j + 12) {
                     peer = ps.substring(j, j + 12);
@@ -386,19 +452,19 @@ public final class SearchEvent {
                 peer = entry1.getKey();
                 if (peer.equals(mypeerhash)) continue; // we dont need to ask ourself
                 urls = entry1.getValue();
-                words = rcAbstracts.wordsFromPeer(peer, urls);
+                words = wordsFromPeer(peer, urls);
                 assert words.length() >= 12 : "words = " + words;
-                //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
-                //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
+                System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
+                System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, "", urls, this.query.getSegment(), peers, crawlResults, this.rankedCache, peer, Switchboard.urlBlacklist,
+                        words, "", urls, query.getSegment(), peers, crawlResults, rankedCache, peer, Switchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
-
             }
-        //} else {
-            //System.out.println("DEBUG-INDEXABSTRACT: no success using index abstracts from remote peers");
+            
         }
+    
     }
+    
     
     public void remove(final WordReferenceVars reference) {
         this.rankedCache.remove(reference);

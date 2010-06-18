@@ -554,7 +554,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return bb;
     }
 
-    public static final <ReferenceType extends Reference> void decompressIndex(final TreeMap<String, String> target, ByteBuffer ci, final String peerhash) {
+    public static final TreeMap<String, String> decompressIndex(ByteBuffer ci, final String peerhash) {
+        TreeMap<String, String> target = new TreeMap<String, String>();
         // target is a mapping from url-hashes to a string of peer-hashes
         if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
             //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
@@ -579,5 +580,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 if (ci.byteAt(0) == ',') ci.trim(1);
             }
         }
+        return target;
     }
+    
 }
