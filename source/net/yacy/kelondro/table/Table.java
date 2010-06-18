@@ -315,6 +315,15 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize, true) * RowCollection.growfactorLarge100 / 100L);
     }
     
+    public boolean consistencyCheck() {
+        try {
+            return file.size() == index.size();
+        } catch (IOException e) {
+            Log.logException(e);
+            return false;
+        }
+    }
+    
     public synchronized void addUnique(final Entry row) throws IOException, RowSpaceExceededException {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();

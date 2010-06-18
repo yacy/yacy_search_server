@@ -117,6 +117,10 @@ public class yacyNewsQueue {
     }
 
     public synchronized void push(final yacyNewsDB.Record entry) throws IOException, RowSpaceExceededException {
+        if (!queueStack.consistencyCheck()) {
+            Log.logSevere("yacyNewsQueue", "reset of table " + this.path);
+            queueStack.clear();
+        }
         queueStack.addUnique(r2b(entry, true));
     }
 
