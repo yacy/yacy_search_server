@@ -301,7 +301,7 @@ public final class search {
                     while (j.hasNext()) {
                         wordhash = j.next();
                         indexabstractContainercount += theSearch.abstractsCount(wordhash);
-                        indexabstract.append("indexabstract." + wordhash + "=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
+                        indexabstract.append("indexabstract." + new String(wordhash) + "=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
@@ -323,11 +323,11 @@ public final class search {
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
                     indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsMaxCountHash());
-                    indexabstract.append("indexabstract." + theSearch.getAbstractsMaxCountHash() + "=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
-                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(theSearch.getAbstractsNearDHTHash().equals(theSearch.getAbstractsMaxCountHash())))) {
+                    indexabstract.append("indexabstract." + new String(theSearch.getAbstractsMaxCountHash()) + "=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
+                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(new String(theSearch.getAbstractsNearDHTHash()).equals(new String(theSearch.getAbstractsMaxCountHash()))))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
                         indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsNearDHTHash());
-                        indexabstract.append("indexabstract." + theSearch.getAbstractsNearDHTHash() + "=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
+                        indexabstract.append("indexabstract." + new String(theSearch.getAbstractsNearDHTHash()) + "=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);
