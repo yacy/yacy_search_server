@@ -396,6 +396,9 @@ public class CrawlProfile {
                 return CacheStrategy.IFFRESH;
             }
         }
+        public void setCacheStrategy(CacheStrategy newStrategy) {
+            mem.put(CACHE_STRAGEGY, newStrategy.toString());
+        }
         public long recrawlIfOlder() {
             // returns a long (millis) that is the minimum age that
             // an entry must have to be re-crawled

@@ -352,10 +352,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 // trying to load the resource from the cache
                 resContent = Cache.getContent(url);
                 responseHeader = Cache.getResponseHeader(url);
-                if (resContent != null && !fetchOnline && resContent.length > maxDocLen) {
-                    // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
-                    return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContent.length + " bytes");
-                } else if (fetchOnline) {
+                if ((resContent == null || responseHeader == null) && fetchOnline) {
                     // if not found try to download it
                     
                     // download resource using the crawler and keep resource in memory if possible

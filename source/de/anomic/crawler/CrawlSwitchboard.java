@@ -30,6 +30,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import de.anomic.crawler.CrawlProfile.CacheStrategy;
+
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
@@ -183,8 +185,9 @@ public final class CrawlSwitchboard {
         if (this.defaultTextSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
             defaultTextSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_BAD_URL, 0,
-                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE), -1, -1, true, true, true, true, true, false, true, true, false, CrawlProfile.CacheStrategy.CACHEONLY);
+                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE), -1, -1, true, true, true, true, true, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
         }
+        this.defaultTextSnippetGlobalProfile.setCacheStrategy(CacheStrategy.IFEXIST);
         if (this.defaultMediaSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
             defaultMediaSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_BAD_URL, 0,

@@ -233,7 +233,7 @@ public final class LoaderDispatcher {
         // check case where we want results from the cache exclusively, and never from the internet (offline mode)
         if (cacheStrategy == CrawlProfile.CacheStrategy.CACHEONLY) {
             // we had a chance to get the content from the cache .. its over. We don't have it.
-            return null;
+            throw new IOException("cache only strategy");
         }
         
         // now forget about the cache, nothing there. Try to load the content from the internet
