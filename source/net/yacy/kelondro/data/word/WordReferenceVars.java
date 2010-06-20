@@ -316,7 +316,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.virtualAge > (v = other.virtualAge)) this.virtualAge = v;
         if (this.wordsintext > (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext > (v = other.phrasesintext)) this.phrasesintext = v;
-        this.positions = a(Math.min(min(this.positions), min(other.positions)));
+        this.positions = this.positions == null ? other.positions : other.positions == null ? this.positions : a(Math.min(min(this.positions), min(other.positions)));
         if (this.posinphrase > (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase > (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified > (w = other.lastModified)) this.lastModified = w;
@@ -338,7 +338,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.virtualAge < (v = other.virtualAge)) this.virtualAge = v;
         if (this.wordsintext < (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext < (v = other.phrasesintext)) this.phrasesintext = v;
-        this.positions = a(Math.max(max(this.positions), max(other.positions)));
+        this.positions = this.positions == null ? other.positions : other.positions == null ? this.positions : a(Math.max(max(this.positions), max(other.positions)));
         if (this.posinphrase < (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase < (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified < (w = other.lastModified)) this.lastModified = w;
