@@ -252,7 +252,7 @@ public class yacySearch extends Thread {
     }
 
     public static yacySearch[] primaryRemoteSearches(
-            final String wordhashes, final String excludehashes, final String urlhashes,
+            final String wordhashes, final String excludehashes,
             final Pattern prefer, final Pattern filter, String language,
             final String sitehash,
             final String authorhash,
@@ -288,7 +288,7 @@ public class yacySearch extends Thread {
         for (int i = 0; i < targets; i++) {
             if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
             searchThreads[i] = new yacySearch(
-                    wordhashes, excludehashes, urlhashes, prefer, filter, language,
+                    wordhashes, excludehashes, "", prefer, filter, language,
                     sitehash, authorhash,
                     count, maxDist, true, targets, targetPeers[i],
                     indexSegment, peers, crawlResults, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
@@ -298,7 +298,7 @@ public class yacySearch extends Thread {
     }
     
     public static yacySearch secondaryRemoteSearch(
-            final String wordhashes, final String excludehashes, final String urlhashes,
+            final String wordhashes, final String urlhashes,
             final Segment indexSegment,
             final yacySeedDB peers,
             final ResultURLs crawlResults,
@@ -310,13 +310,15 @@ public class yacySearch extends Thread {
     	
         // check own peer status
         if (peers.mySeed() == null || peers.mySeed().getPublicAddress() == null) { return null; }
-
+        assert urlhashes != null;
+        assert urlhashes.length() > 0;
+        
         // prepare seed targets and threads
         final yacySeed targetPeer = peers.getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash.getBytes()));
         final yacySearch searchThread = new yacySearch(
-                wordhashes, excludehashes, urlhashes, Pattern.compile(""), Pattern.compile(".*"), "", "", "", 0, 9999, true, 0, targetPeer,
+                wordhashes, "", urlhashes, Pattern.compile(""), Pattern.compile(".*"), "", "", "", 0, 9999, true, 0, targetPeer,
                 indexSegment, peers, crawlResults, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;

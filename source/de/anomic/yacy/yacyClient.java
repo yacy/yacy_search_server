@@ -429,6 +429,8 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("constraint", (constraint == null) ? "" : constraint.exportB64()));
         if (secondarySearchSuperviser != null) post.add(new DefaultCharsetStringPart("abstracts", "auto"));
         final long timestamp = System.currentTimeMillis();
+        boolean thisIsASecondarySearch = urlhashes.length() > 0;
+        assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
 
         // send request
         Map<String, String> result = null;
@@ -565,7 +567,7 @@ public final class yacyClient {
         } catch (Exception e) {
             Log.logException(e);
         }
-        yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + container[0].size() + "/" + joincount + " references for joined word queries");
+        yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + container[0].size() + "/" + joincount + " references for " + (thisIsASecondarySearch ? "a secondary search" : "joined word queries"));
 
         // integrate remote top-words/topics
         final String references = result.get("references");
@@ -604,7 +606,10 @@ public final class yacyClient {
 					ac++;
 				}
 			}
-			if (ac > 0) yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words "+ whacc);
+			if (ac > 0) {
+			    secondarySearchSuperviser.commitAbstract();
+			    yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words "+ whacc);
+			}
 		}
         
         // generate statistics
