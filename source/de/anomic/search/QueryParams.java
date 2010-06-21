@@ -44,6 +44,7 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.SetTools;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.yacy.yacySeed;
 
 public final class QueryParams {
@@ -79,7 +80,7 @@ public final class QueryParams {
     public final int maxDistance;
     public final Bitfield constraint;
     public final boolean allofconstraint;
-    public final boolean onlineSnippetFetch;
+    public final CrawlProfile.CacheStrategy snippetCacheStrategy;
     public final RankingProfile ranking;
     private final Segment indexSegment;
     public final String host; // this is the client host that starts the query, not a site operator
@@ -130,7 +131,7 @@ public final class QueryParams {
         this.domMaxTargets = 0;
         this.constraint = constraint;
         this.allofconstraint = false;
-        this.onlineSnippetFetch = false;
+        this.snippetCacheStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
         this.host = null;
         this.sitehash = null;
         this.authorhash = null;
@@ -149,7 +150,7 @@ public final class QueryParams {
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
         final String navigators,
-        final boolean onlineSnippetFetch,
+        final CrawlProfile.CacheStrategy snippetCacheStrategy,
         final int itemsPerPage, final int offset, final String urlMask,
         final int domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
@@ -184,7 +185,7 @@ public final class QueryParams {
 		this.allofconstraint = allofconstraint;
 		this.sitehash = site; assert site == null || site.length() == 6;
 		this.authorhash = authorhash; assert authorhash == null || authorhash.length() > 0;
-		this.onlineSnippetFetch = onlineSnippetFetch;
+		this.snippetCacheStrategy = snippetCacheStrategy;
 		this.host = host;
         this.remotepeer = null;
 		this.handle = Long.valueOf(System.currentTimeMillis());
@@ -375,7 +376,7 @@ public final class QueryParams {
         "&maximumRecords="+ theQuery.displayResults() +
         "&startRecord=" + (page * theQuery.displayResults()) +
         "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +
-        "&verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
+        "&verify=" + (theQuery.snippetCacheStrategy.mustBeOffline() ? "false" : "true") +
         "&nav=" + nav +
         "&urlmaskfilter=" + originalUrlMask +
         "&prefermaskfilter=" + theQuery.prefer +

@@ -62,6 +62,7 @@ import net.yacy.kelondro.util.ISO639;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.LoaderDispatcher;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 
 public class Segment {
@@ -360,18 +361,24 @@ public class Segment {
     
 
     // method for index deletion
-    public int removeAllUrlReferences(final DigestURI url, LoaderDispatcher loader, final boolean fetchOnline) {
-        return removeAllUrlReferences(url.hash(), loader, fetchOnline);
+    public int removeAllUrlReferences(final DigestURI url, LoaderDispatcher loader, final CrawlProfile.CacheStrategy cacheStrategy) {
+        return removeAllUrlReferences(url.hash(), loader, cacheStrategy);
     }
     
-    public void removeAllUrlReferences(final HandleSet urls, LoaderDispatcher loader, final boolean fetchOnline) {
-        for (byte[] urlhash: urls) removeAllUrlReferences(urlhash, loader, fetchOnline);
+    public void removeAllUrlReferences(final HandleSet urls, LoaderDispatcher loader, final CrawlProfile.CacheStrategy cacheStrategy) {
+        for (byte[] urlhash: urls) removeAllUrlReferences(urlhash, loader, cacheStrategy);
     }
     
-    public int removeAllUrlReferences(final byte[] urlhash, LoaderDispatcher loader, final boolean fetchOnline) {
-        // find all the words in a specific resource and remove the url reference from every word index
-        // finally, delete the url entry
-        
+    /**
+     * find all the words in a specific resource and remove the url reference from every word index
+     * finally, delete the url entry
+     * @param urlhash the hash of the url that shall be removed
+     * @param loader
+     * @param cacheStrategy
+     * @return number of removed words
+     */
+    public int removeAllUrlReferences(final byte[] urlhash, LoaderDispatcher loader, final CrawlProfile.CacheStrategy cacheStrategy) {
+
         if (urlhash == null) return 0;
         // determine the url string
         final URIMetadataRow entry = urlMetadata().load(urlhash, null, 0);
@@ -384,7 +391,7 @@ public class Segment {
             // get the resource content
             byte[] resourceb = null;
             try {
-                resourceb = loader.getResource(metadata.url(), fetchOnline, 10000, true, false);
+                resourceb = loader.getResource(metadata.url(), cacheStrategy, 10000, true, false);
             } catch (IOException e) {
                 Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
             }

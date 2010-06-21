@@ -99,19 +99,11 @@ public final class LoaderDispatcher {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
-    public Response load(
-            final DigestURI url,
-            final boolean forText,
-            final boolean global,
-            final long maxFileSize) throws IOException {
-        return load(request(url, forText, global), maxFileSize);
-    }
-    
     /**
      * load a resource from the web, from ftp, from smb or a file
      * @param url
-     * @param forText
-     * @param global
+     * @param forText shows that this was a for-text crawling request
+     * @param global shows that this was a global crawling request
      * @param cacheStratgy strategy according to CACHE_STRATEGY_NOCACHE,CACHE_STRATEGY_IFFRESH,CACHE_STRATEGY_IFEXIST,CACHE_STRATEGY_CACHEONLY
      * @return the loaded entity in a Response object
      * @throws IOException
@@ -167,13 +159,6 @@ public final class LoaderDispatcher {
                     0, 
                     0, 
                     0);
-    }
-    
-    public Response load(final Request request, long maxFileSize) throws IOException {
-        CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
-        CrawlProfile.CacheStrategy cacheStrategy = CrawlProfile.CacheStrategy.IFEXIST;
-        if (crawlProfile != null) cacheStrategy = crawlProfile.cacheStrategy();
-        return load(request, cacheStrategy, maxFileSize);
     }
     
     public Response load(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
@@ -295,15 +280,10 @@ public final class LoaderDispatcher {
      * @return the content as {@link byte[]}
      * @throws IOException 
      */
-    public byte[] getResource(final DigestURI url, final boolean fetchOnline, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
-        byte[] resource = Cache.getContent(url);
-        if (resource != null) return resource;
-        
-        if (!fetchOnline) return null;
-        
+    public byte[] getResource(final DigestURI url, CrawlProfile.CacheStrategy cacheStrategy, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
         // try to download the resource using the loader
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-        final Response entry = load(url, forText, reindexing, maxFileSize);
+        final Response entry = load(url, forText, reindexing, cacheStrategy, maxFileSize);
         if (entry == null) return null; // not found in web
         
         // read resource body (if it is there)
@@ -322,45 +302,27 @@ public final class LoaderDispatcher {
      * @param global the domain of the search. If global == true then the content is re-indexed
      * @return the parsed document as {@link Document}
      */
-    public static Document retrieveDocument(final DigestURI url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global, long maxFileSize) {
+    public static Document retrieveDocument(final DigestURI url, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, final boolean forText, final boolean global, long maxFileSize) {
 
         // load resource
         byte[] resContent = null;
         ResponseHeader responseHeader = null;
         try {
-            // trying to load the resource from the cache
-            resContent = Cache.getContent(url);
-            responseHeader = Cache.getResponseHeader(url);
-            if (resContent != null) {
-                // if the content was found
-            } else if (fetchOnline) {
-                // if not found try to download it
-                
-                // download resource using the crawler and keep resource in memory if possible
-                final Response entry = Switchboard.getSwitchboard().loader.load(url, forText, global, maxFileSize);
-                
-                // getting resource metadata (e.g. the http headers for http resources)
-                if (entry != null) {
+            final Response entry = Switchboard.getSwitchboard().loader.load(url, forText, global, cacheStrategy, maxFileSize);
+            if (entry == null) {
+                Log.logFine("snippet fetch", "no Response for url " + url);
+                return null;
+            }
 
-                    // read resource body (if it is there)
-                    final byte[] resourceArray = entry.getContent();
-                    if (resourceArray != null) {
-                        resContent = resourceArray;
-                    } else {
-                        resContent = Cache.getContent(url); 
-                    }
-                    
-                    // read a fresh header
-                    responseHeader = entry.getResponseHeader();
-                }
-                
-                // if it is still not available, report an error
-                if (resContent == null) {
-                    Log.logFine("snippet fetch", "plasmaHTCache.Entry cache is NULL for url " + url);
-                    return null;
-                }
-            } else {
-                Log.logFine("snippet fetch", "no resource available for url " + url);
+            // read resource body (if it is there)
+            resContent = entry.getContent();
+            
+            // read a fresh header
+            responseHeader = entry.getResponseHeader();
+        
+            // if it is still not available, report an error
+            if (resContent == null || responseHeader == null) {
+                Log.logFine("snippet fetch", "no Content available for url " + url);
                 return null;
             }
         } catch (final Exception e) {

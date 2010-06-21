@@ -259,6 +259,22 @@ public class CrawlProfile {
             for (CacheStrategy strategy: CacheStrategy.values()) if (strategy.code == code) return strategy;
             return NOCACHE;
         }
+        public static CacheStrategy parse(String name) {
+            if (name.equals("nocache")) return NOCACHE;
+            if (name.equals("iffresh")) return IFFRESH;
+            if (name.equals("ifexist")) return IFEXIST;
+            if (name.equals("cacheonly")) return CACHEONLY;
+            return null;
+        }
+        public String toName() {
+            return this.name().toLowerCase();
+        }
+        public boolean isAllowedToFetchOnline() {
+            return this.code < 3;
+        }
+        public boolean mustBeOffline() {
+            return this.code == 3;
+        }
     }
     
     public static class entry {

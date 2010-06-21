@@ -48,6 +48,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.repository.LoaderDispatcher;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.ResponseHeader;
@@ -308,7 +309,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return al;
     }
     
-    public static TextSnippet retrieveTextSnippet(final LoaderDispatcher loader, final URIMetadataRow.Components comp, final HandleSet queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
+    public static TextSnippet retrieveTextSnippet(final LoaderDispatcher loader, final URIMetadataRow.Components comp, final HandleSet queryhashes, final CrawlProfile.CacheStrategy cacheStrategy, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final DigestURI url = comp.url();
         if (queryhashes.isEmpty()) {
@@ -351,11 +352,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 // trying to load the resource from the cache
                 resContent = Cache.getContent(url);
                 responseHeader = Cache.getResponseHeader(url);
-                if ((resContent == null || responseHeader == null) && fetchOnline) {
+                if ((resContent == null || responseHeader == null) && cacheStrategy.isAllowedToFetchOnline()) {
                     // if not found try to download it
                     
-                    // download resource using the crawler and keep resource in memory if possible
-                    final Response entry = loader.load(url, true, reindexing, Long.MAX_VALUE);
+                    // download resource or get it from the cache
+                    final Response entry = loader.load(url, true, reindexing, cacheStrategy, Long.MAX_VALUE);
                     
                     // get resource metadata (e.g. the http headers for http resources)
                     if (entry != null) {
@@ -371,9 +372,16 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                         }
                     }
                     
-                    // if it is still not available, report an error
-                    if (resContent == null) return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource from net, no cache entry");
                     source = SOURCE_WEB;
+                }
+                if (resContent == null) {
+                    // in case that we did not get any result we can still return a success when we are not allowed to go online
+                    if (cacheStrategy.mustBeOffline()) {
+                        return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "omitted network load (not allowed), no cache entry");
+                    }
+                    
+                    // if it is still not available, report an error
+                    return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource from net, no cache entry");
                 }
             }
         } catch (final Exception e) {

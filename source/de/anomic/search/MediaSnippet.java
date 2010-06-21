@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.MimeTable;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -111,13 +112,13 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return o1.compareTo(o2);
     }
     
-    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final ContentDomain mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
+    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final ContentDomain mediatype, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
         }
         
-        final Document document = LoaderDispatcher.retrieveDocument(url, fetchOnline, timeout, false, reindexing, Long.MAX_VALUE);
+        final Document document = LoaderDispatcher.retrieveDocument(url, cacheStrategy, timeout, false, reindexing, Long.MAX_VALUE);
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
             if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.AUDIO));

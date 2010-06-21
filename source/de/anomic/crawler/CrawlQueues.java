@@ -563,7 +563,8 @@ public class CrawlQueues {
                     try {
                         request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-                        Response response = sb.loader.load(request, maxFileSize);
+                        CrawlProfile.entry e = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
+                        Response response = sb.loader.load(request, e == null ? CrawlProfile.CacheStrategy.IFEXIST : e.cacheStrategy(), maxFileSize);
                         if (response == null) {
                             request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (log.isFine()) log.logFine("problem loading " + request.url().toString() + ": no content (possibly caused by cache policy)");

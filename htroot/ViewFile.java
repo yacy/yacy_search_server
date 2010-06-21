@@ -43,9 +43,9 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.RequestHeader;
@@ -150,7 +150,7 @@ public class ViewFile {
             }
 
             // define an url by post parameter
-            url = new DigestURI(urlString, null);
+            url = new DigestURI(MultiProtocolURI.unescape(urlString), null);
             urlHash = new String(url.hash());
             pre = post.get("pre", "false").equals("true");
         } catch (final MalformedURLException e) {}
@@ -168,17 +168,20 @@ public class ViewFile {
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url) ? 1 : 0);
         
-        ResponseHeader responseHeader = null;
         String resMime = null;
+        ResponseHeader responseHeader = responseHeader = Cache.getResponseHeader(url);;
         byte[] resource = Cache.getContent(url);
         
-        if (resource == null && authorized) {
+        if ((resource == null || responseHeader == null) && authorized) {
             // load resource from net
             Response response = null;
             try {
-                response = sb.loader.load(url, true, false, Long.MAX_VALUE);
+                response = sb.loader.load(url, true, false, CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
             } catch (IOException e) {
-                Log.logException(e);
+                prop.put("error", "4");
+                prop.putHTML("error_errorText", e.getMessage());
+                prop.put("viewMode", VIEW_MODE_NO_TEXT);
+                return prop;
             }
             if (response != null) {
                 resource = response.getContent();
@@ -186,69 +189,14 @@ public class ViewFile {
             }
         }
         
-        if (responseHeader == null) responseHeader = Cache.getResponseHeader(url);
-
-        // if the resource body was not cached we try to load it from web
-        if (resource == null) {
-            Response entry = null;
-            try {
-                entry = sb.loader.load(url, true, false, Long.MAX_VALUE);
-            } catch (final Exception e) {
-                prop.put("error", "4");
-                prop.putHTML("error_errorText", e.getMessage());
-                prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                return prop;
-            }
-
-            if (entry != null) {
-                resource = entry.getContent();
-            }
-
-            if (resource == null) {
-                prop.put("error", "4");
-                prop.put("error_errorText", "No resource available");
-                prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                return prop;
-            }
+        // if resource not available just fail
+        if (resource == null || responseHeader == null) {
+            prop.put("error", "4");
+            prop.put("error_errorText", "No resource available");
+            prop.put("viewMode", VIEW_MODE_NO_TEXT);
+            return prop;
         }
-
-        // try to load resource metadata
-        if (responseHeader == null) {
-
-            // try to load the metadata from cache
-            try {
-                responseHeader = Cache.getResponseHeader(url);
-            } catch (final Exception e) {
-                /* ignore this */
-            }
-
-            // if the metadata was not cached try to load it from web
-            if (responseHeader == null) {
-                final String protocol = url.getProtocol();
-                if (!((protocol.equals("http") || protocol.equals("https")))) {
-                    prop.put("error", "6");
-                    prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                    return prop;
-                }
-
-                try {
-                    Response response = sb.loader.load(url, true, false, Long.MAX_VALUE);
-                    responseHeader = response.getResponseHeader();
-                    resource = response.getContent();
-                } catch (IOException e) {
-                    Log.logException(e);
-                }
-                if (responseHeader == null) {
-                    prop.put("error", "4");
-                    prop.put("error_errorText", "Unable to load resource metadata.");
-                    prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                    return prop;
-                }
-                resMime = responseHeader.mime();
-            }
-        } else {
-            resMime = responseHeader.mime();
-        }
+        resMime = responseHeader.mime();
         
         final String[] wordArray = wordArray(post.get("words", null));
 

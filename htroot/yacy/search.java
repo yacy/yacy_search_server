@@ -47,6 +47,7 @@ import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.ISO639;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;
@@ -206,7 +207,7 @@ public final class search {
                     ContentDomain.contentdomParser(contentdom),
                     language,
                     "", // no navigation
-                    false,
+                    CrawlProfile.CacheStrategy.CACHEONLY,
                     count,
                     0,
                     filter,
@@ -259,7 +260,7 @@ public final class search {
                     ContentDomain.contentdomParser(contentdom),
                     language,
                     "", // no navigation
-                    false, 
+                    CrawlProfile.CacheStrategy.CACHEONLY, 
                     count, 
                     0, 
                     filter, 

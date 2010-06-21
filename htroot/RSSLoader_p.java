@@ -33,6 +33,7 @@ import net.yacy.document.ParserException;
 import net.yacy.document.parser.rssParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -63,7 +64,7 @@ public class RSSLoader_p {
         // if the resource body was not cached we try to load it from web
         Response entry = null;
         try {
-            entry = sb.loader.load(url, true, false, Long.MAX_VALUE);
+            entry = sb.loader.load(url, true, false, CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
         } catch (final Exception e) {
             return prop;
         }

@@ -783,7 +783,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                     } catch (final Exception e) {
                         log.logSevere("command execution, generic exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // whatever happens: the thread has to survive!
-                        writeLine("UNKNOWN REASON:" + this.commandObj.error(e));
+                        writeLine("UNKNOWN REASON:" + ((this.commandObj == null) ? "no command object" : this.commandObj.error(e)));
                         break;
                     }
                     // check if we should still keep this alive:

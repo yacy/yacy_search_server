@@ -35,6 +35,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -90,7 +91,7 @@ public class ViewImage {
         if (scaled == null) {
             byte[] resourceb = null;
             if (url != null) try {
-                resourceb = sb.loader.getResource(url, true, timeout, false, true);
+                resourceb = sb.loader.getResource(url, CrawlProfile.CacheStrategy.IFEXIST, timeout, false, true);
             } catch (IOException e) {
                 Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
             }

@@ -51,6 +51,7 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.repository.LoaderDispatcher;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.LibraryProvider;
 import de.anomic.http.server.HeaderFramework;
@@ -67,7 +68,6 @@ import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.graphics.ProfilingGraph;
 
@@ -97,7 +97,8 @@ public class yacysearch {
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring =  originalquerystring.replace('+', ' ');
-        boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
+        CrawlProfile.CacheStrategy snippetFetchStrategy = (post != null && post.get("verify", "false").equals("true")) ? CrawlProfile.CacheStrategy.IFFRESH : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
+        if (snippetFetchStrategy == null) snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
         final serverObjects prop = new serverObjects();
 
         // get segment
@@ -164,7 +165,7 @@ public class yacysearch {
         // collect search attributes
         boolean newsearch = post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
         
-        int itemsPerPage = Math.min((authenticated) ? (fetchSnippets ? 100 : 1000) : (fetchSnippets ? 10 : 100), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
+        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000) : (snippetFetchStrategy.isAllowedToFetchOnline() ? 10 : 100), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
         int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
         
         boolean global = post.get("resource", "local").equals("global");
@@ -228,12 +229,12 @@ public class yacysearch {
         boolean block = false;
         if (Domains.matchesList(client, sb.networkBlacklist)) {
             global = false;
-            fetchSnippets = false;
+            snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
             block = true;
             Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
         } else if (Domains.matchesList(client, sb.networkWhitelist)) {
             Log.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
-        } else if (global || fetchSnippets) {
+        } else if (global || snippetFetchStrategy.isAllowedToFetchOnline()) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized (trackerHandles) {
                 int accInOneSecond = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size();
@@ -242,21 +243,21 @@ public class yacysearch {
                 int accInTenMinutes = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
                 if (accInTenMinutes > 600) {
                     global = false;
-                    fetchSnippets = false;
+                    snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
                     block = true;
                     Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInTenMinutes + " searches in ten minutes, fully blocked (no results generated)");
                 } else if (accInOneMinute > 200) {
                     global = false;
-                    fetchSnippets = false;
+                    snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
                     block = true;
                     Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneMinute + " searches in one minute, fully blocked (no results generated)");
                 } else if (accInThreeSeconds > 1) {
                     global = false;
-                    fetchSnippets = false;
+                    snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
                     Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + " searches in three seconds, blocked global search and snippets");
                 } else if (accInOneSecond > 2) {
                     global = false;
-                    fetchSnippets = false;
+                    snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
                     Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + " searches in one second, blocked global search and snippets");
                 }
             }
@@ -428,7 +429,7 @@ public class yacysearch {
                 if (urlentry != null) {
                     final URIMetadataRow.Components metadata = urlentry.metadata();
                     Document document;
-                    document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false, Long.MAX_VALUE);
+                    document = LoaderDispatcher.retrieveDocument(metadata.url(), CrawlProfile.CacheStrategy.IFEXIST, 5000, true, false, Long.MAX_VALUE);
                     if (document != null) {
                         // create a news message
                         final HashMap<String, String> map = new HashMap<String, String>();
@@ -460,7 +461,7 @@ public class yacysearch {
                     contentdom,
                     language,
                     navigation,
-                    fetchSnippets,
+                    snippetFetchStrategy,
                     itemsPerPage,
                     offset,
                     urlmask,
@@ -538,7 +539,7 @@ public class yacysearch {
     	                "&maximumRecords="+ theQuery.displayResults() +
     	                "&startRecord=" + (0 * theQuery.displayResults()) +
     	                "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +
-    	                "&verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
+    	                "&verify=" + (theQuery.snippetCacheStrategy.mustBeOffline() ? "false" : "true") +
     	                "&nav=" + theQuery.navigators +
     	                "&urlmaskfilter=" + originalUrlMask.toString() +
     	                "&prefermaskfilter=" + theQuery.prefer.toString() +
@@ -684,7 +685,7 @@ public class yacysearch {
         prop.putHTML("prefermaskfilter", prefermask);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());
-        prop.put("verify", (fetchSnippets) ? "true" : "false");
+        prop.put("verify", snippetFetchStrategy.toName());
         prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);

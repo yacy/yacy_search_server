@@ -134,10 +134,11 @@ public class pdfParser extends AbstractParser implements Idiom {
         
         Writer writer = null;
         File writerFile = null;
+        PDFTextStripper stripper = null;
         try {
             // create a writer for output
             writer = new CharBuffer();
-            final PDFTextStripper stripper = new PDFTextStripper();
+            stripper = new PDFTextStripper();
             stripper.writeText(theDocument, writer); // may throw a NPE
             theDocument.close();           
             writer.close();
@@ -150,11 +151,12 @@ public class pdfParser extends AbstractParser implements Idiom {
             if (writerFile != null) FileUtils.deletedelete(writerFile);
             throw new ParserException(e.getMessage(), location);
         }
-            
+
         String[] docKeywords = null;
         if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
         
         Document theDoc = null;
+        if (docTitle == null) docTitle = docSubject;
         
         if (writer instanceof CharBuffer) {
             byte[] contentBytes;
@@ -170,7 +172,7 @@ public class pdfParser extends AbstractParser implements Idiom {
                     "UTF-8",
                     null,
                     docKeywords,
-                    (docTitle == null) ? docSubject : docTitle,
+                    docTitle,
                     docAuthor,
                     docPublisher,
                     null,
@@ -186,7 +188,7 @@ public class pdfParser extends AbstractParser implements Idiom {
                     "UTF-8",
                     null,
                     docKeywords,
-                    (docTitle == null) ? docSubject : docTitle,
+                    docTitle,
                     docAuthor,
                     docPublisher,
                     null,

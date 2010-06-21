@@ -52,6 +52,7 @@ import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
@@ -162,7 +163,7 @@ public class IndexControlRWIs_p {
                     index = null;
                 }
                 if (delurlref) {
-                    segment.removeAllUrlReferences(urlb, sb.loader, true);
+                    segment.removeAllUrlReferences(urlb, sb.loader, CrawlProfile.CacheStrategy.IFEXIST);
                 }
                 // delete the word first because that is much faster than the deletion of the urls from the url database
                 segment.termIndex().delete(keyhash);
@@ -179,7 +180,7 @@ public class IndexControlRWIs_p {
             // delete selected URLs
             if (post.containsKey("keyhashdelete")) try {
                 if (delurlref) {
-                    segment.removeAllUrlReferences(urlb, sb.loader, true);
+                    segment.removeAllUrlReferences(urlb, sb.loader, CrawlProfile.CacheStrategy.IFEXIST);
                 }
                 if (delurl || delurlref) {
                     for (byte[] b: urlb) sb.urlRemove(segment, b);

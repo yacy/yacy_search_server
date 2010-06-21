@@ -38,6 +38,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.DateFormatter;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.MetadataRepository;
 import de.anomic.search.Segment;
@@ -140,7 +141,7 @@ public class IndexControlURLs_p {
         prop.put("result", " ");
 
         if (post.containsKey("urlhashdeleteall")) {
-            i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, true);
+            i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, CrawlProfile.CacheStrategy.IFEXIST);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
             prop.put("lurlexport", 0);
             prop.put("reload", 0);

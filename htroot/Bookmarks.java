@@ -43,6 +43,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.repository.LoaderDispatcher;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
@@ -188,7 +189,7 @@ public class Bookmarks {
                         Document document = null;
                         if (urlentry != null) {
                             final URIMetadataRow.Components metadata = urlentry.metadata();
-                            document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false, Long.MAX_VALUE);
+                            document = LoaderDispatcher.retrieveDocument(metadata.url(), CrawlProfile.CacheStrategy.IFEXIST, 5000, true, false, Long.MAX_VALUE);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", metadata.url().toNormalform(false, true));
                             prop.putHTML("mode_title", metadata.dc_title());

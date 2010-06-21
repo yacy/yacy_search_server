@@ -42,6 +42,7 @@ import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.SortStore;
 import net.yacy.repository.LoaderDispatcher;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.MediaSnippet;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.graphics.ProfilingGraph;
@@ -105,9 +106,9 @@ public class ResultFetcher {
 
     public void deployWorker(int deployCount, int neededResults) {
     	if (anyWorkerAlive()) return;
-    	this.workerThreads = new Worker[(query.onlineSnippetFetch) ? deployCount : 1];
+    	this.workerThreads = new Worker[(query.snippetCacheStrategy.isAllowedToFetchOnline()) ? deployCount : 1];
     	for (int i = 0; i < workerThreads.length; i++) {
-    		this.workerThreads[i] = new Worker(i, 10000, (query.onlineSnippetFetch) ? 2 : 0, neededResults);
+    		this.workerThreads[i] = new Worker(i, 10000, query.snippetCacheStrategy, neededResults);
     		this.workerThreads[i].start();
         }
     }
@@ -135,12 +136,12 @@ public class ResultFetcher {
         private final long timeout; // the date until this thread should try to work
         private long lastLifeSign; // when the last time the run()-loop was executed
         private final int id;
-        private final int snippetMode;
+        private final CrawlProfile.CacheStrategy cacheStrategy;
         private final int neededResults;
         
-        public Worker(final int id, final long maxlifetime, int snippetMode, int neededResults) {
+        public Worker(final int id, final long maxlifetime, CrawlProfile.CacheStrategy cacheStrategy, int neededResults) {
             this.id = id;
-            this.snippetMode = snippetMode;
+            this.cacheStrategy = cacheStrategy;
             this.lastLifeSign = System.currentTimeMillis();
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
@@ -166,7 +167,7 @@ public class ResultFetcher {
                     if (page == null) break;
                     if (failedURLs.has(page.hash())) continue;
                     
-                    final ResultEntry resultEntry = fetchSnippet(page, snippetMode); // does not fetch snippets if snippetMode == 0
+                    final ResultEntry resultEntry = fetchSnippet(page, cacheStrategy); // does not fetch snippets if snippetMode == 0
 
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     if (result.exists(resultEntry)) continue;
@@ -195,7 +196,7 @@ public class ResultFetcher {
         }
     }
     
-    protected ResultEntry fetchSnippet(final URIMetadataRow page, final int snippetMode) {
+    protected ResultEntry fetchSnippet(final URIMetadataRow page, CrawlProfile.CacheStrategy cacheStrategy) {
         // Snippet Fetching can has 3 modes:
         // 0 - do not fetch snippets
         // 1 - fetch snippets offline only
@@ -209,7 +210,7 @@ public class ResultFetcher {
         if (metadata == null) return null;
         final long dbRetrievalTime = System.currentTimeMillis() - startTime;
         
-        if (snippetMode == 0) {
+        if (cacheStrategy == null) {
             return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, 0); // result without snippet
         }
         
@@ -221,10 +222,10 @@ public class ResultFetcher {
                     this.loader,
                     metadata,
                     snippetFetchWordHashes,
-                    (snippetMode == 2),
+                    cacheStrategy,
                     ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))),
                     180,
-                    (snippetMode == 2) ? Integer.MAX_VALUE : 30000,
+                    Integer.MAX_VALUE,
                     query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
@@ -232,26 +233,26 @@ public class ResultFetcher {
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
                 return new ResultEntry(page, query.getSegment(), peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
-            } else if (snippetMode == 1) {
+            } else if (cacheStrategy.mustBeOffline()) {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
                 return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
-                registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
+                registerFailure(page.hash(), "no text snippet for URL " + metadata.url() + "; errorCode = " + snippet.getErrorCode());
                 return null;
             }
         } else {
             // attach media information
             startTime = System.currentTimeMillis();
-            final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, (snippetMode == 2), 6000, query.isGlobal());
+            final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, cacheStrategy, 6000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
             
             if (mediaSnippets != null && !mediaSnippets.isEmpty()) {
                 // found media snippets, return entry
                 return new ResultEntry(page, query.getSegment(), peers, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
-            } else if (snippetMode == 1) {
+            } else if (cacheStrategy.mustBeOffline()) {
                 return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
