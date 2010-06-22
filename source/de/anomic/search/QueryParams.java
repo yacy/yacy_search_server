@@ -274,7 +274,19 @@ public final class QueryParams {
         return new String(sb);
     }
     
-    protected static final boolean matches(final String text, final HandleSet keyhashes) {
+    /**
+     * check if the given text matches with the query
+     * this checks inclusion and exclusion words
+     * @param text
+     * @return true if the query matches with the given text
+     */
+    public final boolean matches(final String text) {
+        final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text).keySet());
+        if (SetTools.anymatch(wordhashes, this.excludeHashes)) return false;
+        return SetTools.totalInclusion(this.queryHashes, wordhashes);
+    }
+    
+    protected static final boolean anymatch(final String text, final HandleSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
     	final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text).keySet());

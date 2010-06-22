@@ -67,7 +67,7 @@ public class SetTools {
     // - join by iterative tests (where we distinguish left-right and right-left tests)
 
     
-    public static <A, B> TreeMap<A, B> joinConstructive(final Collection<TreeMap<A, B>> maps, final boolean concatStrings) {
+    public final static <A, B> TreeMap<A, B> joinConstructive(final Collection<TreeMap<A, B>> maps, final boolean concatStrings) {
         // this joins all TreeMap(s) contained in maps
         
         // first order entities by their size
@@ -109,7 +109,7 @@ public class SetTools {
         return joinResult;
     }
     
-    public static <A, B> TreeMap<A, B> joinConstructive(final TreeMap<A, B> map1, final TreeMap<A, B> map2, final boolean concatStrings) {
+    public final static <A, B> TreeMap<A, B> joinConstructive(final TreeMap<A, B> map1, final TreeMap<A, B> map2, final boolean concatStrings) {
         // comparators must be equal
         if ((map1 == null) || (map2 == null)) return null;
         if (map1.comparator() != map2.comparator()) return null;
@@ -130,7 +130,7 @@ public class SetTools {
     }
     
     @SuppressWarnings("unchecked")
-    private static <A, B> TreeMap<A, B> joinConstructiveByTest(final TreeMap<A, B> small, final TreeMap<A, B> large, final boolean concatStrings) {
+    private final static <A, B> TreeMap<A, B> joinConstructiveByTest(final TreeMap<A, B> small, final TreeMap<A, B> large, final boolean concatStrings) {
         final Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
         final TreeMap<A, B> result = new TreeMap<A, B>(large.comparator());
         Map.Entry<A, B> mentry1;
@@ -150,7 +150,7 @@ public class SetTools {
     }
 
     @SuppressWarnings("unchecked")
-    private static <A, B> TreeMap<A, B> joinConstructiveByEnumeration(final TreeMap<A, B> map1, final TreeMap<A, B> map2, final boolean concatStrings) {
+    private final static <A, B> TreeMap<A, B> joinConstructiveByEnumeration(final TreeMap<A, B> map1, final TreeMap<A, B> map2, final boolean concatStrings) {
         // implement pairwise enumeration
         final Comparator<? super A> comp = map1.comparator();
         final Iterator<Map.Entry<A, B>> mi1 = map1.entrySet().iterator();
@@ -181,7 +181,7 @@ public class SetTools {
     }
     
     // now the same for set-set
-    public static <A> TreeSet<A> joinConstructive(final TreeSet<A> set1, final TreeSet<A> set2) {
+    public final static <A> TreeSet<A> joinConstructive(final TreeSet<A> set1, final TreeSet<A> set2) {
     	// comparators must be equal
         if ((set1 == null) || (set2 == null)) return null;
         if (set1.comparator() != set2.comparator()) return null;
@@ -201,7 +201,7 @@ public class SetTools {
         return joinConstructiveByEnumeration(set1, set2);
     }
 
-    private static <A> TreeSet<A> joinConstructiveByTest(final TreeSet<A> small, final TreeSet<A> large) {
+    private final static <A> TreeSet<A> joinConstructiveByTest(final TreeSet<A> small, final TreeSet<A> large) {
     	final Iterator<A> mi = small.iterator();
     	final TreeSet<A> result = new TreeSet<A>(small.comparator());
     	A o;
@@ -212,7 +212,7 @@ public class SetTools {
     	return result;
     }
 
-    private static <A> TreeSet<A> joinConstructiveByEnumeration(final TreeSet<A> set1, final TreeSet<A> set2) {
+    private final static <A> TreeSet<A> joinConstructiveByEnumeration(final TreeSet<A> set1, final TreeSet<A> set2) {
     	// implement pairwise enumeration
     	final Comparator<? super A> comp = set1.comparator();
     	final Iterator<A> mi = set1.iterator();
@@ -238,8 +238,41 @@ public class SetTools {
     	return result;
     }
     
-    // now the same for set-set
-    public static <A> boolean anymatch(final TreeSet<A> set1, final TreeSet<A> set2) {
+    /**
+     * test if one set is totally included in another set
+     * @param <A>
+     * @param small
+     * @param large
+     * @return true if the small set is completely included in the large set
+     */
+    public final static <A> boolean totalInclusion(final Set<A> small, final Set<A> large) {
+        for (A o: small) {
+            if (!large.contains(o)) return false;
+        }
+        return true;
+    }    
+    
+    /**
+     * test if one set is totally included in another set
+     * @param small
+     * @param large
+     * @return true if the small set is completely included in the large set
+     */
+    public final static boolean totalInclusion(final HandleSet small, final HandleSet large) {
+        for (byte[] handle: small) {
+            if (!large.has(handle)) return false;
+        }
+        return true;
+    }    
+    
+    /**
+     * test if the intersection of two sets is not empty
+     * @param <A>
+     * @param set1
+     * @param set2
+     * @return true if any element of the first set is part of the second set or vice-versa
+     */
+    public final static <A> boolean anymatch(final TreeSet<A> set1, final TreeSet<A> set2) {
 		// comparators must be equal
 		if ((set1 == null) || (set2 == null)) return false;
 		if (set1.comparator() != set2.comparator()) return false;
@@ -259,7 +292,13 @@ public class SetTools {
 		return anymatchByEnumeration(set1, set2);
 	}
 
-    public static <A> boolean anymatch(final HandleSet set1, final HandleSet set2) {
+    /**
+     * test if the intersection of two sets is not empty
+     * @param set1
+     * @param set2
+     * @return true if any element of the first set is part of the second set or vice-versa
+     */
+    public final static boolean anymatch(final HandleSet set1, final HandleSet set2) {
         // comparators must be equal
         if ((set1 == null) || (set2 == null)) return false;
         if (set1.comparator() != set2.comparator()) return false;
@@ -279,7 +318,7 @@ public class SetTools {
         return anymatchByEnumeration(set1, set2);
     }
 
-    private static <A> boolean anymatchByTest(final TreeSet<A> small, final TreeSet<A> large) {
+    private final static <A> boolean anymatchByTest(final TreeSet<A> small, final TreeSet<A> large) {
         final Iterator<A> mi = small.iterator();
         A o;
         while (mi.hasNext()) {
@@ -289,7 +328,7 @@ public class SetTools {
         return false;
     }
 
-    private static boolean anymatchByTest(final HandleSet small, final HandleSet large) {
+    private final static boolean anymatchByTest(final HandleSet small, final HandleSet large) {
         final Iterator<byte[]> mi = small.iterator();
         byte[] o;
         while (mi.hasNext()) {
@@ -299,7 +338,7 @@ public class SetTools {
         return false;
     }
 
-    private static <A> boolean anymatchByEnumeration(final TreeSet<A> set1, final TreeSet<A> set2) {
+    private final static <A> boolean anymatchByEnumeration(final TreeSet<A> set1, final TreeSet<A> set2) {
         // implement pairwise enumeration
         final Comparator<? super A> comp = set1.comparator();
         final Iterator<A> mi = set1.iterator();
@@ -322,7 +361,7 @@ public class SetTools {
         return false;
     }
     
-    private static boolean anymatchByEnumeration(final HandleSet set1, final HandleSet set2) {
+    private final static boolean anymatchByEnumeration(final HandleSet set1, final HandleSet set2) {
         // implement pairwise enumeration
         final Comparator<byte[]> comp = set1.comparator();
         final Iterator<byte[]> mi = set1.iterator();
@@ -370,7 +409,7 @@ public class SetTools {
     }
     */
     
-    public static <A, B> void excludeDestructive(final Map<A, B> map, final Set<A> set) {
+    public final static <A, B> void excludeDestructive(final Map<A, B> map, final Set<A> set) {
         // comparators must be equal
         if (map == null) return;
         if (set == null) return;
@@ -383,18 +422,18 @@ public class SetTools {
             excludeDestructiveByTestSetInMap(map, set);
     }
     
-    private static <A, B> void excludeDestructiveByTestMapInSet(final Map<A, B> map, final Set<A> set) {
+    private final static <A, B> void excludeDestructiveByTestMapInSet(final Map<A, B> map, final Set<A> set) {
         final Iterator<A> mi = map.keySet().iterator();
         while (mi.hasNext()) if (set.contains(mi.next())) mi.remove();
     }
     
-    private static <A, B> void excludeDestructiveByTestSetInMap(final Map<A, B> map, final Set<A> set) {
+    private final static <A, B> void excludeDestructiveByTestSetInMap(final Map<A, B> map, final Set<A> set) {
         final Iterator<A> si = set.iterator();
         while (si.hasNext()) map.remove(si.next());
     }
     
     // and the same again with set-set
-    public static <A> void excludeDestructive(final Set<A> set1, final Set<A> set2) {
+    public final static <A> void excludeDestructive(final Set<A> set1, final Set<A> set2) {
         if (set1 == null) return;
         if (set2 == null) return;
         assert !(set1 instanceof TreeSet<?> && set2 instanceof TreeSet<?>) || ((TreeSet<A>) set1).comparator() == ((TreeSet<A>) set2).comparator();
@@ -406,19 +445,19 @@ public class SetTools {
             excludeDestructiveByTestLargeInSmall(set1, set2);
     }
     
-    private static <A> void excludeDestructiveByTestSmallInLarge(final Set<A> small, final Set<A> large) {
+    private final static <A> void excludeDestructiveByTestSmallInLarge(final Set<A> small, final Set<A> large) {
         final Iterator<A> mi = small.iterator();
         while (mi.hasNext()) if (large.contains(mi.next())) mi.remove();
     }
     
-    private static <A> void excludeDestructiveByTestLargeInSmall(final Set<A> large, final Set<A> small) {
+    private final static <A> void excludeDestructiveByTestLargeInSmall(final Set<A> large, final Set<A> small) {
         final Iterator<A> si = small.iterator();
         while (si.hasNext()) large.remove(si.next());
     }
     
     // ------------------------------------------------------------------------------------------------
 
-    public static TreeMap<String, String> loadMap(final String filename, final String sep) {
+    public final static TreeMap<String, String> loadMap(final String filename, final String sep) {
         final TreeMap<String, String> map = new TreeMap<String, String>();
         BufferedReader br = null;
         try {
@@ -437,7 +476,7 @@ public class SetTools {
         return map;
     }
     
-    public static TreeMap<String, ArrayList<String>> loadMapMultiValsPerKey(final String filename, final String sep) {
+    public final static TreeMap<String, ArrayList<String>> loadMapMultiValsPerKey(final String filename, final String sep) {
         final TreeMap<String, ArrayList<String>> map = new TreeMap<String, ArrayList<String>>();
         BufferedReader br = null;
         try {
@@ -460,7 +499,7 @@ public class SetTools {
         return map;
     }
     
-    public static TreeSet<String> loadList(final File file, final Comparator<String> c) {
+    public final static TreeSet<String> loadList(final File file, final Comparator<String> c) {
         final TreeSet<String> list = new TreeSet<String>(c);
         if (!(file.exists())) return list;
         
@@ -480,7 +519,7 @@ public class SetTools {
         return list;
     }
 
-    public static String setToString(final HandleSet set, final char separator) {
+    public final static String setToString(final HandleSet set, final char separator) {
         final Iterator<byte[]> i = set.iterator();
         final StringBuilder sb = new StringBuilder(set.size() * 7);
         if (i.hasNext()) sb.append(new String(i.next()));
@@ -490,7 +529,7 @@ public class SetTools {
         return sb.toString();
     }
     
-    public static String setToString(final Set<String> set, final char separator) {
+    public final static String setToString(final Set<String> set, final char separator) {
         final Iterator<String> i = set.iterator();
         final StringBuilder sb = new StringBuilder(set.size() * 7);
         if (i.hasNext()) sb.append(i.next());

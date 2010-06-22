@@ -81,7 +81,7 @@ public class OAIListFriendsLoader {
         Map<String, String> m;
         for (Map.Entry<String, File> oaiFriend: listFriends.entrySet()) try {
             if (!oaiFriend.getValue().exists()) {
-                Response response = loader == null ? null : loader.load(new DigestURI(oaiFriend.getKey(), null), false, true, CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+                Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey(), null), false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
                 if (response != null) FileUtils.copy(response.getContent(), oaiFriend.getValue());
             }
             

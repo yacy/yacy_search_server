@@ -26,9 +26,12 @@
 
 package de.anomic.crawler.retrieval;
 
+import java.io.ByteArrayInputStream;
 import java.util.Date;
 
 import net.yacy.document.Classification;
+import net.yacy.document.Document;
+import net.yacy.document.ParserException;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
@@ -799,4 +802,16 @@ public class Response {
         return processCase;
     }
     
+    public Document parse() throws ParserException {
+        
+        String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.mime());
+        if (supportError != null) throw new ParserException("no parser support:" + supportError, url());
+        
+        try {
+            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.mime(), this.responseHeader == null ? "UTF-8" : this.responseHeader.getCharacterEncoding(), this.content.length, new ByteArrayInputStream(this.content));
+        } catch (InterruptedException e) {
+            return null;
+        }
+
+    }
 }

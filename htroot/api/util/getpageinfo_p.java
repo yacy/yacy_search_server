@@ -6,7 +6,6 @@ import java.util.Set;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.server.RequestHeader;
@@ -55,14 +54,9 @@ public class getpageinfo_p {
                 }
                 ContentScraper scraper = null;
                 if (u != null) try {
-                    scraper = LoaderDispatcher.parseResource(sb.loader, u, CrawlProfile.CacheStrategy.IFFRESH);
+                    scraper = sb.loader.parseResource(u, CrawlProfile.CacheStrategy.IFFRESH);
                 } catch (final IOException e) {
-                    // try again, try harder
-                    try {
-                        scraper = LoaderDispatcher.parseResource(sb.loader, u, CrawlProfile.CacheStrategy.IFEXIST);
-                    } catch (final IOException ee) {
-                        // now thats a fail, do nothing                            
-                    }
+                    // now thats a fail, do nothing      
                 }  
                 if (scraper != null) {
                     // put the document title 

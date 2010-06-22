@@ -24,6 +24,7 @@
 
 package de.anomic.search;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -35,13 +36,13 @@ import de.anomic.data.MimeTable;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
+import net.yacy.document.ParserException;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
-import net.yacy.repository.LoaderDispatcher;
 
 
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
@@ -118,7 +119,16 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             return new ArrayList<MediaSnippet>();
         }
         
-        final Document document = LoaderDispatcher.retrieveDocument(url, cacheStrategy, timeout, false, reindexing, Long.MAX_VALUE);
+        Document document;
+        try {
+            document = Switchboard.getSwitchboard().loader.loadDocument(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, timeout, Long.MAX_VALUE);
+        } catch (IOException e) {
+            Log.logFine("snippet fetch", "load error: " + e.getMessage());
+            return new ArrayList<MediaSnippet>();
+        } catch (ParserException e) {
+            Log.logFine("snippet fetch", "parser error: " + e.getMessage());
+            return new ArrayList<MediaSnippet>();
+        }
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
             if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.AUDIO));

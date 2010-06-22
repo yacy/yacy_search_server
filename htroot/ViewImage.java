@@ -84,14 +84,13 @@ public class ViewImage {
         int height = post.getInt("height", 0);
         int maxwidth = post.getInt("maxwidth", 0);
         int maxheight = post.getInt("maxheight", 0);
-        final int timeout = post.getInt("timeout", 5000);
         
         // get the image as stream
         Image scaled = iconcache.get(urlString);
         if (scaled == null) {
             byte[] resourceb = null;
             if (url != null) try {
-                resourceb = sb.loader.getResource(url, CrawlProfile.CacheStrategy.IFEXIST, timeout, false, true);
+                resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CrawlProfile.CacheStrategy.IFEXIST);
             } catch (IOException e) {
                 Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
             }

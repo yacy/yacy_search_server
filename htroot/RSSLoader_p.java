@@ -64,7 +64,7 @@ public class RSSLoader_p {
         // if the resource body was not cached we try to load it from web
         Response entry = null;
         try {
-            entry = sb.loader.load(url, true, false, CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+            entry = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
         } catch (final Exception e) {
             return prop;
         }

@@ -25,7 +25,6 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -43,13 +42,11 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -168,35 +165,22 @@ public class ViewFile {
         // loading the resource content as byte array
         prop.put("error_incache", Cache.has(url) ? 1 : 0);
         
-        String resMime = null;
-        ResponseHeader responseHeader = responseHeader = Cache.getResponseHeader(url);;
-        byte[] resource = Cache.getContent(url);
-        
-        if ((resource == null || responseHeader == null) && authorized) {
-            // load resource from net
-            Response response = null;
-            try {
-                response = sb.loader.load(url, true, false, CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
-            } catch (IOException e) {
-                prop.put("error", "4");
-                prop.putHTML("error_errorText", e.getMessage());
-                prop.put("viewMode", VIEW_MODE_NO_TEXT);
-                return prop;
-            }
-            if (response != null) {
-                resource = response.getContent();
-                responseHeader = response.getResponseHeader();
-            }
+        Response response = null;
+        try {
+            response = sb.loader.load(sb.loader.request(url, true, false), authorized ? CrawlProfile.CacheStrategy.IFEXIST : CrawlProfile.CacheStrategy.CACHEONLY, Long.MAX_VALUE);
+        } catch (IOException e) {
+            prop.put("error", "4");
+            prop.put("error_errorText", "error loading resource: " + e.getMessage());
+            prop.put("viewMode", VIEW_MODE_NO_TEXT);
+            return prop;
         }
         
-        // if resource not available just fail
-        if (resource == null || responseHeader == null) {
+        if (response == null) {
             prop.put("error", "4");
             prop.put("error_errorText", "No resource available");
             prop.put("viewMode", VIEW_MODE_NO_TEXT);
             return prop;
         }
-        resMime = responseHeader.mime();
         
         final String[] wordArray = wordArray(post.get("words", null));
 
@@ -205,14 +189,12 @@ public class ViewFile {
             // TODO: how to handle very large files here ?
             String content;
             try {
-                content = new String(resource, "UTF-8");
+                content = new String(response.getContent(), "UTF-8");
             } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
-            } finally {
-                resource = null;
             }
 
             prop.put("error", "0");
@@ -231,7 +213,7 @@ public class ViewFile {
             // parsing the resource content
             Document document = null;
             try {
-                document = LoaderDispatcher.parseDocument(url, resource.length, new ByteArrayInputStream(resource), responseHeader);
+                document = response.parse();
                 if (document == null) {
                     prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");
@@ -243,11 +225,7 @@ public class ViewFile {
                 prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
-            } finally {
-                resource = null;
             }
-
-            resMime = document.dc_format();
             
             if (viewMode.equals("parsed")) {
                 final String content = new String(document.getTextBytes());
@@ -352,8 +330,8 @@ public class ViewFile {
         prop.put("error_wordCount", wordCount);
         prop.putHTML("error_desc", descr);
         prop.putNum("error_size", size);
-        prop.put("error_mimeTypeAvailable", (resMime == null) ? "0" : "1");
-        prop.put("error_mimeTypeAvailable_mimeType", resMime);
+        prop.put("error_mimeTypeAvailable", (response.getMimeType() == null) ? "0" : "1");
+        prop.put("error_mimeTypeAvailable_mimeType", response.getMimeType());
         return prop;
     }
 

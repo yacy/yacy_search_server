@@ -36,6 +36,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.ParserException;
 import net.yacy.document.geolocalization.Location;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -49,7 +50,6 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.ISO639;
-import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.DidYouMean;
@@ -428,8 +428,12 @@ public class yacysearch {
                 final URIMetadataRow urlentry = indexSegment.urlMetadata().load(recommendHash.getBytes(), null, 0);
                 if (urlentry != null) {
                     final URIMetadataRow.Components metadata = urlentry.metadata();
-                    Document document;
-                    document = LoaderDispatcher.retrieveDocument(metadata.url(), CrawlProfile.CacheStrategy.IFEXIST, 5000, true, false, Long.MAX_VALUE);
+                    Document document = null;
+                    try {
+                        document = sb.loader.loadDocument(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE);
+                    } catch (IOException e) {
+                    } catch (ParserException e) {
+                    }
                     if (document != null) {
                         // create a news message
                         final HashMap<String, String> map = new HashMap<String, String>();

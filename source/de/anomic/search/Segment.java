@@ -26,10 +26,8 @@
 
 package de.anomic.search;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Iterator;
@@ -386,49 +384,34 @@ public class Segment {
         final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata == null || metadata.url() == null) return 0;
         
-        InputStream resourceContent = null;
         try {
-            // get the resource content
-            byte[] resourceb = null;
-            try {
-                resourceb = loader.getResource(metadata.url(), cacheStrategy, 10000, true, false);
-            } catch (IOException e) {
-                Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
-            }
-            if (resourceb == null) {
+            // parse the resource
+            final Document document = loader.loadDocument(loader.request(metadata.url(), true, false), cacheStrategy, 10000, Long.MAX_VALUE);
+            if (document == null) {
                 // delete just the url entry
                 urlMetadata().remove(urlhash);
                 return 0;
-            } else {
-                resourceContent = new ByteArrayInputStream(resourceb);
-                final long resourceContentLength = resourceb.length;
-                
-                // parse the resource
-                final Document document = LoaderDispatcher.parseDocument(metadata.url(), resourceContentLength, resourceContent, null);
-                
-                // get the word set
-                Set<String> words = null;
-                try {
-                    words = new Condenser(document, true, true).words().keySet();
-                } catch (final UnsupportedEncodingException e) {
-                    Log.logException(e);
-                }
-                
-                // delete all word references
-                int count = 0;
-                if (words != null) count = termIndex().remove(Word.words2hashesHandles(words), urlhash);
-                
-                // finally delete the url entry itself
-                urlMetadata().remove(urlhash);
-                return count;
             }
+            // get the word set
+            Set<String> words = null;
+            try {
+                words = new Condenser(document, true, true).words().keySet();
+            } catch (final UnsupportedEncodingException e) {
+                Log.logException(e);
+            }
+            
+            // delete all word references
+            int count = 0;
+            if (words != null) count = termIndex().remove(Word.words2hashesHandles(words), urlhash);
+            
+            // finally delete the url entry itself
+            urlMetadata().remove(urlhash);
+            return count;
         } catch (final ParserException e) {
             return 0;
         } catch (IOException e) {
             Log.logException(e);
             return 0;
-        } finally {
-            if (resourceContent != null) try { resourceContent.close(); } catch (final Exception e) {/* ignore this */}
         }
     }
 

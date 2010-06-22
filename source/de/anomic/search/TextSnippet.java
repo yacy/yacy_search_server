@@ -24,7 +24,6 @@
 
 package de.anomic.search;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -51,7 +50,6 @@ import net.yacy.repository.LoaderDispatcher;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
-import de.anomic.http.server.ResponseHeader;
 import de.anomic.yacy.yacySearch;
 
 public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
@@ -331,8 +329,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
          * LOADING RESOURCE DATA
          * =========================================================================== */
         // if the snippet is not in the cache, we can try to get it from the htcache
-        byte[] resContent = null;
-        ResponseHeader responseHeader = null;
+        Response response;
         try {
             // first try to get the snippet from metadata
             String loc;
@@ -350,31 +347,9 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(new String(url.hash())));
             } else {
                 // trying to load the resource from the cache
-                resContent = Cache.getContent(url);
-                responseHeader = Cache.getResponseHeader(url);
-                if ((resContent == null || responseHeader == null) && cacheStrategy.isAllowedToFetchOnline()) {
-                    // if not found try to download it
-                    
-                    // download resource or get it from the cache
-                    final Response entry = loader.load(url, true, reindexing, cacheStrategy, Long.MAX_VALUE);
-                    
-                    // get resource metadata (e.g. the http headers for http resources)
-                    if (entry != null) {
-                        // place entry on indexing queue
-                        Switchboard.getSwitchboard().toIndexer(entry);
-                        
-                        // read resource body (if it is there)
-                        final byte[] resourceArray = entry.getContent();
-                        if (resourceArray != null) {
-                            resContent = resourceArray;
-                        } else {
-                            resContent = Cache.getContent(url); 
-                        }
-                    }
-                    
-                    source = SOURCE_WEB;
-                }
-                if (resContent == null) {
+                boolean objectWasInCache = Cache.has(url);
+                response = loader.load(loader.request(url, true, reindexing), cacheStrategy, Long.MAX_VALUE);
+                if (response == null) {
                     // in case that we did not get any result we can still return a success when we are not allowed to go online
                     if (cacheStrategy.mustBeOffline()) {
                         return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "omitted network load (not allowed), no cache entry");
@@ -382,6 +357,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     
                     // if it is still not available, report an error
                     return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource from net, no cache entry");
+                }
+                if (!objectWasInCache) {
+                    // place entry on indexing queue
+                    Switchboard.getSwitchboard().toIndexer(response);
+                    source = SOURCE_WEB;
                 }
             }
         } catch (final Exception e) {
@@ -394,11 +374,9 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
          * =========================================================================== */
         Document document = null;
         try {
-             document = LoaderDispatcher.parseDocument(url, resContent.length, new ByteArrayInputStream(resContent), responseHeader);
+             document = response.parse();
         } catch (final ParserException e) {
             return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, e.getMessage()); // cannot be parsed
-        } finally {
-            resContent = null;
         }
         if (document == null) return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, "parser error/failed"); // cannot be parsed
         

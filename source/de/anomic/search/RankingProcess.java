@@ -428,9 +428,9 @@ public final class RankingProcess extends Thread {
             final String pagetitle = metadata.dc_title().toLowerCase();
 
             // check exclusion
-            if ((QueryParams.matches(pagetitle, query.excludeHashes)) ||
-                (QueryParams.matches(pageurl.toLowerCase(), query.excludeHashes)) ||
-                (QueryParams.matches(pageauthor.toLowerCase(), query.excludeHashes))) {
+            if ((QueryParams.anymatch(pagetitle, query.excludeHashes)) ||
+                (QueryParams.anymatch(pageurl.toLowerCase(), query.excludeHashes)) ||
+                (QueryParams.anymatch(pageauthor.toLowerCase(), query.excludeHashes))) {
                 continue;
             }
             

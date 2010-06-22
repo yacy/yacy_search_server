@@ -52,7 +52,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
-import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -235,12 +234,12 @@ public final class yacyRelease extends yacyVersion {
         // returns the version info if successful, null otherwise
         ContentScraper scraper;
         try {
-            scraper = LoaderDispatcher.parseResource(Switchboard.getSwitchboard().loader, location.getLocationURL(), CrawlProfile.CacheStrategy.NOCACHE);
+            scraper = Switchboard.getSwitchboard().loader.parseResource(location.getLocationURL(), CrawlProfile.CacheStrategy.NOCACHE);
         } catch (final IOException e) {
             return null;
         }
         
-        // analyse links in scraper resource, and find link to latest release in it
+        // analyze links in scraper resource, and find link to latest release in it
         final Map<MultiProtocolURI, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
         final TreeSet<yacyRelease> mainReleases = new TreeSet<yacyRelease>();
         final TreeSet<yacyRelease> devReleases = new TreeSet<yacyRelease>();

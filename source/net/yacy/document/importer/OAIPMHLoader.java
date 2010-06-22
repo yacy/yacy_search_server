@@ -48,7 +48,7 @@ public class OAIPMHLoader {
         this.source = source;
         
         // load the file from the net
-        Response response = loader.load(source, false, true, CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+        Response response = loader.load(loader.request(source, false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
         byte[] b = response.getContent();
         this.resumptionToken = new ResumptionToken(source, b);
         //System.out.println("*** ResumptionToken = " + this.resumptionToken.toString());

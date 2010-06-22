@@ -29,7 +29,6 @@ package net.yacy.repository;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Arrays;
@@ -39,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
 import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
@@ -57,7 +57,6 @@ import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.crawler.retrieval.SMBLoader;
 import de.anomic.http.client.Cache;
-import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;
@@ -98,38 +97,7 @@ public final class LoaderDispatcher {
     public HashSet<String> getSupportedProtocols() {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
-    
-    /**
-     * load a resource from the web, from ftp, from smb or a file
-     * @param url
-     * @param forText shows that this was a for-text crawling request
-     * @param global shows that this was a global crawling request
-     * @param cacheStratgy strategy according to CACHE_STRATEGY_NOCACHE,CACHE_STRATEGY_IFFRESH,CACHE_STRATEGY_IFEXIST,CACHE_STRATEGY_CACHEONLY
-     * @return the loaded entity in a Response object
-     * @throws IOException
-     */
-    public Response load(
-            final DigestURI url,
-            final boolean forText,
-            final boolean global,
-            CrawlProfile.CacheStrategy cacheStratgy,
-            long maxFileSize) throws IOException {
-        return load(request(url, forText, global), cacheStratgy, maxFileSize);
-    }
-    
-    public void load(final DigestURI url, CrawlProfile.CacheStrategy cacheStratgy, long maxFileSize, File targetFile) throws IOException {
 
-        byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize).getContent();
-        if (b == null) throw new IOException("load == null");
-        File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
-        
-        // transaction-safe writing
-        File parent = targetFile.getParentFile();
-        if (!parent.exists()) parent.mkdirs();
-        FileUtils.copy(b, tmp);
-        tmp.renameTo(targetFile);
-    }
-    
     /**
      * generate a request object
      * @param url the target url
@@ -160,7 +128,27 @@ public final class LoaderDispatcher {
                     0, 
                     0);
     }
+
+    public void load(final DigestURI url, CrawlProfile.CacheStrategy cacheStratgy, long maxFileSize, File targetFile) throws IOException {
+
+        byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize).getContent();
+        if (b == null) throw new IOException("load == null");
+        File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
+        
+        // transaction-safe writing
+        File parent = targetFile.getParentFile();
+        if (!parent.exists()) parent.mkdirs();
+        FileUtils.copy(b, tmp);
+        tmp.renameTo(targetFile);
+    }
     
+    /**
+     * load a resource from the web, from ftp, from smb or a file
+     * @param request the request essentials
+     * @param cacheStratgy strategy according to CACHE_STRATEGY_NOCACHE,CACHE_STRATEGY_IFFRESH,CACHE_STRATEGY_IFEXIST,CACHE_STRATEGY_CACHEONLY
+     * @return the loaded entity in a Response object
+     * @throws IOException
+     */
     public Response load(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
         // get the protocol of the next URL
         final String protocol = request.url().getProtocol();
@@ -272,132 +260,40 @@ public final class LoaderDispatcher {
     }
 
     /**
-     * load the url as resource from the web or the cache
-     * @param url
-     * @param fetchOnline
-     * @param socketTimeout
-     * @param forText 
+     * load the url as byte[] content from the web or the cache
+     * @param request
+     * @param cacheStrategy
+     * @param timeout
      * @return the content as {@link byte[]}
      * @throws IOException 
      */
-    public byte[] getResource(final DigestURI url, CrawlProfile.CacheStrategy cacheStrategy, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
+    public byte[] loadContent(final Request request, CrawlProfile.CacheStrategy cacheStrategy) throws IOException {
         // try to download the resource using the loader
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-        final Response entry = load(url, forText, reindexing, cacheStrategy, maxFileSize);
+        final Response entry = load(request, cacheStrategy, maxFileSize);
         if (entry == null) return null; // not found in web
         
         // read resource body (if it is there)
         return entry.getContent();
     }
     
-    /**
-     * Tries to load and parse a resource specified by it's URL.
-     * If the resource is not stored in cache and if fetchOnline is set the
-     * this function tries to download the resource from web.
-     * 
-     * @param url the URL of the resource
-     * @param fetchOnline specifies if the resource should be loaded from web if it'as not available in the cache
-     * @param timeout 
-     * @param forText 
-     * @param global the domain of the search. If global == true then the content is re-indexed
-     * @return the parsed document as {@link Document}
-     */
-    public static Document retrieveDocument(final DigestURI url, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, final boolean forText, final boolean global, long maxFileSize) {
+    public Document loadDocument(final Request request, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, long maxFileSize) throws IOException, ParserException {
 
         // load resource
-        byte[] resContent = null;
-        ResponseHeader responseHeader = null;
-        try {
-            final Response entry = Switchboard.getSwitchboard().loader.load(url, forText, global, cacheStrategy, maxFileSize);
-            if (entry == null) {
-                Log.logFine("snippet fetch", "no Response for url " + url);
-                return null;
-            }
+        final Response response = load(request, cacheStrategy, maxFileSize);
+        if (response == null) throw new IOException("no Response for url " + request.url());
 
-            // read resource body (if it is there)
-            resContent = entry.getContent();
-            
-            // read a fresh header
-            responseHeader = entry.getResponseHeader();
-        
-            // if it is still not available, report an error
-            if (resContent == null || responseHeader == null) {
-                Log.logFine("snippet fetch", "no Content available for url " + url);
-                return null;
-            }
-        } catch (final Exception e) {
-            Log.logFine("snippet fetch", "error loading resource: " + e.getMessage() + " for url " + url);
-            return null;
-        } 
+        // if it is still not available, report an error
+        if (response.getContent() == null || response.getResponseHeader() == null) throw new IOException("no Content available for url " + request.url());
 
         // parse resource
-        Document document = null;
-        try {
-            document = parseDocument(url, resContent.length, new ByteArrayInputStream(resContent), responseHeader);            
-        } catch (final ParserException e) {
-            Log.logFine("snippet fetch", "parser error " + e.getMessage() + " for url " + url);
-            return null;
-        } finally {
-            resContent = null;
-        }
-        return document;
-    }
-    
-    /**
-     * Parse the resource
-     * @param url the URL of the resource
-     * @param contentLength the contentLength of the resource
-     * @param resourceStream the resource body as stream
-     * @param docInfo metadata about the resource
-     * @return the extracted data
-     * @throws ParserException
-     */
-    public static Document parseDocument(final DigestURI url, final long contentLength, final InputStream resourceStream, ResponseHeader responseHeader) throws ParserException {
-        try {
-            if (resourceStream == null) return null;
-
-            // STEP 1: if no resource metadata is available, try to load it from cache 
-            if (responseHeader == null) {
-                // try to get the header from the htcache directory
-                try {                    
-                    responseHeader = Cache.getResponseHeader(url);
-                } catch (final Exception e) {
-                    // ignore this. resource info loading failed
-                }   
-            }
-            
-            // STEP 2: if the metadata is still null try to download it from web
-            if ((responseHeader == null) && (url.getProtocol().startsWith("http"))) {
-                // TODO: we need a better solution here
-                // e.g. encapsulate this in the crawlLoader class
-                
-                // getting URL mimeType
-                try {
-                    responseHeader = Client.whead(url.toString());
-                } catch (final Exception e) {
-                    // ingore this. http header download failed
-                } 
-            }
-
-            // STEP 3: if the metadata is still null try to guess the mimeType of the resource
-            String supportError = TextParser.supports(url, responseHeader == null ? null : responseHeader.mime());
-            if (supportError != null) {
-                return null;
-            }
-            if (responseHeader == null) {
-                return TextParser.parseSource(url, null, null, contentLength, resourceStream);
-            }
-            return TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
-        } catch (final InterruptedException e) {
-            // interruption of thread detected
-            return null;
-        }
+        return response.parse();
     }
 
-    public static ContentScraper parseResource(final LoaderDispatcher loader, final DigestURI location, CrawlProfile.CacheStrategy cachePolicy) throws IOException {
+    public ContentScraper parseResource(final DigestURI location, CrawlProfile.CacheStrategy cachePolicy) throws IOException {
         // load page
-        final long maxFileSize = loader.sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-        Response r = loader.load(location, true, false, cachePolicy, maxFileSize);
+        final long maxFileSize = this.sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+        Response r = this.load(request(location, true, false), cachePolicy, maxFileSize);
         byte[] page = (r == null) ? null : r.getContent();
         if (page == null) throw new IOException("no response from url " + location.toString());
         
@@ -409,6 +305,40 @@ public final class LoaderDispatcher {
         return scraper;
     }
 
+    /**
+     * load all links from a resource
+     * @param url the url that shall be loaded
+     * @param cacheStrategy the cache strategy
+     * @return a map from URLs to the anchor texts of the urls
+     * @throws IOException
+     */
+    public final Map<MultiProtocolURI, String> loadLinks(DigestURI url, CrawlProfile.CacheStrategy cacheStrategy) throws IOException {
+        Response response = load(request(url, true, false), cacheStrategy, Long.MAX_VALUE);
+        if (response == null) throw new IOException("response == null");
+        ResponseHeader responseHeader = response.getResponseHeader();
+        byte[] resource = response.getContent();
+        if (resource == null) throw new IOException("resource == null");
+        if (responseHeader == null) throw new IOException("responseHeader == null");
+    
+        Document document = null;
+        String supportError = TextParser.supports(url, responseHeader.mime());
+        if (supportError != null) throw new IOException("no parser support: " + supportError);
+        try {
+            document = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), resource.length, new ByteArrayInputStream(resource));
+            if (document == null) throw new IOException("document == null");
+        } catch (final ParserException e) {
+            throw new IOException("parser error: " + e.getMessage());
+        } catch (InterruptedException e) {
+            throw new IOException("interrupted");
+        } finally {
+            resource = null;
+        }
+
+        Map<MultiProtocolURI, String> result = document.getHyperlinks();
+        document.close();
+        return result;
+    }
+    
     public synchronized void cleanupAccessTimeTable(long timeout) {
     	final Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();
         Map.Entry<String, Long> e;
@@ -439,7 +369,7 @@ public final class LoaderDispatcher {
             if (this.cache.exists()) return;
             try {
                 // load from the net
-                Response response = load(new DigestURI(this.url), false, true, CrawlProfile.CacheStrategy.NOCACHE, this.maxFileSize);
+                Response response = load(request(new DigestURI(this.url), false, true), CrawlProfile.CacheStrategy.NOCACHE, this.maxFileSize);
                 byte[] b = response.getContent();
                 FileUtils.copy(b, this.cache);
             } catch (MalformedURLException e) {} catch (IOException e) {}

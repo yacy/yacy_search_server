@@ -30,6 +30,7 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,11 +38,11 @@ import java.util.Iterator;
 import java.util.Set;
 
 import net.yacy.document.Document;
+import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.BookmarkHelper;
@@ -187,9 +188,9 @@ public class Bookmarks {
                         // try to get the bookmark from the LURL database
                         final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash.getBytes(), null, 0);
                         Document document = null;
-                        if (urlentry != null) {
+                        if (urlentry != null) try {
                             final URIMetadataRow.Components metadata = urlentry.metadata();
-                            document = LoaderDispatcher.retrieveDocument(metadata.url(), CrawlProfile.CacheStrategy.IFEXIST, 5000, true, false, Long.MAX_VALUE);
+                            document = sb.loader.loadDocument(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", metadata.url().toNormalform(false, true));
                             prop.putHTML("mode_title", metadata.dc_title());
@@ -199,7 +200,7 @@ public class Bookmarks {
                             prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed
-                        }
+                        } catch (IOException e) {Log.logException(e);} catch (ParserException e) {Log.logException(e);}
                         if (document != null) document.close();
                     } else {
                         // get from the bookmark database
