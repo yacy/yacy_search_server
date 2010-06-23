@@ -40,7 +40,7 @@ public class SearchEventPicture {
         final Switchboard sb = (Switchboard) env;
         final String eventID = header.get("event", SearchEventCache.lastEventID);
         if (eventID == null) return null;
-        final RasterPlotter yp = NetworkGraph.getSearchEventPicture(sb.peers, eventID);
+        final RasterPlotter yp = NetworkGraph.getSearchEventPicture(sb.peers, eventID, 0);
         if (yp == null) return new RasterPlotter(1, 1, RasterPlotter.MODE_SUB, "000000"); // empty image
         
         return yp;

@@ -8,6 +8,24 @@
       float: left;
     }
     </style>
+    
+  <script type="text/javascript">
+    imgname = "NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&coronaangle=";
+    i = 0;
+    imagearray = new Array(4);
+    for (j = 0; j < 4; j++) {
+      imagearray[j] = new Image(768, 576);
+      angle = j * 90;
+      imagearray[j].src = imgname + angle;
+    }
+    setTimeout("doanimation()", 1000);
+    function doanimation() {
+      document.getElementById("NetworkPicture").src = imagearray[i].src;
+      i++;
+      if (i == 4) { i = 0; }
+      setTimeout("doanimation()", 100);
+    }
+  </script>
   </head>
   <body id="Network">
   
@@ -187,7 +205,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     </div>
     
     <div class="left"><p>
-    <a href="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF"><img src="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF" alt="The yacy Network" /></a>
+    <a href="NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&coronaangle=0" alt="The YaCy Network" /></a>
     </p></div>
 	<div class="left">
     Your Peer:
@@ -232,7 +250,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       </tr>
     </table>
     </div>
-    <div class="left"><p>
+    <div class="left">
     <table border="0">
             <tr>
                 <td>&nbsp;</td>
@@ -264,7 +282,13 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
                     <td>:</td>
                     <td>this peer</td>
             </tr>
-    </table></p>
+            <tr>
+                    <td style="background-color:#AAAAAA">&nbsp;</td>
+                    <td>waves</td>
+                    <td>:</td>
+                    <td>crawling activity</td>
+            </tr>
+    </table>
     </div>
     
     ::
