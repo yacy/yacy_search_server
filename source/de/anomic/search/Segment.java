@@ -49,6 +49,7 @@ import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
@@ -195,7 +196,16 @@ public class Segment {
      * @param outlinksOther
      * @return
      */
-    private int addPageIndex(final DigestURI url, final Date urlModified, final Document document, final Condenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
+    private int addPageIndex(
+            final DigestURI url,
+            final Date urlModified,
+            final Document document,
+            final Condenser condenser,
+            final String language,
+            final char doctype,
+            final int outlinksSame,
+            final int outlinksOther,
+            final SearchEvent searchEvent) {
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
@@ -215,18 +225,30 @@ public class Segment {
                                 doctype,
                                 outlinksSame, outlinksOther);
         Word wprop;
+        byte[] wordhash;
         while (i.hasNext()) {
             wentry = i.next();
             word = wentry.getKey();
             wprop = wentry.getValue();
             assert (wprop.flags != null);
             ientry.setWord(wprop);
+            wordhash = Word.word2hash(word);
             try {
-                this.termIndex.add(Word.word2hash(word), ientry);
+                this.termIndex.add(wordhash, ientry);
             } catch (Exception e) {
                 Log.logException(e);
             }
             wordCount++;
+            if (searchEvent != null && !searchEvent.getQuery().excludeHashes.has(wordhash) && searchEvent.getQuery().queryHashes.has(wordhash)) {
+                ReferenceContainer<WordReference> container;
+                try {
+                    container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
+                    container.add(ientry);
+                } catch (RowSpaceExceededException e) {
+                    continue;
+                }
+                searchEvent.getRankingResult().add(container, false, -1);
+            }
         }
         
         return wordCount;
@@ -245,7 +267,8 @@ public class Segment {
             final Date loadDate,
             final long sourcesize,
             final Document document,
-            final Condenser condenser
+            final Condenser condenser,
+            final SearchEvent searchEvent
             ) throws IOException {
         final long startTime = System.currentTimeMillis();
 
@@ -333,9 +356,10 @@ public class Segment {
                 document,                                     // document content
                 condenser,                                    // document condenser
                 language,                                     // document language
-                Response.docType(document.dc_format()),  // document type
+                Response.docType(document.dc_format()),       // document type
                 document.inboundLinks(),                      // inbound links
-                document.outboundLinks()                      // outbound links
+                document.outboundLinks(),                     // outbound links
+                searchEvent                                   // a search event that can have results directly
         );
             
         final long indexingEndTime = System.currentTimeMillis();

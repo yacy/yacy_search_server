@@ -322,14 +322,15 @@ public class yacysearch {
             }
             int site = querystring.indexOf("site:");
             String sitehash = null;
+            String sitehost = null;
             if (site >= 0) {
                 int ftb = querystring.indexOf(' ', site);
                 if (ftb == -1) ftb = querystring.length();
-                String domain = querystring.substring(site + 5, ftb);
-                querystring = querystring.replace("site:" + domain, "");
-                while (domain.length() > 0 && domain.charAt(0) == '.') domain = domain.substring(1);
-                while (domain.endsWith(".")) domain = domain.substring(0, domain.length() - 1);
-                sitehash = DigestURI.domhash(domain);
+                sitehost = querystring.substring(site + 5, ftb);
+                querystring = querystring.replace("site:" + sitehost, "");
+                while (sitehost.length() > 0 && sitehost.charAt(0) == '.') sitehost = sitehost.substring(1);
+                while (sitehost.endsWith(".")) sitehost = sitehost.substring(0, sitehost.length() - 1);
+                sitehash = DigestURI.domhash(sitehost);
             }
             int authori = querystring.indexOf("author:");
         	String authorhash = null;
@@ -502,6 +503,7 @@ public class yacysearch {
             final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader);
             try {Thread.sleep(global ? 100 : 10);} catch (InterruptedException e1) {} // wait a little time to get first results in the search
             
+            if (sitehost != null && authenticated) sb.quickFillSite(sitehost, theSearch);
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + (System.currentTimeMillis() - timestamp) + " ms");

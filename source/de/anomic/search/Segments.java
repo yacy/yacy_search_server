@@ -209,7 +209,8 @@ public class Segments implements Iterable<Segment> {
             final Date loadDate,
             final long sourcesize,
             final Document document,
-            final Condenser condenser
+            final Condenser condenser,
+            final SearchEvent searchEvent
             ) throws IOException {
         return segment(segmentName).storeDocument(
                 url,
@@ -218,7 +219,8 @@ public class Segments implements Iterable<Segment> {
                 loadDate,
                 sourcesize,
                 document,
-                condenser
+                condenser,
+                searchEvent
          );
     }
     

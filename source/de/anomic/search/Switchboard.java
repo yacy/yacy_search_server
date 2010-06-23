@@ -117,6 +117,7 @@ import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
+import de.anomic.crawler.CrawlProfile.CacheStrategy;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -1815,11 +1816,11 @@ public final class Switchboard extends serverSwitch {
     
     public void storeDocumentIndex(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
-        storeDocumentIndex(in.process, in.queueEntry, in.document, in.condenser);
+        storeDocumentIndex(in.process, in.queueEntry, in.document, in.condenser, null);
         in.queueEntry.updateStatus(Response.QUEUE_STATE_FINISHED);
     }
     
-    private void storeDocumentIndex(final Segments.Process process, final Response queueEntry, final Document document, final Condenser condenser) {
+    private void storeDocumentIndex(final Segments.Process process, final Response queueEntry, final Document document, final Condenser condenser, final SearchEvent searchEvent) {
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
@@ -1834,7 +1835,7 @@ public final class Switchboard extends serverSwitch {
         }
         
         if (!queueEntry.profile().indexText() && !queueEntry.profile().indexMedia()) {
-            if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase);
+            if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by profile rule");
             return;
         }
@@ -1852,7 +1853,8 @@ public final class Switchboard extends serverSwitch {
                     new Date(),
                     queueEntry.size(),
                     document,
-                    condenser);
+                    condenser,
+                    searchEvent);
             RSSFeed.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
@@ -1891,6 +1893,66 @@ public final class Switchboard extends serverSwitch {
             }
         }
     }
+    
+    /**
+     * load the content of a URL, parse the content and add the content to the index
+     * This process is started concurrently. The method returns immediately after the call.
+     * @param url the url that shall be indexed
+     * @param searchEvent (optional) a search event that shall get results from the indexed pages directly feeded. If object is null then it is ignored
+     * @throws IOException
+     * @throws ParserException
+     */
+    public void addToIndex(final DigestURI url, final SearchEvent searchEvent) throws IOException, ParserException {
+        new Thread() {public void run() {
+            try {
+                Segments.Process process = Segments.Process.LOCALCRAWLING;
+                if (indexSegments.segment(process).urlMetadata.exists(url.hash())) return; // don't do double-work
+                Request request = loader.request(url, true, true);
+                Response response = loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE);
+                if (response == null) throw new IOException("response == null");
+                if (response.getContent() == null) throw new IOException("content == null");
+                if (response.getResponseHeader() == null) throw new IOException("header == null");
+                Document document = response.parse();
+                if (document.indexingDenied()) throw new ParserException("indexing is denied", url);
+                Condenser condenser = new Condenser(document, true, true);
+                ResultImages.registerImages(document, true);
+                webStructure.generateCitationReference(document, condenser, response.lastModified());
+                storeDocumentIndex(process, response, document, condenser, searchEvent);
+                log.logInfo("QuickFill of url " + url.toNormalform(true, true) + " finished");
+            } catch (IOException e) {
+                Log.logException(e);
+            } catch (ParserException e) {
+                Log.logException(e);
+            }
+        }}.start();
+    }
+    
+    public final void addAllToIndex(final DigestURI url, final Map<MultiProtocolURI, String> links, final SearchEvent searchEvent) {
+
+        // add the landing page to the index. should not load that again since it should be in the cache
+        try {
+            this.addToIndex(url, searchEvent);
+        } catch (IOException e) {} catch (ParserException e) {}
+        
+        // check if some of the links match with the query
+        Map<MultiProtocolURI, String> matcher = searchEvent.getQuery().separateMatches(links);
+        
+        // take the matcher and load them all
+        for (Map.Entry<MultiProtocolURI, String> entry: matcher.entrySet()) {
+            try {
+                this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent);
+            } catch (IOException e) {} catch (ParserException e) {}
+        }
+        
+        // take then the no-matcher and load them also
+        for (Map.Entry<MultiProtocolURI, String> entry: links.entrySet()) {
+            try {
+                this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent);
+            } catch (IOException e) {} catch (ParserException e) {}
+        }
+    }
+    
+    
     
     public class receiptSending implements Runnable {
         yacySeed initiatorPeer;
@@ -2101,6 +2163,39 @@ public final class Switchboard extends serverSwitch {
                 0, 
                 0);
         crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failreason);
+    }
+    
+    public final void quickFillSite(final String host, final SearchEvent searchEvent) {
+        new Thread() {public void run() {
+            String r = host;
+            if (r.indexOf("//") < 0) r = "http://" + r;
+            
+            // get the links for a specific site
+            DigestURI url;
+            try {
+                url = new DigestURI(r, null);
+            } catch (MalformedURLException e) {
+                Log.logException(e);
+                return;
+            }
+    
+            Map<MultiProtocolURI, String> links = null;
+            try {
+                links = loader.loadLinks(url, CrawlProfile.CacheStrategy.NOCACHE);
+            } catch (IOException e) {
+                Log.logException(e);
+                return;
+            }
+            Iterator<MultiProtocolURI> i = links.keySet().iterator();
+            MultiProtocolURI u;
+            while (i.hasNext()) {
+                u = i.next();
+                if (!u.getHost().endsWith(host)) i.remove();
+            }
+            
+            // add all pages to the index
+            addAllToIndex(url, links, searchEvent);
+        }}.start();
     }
     
     public int currentPPM() {

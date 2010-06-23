@@ -26,10 +26,13 @@
 
 package de.anomic.search;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -280,7 +283,7 @@ public final class QueryParams {
      * @param text
      * @return true if the query matches with the given text
      */
-    public final boolean matches(final String text) {
+    public final boolean matchesText(final String text) {
         final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text).keySet());
         if (SetTools.anymatch(wordhashes, this.excludeHashes)) return false;
         return SetTools.totalInclusion(this.queryHashes, wordhashes);
@@ -352,6 +355,25 @@ public final class QueryParams {
     	for (byte[] b: blues) queryHashes.remove(b);
     }
 
+
+    public final Map<MultiProtocolURI, String> separateMatches(Map<MultiProtocolURI, String> links) {
+        Map<MultiProtocolURI, String> matcher = new HashMap<MultiProtocolURI, String>();
+        Iterator <Map.Entry<MultiProtocolURI, String>> i = links.entrySet().iterator();
+        Map.Entry<MultiProtocolURI, String> entry;
+        MultiProtocolURI url;
+        String anchorText;
+        while (i.hasNext()) {
+            entry = i.next();
+            url = entry.getKey();
+            anchorText = entry.getValue();
+            if (this.matchesText(anchorText)) {
+                matcher.put(url, anchorText);
+                i.remove();
+            }
+        }
+        return matcher;
+    }
+    
     public String id(final boolean anonymized) {
         // generate a string that identifies a search so results can be re-used in a cache
         String context =
