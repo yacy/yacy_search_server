@@ -11,26 +11,30 @@
     
   <script type="text/javascript">
     imagestub = "NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&coronaangle=";
-    imageindex = 0;
+    imageanimindex = 0;
+    imageloadindex = 0;
     imagecycles = 0;
     imagearray = new Array(4);
     setTimeout("initanimation()", 100);
     setTimeout("doanimation()", 1000);
     function initanimation() {
-      for (j = 0; j < 4; j++) {
-        imagearray[j] = new Image(768, 576);
-        angle = j * 90;
-        time = new Date().getTime();
-        imagearray[j].src = imagestub + angle + "&time=" + time;
-      }
+      handle = new Date().getTime();
+      for (j = 0; j < 4; j++) initanimationphase(j, handle);
+    }
+    function initanimationphase(phase, handle) {
+      imagearray[phase] = new Image(768, 576);
+      angle = phase * 90;
+      imagearray[phase].src = imagestub + angle + "&handle=" + handle;
     }
     function doanimation() {
-      document.getElementById("NetworkPicture").src = imagearray[imageindex].src;
-      imageindex++;
-      if (imageindex == 4) { imageindex = 0; }
+      document.getElementById("NetworkPicture").src = imagearray[imageanimindex].src;
+      imageanimindex++;
+      if (imageanimindex == 4) { imageanimindex = 0; }
       imagecycles++;
-      if (imagecycles == 100) {
-        initanimation();
+      if (imagecycles == 25) {
+        initanimationphase(imageloadindex, new Date().getTime());
+        imageloadindex++;
+        if (imageloadindex == 4) { imageloadindex = 0; }
         imagecycles = 0;
       }
       setTimeout("doanimation()", 100);
