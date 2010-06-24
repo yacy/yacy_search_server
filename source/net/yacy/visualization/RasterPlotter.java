@@ -70,7 +70,7 @@ public class RasterPlotter {
     private final   int[]          cc;
     private final   BufferedImage  image;
     private final   WritableRaster grid;
-    private final   int[]          defaultCol;
+    private         int            defaultColR, defaultColG, defaultColB;
     private final   long           backgroundCol;
     private final   byte           defaultMode;
     
@@ -84,7 +84,9 @@ public class RasterPlotter {
         this.width = width;
         this.height = height;
         this.backgroundCol = backgroundColor;
-        this.defaultCol = new int[]{0xFF, 0xFF, 0xFF};
+        this.defaultColR = 0xFF;
+        this.defaultColG = 0xFF;
+        this.defaultColB = 0xFF;
         this.defaultMode = drawMode;
         
         this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -135,13 +137,13 @@ public class RasterPlotter {
     		final int r = (int) (c >> 16);
             final int g = (int) ((c >> 8) & 0xff);
             final int b = (int) (c & 0xff);
-            defaultCol[0] = (g + b) >>> 1; // / 2;
-            defaultCol[1] = (r + b) >>> 1; // / 2;
-            defaultCol[2] = (r + g) >>> 1; // / 2;
+            defaultColR = (g + b) >>> 1; // / 2;
+            defaultColG = (r + b) >>> 1; // / 2;
+            defaultColB = (r + g) >>> 1; // / 2;
     	} else {
-    		defaultCol[0] = (int) (c >> 16);
-            defaultCol[1] = (int) ((c >> 8) & 0xff);
-            defaultCol[2] = (int) (c & 0xff);
+    		defaultColR = (int) (c >> 16);
+            defaultColG = (int) ((c >> 8) & 0xff);
+            defaultColB = (int) (c & 0xff);
     	}
         
     }
@@ -151,7 +153,7 @@ public class RasterPlotter {
     }
 
     public void plot(final int x, final int y) {
-    	plot (x, y, 100);
+    	plot(x, y, 100);
     }
 
     public void plot(final int x, final int y, final int intensity) {
@@ -160,39 +162,39 @@ public class RasterPlotter {
         synchronized (cc) {
         	if (this.defaultMode == MODE_REPLACE) {
         		if (intensity == 100) {
-        			cc[0] = defaultCol[0];
-            		cc[1] = defaultCol[1];
-            		cc[2] = defaultCol[2];
+        			cc[0] = defaultColR;
+            		cc[1] = defaultColG;
+            		cc[2] = defaultColB;
         		} else {
         			int[] c = new int[3];
             		c = grid.getPixel(x, y, c);
-        			cc[0] = (intensity * defaultCol[0] + (100 - intensity) * c[0]) / 100;
-        			cc[1] = (intensity * defaultCol[1] + (100 - intensity) * c[1]) / 100;
-        			cc[2] = (intensity * defaultCol[2] + (100 - intensity) * c[2]) / 100;
+        			cc[0] = (intensity * defaultColR + (100 - intensity) * c[0]) / 100;
+        			cc[1] = (intensity * defaultColG + (100 - intensity) * c[1]) / 100;
+        			cc[2] = (intensity * defaultColB + (100 - intensity) * c[2]) / 100;
         		}
         	} else if (this.defaultMode == MODE_ADD) {
         		int[] c = new int[3];
         		c = grid.getPixel(x, y, c);
         		if (intensity == 100) {
-        			cc[0] = (0xff & c[0]) + defaultCol[0]; if (cc[0] > 255) cc[0] = 255;
-        			cc[1] = (0xff & c[1]) + defaultCol[1]; if (cc[1] > 255) cc[1] = 255;
-        			cc[2] = (0xff & c[2]) + defaultCol[2]; if (cc[2] > 255) cc[2] = 255;
+        			cc[0] = (0xff & c[0]) + defaultColR; if (cc[0] > 255) cc[0] = 255;
+        			cc[1] = (0xff & c[1]) + defaultColG; if (cc[1] > 255) cc[1] = 255;
+        			cc[2] = (0xff & c[2]) + defaultColB; if (cc[2] > 255) cc[2] = 255;
         		} else {
-        			cc[0] = (0xff & c[0]) + (intensity * defaultCol[0] / 100); if (cc[0] > 255) cc[0] = 255;
-        			cc[1] = (0xff & c[1]) + (intensity * defaultCol[1] / 100); if (cc[1] > 255) cc[1] = 255;
-        			cc[2] = (0xff & c[2]) + (intensity * defaultCol[2] / 100); if (cc[2] > 255) cc[2] = 255;
+        			cc[0] = (0xff & c[0]) + (intensity * defaultColR / 100); if (cc[0] > 255) cc[0] = 255;
+        			cc[1] = (0xff & c[1]) + (intensity * defaultColG / 100); if (cc[1] > 255) cc[1] = 255;
+        			cc[2] = (0xff & c[2]) + (intensity * defaultColB / 100); if (cc[2] > 255) cc[2] = 255;
         		}
         	} else if (this.defaultMode == MODE_SUB) {
         		int[] c = new int[3];
         		c = grid.getPixel(x, y, c);
         		if (intensity == 100) {
-        			cc[0] = (0xff & c[0]) - defaultCol[0]; if (cc[0] < 0) cc[0] = 0;
-        			cc[1] = (0xff & c[1]) - defaultCol[1]; if (cc[1] < 0) cc[1] = 0;
-        			cc[2] = (0xff & c[2]) - defaultCol[2]; if (cc[2] < 0) cc[2] = 0;
+        			cc[0] = (0xff & c[0]) - defaultColR; if (cc[0] < 0) cc[0] = 0;
+        			cc[1] = (0xff & c[1]) - defaultColG; if (cc[1] < 0) cc[1] = 0;
+        			cc[2] = (0xff & c[2]) - defaultColB; if (cc[2] < 0) cc[2] = 0;
         		} else {
-        			cc[0] = (0xff & c[0]) - (intensity * defaultCol[0] / 100); if (cc[0] < 0) cc[0] = 0;
-        			cc[1] = (0xff & c[1]) - (intensity * defaultCol[1] / 100); if (cc[1] < 0) cc[1] = 0;
-        			cc[2] = (0xff & c[2]) - (intensity * defaultCol[2] / 100); if (cc[2] < 0) cc[2] = 0;
+        			cc[0] = (0xff & c[0]) - (intensity * defaultColR / 100); if (cc[0] < 0) cc[0] = 0;
+        			cc[1] = (0xff & c[1]) - (intensity * defaultColG / 100); if (cc[1] < 0) cc[1] = 0;
+        			cc[2] = (0xff & c[2]) - (intensity * defaultColB / 100); if (cc[2] < 0) cc[2] = 0;
         		}
         	}
         	grid.setPixel(x, y, cc);
@@ -296,22 +298,27 @@ public class RasterPlotter {
     }
 
     public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final int angle) {
-        final int xi = cx + (int) (innerRadius * Math.cos(Math.PI * angle / 180));
-        final int yi = cy - (int) (innerRadius * Math.sin(Math.PI * angle / 180));
-        final int xo = cx + (int) (outerRadius * Math.cos(Math.PI * angle / 180));
-        final int yo = cy - (int) (outerRadius * Math.sin(Math.PI * angle / 180));
+        double a = Math.PI * ((double) angle) / 180.0;
+        double cosa = Math.cos(a);
+        double sina = Math.sin(a);
+        final int xi = cx + (int) (innerRadius * cosa);
+        final int yi = cy - (int) (innerRadius * sina);
+        final int xo = cx + (int) (outerRadius * cosa);
+        final int yo = cy - (int) (outerRadius * sina);
         line(xi, yi, xo, yo);
     }
     
     public void arcDot(final int cx, final int cy, final int arcRadius, final int angle, final int dotRadius) {
-        final int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
-        final int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
+        double a = Math.PI * ((double) angle) / 180.0;
+        final int x = cx + (int) (arcRadius * Math.cos(a));
+        final int y = cy - (int) (arcRadius * Math.sin(a));
         dot(x, y, dotRadius, true);
     }
     
     public void arcArc(final int cx, final int cy, final int arcRadius, final int angle, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
-        final int x = cx + (int) (arcRadius * Math.cos(Math.PI * angle / 180));
-        final int y = cy - (int) (arcRadius * Math.sin(Math.PI * angle / 180));
+        double a = Math.PI * ((double) angle) / 180.0;
+        final int x = cx + (int) (arcRadius * Math.cos(a));
+        final int y = cy - (int) (arcRadius * Math.sin(a));
         arc(x, y, innerRadius, outerRadius, fromArc, toArc);
     }
     
@@ -718,6 +725,7 @@ public class RasterPlotter {
     	// generate an byte array from the given image
     	//serverByteBuffer baos = new serverByteBuffer();
     	final ByteBuffer baos = sbbFromPool(image.getWidth(), image.getHeight(), 1000);
+    	ImageIO.setUseCache(false);
     	try {
     		ImageIO.write(image, targetExt, baos);
     		return baos;

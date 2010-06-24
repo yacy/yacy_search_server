@@ -99,17 +99,17 @@ public class CircleTool {
     
     public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius) {
         if (radius == 0) {
-            matrix.plot(xc, yc);
+            matrix.plot(xc, yc, 100);
         } else {
             final int[] c = getCircleCoords(radius);
             int x, y;
             for (int i = (c.length / 2) - 1; i >= 0; i--) {
                 x = c[2 * i    ];
                 y = c[2 * i + 1];
-                matrix.plot(xc + x    , yc - y - 1); // quadrant 1
-                matrix.plot(xc - x + 1, yc - y - 1); // quadrant 2
-                matrix.plot(xc + x    , yc + y    ); // quadrant 4
-                matrix.plot(xc - x + 1, yc + y    ); // quadrant 3
+                matrix.plot(xc + x    , yc - y - 1, 100); // quadrant 1
+                matrix.plot(xc - x + 1, yc - y - 1, 100); // quadrant 2
+                matrix.plot(xc + x    , yc + y    , 100); // quadrant 4
+                matrix.plot(xc - x + 1, yc + y    , 100); // quadrant 3
             }
         }
     }
@@ -118,19 +118,31 @@ public class CircleTool {
         // draws only a part of a circle
         // arc is given in degree
         if (radius == 0) {
-            matrix.plot(xc, yc);
+            matrix.plot(xc, yc, 100);
         } else {
             final int[] c = getCircleCoords(radius);
             final int q = c.length / 2;
-            final int[][] c4 = new int[q * 4][];
+            final int[] c4x = new int[q * 4];
+            final int[] c4y = new int[q * 4];
+            int a0, a1, a2, a3, b0, b1;
             for (int i = 0; i < q; i++) {
-                c4[i        ] = new int[]{    c[2 * (i        )], -c[2 * (i        ) + 1] - 1}; // quadrant 1
-                c4[i +     q] = new int[]{1 - c[2 * (q - 1 - i)], -c[2 * (q - 1 - i) + 1] - 1}; // quadrant 2
-                c4[i + 2 * q] = new int[]{1 - c[2 * (i        )],  c[2 * (i        ) + 1]    }; // quadrant 3
-                c4[i + 3 * q] = new int[]{    c[2 * (q - 1 - i)],  c[2 * (q - 1 - i) + 1]    }; // quadrant 4
+                b0 = 2 * (i        );
+                b1 = 2 * (q - 1 - i);
+                a0 = c[b0    ];
+                a1 = c[b0 + 1];
+                a2 = c[b1    ];
+                a3 = c[b1 + 1];
+                c4x[i        ] =     a0    ; // quadrant 1
+                c4y[i        ] =    -a1 - 1; // quadrant 1
+                c4x[i +     q] = 1 - a2    ; // quadrant 2
+                c4y[i +     q] =    -a3 - 1; // quadrant 2
+                c4x[i + 2 * q] = 1 - a0    ; // quadrant 3
+                c4y[i + 2 * q] =     a1    ; // quadrant 3
+                c4x[i + 3 * q] =     a2    ; // quadrant 4
+                c4y[i + 3 * q] =     a3    ; // quadrant 4
             }
             for (int i = q * 4 * fromArc / 360; i < q * 4 * toArc / 360; i++) {
-                matrix.plot(xc + c4[i][0], yc + c4[i][1]);
+                matrix.plot(xc + c4x[i], yc + c4y[i], 100);
             }
         }
     }
