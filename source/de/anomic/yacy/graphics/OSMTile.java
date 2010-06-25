@@ -91,7 +91,6 @@ public class OSMTile {
                 return null;
             }
             tileb = entry.getContent();
-            if (entry == null) return null;
         }
         try {
             ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM

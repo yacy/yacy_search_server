@@ -1894,6 +1894,31 @@ public final class Switchboard extends serverSwitch {
         }
     }
     
+    public final void addAllToIndex(final DigestURI url, final Map<MultiProtocolURI, String> links, final SearchEvent searchEvent, final String heuristicName) {
+
+        // add the landing page to the index. should not load that again since it should be in the cache
+        if (url != null) try {
+            this.addToIndex(url, searchEvent, heuristicName);
+        } catch (IOException e) {} catch (ParserException e) {}
+        
+        // check if some of the links match with the query
+        Map<MultiProtocolURI, String> matcher = searchEvent.getQuery().separateMatches(links);
+        
+        // take the matcher and load them all
+        for (Map.Entry<MultiProtocolURI, String> entry: matcher.entrySet()) {
+            try {
+                this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
+            } catch (IOException e) {} catch (ParserException e) {}
+        }
+        
+        // take then the no-matcher and load them also
+        for (Map.Entry<MultiProtocolURI, String> entry: links.entrySet()) {
+            try {
+                this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
+            } catch (IOException e) {} catch (ParserException e) {}
+        }
+    }
+    
     /**
      * load the content of a URL, parse the content and add the content to the index
      * This process is started concurrently. The method returns immediately after the call.
@@ -1902,12 +1927,21 @@ public final class Switchboard extends serverSwitch {
      * @throws IOException
      * @throws ParserException
      */
-    public void addToIndex(final DigestURI url, final SearchEvent searchEvent) throws IOException, ParserException {
+    public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName) throws IOException, ParserException {
+        final Segments.Process process = Segments.Process.LOCALCRAWLING;
+        if (indexSegments.segment(process).urlMetadata.exists(url.hash())) {
+            searchEvent.addHeuristicResult(url.hash(), heuristicName, true);
+            return; // don't do double-work
+        }
+        final Request request = loader.request(url, true, true);
+        String acceptedError = this.crawlStacker.checkAcceptance(url, this.crawler.profilesActiveCrawls.getEntry(request.profileHandle()), 0);
+        if (acceptedError != null) {
+            log.logInfo("Heuristic: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);
+            return;
+        }
         new Thread() {public void run() {
             try {
-                Segments.Process process = Segments.Process.LOCALCRAWLING;
-                if (indexSegments.segment(process).urlMetadata.exists(url.hash())) return; // don't do double-work
-                Request request = loader.request(url, true, true);
+                searchEvent.addHeuristicResult(url.hash(), heuristicName, false);
                 Response response = loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE);
                 if (response == null) throw new IOException("response == null");
                 if (response.getContent() == null) throw new IOException("content == null");
@@ -1918,41 +1952,14 @@ public final class Switchboard extends serverSwitch {
                 ResultImages.registerImages(document, true);
                 webStructure.generateCitationReference(document, condenser, response.lastModified());
                 storeDocumentIndex(process, response, document, condenser, searchEvent);
-                log.logInfo("QuickFill of url " + url.toNormalform(true, true) + " finished");
+                log.logInfo("heuristic fill of url " + url.toNormalform(true, true) + " finished");
             } catch (IOException e) {
-                Log.logException(e);
+                //Log.logException(e);
             } catch (ParserException e) {
-                Log.logException(e);
+                //Log.logException(e);
             }
         }}.start();
     }
-    
-    public final void addAllToIndex(final DigestURI url, final Map<MultiProtocolURI, String> links, final SearchEvent searchEvent) {
-
-        // add the landing page to the index. should not load that again since it should be in the cache
-        try {
-            this.addToIndex(url, searchEvent);
-        } catch (IOException e) {} catch (ParserException e) {}
-        
-        // check if some of the links match with the query
-        Map<MultiProtocolURI, String> matcher = searchEvent.getQuery().separateMatches(links);
-        
-        // take the matcher and load them all
-        for (Map.Entry<MultiProtocolURI, String> entry: matcher.entrySet()) {
-            try {
-                this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent);
-            } catch (IOException e) {} catch (ParserException e) {}
-        }
-        
-        // take then the no-matcher and load them also
-        for (Map.Entry<MultiProtocolURI, String> entry: links.entrySet()) {
-            try {
-                this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent);
-            } catch (IOException e) {} catch (ParserException e) {}
-        }
-    }
-    
-    
     
     public class receiptSending implements Runnable {
         yacySeed initiatorPeer;
@@ -2165,7 +2172,7 @@ public final class Switchboard extends serverSwitch {
         crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failreason);
     }
     
-    public final void quickFillSite(final String host, final SearchEvent searchEvent) {
+    public final void heuristicSite(final SearchEvent searchEvent, final String host) {
         new Thread() {public void run() {
             String r = host;
             if (r.indexOf("//") < 0) r = "http://" + r;
@@ -2194,7 +2201,42 @@ public final class Switchboard extends serverSwitch {
             }
             
             // add all pages to the index
-            addAllToIndex(url, links, searchEvent);
+            addAllToIndex(url, links, searchEvent, "site");
+        }}.start();
+    }
+    
+    public final void heuristicScroogle(final SearchEvent searchEvent) {
+        new Thread() {public void run() {
+            String query = searchEvent.getQuery().queryString(true);
+            int meta = query.indexOf("heuristic:");
+            if (meta >= 0) {
+                int q = query.indexOf(' ', meta);
+                if (q >= 0) query = query.substring(0, meta) + query.substring(q + 1); else query = query.substring(0, meta);
+            }
+            final String urlString = "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=" + query.trim().replaceAll(" ", "+") + "&n=2";
+            DigestURI url;
+            try {
+                url = new DigestURI(MultiProtocolURI.unescape(urlString), null);
+            } catch (MalformedURLException e1) {
+                return;
+            }
+    
+            Map<MultiProtocolURI, String> links = null;
+            try {
+                links = loader.loadLinks(url, CrawlProfile.CacheStrategy.NOCACHE);
+            } catch (IOException e) {
+                Log.logException(e);
+                return;
+            }
+            Iterator<MultiProtocolURI> i = links.keySet().iterator();
+            MultiProtocolURI u;
+            while (i.hasNext()) {
+                u = i.next();
+                if (u.toNormalform(false, false).indexOf("scroogle") >= 0) i.remove();
+            }
+            log.logInfo("Heuristic: adding " + links.size() + " links from scroogle");
+            // add all pages to the index
+            addAllToIndex(null, links, searchEvent, "scroogle");
         }}.start();
     }
     

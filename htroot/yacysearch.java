@@ -332,6 +332,12 @@ public class yacysearch {
                 while (sitehost.endsWith(".")) sitehost = sitehost.substring(0, sitehost.length() - 1);
                 sitehash = DigestURI.domhash(sitehost);
             }
+            
+            int heuristic = querystring.indexOf("heuristic:scroogle");
+            if (heuristic >= 0) {
+                querystring = querystring.replace("heuristic:scroogle", "");
+            }
+            
             int authori = querystring.indexOf("author:");
         	String authorhash = null;
             if (authori >= 0) {
@@ -503,7 +509,9 @@ public class yacysearch {
             final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader);
             try {Thread.sleep(global ? 100 : 10);} catch (InterruptedException e1) {} // wait a little time to get first results in the search
             
-            if (sitehost != null && authenticated) sb.quickFillSite(sitehost, theSearch);
+            if (sitehost != null && authenticated) sb.heuristicSite(theSearch, sitehost);
+            if (heuristic >= 0 && authenticated) sb.heuristicScroogle(theSearch);
+            
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER RESULT PREPARATION: " + (System.currentTimeMillis() - timestamp) + " ms");

@@ -33,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -239,15 +238,15 @@ public class Dispatcher {
         
         // check all entries and split them to the partitions
         ReferenceContainer<WordReference>[] partitionBuffer = new ReferenceContainer[partitionCount];
-        WordReferenceRow re;
-        for (ReferenceContainer container: containers) {
+        WordReference re;
+        for (ReferenceContainer<WordReference> container: containers) {
             // init the new partitions
             for (int j = 0; j < partitionBuffer.length; j++) {
-                partitionBuffer[j] = new ReferenceContainer(Segment.wordReferenceFactory, container.getTermHash(), container.size() / partitionCount);
+                partitionBuffer[j] = new ReferenceContainer<WordReference>(Segment.wordReferenceFactory, container.getTermHash(), container.size() / partitionCount);
             }
 
             // split the container
-            Iterator<WordReferenceRow> i = container.entries();
+            Iterator<WordReference> i = container.entries();
             while (i.hasNext()) {
                 re = i.next();
                 if (re == null) continue;

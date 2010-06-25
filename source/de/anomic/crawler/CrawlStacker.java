@@ -49,13 +49,13 @@ public final class CrawlStacker {
     private final Log log = new Log("STACKCRAWL");
 
     private final WorkflowProcessor<Request>  fastQueue, slowQueue;
-    //private long                      dnsHit;
-    private long                      dnsMiss;
-    private final CrawlQueues               nextQueue;
-    private final CrawlSwitchboard          crawler;
-    private final Segment                   indexSegment;
-    private final yacySeedDB                peers;
-    private final boolean                   acceptLocalURLs, acceptGlobalURLs;
+    //private long                   dnsHit;
+    private long                    dnsMiss;
+    private final CrawlQueues       nextQueue;
+    private final CrawlSwitchboard  crawler;
+    private final Segment           indexSegment;
+    private final yacySeedDB        peers;
+    private final boolean           acceptLocalURLs, acceptGlobalURLs;
 
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
@@ -178,120 +178,23 @@ public final class CrawlStacker {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
-
-        final long startTime = System.currentTimeMillis();
-
-        // check if the protocol is supported
-        final String urlProtocol = entry.url().getProtocol();
-        if (!Switchboard.getSwitchboard().loader.isSupportedProtocol(urlProtocol)) {
-            this.log.logSevere("Unsupported protocol in URL '" + entry.url().toString() + "'. " +
-                               "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "unsupported protocol";
-        }
-
-        // check if ip is local ip address
-        final String urlRejectReason = urlInAcceptedDomain(entry.url());
-        if (urlRejectReason != null) {
-            if (this.log.isFine()) this.log.logFine("denied_(" + urlRejectReason + ") Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "denied_(" + urlRejectReason + ")";
-        }
-
-        // check blacklist
-        if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, entry.url())) {
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is in blacklist. " +
-                             "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "url in blacklist";
-        }
-
+       
         final CrawlProfile.entry profile = crawler.profilesActiveCrawls.getEntry(entry.profileHandle());
+        String error;
         if (profile == null) {
-            final String errorMsg = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
-            log.logWarning(errorMsg);
-            return errorMsg;
+            error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
+            log.logWarning(error);
+            return error;
         }
-
-        // filter with must-match
-        if ((entry.depth() > 0) && !profile.mustMatchPattern().matcher(entry.url().toString()).matches()) {
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does not match must-match crawling filter '" + profile.mustMatchPattern().toString() + "'. " +
-                             "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "url does not match must-match filter";
-        }
-
-        // filter with must-not-match
-        if ((entry.depth() > 0) && profile.mustNotMatchPattern().matcher(entry.url().toString()).matches()) {
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' does matches do-not-match crawling filter '" + profile.mustNotMatchPattern().toString() + "'. " +
-                             "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "url matches must-not-match filter";
-        }
-
-        // deny cgi
-        if (entry.url().isIndividual())  {
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is CGI URL. " +
-                             "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "cgi url not allowed";
-        }
-
-        // deny post properties
-        if (entry.url().isPOST() && !(profile.crawlingQ()))  {
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is post URL. " +
-                             "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "post url not allowed";
-        }
-
+        
+        error = checkAcceptance(entry.url(), profile, entry.depth());
+        if (error != null) return error;
+        
         final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : nextQueue.getURL(entry.referrerhash());
 
         // add domain to profile domain list
         if ((profile.domFilterDepth() != Integer.MAX_VALUE) || (profile.domMaxPages() != Integer.MAX_VALUE)) {
             profile.domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
-        }
-
-        // deny urls that do not match with the profile domain list
-        if (!(profile.grantedDomAppearance(entry.url().getHost()))) {
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is not listed in granted domains. " +
-                             "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "url does not match domain filter";
-        }
-
-        // deny urls that exceed allowed number of occurrences
-        if (!(profile.grantedDomCount(entry.url().getHost()))) {
-            if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed. " +
-                             "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-            return "domain counter exceeded";
-        }
-
-        // check if the url is double registered
-        final String dbocc = nextQueue.urlExists(entry.url().hash()); // returns the name of the queue if entry exists
-        URIMetadataRow oldEntry = indexSegment.urlMetadata().load(entry.url().hash(), null, 0);
-        if (oldEntry == null) {
-            if (dbocc != null) {
-                // do double-check
-                if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-                if (dbocc.equals("errors")) {
-                    ZURL.Entry errorEntry = nextQueue.errorURL.get(entry.url().hash());
-                    return "double in: errors (" + errorEntry.anycause() + ")";
-                } else {
-                    return "double in: " + dbocc;
-                }
-            }
-        } else {
-            final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
-            if (recrawl) {
-                if (this.log.isFine()) 
-                    this.log.logFine("RE-CRAWL of URL '" + entry.url().toString() + "': this url was crawled " +
-                        ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
-            } else {
-                if (dbocc == null) {
-                    return "double in: LURL-DB";
-                } else {
-                    if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-                    if (dbocc.equals("errors")) {
-                        ZURL.Entry errorEntry = nextQueue.errorURL.get(entry.url().hash());
-                        return "double in: errors (" + errorEntry.anycause() + ")";
-                    } else {
-                        return "double in: " + dbocc;
-                    }
-                }
-            }
         }
 
         // store information
@@ -308,7 +211,7 @@ public final class CrawlStacker {
             ) /* qualified */;
 
         if (!local && !global && !remote && !proxy) {
-            String error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle();
+            error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle();
             this.log.logSevere(error);
             return error;
         }
@@ -344,6 +247,103 @@ public final class CrawlStacker {
         return null;
     }
 
+    public String checkAcceptance(final DigestURI url, final CrawlProfile.entry profile, int depth) {
+        
+        // check if the protocol is supported
+        final String urlProtocol = url.getProtocol();
+        if (!Switchboard.getSwitchboard().loader.isSupportedProtocol(urlProtocol)) {
+            this.log.logSevere("Unsupported protocol in URL '" + url.toString() + "'.");
+            return "unsupported protocol";
+        }
+
+        // check if ip is local ip address
+        final String urlRejectReason = urlInAcceptedDomain(url);
+        if (urlRejectReason != null) {
+            if (this.log.isFine()) this.log.logFine("denied_(" + urlRejectReason + ")");
+            return "denied_(" + urlRejectReason + ")";
+        }
+
+        // check blacklist
+        if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
+            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is in blacklist.");
+            return "url in blacklist";
+        }
+
+        // filter with must-match
+        if ((depth > 0) && !profile.mustMatchPattern().matcher(url.toString()).matches()) {
+            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' does not match must-match crawling filter '" + profile.mustMatchPattern().toString() + "'.");
+            return "url does not match must-match filter";
+        }
+
+        // filter with must-not-match
+        if ((depth > 0) && profile.mustNotMatchPattern().matcher(url.toString()).matches()) {
+            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' does matches do-not-match crawling filter '" + profile.mustNotMatchPattern().toString() + "'.");
+            return "url matches must-not-match filter";
+        }
+
+        // deny cgi
+        if (url.isIndividual())  {
+            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is CGI URL.");
+            return "cgi url not allowed";
+        }
+
+        // deny post properties
+        if (url.isPOST() && !(profile.crawlingQ()))  {
+            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is post URL.");
+            return "post url not allowed";
+        }
+
+        // deny urls that do not match with the profile domain list
+        if (!(profile.grantedDomAppearance(url.getHost()))) {
+            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is not listed in granted domains.");
+            return "url does not match domain filter";
+        }
+
+        // deny urls that exceed allowed number of occurrences
+        if (!(profile.grantedDomCount(url.getHost()))) {
+            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed.");
+            return "domain counter exceeded";
+        }
+
+        // check if the url is double registered
+        final String dbocc = nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
+        URIMetadataRow oldEntry = indexSegment.urlMetadata().load(url.hash(), null, 0);
+        if (oldEntry == null) {
+            if (dbocc != null) {
+                // do double-check
+                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is double registered in '" + dbocc + "'.");
+                if (dbocc.equals("errors")) {
+                    ZURL.Entry errorEntry = nextQueue.errorURL.get(url.hash());
+                    return "double in: errors (" + errorEntry.anycause() + ")";
+                } else {
+                    return "double in: " + dbocc;
+                }
+            }
+        } else {
+            final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
+            if (recrawl) {
+                if (this.log.isFine()) 
+                    this.log.logFine("RE-CRAWL of URL '" + url.toString() + "': this url was crawled " +
+                        ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
+            } else {
+                if (dbocc == null) {
+                    return "double in: LURL-DB";
+                } else {
+                    if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
+                    if (dbocc.equals("errors")) {
+                        ZURL.Entry errorEntry = nextQueue.errorURL.get(url.hash());
+                        return "double in: errors (" + errorEntry.anycause() + ")";
+                    } else {
+                        return "double in: " + dbocc;
+                    }
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    
     /**
      * Test a url if it can be used for crawling/indexing
      * This mainly checks if the url is in the declared domain (local/global)

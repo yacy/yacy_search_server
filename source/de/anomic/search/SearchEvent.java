@@ -80,12 +80,13 @@ public final class SearchEvent {
     private final TreeMap<byte[], String> preselectedPeerHashes;
     private final ResultURLs crawlResults;
     private final Thread localSearchThread;
-    private final TreeMap<byte[], String> IAResults;
     private final TreeMap<byte[], Integer> IACount;
+    private final TreeMap<byte[], String> IAResults;
+    private final TreeMap<byte[], HeuristicResult> heuristics;
     private byte[] IAmaxcounthash, IAneardhthash;
     private final ReferenceOrder order;
     
-   @SuppressWarnings("unchecked") SearchEvent(final QueryParams query,
+    public SearchEvent(final QueryParams query,
                              final yacySeedDB peers,
                              final ResultURLs crawlResults,
                              final TreeMap<byte[], String> preselectedPeerHashes,
@@ -102,6 +103,7 @@ public final class SearchEvent {
         this.preselectedPeerHashes = preselectedPeerHashes;
         this.IAResults = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
         this.IACount = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
+        this.heuristics = new TreeMap<byte[], HeuristicResult>(Base64Order.enhancedCoder);
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localSearchThread = null;
@@ -169,7 +171,7 @@ public final class SearchEvent {
                 assert this.rankedCache.searchContainerMap() != null;
                 for (Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankedCache.searchContainerMap().entrySet()) {
                     wordhash = entry.getKey();
-                    final ReferenceContainer container = entry.getValue();
+                    final ReferenceContainer<WordReference> container = entry.getValue();
                     assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + new String(container.getTermHash()) + ", wordhash = " + new String(wordhash);
                     if (container.size() > maxcount) {
                         IAmaxcounthash = wordhash;
@@ -317,6 +319,18 @@ public final class SearchEvent {
         return this.rankedCache.getAuthorNavigator(maxentries);
     }
     
+    public void addHeuristicResult(byte[] urlhash, String heuristicName, boolean redundant) {
+        synchronized (this.heuristics) {
+            this.heuristics.put(urlhash, new HeuristicResult(urlhash, heuristicName, redundant));
+        }
+    }
+    
+    public HeuristicResult getHeuristic(byte[] urlhash) {
+        synchronized (this.heuristics) {
+            return this.heuristics.get(urlhash);
+        }
+    }
+    
     public ResultEntry oneResult(final int item) {
         if ((query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ||
              (query.domType == QueryParams.SEARCHDOM_CLUSTERALL)) {
@@ -332,6 +346,22 @@ public final class SearchEvent {
     }
     
     boolean secondarySearchStartet = false;
+    
+    public static class HeuristicResult /*implements Comparable<HeuristicResult>*/ {
+        public final byte[] urlhash; public final String heuristicName; public final boolean redundant;
+        public HeuristicResult(byte[] urlhash, String heuristicName, boolean redundant) {
+            this.urlhash = urlhash; this.heuristicName = heuristicName; this.redundant = redundant;
+        }/*
+        public int compareTo(HeuristicResult o) {
+            return Base64Order.enhancedCoder.compare(this.urlhash, o.urlhash);
+        }
+        public int hashCode() {
+            return (int) Base64Order.enhancedCoder.cardinal(this.urlhash);
+        }
+        public boolean equals(Object o) {
+            return Base64Order.enhancedCoder.equal(this.urlhash, ((HeuristicResult) o).urlhash);
+        }*/
+    }
     
     public class SecondarySearchSuperviser extends Thread {
         

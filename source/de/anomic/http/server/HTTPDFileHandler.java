@@ -973,7 +973,6 @@ public final class HTTPDFileHandler {
                                 if ((ranges.length == 1)&&(ranges[0].endsWith("-"))) {
                                     rangeStartOffset = Integer.parseInt(ranges[0].substring(0,ranges[0].length()-1));
                                     statusCode = 206;
-                                    if (header == null) header = new ResponseHeader();
                                     header.put(HeaderFramework.CONTENT_RANGE, "bytes " + rangeStartOffset + "-" + (targetFile.length()-1) + "/" + targetFile.length());
                                 }
                             }

@@ -376,7 +376,6 @@ public class Crawler_p {
                                     final Map.Entry<MultiProtocolURI, String> e = linkiterator.next();
                                     if (e.getKey() == null) continue;
                                     nexturl = new DigestURI(e.getKey());
-                                    if (nexturl == null) continue;
                                     
                                     // enqueuing the url for crawling
                                     sb.crawlStacker.enqueueEntry(new Request(

@@ -490,9 +490,9 @@ a:hover.MenuItemLink {
 
 div.urlactions a {
   display:block;
-  width: 12px;
-  height: 12px;
-  margin: 2px 0px;
+  width: 11px;
+  height: 11px;
+  margin: 0px 0px 0px 3px;
 }
 
 a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
