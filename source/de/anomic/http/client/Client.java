@@ -25,14 +25,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
 package de.anomic.http.client;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ProxySettings;
@@ -47,7 +44,6 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -343,6 +339,7 @@ public class Client {
      * @return a ByteArrayRequestEntitiy with gzipped data
      * @throws IOException
      */
+    /*
     private RequestEntity zipRequest(final RequestEntity data) throws IOException {
         // cache data and gzip it
         final ByteArrayOutputStream zippedBytes = new ByteArrayOutputStream(512);
@@ -353,7 +350,7 @@ public class Client {
         // use compressed data as body (not setting content length according to RFC 2616 HTTP/1.1, section 4.4)
         return new ByteArrayRequestEntity(zippedBytes.toByteArray(), data.getContentType());
     }
-
+     */
     /*
      * (non-Javadoc)
      * @see de.anomic.http.HttpClient#CONNECT(java.lang.String, int, de.anomic.http.httpHeader)

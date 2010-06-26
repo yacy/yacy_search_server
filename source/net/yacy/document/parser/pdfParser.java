@@ -31,7 +31,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -132,8 +131,7 @@ public class pdfParser extends AbstractParser implements Idiom {
             docKeywordStr = theDocInfo.getKeywords();
         }            
         
-        Writer writer = null;
-        File writerFile = null;
+        CharBuffer writer = null;
         PDFTextStripper stripper = null;
         try {
             // create a writer for output
@@ -146,9 +144,7 @@ public class pdfParser extends AbstractParser implements Idiom {
             Log.logException(e);
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-            
-            // delete the file
-            if (writerFile != null) FileUtils.deletedelete(writerFile);
+
             throw new ParserException(e.getMessage(), location);
         }
 
@@ -157,47 +153,29 @@ public class pdfParser extends AbstractParser implements Idiom {
         
         Document theDoc = null;
         if (docTitle == null) docTitle = docSubject;
-        
-        if (writer instanceof CharBuffer) {
-            byte[] contentBytes;
-            try {
-                contentBytes = ((CharBuffer) writer).toString().getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                Log.logException(e);
-                throw new ParserException(e.getMessage(), location);
-            }
-            theDoc = new Document(
-                    location,
-                    mimeType,
-                    "UTF-8",
-                    null,
-                    docKeywords,
-                    docTitle,
-                    docAuthor,
-                    docPublisher,
-                    null,
-                    null,
-                    contentBytes,
-                    null,
-                    null,
-                    false);
-        } else {
-            theDoc = new Document(
-                    location,
-                    mimeType,
-                    "UTF-8",
-                    null,
-                    docKeywords,
-                    docTitle,
-                    docAuthor,
-                    docPublisher,
-                    null,
-                    null,
-                    writerFile,
-                    null,
-                    null,
-                    false);                
+    
+        byte[] contentBytes;
+        try {
+            contentBytes = writer.toString().getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            Log.logException(e);
+            throw new ParserException(e.getMessage(), location);
         }
+        theDoc = new Document(
+                location,
+                mimeType,
+                "UTF-8",
+                null,
+                docKeywords,
+                docTitle,
+                docAuthor,
+                docPublisher,
+                null,
+                null,
+                contentBytes,
+                null,
+                null,
+                false);
         
         return theDoc;
     }

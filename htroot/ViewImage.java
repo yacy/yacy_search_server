@@ -110,7 +110,6 @@ public class ViewImage {
                 }
             } else {
                 final InputStream imgStream = new ByteArrayInputStream(resourceb);
-                if (imgStream == null) return null;
 
                 // read image data
                 try {

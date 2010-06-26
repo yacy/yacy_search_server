@@ -189,8 +189,7 @@ class nativeTrayIcon {
 
 	}
 
-	@SuppressWarnings("unchecked")
-    public nativeTrayIcon(String IconPath, ActionListener al, PopupMenu menu) {
+	public nativeTrayIcon(String IconPath, ActionListener al, PopupMenu menu) {
 		if(!isSupported()) return;
 
 		final Image i = Toolkit.getDefaultToolkit().getImage(IconPath);
@@ -200,11 +199,11 @@ class nativeTrayIcon {
 			this.SystemTrayClass = Class.forName("java.awt.SystemTray");
 
 			// with reflections: this.TrayIcon = new TrayIcon(i, "YaCy");
-			Class partypes1[] = new Class[3];
+			Class<?> partypes1[] = new Class[3];
 			partypes1[0] = Image.class;
 			partypes1[1] = String.class;
 			partypes1[2] = PopupMenu.class;
-			Constructor TrayIconConstructor = TrayIconClass.getConstructor(partypes1);
+			Constructor<?> TrayIconConstructor = TrayIconClass.getConstructor(partypes1);
 
 			Object arglist1[] = new Object[3];
 			arglist1[0] = i;
@@ -213,7 +212,7 @@ class nativeTrayIcon {
 			this.TrayIcon = TrayIconConstructor.newInstance(arglist1);
 
 			// with reflections: this.TrayIcon.setImageAutoSize(true)
-			Class partypes2[] = new Class[1];
+			Class<?> partypes2[] = new Class[1];
 			partypes2[0] = Boolean.TYPE;
 			Method setImageAutoSizeMethod = TrayIconClass.getMethod("setImageAutoSize", partypes2);
 
@@ -222,7 +221,7 @@ class nativeTrayIcon {
 			setImageAutoSizeMethod.invoke(this.TrayIcon, arglist2);
 
 			// with reflections: this.TrayIcon.addActionListener(al)
-			Class partypes3[] = new Class[1];
+			Class<?> partypes3[] = new Class[1];
 			partypes3[0] = ActionListener.class;
 			Method addActionListenerMethod = TrayIconClass.getMethod("addActionListener", partypes3);
 
@@ -241,11 +240,10 @@ class nativeTrayIcon {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
     public void addToSystemTray() {
 		try {
 			// with reflections: this.SystemTray.add(this.TrayIcon)
-			Class partypes1[] = new Class[1];
+			Class<?> partypes1[] = new Class[1];
 			partypes1[0] = TrayIconClass;
 			Method addMethod = SystemTrayClass.getMethod("add", partypes1);
 
@@ -257,11 +255,10 @@ class nativeTrayIcon {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
     public void removeFromSystemTray() {
 		try {
 			// with reflections: this.SystemTray.remove(this.TrayIcon)
-			Class partypes1[] = new Class[1];
+			Class<?> partypes1[] = new Class[1];
 			partypes1[0] = TrayIconClass;
 			Method removeMethod = SystemTrayClass.getMethod("remove", partypes1);
 
@@ -273,11 +270,10 @@ class nativeTrayIcon {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
     public void displayBalloonMessage(final String title, final String message) {
 		try {
 			// with reflections: this.TrayIcon.displayBalloonMessage(title, message, TrayIcon.MessageType.NONE)
-			Class partypes1[] = new Class[3];
+			Class<?> partypes1[] = new Class[3];
 			partypes1[0] = String.class;
 			partypes1[1] = String.class;
 			partypes1[2] = Class.forName("java.awt.TrayIcon.MessageType");

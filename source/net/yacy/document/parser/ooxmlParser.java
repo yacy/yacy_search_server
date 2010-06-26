@@ -29,7 +29,6 @@ package net.yacy.document.parser;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.Writer;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -92,8 +91,7 @@ public class ooxmlParser extends AbstractParser implements Idiom {
     @Override
     public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final File dest) throws ParserException, InterruptedException {
         
-        Writer writer = null;
-        File writerFile = null;
+        CharBuffer writer = null;
         try {          
             String docDescription = null;
             String docKeywordStr  = null;
@@ -166,40 +164,22 @@ public class ooxmlParser extends AbstractParser implements Idiom {
             
             // create the parser document
             Document theDoc = null;
-            if (writer instanceof CharBuffer) {
-                final byte[] contentBytes = ((CharBuffer)writer).toString().getBytes("UTF-8");
-                theDoc = new Document(
-                        location,
-                        mimeType,
-                        "UTF-8",
-                        languages,
-                        docKeywords,
-                        docLongTitle,
-                        docAuthor,
-                        "",
-                        null,
-                        docDescription,
-                        contentBytes,
-                        null,
-                        null,
-                        false);
-            } else {
-                theDoc = new Document(
-                        location,
-                        mimeType,
-                        "UTF-8",
-                        languages,
-                        docKeywords,
-                        docLongTitle,
-                        docAuthor,
-                        "",
-                        null,
-                        docDescription,
-                        writerFile,
-                        null,
-                        null,
-                        false);
-            }
+            final byte[] contentBytes = writer.toString().getBytes("UTF-8");
+            theDoc = new Document(
+                    location,
+                    mimeType,
+                    "UTF-8",
+                    languages,
+                    docKeywords,
+                    docLongTitle,
+                    docAuthor,
+                    "",
+                    null,
+                    docDescription,
+                    contentBytes,
+                    null,
+                    null,
+                    false);
             return theDoc;
         } catch (final Exception e) {            
             if (e instanceof InterruptedException) throw (InterruptedException) e;
@@ -207,9 +187,7 @@ public class ooxmlParser extends AbstractParser implements Idiom {
             
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
-            
-            // delete the file
-            if (writerFile != null) FileUtils.deletedelete(writerFile);
+
             Log.logException(e);
             throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         }

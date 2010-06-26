@@ -196,12 +196,13 @@
     	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
     	<pathelement location="${lib}/poi-3.6-20091214.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.6-20091214.jar" />
-    	<pathelement location="${lib}/servlet-api.jar" />
+        <pathelement location="${lib}/servlet-api.jar" />
+        <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
     	<pathelement location="${lib}/tm-extractors-1.0.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
     	<pathelement location="${lib}/xerces.jar" />
     </path>
-
+  	
     <!-- compile yacyBuildProperties.java -->
     <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
            debug="true" debuglevel="lines,vars,source"

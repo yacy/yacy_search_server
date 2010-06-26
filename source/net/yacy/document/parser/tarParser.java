@@ -29,7 +29,6 @@ package net.yacy.document.parser;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,8 +83,7 @@ public class tarParser extends AbstractParser implements Idiom {
     public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, InputStream source) throws ParserException, InterruptedException {
         
         long docTextLength = 0;
-        OutputStream docText = null;
-        File outputFile = null;
+        ByteBuffer docText = null;
         Document subDoc = null;        
         try {           
             docText = new ByteBuffer();
@@ -176,41 +174,21 @@ public class tarParser extends AbstractParser implements Idiom {
                 subDoc = null;                
             }
             
-            Document result = null;
-            
-            if (docText instanceof ByteBuffer) {
-                result = new Document(
-                    location,
-                    mimeType,
-                    null,
-                    null,
-                    docKeywords.toString().split(" |,"),
-                    docLongTitle.toString(),
-                    "", // TODO: AUTHOR
-                    "", // TODO: publisher
-                    docSections.toArray(new String[docSections.size()]),
-                    docAbstrct.toString(),
-                    ((ByteBuffer)docText).getBytes(),
-                    docAnchors,
-                    docImages,
-                    false);
-            } else {
-                result = new Document(
-                        location,
-                        mimeType,
-                        null,
-                        null,
-                        docKeywords.toString().split(" |,"),
-                        docLongTitle.toString(),
-                        "", // TODO: AUTHOR
-                        "", // TODO: publisher
-                        docSections.toArray(new String[docSections.size()]),
-                        docAbstrct.toString(),
-                        outputFile,
-                        docAnchors,
-                        docImages,
-                        false);                
-            }
+            Document result = new Document(
+                location,
+                mimeType,
+                null,
+                null,
+                docKeywords.toString().split(" |,"),
+                docLongTitle.toString(),
+                "", // TODO: AUTHOR
+                "", // TODO: publisher
+                docSections.toArray(new String[docSections.size()]),
+                docAbstrct.toString(),
+                docText.getBytes(),
+                docAnchors,
+                docImages,
+                false);
             
             return result;
         } catch (final Exception e) {
@@ -221,9 +199,6 @@ public class tarParser extends AbstractParser implements Idiom {
             
             // close the writer
             if (docText != null) try { docText.close(); } catch (final Exception ex) {/* ignore this */}
-            
-            // delete the file
-            if (outputFile != null) FileUtils.deletedelete(outputFile);
             
             throw new ParserException("Unexpected error while parsing tar resource. " + e.getMessage(),location); 
         }

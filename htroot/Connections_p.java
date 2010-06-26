@@ -85,7 +85,7 @@ public final class Connections_p {
             // get the session runtime
             final long sessionTime = s.getTime();
             
-            // getthe request command line
+            // get the request command line
             boolean blockingRequest = false;
             String commandLine = s.getCommandLine();
             if (commandLine == null) blockingRequest = true;                

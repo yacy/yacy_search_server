@@ -308,121 +308,118 @@ public final class yacy {
                 server.setName("httpd:"+port);
                 server.setPriority(Thread.MAX_PRIORITY);
                 server.setObeyIntermission(false);
-                if (server == null) {
-                    Log.logSevere("STARTUP", "Failed to start server. Probably port " + port + " already in use.");
-                } else {
-                    // first start the server
-                    sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
-                    //server.start();
+                
+                // start the server
+                sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
+                //server.start();
 
-                    // open the browser window
-                    final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
-                    if (browserPopUpTrigger) {
-                        final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
-                        //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
-                        //if (!properPW) browserPopUpPage = "ConfigBasic.html";
-                        final String  browserPopUpApplication = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_APPLICATION, "firefox");
-                        OS.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
-                    }
-                    
-                    // unlock yacyTray browser popup
-                    Tray.lockBrowserPopup = false;
-
-                    // Copy the shipped locales into DATA, existing files are overwritten
-                    final File locale_work   = sb.getConfigPath("locale.work", "DATA/LOCALE/locales");
-                    final File locale_source = sb.getConfigPath("locale.source", "locales");
-                    try{
-                        final File[] locale_source_files = locale_source.listFiles();
-                        mkdirsIfNeseccary(locale_work);
-                        File target;
-                        for (int i=0; i < locale_source_files.length; i++){
-                        	target = new File(locale_work, locale_source_files[i].getName());
-                            if (locale_source_files[i].getName().endsWith(".lng")) {
-                            	if (target.exists()) delete(target);
-                                FileUtils.copy(locale_source_files[i], target);
-                            }
-                        }
-                        Log.logInfo("STARTUP", "Copied the default locales to " + locale_work.toString());
-                    }catch(final NullPointerException e){
-                        Log.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
-                    }
-
-                    //regenerate Locales from Translationlist, if needed
-                    final String lang = sb.getConfig("locale.language", "");
-                    if (!lang.equals("") && !lang.equals("default")) { //locale is used
-                        String currentRev = "";
-                        try{
-                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
-                            currentRev = br.readLine();
-                            br.close();
-                        }catch(final IOException e){
-                            //Error
-                        }
-
-                        if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
-                            final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
-                            final File destDir = new File(sb.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
-                            if (translator.translateFilesRecursive(sourceDir, destDir, new File(locale_work, lang + ".lng"), "html,template,inc", "locale")){ //translate it
-                                //write the new Versionnumber
-                                final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
-                                bw.write(sb.getConfig("svnRevision", "Error getting Version"));
-                                bw.close();
-                            }
-                        } catch (final IOException e) {}
-                    }
-                    // initialize number formatter with this locale
-                    Formatter.setLocale(lang);
-                    
-                    // registering shutdown hook
-                    Log.logConfig("STARTUP", "Registering Shutdown Hook");
-                    final Runtime run = Runtime.getRuntime();
-                    run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
-
-                    // save information about available memory after all initializations
-                    //try {
-                        sb.setConfig("memoryFreeAfterInitBGC", MemoryControl.free());
-                        sb.setConfig("memoryTotalAfterInitBGC", MemoryControl.total());
-                        System.gc();
-                        sb.setConfig("memoryFreeAfterInitAGC", MemoryControl.free());
-                        sb.setConfig("memoryTotalAfterInitAGC", MemoryControl.total());
-                    //} catch (ConcurrentModificationException e) {}
-                    
-                    // signal finished startup
-                    startupFinishedSync.release();
-                        
-                    // wait for server shutdown
-                    try {
-                        sb.waitForShutdown();
-                    } catch (final Exception e) {
-                        Log.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
-                    }
-                    // shut down
-                    if (RowCollection.sortingthreadexecutor != null) RowCollection.sortingthreadexecutor.shutdown();
-                    Log.logConfig("SHUTDOWN", "caught termination signal");
-                    server.terminate(false);
-                    server.interrupt();
-                    server.close();
-                    if (server.isAlive()) try {
-                        // TODO only send request, don't read response (cause server is already down resulting in error)
-                        final DigestURI u = new DigestURI((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
-                        Client.wget(u.toString(), null, 10000); // kick server
-                        Log.logConfig("SHUTDOWN", "sent termination signal to server socket");
-                    } catch (final IOException ee) {
-                        Log.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
-                    }
-                    Client.closeAllConnections();
-                    MultiThreadedHttpConnectionManager.shutdownAll();
-                    
-                    // idle until the processes are down
-                    if (server.isAlive()) {
-                        //Thread.sleep(2000); // wait a while
-                        server.interrupt();
-                        MultiThreadedHttpConnectionManager.shutdownAll();
-                    }
-                    MultiThreadedHttpConnectionManager.shutdownAll();
-                    Log.logConfig("SHUTDOWN", "server has terminated");
-                    sb.close();
+                // open the browser window
+                final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
+                if (browserPopUpTrigger) {
+                    final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
+                    //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
+                    //if (!properPW) browserPopUpPage = "ConfigBasic.html";
+                    final String  browserPopUpApplication = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_APPLICATION, "firefox");
+                    OS.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
                 }
+                
+                // unlock yacyTray browser popup
+                Tray.lockBrowserPopup = false;
+
+                // Copy the shipped locales into DATA, existing files are overwritten
+                final File locale_work   = sb.getConfigPath("locale.work", "DATA/LOCALE/locales");
+                final File locale_source = sb.getConfigPath("locale.source", "locales");
+                try{
+                    final File[] locale_source_files = locale_source.listFiles();
+                    mkdirsIfNeseccary(locale_work);
+                    File target;
+                    for (int i=0; i < locale_source_files.length; i++){
+                    	target = new File(locale_work, locale_source_files[i].getName());
+                        if (locale_source_files[i].getName().endsWith(".lng")) {
+                        	if (target.exists()) delete(target);
+                            FileUtils.copy(locale_source_files[i], target);
+                        }
+                    }
+                    Log.logInfo("STARTUP", "Copied the default locales to " + locale_work.toString());
+                }catch(final NullPointerException e){
+                    Log.logSevere("STARTUP", "Nullpointer Exception while copying the default Locales");
+                }
+
+                //regenerate Locales from Translationlist, if needed
+                final String lang = sb.getConfig("locale.language", "");
+                if (!lang.equals("") && !lang.equals("default")) { //locale is used
+                    String currentRev = "";
+                    try{
+                        final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
+                        currentRev = br.readLine();
+                        br.close();
+                    }catch(final IOException e){
+                        //Error
+                    }
+
+                    if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
+                        final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
+                        final File destDir = new File(sb.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
+                        if (translator.translateFilesRecursive(sourceDir, destDir, new File(locale_work, lang + ".lng"), "html,template,inc", "locale")){ //translate it
+                            //write the new Versionnumber
+                            final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
+                            bw.write(sb.getConfig("svnRevision", "Error getting Version"));
+                            bw.close();
+                        }
+                    } catch (final IOException e) {}
+                }
+                // initialize number formatter with this locale
+                Formatter.setLocale(lang);
+                
+                // registering shutdown hook
+                Log.logConfig("STARTUP", "Registering Shutdown Hook");
+                final Runtime run = Runtime.getRuntime();
+                run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
+
+                // save information about available memory after all initializations
+                //try {
+                    sb.setConfig("memoryFreeAfterInitBGC", MemoryControl.free());
+                    sb.setConfig("memoryTotalAfterInitBGC", MemoryControl.total());
+                    System.gc();
+                    sb.setConfig("memoryFreeAfterInitAGC", MemoryControl.free());
+                    sb.setConfig("memoryTotalAfterInitAGC", MemoryControl.total());
+                //} catch (ConcurrentModificationException e) {}
+                
+                // signal finished startup
+                startupFinishedSync.release();
+                    
+                // wait for server shutdown
+                try {
+                    sb.waitForShutdown();
+                } catch (final Exception e) {
+                    Log.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
+                }
+                // shut down
+                if (RowCollection.sortingthreadexecutor != null) RowCollection.sortingthreadexecutor.shutdown();
+                Log.logConfig("SHUTDOWN", "caught termination signal");
+                server.terminate(false);
+                server.interrupt();
+                server.close();
+                if (server.isAlive()) try {
+                    // TODO only send request, don't read response (cause server is already down resulting in error)
+                    final DigestURI u = new DigestURI((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
+                    Client.wget(u.toString(), null, 10000); // kick server
+                    Log.logConfig("SHUTDOWN", "sent termination signal to server socket");
+                } catch (final IOException ee) {
+                    Log.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
+                }
+                Client.closeAllConnections();
+                MultiThreadedHttpConnectionManager.shutdownAll();
+                
+                // idle until the processes are down
+                if (server.isAlive()) {
+                    //Thread.sleep(2000); // wait a while
+                    server.interrupt();
+                    MultiThreadedHttpConnectionManager.shutdownAll();
+                }
+                MultiThreadedHttpConnectionManager.shutdownAll();
+                Log.logConfig("SHUTDOWN", "server has terminated");
+                sb.close();
             } catch (final Exception e) {
                 Log.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
                 //System.exit(1);

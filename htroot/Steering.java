@@ -46,7 +46,6 @@ public class Steering {
         final Switchboard sb = (Switchboard) ss;
         final serverObjects prop = new serverObjects();
         prop.put("info", "0"); //no information submitted
-        if (prop == null) { return null; }
 
         final String requestIP = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
         

@@ -78,14 +78,14 @@ public class IODispatcher extends Thread {
             }
         }
     }
-    
-    @SuppressWarnings("unchecked")
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     protected synchronized void dump(ReferenceContainerCache<? extends Reference> cache, File file, ReferenceContainerArray<? extends Reference> array) {
         if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
              if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize), true);
         } else {
-            DumpJob<? extends Reference> job = (DumpJob<? extends Reference>)new DumpJob(cache, file, array);
+            DumpJob<? extends Reference> job = new DumpJob(cache, file, array);
             try {
                 // check if the dispatcher is running
                 if (this.isAlive()) {

@@ -147,7 +147,7 @@ public class Engine<
                     // apply finding: compute next model
                     // avoid double computation of findings using cached assets
                     if (context.useAssetCache()) {
-                        asset = new Asset(agent.getModel(), challenge.getFinding());
+                        asset = new Asset<SpecificRole, SpecificFinding, SpecificModel>(agent.getModel(), challenge.getFinding());
                         nextModel = assets.get(asset);
                         if (nextModel == null) {
                             // generate model clone and apply finding
@@ -170,7 +170,7 @@ public class Engine<
                         nextModel.applyFinding(challenge.getFinding());
                         nextModel.nextRole();
                         if (context.feedAssetCache()) {
-                            asset = new Asset(agent.getModel(), challenge.getFinding());
+                            asset = new Asset<SpecificRole, SpecificFinding, SpecificModel>(agent.getModel(), challenge.getFinding());
                             assets.put(asset, nextModel);
                         }
                     }
@@ -186,7 +186,7 @@ public class Engine<
                         continue;
                     }
                     // place new model into agent and record finding
-                    nextAgent = new Agent(agent, nextModel, challenge.getFinding());
+                    nextAgent = new Agent<SpecificRole, SpecificFinding, SpecificModel>(agent, nextModel, challenge.getFinding());
                     nextAgent.checkInstanceCount();
                     
                     // check if we arrived at a termination point

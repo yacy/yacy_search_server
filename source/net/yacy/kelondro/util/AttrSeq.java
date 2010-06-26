@@ -432,13 +432,8 @@ public class AttrSeq {
         }
     }
     
-    private static final long cc = 0;
-    private static boolean shortmemstate = false;
     private static boolean shortmem() {
-        if ((cc % 300) == 0) {
-            shortmemstate = (MemoryControl.available() < 20000000L);
-        }
-        return shortmemstate;
+        return (MemoryControl.available() < 20000000L);
     }
     
     public static void transcode(final File from_file, final File to_file) throws IOException {

@@ -34,7 +34,6 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -56,7 +55,6 @@ import de.anomic.yacy.yacySeed;
 
 public class ViewProfile {
 
-    @SuppressWarnings("unchecked")
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
@@ -73,7 +71,7 @@ public class ViewProfile {
         prop.put("hash", hash);
         
         // get the profile
-        Map profile = null;
+        Map<String, String> profile = null;
         if (hash.equals("localhash")) {
             // read the profile from local peer
             final Properties p = new Properties();
@@ -84,8 +82,8 @@ public class ViewProfile {
             } catch(final IOException e) {} finally {
                 if (fileIn != null) try { fileIn.close(); fileIn = null; } catch (final Exception e) {}
             }
-            profile = new HashMap();
-            profile.putAll(p);
+            profile = new HashMap<String, String>();
+            for (Map.Entry<Object, Object> e: p.entrySet()) profile.put((String) e.getKey(), (String) e.getValue());
             prop.put("success", "3"); // everything ok
             prop.put("localremotepeer", "0");
             prop.putHTML("success_peername", sb.peers.mySeed().getName());
@@ -121,13 +119,13 @@ public class ViewProfile {
             }
             prop.put("localremotepeer", "1");
         }
-        Iterator i;
+        Iterator<Map.Entry<String, String>> i;
         if (profile != null) {
             i = profile.entrySet().iterator();
         } else {
-            i = (new ArrayList()).iterator();
+            i = (new HashMap<String, String>()).entrySet().iterator();
         }
-        Map.Entry entry;
+        Map.Entry<String, String> entry;
         // all known keys which should be set as they are
         final HashSet<String> knownKeys = new HashSet<String>();
         knownKeys.add("name");
@@ -150,12 +148,12 @@ public class ViewProfile {
         //number of not explicitly recognized but displayed items
         int numUnknown = 0;
         while (i.hasNext()) {
-            entry = (Map.Entry) i.next();
-            final String key = ((String) entry.getKey());
+            entry = i.next();
+            final String key = entry.getKey();
             String value;
 
             // this prevents broken links ending in <br>
-            value=((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n");
+            value = entry.getValue().replaceAll("\r", "").replaceAll("\\\\n", "\n");
 
             //all known Keys which should be set as they are
             if (knownKeys.contains(key)) {
@@ -165,8 +163,8 @@ public class ViewProfile {
                     if(key.equals("comment")){
                         prop.putWiki(
                                 "success_" + key + "_value",
-                                ((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"));
-                        prop.put("success_" + key + "_b64value",Base64Order.standardCoder.encodeString((String) entry.getValue()));
+                                entry.getValue().replaceAll("\r", "").replaceAll("\\\\n", "\n"));
+                        prop.put("success_" + key + "_b64value", Base64Order.standardCoder.encodeString(entry.getValue()));
                     }else{
                         prop.putHTML("success_" + key + "_value", value); //put replaces HTML Chars by entities.
                     }
