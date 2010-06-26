@@ -61,8 +61,10 @@ import net.yacy.kelondro.util.SetTools;
 public final class Condenser {
 
     // this is the page analysis class
-    final static boolean pseudostemming = false; // switch for removal of words that appear in shortened form
-    
+    public final static boolean pseudostemming = false; // switch for removal of words that appear in shortened form
+    public final static int wordminsize = 2;
+    public final static int wordcut = 2;
+
     // category flags that show how the page can be distinguished in different interest groups
     public  static final int flag_cat_indexof       =  0; // a directory listing page (i.e. containing 'index of')
     public  static final int flag_cat_opencontent   =  1; // open source, any free stuff
@@ -93,9 +95,7 @@ public final class Condenser {
 
     //private Properties analysis;
     private Map<String, Word> words; // a string (the words) to (indexWord) - relation
-    private final int wordminsize;
-    private final int wordcut;
-
+    
     //public int RESULT_NUMB_TEXT_BYTES = -1;
     public int RESULT_NUMB_WORDS = -1;
     public int RESULT_DIFF_WORDS = -1;
@@ -111,8 +111,6 @@ public final class Condenser {
             ) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
-        this.wordminsize = 2;
-        this.wordcut = 2;
         this.words = new HashMap<String, Word>();
         this.RESULT_FLAGS = new Bitfield(4);
 
@@ -252,12 +250,6 @@ public final class Condenser {
     }
 
     public Condenser(final InputStream text) throws UnsupportedEncodingException {
-        this(text, 3, 2);
-    }
-
-    public Condenser(final InputStream text, final int wordminsize, final int wordcut) throws UnsupportedEncodingException {
-        this.wordminsize = wordminsize;
-        this.wordcut = wordcut;
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         words = new TreeMap<String, Word>();
@@ -728,7 +720,7 @@ public final class Condenser {
 			buffer = new ByteArrayInputStream(text.getBytes());
 		}
         try {
-            return new Condenser(buffer, 2, 1).words();
+            return new Condenser(buffer).words();
         } catch (final UnsupportedEncodingException e) {
             return null;
         }

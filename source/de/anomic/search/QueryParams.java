@@ -325,12 +325,12 @@ public final class QueryParams {
         		while ((c = a[i].indexOf('-')) >= 0) {
         			s = a[i].substring(0, c);
         			l = s.length();
-					if(l > 2) query.add(s);
-        			if(l > 0) fullquery.add(s);
+					if (l >= Condenser.wordminsize) query.add(s);
+        			if (l > 0) fullquery.add(s);
         			a[i] = a[i].substring(c + 1);
         		}
         		l = a[i].length();
-				if (l > 2) query.add(a[i]);
+				if (l >= Condenser.wordminsize) query.add(a[i]);
         		if (l > 0) fullquery.add(a[i]);
         	}
         }
