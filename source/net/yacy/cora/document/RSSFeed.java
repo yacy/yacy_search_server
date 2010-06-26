@@ -27,14 +27,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RSSFeed implements Iterable<Hit> {
 
-    // static channel names of feeds
-    public static final String TEST           = "TEST";
-    public static final String PEERNEWS       = "PEERNEWS";
-    public static final String REMOTESEARCH   = "REMOTESEARCH";
-    public static final String LOCALSEARCH    = "LOCALSEARCH";
-    public static final String REMOTEINDEXING = "REMOTEINDEXING";
-    public static final String LOCALINDEXING  = "LOCALINDEXING";
-    public static final String INDEXRECEIVE   = "INDEXRECEIVE";
+    public static enum YaCyChannel {
+        TEST,
+        PEERNEWS,
+        REMOTESEARCH,
+        LOCALSEARCH,
+        REMOTEINDEXING,
+        LOCALINDEXING,
+        DHTRECEIVE,
+        DHTSEND;
+    }
     
     // test:
     // http://localhost:8080/xml/feed.rss?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING
@@ -43,10 +45,10 @@ public class RSSFeed implements Iterable<Hit> {
      * the following private channels are declared to prevent that an access to the feed servlet
      * gets results from news channels that are not for the public
      */
-    public static final HashSet<String> privateChannels = new HashSet<String>();
+    public static final HashSet<YaCyChannel> privateChannels = new HashSet<YaCyChannel>();
     static {
-        privateChannels.add(LOCALSEARCH);
-        privateChannels.add(LOCALINDEXING);
+        privateChannels.add(YaCyChannel.LOCALSEARCH);
+        privateChannels.add(YaCyChannel.LOCALINDEXING);
     }
     
     
@@ -152,16 +154,20 @@ public class RSSFeed implements Iterable<Hit> {
     /**
      * the following static channels object is used to organize a storage array for RSS feeds
      */
-    private static final ConcurrentHashMap<String, RSSFeed> channels = new ConcurrentHashMap<String, RSSFeed>();
-    
+    private static final ConcurrentHashMap<YaCyChannel, RSSFeed> channels = new ConcurrentHashMap<YaCyChannel, RSSFeed>();
     public static RSSFeed channels(final String channelName) {
-        final ConcurrentHashMap<String, RSSFeed> channelss = channels;
-        RSSFeed feed = channelss.get(channelName);
+        for (YaCyChannel channel: YaCyChannel.values()) {
+            if (channel.name().equals(channelName)) return channels(channel);
+        }
+        return null;
+    }
+    public static RSSFeed channels(final YaCyChannel channel) {
+        RSSFeed feed = channels.get(channel);
         if (feed != null) return feed;
         feed = new RSSFeed();
-        feed.setChannel(new RSSMessage(channelName, "", ""));
+        feed.setChannel(new RSSMessage(channel.name(), "", ""));
         feed.maxsize = 100;
-        channels.put(channelName, feed);
+        channels.put(channel, feed);
         return feed;
     }
 }

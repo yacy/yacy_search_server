@@ -277,7 +277,7 @@ public final class search {
                     rankingProfile
                     );
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
-            RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
+            RSSFeed.channels(RSSFeed.YaCyChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, true, sb.loader);

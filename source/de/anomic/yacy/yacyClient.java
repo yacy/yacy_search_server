@@ -57,6 +57,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.protocol.HttpConnector;
 import net.yacy.cora.services.Search;
@@ -873,6 +874,8 @@ public final class yacyClient {
             if (uhss == null) {
                 return "no unknownURL tag in response";
             }
+            RSSFeed.channels(RSSFeed.YaCyChannel.DHTSEND).addMessage(new RSSMessage("Send " + indexes.size() + " RWIs to " + targetSeed.getName(), "", ""));
+            
             uhss = uhss.trim();
             if (uhss.length() == 0 || uhss.equals(",")) { return null; } // all url's known, we are ready here
             
@@ -902,9 +905,10 @@ public final class yacyClient {
                 return "no result from transferURL";
             }
             
-            if (!(result.equals("ok"))) {
+            if (!result.equals("ok")) {
                 return result;
-            }
+            }            
+            RSSFeed.channels(RSSFeed.YaCyChannel.DHTSEND).addMessage(new RSSMessage("Send " + uhs.length + " URLs to peer " + targetSeed.getName(), "", ""));
             
             return null;
         } finally {

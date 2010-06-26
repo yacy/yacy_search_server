@@ -33,16 +33,16 @@ public class feed {
         int messageMaxCount = Math.min(post.getInt("count", 100), 1000);
 
         RSSFeed feed;
-        channelIteration: for (int channelIndex = 0; channelIndex < channels.length; channelIndex++) {
+        channelIteration: for (String channel: channels) {
             // prevent that unauthorized access to this servlet get results from private data
-            if ((!authorized) && (RSSFeed.privateChannels.contains(channels[channelIndex]))) continue channelIteration; // allow only public channels if not authorized
+            if ((!authorized) && (RSSFeed.privateChannels.contains(channel))) continue channelIteration; // allow only public channels if not authorized
 
-            if (channels[channelIndex].equals("TEST")) {
+            if (channel.equals("TEST")) {
                 // for interface testing return at least one single result
                 prop.putXML("channel_title", "YaCy News Testchannel");
                 prop.putXML("channel_description", "");
                 prop.put("channel_pubDate", (new Date()).toString());
-                prop.putXML("item_" + messageCount + "_title", channels[channelIndex] + ": " + "YaCy Test Entry " + (new Date()).toString());
+                prop.putXML("item_" + messageCount + "_title", channel + ": " + "YaCy Test Entry " + (new Date()).toString());
                 prop.putXML("item_" + messageCount + "_description", "abcdefg");
                 prop.putXML("item_" + messageCount + "_link", "http://yacy.net");
                 prop.put("item_" + messageCount + "_pubDate", (new Date()).toString());
@@ -53,7 +53,7 @@ public class feed {
             }
             
             // read the channel
-            feed = RSSFeed.channels(channels[channelIndex]);
+            feed = RSSFeed.channels(channel);
             if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();
@@ -67,7 +67,7 @@ public class feed {
                 if (message == null) continue;
 
                 // create RSS entry
-                prop.putXML("item_" + messageCount + "_title", channels[channelIndex] + ": " + message.getTitle());
+                prop.putXML("item_" + messageCount + "_title", channel + ": " + message.getTitle());
                 prop.putXML("item_" + messageCount + "_description", message.getDescription());
                 prop.putXML("item_" + messageCount + "_link", message.getLink());
                 prop.put("item_" + messageCount + "_pubDate", message.getPubDate());

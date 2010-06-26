@@ -1855,7 +1855,7 @@ public final class Switchboard extends serverSwitch {
                     document,
                     condenser,
                     searchEvent);
-            RSSFeed.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
+            RSSFeed.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? RSSFeed.YaCyChannel.LOCALINDEXING : RSSFeed.YaCyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage());

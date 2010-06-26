@@ -498,7 +498,7 @@ public class yacysearch {
             
             // log
             Log.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + QueryParams.hashSet2hashString(theQuery.queryHashes) + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
-            RSSFeed.channels(RSSFeed.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
+            RSSFeed.channels(RSSFeed.YaCyChannel.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
