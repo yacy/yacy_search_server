@@ -188,7 +188,6 @@ public class NetworkGraph {
         int count = 0;
         int totalCount = 0;
         Iterator<yacySeed> e = seedDB.seedsConnected(true, false, null, (float) 0.0);
-        
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
             if (seed != null) {
@@ -229,6 +228,11 @@ public class NetworkGraph {
         // draw my own peer
         drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seedDB.mySeed(), COL_WE_DOT, COL_WE_LINE, COL_WE_TEXT, coronaangle);
 
+        // draw DHT activity
+        
+        
+        
+        
         // draw description
         networkPicture.setColor(COL_HEADLINE);
         PrintTool.print(networkPicture, 2, 8, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);

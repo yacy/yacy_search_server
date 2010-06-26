@@ -157,7 +157,7 @@ public final class transferURL {
             final int more = sb.indexSegments.urlMetadata(Segments.Process.DHTIN).size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
             yacyCore.log.logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
-            RSSFeed.channels(RSSFeed.YaCyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " URLs from peer " + otherPeerName + ", blocked " + blocked, "", ""));
+            RSSFeed.channels(RSSFeed.YaCyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
             if ((received - more) > 0) yacyCore.log.logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
         }

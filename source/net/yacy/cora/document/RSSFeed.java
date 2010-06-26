@@ -27,6 +27,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RSSFeed implements Iterable<Hit> {
 
+    public static final int maxMessagesPerChannel = 200; // to avoid a memory leak
+    
     public static enum YaCyChannel {
         TEST,
         PEERNEWS,
@@ -166,7 +168,7 @@ public class RSSFeed implements Iterable<Hit> {
         if (feed != null) return feed;
         feed = new RSSFeed();
         feed.setChannel(new RSSMessage(channel.name(), "", ""));
-        feed.maxsize = 100;
+        feed.maxsize = maxMessagesPerChannel;
         channels.put(channel, feed);
         return feed;
     }

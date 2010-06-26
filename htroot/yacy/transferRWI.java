@@ -218,8 +218,8 @@ public final class transferRWI {
                 String firstHash = wordhashes.get(0);
                 String lastHash = wordhashes.get(wordhashes.size() - 1);
                 final long avdist = (FlatWordPartitionScheme.std.dhtDistance(firstHash.getBytes(), null, sb.peers.mySeed()) + FlatWordPartitionScheme.std.dhtDistance(lastHash.getBytes(), null, sb.peers.mySeed())) / 2;
-                sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
-                RSSFeed.channels(RSSFeed.YaCyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + firstHash + " .. " + lastHash + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
+                sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName);
+                RSSFeed.channels(RSSFeed.YaCyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
             }
             result = "ok";
             
