@@ -176,9 +176,8 @@
         <pathelement location="${build}" />
         <pathelement location="${htroot}" />
     	<pathelement location="${lib}/activation.jar" />
-    	<pathelement location="${lib}/fontbox-1.0.0.jar" />
+    	<pathelement location="${lib}/fontbox-1.1.0.jar" />
     	<pathelement location="${lib}/J7Zip-modified.jar" />
-    	<pathelement location="${lib}/pdfbox-1.0.0.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-145.jar" />
     	<pathelement location="${lib}/bzip2.jar" />
@@ -194,6 +193,7 @@
     	<pathelement location="${lib}/log4j-1.2.9.jar" />
     	<pathelement location="${lib}/metadata-extractor-2.4.0-beta-1.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
+        <pathelement location="${lib}/pdfbox-1.1.0.jar" />
     	<pathelement location="${lib}/poi-3.6-20091214.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.6-20091214.jar" />
         <pathelement location="${lib}/servlet-api.jar" />

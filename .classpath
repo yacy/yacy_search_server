@@ -12,20 +12,18 @@
 	<classpathentry kind="src" path="htroot/api/util"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="/commons-httpclient-3.1/src"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-fileupload-1.2.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/servlet-api.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/xerces.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/bzip2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/J7Zip-modified.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/webcat-0.1-swf.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/activation.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-jxpath-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/fontbox-1.0.0.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-1.0.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-httpclient-3.1.jar" sourcepath="/commons-httpclient-3.1/src"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/xerces.jar"/>
+	<classpathentry kind="lib" path="lib/bzip2.jar"/>
+	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
+	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
+	<classpathentry kind="lib" path="lib/activation.jar"/>
+	<classpathentry kind="lib" path="lib/commons-jxpath-1.3.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.6-20091214.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.6-20091214.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-145.jar"/>
@@ -38,6 +36,8 @@
 	<classpathentry kind="lib" path="lib/jcifs-1.3.14.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.4.0-beta-1.jar"/>
 	<classpathentry kind="lib" path="lib/sbbi-upnplib-1.0.4.jar"/>
-	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-1.1.0.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
