@@ -26,14 +26,12 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.Hit;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.server.RequestHeader;
@@ -68,11 +66,7 @@ public class rct_p {
                             url = null;
                         }
                         Date loaddate;
-                        try {
-                            loaddate = DateFormatter.parseShortSecond(item.getPubDate());
-                        } catch (final ParseException e) {
-                            loaddate = new Date();
-                        }
+                        loaddate = item.getPubDate();
                         final DigestURI referrer = null; // referrer needed!
                         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(url);
                         if (urlRejectReason == null) {

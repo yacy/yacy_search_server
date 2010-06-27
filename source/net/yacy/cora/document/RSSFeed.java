@@ -20,10 +20,12 @@
 
 package net.yacy.cora.document;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RSSFeed implements Iterable<Hit> {
 
@@ -57,13 +59,11 @@ public class RSSFeed implements Iterable<Hit> {
     // class variables
     private RSSMessage channel;
     private String imageURL;
-    ConcurrentLinkedQueue<String> messageQueue; // a list of GUIDs, so the items can be retrieved by a specific order
-    ConcurrentHashMap<String, RSSMessage> messages; // a guid:Item map
+    private Map<String, RSSMessage> messages; // a guid:Item map
     private int maxsize;
     
     public RSSFeed() {
-        messageQueue = new ConcurrentLinkedQueue<String>();
-        messages = new ConcurrentHashMap<String, RSSMessage>();
+        messages = Collections.synchronizedMap(new LinkedHashMap<String, RSSMessage>());
         channel = null;
         maxsize = Integer.MAX_VALUE;
     }
@@ -75,7 +75,7 @@ public class RSSFeed implements Iterable<Hit> {
 
     public void setMaxsize(final int maxsize) {
         this.maxsize = maxsize;
-        while (messageQueue.size() > this.maxsize) pollMessage();
+        while (messages.size() > this.maxsize) pollMessage();
     }
     
     public void setChannel(final RSSMessage channelItem) {
@@ -96,9 +96,8 @@ public class RSSFeed implements Iterable<Hit> {
     
     public void addMessage(final RSSMessage item) {
         final String guid = item.getGuid();
-        messageQueue.add(guid);
         messages.put(guid, item);
-        while (messageQueue.size() > this.maxsize) pollMessage();
+        while (messages.size() > this.maxsize) pollMessage();
     }
     
     public RSSMessage getMessage(final String guid) {
@@ -120,10 +119,12 @@ public class RSSFeed implements Iterable<Hit> {
     
     public RSSMessage pollMessage() {
         // retrieve and delete item
-        if (messageQueue.isEmpty()) return null;
-        final String nextGUID = messageQueue.poll();
-        if (nextGUID == null) return null;
-        return messages.remove(nextGUID);
+        synchronized (messages) {
+            if (messages.isEmpty()) return null;
+            final String nextGUID = messages.keySet().iterator().next();
+            if (nextGUID == null) return null;
+            return messages.remove(nextGUID);
+        }
     }
 
     public class messageIterator implements Iterator<Hit>{
@@ -132,7 +133,7 @@ public class RSSFeed implements Iterable<Hit> {
         String lastGUID;
         
         public messageIterator() {
-            GUIDiterator = messageQueue.iterator();
+            GUIDiterator = messages.keySet().iterator();
             lastGUID = null;
         }
 

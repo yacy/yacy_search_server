@@ -20,11 +20,14 @@
 
 package net.yacy.cora.document;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import net.yacy.kelondro.util.DateFormatter;
 
 public class RSSMessage implements Hit {
 
@@ -84,7 +87,7 @@ public class RSSMessage implements Hit {
         setValue("title", title);
         setValue("description", description);
         setValue("link", link);
-        setValue("pubDate", new Date().toString());
+        setValue("pubDate", DateFormatter.formatShortSecond(new Date()));
         setValue("guid", Integer.toHexString((title + description + link).hashCode()));
     }
     
@@ -137,8 +140,19 @@ public class RSSMessage implements Hit {
         return Token.language.valueFrom(this.map);
     }
     
-    public String getPubDate() {
-        return Token.pubDate.valueFrom(this.map);
+    public Date getPubDate() {
+        String dateString = Token.pubDate.valueFrom(this.map);
+        Date date;
+        try {
+            date = DateFormatter.parseShortSecond(dateString);
+        } catch (ParseException e) {
+            try {
+                date = DateFormatter.parseISO8601(dateString);
+            } catch (ParseException e1) {
+                date = DateFormatter.parseHTTPDate(dateString);
+            }
+        }
+        return date;
     }
     
     public String getGuid() {
@@ -159,59 +173,51 @@ public class RSSMessage implements Hit {
         return this.map.toString();
     }
     
-    public void setAuthor(String title) {
-        // TODO Auto-generated method stub
-        
+    public void setAuthor(String author) {
+        setValue("author", author);
     }
 
-    public void setCategory(String title) {
-        // TODO Auto-generated method stub
-        
+    public void setCategory(String category) {
+        setValue("category", category);
     }
 
-    public void setCopyright(String title) {
-        // TODO Auto-generated method stub
-        
+    public void setCopyright(String copyright) {
+        setValue("copyright", copyright);
     }
-
-    public void setCreator(String pubdate) {
-        // TODO Auto-generated method stub
-        
+    
+    public void setSubject(String[] tags) {
+        StringBuilder sb = new StringBuilder(tags.length * 10);
+        for (String tag: tags) sb.append(tag).append(',');
+        if (sb.length() > 0) sb.setLength(sb.length() - 1);
+        setValue("subject", sb.toString());
     }
-
+    
     public void setDescription(String description) {
-        // TODO Auto-generated method stub
-        
+        setValue("description", description);
     }
 
-    public void setDocs(String guid) {
-        // TODO Auto-generated method stub
-        
+    public void setDocs(String docs) {
+        setValue("docs", docs);
     }
 
     public void setGuid(String guid) {
-        // TODO Auto-generated method stub
-        
+        setValue("guid", guid);
     }
 
-    public void setLanguage(String title) {
-        // TODO Auto-generated method stub
-        
+    public void setLanguage(String language) {
+        setValue("language", language);
     }
 
     public void setLink(String link) {
-        // TODO Auto-generated method stub
-        
+        setValue("link", link);
     }
 
-    public void setPubDate(String pubdate) {
-        // TODO Auto-generated method stub
-        
+    public void setPubDate(Date pubdate) {
+        setValue("pubDate", DateFormatter.formatISO8601(new Date()));
     }
-
-    public void setReferrer(String title) {
-        // TODO Auto-generated method stub
-        
+    
+    public void setReferrer(String referrer) {
+        setValue("referrer", referrer);
     }
 
     public void setSize(long size) {
@@ -225,7 +231,6 @@ public class RSSMessage implements Hit {
     }
 
     public void setTitle(String title) {
-        // TODO Auto-generated method stub
-        
+        setValue("title", title);
     }
 }

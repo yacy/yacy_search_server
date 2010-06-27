@@ -315,6 +315,16 @@ public class RasterPlotter {
         dot(x, y, dotRadius, true);
     }
     
+    public void arcConnect(final int cx, final int cy, final int arcRadius, final int angle1, final int angle2) {
+        double a1 = Math.PI * ((double) angle1) / 180.0;
+        double a2 = Math.PI * ((double) angle2) / 180.0;
+        final int x1 = cx + (int) (arcRadius * Math.cos(a1));
+        final int y1 = cy - (int) (arcRadius * Math.sin(a1));
+        final int x2 = cx + (int) (arcRadius * Math.cos(a2));
+        final int y2 = cy - (int) (arcRadius * Math.sin(a2));
+        line(x1, y1, x2, y2);
+    }
+    
     public void arcArc(final int cx, final int cy, final int arcRadius, final int angle, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
         double a = Math.PI * ((double) angle) / 180.0;
         final int x = cx + (int) (arcRadius * Math.cos(a));

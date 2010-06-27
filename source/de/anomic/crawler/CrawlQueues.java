@@ -29,7 +29,6 @@ package de.anomic.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -41,7 +40,6 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
 
@@ -435,11 +433,7 @@ public class CrawlQueues {
             } catch (final MalformedURLException e) {
                 referrer = null;
             }
-            try {
-                loaddate = DateFormatter.parseShortSecond(item.getPubDate());
-            } catch (final ParseException e) {
-                loaddate = new Date();
-            }
+            loaddate = item.getPubDate();
             final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(url);
             if (urlRejectReason == null) {
                 // stack url

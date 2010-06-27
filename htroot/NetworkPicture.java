@@ -47,6 +47,7 @@ public class NetworkPicture {
         String bgcolor = NetworkGraph.COL_BACKGROUND;
         boolean corona = true;
         int coronaangle = 0;
+        long communicationTimeout = -1;
         
         if (post != null) {
             width = post.getInt("width", 768);
@@ -56,6 +57,7 @@ public class NetworkPicture {
             maxCount = post.getInt("max", 1000);
             corona = post.get("corona", "true").equals("true");
             coronaangle = (corona) ? post.getInt("coronaangle", 0) : -1;
+            communicationTimeout = post.getLong("ct", -1);
             bgcolor = post.get("bgcolor", bgcolor);
         }
         
@@ -71,7 +73,7 @@ public class NetworkPicture {
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 10000) maxCount = 10000;
-        return NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
+        return NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
     }
     
 }

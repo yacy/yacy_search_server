@@ -10,7 +10,7 @@
     </style>
     
   <script type="text/javascript">
-    imagestub = "NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&coronaangle=";
+    imagestub = "NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&ct=5000&coronaangle=";
     imageanimindex = 0;
     imageloadindex = 0;
     imagecycles = 0;
@@ -218,10 +218,56 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     </table>
     </div>
     
-    <div class="left"><p>
+    <div class="left">
     <a href="NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&coronaangle=0" alt="The YaCy Network" /></a>
     </p></div>
 	<div class="left">
+    <table border="0">
+            <tr>
+                    <td style="background-color:#668877">&nbsp;</td>
+                    <td>dark font</td>
+                    <td>:</td>
+                    <td>senior/principal peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#B3CCB3">&nbsp;</td>
+                    <td>lightred font</td>
+                    <td>:</td>
+                    <td>passive peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#CCB3B3">&nbsp;</td>
+                    <td>turquoise font</td>
+                    <td>:</td>
+                    <td>junior peers</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#BE6F4F">&nbsp;</td>
+                    <td>red point</td>
+                    <td>:</td>
+                    <td>this peer</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#AAAAAA">&nbsp;</td>
+                    <td>waves</td>
+                    <td>:</td>
+                    <td>crawling activity</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#FF6666">&nbsp;</td>
+                    <td>red lines</td>
+                    <td>:</td>
+                    <td>DHT-out</td>
+            </tr>
+            <tr>
+                    <td style="background-color:#66FF66">&nbsp;</td>
+                    <td>green lines</td>
+                    <td>:</td>
+                    <td>DHT-in</td>
+            </tr>
+    </table>
+    </div>
+    <div class="left">
     Your Peer:
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
@@ -264,46 +310,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       </tr>
     </table>
     </div>
-    <div class="left">
-    <table border="0">
-            <tr>
-                <td>&nbsp;</td>
-                    <td><strong>Network legend:</strong></td>
-                    <td></td>
-                    <td></td>
-            </tr>
-            <tr>
-                    <td style="background-color:#668877">&nbsp;</td>
-                    <td>dark font</td>
-                    <td>:</td>
-                    <td>senior/principal peers</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#B3CCB3">&nbsp;</td>
-                    <td>lightred font</td>
-                    <td>:</td>
-                    <td>passiv peers ( &lt; 5 hour passive time)</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#CCB3B3">&nbsp;</td>
-                    <td>turquoise font</td>
-                    <td>:</td>
-                    <td>junior peers</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#BE6F4F">&nbsp;</td>
-                    <td>red point</td>
-                    <td>:</td>
-                    <td>this peer</td>
-            </tr>
-            <tr>
-                    <td style="background-color:#AAAAAA">&nbsp;</td>
-                    <td>waves</td>
-                    <td>:</td>
-                    <td>crawling activity</td>
-            </tr>
-    </table>
-    </div>
+    
     
     ::
     #(comment)#

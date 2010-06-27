@@ -22,6 +22,8 @@
 
 package net.yacy.cora.document;
 
+import java.util.Date;
+
 public interface Hit {
 
     public void setAuthor(String title);
@@ -40,14 +42,13 @@ public interface Hit {
     
     public void setDescription(String description);
     
-    public void setCreator(String pubdate);
-    
-    public void setPubDate(String pubdate);
+    public void setPubDate(Date pubdate);
     
     public void setGuid(String guid);
     
-    public void setDocs(String guid);
+    public void setDocs(String docs);
 
+    public void setSubject(String[] tags);
     
     public String getAuthor();
     
@@ -65,10 +66,12 @@ public interface Hit {
     
     public String getDescription();
     
-    public String getPubDate();
+    public Date   getPubDate();
     
     public String getGuid();
     
     public String getDocs();
+
+    public String[] getSubject();
 
 }

@@ -30,6 +30,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
@@ -74,7 +75,7 @@ public class FeedReader_p {
                     prop.putHTML("page_items_" + i + "_title", item.getTitle());
                     prop.putHTML("page_items_" + i + "_link", item.getLink());
                     prop.putHTML("page_items_" + i + "_description", item.getDescription());
-                    prop.putHTML("page_items_" + i + "_date", item.getPubDate());
+                    prop.putHTML("page_items_" + i + "_date", DateFormatter.formatShortSecond(item.getPubDate()));
                     i++;
                 }
                 prop.put("page_items", feed.size());
