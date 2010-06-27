@@ -1930,7 +1930,7 @@ public final class Switchboard extends serverSwitch {
     public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName) throws IOException, ParserException {
         final Segments.Process process = Segments.Process.LOCALCRAWLING;
         if (indexSegments.segment(process).urlMetadata.exists(url.hash())) {
-            searchEvent.addHeuristicResult(url.hash(), heuristicName, true);
+            searchEvent.addHeuristic(url.hash(), heuristicName, true);
             return; // don't do double-work
         }
         final Request request = loader.request(url, true, true);
@@ -1939,9 +1939,9 @@ public final class Switchboard extends serverSwitch {
             log.logInfo("Heuristic: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);
             return;
         }
+        searchEvent.addHeuristic(url.hash(), heuristicName, false);
         new Thread() {public void run() {
             try {
-                searchEvent.addHeuristicResult(url.hash(), heuristicName, false);
                 Response response = loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE);
                 if (response == null) throw new IOException("response == null");
                 if (response.getContent() == null) throw new IOException("content == null");

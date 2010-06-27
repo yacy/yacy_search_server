@@ -117,17 +117,6 @@ public class yacysearchitem {
             prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + new String(result.hash()) + "&urlmaskfilter=.*");
             prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + new String(result.hash()) + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", new String(result.hash()));
-            SearchEvent.HeuristicResult heuristic = theSearch.getHeuristic(result.hash());
-            if (heuristic == null) {
-                prop.put("content_heuristic", 0);
-            } else {
-                if (heuristic.redundant) {
-                    prop.put("content_heuristic", 1);
-                } else {
-                    prop.put("content_heuristic", 2);
-                }
-                prop.put("content_heuristic_name", heuristic.heuristicName);
-            }
             String resulthashString = new String(result.hash());
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
@@ -160,6 +149,17 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
+            SearchEvent.HeuristicResult heuristic = theSearch.getHeuristic(result.hash());
+            if (heuristic == null) {
+                prop.put("content_heuristic", 0);
+            } else {
+                if (heuristic.redundant) {
+                    prop.put("content_heuristic", 1);
+                } else {
+                    prop.put("content_heuristic", 2);
+                }
+                prop.put("content_heuristic_name", heuristic.heuristicName);
+            }
             EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + item, 0, 0), false, 30000, ProfilingGraph.maxTime);
             
             return prop;

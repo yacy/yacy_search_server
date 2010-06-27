@@ -5,6 +5,7 @@
     <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Basic Configuration</a></li>
     <li><a href="/ConfigAccounts_p.html" class="MenuItemLink lock">Accounts</a></li>
     <li><a href="/ConfigNetwork_p.html" class="MenuItemLink lock">Network Configuration</a></li>
+    <li><a href="/ConfigHeuristics_p.html" class="MenuItemLink lock">Heuristics</a></li>
     <li><a href="/DictionaryLoader_p.html" class="MenuItemLink lock">Dictionary Loader</a></li>
     <li><a href="/ConfigUpdate_p.html" class="MenuItemLink lock">System Update</a></li>
   </ul>

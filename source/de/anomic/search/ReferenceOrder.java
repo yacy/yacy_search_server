@@ -117,7 +117,6 @@ public class ReferenceOrder {
         private final BlockingQueue<WordReferenceVars> decodedEntries;
         
         public NormalizeWorker(final BlockingQueue<WordReferenceVars> out, Semaphore termination) {
-            // normalize ranking: find minimum and maximum of separate ranking criteria
             this.out = out;
             this.termination = termination;
             this.decodedEntries = new LinkedBlockingQueue<WordReferenceVars>();
@@ -131,38 +130,8 @@ public class ReferenceOrder {
         }
         
         public void run() {
-            
-            Map<String, Integer> doms0 = new HashMap<String, Integer>();
-            Integer int1 = 1;
-            
-            WordReferenceVars iEntry;
-            String dom;
-            Integer count;
             try {
-                // calculate min and max for normalization
-                while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
-                    out.put(iEntry);
-                    // find min/max
-                    if (min == null) min = iEntry.clone(); else min.min(iEntry);
-                    if (max == null) max = iEntry.clone(); else max.max(iEntry);
-                    // update domcount
-                    dom = new String(iEntry.metadataHash()).substring(6);
-                    count = doms0.get(dom);
-                    if (count == null) {
-                        doms0.put(dom, int1);
-                    } else {
-                        doms0.put(dom, Integer.valueOf(count.intValue() + 1));
-                    }
-                }
-
-                // update domain score
-                Map.Entry<String, Integer> entry;
-                final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
-                while (di.hasNext()) {
-                    entry = di.next();
-                    doms.addScore(entry.getKey(), (entry.getValue()).intValue());
-                }
-                if (!doms.isEmpty()) maxdomcount = doms.getMaxScore();
+                addNormalizer(decodedEntries, out);
             } catch (InterruptedException e) {
                 Log.logException(e);
             } catch (Exception e) {
@@ -175,6 +144,57 @@ public class ReferenceOrder {
                 } catch (InterruptedException e) {}
             }
         }
+    }
+    
+    /**
+     * normalize ranking: find minimum and maximum of separate ranking criteria
+     * @param decodedEntries
+     * @param out
+     * @throws InterruptedException
+     */
+    public void addNormalizer(BlockingQueue<WordReferenceVars> decodedEntries, final BlockingQueue<WordReferenceVars> out) throws InterruptedException {
+        WordReferenceVars iEntry;
+        Map<String, Integer> doms0 = new HashMap<String, Integer>();
+        String dom;
+        Integer count;
+        final Integer int1 = 1;
+        while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
+            out.put(iEntry);
+            // find min/max
+            if (min == null) min = iEntry.clone(); else min.min(iEntry);
+            if (max == null) max = iEntry.clone(); else max.max(iEntry);
+            // update domcount
+            dom = new String(iEntry.metadataHash()).substring(6);
+            count = doms0.get(dom);
+            if (count == null) {
+                doms0.put(dom, int1);
+            } else {
+                doms0.put(dom, Integer.valueOf(count.intValue() + 1));
+            }
+        }
+
+        // update domain score
+        Map.Entry<String, Integer> entry;
+        final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
+        while (di.hasNext()) {
+            entry = di.next();
+            doms.addScore(entry.getKey(), (entry.getValue()).intValue());
+        }
+        if (!doms.isEmpty()) this.maxdomcount = doms.getMaxScore();
+    }
+    
+    public void addNormalizer(WordReferenceVars iEntry, final BlockingQueue<WordReferenceVars> out) throws InterruptedException {
+        out.put(iEntry);
+        
+        // find min/max
+        if (min == null) min = iEntry.clone(); else min.min(iEntry);
+        if (max == null) max = iEntry.clone(); else max.max(iEntry);
+        
+        // update domcount
+        String dom = new String(iEntry.metadataHash()).substring(6);
+        doms.addScore(dom, 1);
+        
+        if (!doms.isEmpty()) this.maxdomcount = doms.getMaxScore();
     }
     
     public int authority(final byte[] urlHash) {

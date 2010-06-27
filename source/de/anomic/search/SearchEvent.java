@@ -319,7 +319,7 @@ public final class SearchEvent {
         return this.rankedCache.getAuthorNavigator(maxentries);
     }
     
-    public void addHeuristicResult(byte[] urlhash, String heuristicName, boolean redundant) {
+    public void addHeuristic(byte[] urlhash, String heuristicName, boolean redundant) {
         synchronized (this.heuristics) {
             this.heuristics.put(urlhash, new HeuristicResult(urlhash, heuristicName, redundant));
         }

@@ -941,3 +941,8 @@ segment.process.default_tmp = default
 # this is only shown, if the about.body is filled
 about.headline =
 about.body = 
+
+# search heuristics
+heuristic.site = false
+heuristic.scroogle = false
+
