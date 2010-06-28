@@ -483,6 +483,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         }
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         */
+        if (table == null) return false; // may appear during shutdown
         return index.has(key);
     }
 
