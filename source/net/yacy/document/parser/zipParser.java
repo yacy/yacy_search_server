@@ -60,6 +60,8 @@ public class zipParser extends AbstractParser implements Idiom {
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
         SUPPORTED_EXTENSIONS.add("zip");
+        SUPPORTED_EXTENSIONS.add("jar");
+        SUPPORTED_EXTENSIONS.add("apk");    // Android package
         SUPPORTED_MIME_TYPES.add("application/zip");
         SUPPORTED_MIME_TYPES.add("application/x-zip");
         SUPPORTED_MIME_TYPES.add("application/x-zip-compressed");
@@ -67,6 +69,7 @@ public class zipParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("application/x-compressed");
         SUPPORTED_MIME_TYPES.add("multipart/x-zip");
         SUPPORTED_MIME_TYPES.add("application/java-archive");
+        SUPPORTED_MIME_TYPES.add("application/vnd.android.package-archive");
     }     
 
     public zipParser() {        
