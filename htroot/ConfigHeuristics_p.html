@@ -41,11 +41,6 @@
       That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.
       Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).
       </p>
-      #(site.checked)#
-      <input type="submit" name="site_on" value="Switch site-heuristic on" />
-      ::
-      <input type="submit" name="site_off" value="Switch site-heuristic off" />
-      #(/site.checked)#
     </fieldset>
     </form>
     <form name="HeuristicForm" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
@@ -58,11 +53,6 @@
       When using this heuristic, then every search request line is used for a call to scroogle.
       20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.
       </p>
-      #(scroogle.checked)#
-      <input type="submit" name="scroogle_on" value="Switch scroogle-heuristic on" />
-      ::
-      <input type="submit" name="scroogle_off" value="Switch scroogle-heuristic off" />
-      #(/scroogle.checked)#
     </fieldset>
     </form>
     
