@@ -29,68 +29,53 @@ package net.yacy.document.parser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.ParserException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.IInStream;
-import SevenZip.MyRandomAccessFile;
 import SevenZip.Archive.IInArchive;
 import SevenZip.Archive.SevenZipEntry;
 import SevenZip.Archive.SevenZip.Handler;
 
-public class sevenzipParser extends AbstractParser implements Idiom {
+public class sevenzipParser extends AbstractParser implements Parser {
     
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */    
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public sevenzipParser() {
+        super("7zip Archive Parser");
         SUPPORTED_EXTENSIONS.add("7z");
         SUPPORTED_MIME_TYPES.add("application/x-7z-compressed"); 
     }
     
-    public sevenzipParser() {
-        super("7zip Archive Parser");
-    }
-    
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final IInStream source) throws ParserException, InterruptedException {
+    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final IInStream source) throws Parser.Failure, InterruptedException {
         final Document doc = new Document(location, mimeType, charset, null, null, null, null, null, null, null, (Object)null, null, null, false);
         Handler archive;
-        super.theLogger.logFine("opening 7zip archive...");
+        super.log.logFine("opening 7zip archive...");
         try {
             archive = new Handler(source);
         } catch (final IOException e) {
-            throw new ParserException("error opening 7zip archive: " + e.getMessage(), location);
+            throw new Parser.Failure("error opening 7zip archive: " + e.getMessage(), location);
         }
-        checkInterruption();
-        final SZParserExtractCallback aec = new SZParserExtractCallback(super.theLogger, archive,
+        final SZParserExtractCallback aec = new SZParserExtractCallback(super.log, archive,
                 doc, location.getFile());
-        super.theLogger.logFine("processing archive contents...");
+        super.log.logFine("processing archive contents...");
         try {
             archive.Extract(null, -1, 0, aec);
             return doc;   
         } catch (final IOException e) {
             if (e.getCause() instanceof InterruptedException)
                 throw (InterruptedException)e.getCause();
-            if (e.getCause() instanceof ParserException)
-                throw (ParserException)e.getCause();
-            throw new ParserException(
+            if (e.getCause() instanceof Parser.Failure)
+                throw (Parser.Failure)e.getCause();
+            throw new Parser.Failure(
                     "error processing 7zip archive at internal file " + aec.getCurrentFilePath() + ": " + e.getMessage(),
                     location);
         } finally {
@@ -98,41 +83,16 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         }
     }
     
-    @Override
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset,
-            final byte[] source) throws ParserException, InterruptedException {
-        return parse(location, mimeType, charset, new ByteArrayIInStream(source));
-    }
-    
-    @Override
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset,
-            final File sourceFile) throws ParserException, InterruptedException {
-        try {
-            return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"));
-        } catch (final IOException e) {
-            throw new ParserException("error processing 7zip archive: " + e.getMessage(), location);
-        }
-    }
-    
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset,
-            final InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset,
+            final InputStream source) throws Parser.Failure, InterruptedException {
         try {
             final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
             FileUtils.copy(source, cfos);
             return parse(location, mimeType, charset, new ByteArrayInputStream(cfos.toByteArray()));
         } catch (final IOException e) {
-            throw new ParserException("error processing 7zip archive: " + e.getMessage(), location);
+            throw new Parser.Failure("error processing 7zip archive: " + e.getMessage(), location);
         }
     }
-    
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
 
      // wrapper class to redirect output of standard ArchiveExtractCallback to serverLog
      // and parse the extracted content
@@ -182,25 +142,20 @@ public class sevenzipParser extends AbstractParser implements Idiom {
                          // throw new IOException("Unknown Error");
                  }
              } else try {
-                 AbstractParser.checkInterruption();
                  
                  if (this.cfos != null) {
                      // parse the file
-                     Document theDoc;
+                     Document[] theDocs;
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
                      final MultiProtocolURI url = MultiProtocolURI.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
-                     theDoc = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
+                     theDocs = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
                      
-                     this.doc.addSubDocument(theDoc);
+                     this.doc.addSubDocuments(theDocs);
                  }
-             } catch (final ParserException e) {
+             } catch (final Exception e) {
                  final IOException ex = new IOException("error parsing extracted content of " + super.filePath + ": " + e.getMessage());
-                 ex.initCause(e);
-                 throw ex;
-             } catch (final InterruptedException e) {
-                 final IOException ex = new IOException("interrupted");
                  ex.initCause(e);
                  throw ex;
              }
@@ -210,58 +165,12 @@ public class sevenzipParser extends AbstractParser implements Idiom {
          public OutputStream GetStream(final int index, final int askExtractMode) throws IOException {
              final SevenZipEntry item = super.archiveHandler.getEntry(index);
              super.filePath = item.getName();
-             try {
-                 AbstractParser.checkInterruption();
-             } catch (final InterruptedException e) {
-                 final IOException ex = new IOException("interrupted");
-                 ex.initCause(e);
-                 throw ex;
-             }
              this.cfos = (item.isDirectory()) ? null : new ByteArrayOutputStream();
              return this.cfos;
          }
          
          public String getCurrentFilePath() {
              return super.filePath;
-         }
-     }
-     
-     private static class SeekableByteArrayInputStream extends ByteArrayInputStream {
-         public SeekableByteArrayInputStream(final byte[] buf) { super(buf); }
-         public SeekableByteArrayInputStream(final byte[] buf, final int off, final int len) { super(buf, off, len); }
-         
-         public int getPosition() { return super.pos; }
-         public void seekRelative(final int offset) { seekAbsolute(super.pos + offset); }
-         public void seekAbsolute(final int offset) {
-             if (offset > super.count)
-                 throw new IndexOutOfBoundsException(Integer.toString(offset));
-             super.pos = offset;
-         }
-     }
-     
-     private static class ByteArrayIInStream extends IInStream {
-         
-         private final SeekableByteArrayInputStream sbais;
-         
-         public ByteArrayIInStream(final byte[] buffer) {
-             this.sbais = new SeekableByteArrayInputStream(buffer);
-         }
-         
-         public long Seek(final long offset, final int origin) {
-             switch (origin) {
-                 case STREAM_SEEK_SET: this.sbais.seekAbsolute((int)offset); break;
-                 case STREAM_SEEK_CUR: this.sbais.seekRelative((int)offset); break;
-             }
-             return this.sbais.getPosition();
-         }
-         
-         public int read() throws IOException {
-             return this.sbais.read();
-         }
-         
-        @Override
-         public int read(final byte[] b, final int off, final int len) throws IOException {
-             return this.sbais.read(b, off, len);
          }
      }
      

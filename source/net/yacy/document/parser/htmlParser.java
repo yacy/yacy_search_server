@@ -1,28 +1,22 @@
-// htmlParser.java
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 09.07.2009 on http://yacy.net
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  htmlParser.java
+ *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  First released 09.07.2009 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.document.parser;
 
@@ -33,15 +27,12 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HttpConnector;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ScraperInputStream;
@@ -49,15 +40,10 @@ import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.util.FileUtils;
 
 
-public class htmlParser extends AbstractParser implements Idiom {
+public class htmlParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public htmlParser() {
+        super("HTML Parser"); 
         SUPPORTED_EXTENSIONS.add("htm");
         SUPPORTED_EXTENSIONS.add("html");
         SUPPORTED_EXTENSIONS.add("shtml");
@@ -72,6 +58,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         SUPPORTED_EXTENSIONS.add("tex");
         SUPPORTED_EXTENSIONS.add("txt");
         SUPPORTED_EXTENSIONS.add("jsp");
+        SUPPORTED_EXTENSIONS.add("mf");
         SUPPORTED_EXTENSIONS.add("pl");
         SUPPORTED_EXTENSIONS.add("py");
         SUPPORTED_MIME_TYPES.add("text/html");
@@ -84,16 +71,11 @@ public class htmlParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("text/csv");
     }
     
-    public htmlParser() {
-        super("HTML Parser"); 
-    }
-    
-    @Override
-    public Document parse(
+    public Document[] parse(
             final MultiProtocolURI location, 
             final String mimeType, 
             final String documentCharset, 
-            final InputStream sourceStream) throws ParserException, InterruptedException {
+            final InputStream sourceStream) throws Parser.Failure, InterruptedException {
         
         // make a scraper and transformer
         final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
@@ -101,7 +83,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         try {
             charset = htmlFilter.detectCharset();
         } catch (IOException e1) {
-            throw new ParserException("Charset error:" + e1.getMessage(), location);
+            throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
         }
         if (charset == null) {
             charset = documentCharset;
@@ -110,7 +92,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         }
         
         if (documentCharset == null || !documentCharset.equalsIgnoreCase(charset)) {
-            theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
+            log.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
         }
         
         Charset c;
@@ -129,24 +111,24 @@ public class htmlParser extends AbstractParser implements Idiom {
             FileUtils.copy(htmlFilter, writer, c);
             writer.close();
         } catch (IOException e) {
-            throw new ParserException("IO error:" + e.getMessage(), location);
+            throw new Parser.Failure("IO error:" + e.getMessage(), location);
         }
         //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
         //serverFileUtils.copy(sourceFile, hfos);
         //hfos.close();
         if (writer.binarySuspect()) {
             final String errorMsg = "Binary data found in resource";
-            theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg);
-            throw new ParserException(errorMsg,location);    
+            log.logSevere("Unable to parse '" + location + "'. " + errorMsg);
+            throw new Parser.Failure(errorMsg,location);    
         }
         return transformScraper(location, mimeType, documentCharset, scraper);
     }
 
-    private static Document transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
+    private static Document[] transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
         final String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
         int p = 0;
         for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
-        final Document ppd =  new Document(
+        final Document[] ppds = new Document[]{new Document(
                 location,
                 mimeType,
                 charSet,
@@ -160,10 +142,10 @@ public class htmlParser extends AbstractParser implements Idiom {
                 scraper.getText(),
                 scraper.getAnchors(),
                 scraper.getImages(),
-                scraper.indexingDenied());
+                scraper.indexingDenied())};
         //scraper.close();            
-        ppd.setFavicon(scraper.getFavicon());
-        return ppd;
+        for (Document ppd: ppds) ppd.setFavicon(scraper.getFavicon());
+        return ppds;
     }
 
 
@@ -241,14 +223,6 @@ public class htmlParser extends AbstractParser implements Idiom {
 
         return encoding;
     }
-
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
     
     public boolean indexingDenied() {
         return false;
@@ -260,15 +234,15 @@ public class htmlParser extends AbstractParser implements Idiom {
         try {
             url = new MultiProtocolURI(args[0]);
             byte[] content = HttpConnector.wget(url, 3000);
-            Document document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
-            String title = document.dc_title();
+            Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
+            String title = document[0].dc_title();
             System.out.println(title);
             System.out.println(CharacterCoding.unicode2html(title, false));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (ParserException e) {
+        } catch (Parser.Failure e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();

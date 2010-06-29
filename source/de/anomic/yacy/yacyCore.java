@@ -98,7 +98,7 @@ public class yacyCore {
         sb.setConfig("yacyStatus", "");
         
         // create a peer news channel
-        final RSSFeed peernews = RSSFeed.channels(RSSFeed.YaCyChannel.PEERNEWS);
+        final RSSFeed peernews = yacyChannel.channels(yacyChannel.PEERNEWS);
         peernews.addMessage(new RSSMessage("YaCy started", "", ""));
         
         // ensure that correct IP is used

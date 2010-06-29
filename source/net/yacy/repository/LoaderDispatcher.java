@@ -40,8 +40,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.ParserException;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -277,7 +277,7 @@ public final class LoaderDispatcher {
         return entry.getContent();
     }
     
-    public Document loadDocument(final Request request, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, long maxFileSize) throws IOException, ParserException {
+    public Document[] loadDocuments(final Request request, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, long maxFileSize) throws IOException, Parser.Failure {
 
         // load resource
         final Response response = load(request, cacheStrategy, maxFileSize);
@@ -320,23 +320,19 @@ public final class LoaderDispatcher {
         if (resource == null) throw new IOException("resource == null");
         if (responseHeader == null) throw new IOException("responseHeader == null");
     
-        Document document = null;
+        Document[] documents = null;
         String supportError = TextParser.supports(url, responseHeader.mime());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            document = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), resource.length, new ByteArrayInputStream(resource));
-            if (document == null) throw new IOException("document == null");
-        } catch (final ParserException e) {
+            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), resource.length, new ByteArrayInputStream(resource));
+            if (documents == null) throw new IOException("document == null");
+        } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());
-        } catch (InterruptedException e) {
-            throw new IOException("interrupted");
         } finally {
             resource = null;
         }
 
-        Map<MultiProtocolURI, String> result = document.getHyperlinks();
-        document.close();
-        return result;
+        return Document.getHyperlinks(documents);
     }
     
     public synchronized void cleanupAccessTimeTable(long timeout) {

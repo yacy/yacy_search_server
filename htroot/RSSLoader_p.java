@@ -29,7 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.net.MalformedURLException;
 
 import net.yacy.document.Document;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.document.parser.rssParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 
@@ -79,10 +79,10 @@ public class RSSLoader_p {
         // now parse the content as rss
         ByteArrayInputStream bais = new ByteArrayInputStream(resource);
         rssParser parser = new rssParser();
-        Document doc;
+        Document[] doc;
         try {
             doc = parser.parse(url, "text/rss", "UTF-8", bais);
-        } catch (ParserException e) {
+        } catch (Parser.Failure e) {
             return prop;
         } catch (InterruptedException e) {
             return prop;

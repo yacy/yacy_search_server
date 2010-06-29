@@ -32,16 +32,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.order.Base64Order;
 
 /**
@@ -49,17 +46,10 @@ import net.yacy.kelondro.order.Base64Order;
  * @author theli
  *
  */
-public class vcfParser extends AbstractParser implements Idiom {
+public class vcfParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     * 
-     * TODO: support of x-mozilla-cpt and x-mozilla-html tags
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public vcfParser() {        
+        super("vCard Parser");
         SUPPORTED_EXTENSIONS.add("vcf");
         SUPPORTED_MIME_TYPES.add("text/x-vcard");
         SUPPORTED_MIME_TYPES.add("application/vcard");
@@ -68,20 +58,8 @@ public class vcfParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("text/x-vcalendar");
     }
     
-    public vcfParser() {        
-        super("vCard Parser"); 
-    }
-    
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
-    public Document parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
-        
+    public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+
         try {
             final StringBuilder parsedTitle = new StringBuilder();
             final StringBuilder parsedDataText = new StringBuilder();
@@ -96,10 +74,8 @@ public class vcfParser extends AbstractParser implements Idiom {
                                        ? new BufferedReader(new InputStreamReader(source,charset))
                                        : new BufferedReader(new InputStreamReader(source));
             while (true) {
-                // check for interruption
-                checkInterruption();
                 
-                // getting the next line
+                // get the next line
                 if (!useLastLine) {
                     line = inputReader.readLine();
                 } else {
@@ -214,7 +190,7 @@ public class vcfParser extends AbstractParser implements Idiom {
                     } 
                     
                 } else {
-                    if (theLogger.isFinest()) this.theLogger.logFinest("Invalid data in vcf file" +
+                    if (log.isFinest()) this.log.logFinest("Invalid data in vcf file" +
                                              "\n\tURL: " + url +
                                              "\n\tLine: " + line + 
                                              "\n\tLine-Nr: " + lineNr);
@@ -223,7 +199,7 @@ public class vcfParser extends AbstractParser implements Idiom {
 
             final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
             final byte[] text = parsedDataText.toString().getBytes();
-            final Document theDoc = new Document(
+            return new Document[]{new Document(
                     url,                        // url of the source document
                     mimeType,                   // the documents mime type
                     null,                       // charset
@@ -237,20 +213,13 @@ public class vcfParser extends AbstractParser implements Idiom {
                     text,                       // the parsed document text
                     anchors,                    // a map of extracted anchors
                     null,                       // a treeset of image URLs
-                    false);                      
-            return theDoc;
+                    false)};
         } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
+            if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             
-            throw new ParserException("Unexpected error while parsing vcf resource. " + e.getMessage(),url);
+            throw new Parser.Failure("Unexpected error while parsing vcf resource. " + e.getMessage(),url);
         } 
-    }
-    
-    @Override
-    public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
     }
     
     public static final String decodeQuotedPrintable(final String s) {

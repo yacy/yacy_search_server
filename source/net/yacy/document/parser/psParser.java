@@ -34,33 +34,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.util.FileUtils;
 
 
-public class psParser extends AbstractParser implements Idiom {
-
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
-        SUPPORTED_EXTENSIONS.add("ps");
-        SUPPORTED_MIME_TYPES.add("application/postscript");
-        SUPPORTED_MIME_TYPES.add("application/ps");
-        SUPPORTED_MIME_TYPES.add("application/x-postscript");
-        SUPPORTED_MIME_TYPES.add("application/x-ps");
-        SUPPORTED_MIME_TYPES.add("application/x-postscript-not-eps");
-    }
+public class psParser extends AbstractParser implements Parser {
     
     private final static Object modeScan = new Object();
     private static boolean modeScanDone = false;
@@ -68,21 +50,19 @@ public class psParser extends AbstractParser implements Idiom {
     
     public psParser() {        
         super("PostScript Document Parser"); 
+        SUPPORTED_EXTENSIONS.add("ps");
+        SUPPORTED_MIME_TYPES.add("application/postscript");
+        SUPPORTED_MIME_TYPES.add("application/ps");
+        SUPPORTED_MIME_TYPES.add("application/x-postscript");
+        SUPPORTED_MIME_TYPES.add("application/x-ps");
+        SUPPORTED_MIME_TYPES.add("application/x-postscript-not-eps");
         if (!modeScanDone) synchronized (modeScan) {
         	if (testForPs2Ascii()) parserMode = "ps2ascii";
         	else parserMode = "java";
         	modeScanDone = true;
 		}
     }
-    
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
+
     public boolean testForPs2Ascii() {
         try {
             String procOutputLine = null;
@@ -97,19 +77,18 @@ public class psParser extends AbstractParser implements Idiom {
             final int returnCode = ps2asciiProc.waitFor();
             return (returnCode == 0);
         } catch (final Exception e) {
-            if (this.theLogger != null) this.theLogger.logInfo("ps2ascii not found. Switching to java parser mode.");
+            if (this.log != null) this.log.logInfo("ps2ascii not found. Switching to java parser mode.");
             return false;
         }
     }
     
     
-    @Override
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final File sourceFile) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
         
     	File outputFile = null;
         try { 
         	// creating a temp file for the output
-        	outputFile = super.createTempFile("ascii.txt");
+        	outputFile = FileUtils.createTempFile(this.getClass(), "ascii.txt");
         	
         	// decide with parser mode to use
             if (parserMode.equals("ps2ascii")) {
@@ -119,7 +98,7 @@ public class psParser extends AbstractParser implements Idiom {
             }
             
             // return result
-            final Document theDoc = new Document(
+            final Document[] docs = new Document[]{new Document(
                     location, // url
                     mimeType, // mime
                     "UTF-8",  // charset
@@ -133,22 +112,22 @@ public class psParser extends AbstractParser implements Idiom {
                     outputFile, // fulltext
                     null,     // anchors
                     null,     // images
-                    false);   // indexingdenied
+                    false)};  // indexingdenied
             
-            return theDoc;
+            return docs;
         } catch (final Exception e) {            
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
+            if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             
             // delete temp file
             if (outputFile != null) FileUtils.deletedelete(outputFile);
             
             // throw exception
-            throw new ParserException("Unexpected error while parsing ps file. " + e.getMessage(),location); 
+            throw new Parser.Failure("Unexpected error while parsing ps file. " + e.getMessage(),location); 
         } 
     }    
     
-    public void parseUsingJava (final File inputFile, final File outputFile) throws Exception {
+    public void parseUsingJava(final File inputFile, final File outputFile) throws Exception {
         
         BufferedReader reader = null;
         BufferedWriter writer = null;
@@ -264,25 +243,19 @@ public class psParser extends AbstractParser implements Idiom {
     		execCode = ps2asciiProc.waitFor();
     	} catch (final Exception e) {
     		final String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();
-    		this.theLogger.logSevere(errorMsg);
+    		this.log.logSevere(errorMsg);
     		throw new Exception(errorMsg);
     	}
     	
     	if (execCode != 0) throw new Exception("Unable to convert ps to ascii. ps2ascii returned statuscode " + execCode + "\n" + procErr.toString());
     }
-    
-    @Override
-    public void reset() {
-		// Nothing todo here at the moment
-    	super.reset();
-    }
 
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         
         File tempFile = null;
         try {
             // creating a tempfile
-            tempFile = super.createTempFile("temp.ps");
+            tempFile = FileUtils.createTempFile(this.getClass(), "temp.ps");
             tempFile.deleteOnExit();
             
             // copying inputstream into file
@@ -292,9 +265,9 @@ public class psParser extends AbstractParser implements Idiom {
             return parse(location,mimeType,charset,tempFile);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;        	
+            if (e instanceof Parser.Failure) throw (Parser.Failure) e;        	
         	
-            throw new ParserException("Unable to parse the ps file. " + e.getMessage(), location);
+            throw new Parser.Failure("Unable to parse the ps file. " + e.getMessage(), location);
         } finally {
             if (tempFile != null) FileUtils.deletedelete(tempFile);
         }

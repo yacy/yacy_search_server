@@ -1,64 +1,46 @@
-//zipParser.java 
-//------------------------
-//part of YaCy
-//(C) by Michael Peter Christen; mc@yacy.net
-//first published on http://www.anomic.de
-//Frankfurt, Germany, 2005
-//
-//this file is contributed by Martin Thelian
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-//This program is free software; you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
-//the Free Software Foundation; either version 2 of the License, or
-//(at your option) any later version.
-//
-//This program is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
-//
-//You should have received a copy of the GNU General Public License
-//along with this program; if not, write to the Free Software
-//Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  zipParser
+ *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  First released 29.6.2010 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.document.parser;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.ParserException;
-import net.yacy.document.parser.html.ContentScraper;
-import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
+// this is a new implementation of this parser idiom using multiple documents as result set
 
-public class zipParser extends AbstractParser implements Idiom {
+public class zipParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public zipParser() {        
+        super("ZIP File Parser");
         SUPPORTED_EXTENSIONS.add("zip");
         SUPPORTED_EXTENSIONS.add("jar");
         SUPPORTED_EXTENSIONS.add("apk");    // Android package
@@ -70,132 +52,42 @@ public class zipParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("multipart/x-zip");
         SUPPORTED_MIME_TYPES.add("application/java-archive");
         SUPPORTED_MIME_TYPES.add("application/vnd.android.package-archive");
-    }     
-
-    public zipParser() {        
-        super("ZIP File Parser"); 
     }
     
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+        Document[] docs = null;
+        List<Document> docacc = new ArrayList<Document>();
+        ZipEntry entry;
+        final ZipInputStream zis = new ZipInputStream(source);                      
+        File tmp = null;
         
-        long docTextLength = 0;
-        ByteBuffer docText = null;
-        Document subDoc = null;
-        try {           
-            docText = new ByteBuffer();
-            
-            final StringBuilder docKeywords = new StringBuilder();
-            final StringBuilder docLongTitle = new StringBuilder();   
-            final LinkedList<String> docSections = new LinkedList<String>();
-            final StringBuilder docAbstrct = new StringBuilder();
-            final Map<MultiProtocolURI, String> docAnchors = new HashMap<MultiProtocolURI, String>();
-            final HashMap<MultiProtocolURI, ImageEntry> docImages = new HashMap<MultiProtocolURI, ImageEntry>();
-            
-            // looping through the contained files
-            ZipEntry entry;
-            final ZipInputStream zippedContent = new ZipInputStream(source);                      
-            while ((entry = zippedContent.getNextEntry()) !=null) {
-                // check for interruption
-                checkInterruption();                
-                
-                // skip directories
-                if (entry.isDirectory()) continue;
-                if (entry.getSize() <= 0) continue;
-                
-                // Get the entry name
-                final String entryName = entry.getName();                
-                final int idx = entryName.lastIndexOf('.');
-                
-                // getting the file extension
-                final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
-                
-                // trying to determine the mimeType per file extension   
-                final String entryMime = TextParser.mimeOf(entryExt);      
-                
-                // parsing the content
-                File subDocTempFile = null;
+        // loop through the elements in the zip file and parse every single file inside
+        while (true) {
+            try {
+                if (zis.available() <= 0) break;
+                entry = zis.getNextEntry();
+                if (entry == null) break;
+                if (entry.isDirectory() || entry.getSize() <= 0) continue;
+                final String name = entry.getName();                
+                final int idx = name.lastIndexOf('.');
+                final String mime = TextParser.mimeOf((idx >= 0) ? name.substring(idx + 1) : "");
                 try {
-                    // create the temp file
-                    subDocTempFile = createTempFile(entryName);
-                    
-                    // copy the data into the file
-                    FileUtils.copy(zippedContent,subDocTempFile,entry.getSize());                    
-                    
-                    // parsing the zip file entry
-                    subDoc = TextParser.parseSource(MultiProtocolURI.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
-                } catch (final ParserException e) {
-                    this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getMessage());
+                    tmp = FileUtils.createTempFile(this.getClass(), name);
+                    FileUtils.copy(zis, tmp, entry.getSize());  
+                    docs = TextParser.parseSource(MultiProtocolURI.newURL(url, "#" + name), mime, null, tmp);
+                } catch (final Parser.Failure e) {
+                    log.logWarning("ZIP parser entry " + name + ": " + e.getMessage());
                 } finally {
-                    if (subDocTempFile != null) FileUtils.deletedelete(subDocTempFile);
+                    if (tmp != null) FileUtils.deletedelete(tmp);
                 }
-                if (subDoc == null) continue;
-                
-                // merging all documents together
-                if (docKeywords.length() > 0) docKeywords.append(",");
-                docKeywords.append(subDoc.dc_subject(','));
-                
-                if (docLongTitle.length() > 0) docLongTitle.append("\n");
-                docLongTitle.append(subDoc.dc_title());
-                
-                docSections.addAll(Arrays.asList(subDoc.getSectionTitles()));
-                
-                if (docAbstrct.length() > 0) docAbstrct.append("\n");
-                docAbstrct.append(subDoc.dc_description());
-
-                if (subDoc.getTextLength() > 0) {
-                    if (docTextLength > 0) docText.write('\n');
-                    docTextLength += FileUtils.copy(subDoc.getText(), docText);
-                }
-                
-                //docAnchors.putAll(subDoc.getAnchors());
-                ContentScraper.addAllImages(docImages, subDoc.getImages());
-                
-                // release subdocument
-                subDoc.close();
-                subDoc = null;
+                if (docs == null) continue;
+                for (Document d: docs) docacc.add(d);
+            } catch (IOException e) {
+                log.logWarning("ZIP parser:" + e.getMessage());
+                break;
             }
-            
-        
-            Document result = new Document(
-                location,
-                mimeType,
-                null,
-                null,
-                docKeywords.toString().split(" |,"),
-                docLongTitle.toString(),
-                "", // TODO: AUTHOR
-                "", // TODO: Publisher
-                docSections.toArray(new String[docSections.size()]),
-                docAbstrct.toString(),
-                docText.getBytes(),
-                docAnchors,
-                docImages,
-                false);
-            return result;
-        } catch (final Exception e) {  
-            if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
-            
-            if (subDoc != null) subDoc.close();
-            
-            // close the writer
-            if (docText != null) try { docText.close(); } catch (final Exception ex) {/* ignore this */}
-            
-            throw new ParserException("Unexpected error while parsing zip resource. " + e.getClass().getName() + ": "+ e.getMessage(),location);
         }
-    }
-    
-    @Override
-    public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
+        if (docacc.size() == 0) return null;
+        return docacc.toArray(new Document[docacc.size()]);
     }
 }

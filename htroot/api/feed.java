@@ -9,6 +9,7 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyChannel;
 
 public class feed {
  
@@ -35,7 +36,7 @@ public class feed {
         RSSFeed feed;
         channelIteration: for (String channel: channels) {
             // prevent that unauthorized access to this servlet get results from private data
-            if ((!authorized) && (RSSFeed.privateChannels.contains(channel))) continue channelIteration; // allow only public channels if not authorized
+            if ((!authorized) && (yacyChannel.privateChannels.contains(channel))) continue channelIteration; // allow only public channels if not authorized
 
             if (channel.equals("TEST")) {
                 // for interface testing return at least one single result
@@ -53,7 +54,7 @@ public class feed {
             }
             
             // read the channel
-            feed = RSSFeed.channels(channel);
+            feed = yacyChannel.channels(channel);
             if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();

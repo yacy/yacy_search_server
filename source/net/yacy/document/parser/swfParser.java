@@ -30,27 +30,19 @@ package net.yacy.document.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.logging.Log;
 
 import pt.tumba.parser.swf.SWF2HTML;
 
-public class swfParser extends AbstractParser implements Idiom {
+public class swfParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public swfParser() {
+        super("Adobe Flash Parser");
         SUPPORTED_EXTENSIONS.add("swf");
         SUPPORTED_MIME_TYPES.add("application/x-shockwave-flash");
         SUPPORTED_MIME_TYPES.add("application/x-shockwave-flash2-preview");
@@ -58,23 +50,11 @@ public class swfParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("image/vnd.rn-realflash");
     }
 
-    public swfParser() {
-        super("Adobe Flash Parser");
-    }
-
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-
     /*
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         try {
             final SWF2HTML swf2html = new SWF2HTML();
@@ -83,13 +63,13 @@ public class swfParser extends AbstractParser implements Idiom {
             	contents = swf2html.convertSWFToHTML(source);
             } catch (NegativeArraySizeException e) {
                 Log.logException(e);
-                throw new ParserException(e.getMessage(), location);
+                throw new Parser.Failure(e.getMessage(), location);
             } catch (IOException e) {
                 Log.logException(e);
-                throw new ParserException(e.getMessage(), location);
+                throw new Parser.Failure(e.getMessage(), location);
             } catch (Exception e) {
                 Log.logException(e);
-                throw new ParserException(e.getMessage(), location);
+                throw new Parser.Failure(e.getMessage(), location);
             }
             String url = null;
             String urlnr = null;
@@ -119,7 +99,7 @@ public class swfParser extends AbstractParser implements Idiom {
             }
 
            // As the result of parsing this function must return a plasmaParserDocument object
-            final Document theDoc = new Document(
+            return new Document[]{new Document(
                     location,     // url of the source document
                     mimeType,     // the documents mime type
                     "UTF-8",      // charset of the document text
@@ -137,22 +117,15 @@ public class swfParser extends AbstractParser implements Idiom {
                     contents.getBytes("UTF-8"),     // the parsed document text
                     anchors,      // a map of extracted anchors
                     null,
-                    false);      // a treeset of image URLs
-            return theDoc;
+                    false)};      // a treeset of image URLs
         } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
-            // if an unexpected error occures just log the error and raise a new ParserException
+            // if an unexpected error occures just log the error and raise a new Parser.Failure
             final String errorMsg = "Unable to parse the swf document '" + location + "':" + e.getMessage();
-            this.theLogger.logSevere(errorMsg);
-            throw new ParserException(errorMsg, location);
+            this.log.logSevere(errorMsg);
+            throw new Parser.Failure(errorMsg, location);
         }
     }
 
-    @Override
-    public void reset() {
-    // this code is executed if the parser class is returned into the parser pool
-        super.reset();
-
-    }
 }

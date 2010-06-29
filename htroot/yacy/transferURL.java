@@ -29,7 +29,6 @@
 import java.io.IOException;
 import java.text.ParseException;
 
-import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
@@ -46,6 +45,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyChannel;
 
 public final class transferURL {
     
@@ -157,7 +157,7 @@ public final class transferURL {
             final int more = sb.indexSegments.urlMetadata(Segments.Process.DHTIN).size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
             yacyCore.log.logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
-            RSSFeed.channels(RSSFeed.YaCyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
+            yacyChannel.channels(yacyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
             if ((received - more) > 0) yacyCore.log.logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
         }

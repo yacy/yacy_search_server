@@ -28,8 +28,6 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
@@ -37,32 +35,22 @@ import javax.swing.text.rtf.RTFEditorKit;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 
 
-public class rtfParser extends AbstractParser implements Idiom {
+public class rtfParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */    
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+	public rtfParser() {
+		super("Rich Text Format Parser");
         SUPPORTED_EXTENSIONS.add("rtf");
         SUPPORTED_MIME_TYPES.add("text/rtf");
         SUPPORTED_MIME_TYPES.add("text/richtext");
         SUPPORTED_MIME_TYPES.add("application/rtf");
         SUPPORTED_MIME_TYPES.add("application/x-rtf");
         SUPPORTED_MIME_TYPES.add("application/x-soffice");
-    } 
-
-	public rtfParser() {
-		super("Rich Text Format Parser");  
 	}
 
-	public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+	public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         
 		try {	
@@ -73,7 +61,7 @@ public class rtfParser extends AbstractParser implements Idiom {
             
             final String bodyText = doc.getText(0, doc.getLength());
             
-            final Document theDoc = new Document(
+            return new Document[]{new Document(
                     location,
                     mimeType,
                     "UTF-8",
@@ -91,29 +79,14 @@ public class rtfParser extends AbstractParser implements Idiom {
                     bodyText.getBytes("UTF-8"),
                     null,
                     null,
-                    false);
-            
-            return theDoc;             
+                    false)};        
 		}
 		catch (final Exception e) {			
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
+            if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             
-            throw new ParserException("Unexpected error while parsing rtf resource." + e.getMessage(),location); 
+            throw new Parser.Failure("Unexpected error while parsing rtf resource." + e.getMessage(),location); 
 		}        
-	}
-
-	public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-
-	public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
 	}
 
 }

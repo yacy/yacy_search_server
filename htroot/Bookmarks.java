@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import net.yacy.document.Document;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
@@ -187,10 +187,11 @@ public class Bookmarks {
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
                         final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash.getBytes(), null, 0);
-                        Document document = null;
+                        Document[] documents = null;
                         if (urlentry != null) try {
                             final URIMetadataRow.Components metadata = urlentry.metadata();
-                            document = sb.loader.loadDocument(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE);
+                            documents = sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE);
+                            Document document = Document.mergeDocuments(metadata.url(), null, documents);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", metadata.url().toNormalform(false, true));
                             prop.putHTML("mode_title", metadata.dc_title());
@@ -200,8 +201,7 @@ public class Bookmarks {
                             prop.putHTML("mode_path","");
                             prop.put("mode_public", "0");
                             prop.put("mode_feed", "0"); //TODO: check if it IS a feed
-                        } catch (IOException e) {Log.logException(e);} catch (ParserException e) {Log.logException(e);}
-                        if (document != null) document.close();
+                        } catch (IOException e) {Log.logException(e);} catch (Parser.Failure e) {Log.logException(e);}
                     } else {
                         // get from the bookmark database
                         prop.put("mode_edit", "1"); // edit mode

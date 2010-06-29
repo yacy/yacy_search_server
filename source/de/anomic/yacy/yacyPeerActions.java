@@ -27,7 +27,6 @@ package de.anomic.yacy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
@@ -197,7 +196,7 @@ public class yacyPeerActions {
         if (res) {
             // perform all actions if peer is effective new
             this.processPeerArrival(peer);
-            RSSFeed.channels(RSSFeed.YaCyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
+            yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
         }
         return res;
     }
@@ -211,7 +210,7 @@ public class yacyPeerActions {
             peer.put("dct", Long.toString(System.currentTimeMillis()));
             seedDB.addDisconnected(peer); // update info
         }
-        RSSFeed.channels(RSSFeed.YaCyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
+        yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
     }
     
     public void peerPing(final yacySeed peer) {
@@ -220,7 +219,7 @@ public class yacyPeerActions {
         seedDB.addPotential(peer);
         // perform all actions
         processPeerArrival(peer);
-        RSSFeed.channels(RSSFeed.YaCyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " sent me a ping", "", ""));
+        yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " sent me a ping", "", ""));
     }
     
     private void processPeerArrival(final yacySeed peer) {

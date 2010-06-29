@@ -874,7 +874,7 @@ public final class yacyClient {
             if (uhss == null) {
                 return "no unknownURL tag in response";
             }
-            RSSFeed.channels(RSSFeed.YaCyChannel.DHTSEND).addMessage(new RSSMessage("Sent " + indexes.size() + " RWIs to " + targetSeed.getName(), "", targetSeed.hash));
+            yacyChannel.channels(yacyChannel.DHTSEND).addMessage(new RSSMessage("Sent " + indexes.size() + " RWIs to " + targetSeed.getName(), "", targetSeed.hash));
             
             uhss = uhss.trim();
             if (uhss.length() == 0 || uhss.equals(",")) { return null; } // all url's known, we are ready here
@@ -908,7 +908,7 @@ public final class yacyClient {
             if (!result.equals("ok")) {
                 return result;
             }            
-            RSSFeed.channels(RSSFeed.YaCyChannel.DHTSEND).addMessage(new RSSMessage("Sent " + uhs.length + " URLs to peer " + targetSeed.getName(), "", targetSeed.hash));
+            yacyChannel.channels(yacyChannel.DHTSEND).addMessage(new RSSMessage("Sent " + uhs.length + " URLs to peer " + targetSeed.getName(), "", targetSeed.hash));
             
             return null;
         } finally {

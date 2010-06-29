@@ -29,26 +29,17 @@ package net.yacy.document.parser;
 
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
-
+import net.yacy.document.Parser;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
-public class docParser extends AbstractParser implements Idiom {
+public class docParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */    
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+	public docParser() {
+		super("Word Document Parser");
         SUPPORTED_EXTENSIONS.add("doc");
         SUPPORTED_MIME_TYPES.add("application/msword");
         SUPPORTED_MIME_TYPES.add("application/doc");
@@ -59,20 +50,16 @@ public class docParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("application/word");
         SUPPORTED_MIME_TYPES.add("application/x-msw6");
         SUPPORTED_MIME_TYPES.add("application/x-msword");
-    }
-    
-	public docParser() {
-		super("Word Document Parser");
 	}
 
-	public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+	public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         final WordExtractor extractor;
 
         try {
             extractor = new WordExtractor(source);
         } catch (Exception e) {
-            throw new ParserException("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
+            throw new Parser.Failure("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
         }
 
 		StringBuilder contents = new StringBuilder();
@@ -83,7 +70,7 @@ public class docParser extends AbstractParser implements Idiom {
             contents.append(" ");
             contents.append(extractor.getFooterText());
         } catch (Exception e) {
-            throw new ParserException("error in docParser, getText: " + e.getMessage(), location);
+            throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
         }
 	    String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
         title.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
@@ -95,9 +82,9 @@ public class docParser extends AbstractParser implements Idiom {
 	        l = title.length();
 	    }
 
-        Document theDoc;
+        Document[] docs;
         try {
-            theDoc = new Document(
+            docs = new Document[]{new Document(
                       location,
                       mimeType,
                       "UTF-8",
@@ -111,26 +98,12 @@ public class docParser extends AbstractParser implements Idiom {
                       contents.toString().getBytes("UTF-8"),
                       null,
                       null,
-                      false);
+                      false)};
         } catch (UnsupportedEncodingException e) {
-            throw new ParserException("error in docParser, getBytes: " + e.getMessage(), location);
+            throw new Parser.Failure("error in docParser, getBytes: " + e.getMessage(), location);
         }
           
-        return theDoc;
-	}
-
-	public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-
-    @Override
-	public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
+        return docs;
 	}
 
 }

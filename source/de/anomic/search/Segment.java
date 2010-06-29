@@ -38,7 +38,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.navigation.NavigationReference;
@@ -410,7 +410,7 @@ public class Segment {
         
         try {
             // parse the resource
-            final Document document = loader.loadDocument(loader.request(metadata.url(), true, false), cacheStrategy, 10000, Long.MAX_VALUE);
+            final Document document = Document.mergeDocuments(metadata.url(), null, loader.loadDocuments(loader.request(metadata.url(), true, false), cacheStrategy, 10000, Long.MAX_VALUE));
             if (document == null) {
                 // delete just the url entry
                 urlMetadata().remove(urlhash);
@@ -431,7 +431,7 @@ public class Segment {
             // finally delete the url entry itself
             urlMetadata().remove(urlhash);
             return count;
-        } catch (final ParserException e) {
+        } catch (final Parser.Failure e) {
             return 0;
         } catch (IOException e) {
             Log.logException(e);

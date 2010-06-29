@@ -23,8 +23,8 @@
 package net.yacy.document.importer;
 
 import net.yacy.document.Document;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -488,10 +488,10 @@ public class MediawikiImporter extends Thread implements Importer {
                 throw new IOException(e.getMessage());
             }
         }
-        public void genDocument() throws InterruptedException, ParserException {
+        public void genDocument() throws Parser.Failure {
             try {
 				url = new DigestURI(urlStub + title, null);
-				document = TextParser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8"));
+				document = Document.mergeDocuments(url, "text/html", TextParser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8")));
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				document.setTitle(title);
 			} catch (UnsupportedEncodingException e) {
@@ -628,7 +628,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         out.put(record);
                     } catch (RuntimeException e) {
                         Log.logException(e);
-                    } catch (ParserException e) {
+                    } catch (Parser.Failure e) {
                         Log.logException(e);
                     } catch (IOException e) {
 						// TODO Auto-generated catch block

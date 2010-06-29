@@ -28,29 +28,21 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hdgf.extractor.VisioTextExtractor;
 import org.apache.poi.hpsf.SummaryInformation;
 
 
-public class vsdParser extends AbstractParser implements Idiom {
+public class vsdParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public vsdParser() {
+        super("Microsoft Visio Parser");
         SUPPORTED_EXTENSIONS.add("vsd");
         SUPPORTED_EXTENSIONS.add("vss");
         SUPPORTED_EXTENSIONS.add("vst");
@@ -65,24 +57,12 @@ public class vsdParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("image/x-vsd");
         SUPPORTED_MIME_TYPES.add("zz-application/zz-winassoc-vsd");
     }
-
-    public vsdParser() {
-        super("Microsoft Visio Parser");
-    }
-
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
     
     /*
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
     	Document theDoc = null;
     	
@@ -120,7 +100,7 @@ public class vsdParser extends AbstractParser implements Idiom {
             }
 
            // As the result of parsing this function must return a plasmaParserDocument object
-            theDoc = new Document(
+            return new Document[]{new Document(
                     location,     // url of the source document
                     mimeType,     // the documents mime type
                     "UTF-8",      // charset of the document text
@@ -134,29 +114,22 @@ public class vsdParser extends AbstractParser implements Idiom {
                     contents.getBytes("UTF-8"),     // the parsed document text
                     null,         // a map of extracted anchors
                     null,         // a treeset of image URLs
-                    false);
-            return theDoc;
+                    false)};
         } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;
 
             // if an unexpected error occures just log the error and raise a new ParserException
             final String errorMsg = "Unable to parse the vsd document '" + location + "':" + e.getMessage();
-            this.theLogger.logSevere(errorMsg);
-            throw new ParserException(errorMsg, location);
+            this.log.logSevere(errorMsg);
+            throw new Parser.Failure(errorMsg, location);
         } finally {
         	if (theDoc == null) {
-                // if an unexpected error occures just log the error and raise a new ParserException
+                // if an unexpected error occures just log the error and raise a new Parser.Failure
                 final String errorMsg = "Unable to parse the vsd document '" + location + "': possibly out of memory";
-                this.theLogger.logSevere(errorMsg);
-                throw new ParserException(errorMsg, location);
+                this.log.logSevere(errorMsg);
+                throw new Parser.Failure(errorMsg, location);
         	}
         }
     }
 
-    @Override
-    public void reset() {
-    // this code is executed if the parser class is returned into the parser pool
-        super.reset();
-
-    }
 }

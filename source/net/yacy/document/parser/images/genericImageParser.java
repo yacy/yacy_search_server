@@ -53,14 +53,13 @@ import com.sun.image.codec.jpeg.JPEGImageDecoder;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
-public class genericImageParser extends AbstractParser implements Idiom {
+public class genericImageParser extends AbstractParser implements Parser {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -85,13 +84,11 @@ public class genericImageParser extends AbstractParser implements Idiom {
         super("Generic Image Parser"); 
     }
     
-    @SuppressWarnings("unchecked")
-    @Override
-    public Document parse(
+    public Document[] parse(
             final MultiProtocolURI location, 
             final String mimeType, 
             final String documentCharset, 
-            final InputStream sourceStream) throws ParserException, InterruptedException {
+            final InputStream sourceStream) throws Parser.Failure, InterruptedException {
         
         ImageInfo ii = null;
         String title = null;
@@ -105,7 +102,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
                 b = FileUtils.read(sourceStream);
             } catch (IOException e) {
                 Log.logException(e);
-                throw new ParserException(e.getMessage(), location);
+                throw new Parser.Failure(e.getMessage(), location);
             }
             IMAGEMAP imap = bmpParser.parse(b);
             ii = parseJavaImage(location, imap.getImage());
@@ -122,19 +119,21 @@ public class genericImageParser extends AbstractParser implements Idiom {
             try {
                 image = jpegDecoder.decodeAsBufferedImage();
             } catch (ImageFormatException e) {
-                throw new ParserException(e.getMessage(), location);
+                throw new Parser.Failure(e.getMessage(), location);
             } catch (IOException e) {
-                throw new ParserException(e.getMessage(), location);
+                throw new Parser.Failure(e.getMessage(), location);
             }
             JPEGDecodeParam decodeParam = jpegDecoder.getJPEGDecodeParam();
             Metadata metadata = JpegMetadataReader.readMetadata(decodeParam);
             ii = parseJavaImage(location, image);
             
-            Iterator<Directory> directories = (Iterator<Directory>) metadata.getDirectoryIterator();
+            @SuppressWarnings("unchecked")
+            Iterator<Directory> directories = metadata.getDirectoryIterator();
             HashMap<String, String> props = new HashMap<String, String>();
             while (directories.hasNext()) {
                 Directory directory = directories.next();
-                Iterator<Tag> tags = (Iterator<Tag>) directory.getTagIterator();
+                @SuppressWarnings("unchecked")
+                Iterator<Tag> tags = directory.getTagIterator();
                 while (tags.hasNext()) {
                     Tag tag = tags.next();
                     try {
@@ -176,7 +175,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
         
         if (title == null) title = location.toNormalform(true, true);
         
-        return new Document(
+        return new Document[]{new Document(
              location,
              mimeType,
              "UTF-8",
@@ -190,7 +189,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
              infoString.getBytes(), // content text
              anchors, // anchors
              images,
-             false); // images
+             false)}; // images
     }
     
     public Set<String> supportedMimeTypes() {
@@ -203,19 +202,19 @@ public class genericImageParser extends AbstractParser implements Idiom {
     
     public static ImageInfo parseJavaImage(
                             final MultiProtocolURI location,
-                            final InputStream sourceStream) throws ParserException {
+                            final InputStream sourceStream) throws Parser.Failure {
         BufferedImage image = null;
         try {
             ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
             image = ImageIO.read(sourceStream);
         } catch (final EOFException e) {
             Log.logException(e);
-            throw new ParserException(e.getMessage(), location);
+            throw new Parser.Failure(e.getMessage(), location);
         } catch (final IOException e) {
             Log.logException(e);
-            throw new ParserException(e.getMessage(), location);
+            throw new Parser.Failure(e.getMessage(), location);
         }
-        if (image == null) throw new ParserException("ImageIO returned NULL", location);
+        if (image == null) throw new Parser.Failure("ImageIO returned NULL", location);
         return parseJavaImage(location, image);
     }
     
@@ -279,13 +278,13 @@ public class genericImageParser extends AbstractParser implements Idiom {
         MultiProtocolURI uri;
         try {
             uri = new MultiProtocolURI("http://localhost/" + image.getName());
-            Document document = parser.parse(uri, "image/" + uri.getFileExtension(), "UTF-8", new FileInputStream(image));
-            System.out.println(document.toString());
+            Document[] document = parser.parse(uri, "image/" + uri.getFileExtension(), "UTF-8", new FileInputStream(image));
+            System.out.println(document[0].toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (ParserException e) {
+        } catch (Parser.Failure e) {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();

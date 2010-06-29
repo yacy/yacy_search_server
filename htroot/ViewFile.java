@@ -37,7 +37,7 @@ import java.util.Map;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -213,14 +213,14 @@ public class ViewFile {
             // parsing the resource content
             Document document = null;
             try {
-                document = response.parse();
+                document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
                 if (document == null) {
                     prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");
                     prop.put("viewMode", VIEW_MODE_NO_TEXT);
                     return prop;
                 }
-            } catch (final ParserException e) {
+            } catch (final Parser.Failure e) {
                 prop.put("error", "5");
                 prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
@@ -238,7 +238,7 @@ public class ViewFile {
                 prop.put("viewMode_publisher", document.dc_publisher());
                 prop.put("viewMode_format", document.dc_format());
                 prop.put("viewMode_identifier", document.dc_identifier());
-                prop.put("viewMode_source", document.dc_source().toString());
+                prop.put("viewMode_source", url.toString());
                 prop.put("viewMode_parsedText", markup(wordArray, content).replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
                 
             } else if (viewMode.equals("sentences")) {

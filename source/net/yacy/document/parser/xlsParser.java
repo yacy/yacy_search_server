@@ -28,14 +28,11 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
@@ -47,15 +44,10 @@ import org.apache.poi.hssf.record.SSTRecord;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 
-public class xlsParser extends AbstractParser implements Idiom {
-    
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+public class xlsParser extends AbstractParser implements Parser {
+
+    public xlsParser(){
+        super("Microsoft Excel Parser");
         SUPPORTED_EXTENSIONS.add("xls");
         SUPPORTED_EXTENSIONS.add("xla");
         SUPPORTED_MIME_TYPES.add("application/msexcel");
@@ -66,36 +58,17 @@ public class xlsParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("application/x-ms-excel");
         SUPPORTED_MIME_TYPES.add("application/x-dos_ms_excel");
         SUPPORTED_MIME_TYPES.add("application/xls");
-    }     
-
-    public xlsParser(){
-        super("Microsoft Excel Parser");
     }
 
     /*
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */ 
-    public Document parse(final MultiProtocolURI location, final String mimeType,
-            final String charset, final InputStream source) throws ParserException,
+    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+            final String charset, final InputStream source) throws Parser.Failure,
             InterruptedException {
         return new XLSHSSFListener().parse(location, mimeType, charset, source);
     }
-    
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-
-    @Override
-    public void reset(){
-        //nothing to do
-        super.reset();
-    }
-    
     
     public class XLSHSSFListener implements HSSFListener {
 
@@ -111,8 +84,8 @@ public class xlsParser extends AbstractParser implements Idiom {
          * parses the source documents and returns a Document containing
          * all extracted information about the parsed document
          */ 
-        public Document parse(final MultiProtocolURI location, final String mimeType,
-                final String charset, final InputStream source) throws ParserException,
+        public Document[] parse(final MultiProtocolURI location, final String mimeType,
+                final String charset, final InputStream source) throws Parser.Failure,
                 InterruptedException {
             try {
                 
@@ -138,7 +111,7 @@ public class xlsParser extends AbstractParser implements Idiom {
                  * create the plasmaParserDocument for the database
                  * and set shortText and bodyText properly
                  */
-                final Document theDoc = new Document(
+                return new Document[]{new Document(
                         location,
                         mimeType,
                         "UTF-8",
@@ -152,17 +125,16 @@ public class xlsParser extends AbstractParser implements Idiom {
                         contents.getBytes("UTF-8"),
                         null,
                         null,
-                        false);
-                return theDoc;
+                        false)};
             } catch (final Exception e) { 
                 if (e instanceof InterruptedException) throw (InterruptedException) e;
 
                 /*
-                 * an unexpected error occurred, log it and throw a ParserException
+                 * an unexpected error occurred, log it and throw a Parser.Failure
                  */
                 Log.logException(e);
                 final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
-                throw new ParserException(errorMsg, location);
+                throw new Parser.Failure(errorMsg, location);
             }
         }
 

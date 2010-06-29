@@ -25,7 +25,7 @@
 // javac -classpath .:../Classes Settings_p.java
 // if the shell's current path is HTROOT
 
-import net.yacy.document.Idiom;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -52,7 +52,7 @@ public class ConfigParser {
             if (post.containsKey("parserSettings")) {
                 post.remove("parserSettings");
                 
-                for (Idiom parser: TextParser.idioms()) {
+                for (Parser parser: TextParser.parsers()) {
                     for (String mimeType: parser.supportedMimeTypes()) {
                         TextParser.grantMime(mimeType, post.get("mimename_" + mimeType, "").equals("on"));
                     }
@@ -62,7 +62,7 @@ public class ConfigParser {
         }
         
         int i = 0;        
-        for (Idiom parser: TextParser.idioms()) {
+        for (Parser parser: TextParser.parsers()) {
             prop.put("parser_" + i + "_name", parser.getName());
             
             int mimeIdx = 0;

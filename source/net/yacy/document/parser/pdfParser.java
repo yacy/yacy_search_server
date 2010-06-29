@@ -28,11 +28,11 @@
 package net.yacy.document.parser;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdfparser.PDFParser;
@@ -46,22 +46,16 @@ import org.apache.pdfbox.util.PDFTextStripper;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 
-public class pdfParser extends AbstractParser implements Idiom {
-
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+public class pdfParser extends AbstractParser implements Parser {
+    
+    public pdfParser() {        
+        super("Acrobat Portable Document Parser");
         SUPPORTED_EXTENSIONS.add("pdf");
         SUPPORTED_MIME_TYPES.add("application/pdf");
         SUPPORTED_MIME_TYPES.add("application/x-pdf");
@@ -71,57 +65,43 @@ public class pdfParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("text/x-pdf");
     }
     
-    public pdfParser() {        
-        super("Acrobat Portable Document Parser"); 
-    }
-    
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         
         // create a pdf parser
-        final PDDocument theDocument;
-        final PDFParser parser;
+        PDDocument pdfDoc = null;
+        final PDFParser pdfParser;
         try {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            parser = new PDFParser(source);
-            parser.parse();
-            theDocument = parser.getPDDocument();
+            pdfParser = new PDFParser(source);
+            pdfParser.parse();
+            pdfDoc = pdfParser.getPDDocument();
         } catch (IOException e) {
-            Log.logException(e);
-            throw new ParserException(e.getMessage(), location);
+            if (pdfDoc != null) try {pdfDoc.close();} catch (IOException ee) {}
+            throw new Parser.Failure(e.getMessage(), location);
         } finally {
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         }
-
-        checkInterruption();
         
-        if (theDocument.isEncrypted()) {
+        if (pdfDoc.isEncrypted()) {
             try {
-                theDocument.openProtection(new StandardDecryptionMaterial(""));
+                pdfDoc.openProtection(new StandardDecryptionMaterial(""));
             } catch (BadSecurityHandlerException e) {
-                Log.logException(e);
-                throw new ParserException("Document is encrypted (1): " + e.getMessage(), location);
+                try {pdfDoc.close();} catch (IOException ee) {}
+                throw new Parser.Failure("Document is encrypted (1): " + e.getMessage(), location);
             } catch (IOException e) {
-                Log.logException(e);
-                throw new ParserException("Document is encrypted (2): " + e.getMessage(), location);
+                try {pdfDoc.close();} catch (IOException ee) {}
+                throw new Parser.Failure("Document is encrypted (2): " + e.getMessage(), location);
             } catch (CryptographyException e) {
-                Log.logException(e);
-                throw new ParserException("Document is encrypted (3): " + e.getMessage(), location);
+                try {pdfDoc.close();} catch (IOException ee) {}
+                throw new Parser.Failure("Document is encrypted (3): " + e.getMessage(), location);
             }
-            final AccessPermission perm = theDocument.getCurrentAccessPermission();
+            final AccessPermission perm = pdfDoc.getCurrentAccessPermission();
             if (perm == null || !perm.canExtractContent())
-                throw new ParserException("Document is encrypted and cannot decrypted", location);
+                throw new Parser.Failure("Document is encrypted and cannot decrypted", location);
         }
         
         // extracting some metadata
-        final PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
+        final PDDocumentInformation theDocInfo = pdfDoc.getDocumentInformation();            
         String docTitle = null, docSubject = null, docAuthor = null, docPublisher = null, docKeywordStr = null;
         if (theDocInfo != null) {
             docTitle = theDocInfo.getTitle();
@@ -137,21 +117,21 @@ public class pdfParser extends AbstractParser implements Idiom {
             // create a writer for output
             writer = new CharBuffer();
             stripper = new PDFTextStripper();
-            stripper.writeText(theDocument, writer); // may throw a NPE
-            theDocument.close();           
+            stripper.writeText(pdfDoc, writer); // may throw a NPE
+            pdfDoc.close();           
             writer.close();
         } catch (IOException e) {
-            Log.logException(e);
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {}
-
-            throw new ParserException(e.getMessage(), location);
+            try {pdfDoc.close();} catch (IOException ee) {}
+            throw new Parser.Failure(e.getMessage(), location);
+        } finally {
+            try {pdfDoc.close();} catch (IOException e) {}
         }
 
         String[] docKeywords = null;
         if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
         
-        Document theDoc = null;
         if (docTitle == null) docTitle = docSubject;
     
         byte[] contentBytes;
@@ -159,9 +139,11 @@ public class pdfParser extends AbstractParser implements Idiom {
             contentBytes = writer.toString().getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             Log.logException(e);
-            throw new ParserException(e.getMessage(), location);
+            throw new Parser.Failure(e.getMessage(), location);
+        } finally {
+            try {pdfDoc.close();} catch (IOException e) {}
         }
-        theDoc = new Document(
+        return new Document[]{new Document(
                 location,
                 mimeType,
                 "UTF-8",
@@ -175,15 +157,7 @@ public class pdfParser extends AbstractParser implements Idiom {
                 contentBytes,
                 null,
                 null,
-                false);
-        
-        return theDoc;
-    }
-    
-    @Override
-    public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
+                false)};
     }
     
     /**
@@ -191,7 +165,7 @@ public class pdfParser extends AbstractParser implements Idiom {
      * @param args
      */
     public static void main(final String[] args) {
-        if(args.length > 0 && args[0].length() > 0) {
+        if (args.length > 0 && args[0].length() > 0) {
             // file
             final File pdfFile = new File(args[0]);
             if(pdfFile.canRead()) {
@@ -203,23 +177,24 @@ public class pdfParser extends AbstractParser implements Idiom {
                 final AbstractParser parser = new pdfParser();
                 Document document = null;
                 try {
-                    document = parser.parse(null, "application/pdf", null, pdfFile);
-                    
-                } catch (final ParserException e) {
-                    System.err.println("Cannot parse file "+ pdfFile.getAbsolutePath());
+                    document = Document.mergeDocuments(null, "application/pdf", parser.parse(null, "application/pdf", null, new FileInputStream(pdfFile)));
+                } catch (final Parser.Failure e) {
+                    System.err.println("Cannot parse file " + pdfFile.getAbsolutePath());
                     Log.logException(e);
                 } catch (final InterruptedException e) {
                     System.err.println("Interrupted while parsing!");
                     Log.logException(e);
                 } catch (final NoClassDefFoundError e) {
                     System.err.println("class not found: " + e.getMessage());
+                } catch (FileNotFoundException e) {
+                    Log.logException(e);
                 }
                 
                 // statistics
                 System.out.println("\ttime elapsed: " + (System.currentTimeMillis() - startTime) + " ms");
                 
                 // output
-                if(document == null) {
+                if (document == null) {
                     System.out.println("\t!!!Parsing without result!!!");
                 } else {
                     System.out.println("\tParsed text with " + document.getTextLength() + " chars of text and " + document.getAnchors().size() + " anchors");

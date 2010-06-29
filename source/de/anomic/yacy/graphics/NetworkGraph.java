@@ -36,8 +36,6 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.document.Hit;
-import net.yacy.cora.document.RSSFeed;
-import net.yacy.cora.document.RSSFeed.YaCyChannel;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
 
@@ -46,6 +44,7 @@ import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
+import de.anomic.yacy.yacyChannel;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -236,7 +235,7 @@ public class NetworkGraph {
         // draw DHT activity
         if (communicationTimeout >= 0) {
             Date horizon = new Date(System.currentTimeMillis() - communicationTimeout);
-            for (Hit event: RSSFeed.channels(YaCyChannel.DHTRECEIVE)) {
+            for (Hit event: yacyChannel.channels(yacyChannel.DHTRECEIVE)) {
                 assert event != null;
                 assert event.getPubDate() != null;
                 if (event.getPubDate().after(horizon)) {
@@ -244,7 +243,7 @@ public class NetworkGraph {
                     drawNetworkPictureConnection(networkPicture, width / 2, height / 2 + 20, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTIN);
                 }
             }
-            for (Hit event: RSSFeed.channels(YaCyChannel.DHTSEND)) {
+            for (Hit event: yacyChannel.channels(yacyChannel.DHTSEND)) {
                 assert event != null;
                 assert event.getPubDate() != null;
                 if (event.getPubDate().after(horizon)) {

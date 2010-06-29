@@ -49,13 +49,14 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
 
 public class Document {
     
-    private final MultiProtocolURI source;             // the source url
+    private final MultiProtocolURI source;      // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
@@ -487,24 +488,26 @@ dc_rights
         return v;
     }
     
-    public void addSubDocument(final Document doc) throws IOException {
-        this.sections.addAll(Arrays.asList(doc.getSectionTitles()));
-        
-        if (this.title.length() > 0) this.title.append('\n');
-        this.title.append(doc.dc_title());
-        
-        this.keywords.addAll(doc.getKeywords());
-        
-        if (this.description.length() > 0) this.description.append('\n');
-        this.description.append(doc.dc_description());
-        
-        if (!(this.text instanceof ByteArrayOutputStream)) {
-            this.text = new ByteArrayOutputStream();
+    public void addSubDocuments(final Document[] docs) throws IOException {
+        for (Document doc: docs) {
+            this.sections.addAll(Arrays.asList(doc.getSectionTitles()));
+            
+            if (this.title.length() > 0) this.title.append('\n');
+            this.title.append(doc.dc_title());
+            
+            this.keywords.addAll(doc.getKeywords());
+            
+            if (this.description.length() > 0) this.description.append('\n');
+            this.description.append(doc.dc_description());
+            
+            if (!(this.text instanceof ByteArrayOutputStream)) {
+                this.text = new ByteArrayOutputStream();
+            }
+            FileUtils.copy(doc.getText(), (ByteArrayOutputStream) this.text);
+            
+            anchors.putAll(doc.getAnchors());
+            ContentScraper.addAllImages(images, doc.getImages());
         }
-        FileUtils.copy(doc.getText(), (ByteArrayOutputStream) this.text);
-        
-        anchors.putAll(doc.getAnchors());
-        ContentScraper.addAllImages(images, doc.getImages());
     }
     
     /**
@@ -597,5 +600,99 @@ dc_rights
             }
         }        
     }
+    
+    /**
+     * merge documents: a helper method for all parsers that return multiple documents
+     * @param docs
+     * @return
+     */
+    public static Document mergeDocuments(final MultiProtocolURI location, final String globalMime, Document[] docs) {
+        if (docs == null || docs.length == 0) return null;
+        if (docs.length == 1) return docs[0];
+        
+        long docTextLength = 0;
+        final ByteBuffer         content       = new ByteBuffer();
+        final StringBuilder      authors       = new StringBuilder();
+        final StringBuilder      publishers    = new StringBuilder();
+        final StringBuilder      subjects      = new StringBuilder();
+        final StringBuilder      title         = new StringBuilder();
+        final StringBuilder      description   = new StringBuilder();
+        final LinkedList<String> sectionTitles = new LinkedList<String>();
+        
+        final Map<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
+        final HashMap<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
+        
+        for (Document doc: docs) {
+            
+            String author = doc.dc_creator();
+            if (author.length() > 0) {
+                if (authors.length() > 0) authors.append(",");
+                subjects.append(author);
+            }
+            
+            String publisher = doc.dc_publisher();
+            if (publisher.length() > 0) {
+                if (publishers.length() > 0) publishers.append(",");
+                publishers.append(publisher);
+            }
+            
+            String subject = doc.dc_subject(',');
+            if (subject.length() > 0) {
+                if (subjects.length() > 0) subjects.append(",");
+                subjects.append(subject);
+            }
+            
+            if (title.length() > 0) title.append("\n");
+            title.append(doc.dc_title());
+            
+            sectionTitles.addAll(Arrays.asList(doc.getSectionTitles()));
+            
+            if (description.length() > 0) description.append("\n");
+            description.append(doc.dc_description());
+    
+            if (doc.getTextLength() > 0) {
+                if (docTextLength > 0) content.write('\n');
+                try {
+                    docTextLength += FileUtils.copy(doc.getText(), content);
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
+            }
+            anchors.putAll(doc.getAnchors());
+            ContentScraper.addAllImages(images, doc.getImages());
+        }
+        return new Document(
+                location,
+                globalMime,
+                null,
+                null,
+                subjects.toString().split(" |,"),
+                title.toString(),
+                authors.toString(),
+                publishers.toString(),
+                sectionTitles.toArray(new String[sectionTitles.size()]),
+                description.toString(),
+                content.getBytes(),
+                anchors,
+                images,
+                false);
+    }
+    
+    public static Map<MultiProtocolURI, String> getHyperlinks(Document[] documents) {
+        Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+        for (Document d: documents) result.putAll(d.getHyperlinks());
+        return result;
+    }
+    
+    public static Map<MultiProtocolURI, String> getImagelinks(Document[] documents) {
+        Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+        for (Document d: documents) {
+            for (ImageEntry imageReference : d.getImages().values()) {
+                result.put(imageReference.url(), imageReference.alt());
+            }
+        }
+        return result;
+    }
 
+    
 }

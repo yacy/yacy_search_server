@@ -821,14 +821,25 @@ public final class FileUtils {
         }
     }    
 
-    public static void main(final String[] args) {
-        try {
-            writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
-        } catch (final IOException e) {
-            Log.logException(e);
-        }
+    public static final File createTempFile(@SuppressWarnings("rawtypes") Class classObj, final String name) throws IOException {
+        String parserClassName = classObj.getName();
+        int idx = parserClassName.lastIndexOf('.');
+        if (idx != -1) {
+            parserClassName = parserClassName.substring(idx+1);
+        } 
+                    
+        // get the file extension
+        idx = name.lastIndexOf('/');
+        final String fileName = (idx != -1) ? name.substring(idx+1) : name;        
+        
+        idx = fileName.lastIndexOf('.');
+        final String fileExt = (idx > -1) ? fileName.substring(idx+1) : "";
+        
+        // create the temp file
+        final File tempFile = File.createTempFile(parserClassName + "_" + ((idx>-1)?fileName.substring(0,idx):fileName), (fileExt.length()>0)?"."+fileExt:fileExt);
+        return tempFile;
     }
-
+    
     /**
      * copies the input stream to one output stream (byte per byte)
      * @param in
@@ -967,4 +978,13 @@ public final class FileUtils {
             if (path.exists()) Log.logSevere("FileUtils", "cannot delete file " + p);
         }
     }
+    
+    public static void main(final String[] args) {
+        try {
+            writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
+        } catch (final IOException e) {
+            Log.logException(e);
+        }
+    }
+
 }

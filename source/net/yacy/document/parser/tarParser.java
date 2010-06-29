@@ -1,212 +1,98 @@
-//tarParser.java 
-//------------------------
-//part of YaCy
-//(C) by Michael Peter Christen; mc@yacy.net
-//first published on http://www.anomic.de
-//Frankfurt, Germany, 2005
-//
-//this file is contributed by Martin Thelian
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-//This program is free software; you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
-//the Free Software Foundation; either version 2 of the License, or
-//(at your option) any later version.
-//
-//This program is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
-//
-//You should have received a copy of the GNU General Public License
-//along with this program; if not, write to the Free Software
-//Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  tarParser
+ *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  First released 29.6.2010 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.document.parser;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.ParserException;
-import net.yacy.document.parser.html.ContentScraper;
-import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 
+// this is a new implementation of this parser idiom using multiple documents as result set
 
-public class tarParser extends AbstractParser implements Idiom {
+public class tarParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public tarParser() {        
+        super("Tape Archive File Parser"); 
         SUPPORTED_EXTENSIONS.add("tar");
         SUPPORTED_MIME_TYPES.add("application/x-tar");
         SUPPORTED_MIME_TYPES.add("application/tar");
         SUPPORTED_MIME_TYPES.add("applicaton/x-gtar");
         SUPPORTED_MIME_TYPES.add("multipart/x-tar");
-    }     
-
-    public tarParser() {        
-        super("Tape Archive File Parser"); 
     }
     
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, InputStream source) throws Parser.Failure, InterruptedException {
         
-        long docTextLength = 0;
-        ByteBuffer docText = null;
-        Document subDoc = null;        
-        try {           
-            docText = new ByteBuffer();
-            
-            /*
-             * If the mimeType was not reported correcly by the webserve we
-             * have to decompress it first
-             */
-            final String ext = location.getFileExtension().toLowerCase();
-            if (ext.equals("gz") || ext.equals("tgz")) {
+        List<Document> docacc = new ArrayList<Document>();
+        Document[] subDocs = null;
+        final String ext = url.getFileExtension().toLowerCase();
+        if (ext.equals("gz") || ext.equals("tgz")) {
+            try {
                 source = new GZIPInputStream(source);
+            } catch (IOException e) {
+                throw new Parser.Failure("tar parser: " + e.getMessage(), url);
             }
-            
-            // TODO: what about bzip ....
-
-            final StringBuilder docKeywords = new StringBuilder();
-            final StringBuilder docLongTitle = new StringBuilder();   
-            final LinkedList<String> docSections = new LinkedList<String>();
-            final StringBuilder docAbstrct = new StringBuilder();
-
-            final Map<MultiProtocolURI, String> docAnchors = new HashMap<MultiProtocolURI, String>();
-            final HashMap<MultiProtocolURI, ImageEntry> docImages = new HashMap<MultiProtocolURI, ImageEntry>(); 
-                        
-            // looping through the contained files
-            TarEntry entry;
-            final TarInputStream tin = new TarInputStream(source);                      
-            while ((entry = tin.getNextEntry()) !=null) {
-                // check for interruption
-                checkInterruption();
-                
-                // skip directories
-                if (entry.isDirectory()) continue;
-                if (entry.getSize() <= 0) continue;
-                
-                // Get the short entry name
-                final String entryName = entry.getName();
-                
-                // getting the entry file extension
-                final int idx = entryName.lastIndexOf('.');
-                final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
-                
-                // trying to determine the mimeType per file extension   
-                final String entryMime = TextParser.mimeOf(entryExt);
-                
-                // getting the entry content
-                File subDocTempFile = null;
-                try {
-                    // create the temp file
-                    subDocTempFile = createTempFile(entryName);
-                    
-                    // copy the data into the file
-                    FileUtils.copy(tin,subDocTempFile,entry.getSize());
-                    
-                    // check for interruption
-                    checkInterruption();
-                    
-                    // parsing the content                    
-                    subDoc = TextParser.parseSource(MultiProtocolURI.newURL(location,"#" + entryName),entryMime,null,subDocTempFile);
-                } catch (final ParserException e) {
-                    this.theLogger.logInfo("Unable to parse tar file entry '" + entryName + "'. " + e.getMessage());
-                } finally {
-                    if (subDocTempFile != null) FileUtils.deletedelete(subDocTempFile);
-                }
-                if (subDoc == null) continue;
-                
-                // merging all documents together
-                if (docKeywords.length() > 0) docKeywords.append(",");
-                docKeywords.append(subDoc.dc_subject(','));
-                
-                if (docLongTitle.length() > 0) docLongTitle.append("\n");
-                docLongTitle.append(subDoc.dc_title());
-                
-                docSections.addAll(Arrays.asList(subDoc.getSectionTitles()));
-                
-                if (docAbstrct.length() > 0) docAbstrct.append("\n");
-                docAbstrct.append(subDoc.dc_description());
-
-                if (subDoc.getTextLength() > 0) {
-                    if (docTextLength > 0) docText.write('\n');
-                    docTextLength += FileUtils.copy(subDoc.getText(), docText);
-                }               
-                
-                //docAnchors.putAll(subDoc.getAnchors());
-                ContentScraper.addAllImages(docImages, subDoc.getImages());
-                
-                // release subdocument
-                subDoc.close();
-                subDoc = null;                
-            }
-            
-            Document result = new Document(
-                location,
-                mimeType,
-                null,
-                null,
-                docKeywords.toString().split(" |,"),
-                docLongTitle.toString(),
-                "", // TODO: AUTHOR
-                "", // TODO: publisher
-                docSections.toArray(new String[docSections.size()]),
-                docAbstrct.toString(),
-                docText.getBytes(),
-                docAnchors,
-                docImages,
-                false);
-            
-            return result;
-        } catch (final Exception e) {
-            if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
-            
-            if (subDoc != null) subDoc.close();
-            
-            // close the writer
-            if (docText != null) try { docText.close(); } catch (final Exception ex) {/* ignore this */}
-            
-            throw new ParserException("Unexpected error while parsing tar resource. " + e.getMessage(),location); 
         }
-    }
-    
-    @Override
-    public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
+        TarEntry entry;
+        final TarInputStream tis = new TarInputStream(source);                      
+        File tmp = null;
+        
+        // loop through the elements in the tar file and parse every single file inside
+        while (true) {
+            try {
+                if (tis.available() <= 0) break;
+                entry = tis.getNextEntry();
+                if (entry == null) break;
+                if (entry.isDirectory() || entry.getSize() <= 0) continue;
+                final String name = entry.getName();
+                final int idx = name.lastIndexOf('.');
+                final String mime = TextParser.mimeOf((idx > -1) ? name.substring(idx+1) : "");
+                try {
+                    tmp = FileUtils.createTempFile(this.getClass(), name);
+                    FileUtils.copy(tis, tmp, entry.getSize());
+                    subDocs = TextParser.parseSource(MultiProtocolURI.newURL(url,"#" + name), mime, null, tmp);
+                } catch (final Parser.Failure e) {
+                    log.logWarning("tar parser entry " + name + ": " + e.getMessage());
+                } finally {
+                    if (tmp != null) FileUtils.deletedelete(tmp);
+                }
+                if (subDocs == null) continue;
+                
+                for (Document d: subDocs) docacc.add(d);
+            } catch (IOException e) {
+                log.logWarning("tar parser:" + e.getMessage());
+                break;
+            }
+        }
+        return docacc.toArray(new Document[docacc.size()]);
     }
 }

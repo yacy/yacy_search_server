@@ -36,7 +36,7 @@ import de.anomic.data.MimeTable;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.HandleSet;
@@ -121,25 +121,25 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         
         Document document;
         try {
-            document = Switchboard.getSwitchboard().loader.loadDocument(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, timeout, Long.MAX_VALUE);
+            document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, timeout, Long.MAX_VALUE));
         } catch (IOException e) {
             Log.logFine("snippet fetch", "load error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
-        } catch (ParserException e) {
+        } catch (Parser.Failure e) {
             Log.logFine("snippet fetch", "parser error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
         }
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
-            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.AUDIO));
-            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.VIDEO));
-            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.APP)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.APP));
-            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.IMAGE)) a.addAll(computeImageSnippets(document, queryhashes));
+            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.AUDIO)) a.addAll(computeMediaSnippets(url, document, queryhashes, ContentDomain.AUDIO));
+            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.VIDEO)) a.addAll(computeMediaSnippets(url, document, queryhashes, ContentDomain.VIDEO));
+            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.APP)) a.addAll(computeMediaSnippets(url, document, queryhashes, ContentDomain.APP));
+            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.IMAGE)) a.addAll(computeImageSnippets(url, document, queryhashes));
         }
         return a;
     }
     
-    public static ArrayList<MediaSnippet> computeMediaSnippets(final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
+    public static ArrayList<MediaSnippet> computeMediaSnippets(final DigestURI source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<MultiProtocolURI, String> media = null;
@@ -160,13 +160,13 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             int ranking = TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
                            TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
-                result.add(new MediaSnippet(mediatype, url, MimeTable.url2mime(url), desc, document.getTextLength(), null, ranking, new DigestURI(document.dc_source())));
+                result.add(new MediaSnippet(mediatype, url, MimeTable.url2mime(url), desc, document.getTextLength(), null, ranking, source));
             }
         }
         return result;
     }
     
-    public static ArrayList<MediaSnippet> computeImageSnippets(final Document document, final HandleSet queryhashes) {
+    public static ArrayList<MediaSnippet> computeImageSnippets(final DigestURI source, final Document document, final HandleSet queryhashes) {
         
         final TreeSet<ImageEntry> images = new TreeSet<ImageEntry>();
         images.addAll(document.getImages().values()); // iterates images in descending size order!
@@ -189,7 +189,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
                            TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
                            TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
             final int ranking = Integer.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);  
-            result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, new DigestURI(document.dc_source())));
+            result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, source));
         }
         return result;
     }

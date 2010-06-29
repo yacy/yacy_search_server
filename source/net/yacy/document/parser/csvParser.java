@@ -1,29 +1,22 @@
-// CSVParser
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 02.10.2009 on http://yacy.net
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate: 2009-09-23 23:26:14 +0200 (Mi, 23 Sep 2009) $
-// $LastChangedRevision: 6340 $
-// $LastChangedBy: low012 $
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+/**
+ *  tarParser
+ *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  First released 02.10.2009 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.document.parser;
 
@@ -33,56 +26,35 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 
 /**
  * a parser for comma-separated values
  * The values may also be separated by semicolon or tab,
  * the separator character is detected automatically
  */
-public class csvParser extends AbstractParser implements Idiom {
+public class csvParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */    
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public csvParser() {
+        super("Comma Separated Value Parser");
         SUPPORTED_EXTENSIONS.add("csv");
     }
     
-    public csvParser() {
-        super("Comma Separated Value Parser");
-    }
-    
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
-    @Override
-    public Document parse(MultiProtocolURI location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(MultiProtocolURI location, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
         // construct a document using all cells of the document
         // the first row is used as headline
         // all lines are artificially terminated by a '.' to separate them as sentence for the condenser.
         List<String[]> table = getTable(location, mimeType, charset, source);
-        if (table.isEmpty()) throw new ParserException("document has no lines", location);
+        if (table.isEmpty()) throw new Parser.Failure("document has no lines", location);
         StringBuilder sb = new StringBuilder();
         for (String[] row: table) sb.append(concatRow(row)).append(' ');
         try {
-            return new Document(
+            return new Document[]{new Document(
                     location,
                     mimeType,
                     charset,
@@ -96,9 +68,9 @@ public class csvParser extends AbstractParser implements Idiom {
                     sb.toString().getBytes(charset),
                     null,
                     null,
-                    false);
+                    false)};
         } catch (UnsupportedEncodingException e) {
-            throw new ParserException("error in csvParser, getBytes: " + e.getMessage(), location);
+            throw new Parser.Failure("error in csvParser, getBytes: " + e.getMessage(), location);
         }
     }
 

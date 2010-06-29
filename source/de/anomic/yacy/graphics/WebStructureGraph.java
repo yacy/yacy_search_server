@@ -95,9 +95,7 @@ public class WebStructureGraph {
         }
     }
     
-    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final Document document, final Condenser condenser, final Date docDate) {
-        final DigestURI url = new DigestURI(document.dc_source());
-        
+    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final DigestURI url, final Document document, final Condenser condenser, final Date docDate) {
         // generate citation reference
         final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
         final Iterator<MultiProtocolURI> it = hl.keySet().iterator();

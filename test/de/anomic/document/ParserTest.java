@@ -3,6 +3,7 @@ package de.anomic.document;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 import net.yacy.document.Document;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 
@@ -10,15 +11,17 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 
 
 public class ParserTest {
 
-	@Test public void testParsers() throws java.io.FileNotFoundException, java.lang.InterruptedException,
-		net.yacy.document.ParserException, java.net.MalformedURLException,
-	       java.io.UnsupportedEncodingException, java.io.IOException	{
+	@Test public void testParsers() throws FileNotFoundException, Parser.Failure, MalformedURLException, UnsupportedEncodingException, IOException	{
 		String[][] testFiles = new String[][] {
 			// meaning:  filename in test/parsertest, mimetype, title, creator, description, 
 			new String[]{"umlaute_windows.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen", "", ""},
@@ -37,19 +40,20 @@ public class ParserTest {
 			String mimetype = testFiles[i][1];
 			DigestURI url = new DigestURI("http://localhost/"+filename);
 
-			Document doc = TextParser.parseSource(url, mimetype, null, file.length(), new FileInputStream(file));
-			Reader content = new InputStreamReader(doc.getText(), doc.getCharset());
-			StringBuilder str = new StringBuilder();
-			int c;
-			while( (c = content.read()) != -1 )
-				str.append((char)c);
-
-			System.out.println("Parsed " + filename + ": " + str);
-			assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
-			assertThat(doc.dc_title(), containsString(testFiles[i][2]));
-			assertThat(doc.dc_creator(), containsString(testFiles[i][3]));
-			assertThat(doc.dc_description(), containsString(testFiles[i][4]));
-			
+			Document[] docs = TextParser.parseSource(url, mimetype, null, file.length(), new FileInputStream(file));
+			for (Document doc: docs) {
+    			Reader content = new InputStreamReader(doc.getText(), doc.getCharset());
+    			StringBuilder str = new StringBuilder();
+    			int c;
+    			while( (c = content.read()) != -1 )
+    				str.append((char)c);
+    
+    			System.out.println("Parsed " + filename + ": " + str);
+    			assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+    			assertThat(doc.dc_title(), containsString(testFiles[i][2]));
+    			assertThat(doc.dc_creator(), containsString(testFiles[i][3]));
+    			assertThat(doc.dc_description(), containsString(testFiles[i][4]));
+			}			
 		}
 	}
 }

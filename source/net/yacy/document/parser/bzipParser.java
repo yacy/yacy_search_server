@@ -30,29 +30,21 @@ package net.yacy.document.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.ParserException;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.apache.tools.bzip2.CBZip2InputStream;
 
 
-public class bzipParser extends AbstractParser implements Idiom {
-
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+public class bzipParser extends AbstractParser implements Parser {
+    
+    public bzipParser() {        
+        super("Bzip 2 UNIX Compressed File Parser");
         SUPPORTED_EXTENSIONS.add("bz2");
         SUPPORTED_EXTENSIONS.add("tbz");
         SUPPORTED_EXTENSIONS.add("tbz2");
@@ -63,19 +55,7 @@ public class bzipParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("application/x-stuffit");
     }
     
-    public bzipParser() {        
-        super("Bzip 2 UNIX Compressed File Parser");
-    }
-    
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         
         File tempFile = null;
         try {           
@@ -108,25 +88,16 @@ public class bzipParser extends AbstractParser implements Idiom {
             }
             zippedContent.close();
             out.close();
-             
-            // check for interruption
-            checkInterruption();
             
             // creating a new parser class to parse the unzipped content
-            return TextParser.parseSource(location,null,null,tempFile);
+            return TextParser.parseSource(location, null, null, tempFile);
         } catch (final Exception e) {  
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
+            if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             
-            throw new ParserException("Unexpected error while parsing bzip file. " + e.getMessage(),location);
+            throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(),location);
         } finally {
             if (tempFile != null) FileUtils.deletedelete(tempFile);
         }
-    }
-    
-    @Override
-    public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
     }
 }

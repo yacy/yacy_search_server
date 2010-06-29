@@ -21,41 +21,12 @@
 package net.yacy.cora.document;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class RSSFeed implements Iterable<Hit> {
 
-    public static final int maxMessagesPerChannel = 200; // to avoid a memory leak
-    
-    public static enum YaCyChannel {
-        TEST,
-        PEERNEWS,
-        REMOTESEARCH,
-        LOCALSEARCH,
-        REMOTEINDEXING,
-        LOCALINDEXING,
-        DHTRECEIVE,
-        DHTSEND;
-    }
-    
-    // test:
-    // http://localhost:8080/xml/feed.rss?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING
-    
-    /**
-     * the following private channels are declared to prevent that an access to the feed servlet
-     * gets results from news channels that are not for the public
-     */
-    public static final HashSet<YaCyChannel> privateChannels = new HashSet<YaCyChannel>();
-    static {
-        privateChannels.add(YaCyChannel.LOCALSEARCH);
-        privateChannels.add(YaCyChannel.LOCALINDEXING);
-    }
-    
-    
     // class variables
     private RSSMessage channel;
     private String imageURL;
@@ -154,23 +125,4 @@ public class RSSFeed implements Iterable<Hit> {
         }
     }
     
-    /**
-     * the following static channels object is used to organize a storage array for RSS feeds
-     */
-    private static final ConcurrentHashMap<YaCyChannel, RSSFeed> channels = new ConcurrentHashMap<YaCyChannel, RSSFeed>();
-    public static RSSFeed channels(final String channelName) {
-        for (YaCyChannel channel: YaCyChannel.values()) {
-            if (channel.name().equals(channelName)) return channels(channel);
-        }
-        return null;
-    }
-    public static RSSFeed channels(final YaCyChannel channel) {
-        RSSFeed feed = channels.get(channel);
-        if (feed != null) return feed;
-        feed = new RSSFeed();
-        feed.setChannel(new RSSMessage(channel.name(), "", ""));
-        feed.maxsize = maxMessagesPerChannel;
-        channels.put(channel, feed);
-        return feed;
-    }
 }

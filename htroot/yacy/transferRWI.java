@@ -30,7 +30,6 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -46,6 +45,7 @@ import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyChannel;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
@@ -219,7 +219,7 @@ public final class transferRWI {
                 String lastHash = wordhashes.get(wordhashes.size() - 1);
                 final long avdist = (FlatWordPartitionScheme.std.dhtDistance(firstHash.getBytes(), null, sb.peers.mySeed()) + FlatWordPartitionScheme.std.dhtDistance(lastHash.getBytes(), null, sb.peers.mySeed())) / 2;
                 sb.getLog().logInfo("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName);
-                RSSFeed.channels(RSSFeed.YaCyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
+                yacyChannel.channels(yacyChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs, " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + ", blocked " + blocked + ", requesting " + unknownURL.size() + "/" + receivedURL + " URLs from " + otherPeerName, "", otherPeer.hash));
             }
             result = "ok";
             

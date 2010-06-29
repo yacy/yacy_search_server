@@ -41,8 +41,7 @@ import javax.xml.parsers.SAXParserFactory;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.document.parser.xml.ODContentHandler;
 import net.yacy.document.parser.xml.ODMetaHandler;
 import net.yacy.kelondro.io.CharBuffer;
@@ -51,15 +50,10 @@ import net.yacy.kelondro.util.FileUtils;
 
 
 
-public class ooxmlParser extends AbstractParser implements Idiom {
+public class ooxmlParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+    public ooxmlParser() {        
+        super("Open Office XML Document Parser"); 
         SUPPORTED_EXTENSIONS.add("docx");
         SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         SUPPORTED_EXTENSIONS.add("dotx");
@@ -75,21 +69,8 @@ public class ooxmlParser extends AbstractParser implements Idiom {
         SUPPORTED_EXTENSIONS.add("xltx");
         SUPPORTED_MIME_TYPES.add("application/vnd.openxmlformats-officedocument.spreadsheetml.template");
     }
-
-    public ooxmlParser() {        
-        super("Open Office XML Document Parser"); 
-    }
     
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-    
-    @Override
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final File dest) throws ParserException, InterruptedException {
+    private Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final File dest) throws Parser.Failure, InterruptedException {
         
         CharBuffer writer = null;
         try {          
@@ -107,10 +88,8 @@ public class ooxmlParser extends AbstractParser implements Idiom {
             
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
-                // check for interruption
-                checkInterruption();
                 
-                // getting the next zip file entry
+                // get next zip file entry
                 final ZipEntry zipEntry= zipEnum.nextElement();
                 final String entryName = zipEntry.getName();
                 
@@ -163,9 +142,9 @@ public class ooxmlParser extends AbstractParser implements Idiom {
             if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
             
             // create the parser document
-            Document theDoc = null;
+            Document[] docs = null;
             final byte[] contentBytes = writer.toString().getBytes("UTF-8");
-            theDoc = new Document(
+            docs = new Document[]{new Document(
                     location,
                     mimeType,
                     "UTF-8",
@@ -179,21 +158,21 @@ public class ooxmlParser extends AbstractParser implements Idiom {
                     contentBytes,
                     null,
                     null,
-                    false);
-            return theDoc;
+                    false)};
+            return docs;
         } catch (final Exception e) {            
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
+            if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             
             // close the writer
             if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
 
             Log.logException(e);
-            throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
+            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         }
     }
     
-    public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile
@@ -207,17 +186,12 @@ public class ooxmlParser extends AbstractParser implements Idiom {
             return parse(location, mimeType, charset, dest);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
+            if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             
-            throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
+            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         } finally {
             if (dest != null) FileUtils.deletedelete(dest);
         }
     }
-    
-    @Override
-    public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
-    }
+
 }

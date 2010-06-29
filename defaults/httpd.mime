@@ -45,6 +45,7 @@ kml     = application/vnd.google-earth.kml+xml
 lha     = application/x-lzh
 lzh     = application/x-lzh
 m4v     = video/x-m4v
+mf      = application/octet-stream
 mov     = video/quicktime
 mp2     = audio/mpeg
 mp3     = audio/mpeg

@@ -71,17 +71,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.ProxySettings;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.ParserException;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
-import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
@@ -149,6 +147,7 @@ import de.anomic.server.serverCore;
 import de.anomic.tools.crypt;
 import de.anomic.tools.CryptoLib;
 import de.anomic.yacy.yacyBuildProperties;
+import de.anomic.yacy.yacyChannel;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -1338,7 +1337,7 @@ public final class Switchboard extends serverSwitch {
                     0        
             );
             response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
-            indexingQueueEntry queueEntry = new indexingQueueEntry(Segments.Process.SURROGATES, response, document, null);
+            indexingQueueEntry queueEntry = new indexingQueueEntry(Segments.Process.SURROGATES, response, new Document[]{document}, null);
             
             // place the queue entry into the concurrent process of the condenser (document analysis)
             try {
@@ -1402,17 +1401,17 @@ public final class Switchboard extends serverSwitch {
     public static class indexingQueueEntry extends WorkflowJob {
         public Segments.Process process;
         public Response queueEntry;
-        public Document document;
-        public Condenser condenser;
+        public Document[] documents;
+        public Condenser[] condenser;
         public indexingQueueEntry(
                 final Segments.Process process,
                 final Response queueEntry,
-                final Document document,
-                final Condenser condenser) {
+                final Document[] documents,
+                final Condenser[] condenser) {
             super();
             this.process = process;
             this.queueEntry = queueEntry;
-            this.document = document;
+            this.documents = documents;
             this.condenser = condenser;
         }
     }
@@ -1670,22 +1669,22 @@ public final class Switchboard extends serverSwitch {
         // debug
         if (log.isFinest()) log.logFinest("PARSE "+ in.queueEntry);
         
-        Document document = null;
+        Document[] documents = null;
         try {
-            document = parseDocument(in.queueEntry);
+            documents = parseDocument(in.queueEntry);
         } catch (final InterruptedException e) {
-            document = null;
+            documents = null;
         } catch (final Exception e) {
-            document = null;
+            documents = null;
         }
-        if (document == null) {
+        if (documents == null) {
             return null;
         }
-        return new indexingQueueEntry(in.process, in.queueEntry, document, null);
+        return new indexingQueueEntry(in.process, in.queueEntry, documents, null);
     }
     
-    private Document parseDocument(final Response response) throws InterruptedException {
-        Document document = null;
+    private Document[] parseDocument(final Response response) throws InterruptedException {
+        Document[] documents = null;
         final EventOrigin processCase = response.processCase(peers.mySeed().hash);
         
         if (this.log.isFine()) log.logFine("processResourceStack processCase=" + processCase +
@@ -1713,15 +1712,11 @@ public final class Switchboard extends serverSwitch {
         
         try {
             // parse the document
-            document = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), b);
-            assert(document != null) : "Unexpected error. Parser returned null.";
-        } catch (final ParserException e) {
+            documents = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), b);
+            assert(documents != null) : "Unexpected error. Parser returned null.";
+        } catch (final Parser.Failure e) {
             this.log.logWarning("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
             addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), e.getMessage());
-            if (document != null) {
-                document.close();
-                document = null;
-            }
             return null;
         }
         
@@ -1734,12 +1729,10 @@ public final class Switchboard extends serverSwitch {
                 ((response.profile() == null) || (response.depth() < response.profile().depth()))
         ) {
             // get the hyperlinks
-            final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
+            final Map<MultiProtocolURI, String> hl = Document.getHyperlinks(documents);
             
             // add all images also to the crawl stack
-            for (ImageEntry imageReference : document.getImages().values()) {
-                hl.put(imageReference.url(), imageReference.alt());
-            }
+            hl.putAll(Document.getImagelinks(documents));
             
             // insert those hyperlinks to the crawler
             MultiProtocolURI nextUrl;
@@ -1773,50 +1766,69 @@ public final class Switchboard extends serverSwitch {
                     ", STACKING TIME = " + (stackEndTime-stackStartTime) +
                     ", PARSING TIME = " + (parsingEndTime-parsingStartTime));
         }
-        return document;
+        return documents;
     }
     
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
-        
-        if (in.document.indexingDenied()) {
-            if (log.isInfo()) log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': denied by document-attached noindexing rule");
-            return new indexingQueueEntry(in.process, in.queueEntry, in.document, null);
-        }
-        
         if (!in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia()) {
             if (log.isInfo()) log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': indexing not wanted by crawl profile");
-            return new indexingQueueEntry(in.process, in.queueEntry, in.document, null);
+            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+        }
+        List<Document> doclist = new ArrayList<Document>();
+        
+        // check which files may take part in the indexing process
+        for (Document document: in.documents) {
+            if (document.indexingDenied()) {
+                if (log.isInfo()) log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': denied by document-attached noindexing rule");
+                continue;
+            }
+            doclist.add(document);
         }
         
-        // strip out words and generate statistics
+        if (doclist.size() == 0)  return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+        in.documents = doclist.toArray(new Document[doclist.size()]);
+        Condenser[] condenser = new Condenser[in.documents.length];
         if (this.log.isFine()) log.logFine("Condensing for '" + in.queueEntry.url().toNormalform(false, true) + "'");
-        try {
-            Condenser condenser = new Condenser(in.document, in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia());
+        for (int i = 0; i < in.documents.length; i++) {
+            // strip out words and generate statistics
+            try {
+                condenser[i] = new Condenser(in.documents[i], in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia());
+    
+                // update image result list statistics
+                // its good to do this concurrently here, because it needs a DNS lookup
+                // to compute a URL hash which is necessary for a double-check
+                final CrawlProfile.entry profile = in.queueEntry.profile();
+                ResultImages.registerImages(in.queueEntry.url(), in.documents[i], (profile == null) ? true : !profile.remoteIndexing());
 
-            // update image result list statistics
-            // its good to do this concurrently here, because it needs a DNS lookup
-            // to compute a URL hash which is necessary for a double-check
-            final CrawlProfile.entry profile = in.queueEntry.profile();
-            ResultImages.registerImages(in.document, (profile == null) ? true : !profile.remoteIndexing());
-            
-            return new indexingQueueEntry(in.process, in.queueEntry, in.document, condenser);
-        } catch (final UnsupportedEncodingException e) {
-            return null;
+            } catch (final UnsupportedEncodingException e) {
+                return null;
+            }
         }
+        return new indexingQueueEntry(in.process, in.queueEntry, in.documents, condenser);
     }
     
     public indexingQueueEntry webStructureAnalysis(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_STRUCTUREANALYSIS);
-        final Integer[] ioLinks = webStructure.generateCitationReference(in.document, in.condenser, in.queueEntry.lastModified()); // [outlinksSame, outlinksOther]
-        in.document.setInboundLinks(ioLinks[0].intValue());
-        in.document.setOutboundLinks(ioLinks[1].intValue());
+        for (int i = 0; i < in.documents.length; i++) {
+            assert webStructure != null;
+            assert in != null;
+            assert in.queueEntry != null;
+            assert in.documents != null;
+            assert in.queueEntry != null;
+            final Integer[] ioLinks = webStructure.generateCitationReference(in.queueEntry.url(), in.documents[i], (in.condenser == null) ? null : in.condenser[i], in.queueEntry.lastModified()); // [outlinksSame, outlinksOther]
+            in.documents[i].setInboundLinks(ioLinks[0].intValue());
+            in.documents[i].setOutboundLinks(ioLinks[1].intValue());
+        }
         return in;
     }
     
     public void storeDocumentIndex(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
-        storeDocumentIndex(in.process, in.queueEntry, in.document, in.condenser, null);
+        // the condenser may be null in case that an indexing is not wanted (there may be a no-indexing flag in the file)
+        if (in.condenser != null) for (int i = 0; i < in.documents.length; i++) {
+            storeDocumentIndex(in.process, in.queueEntry, in.documents[i], in.condenser[i], null);
+        }
         in.queueEntry.updateStatus(Response.QUEUE_STATE_FINISHED);
     }
     
@@ -1855,7 +1867,7 @@ public final class Switchboard extends serverSwitch {
                     document,
                     condenser,
                     searchEvent);
-            RSSFeed.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? RSSFeed.YaCyChannel.LOCALINDEXING : RSSFeed.YaCyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
+            yacyChannel.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage());
@@ -1899,7 +1911,7 @@ public final class Switchboard extends serverSwitch {
         // add the landing page to the index. should not load that again since it should be in the cache
         if (url != null) try {
             this.addToIndex(url, searchEvent, heuristicName);
-        } catch (IOException e) {} catch (ParserException e) {}
+        } catch (IOException e) {} catch (Parser.Failure e) {}
         
         // check if some of the links match with the query
         Map<MultiProtocolURI, String> matcher = searchEvent.getQuery().separateMatches(links);
@@ -1908,14 +1920,14 @@ public final class Switchboard extends serverSwitch {
         for (Map.Entry<MultiProtocolURI, String> entry: matcher.entrySet()) {
             try {
                 this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
-            } catch (IOException e) {} catch (ParserException e) {}
+            } catch (IOException e) {} catch (Parser.Failure e) {}
         }
         
         // take then the no-matcher and load them also
         for (Map.Entry<MultiProtocolURI, String> entry: links.entrySet()) {
             try {
                 this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
-            } catch (IOException e) {} catch (ParserException e) {}
+            } catch (IOException e) {} catch (Parser.Failure e) {}
         }
     }
     
@@ -1925,9 +1937,9 @@ public final class Switchboard extends serverSwitch {
      * @param url the url that shall be indexed
      * @param searchEvent (optional) a search event that shall get results from the indexed pages directly feeded. If object is null then it is ignored
      * @throws IOException
-     * @throws ParserException
+     * @throws Parser.Failure
      */
-    public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName) throws IOException, ParserException {
+    public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName) throws IOException, Parser.Failure {
         final Segments.Process process = Segments.Process.LOCALCRAWLING;
         if (indexSegments.segment(process).urlMetadata.exists(url.hash())) {
             searchEvent.addHeuristic(url.hash(), heuristicName, true);
@@ -1946,16 +1958,18 @@ public final class Switchboard extends serverSwitch {
                 if (response == null) throw new IOException("response == null");
                 if (response.getContent() == null) throw new IOException("content == null");
                 if (response.getResponseHeader() == null) throw new IOException("header == null");
-                Document document = response.parse();
-                if (document.indexingDenied()) throw new ParserException("indexing is denied", url);
-                Condenser condenser = new Condenser(document, true, true);
-                ResultImages.registerImages(document, true);
-                webStructure.generateCitationReference(document, condenser, response.lastModified());
-                storeDocumentIndex(process, response, document, condenser, searchEvent);
-                log.logInfo("heuristic fill of url " + url.toNormalform(true, true) + " finished");
+                Document[] documents = response.parse();
+                if (documents != null) for (Document document: documents) {
+                    if (document.indexingDenied()) throw new Parser.Failure("indexing is denied", url);
+                    Condenser condenser = new Condenser(document, true, true);
+                    ResultImages.registerImages(url, document, true);
+                    webStructure.generateCitationReference(url, document, condenser, response.lastModified());
+                    storeDocumentIndex(process, response, document, condenser, searchEvent);
+                    log.logInfo("heuristic fill of url " + url.toNormalform(true, true) + " finished");
+                }
             } catch (IOException e) {
                 //Log.logException(e);
-            } catch (ParserException e) {
+            } catch (Parser.Failure e) {
                 //Log.logException(e);
             }
         }}.start();

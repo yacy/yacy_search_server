@@ -32,11 +32,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.document.geolocalization.Location;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -70,6 +69,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.graphics.ProfilingGraph;
+import de.anomic.yacy.yacyChannel;
 
 public class yacysearch {
 
@@ -435,22 +435,22 @@ public class yacysearch {
                 final URIMetadataRow urlentry = indexSegment.urlMetadata().load(recommendHash.getBytes(), null, 0);
                 if (urlentry != null) {
                     final URIMetadataRow.Components metadata = urlentry.metadata();
-                    Document document = null;
+                    Document[] documents = null;
                     try {
-                        document = sb.loader.loadDocument(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE);
+                        documents = sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE);
                     } catch (IOException e) {
-                    } catch (ParserException e) {
+                    } catch (Parser.Failure e) {
                     }
-                    if (document != null) {
+                    if (documents != null) {
                         // create a news message
                         final HashMap<String, String> map = new HashMap<String, String>();
                         map.put("url", metadata.url().toNormalform(false, true).replace(',', '|'));
                         map.put("title", metadata.dc_title().replace(',', ' '));
-                        map.put("description", document.dc_title().replace(',', ' '));
-                        map.put("author", document.dc_creator());
-                        map.put("tags", document.dc_subject(' '));
+                        map.put("description", documents[0].dc_title().replace(',', ' '));
+                        map.put("author", documents[0].dc_creator());
+                        map.put("tags", documents[0].dc_subject(' '));
                         sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map);
-                        document.close();
+                        documents[0].close();
                     }
                 }
             }
@@ -498,7 +498,7 @@ public class yacysearch {
             
             // log
             Log.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + QueryParams.hashSet2hashString(theQuery.queryHashes) + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
-            RSSFeed.channels(RSSFeed.YaCyChannel.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
+            yacyChannel.channels(yacyChannel.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event

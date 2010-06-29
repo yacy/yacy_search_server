@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 
 public class ResultImages {
@@ -50,9 +51,9 @@ public class ResultImages {
     // the same images may be linked from different pages
     private static final ConcurrentHashMap<MultiProtocolURI, Long> doubleCheck = new ConcurrentHashMap<MultiProtocolURI, Long>(); // (url, time) when the url appeared first
     
-    public static void registerImages(final Document document, final boolean privateEntry) {
+    public static void registerImages(final DigestURI source, final Document document, final boolean privateEntry) {
         if (document == null) return;
-        if (document.dc_source() == null) return;
+        if (source == null) return;
         
         final HashMap<MultiProtocolURI, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
@@ -81,15 +82,15 @@ public class ResultImages {
             }
             if (good) {
                 if (privateEntry) {
-                    privateImageQueueHigh.add(new OriginEntry(image, document.dc_source()));
+                    privateImageQueueHigh.add(new OriginEntry(image, source));
                 } else {
-                    publicImageQueueHigh.add(new OriginEntry(image, document.dc_source()));
+                    publicImageQueueHigh.add(new OriginEntry(image, source));
                 }
             } else {
                 if (privateEntry) {
-                    privateImageQueueLow.add(new OriginEntry(image, document.dc_source()));
+                    privateImageQueueLow.add(new OriginEntry(image, source));
                 } else {
-                    publicImageQueueLow.add(new OriginEntry(image, document.dc_source()));
+                    publicImageQueueLow.add(new OriginEntry(image, source));
                 }
             }
         }

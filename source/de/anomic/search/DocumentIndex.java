@@ -38,7 +38,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.TextParser;
-import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
@@ -121,14 +120,13 @@ public class DocumentIndex extends Segment {
         if (url == null) throw new IOException("file = null");
         if (url.isDirectory()) throw new IOException("file should be a document, not a path");
         if (!url.canRead()) throw new IOException("cannot read file");
-        Document document;
+        Document[] documents;
         try {
-            document = TextParser.parseSource(url, null, null, url.length(), url.getInputStream());
-        } catch (InterruptedException e) {
-            throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
-        } catch (ParserException e) {
+            documents = TextParser.parseSource(url, null, null, url.length(), url.getInputStream());
+        } catch (Exception e) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
+        Document document = Document.mergeDocuments(url, null, documents);
         final Condenser condenser = new Condenser(document, true, true);
         return super.storeDocument(
                 url,

@@ -35,10 +35,8 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.MultiProtocolURI;
@@ -46,8 +44,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
+import net.yacy.document.Parser;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
@@ -57,28 +54,19 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
 
-public class rssParser extends AbstractParser implements Idiom {
+public class rssParser extends AbstractParser implements Parser {
 
-    /**
-     * a list of mime types that are supported by this parser class
-     * @see #getSupportedMimeTypes()
-     */  
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
+	public rssParser() {
+		super("Rich Site Summary/Atom Feed Parser");
         SUPPORTED_EXTENSIONS.add("rss");
         SUPPORTED_EXTENSIONS.add("xml");
         SUPPORTED_MIME_TYPES.add("XML");
         SUPPORTED_MIME_TYPES.add("text/rss");
         SUPPORTED_MIME_TYPES.add("application/rss+xml");
         SUPPORTED_MIME_TYPES.add("application/atom+xml");
-    }
-    
-	public rssParser() {
-		super("Rich Site Summary/Atom Feed Parser"); 
 	}
 
-	public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+	public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
 
         final LinkedList<String> feedSections = new LinkedList<String>();
         final HashMap<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
@@ -90,15 +78,15 @@ public class rssParser extends AbstractParser implements Idiom {
         try {
             feed = new RSSReader(source).getFeed();
         } catch (IOException e) {
-            throw new ParserException("reading feed failed: " + e.getMessage(), location);
+            throw new Parser.Failure("reading feed failed: " + e.getMessage(), location);
         }
-        if (feed == null) throw new ParserException("no feed in document", location);
+        if (feed == null) throw new Parser.Failure("no feed in document", location);
         
         String feedTitle = "";
         String feedDescription = "";
         String feedPublisher = "";
         String[] feedSubject = {""};
-        if (feed.getChannel() != null) {//throw new ParserException("no channel in document",location);
+        if (feed.getChannel() != null) {//throw new Parser.Failure("no channel in document",location);
             
             // get the rss feed title and description
             feedTitle = feed.getChannel().getTitle();
@@ -126,8 +114,6 @@ public class rssParser extends AbstractParser implements Idiom {
         
         // loop through the feed items
         for (final Hit item: feed) {
-                // check for interruption
-                checkInterruption();
                 
     			final String itemTitle = item.getTitle();
     			MultiProtocolURI itemURL = null;
@@ -183,7 +169,7 @@ public class rssParser extends AbstractParser implements Idiom {
                 }
         }
         
-        final Document theDoc = new Document(
+        final Document[] docs = new Document[]{new Document(
                 location,
                 mimeType,
                 "UTF-8",
@@ -197,7 +183,7 @@ public class rssParser extends AbstractParser implements Idiom {
                 text.getBytes(),
                 anchors,
                 images,
-                false);            
+                false)};
         // close streams
         try {
             text.close();
@@ -205,21 +191,6 @@ public class rssParser extends AbstractParser implements Idiom {
         } catch (IOException e) {
         }
         
-        return theDoc;
+        return docs;
 	}
-
-	public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
-
-    @Override
-	public void reset() {
-        // Nothing todo here at the moment
-        super.reset();
-	}
-
 }
