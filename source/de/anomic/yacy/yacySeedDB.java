@@ -968,10 +968,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
             this.minVersion = minVersion;
             try {
                 it = (firstKey == null) ? database.maps(up, rot) : database.maps(up, rot, firstKey, secondKey);
+                float version;
                 while (true) {
                     nextSeed = internalNext();
                     if (nextSeed == null) break;
-                    if (nextSeed.getVersion() >= this.minVersion) break;
+                    version = nextSeed.getVersion();
+                    if (version >= this.minVersion || version == 0.0) break; // include 0.0 to access always developer peers
                 }
             } catch (final IOException e) {
                 Log.logException(e);
@@ -1034,13 +1036,15 @@ public final class yacySeedDB implements AlternativeDomainNames {
         
         public yacySeed next() {
             final yacySeed seed = nextSeed;
+            float version;
             try {while (true) {
                 nextSeed = internalNext();
                 if (nextSeed == null) break;
-                if (nextSeed.getVersion() >= this.minVersion) break;
+                version = nextSeed.getVersion();
+                if (version >= this.minVersion || version == 0.0) break; // include 0.0 to access always developer peers
             }} catch (final kelondroException e) {
                 Log.logException(e);
-            	// eergency reset
+            	// emergency reset
             	yacyCore.log.logSevere("seed-db emergency reset", e);
             	try {
 					database.clear();
