@@ -1772,15 +1772,21 @@ Connects<br/>per hour==Verbindungen<br/>pro Stunde
 
 Version==Version
 Own/Other==Eigene/Andere
-Network legend:==Netzwerklegende:
 dark font==schwarze Schrift
 senior/principal peers==Senior/Principal Peers
 lightred font==hellrote Schrift
-passiv peers \( &lt; 5 hour passive time\)==Passive Peers ( &lt; 5 Stunden passiv)
+>passive peers<==>passive Peers<
 turquoise font==türkise Schrift
 junior peers==Junior Peers
 red point==roter Punkt
 this peer==Ihr Peer
+>waves<==>Wellen<
+>crawling activity<==>Crawl Aktivität<
+>red lines<==>rote Linien<
+>DHT-out<==>DHT ausgehend<
+>green lines<==>grüne Linien<
+>DHT-in<==>DHT eingehend<
+#DHT-out==DHT-out
 #You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
 #Please check your internet connection.==Bitte überprüfen Sie Ihre Internetverbindung.
 #You are not in online mode. To get online, press this button:==Sie sind nicht im Online-Modus. Um Online zu gehen, drücken Sie diesen Knopf:
