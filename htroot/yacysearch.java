@@ -509,8 +509,8 @@ public class yacysearch {
             final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader);
             try {Thread.sleep(global ? 100 : 10);} catch (InterruptedException e1) {} // wait a little time to get first results in the search
             
-            if (sitehost != null && sb.getConfigBool("heuristic.site", false)) sb.heuristicSite(theSearch, sitehost);
-            if ((heuristic >= 0  && authenticated) || sb.getConfigBool("heuristic.scroogle", false)) sb.heuristicScroogle(theSearch);
+            if (sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated) sb.heuristicSite(theSearch, sitehost);
+            if ((heuristic >= 0  || sb.getConfigBool("heuristic.scroogle", false)) && authenticated) sb.heuristicScroogle(theSearch);
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");
