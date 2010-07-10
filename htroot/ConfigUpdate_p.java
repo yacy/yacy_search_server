@@ -66,7 +66,8 @@ public class ConfigUpdate_p {
         prop.put("candeploy_autoUpdate", "0");
         
         if (post != null) {
-            if (post.containsKey("update")) {
+            // check if update is supposed to be installed and a release is defined
+            if (post.containsKey("update") && post.get("releaseinstall", "").length() > 0) {
                 prop.put("forwardToSteering", "1");
                 prop.putHTML("forwardToSteering_release",post.get("releaseinstall", ""));
                 prop.put("deploys", "1");

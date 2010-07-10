@@ -77,7 +77,7 @@ public class Steering {
             final boolean devenvironment = new File(sb.getRootPath(), ".svn").exists();
             final String releaseFileName = post.get("releaseinstall", "");
             final File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + releaseFileName);
-            if ((!devenvironment) && (releaseFile.length() > 0) && (releaseFile.exists())) {
+            if ((!devenvironment) && (releaseFileName.length() > 0) && (releaseFile.exists())) {
                 yacyRelease.deployRelease(releaseFile);
             }
             prop.put("info", "5");
