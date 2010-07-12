@@ -1178,6 +1178,11 @@ public final class Switchboard extends serverSwitch {
         tables.close();
         UPnP.deletePortMapping();
         Tray.removeTray();
+        try {
+			net.yacy.cora.protocol.Client.closeConnectionManager();
+		} catch (InterruptedException e) {
+			Log.logException(e);
+		}
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     

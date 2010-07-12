@@ -51,6 +51,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -78,6 +79,8 @@ import net.yacy.repository.Blacklist;
 
 import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
 import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.entity.mime.content.StringBody;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.retrieval.EventOrigin;
@@ -141,14 +144,18 @@ public final class yacyClient {
         
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
-        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), null, salt);
+//        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), null, salt);
         try {
             // generate request
-            post.add(new DefaultCharsetStringPart("count", "20"));
-            post.add(new DefaultCharsetStringPart("seed", mySeed.genSeedStr(salt)));
+        	final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+//            post.add(new DefaultCharsetStringPart("count", "20"));
+            parts.put("count", new StringBody("20"));
+//            post.add(new DefaultCharsetStringPart("seed", mySeed.genSeedStr(salt)));
+            parts.put("seed", new StringBody(mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
-            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 10000, false);
+//            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 10000, false);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts, 10000);
             yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = FileUtils.table(content);
         } catch (final Exception e) {
@@ -1092,6 +1099,26 @@ public final class yacyClient {
             } catch (final IOException e) {
                 Log.logException(e);
             }
+            // new data
+            final LinkedHashMap<String,ContentBody> newpost = new LinkedHashMap<String,ContentBody>();
+            try {
+				newpost.put("process", new StringBody("permission"));
+				newpost.put("purpose", new StringBody("crcon"));
+			} catch (UnsupportedEncodingException e) {
+				Log.logException(e);
+			}
+			byte[] res;
+			try {
+				res = HttpConnector.wput(url.toString(), vhost, newpost, timeout);
+				System.out.println(new String(res));
+			} catch (IOException e1) {
+				Log.logException(e1);
+			}
+			try {
+				net.yacy.cora.protocol.Client.closeConnectionManager();
+			} catch (InterruptedException e) {
+				Log.logException(e);
+			}
         }
     }
 

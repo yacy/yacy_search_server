@@ -22,14 +22,16 @@
 package net.yacy.cora.protocol;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
 
 import org.apache.commons.httpclient.methods.multipart.Part;
+import org.apache.http.entity.mime.content.ContentBody;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.client.Client;
+// import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseContainer;
@@ -65,7 +67,7 @@ public class HttpConnector {
         final RequestHeader header = new RequestHeader();
         header.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
         header.put(HeaderFramework.HOST, vhost);
-        final Client client = new Client(timeout, header);
+        final de.anomic.http.client.Client client = new de.anomic.http.client.Client(timeout, header);
         
         ResponseContainer res = null;
         byte[] content = null;
@@ -82,29 +84,48 @@ public class HttpConnector {
         return content;
     }
     
+	public static byte[] wput(final String url, final String vhost, LinkedHashMap<String,ContentBody> post, final int timeout) throws IOException {
+		final Client client = new Client();
+		client.setTimout(timeout);
+		client.setUserAgent(HTTPLoader.yacyUserAgent);
+		client.setHost(vhost);
+		
+		return client.POSTbytes(url, post);
+	}
+	
+	public static byte[] wget(final String url, final String vhost, final int timeout) throws IOException {
+		final Client client = new Client();
+        client.setTimout(timeout);
+		client.setUserAgent(HTTPLoader.yacyUserAgent);
+        client.setHost(vhost);
+        
+        return client.GETbytes(url);
+	}
+        
+    
     public static byte[] wget(final MultiProtocolURI url, final int timeout) throws IOException {
         return wget(url.toNormalform(false, false), url.getHost(), timeout);
     }
     
-    public static byte[] wget(final String url, final String vhost, final int timeout) throws IOException {
-        final RequestHeader header = new RequestHeader();
-        header.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-        header.put(HeaderFramework.HOST, vhost);
-        final Client client = new Client(timeout, header);
-        
-        ResponseContainer res = null;
-        byte[] content = null;
-        try {
-            // send request/data
-            res = client.GET(url);
-            content = res.getData();
-        } finally {
-            if(res != null) {
-                // release connection
-                res.closeStream();
-            }
-        }
-        return content;
-    }
+//    public static byte[] wget(final String url, final String vhost, final int timeout) throws IOException {
+//        final RequestHeader header = new RequestHeader();
+//        header.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+//        header.put(HeaderFramework.HOST, vhost);
+//        final de.anomic.http.client.Client client = new de.anomic.http.client.Client(timeout, header);
+//        
+//        ResponseContainer res = null;
+//        byte[] content = null;
+//        try {
+//            // send request/data
+//            res = client.GET(url);
+//            content = res.getData();
+//        } finally {
+//            if(res != null) {
+//                // release connection
+//                res.closeStream();
+//            }
+//        }
+//        return content;
+//    }
 
 }
