@@ -60,6 +60,7 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
+import net.yacy.cora.protocol.ByteArrayBody;
 import net.yacy.cora.protocol.HttpConnector;
 import net.yacy.cora.services.Search;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -77,7 +78,7 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
-import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
+//import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
@@ -85,7 +86,6 @@ import org.apache.http.entity.mime.content.StringBody;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.client.DefaultCharsetFilePart;
 import de.anomic.http.client.DefaultCharsetStringPart;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
@@ -147,10 +147,10 @@ public final class yacyClient {
 //        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), null, salt);
         try {
             // generate request
-        	final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
 //            post.add(new DefaultCharsetStringPart("count", "20"));
-            parts.put("count", new StringBody("20"));
 //            post.add(new DefaultCharsetStringPart("seed", mySeed.genSeedStr(salt)));
+        	final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+            parts.put("count", new StringBody("20"));
             parts.put("seed", new StringBody(mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
@@ -336,15 +336,20 @@ public final class yacyClient {
         
         // prepare request
         final String salt = crypt.randomSalt();
-        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), target.hash, salt);
-        post.add(new DefaultCharsetStringPart("call", "remotecrawl"));
-        post.add(new DefaultCharsetStringPart("count", Integer.toString(maxCount)));
-        post.add(new DefaultCharsetStringPart("time", Long.toString(maxTime)));
+//        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), target.hash, salt);
+//        post.add(new DefaultCharsetStringPart("call", "remotecrawl"));
+//        post.add(new DefaultCharsetStringPart("count", Integer.toString(maxCount)));
+//        post.add(new DefaultCharsetStringPart("time", Long.toString(maxTime)));
         
         // send request
         try {
             /* a long time-out is needed */
-            final byte[] result = HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, (int) maxTime); 
+//            final byte[] result = HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", post, (int) maxTime); 
+            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            parts.put("call", new StringBody("remotecrawl"));
+            parts.put("count", new StringBody(Integer.toString(maxCount)));
+            parts.put("time", new StringBody(Long.toString(maxTime)));
+            final byte[] result = HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/urls.xml", target.getHexHash() + ".yacyh", parts, (int) maxTime); 
             final RSSReader reader = RSSReader.parse(result);
             if (reader == null) {
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
@@ -417,25 +422,25 @@ public final class yacyClient {
 
         // prepare request
         final String salt = crypt.randomSalt();
-        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), target.hash, salt);
-        post.add(new DefaultCharsetStringPart("myseed", mySeed.genSeedStr(salt)));
-        post.add(new DefaultCharsetStringPart("count", Integer.toString(Math.max(10, count))));
-        post.add(new DefaultCharsetStringPart("resource", ((global) ? "global" : "local")));
-        post.add(new DefaultCharsetStringPart("partitions", Integer.toString(partitions)));
-        post.add(new DefaultCharsetStringPart("query", wordhashes));
-        post.add(new DefaultCharsetStringPart("exclude", excludehashes));
-        post.add(new DefaultCharsetStringPart("duetime", "1000"));
-        post.add(new DefaultCharsetStringPart("urls", urlhashes));
-        post.add(new DefaultCharsetStringPart("prefer", prefer.toString()));
-        post.add(new DefaultCharsetStringPart("filter", filter.toString()));
-        post.add(new DefaultCharsetStringPart("language", language));
-        post.add(new DefaultCharsetStringPart("sitehash", sitehash));
-        post.add(new DefaultCharsetStringPart("authorhash", authorhash));
-        post.add(new DefaultCharsetStringPart("ttl", "0"));
-        post.add(new DefaultCharsetStringPart("maxdist", Integer.toString(maxDistance)));
-        post.add(new DefaultCharsetStringPart("profile", crypt.simpleEncode(rankingProfile.toExternalString())));
-        post.add(new DefaultCharsetStringPart("constraint", (constraint == null) ? "" : constraint.exportB64()));
-        if (secondarySearchSuperviser != null) post.add(new DefaultCharsetStringPart("abstracts", "auto"));
+//        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), target.hash, salt);
+//        post.add(new DefaultCharsetStringPart("myseed", mySeed.genSeedStr(salt)));
+//        post.add(new DefaultCharsetStringPart("count", Integer.toString(Math.max(10, count))));
+//        post.add(new DefaultCharsetStringPart("resource", ((global) ? "global" : "local")));
+//        post.add(new DefaultCharsetStringPart("partitions", Integer.toString(partitions)));
+//        post.add(new DefaultCharsetStringPart("query", wordhashes));
+//        post.add(new DefaultCharsetStringPart("exclude", excludehashes));
+//        post.add(new DefaultCharsetStringPart("duetime", "1000"));
+//        post.add(new DefaultCharsetStringPart("urls", urlhashes));
+//        post.add(new DefaultCharsetStringPart("prefer", prefer.toString()));
+//        post.add(new DefaultCharsetStringPart("filter", filter.toString()));
+//        post.add(new DefaultCharsetStringPart("language", language));
+//        post.add(new DefaultCharsetStringPart("sitehash", sitehash));
+//        post.add(new DefaultCharsetStringPart("authorhash", authorhash));
+//        post.add(new DefaultCharsetStringPart("ttl", "0"));
+//        post.add(new DefaultCharsetStringPart("maxdist", Integer.toString(maxDistance)));
+//        post.add(new DefaultCharsetStringPart("profile", crypt.simpleEncode(rankingProfile.toExternalString())));
+//        post.add(new DefaultCharsetStringPart("constraint", (constraint == null) ? "" : constraint.exportB64()));
+//        if (secondarySearchSuperviser != null) post.add(new DefaultCharsetStringPart("abstracts", "auto"));
         final long timestamp = System.currentTimeMillis();
         boolean thisIsASecondarySearch = urlhashes.length() > 0;
         assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
@@ -443,7 +448,28 @@ public final class yacyClient {
         // send request
         Map<String, String> result = null;
         try {
-          	result = FileUtils.table(HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000));
+//          	result = FileUtils.table(HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000));
+          	final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+          	parts.put("myseed", new StringBody(mySeed.genSeedStr(salt)));
+          	parts.put("count", new StringBody(Integer.toString(Math.max(10, count))));
+          	parts.put("resource", new StringBody(((global) ? "global" : "local")));
+          	parts.put("partitions", new StringBody(Integer.toString(partitions)));
+          	parts.put("query", new StringBody(wordhashes));
+          	parts.put("exclude", new StringBody(excludehashes));
+          	parts.put("duetime", new StringBody("1000"));
+          	parts.put("urls", new StringBody(urlhashes));
+          	parts.put("prefer", new StringBody(prefer.toString()));
+          	parts.put("filter", new StringBody(filter.toString()));
+          	parts.put("language", new StringBody(language));
+          	parts.put("sitehash", new StringBody(sitehash));
+          	parts.put("authorhash", new StringBody(authorhash));
+          	parts.put("ttl", new StringBody("0"));
+          	parts.put("maxdist", new StringBody(Integer.toString(maxDistance)));
+          	parts.put("profile", new StringBody(crypt.simpleEncode(rankingProfile.toExternalString())));
+          	parts.put("constraint", new StringBody((constraint == null) ? "" : constraint.exportB64()));
+          	if (secondarySearchSuperviser != null)
+          		parts.put("abstracts", new StringBody("auto"));
+          	result = FileUtils.table(HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", parts, 60000));
         } catch (final IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore);
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
@@ -706,16 +732,23 @@ public final class yacyClient {
 
         // prepare request
         final String salt = crypt.randomSalt();
-        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), null, salt);
-        post.add(new DefaultCharsetStringPart("process", "permission"));
-        post.add(new DefaultCharsetStringPart("purpose", "crcon"));
-        post.add(new DefaultCharsetStringPart("filename", filename));
-        post.add(new DefaultCharsetStringPart("filesize", Long.toString(filesize)));
-        post.add(new DefaultCharsetStringPart("can-send-protocol", "http"));
+//        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), null, salt);
+//        post.add(new DefaultCharsetStringPart("process", "permission"));
+//        post.add(new DefaultCharsetStringPart("purpose", "crcon"));
+//        post.add(new DefaultCharsetStringPart("filename", filename));
+//        post.add(new DefaultCharsetStringPart("filesize", Long.toString(filesize)));
+//        post.add(new DefaultCharsetStringPart("can-send-protocol", "http"));
         
         // send request
         try {
-            final byte[] content = HttpConnector.wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 10000);
+            // final byte[] content = HttpConnector.wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 10000);
+            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+            parts.put("process", new StringBody("permission"));
+            parts.put("purpose", new StringBody("crcon"));
+            parts.put("filename", new StringBody(filename));
+            parts.put("filesize", new StringBody(Long.toString(filesize)));
+            parts.put("can-send-protocol", new StringBody("http"));
+            final byte[] content = HttpConnector.wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, parts, 10000);
             final Map<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
@@ -729,17 +762,25 @@ public final class yacyClient {
         
         // prepare request
         final String salt = crypt.randomSalt();
-        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), null, salt);
-        post.add(new DefaultCharsetStringPart("process", "store"));
-        post.add(new DefaultCharsetStringPart("purpose", "crcon"));
-        post.add(new DefaultCharsetStringPart("filesize", Long.toString(file.length)));
-        post.add(new DefaultCharsetStringPart("md5", Digest.encodeMD5Hex(file)));
-        post.add(new DefaultCharsetStringPart("access", access));
-        post.add(new DefaultCharsetFilePart("filename", new ByteArrayPartSource(filename, file)));
+//        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), null, salt);
+//        post.add(new DefaultCharsetStringPart("process", "store"));
+//        post.add(new DefaultCharsetStringPart("purpose", "crcon"));
+//        post.add(new DefaultCharsetStringPart("filesize", Long.toString(file.length)));
+//        post.add(new DefaultCharsetStringPart("md5", Digest.encodeMD5Hex(file)));
+//        post.add(new DefaultCharsetStringPart("access", access));
+//        post.add(new DefaultCharsetFilePart("filename", new ByteArrayPartSource(filename, file)));
         
         // send request
         try {
-            final byte[] content = HttpConnector.wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 20000);
+//            final byte[] content = HttpConnector.wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 20000);
+            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+            parts.put("process", new StringBody("store"));
+            parts.put("purpose", new StringBody("crcon"));
+            parts.put("filesize", new StringBody(Long.toString(file.length)));
+            parts.put("md5", new StringBody(Digest.encodeMD5Hex(file)));
+            parts.put("access", new StringBody(access));
+            parts.put("filename", new ByteArrayBody(file, filename));
+            final byte[] content = HttpConnector.wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, parts, 20000);
             final Map<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
@@ -800,13 +841,13 @@ public final class yacyClient {
         
         // prepare request
         final String salt = crypt.randomSalt();
-        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), target.hash, salt);
-        post.add(new DefaultCharsetStringPart("process", process));
-        post.add(new DefaultCharsetStringPart("urlhash", ((entry == null) ? "" : new String(entry.hash()))));
-        post.add(new DefaultCharsetStringPart("result", result));
-        post.add(new DefaultCharsetStringPart("reason", reason));
-        post.add(new DefaultCharsetStringPart("wordh", wordhashes));
-        post.add(new DefaultCharsetStringPart("lurlEntry", ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
+//        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), target.hash, salt);
+//        post.add(new DefaultCharsetStringPart("process", process));
+//        post.add(new DefaultCharsetStringPart("urlhash", ((entry == null) ? "" : new String(entry.hash()))));
+//        post.add(new DefaultCharsetStringPart("result", result));
+//        post.add(new DefaultCharsetStringPart("reason", reason));
+//        post.add(new DefaultCharsetStringPart("wordh", wordhashes));
+//        post.add(new DefaultCharsetStringPart("lurlEntry", ((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
         
         // determining target address
         final String address = target.getClusterAddress();
@@ -814,7 +855,17 @@ public final class yacyClient {
             
         // send request
         try {
-            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post, 10000);
+//            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post, 10000);
+            // prepare request
+            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            parts.put("process", new StringBody(process));
+            parts.put("urlhash", new StringBody(((entry == null) ? "" : new String(entry.hash()))));
+            parts.put("result", new StringBody(result));
+            parts.put("reason", new StringBody(reason));
+            parts.put("wordh", new StringBody(wordhashes));
+            parts.put("lurlEntry", new StringBody(((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
+            // send request
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", parts, 10000);
             return FileUtils.table(content);
         } catch (final Exception e) {
             // most probably a network time-out exception
@@ -1028,12 +1079,14 @@ public final class yacyClient {
 
         // this post a message to the remote message board
         final String salt = crypt.randomSalt();
-        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+//        final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), targetSeed.hash, salt);
          
         String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
-            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post, 5000);
+//            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post, 5000);
+            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", parts, 5000);
             return FileUtils.table(content);
         } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.getProfile error:" + e.getMessage());

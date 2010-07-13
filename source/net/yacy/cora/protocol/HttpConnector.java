@@ -38,19 +38,19 @@ import de.anomic.http.server.ResponseContainer;
 
 public class HttpConnector {
 
-    /**
-     * send data to the server named by vhost
-     * 
-     * @param address address of the server
-     * @param vhost name of the server at address which should respond
-     * @param post data to send (name-value-pairs)
-     * @param timeout in milliseconds
-     * @return response body
-     * @throws IOException
-     */
-    public static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout) throws IOException {
-        return wput(url, vhost, post, timeout, false);
-    }
+//    /**
+//     * send data to the server named by vhost
+//     * 
+//     * @param address address of the server
+//     * @param vhost name of the server at address which should respond
+//     * @param post data to send (name-value-pairs)
+//     * @param timeout in milliseconds
+//     * @return response body
+//     * @throws IOException
+//     */
+//    public static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout) throws IOException {
+//        return wput(url, vhost, post, timeout, false);
+//    }
     
     /**
      * send data to the server named by vhost
@@ -84,7 +84,17 @@ public class HttpConnector {
         return content;
     }
     
-	public static byte[] wput(final String url, final String vhost, LinkedHashMap<String,ContentBody> post, final int timeout) throws IOException {
+    /**
+     * send data to the server named by vhost
+     * 
+     * @param url address of the server
+     * @param vhost name of the server at address which should respond
+     * @param post data to send (name-value-pairs)
+     * @param timeout in milliseconds
+     * @return response body
+     * @throws IOException
+     */
+    public static byte[] wput(final String url, final String vhost, LinkedHashMap<String,ContentBody> post, final int timeout) throws IOException {
 		final Client client = new Client();
 		client.setTimout(timeout);
 		client.setUserAgent(HTTPLoader.yacyUserAgent);
@@ -93,7 +103,16 @@ public class HttpConnector {
 		return client.POSTbytes(url, post);
 	}
 	
-	public static byte[] wget(final String url, final String vhost, final int timeout) throws IOException {
+    /**
+     * get data from the server named by vhost
+     * 
+     * @param url address of the server
+     * @param vhost name of the server at address which should respond
+     * @param timeout in milliseconds
+     * @return response body
+     * @throws IOException
+     */
+    public static byte[] wget(final String url, final String vhost, final int timeout) throws IOException {
 		final Client client = new Client();
         client.setTimout(timeout);
 		client.setUserAgent(HTTPLoader.yacyUserAgent);
