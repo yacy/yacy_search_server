@@ -208,6 +208,7 @@ public class Client {
     	byte[] content = null;
     	final HttpContext httpContext = new BasicHttpContext();
     	httpUriRequest.getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+    	httpUriRequest.getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
     	if (userAgent != null)
     		httpUriRequest.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
     	if (host != null) 
@@ -228,6 +229,7 @@ public class Client {
         	}
 		} catch (final IOException e) {
 			httpUriRequest.abort();
+			count--;
 			throw e;
 		}
 		count--;
