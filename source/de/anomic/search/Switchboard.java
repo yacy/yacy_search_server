@@ -2125,10 +2125,10 @@ public final class Switchboard extends serverSwitch {
         	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
         } else if (MemoryControl.available() < 1024*1024*25) {
             log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
-        } else if (Client.connectionCount() > 25) {
-            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + Client.connectionCount());
+        } else if (net.yacy.cora.protocol.Client.connectionCount() > 5) {
+            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + net.yacy.cora.protocol.Client.connectionCount());
             // close unused connections
-            Client.cleanup();
+//            Client.cleanup();
         } else {
             byte[] startHash = null, limitHash = null;
             int tries = 10;
@@ -2157,10 +2157,10 @@ public final class Switchboard extends serverSwitch {
         // check if we can deliver entries to other peers
         if (this.dhtDispatcher.transmissionSize() >= 10) {
         	log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());
-        } else if (Client.connectionCount() > 25) {
-            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + Client.connectionCount());
+        } else if (net.yacy.cora.protocol.Client.connectionCount() > 5) {
+            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + net.yacy.cora.protocol.Client.connectionCount());
             // close unused connections
-            Client.cleanup();
+//            Client.cleanup();
         } else {
         	boolean dequeued = this.dhtDispatcher.dequeueContainer();
         	hasDoneSomething = hasDoneSomething | dequeued;

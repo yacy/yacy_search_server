@@ -23,18 +23,18 @@ package net.yacy.cora.protocol;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.List;
+//import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
 
-import org.apache.commons.httpclient.methods.multipart.Part;
+//import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.http.entity.mime.content.ContentBody;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 // import de.anomic.http.client.Client;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
+//import de.anomic.http.server.HeaderFramework;
+//import de.anomic.http.server.RequestHeader;
+//import de.anomic.http.server.ResponseContainer;
 
 public class HttpConnector {
 
@@ -52,37 +52,37 @@ public class HttpConnector {
 //        return wput(url, vhost, post, timeout, false);
 //    }
     
-    /**
-     * send data to the server named by vhost
-     * 
-     * @param address address of the server
-     * @param vhost name of the server at address which should respond
-     * @param post data to send (name-value-pairs)
-     * @param timeout in milliseconds
-     * @param gzipBody send with content gzip encoded
-     * @return response body
-     * @throws IOException
-     */
-    public static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout, final boolean gzipBody) throws IOException {
-        final RequestHeader header = new RequestHeader();
-        header.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-        header.put(HeaderFramework.HOST, vhost);
-        final de.anomic.http.client.Client client = new de.anomic.http.client.Client(timeout, header);
-        
-        ResponseContainer res = null;
-        byte[] content = null;
-        try {
-            // send request/data
-            res = client.POST(url, post, gzipBody);
-            content = res.getData();
-        } finally {
-            if(res != null) {
-                // release connection
-                res.closeStream();
-            }
-        }
-        return content;
-    }
+//    /**
+//     * send data to the server named by vhost
+//     * 
+//     * @param address address of the server
+//     * @param vhost name of the server at address which should respond
+//     * @param post data to send (name-value-pairs)
+//     * @param timeout in milliseconds
+//     * @param gzipBody send with content gzip encoded
+//     * @return response body
+//     * @throws IOException
+//     */
+//    public static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout, final boolean gzipBody) throws IOException {
+//        final RequestHeader header = new RequestHeader();
+//        header.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+//        header.put(HeaderFramework.HOST, vhost);
+//        final de.anomic.http.client.Client client = new de.anomic.http.client.Client(timeout, header);
+//        
+//        ResponseContainer res = null;
+//        byte[] content = null;
+//        try {
+//            // send request/data
+//            res = client.POST(url, post, gzipBody);
+//            content = res.getData();
+//        } finally {
+//            if(res != null) {
+//                // release connection
+//                res.closeStream();
+//            }
+//        }
+//        return content;
+//    }
     
     /**
      * send data to the server named by vhost
