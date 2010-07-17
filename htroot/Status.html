@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>YaCy '#[clientname]#': Console Status</title>
@@ -7,7 +7,7 @@
       function loadBanner() {
         for (var i = 0; i < document.images.length; i++) {
           if (document.images[i].src.indexOf("Banner.png") > 0) {
-            document.images[i].src = "/Banner.png?textcolor=000000&bgcolor=e7effc&bordercolor=5090d0&time=" + (new Date()).getTime();
+            document.images[i].src = "/Banner.png?textcolor=000000&amp;bgcolor=e7effc&amp;bordercolor=5090d0&amp;time=" + (new Date()).getTime();
             break;
           }
         }
@@ -41,7 +41,7 @@
     
     <div class="welcome">
     <div style="margin:auto;text-align:center;">
-        <h2><img src="/env/grafics/kaskelix.png" width="128" height="64" alt="YaCy Websearch" style="margin-right:5px; vertical-align:middle;" />Welcome to YaCy!</h2>
+      <h2><img src="/env/grafics/kaskelix.png" width="128" height="64" alt="YaCy Websearch" style="margin-right:5px; vertical-align:middle;" />Welcome to YaCy!</h2>
       <iframe src="rssTerminal.html?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING,DHTRECEIVE,DHTSEND&amp;width=600px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120"
               style="width:600px;height:180px;margin:0px;border:1px solid black;" scrolling="no" name="newsframe"></iframe><br />
       <img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/><br />
@@ -107,12 +107,12 @@
     <dd class="hint">Latest public version is v#[latestVersion]#.
       You can download a more recent version of YaCy. Click here to install this update and restart YaCy: 
       <form action="Status.html" method="get" class="PeerControl">
-      
-      
+
+<!-- Is this line here on purpose or by accident?
       <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist">
-    
+-->
         <button type="submit" name="aquirerelease" value="Update YaCy">
-          <img src="/env/grafics/lock.gif" />
+          <img src="/env/grafics/lock.gif" alt="lock icon"/>
           Install YaCy v#[latestVersion]#
         </button>
       </form>
