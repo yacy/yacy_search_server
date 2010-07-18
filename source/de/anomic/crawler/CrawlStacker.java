@@ -351,31 +351,28 @@ public final class CrawlStacker {
      * @return null if the url can be accepted, a string containing a rejection reason if the url cannot be accepted
      */
     public String urlInAcceptedDomain(final DigestURI url) {
-        // returns true if the url can be accepted accoring to network.unit.domain
+        // returns true if the url can be accepted according to network.unit.domain
         if (url == null) return "url is null";
+        final boolean local = url.isLocal();
+        if (this.acceptLocalURLs && local) return null;
+        if (this.acceptGlobalURLs && !local) return null;
         final String host = url.getHost();
-        if (this.acceptLocalURLs && host == null && url.getProtocol().equals("file")) return null;
         if (host == null) return "url.host is null";
-        if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
         // check if this is a local address and we are allowed to index local pages:
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
-        final boolean local = url.isLocal();
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
-        if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
         return (local) ?
             ("the host '" + host + "' is local, but local addresses are not accepted") :
             ("the host '" + host + "' is global, but global addresses are not accepted");
     }
     
     public String urlInAcceptedDomainHash(final byte[] urlhash) {
-        // returns true if the url can be accepted accoring to network.unit.domain
+        // returns true if the url can be accepted according to network.unit.domain
         if (urlhash == null) return "url is null";
-        if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
         // check if this is a local address and we are allowed to index local pages:
-        //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         final boolean local = DigestURI.isLocal(urlhash);
-        //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
-        if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
+        if (this.acceptLocalURLs && local) return null;
+        if (this.acceptGlobalURLs && !local) return null;
         return (local) ?
             ("the urlhash '" + new String(urlhash) + "' is local, but local addresses are not accepted") :
             ("the urlhash '" + new String(urlhash) + "' is global, but global addresses are not accepted");

@@ -91,4 +91,11 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
     public final void clear() {
     	for (ARC<K, V> a: this.arc) a.clear();
     }
+
+    @Override
+    public final int size() {
+        int s = 0;
+        for (ARC<K, V> a: this.arc) s += a.size();
+        return s;
+    }
 }

@@ -37,6 +37,12 @@ package net.yacy.kelondro.index;
 public interface ARC<K, V> {
 
     /**
+     * get the size of the ARC. this returns the sum of main and ghost cache
+     * @return the complete number of entries in the ARC cache
+     */
+    public int size();
+    
+    /**
      * put a value to the cache.
      * @param s
      * @param v

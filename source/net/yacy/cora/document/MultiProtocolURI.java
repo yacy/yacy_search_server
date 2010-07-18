@@ -39,6 +39,7 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 
 import net.yacy.cora.document.Punycode.PunycodeException;
+import net.yacy.kelondro.util.Domains;
 
 /**
  * MultiProtocolURI provides a URL object for multiple protocols like http, https, ftp, smb and file
@@ -776,11 +777,7 @@ public class MultiProtocolURI implements Serializable {
 
     // checks for local/global IP range and local IP
     public boolean isLocal() {
-        return isLocal(this.host);
-    }
-    
-    public static boolean isLocal(String host) {
-        return host.startsWith("127.") || host.equals("localhost") || host.startsWith("0:0:0:0:0:0:0:1");
+        return this.protocol.equals("file") || this.protocol.equals("smb") || Domains.isLocal(this.host);
     }
 
     // language calculation

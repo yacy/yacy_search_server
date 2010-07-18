@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.kelondro.util.Domains;
 
 import de.anomic.search.Switchboard;
 
@@ -123,7 +124,7 @@ public class Latency {
         final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
         
         // find the minimum waiting time based on the network domain (local or global)
-        final boolean local = MultiProtocolURI.isLocal(hostname);
+        final boolean local = Domains.isLocal(hostname);
         long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
         
         // if we have accessed the domain many times, get slower (the flux factor)

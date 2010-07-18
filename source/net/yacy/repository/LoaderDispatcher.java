@@ -46,7 +46,6 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
@@ -151,12 +150,13 @@ public final class LoaderDispatcher {
      */
     public Response load(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
         // get the protocol of the next URL
-        final String protocol = request.url().getProtocol();
-        final String host = request.url().getHost();
+        final DigestURI url = request.url();
+        final String protocol = url.getProtocol();
+        final String host = url.getHost();
         
         // check if this loads a page from localhost, which must be prevented to protect the server
         // against attacks to the administration interface when localhost access is granted
-        if (Domains.isLocal(host) && sb.getConfigBool("adminAccountForLocalhost", false)) throw new IOException("access to localhost not granted for url " + request.url());
+        if (url.isLocal() && sb.getConfigBool("adminAccountForLocalhost", false)) throw new IOException("access to localhost not granted for url " + url);
         
         // check if we have the page in the cache
 
@@ -165,8 +165,8 @@ public final class LoaderDispatcher {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry
         
-            ResponseHeader cachedResponse = (request.url().isLocal()) ? null : Cache.getResponseHeader(request.url());
-            byte[] content = (cachedResponse == null) ? null : Cache.getContent(request.url());
+            ResponseHeader cachedResponse = (url.isLocal()) ? null : Cache.getResponseHeader(url);
+            byte[] content = (cachedResponse == null) ? null : Cache.getContent(url);
             if (cachedResponse != null && content != null) {
                 // yes we have the content
                 
@@ -188,17 +188,17 @@ public final class LoaderDispatcher {
                 // check which caching strategy shall be used
                 if (cacheStrategy == CrawlProfile.CacheStrategy.IFEXIST || cacheStrategy == CrawlProfile.CacheStrategy.CACHEONLY) {
                     // well, just take the cache and don't care about freshness of the content
-                    log.logInfo("cache hit/useall for: " + request.url().toNormalform(true, false));
+                    log.logInfo("cache hit/useall for: " + url.toNormalform(true, false));
                     return response;
                 }
                 
                 // now the cacheStrategy must be CACHE_STRATEGY_IFFRESH, that means we should do a proxy freshness test
                 assert cacheStrategy == CrawlProfile.CacheStrategy.IFFRESH : "cacheStrategy = " + cacheStrategy;
                 if (response.isFreshForProxy()) {
-                    log.logInfo("cache hit/fresh for: " + request.url().toNormalform(true, false));
+                    log.logInfo("cache hit/fresh for: " + url.toNormalform(true, false));
                     return response;
                 } else {
-                    log.logInfo("cache hit/stale for: " + request.url().toNormalform(true, false));
+                    log.logInfo("cache hit/stale for: " + url.toNormalform(true, false));
                 }
             }
         }
@@ -213,7 +213,7 @@ public final class LoaderDispatcher {
         
         // check access time: this is a double-check (we checked possibly already in the balancer)
         // to make sure that we don't DoS the target by mistake
-        if (!request.url().isLocal()) {
+        if (!url.isLocal()) {
             final Long lastAccess = accessTime.get(host);
             long wait = 0;
             if (lastAccess != null) wait = Math.max(0, minDelay + lastAccess.longValue() - System.currentTimeMillis());
@@ -246,7 +246,7 @@ public final class LoaderDispatcher {
             String storeError = response.shallStoreCacheForCrawler();
             if (storeError == null) {
                 try {
-                    Cache.store(request.url(), response.getResponseHeader(), response.getContent());
+                    Cache.store(url, response.getResponseHeader(), response.getContent());
                 } catch (IOException e) {
                     log.logWarning("cannot write " + response.url() + " to Cache (3): " + e.getMessage(), e);
                 }
@@ -256,7 +256,7 @@ public final class LoaderDispatcher {
             return response;
         }
         
-        throw new IOException("Unsupported protocol '" + protocol + "' in url " + request.url());
+        throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
     }
 
     /**
@@ -281,10 +281,11 @@ public final class LoaderDispatcher {
 
         // load resource
         final Response response = load(request, cacheStrategy, maxFileSize);
-        if (response == null) throw new IOException("no Response for url " + request.url());
+        final DigestURI url = request.url();
+        if (response == null) throw new IOException("no Response for url " + url);
 
         // if it is still not available, report an error
-        if (response.getContent() == null || response.getResponseHeader() == null) throw new IOException("no Content available for url " + request.url());
+        if (response.getContent() == null || response.getResponseHeader() == null) throw new IOException("no Content available for url " + url);
 
         // parse resource
         return response.parse();

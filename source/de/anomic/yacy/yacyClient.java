@@ -161,7 +161,7 @@ public final class yacyClient {
             // send request
             final long start = System.currentTimeMillis();
 //            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 10000, false);
-            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts, 10000);
+            final byte[] content = HttpConnector.wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts, 30000);
             yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = FileUtils.table(content);
         } catch (final Exception e) {

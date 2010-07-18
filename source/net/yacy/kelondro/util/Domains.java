@@ -29,26 +29,30 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.index.ARC;
+import net.yacy.kelondro.index.ConcurrentARC;
+
 public class Domains {
 
+    private static final String PRESENT = "";
 	private static final String localPatterns = "10\\..*,127.*,172.(1[6-9]|2[0-9]|3[0-1])\\..*,169.254.*,192.168.*,localhost";
+	private static final int maxNameCacheHitSize = 20000; 
+    private static final int maxNameCacheMissSize = 20000;
+    private static final int maxNameNoCachingListSize = 20000;
+	private static final int concurrencyLevel = Runtime.getRuntime().availableProcessors() + 1;
     
     // a dns cache
-    private static final Map<String, InetAddress> nameCacheHit = new ConcurrentHashMap<String, InetAddress>(); // a not-synchronized map resulted in deadlocks
-    private static final Set<String> nameCacheMiss = Collections.synchronizedSet(new HashSet<String>());
-    private static final int maxNameCacheHitSize = 8000; 
-    private static final int maxNameCacheMissSize = 8000; 
+    private static final ARC<String, InetAddress> nameCacheHit = new ConcurrentARC<String, InetAddress>(maxNameCacheHitSize, concurrencyLevel);
+    private static final ARC<String, String> nameCacheMiss = new ConcurrentARC<String, String>(maxNameCacheMissSize, concurrencyLevel);
+    private static final ARC<String, String> nameCacheNoCachingList = new ConcurrentARC<String, String>(maxNameNoCachingListSize, concurrencyLevel);
     public  static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
     public  static final List<Pattern> localhostPatterns = makePatterns(localPatterns);
-    private static final Set<String> nameCacheNoCachingList = Collections.synchronizedSet(new HashSet<String>());
     
     /**
      * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
@@ -413,7 +417,7 @@ public class Domains {
         final InetAddress ip = nameCacheHit.get(host);
         if (ip != null) return ip;
         
-        if (nameCacheMiss.contains(host)) return null;
+        if (nameCacheMiss.containsKey(host)) return null;
         throw new UnknownHostException("host not in cache");
     }
     
@@ -445,26 +449,24 @@ public class Domains {
         InetAddress ip = nameCacheHit.get(host);
         if (ip != null) return ip;
         
-        if (nameCacheMiss.contains(host)) return null;
+        if (nameCacheMiss.containsKey(host)) return null;
         //System.out.println("***DEBUG dnsResolve(" + host + ")");
         try {
             boolean doCaching = true;
             ip = InetAddress.getByName(host); // this makes the DNS request to backbone
             if ((ip == null) ||
                 (ip.isLoopbackAddress()) ||
-                (nameCacheNoCachingList.contains(host))
+                (nameCacheNoCachingList.containsKey(host))
             ) {
                 doCaching = false;
             } else {
             	if (matchesList(host, nameCacheNoCachingPatterns)) {
-            		nameCacheNoCachingList.add(host);
+            		nameCacheNoCachingList.put(host, PRESENT);
                     doCaching = false;
             	}
             }
             
             if (doCaching && ip != null) {
-                // remove old entries
-                flushHitNameCache();
                 
                 // add new entries
                 nameCacheHit.put(host, ip);
@@ -475,7 +477,7 @@ public class Domains {
             flushMissNameCache();
             
             // add new entries
-            nameCacheMiss.add(host);
+            nameCacheMiss.put(host, PRESENT);
         }
         return null;
     }
@@ -501,15 +503,7 @@ public class Domains {
     public static int nameCacheNoCachingListSize() {
         return nameCacheNoCachingList.size();
     }
-    
 
-    /**
-    * Removes old entries from the dns hit cache
-    */
-    public static void flushHitNameCache() {
-        if (nameCacheHit.size() > maxNameCacheHitSize) nameCacheHit.clear();
-    }
-    
     /**
      * Removes old entries from the dns miss cache
      */
@@ -580,35 +574,32 @@ public class Domains {
     }
     
     public static int getDomainID(final String host) {
-        if (host == null) return TLD_Local_ID;
+        if (host == null || host.length() == 0) return TLD_Local_ID;
+        if (isLocal(host)) return TLD_Local_ID;
         final int p = host.lastIndexOf('.');
-        String tld = "";
-        if (p > 0) {
-            tld = host.substring(p + 1);
-        }
+        String tld = (p > 0) ? host.substring(p + 1) : "";
         final Integer i = TLDID.get(tld);
-        if (i == null) {
-            return (isLocal(host)) ? TLD_Local_ID : TLD_Generic_ID;
-        }
+        if (i == null) return TLD_Generic_ID;
         return i.intValue();
     }
      
     public static boolean isLocal(final String host) {
-        if (host == null) return true;
+        if (host == null || host.length() == 0) return true;
 
         // FIXME IPv4 only
         // check local ip addresses
         if (matchesList(host, localhostPatterns)) return true;
         if (host.startsWith("0:0:0:0:0:0:0:1")) return true;
         
-        // finally check if there are other local IP adresses that are not in
+        // finally check if there are other local IP addresses that are not in
         // the standard IP range
         for (int i = 0; i < localHostAddresses.length; i++) {
             if (localHostAddresses[i].getHostName().equals(host)) return true;
             if (localHostAddresses[i].getHostAddress().equals(host)) return true;
         }
 
-        // the address must be a global address
-        return false;
+        // check dns lookup: may be a local address even if the domain name looks global
+        InetAddress a = dnsResolve(host);
+        return a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress();
     }
 }
