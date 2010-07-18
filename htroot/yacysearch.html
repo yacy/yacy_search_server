@@ -146,11 +146,11 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
   <p class="url">
   #{loc}#
   <div style="margin: 20px; width: 100px; float: left;">
-  <a href="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" class="thumblink"  style="float:left;" onclick="return hs.expand(this)">
-      <img src="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" width="192" height="192">
+  <a href="/osm.png?lon=#[lon]#&amp;lat=#[lat]#&amp;zoom=14" class="thumblink"  style="float:left;" onclick="return hs.expand(this)">
+      <img src="/osm.png?lon=#[lon]#&amp;lat=#[lat]#&amp;zoom=14" width="192" height="192" alt="map #[lon]#, #[lat]#" />
   </a>
-  <div class="TableCellDark"><a href="http://www.openstreetmap.org/?lat=#[lat]#&lon=#[lon]#&zoom=14">#[name]#</a><br /><a href="http://www.openstreetmap.org/?lat=#[lat]#&lon=#[lon]#&zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- preview -->
-  <div class="highslide-caption"><a href="http://www.openstreetmap.org/?lat=#[lat]#&lon=#[lon]#&zoom=14">#[name]#</a><br /><a href="http://www.openstreetmap.org/?lat=#[lat]#&lon=#[lon]#&zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- zoomed -->
+  <div class="TableCellDark"><a href="http://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">#[name]#</a><br /><a href="http://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- preview -->
+  <div class="highslide-caption"><a href="http://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">#[name]#</a><br /><a href="http://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- zoomed -->
   </div>
   #{/loc}#
   </p>
@@ -169,7 +169,7 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 #(pageNavBottom)#::<div id="pageNavBottom" align="center">#[resnav]#</div>#(/pageNavBottom)#
 </div>
 <!-- div style="width=220px;" -->
-<!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#&display=#[display]#" -->
+<!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#&amp;display=#[display]#" -->
 <!-- /div -->
 </div>
 </body>
