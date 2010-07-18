@@ -36,22 +36,18 @@ public class ByteArrayBody extends AbstractContentBody {
     	outputStream.flush();
 	}
 
-	@Override
 	public String getFilename() {
 		return this.filename;
 	}
 
-	@Override
 	public String getCharset() {
 		return null;
 	}
 
-	@Override
 	public long getContentLength() {
 		return bytes.length;
 	}
 
-	@Override
 	public String getTransferEncoding() {
 		return MIME.ENC_BINARY;
 	}
