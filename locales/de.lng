@@ -2539,16 +2539,20 @@ Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
 #File: Steering.html
 #---------------------------
 Steering</title>==Steuerung</title>
-#Steering Receipt:==Steuerung Eingang:
+Checking peer status...==Überprüfe Peer Status ...
+Peer is online again, forwarding to status page...==Peer ist wieder online. Weiterleitung auf Status Seite ...
+Peer is not online yet, will check again in a few seconds...==Peer ist noch nicht online. Nächste Prüfung in wenigen Sekunden ...
+No action submitted==Keine Aktion übermittelt
+Go back to the <a href="Settings_p.html">Settings</a> page==Zurück zur Seite mit den <a href="Settings_p.html">Erweiterten Einstellungen</a>
 Your system is not protected by a password==Ihr System wird nicht von einem Passwort geschützt
-Please go to the <a href="/Settings_p.html">Settings</a> page and set an administration password==Bitte gehen Sie auf die <a href="/Settings_p.html">Einstellungen</a> Seite und geben ein Administrator Passwort ein
+Please go to the <a href="/ConfigAccounts_p.html">User Administration</a> page and set an administration password.==Bitte legen Sie ein Administrator Passwort auf der Seite <a href="/ConfigAccounts_p.html">Benutzerverwaltung</a> fest.
 You don't have the correct access right to perform this task.==Sie haben nicht die Erlaubnis diese Anwendung auszuführen.
 Please log in.==Bitte melden Sie sich an.
-Then YaCy will restart.==Dann wird YaCy neu gestartet.
-You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie Änderungen vornehmen wollen.
+You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie weitere Änderungen vornehmen wollen.
 See you soon!==Bis bald!
-Application will terminate after working off all scheduled tasks.==Der YaCy Proxy fährt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
 Just a moment, please!==Einen Moment bitte!
+Application will terminate after working off all scheduled tasks.==Der YaCy Proxy fährt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+Then YaCy will restart.==Dann wird YaCy neu gestartet.
 If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
 Installing release==Installiere Release
 YaCy will be restarted after installation==YaCy wird nach der Installation neugestartet
