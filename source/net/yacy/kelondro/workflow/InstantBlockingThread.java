@@ -3,8 +3,8 @@
 // first published 27.03.2008 on http://yacy.net
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -27,19 +27,21 @@ package net.yacy.kelondro.workflow;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 import net.yacy.kelondro.logging.Log;
 
 
 public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlockingThread<J> implements BlockingThread<J> {
+    private static final String BLOCKINGTHREAD = "BLOCKINGTHREAD";
 
     private final Method jobExecMethod;
     private final Object environment;
     private final Long   handle;
     private static int handleCounter = 0;
     public static int instantThreadCounter = 0;
-    public static final ConcurrentHashMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
+    public static final ConcurrentMap<Long, String> jobs = new ConcurrentHashMap<Long, String>();
     
     public InstantBlockingThread(final Object env, final String jobExec, final WorkflowProcessor<J> manager) {
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
@@ -72,10 +74,9 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
     protected static Method execMethod(final Object env, final String jobExec) {
         final Class<?> theClass = (env instanceof Class<?>) ? (Class<?>) env : env.getClass();
         try {
-            final Method[] methods = theClass.getMethods();
-            for (int i = 0; i < methods.length; i++) {
-                if ((methods[i].getParameterTypes().length == 1) && (methods[i].getName().equals(jobExec))) {
-                    return methods[i];
+            for (final Method method: theClass.getMethods()) {
+                if ((method.getParameterTypes().length == 1) && (method.getName().equals(jobExec))) {
+                    return method;
                 }
             }
             throw new NoSuchMethodException(jobExec + " does not exist in " + env.getClass().getName());
@@ -90,38 +91,48 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
         
     @SuppressWarnings("unchecked")
     public J job(final J next) throws Exception {
-        // see if we got a poison pill to tell us to shut down
-        if (next == null) return (J) WorkflowJob.poisonPill;
-        if (next == WorkflowJob.poisonPill || next.status == WorkflowJob.STATUS_POISON) return next;
-        long t = System.currentTimeMillis();
-        
-        instantThreadCounter++;
-        //System.out.println("started job " + this.handle + ": " + this.getName());
-        jobs.put(this.handle, this.getName());
         J out = null;
-        try {
-            out = (J) jobExecMethod.invoke(environment, new Object[]{next});
-        } catch (final IllegalAccessException e) {
-            Log.logSevere("BLOCKINGTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
-            Log.logSevere("BLOCKINGTHREAD", "shutting down thread '" + this.getName() + "'");
-            this.terminate(false);
-        } catch (final IllegalArgumentException e) {
-            Log.logSevere("BLOCKINGTHREAD", "Internal Error in serverInstantThread.job: " + e.getMessage());
-            Log.logSevere("BLOCKINGTHREAD", "shutting down thread '" + this.getName() + "'");
-            this.terminate(false);
-        } catch (final InvocationTargetException e) {
-            final String targetException = e.getTargetException().getMessage();
-            Log.logException(e.getTargetException());
-            Log.logException(e);
-            if ((targetException != null) && ((targetException.indexOf("heap space") > 0) || (targetException.indexOf("NullPointerException") > 0))) Log.logException(e.getTargetException());
-            Log.logSevere("BLOCKINGTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
-        } catch (final OutOfMemoryError e) {
-            Log.logSevere("BLOCKINGTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
-            Log.logException(e);
+
+        // see if we got a poison pill to tell us to shut down
+        if (next == null) {
+            out = (J) WorkflowJob.poisonPill;
+        } else if (next == WorkflowJob.poisonPill || next.status == WorkflowJob.STATUS_POISON) {
+            out = next;
+        } else {
+            long t = System.currentTimeMillis();
+
+            instantThreadCounter++;
+            //System.out.println("started job " + this.handle + ": " + this.getName());
+            jobs.put(this.handle, this.getName());
+
+            try {
+                out = (J) jobExecMethod.invoke(environment, new Object[]{next});
+            } catch (final IllegalAccessException e) {
+                Log.logSevere(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
+                Log.logSevere(BLOCKINGTHREAD, "shutting down thread '" + this.getName() + "'");
+                this.terminate(false);
+            } catch (final IllegalArgumentException e) {
+                Log.logSevere(BLOCKINGTHREAD, "Internal Error in serverInstantThread.job: " + e.getMessage());
+                Log.logSevere(BLOCKINGTHREAD, "shutting down thread '" + this.getName() + "'");
+                this.terminate(false);
+            } catch (final InvocationTargetException e) {
+                final String targetException = e.getTargetException().getMessage();
+                Log.logException(e.getTargetException());
+                Log.logException(e);
+                if ((targetException != null) &&
+                        ((targetException.indexOf("heap space") > 0) ||
+                        (targetException.indexOf("NullPointerException") > 0))) {
+                    Log.logException(e.getTargetException());
+                }
+                Log.logSevere(BLOCKINGTHREAD, "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
+            } catch (final OutOfMemoryError e) {
+                Log.logSevere(BLOCKINGTHREAD, "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
+                Log.logException(e);
+            }
+            instantThreadCounter--;
+            jobs.remove(this.handle);
+            this.getManager().increaseJobTime(System.currentTimeMillis() - t);
         }
-        instantThreadCounter--;
-        jobs.remove(this.handle);
-        this.getManager().increaseJobTime(System.currentTimeMillis() - t);
         return out;
     }
     
