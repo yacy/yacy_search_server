@@ -98,12 +98,13 @@ public final class QueryParams {
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     
     public QueryParams(final String queryString,
-    						 final int itemsPerPage,
-    		                 final Bitfield constraint,
-    		                 final Segment indexSegment,
-                             final RankingProfile ranking) {
+            final int itemsPerPage,
+            final Bitfield constraint,
+            final Segment indexSegment,
+            final RankingProfile ranking) {
+
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
-    		this.queryString = null;
+            this.queryString = null;
             this.queryHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.excludeHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {
@@ -146,8 +147,8 @@ public final class QueryParams {
     }
     
     public QueryParams(
-		final String queryString, final HandleSet queryHashes,
-		final HandleSet excludeHashes, 
+        final String queryString, final HandleSet queryHashes,
+        final HandleSet excludeHashes,
         final HandleSet fullqueryHashes,
         final String tenant,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
@@ -164,35 +165,36 @@ public final class QueryParams {
         final boolean specialRights,
         final Segment indexSegment,
         final RankingProfile ranking) {
-		this.queryString = queryString;
-		this.queryHashes = queryHashes;
-		this.excludeHashes = excludeHashes;
-		this.fullqueryHashes = fullqueryHashes;
-		this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
-		this.ranking = ranking;
-		this.maxDistance = maxDistance;
-		this.contentdom = contentdom;
-		this.itemsPerPage = Math.min((specialRights) ? 1000 : 100, itemsPerPage);
-		this.offset = Math.min((specialRights) ? 10000 : 1000, offset);
-		this.urlMask = Pattern.compile(urlMask);
+
+        this.queryString = queryString;
+        this.queryHashes = queryHashes;
+        this.excludeHashes = excludeHashes;
+        this.fullqueryHashes = fullqueryHashes;
+        this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
+        this.ranking = ranking;
+        this.maxDistance = maxDistance;
+        this.contentdom = contentdom;
+        this.itemsPerPage = Math.min((specialRights) ? 1000 : 100, itemsPerPage);
+        this.offset = Math.min((specialRights) ? 10000 : 1000, offset);
+        this.urlMask = Pattern.compile(urlMask);
         this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
-		this.prefer = Pattern.compile(prefer);
-        this.prefer_isMatchnothing = this.prefer.toString().equals(matchnothing_pattern.toString());;
-		assert language != null;
+        this.prefer = Pattern.compile(prefer);
+        this.prefer_isMatchnothing = this.prefer.toString().equals(matchnothing_pattern.toString());
+        assert language != null;
         this.targetlang = language;
         this.navigators = navigators;
         this.domType = domType;
         this.zonecode = domainzone;
-		this.domMaxTargets = domMaxTargets;
-		this.constraint = constraint;
-		this.allofconstraint = allofconstraint;
-		this.sitehash = site; assert site == null || site.length() == 6;
-		this.authorhash = authorhash; assert authorhash == null || authorhash.length() > 0;
-		this.snippetCacheStrategy = snippetCacheStrategy;
-		this.host = host;
+        this.domMaxTargets = domMaxTargets;
+        this.constraint = constraint;
+        this.allofconstraint = allofconstraint;
+        this.sitehash = site; assert site == null || site.length() == 6;
+        this.authorhash = authorhash; assert authorhash == null || authorhash.length() > 0;
+        this.snippetCacheStrategy = snippetCacheStrategy;
+        this.host = host;
         this.remotepeer = null;
-		this.handle = Long.valueOf(System.currentTimeMillis());
-		this.specialRights = specialRights;
+        this.handle = Long.valueOf(System.currentTimeMillis());
+        this.specialRights = specialRights;
         this.indexSegment = indexSegment;
     }
     
@@ -228,22 +230,24 @@ public final class QueryParams {
     
     public static HandleSet hashes2Set(final String query) {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-        if (query == null) return keyhashes;
-        for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
-            keyhashes.put(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
-        } catch (RowSpaceExceededException e) {
-            Log.logException(e);
+        if (query != null) {
+            for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
+                keyhashes.put(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
         }
         return keyhashes;
     }
     
     public static HandleSet hashes2Handles(final String query) {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
-        if (query == null) return keyhashes;
-        for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
-            keyhashes.put(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
-        } catch (RowSpaceExceededException e) {
-            Log.logException(e);
+        if (query != null) {
+            for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
+                keyhashes.put(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
         }
         return keyhashes;
     }
@@ -251,7 +255,7 @@ public final class QueryParams {
     public static String hashSet2hashString(final HandleSet hashes) {
         final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
         int p = 0;
-        for (byte[] b : hashes) {
+        for (final byte[] b : hashes) {
             assert b.length == Word.commonHashLength : "hash = " + new String(b);
             System.arraycopy(b, 0, bb, p, Word.commonHashLength);
             p += Word.commonHashLength;
@@ -284,9 +288,12 @@ public final class QueryParams {
      * @return true if the query matches with the given text
      */
     public final boolean matchesText(final String text) {
+        boolean ret = false;
         final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text).keySet());
-        if (SetTools.anymatch(wordhashes, this.excludeHashes)) return false;
-        return SetTools.totalInclusion(this.queryHashes, wordhashes);
+        if (!SetTools.anymatch(wordhashes, this.excludeHashes)) {
+            ret = SetTools.totalInclusion(this.queryHashes, wordhashes);
+        }
+        return ret;
     }
     
     protected static final boolean anymatch(final String text, final HandleSet keyhashes) {
@@ -305,43 +312,49 @@ public final class QueryParams {
         final TreeSet<String> exclude = new TreeSet<String>(NaturalOrder.naturalComparator);
         final TreeSet<String> fullquery = new TreeSet<String>(NaturalOrder.naturalComparator);
         
-        if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{query, exclude, fullquery};
+        if ((querystring != null) && (querystring.length() > 0)) {
         
-        // convert Umlaute
-        querystring = AbstractScraper.stripAll(querystring).toLowerCase().trim();
-        int c;
-        for (int i = 0; i < seps.length(); i++) {
-            while ((c = querystring.indexOf(seps.charAt(i))) >= 0) { querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : ""); }
-        }
-        
-        String s;
-        int l;
-        // the string is clean now, but we must generate a set out of it
-        final String[] a = querystring.split(" ");
-        for (int i = 0; i < a.length; i++) {
-        	if (a[i].startsWith("-")) {
-        		exclude.add(a[i].substring(1));
-        	} else {
-        		while ((c = a[i].indexOf('-')) >= 0) {
-        			s = a[i].substring(0, c);
-        			l = s.length();
-					if (l >= Condenser.wordminsize) query.add(s);
-        			if (l > 0) fullquery.add(s);
-        			a[i] = a[i].substring(c + 1);
-        		}
-        		l = a[i].length();
-				if (l >= Condenser.wordminsize) query.add(a[i]);
-        		if (l > 0) fullquery.add(a[i]);
-        	}
+            // convert Umlaute
+            querystring = AbstractScraper.stripAll(querystring).toLowerCase().trim();
+            int c;
+            for (int i = 0; i < seps.length(); i++) {
+                while ((c = querystring.indexOf(seps.charAt(i))) >= 0) {
+                    querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : "");
+                }
+            }
+
+            String s;
+            int l;
+            // the string is clean now, but we must generate a set out of it
+            final String[] a = querystring.split(" ");
+            for (int i = 0; i < a.length; i++) {
+                if (a[i].startsWith("-")) {
+                    exclude.add(a[i].substring(1));
+                } else {
+                    while ((c = a[i].indexOf('-')) >= 0) {
+                        s = a[i].substring(0, c);
+                        l = s.length();
+                        if (l >= Condenser.wordminsize) {query.add(s);}
+                        if (l > 0) {fullquery.add(s);}
+                        a[i] = a[i].substring(c + 1);
+                    }
+                    l = a[i].length();
+                    if (l >= Condenser.wordminsize) {query.add(a[i]);}
+                    if (l > 0) {fullquery.add(a[i]);}
+                }
+            }
         }
         return new TreeSet[]{query, exclude, fullquery};
     }
     
     public String queryString(final boolean encodeHTML) {
-    	if(encodeHTML){
-    		return CharacterCoding.unicode2html(this.queryString, true);
-    	}
-    	return this.queryString;
+        final String ret;
+    	if (encodeHTML){
+            ret =CharacterCoding.unicode2html(this.queryString, true);
+    	} else {
+            ret = this.queryString;
+        }
+    	return ret;
     }
     
     public TreeSet<String>[] queryWords() {
@@ -356,9 +369,9 @@ public final class QueryParams {
     }
 
 
-    public final Map<MultiProtocolURI, String> separateMatches(Map<MultiProtocolURI, String> links) {
-        Map<MultiProtocolURI, String> matcher = new HashMap<MultiProtocolURI, String>();
-        Iterator <Map.Entry<MultiProtocolURI, String>> i = links.entrySet().iterator();
+    public final Map<MultiProtocolURI, String> separateMatches(final Map<MultiProtocolURI, String> links) {
+        final Map<MultiProtocolURI, String> matcher = new HashMap<MultiProtocolURI, String>();
+        final Iterator <Map.Entry<MultiProtocolURI, String>> i = links.entrySet().iterator();
         Map.Entry<MultiProtocolURI, String> entry;
         MultiProtocolURI url;
         String anchorText;
@@ -375,23 +388,40 @@ public final class QueryParams {
     }
     
     public String id(final boolean anonymized) {
+        final String asterisk = "*";
+
         // generate a string that identifies a search so results can be re-used in a cache
-        String context =
-            "*" + this.domType + 
-            "*" + this.contentdom +
-            "*" + this.zonecode +
-            "*" + new String(Word.word2hash(this.ranking.toExternalString())) +
-            "*" + this.prefer +
-            "*" + this.urlMask +
-            "*" + this.sitehash +
-            "*" + this.authorhash +
-            "*" + this.targetlang +
-            "*" + this.constraint +
-            "*" + this.maxDistance;
-        if (anonymized) 
-            return anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + context;
-        else
-            return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + context;
+        final StringBuilder context = new StringBuilder();
+        context.append(asterisk);
+        context.append(this.domType);
+        context.append(asterisk);
+        context.append(this.contentdom);
+        context.append(asterisk);
+        context.append(this.zonecode);
+        context.append(asterisk);
+        context.append(Word.word2hash(this.ranking.toExternalString()));
+        context.append(asterisk);
+        context.append(this.prefer);
+        context.append(asterisk);
+        context.append(this.urlMask);
+        context.append(asterisk);
+        context.append(this.sitehash);
+        context.append(asterisk);
+        context.append(this.authorhash);
+        context.append(asterisk);
+        context.append(this.targetlang);
+        context.append(asterisk);
+        context.append(this.constraint);
+        context.append(asterisk);
+        context.append(this.maxDistance);
+
+        final String ret;
+        if (anonymized) {
+            ret = anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + context;
+        } else {
+            ret = hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + context;
+        }
+        return ret;
     }
     
     /**
@@ -403,19 +433,64 @@ public final class QueryParams {
      * @param addToQuery
      * @return
      */
-    public static String navurl(String ext, final int page, final int display, final QueryParams theQuery, final String originalUrlMask, String addToQuery, String nav) {
-        return
-        "/yacysearch." + ext + "?display=" + display +
-        "&query=" + theQuery.queryString(true).replace(' ', '+') + ((addToQuery == null) ? "" : "+" + addToQuery) +
-        "&maximumRecords="+ theQuery.displayResults() +
-        "&startRecord=" + (page * theQuery.displayResults()) +
-        "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +
-        "&verify=" + (theQuery.snippetCacheStrategy.mustBeOffline() ? "false" : "true") +
-        "&nav=" + nav +
-        "&urlmaskfilter=" + originalUrlMask +
-        "&prefermaskfilter=" + theQuery.prefer +
-        "&cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
-        "&contentdom=" + theQuery.contentdom() +
-        "&former=" + theQuery.queryString(true);
+    public static String navurl(final String ext, final int page, final int display, final QueryParams theQuery, final String originalUrlMask, final String addToQuery, final String nav) {
+
+        final String ampersand = "&amp;";
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("/yacysearch.");
+        sb.append(ext);
+        sb.append("?display=");
+        sb.append(display);
+
+        sb.append(ampersand);
+        sb.append("query=");
+        sb.append(theQuery.queryString(true).replace(' ', '+'));
+        sb.append((addToQuery == null) ? "" : "+" + addToQuery);
+
+        sb.append(ampersand);
+        sb.append("maximumRecords=");
+        sb.append(theQuery.displayResults());
+
+        sb.append(ampersand);
+        sb.append("startRecord=");
+        sb.append(page * theQuery.displayResults());
+
+        sb.append(ampersand);
+        sb.append("resource=");
+        sb.append((theQuery.isLocal()) ? "local" : "global");
+
+        sb.append(ampersand);
+        sb.append("verify=");
+        sb.append(theQuery.snippetCacheStrategy.mustBeOffline() ? "false" : "true");
+
+        sb.append(ampersand);
+        sb.append("nav=");
+        sb.append(nav);
+
+        sb.append(ampersand);
+        sb.append("urlmaskfilter=");
+        sb.append(originalUrlMask);
+
+        sb.append(ampersand);
+        sb.append("prefermaskfilter=");
+        sb.append(theQuery.prefer);
+
+        sb.append(ampersand);
+        sb.append("cat=href");
+
+        sb.append(ampersand);
+        sb.append("constraint=");
+        sb.append((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64());
+
+        sb.append(ampersand);
+        sb.append("contentdom=");
+        sb.append(theQuery.contentdom());
+
+        sb.append(ampersand);
+        sb.append("former=");
+        sb.append(theQuery.queryString(true));
+
+        return sb.toString();
     }
 }
