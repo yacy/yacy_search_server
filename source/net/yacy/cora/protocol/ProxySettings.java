@@ -25,6 +25,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.AbstractHttpClient;
 
 /**
  * settings for a remote proxy
@@ -53,6 +57,22 @@ public final class ProxySettings {
         hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
         hostConfig.setProxy(host, port);
         return hostConfig;
+    }
+    
+    /**
+     * 
+     * @return the HttpHost to be used as proxy
+     */
+    public static HttpHost getProxyHost() {
+    	if (!use) return null;
+    	return new HttpHost(host, port);
+    }
+    
+    public static void setProxyCreds(AbstractHttpClient httpClient) {
+    	if (!use) return;
+    	httpClient.getCredentialsProvider().setCredentials(
+    			new AuthScope(host, port),
+    			new UsernamePasswordCredentials(user, password));
     }
     
     /**

@@ -17,6 +17,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRouteBean;
+import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -25,11 +26,10 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
@@ -46,9 +46,9 @@ import org.apache.http.util.EntityUtils;
  */
 public class Client {
 
+	private final static int maxcon = 20;
 	private static IdledConnectionEvictor idledConnectionEvictor = null;
 	private static HttpClient httpClient = null;
-	private static int count = 0;
 	private int timeout = 10000;
 	private String userAgent = null;
 	private String host = null;
@@ -67,12 +67,14 @@ public class Client {
 		 * ConnectionManager settings
 		 */
 		// TODO: how much connections do we need? - default: 20
-		// ConnManagerParams.setMaxTotalConnections(httpParams, 100);
+		ConnManagerParams.setMaxTotalConnections(httpParams, maxcon);
+		// for statistics same value should also be set here
+		ConnectionInfo.setMaxcount(maxcon);
 		// perhaps we need more than 2(default) connections per host?
 		ConnPerRouteBean connPerRoute = new ConnPerRouteBean(2);
 		// Increase max connections for localhost to 100
 		HttpHost localhost = new HttpHost("locahost");
-		connPerRoute.setMaxForRoute(new HttpRoute(localhost), 100);
+		connPerRoute.setMaxForRoute(new HttpRoute(localhost), maxcon);
 		ConnManagerParams.setMaxConnectionsPerRoute(httpParams, connPerRoute);
 		// how long to wait for getting a connection from manager in milliseconds
 		ConnManagerParams.setTimeout(httpParams, 3000L);
@@ -88,7 +90,7 @@ public class Client {
 		// timeout in milliseconds until a connection is established in milliseconds
 		HttpConnectionParams.setConnectionTimeout(httpParams, 10000);
 		// SO_LINGER affects the socket close operation in seconds
-		HttpConnectionParams.setLinger(httpParams, 6);
+		// HttpConnectionParams.setLinger(httpParams, 6);
 		// TODO: is default ok?
 		// HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
 		// SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
@@ -97,6 +99,7 @@ public class Client {
 		HttpConnectionParams.setStaleCheckingEnabled(httpParams, true);
 		// conserve bandwidth by minimizing the number of segments that are sent
 		HttpConnectionParams.setTcpNoDelay(httpParams, false);
+		// TODO: testing noreuse - there will be HttpConnectionParams.setSoReuseaddr(HttpParams params, boolean reuseaddr) in core-4.1
 		
 		// Create and initialize scheme registry
 		SchemeRegistry schemeRegistry = new SchemeRegistry();
@@ -152,15 +155,6 @@ public class Client {
     }
     
     /**
-     * number of active connections
-     * 
-     * @return number of active connections
-     */
-    public static int connectionCount() {
-    	return count;
-    }
-    
-    /**
      * This method GETs a page from the server.
      * 
      * @param uri the url to get
@@ -204,16 +198,12 @@ public class Client {
     }
     
     private byte[] getContentBytes(HttpUriRequest httpUriRequest, long maxBytes) throws IOException {
-    	count++;
     	byte[] content = null;
     	final HttpContext httpContext = new BasicHttpContext();
-    	httpUriRequest.getParams().setIntParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
-    	httpUriRequest.getParams().setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
-    	if (userAgent != null)
-    		httpUriRequest.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
-    	if (host != null) 
-    		httpUriRequest.getParams().setParameter(HTTP.TARGET_HOST, host);
-    	
+    	setParams(httpUriRequest.getParams());
+    	setProxy(httpUriRequest.getParams());
+    	// statistics
+    	storeConnectionInfo(httpUriRequest);
     	try {
     		// execute the method
         	HttpResponse httpResponse = httpClient.execute(httpUriRequest, httpContext);
@@ -229,11 +219,38 @@ public class Client {
         	}
 		} catch (final IOException e) {
 			httpUriRequest.abort();
-			count--;
+			ConnectionInfo.removeConnection(httpUriRequest.hashCode());
 			throw e;
 		}
-		count--;
+		ConnectionInfo.removeConnection(httpUriRequest.hashCode());
 		return content;
+    }
+    
+    private void setParams(HttpParams httpParams) {
+    	HttpConnectionParams.setConnectionTimeout(httpParams, timeout);
+    	HttpConnectionParams.setSoTimeout(httpParams, timeout);
+    	if (userAgent != null)
+    		HttpProtocolParams.setUserAgent(httpParams, userAgent);
+    	if (host != null) 
+    		httpParams.setParameter(HTTP.TARGET_HOST, host);
+    }
+    
+    private void setProxy(HttpParams httpParams) {
+    	if (ProxySettings.use)
+    		ConnRouteParams.setDefaultProxy(httpParams, ProxySettings.getProxyHost());
+    	// TODO find a better way for this
+    	ProxySettings.setProxyCreds((AbstractHttpClient) httpClient);
+    }
+    
+    private void storeConnectionInfo(HttpUriRequest httpUriRequest) {
+    	int port = httpUriRequest.getURI().getPort();
+    	String thost = httpUriRequest.getURI().getHost();
+    	ConnectionInfo.addConnection(new ConnectionInfo(
+    			httpUriRequest.getURI().getScheme(),
+    			port == 80 ? thost : thost + ":" + port,
+    			httpUriRequest.getMethod() + " " + httpUriRequest.getURI().getPath(),
+    			httpUriRequest.hashCode(),
+    			System.currentTimeMillis()));
     }
     
     /**

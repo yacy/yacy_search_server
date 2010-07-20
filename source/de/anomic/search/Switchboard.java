@@ -72,6 +72,7 @@ import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.ProxySettings;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -1485,6 +1486,7 @@ public final class Switchboard extends serverSwitch {
             
             // close unused connections
             Client.cleanup();
+            ConnectionInfo.cleanUp();
             
             // do transmission of CR-files
             checkInterruption();
@@ -2125,8 +2127,8 @@ public final class Switchboard extends serverSwitch {
         	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
         } else if (MemoryControl.available() < 1024*1024*25) {
             log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
-        } else if (net.yacy.cora.protocol.Client.connectionCount() > 5) {
-            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + net.yacy.cora.protocol.Client.connectionCount());
+        } else if (ConnectionInfo.getLoadPercent() > 50) {
+            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + ConnectionInfo.getCount());
             // close unused connections
 //            Client.cleanup();
         } else {
@@ -2157,8 +2159,8 @@ public final class Switchboard extends serverSwitch {
         // check if we can deliver entries to other peers
         if (this.dhtDispatcher.transmissionSize() >= 10) {
         	log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());
-        } else if (net.yacy.cora.protocol.Client.connectionCount() > 5) {
-            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + net.yacy.cora.protocol.Client.connectionCount());
+        } else if (ConnectionInfo.getLoadPercent() > 75) {
+            log.logInfo("dhtTransferJob: too many connections in httpc pool : " + ConnectionInfo.getCount());
             // close unused connections
 //            Client.cleanup();
         } else {
