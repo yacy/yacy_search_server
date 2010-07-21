@@ -12,8 +12,8 @@
     A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia). The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.
     When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content. This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.
     </p>
-    <p>
-    <form><fieldset>
+    
+    <form action=""><fieldset>
     The success of heuristics are marked with an image (<img width="16" height="9" src="/env/grafics/heuristic_redundant.gif" title="heuristic:&lt;name&gt; (redundant)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (redundant)"/>/<img width="16" height="9" src="/env/grafics/heuristic_new.gif" title="heuristic:&lt;name&gt; (new link)" style="width:16px; height:9px;" alt="heuristic:&lt;name&gt; (new link)"/>) below the favicon left from the search result entry:
     <dl>
         <dt>
@@ -29,12 +29,12 @@
           The search result was discovered by a heuristic, not previously known by YaCy
         </dd>
     </dl></fieldset></form>
-    </p>
-    <form name="HeuristicForm" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    
+    <form id="HeuristicFormSite" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>
         <input type="checkbox" name="site_check" id="site" onclick="window.location.href='ConfigHeuristics_p.html?#(site.checked)#site_on=::site_off=#(/site.checked)#'" value="site"#(site.checked)#:: checked="checked"#(/site.checked)# />
-        <label for="domain">'site'-operator: instant shallow crawl</label>
+        <label for="site">'site'-operator: instant shallow crawl</label>
       </legend>
       <p>
       When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.
@@ -43,11 +43,11 @@
       </p>
     </fieldset>
     </form>
-    <form name="HeuristicForm" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="HeuristicFormScroogle" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>
         <input type="checkbox" name="scroogle_check" id="scroogle" onclick="window.location.href='ConfigHeuristics_p.html?#(scroogle.checked)#scroogle_on=::scroogle_off=#(/scroogle.checked)#'" value="scroogle"#(scroogle.checked)#:: checked="checked"#(/scroogle.checked)# />
-        <label for="domain">scroogle: load external search result list</label>
+        <label for="scroogle">scroogle: load external search result list</label>
       </legend>
       <p>
       When using this heuristic, then every search request line is used for a call to scroogle.
