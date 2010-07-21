@@ -133,8 +133,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
     public void store(final URIMetadataRow entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
         URIMetadataRow oldEntry;
+        if (urlIndexFile == null) return; // case may happen during shutdown or startup
         try {
-            Row.Entry oe = (urlIndexFile == null) ? null : urlIndexFile.get(entry.hash());
+            Row.Entry oe = urlIndexFile.get(entry.hash());
             oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
         } catch (final Exception e) {
             Log.logException(e);
