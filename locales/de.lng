@@ -6,6 +6,13 @@
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
 #
+# Testing the new SVN Properties http://forum.yacy-websuche.de/viewtopic.php?f=15&t=2906
+#
+# $Revision::                                                $
+# $Date::                                                    $
+# $Tag::                                                     $
+# $Author::                                                  $
+# 
 # This file is maintained by Oliver Wunder <webmaster@daburna.de>
 # This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink,
 # Thomas Süß <th-suess@gmx.de>
@@ -88,7 +95,6 @@ Blacklist Pattern==Blacklisteintrag
 Edit selected pattern\(s\)==Bearbeite gewählten Eintrag
 Delete selected pattern\(s\)==Lösche gewählten Eintrag
 Move selected pattern\(s\) to==Verschiebe gewählten Eintrag zu
-#"Save URL pattern"=="URL-Eintrag speichern"
 #You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
 Add new pattern:==Neuen Eintrag hinzufügen:
 "Add URL pattern"=="URL hinzufügen"
@@ -656,7 +662,7 @@ Default Pop-Up Page<==Standard Pop-up<
 >Interactive Search Page==>Interaktive Suchseite
 "Change Search Page"=="Ändere die Suchseite"
 "Set to Default Values"=="Standardwerte setzen"
-The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann in Ihre eigenen Webseiten mit einem iframe eingebaut werden. Verwenden Sie dazu den folgenden Code:
+The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigenen Webseiten eingebaut werden. Verwenden Sie dazu den folgenden Code:
 This would look like:==Das würde so aussehen:
 For a search page with a small header, use this code:==Für eine Suchseite mit kleiner Kopfzeile verwenden Sie folgenden Code:
 A third option is the interactive search. Use this code:==Als dritte Option gibt es die interaktive Suche. Verwenden Sie dazu folgenden Code:
