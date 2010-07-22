@@ -665,12 +665,14 @@ public class ArrayStack implements BLOB {
      */
     public synchronized void put(byte[] key, byte[] b) throws IOException {
         blobItem bi = (blobs.isEmpty()) ? null : blobs.get(blobs.size() - 1);
+        /*
         if (bi == null)
             System.out.println("bi == null");
         else if (System.currentTimeMillis() - bi.creation.getTime() > this.fileAgeLimit)
             System.out.println("System.currentTimeMillis() - bi.creation.getTime() > this.maxage");
         else if (bi.location.length() > this.fileSizeLimit)
             System.out.println("bi.location.length() > this.maxsize");
+        */
         if ((bi == null) || (System.currentTimeMillis() - bi.creation.getTime() > this.fileAgeLimit) || (bi.location.length() > this.fileSizeLimit)) {
             // add a new blob to the array
             bi = new blobItem(buffersize);
