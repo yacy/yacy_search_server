@@ -48,7 +48,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
      * and the urls are not spread over all positions of the DHT. To use this effect, the
      * horizontal DHT position must be normed to a 'rest' value of a partition size
      * This method is compatible to the classic DHT computation as always one of the vertical
-     * DHT position corresponds to the classic position. 
+     * DHT position corresponds to the classic horizontal position. 
      * @param wordHash, the hash of the RWI
      * @param partitions, the number of partitions should be computed with partitions = 2**n, n = scaling factor
      * @param urlHash, the hash of a reference

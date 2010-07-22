@@ -278,7 +278,7 @@ public class Dispatcher {
         ByteArray pTArray;
         Transmission.Chunk entry;
         for (int vertical = 0; vertical < containers.length; vertical++) {
-            // the 'new' primary target is the word hash of the last container
+            // the 'new' primary target is the word hash of the last container in the array
             lastContainer = containers[vertical].get(containers[vertical].size() - 1);
             primaryTarget = FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(lastContainer.getTermHash(), vertical));
             assert primaryTarget[2] != '@';
@@ -294,13 +294,15 @@ public class Dispatcher {
             this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + new String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
             if (entry == null) entry = transmission.newChunk(primaryTarget, targets, lastContainer.row());
 
-            /*/ lookup own target
+            /*/ lookup targets
             int sc = 1;
             for (yacySeed seed : targets) {
-				if(seed == seeds.mySeed())
-					this.log.logInfo("enqueueContainers: myself-target at position " + sc);
+            	if(seed == null) continue;
+				if(seed == seeds.mySeed())	this.log.logInfo("enqueueContainers: myself-target at position " + sc);
+				this.log.logInfo("enqueueContainers: primaryTarget distance at position " + sc + ": " + FlatWordPartitionScheme.std.dhtDistance(primaryTarget, null, seed));
+				this.log.logInfo("enqueueContainers: distance to first container at position " + sc + ": " + FlatWordPartitionScheme.std.dhtDistance(FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(containers[vertical].get(0).getTermHash(), vertical)), null, seed));
 				sc++;
-			} */
+			}*/
             
             // fill the entry with the containers
             for (ReferenceContainer<WordReference> c: containers[vertical]) {
