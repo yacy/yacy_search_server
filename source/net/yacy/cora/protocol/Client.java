@@ -2,6 +2,7 @@ package net.yacy.cora.protocol;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -44,6 +45,7 @@ import org.apache.http.util.EntityUtils;
 
 
 /**
+ * HttpClient implementation which uses HttpComponents Client {@link http://hc.apache.org/}
  * 
  * @author sixcooler
  *
@@ -54,7 +56,7 @@ public class Client {
 	private static IdledConnectionEvictor idledConnectionEvictor = null;
 	private static HttpClient httpClient = null;
 	private Header[] headers = null;
-	private HttpResponse httpResponse;
+	private HttpResponse httpResponse = null;
 	private long upbytes = 0L;
 	private int timeout = 10000;
 	private String userAgent = null;
@@ -144,10 +146,12 @@ public class Client {
      * @param entrys to be set as request header
      */
     public void setHeader(final Set<Entry<String, String>> entrys) {
-    	int i = 0;
-    	headers = new Header[entrys.size()];
-    	for (final Entry<String, String> entry : entrys) {
-    		headers[i++] = new BasicHeader(entry.getKey(),entry.getValue());
+    	if (entrys != null) {
+	    	int i = 0;
+	    	headers = new Header[entrys.size()];
+	    	for (final Entry<String, String> entry : entrys) {
+	    		headers[i++] = new BasicHeader(entry.getKey(),entry.getValue());
+	    	}
     	}
     }
     
@@ -237,6 +241,15 @@ public class Client {
 	 */
 	public HttpResponse getHttpResponse() {
 		return httpResponse;
+	}
+	
+	public HashMap<String, String> getHeaderHashMap() {
+		if (httpResponse == null) return null;
+		final HashMap<String, String> hmap = new HashMap<String, String>();
+		for (Header h : httpResponse.getAllHeaders()) {
+			hmap.put(h.getName(), h.getValue());
+		}
+		return hmap;
 	}
     
     private byte[] getContentBytes(HttpUriRequest httpUriRequest, long maxBytes) throws IOException {

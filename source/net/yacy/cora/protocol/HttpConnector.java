@@ -23,6 +23,8 @@ package net.yacy.cora.protocol;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.Map.Entry;
 //import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -102,6 +104,19 @@ public class HttpConnector {
 		
 		return client.POSTbytes(url, post);
 	}
+        
+    
+    /**
+     * get data from the server named by url
+     * 
+     * @param url address of the server
+     * @param timeout in milliseconds
+     * @return response body
+     * @throws IOException
+     */
+    public static byte[] wget(final MultiProtocolURI url, final int timeout) throws IOException {
+        return wget(url.toNormalform(false, false), url.getHost(), timeout);
+    }
 	
     /**
      * get data from the server named by vhost
@@ -120,18 +135,37 @@ public class HttpConnector {
         
         return client.GETbytes(url);
 	}
-        
+    
+    /**
+     * get data from the server named by vhost
+     * 
+     * @param url address of the server
+     * @param entrys of RequestHeader
+     * @param timeout in milliseconds
+     * @return response body
+     * @throws IOException
+     */
+    public static byte[] wget(final String url, final Set<Entry<String, String>> entrys, final int timeout) throws IOException {
+    	return wget(url, entrys, timeout, null);
+    }
     
     /**
      * get data from the server named by url
      * 
      * @param url address of the server
+     * @param entrys of RequestHeader
      * @param timeout in milliseconds
+     * @param vhost name of the server at address which should respond
      * @return response body
      * @throws IOException
      */
-    public static byte[] wget(final MultiProtocolURI url, final int timeout) throws IOException {
-        return wget(url.toNormalform(false, false), url.getHost(), timeout);
+    public static byte[] wget(final String url, final Set<Entry<String, String>> entrys, final int timeout, final String vhost) throws IOException {
+    	final Client client = new Client();
+    	client.setHeader(entrys);
+        client.setTimout(timeout);
+        client.setHost(vhost);
+        
+        return client.GETbytes(url);
     }
     
 //    public static byte[] wget(final String url, final String vhost, final int timeout) throws IOException {

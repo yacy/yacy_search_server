@@ -37,11 +37,12 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 
+import net.yacy.cora.protocol.HttpConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -102,7 +103,8 @@ public class ConfigAppearance_p {
                     final DigestURI u = new DigestURI(url, null);
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    it = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000));
+//                    it = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000));
+                    it = FileUtils.strings(HttpConnector.wget(u.toString(), reqHeader.entrySet(), 10000));
                 } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL
                     prop.put("status_url", url);

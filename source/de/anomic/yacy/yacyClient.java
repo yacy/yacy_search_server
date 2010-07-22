@@ -1212,12 +1212,12 @@ public final class yacyClient {
 			} catch (IOException e1) {
 				Log.logException(e1);
 			}
-			try {
-				net.yacy.cora.protocol.Client.closeConnectionManager();
-			} catch (InterruptedException e) {
-				Log.logException(e);
-			}
         }
+		try {
+			net.yacy.cora.protocol.Client.closeConnectionManager();
+		} catch (InterruptedException e) {
+			Log.logException(e);
+		}
     }
 
 }

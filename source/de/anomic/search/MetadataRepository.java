@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.Client;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -54,8 +55,8 @@ import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.ScoreCluster;
 import net.yacy.repository.Blacklist;
 
-import de.anomic.http.client.Client;
-import de.anomic.http.server.ResponseContainer;
+//import de.anomic.http.client.Client;
+//import de.anomic.http.server.ResponseContainer;
 
 public final class MetadataRepository implements Iterable<byte[]> {
 
@@ -268,6 +269,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             }
             log.logInfo("URLs vorher: " + urlIndexFile.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
 
+            final Client client = new Client();
             final Iterator<String> eiter2 = damagedURLS.iterator();
             byte[] urlHashBytes;
             while (eiter2.hasNext()) {
@@ -289,24 +291,25 @@ public final class MetadataRepository implements Iterable<byte[]> {
                         final DigestURI newUrl = new DigestURI(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        final Client client = new Client(10000);
-                        ResponseContainer res = null;
-                        try {
-                            res = client.HEAD(newUrl.toString());
-                        } finally {
-                            if(res != null) {
-                                // release connection
-                                res.closeStream();
-                            }
-                        }
+//                        final Client client = new Client(10000);
+//                        ResponseContainer res = null;
+//                        try {
+//                            res = client.HEAD(newUrl.toString());
+//                        } finally {
+//                            if(res != null) {
+//                                // release connection
+//                                res.closeStream();
+//                            }
+//                        }
 
-                        if (res != null && res.getStatusCode() == 200) {
+                        if (client.HEADResponse(newUrl.toString()) != null
+                        		&& client.getHttpResponse().getStatusLine().getStatusCode() == 200) {
                             entry.setCol(1, newUrl.toString().getBytes());
                             urlIndexFile.put(entry);
                             if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + new String(urlHashBytes) + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             remove(urlHashBytes);
-                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + new String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + (res == null ? "null" : res.getStatusLine()));
+                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + new String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + (client.getHttpResponse() == null ? "null" : client.getHttpResponse().getStatusLine()));
                         }
                     }
                 } catch (final Exception e) {

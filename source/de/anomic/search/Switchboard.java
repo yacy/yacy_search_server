@@ -72,6 +72,7 @@ import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.Client;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.ProxySettings;
 import net.yacy.document.Condenser;
@@ -134,7 +135,7 @@ import de.anomic.data.userDB;
 import de.anomic.data.wiki.wikiBoard;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HeaderFramework;
@@ -1161,7 +1162,7 @@ public final class Switchboard extends serverSwitch {
         indexingStorageProcessor.awaitShutdown(12000);
         crawlStacker.close();
         this.dbImportManager.close();
-        Client.closeAllConnections();
+        de.anomic.http.client.Client.closeAllConnections();
         wikiDB.close();
         blogDB.close();
         blogCommentDB.close();
@@ -1180,7 +1181,7 @@ public final class Switchboard extends serverSwitch {
         UPnP.deletePortMapping();
         Tray.removeTray();
         try {
-			net.yacy.cora.protocol.Client.closeConnectionManager();
+			Client.closeConnectionManager();
 		} catch (InterruptedException e) {
 			Log.logException(e);
 		}
@@ -1485,7 +1486,7 @@ public final class Switchboard extends serverSwitch {
             }
             
             // close unused connections
-            Client.cleanup();
+            de.anomic.http.client.Client.cleanup();
             ConnectionInfo.cleanUp();
             
             // do transmission of CR-files
@@ -2333,6 +2334,14 @@ public final class Switchboard extends serverSwitch {
         final int          sc = peers.sizeConnected();
         ResponseHeader header;
         
+        final RequestHeader reqHeader = new RequestHeader();
+        reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
+        reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
+        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+        final Client client = new Client();
+        client.setHeader(reqHeader.entrySet());
+        client.setTimout((int) getConfigLong("bootstrapLoadTimeout", 20000));
+        
         yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
         
         // - use the superseed to further fill up the seedDB
@@ -2348,15 +2357,14 @@ public final class Switchboard extends serverSwitch {
             ) {
                 // load the seed list
                 try {
-                    final RequestHeader reqHeader = new RequestHeader();
-                    reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
-                    reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
-                    reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
                     
                     url = new DigestURI(seedListFileURL, null);
                     final long start = System.currentTimeMillis();
-                    header = Client.whead(url.toString(), reqHeader); 
+//                    header = Client.whead(url.toString(), reqHeader); 
+                    client.HEADResponse(url.toString());
+                    header = new ResponseHeader(client.getHeaderHashMap());
                     final long loadtime = System.currentTimeMillis() - start;
+//                    if (header == null) {
                     if (header == null) {
                         if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {
                             yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, time-out after " + loadtime + " milliseconds");
@@ -2369,7 +2377,8 @@ public final class Switchboard extends serverSwitch {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        final byte[] content = Client.wget(url.toString(), reqHeader, (int) getConfigLong("bootstrapLoadTimeout", 20000));
+//                        final byte[] content = Client.wget(url.toString(), reqHeader, (int) getConfigLong("bootstrapLoadTimeout", 20000));
+                        final byte[] content = client.GETbytes(url.toString());
                         enu = FileUtils.strings(content);
                         lc = 0;
                         while (enu.hasNext()) {
@@ -2480,11 +2489,14 @@ public final class Switchboard extends serverSwitch {
      * @return
      */
     public static Map<String, String> loadFileAsMap(final DigestURI url) {
-        try {
+    	final RequestHeader reqHeader = new RequestHeader();
+        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+        final Client client = new Client();
+        client.setHeader(reqHeader.entrySet());
+    	try {
             // sending request
-            final RequestHeader reqHeader = new RequestHeader();
-            reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-            final Map<String, String> result = FileUtils.table(Client.wget(url.toString(), reqHeader, 10000));
+//            final Map<String, String> result = FileUtils.table(Client.wget(url.toString(), reqHeader, 10000));
+    		final Map<String, String> result = FileUtils.table(client.GETbytes(url.toString()));
             if (result == null) return new HashMap<String, String>();
             return result;
         } catch (final Exception e) {

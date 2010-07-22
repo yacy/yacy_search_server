@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.protocol.Client;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -50,12 +51,12 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.AlternativeDomainNames;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
+//import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSwitch;
@@ -855,24 +856,38 @@ public final class yacySeedDB implements AlternativeDomainNames {
         reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
         
         // init http-client
-        final Client client = new Client(10000, reqHeader);
+//        final Client client = new Client(10000, reqHeader);
+//        byte[] content = null;
+//        ResponseContainer res = null;
+//        try {
+//            // send request
+//            res = client.GET(seedURL.toString());
+//            
+//            // check response code
+//            if (res.getStatusCode() != 200) {
+//            	throw new IOException("Server returned status: " + res.getStatusLine());
+//            }
+//            
+//            // read byte array
+//                content = res.getData();
+//        } finally {
+//            if(res != null) {
+//                res.closeStream();
+//            }
+//        }
+        final Client client = new Client();
+        client.setHeader(reqHeader.entrySet());
         byte[] content = null;
-        ResponseContainer res = null;
         try {
             // send request
-            res = client.GET(seedURL.toString());
+        	content = client.GETbytes(seedURL.toString());
+        } catch (final Exception e) {
+        	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
+        }
             
-            // check response code
-            if (res.getStatusCode() != 200) {
-            	throw new IOException("Server returned status: " + res.getStatusLine());
-            }
-            
-            // read byte array
-                content = res.getData();
-        } finally {
-            if(res != null) {
-                res.closeStream();
-            }
+        // check response code
+        if (client.getHttpResponse().getStatusLine().getStatusCode() != 200) {
+        	throw new IOException("Server returned status: " + client.getHttpResponse().getStatusLine());
         }
             
         try {
@@ -882,7 +897,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             // convert it into an array
             return FileUtils.strings(content);
         } catch (final Exception e) {
-        	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
+        	throw new IOException("Unable to uncompress seed file '" + seedURL + "'. " + e.getMessage());
         }
     }
 

@@ -43,7 +43,7 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.data.list.ListAccumulator;
 import de.anomic.data.list.XMLBlacklistImporter;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.SearchEventCache;
@@ -51,6 +51,7 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
+import net.yacy.cora.protocol.HttpConnector;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
@@ -150,7 +151,8 @@ public class sharedBlacklist_p {
                         // get List
                         DigestURI u = new DigestURI(downloadURLOld, null);
 
-                        otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 1000));
+//                        otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 1000));
+                        otherBlacklist = FileUtils.strings(HttpConnector.wget(u.toString(), reqHeader.entrySet(), 1000));
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", Hash);
@@ -169,7 +171,8 @@ public class sharedBlacklist_p {
                     final DigestURI u = new DigestURI(downloadURL, null);
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000)); //get List
+//                    otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000)); //get List
+                    otherBlacklist = FileUtils.strings(HttpConnector.wget(u.toString(), reqHeader.entrySet(), 10000));
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);
