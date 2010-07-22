@@ -135,11 +135,18 @@ public class UPNPRootDevice extends UPNPDevice {
     creationTime = System.currentTimeMillis();
    
     JXPathContext context = JXPathContext.newContext( this );
-    Pointer rootPtr = context.getPointer( "UPNPDevice/root" );
-    JXPathContext rootCtx = context.getRelativeContext( rootPtr );
 
-    specVersionMajor = Integer.parseInt( (String)rootCtx.getValue( "specVersion/major" ) );
-    specVersionMinor = Integer.parseInt( (String)rootCtx.getValue( "specVersion/minor" ) );
+    // registering this namespace because JxPath 1.3 is namespace aware per default - 2010-07-17 MiB
+  
+    context.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
+
+    Pointer rootPtr = context.getPointer( "UPNPDevice/upnp:root" );
+    JXPathContext rootCtx = context.getRelativeContext( rootPtr );
+    rootCtx.setNamespaceContextPointer(rootPtr);
+    // rootCtx.registerNamespace(null, "urn:schemas-upnp-org:device-1-0");
+
+    specVersionMajor = Integer.parseInt( (String)rootCtx.getValue( "upnp:specVersion/upnp:major" ) );
+    specVersionMinor = Integer.parseInt( (String)rootCtx.getValue( "upnp:specVersion/upnp:minor" ) );
     
     if ( !( specVersionMajor == 1 && specVersionMinor == 0 ) ) {
       throw new IllegalStateException( "Unsupported device version (" + specVersionMajor + "." + specVersionMinor + ")" );
@@ -147,7 +154,7 @@ public class UPNPRootDevice extends UPNPDevice {
     boolean buildURLBase = true;
     String base = null;
     try {
-      base = (String)rootCtx.getValue( "URLBase" );
+      base = (String)rootCtx.getValue( "upnp:URLBase" );
       if ( base != null && base.trim().length() > 0 ) {
         URLBase = new URL( base );
         if ( log.isDebugEnabled() ) log.debug( "device URLBase " + URLBase );
@@ -170,8 +177,9 @@ public class UPNPRootDevice extends UPNPDevice {
       }
       URLBase = new URL( URL );
     }
-    Pointer devicePtr = rootCtx.getPointer( "device" );
+    Pointer devicePtr = rootCtx.getPointer( "upnp:device" );
     JXPathContext deviceCtx = rootCtx.getRelativeContext( devicePtr );
+    deviceCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
 
     fillUPNPDevice( this, null, deviceCtx, URLBase );
   }
@@ -243,29 +251,29 @@ public class UPNPRootDevice extends UPNPDevice {
    */
   private void fillUPNPDevice( UPNPDevice device, UPNPDevice parent, JXPathContext deviceCtx, URL baseURL ) throws MalformedURLException {
     
-    device.deviceType = getMandatoryData( deviceCtx, "deviceType" );
+    device.deviceType = getMandatoryData( deviceCtx, "upnp:deviceType" );
     if ( log.isDebugEnabled() ) log.debug( "parsing device " + device.deviceType );
-    device.friendlyName = getMandatoryData( deviceCtx, "friendlyName" );
-    device.manufacturer = getNonMandatoryData( deviceCtx, "manufacturer" );
-    String base = getNonMandatoryData( deviceCtx, "manufacturerURL" );
+    device.friendlyName = getMandatoryData( deviceCtx, "upnp:friendlyName" );
+    device.manufacturer = getNonMandatoryData( deviceCtx, "upnp:manufacturer" );
+    String base = getNonMandatoryData( deviceCtx, "upnp:manufacturerURL" );
     try {
       if ( base != null ) device.manufacturerURL = new URL( base );
     } catch ( java.net.MalformedURLException ex ) {
       // crappy data provided, keep the field null
     }
     try {
-      device.presentationURL = getURL( getNonMandatoryData( deviceCtx, "presentationURL" ), URLBase );
+      device.presentationURL = getURL( getNonMandatoryData( deviceCtx, "upnp:presentationURL" ), URLBase );
     } catch ( java.net.MalformedURLException ex ) {
       // crappy data provided, keep the field null
     }
-    device.modelDescription = getNonMandatoryData( deviceCtx, "modelDescription" );
-    device.modelName = getMandatoryData( deviceCtx, "modelName" );
-    device.modelNumber = getNonMandatoryData( deviceCtx, "modelNumber" );
-    device.modelURL = getNonMandatoryData( deviceCtx, "modelURL" );
-    device.serialNumber = getNonMandatoryData( deviceCtx, "serialNumber" );
-    device.UDN = getMandatoryData( deviceCtx, "UDN" );
+    device.modelDescription = getNonMandatoryData( deviceCtx, "upnp:modelDescription" );
+    device.modelName = getMandatoryData( deviceCtx, "upnp:modelName" );
+    device.modelNumber = getNonMandatoryData( deviceCtx, "upnp:modelNumber" );
+    device.modelURL = getNonMandatoryData( deviceCtx, "upnp:modelURL" );
+    device.serialNumber = getNonMandatoryData( deviceCtx, "upnp:serialNumber" );
+    device.UDN = getMandatoryData( deviceCtx, "upnp:UDN" );
     device.USN = UDN.concat( "::" ).concat( deviceType );
-    String tmp = getNonMandatoryData( deviceCtx, "UPC" );
+    String tmp = getNonMandatoryData( deviceCtx, "upnp:UPC" );
     if ( tmp != null ) {
       try {
         device.UPC = Long.parseLong( tmp );
@@ -280,19 +288,21 @@ public class UPNPRootDevice extends UPNPDevice {
     
     Pointer deviceListPtr;
     try {
-      deviceListPtr = deviceCtx.getPointer( "deviceList" );
+      deviceListPtr = deviceCtx.getPointer( "upnp:deviceList" );
     } catch ( JXPathException ex ) {
       // no pointers for this device list, this can happen
       // if the device has no child devices, simply returning
       return;
     }
     JXPathContext deviceListCtx = deviceCtx.getRelativeContext( deviceListPtr );
-    Double arraySize = (Double)deviceListCtx.getValue( "count( device )" );
+    deviceListCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
+    Double arraySize = (Double)deviceListCtx.getValue( "count( upnp:device )" );
     device.childDevices = new ArrayList();
     if ( log.isDebugEnabled() ) log.debug( "child devices count is " + arraySize );
     for ( int i = 1; i <= arraySize.intValue(); i++ ) {
-      Pointer devicePtr = deviceListCtx.getPointer( "device[" + i + "]" );
+      Pointer devicePtr = deviceListCtx.getPointer( "upnp:device[" + i + "]" );
       JXPathContext childDeviceCtx = deviceListCtx.getRelativeContext( devicePtr );
+      childDeviceCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
       UPNPDevice childDevice = new UPNPDevice();
       fillUPNPDevice( childDevice, device, childDeviceCtx, baseURL );
       if ( log.isDebugEnabled() ) log.debug( "adding child device " + childDevice.getDeviceType() );
@@ -329,15 +339,17 @@ public class UPNPRootDevice extends UPNPDevice {
    *                               file for a service entry is invalid
    */
   private void fillUPNPServicesList( UPNPDevice device, JXPathContext deviceCtx ) throws MalformedURLException {
-    Pointer serviceListPtr = deviceCtx.getPointer( "serviceList" );
+    Pointer serviceListPtr = deviceCtx.getPointer( "upnp:serviceList" );
     JXPathContext serviceListCtx = deviceCtx.getRelativeContext( serviceListPtr );
-    Double arraySize = (Double)serviceListCtx.getValue( "count( service )" );
+    serviceListCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
+    Double arraySize = (Double)serviceListCtx.getValue( "count( upnp:service )" );
     if ( log.isDebugEnabled() ) log.debug( "device services count is " + arraySize );
     device.services = new ArrayList();
     for ( int i = 1; i <= arraySize.intValue(); i++ ) {
       
-      Pointer servicePtr = serviceListCtx.getPointer( "service["+i+"]" );
+      Pointer servicePtr = serviceListCtx.getPointer( "upnp:service["+i+"]" );
       JXPathContext serviceCtx = serviceListCtx.getRelativeContext( servicePtr );
+      serviceCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
       // TODO possibility of bugs if deviceDefLoc contains a file name
       URL base = URLBase != null ? URLBase : deviceDefLoc;
       UPNPService service = new UPNPService( serviceCtx, base, this );
@@ -356,24 +368,25 @@ public class UPNPRootDevice extends UPNPDevice {
   private void fillUPNPDeviceIconsList( UPNPDevice device, JXPathContext deviceCtx, URL baseURL ) throws MalformedURLException {
     Pointer iconListPtr;
     try {
-      iconListPtr = deviceCtx.getPointer( "iconList" );
+      iconListPtr = deviceCtx.getPointer( "upnp:iconList" );
     } catch ( JXPathException ex ) {
       // no pointers for icons list, this can happen
       // simply returning
       return;
     }
     JXPathContext iconListCtx = deviceCtx.getRelativeContext( iconListPtr );
-    Double arraySize = (Double)iconListCtx.getValue( "count( icon )" );
+    iconListCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
+    Double arraySize = (Double)iconListCtx.getValue( "count( upnp:icon )" );
     if ( log.isDebugEnabled() ) log.debug( "device icons count is " + arraySize );
     device.deviceIcons = new ArrayList();
     for ( int i = 1; i <= arraySize.intValue(); i++ ) {
       
       DeviceIcon ico = new DeviceIcon();
-      ico.mimeType = (String)iconListCtx.getValue( "icon["+i+"]/mimetype" );
-      ico.width = Integer.parseInt( (String)iconListCtx.getValue( "icon["+i+"]/width" ) );
-      ico.height = Integer.parseInt( (String)iconListCtx.getValue( "icon["+i+"]/height" ) );
-      ico.depth = Integer.parseInt( (String)iconListCtx.getValue( "icon["+i+"]/depth" ) );
-      ico.url = getURL( (String)iconListCtx.getValue( "icon["+i+"]/url" ), baseURL );
+      ico.mimeType = (String)iconListCtx.getValue( "upnp:icon["+i+"]/upnp:mimetype" );
+      ico.width = Integer.parseInt( (String)iconListCtx.getValue( "upnp:icon["+i+"]/upnp:width" ) );
+      ico.height = Integer.parseInt( (String)iconListCtx.getValue( "upnp:icon["+i+"]/upnp:height" ) );
+      ico.depth = Integer.parseInt( (String)iconListCtx.getValue( "upnp:icon["+i+"]/upnp:depth" ) );
+      ico.url = getURL( (String)iconListCtx.getValue( "upnp:icon["+i+"]/upnp:url" ), baseURL );
       if ( log.isDebugEnabled() ) log.debug( "icon URL is " + ico.url );
       device.deviceIcons.add( ico );
     }
