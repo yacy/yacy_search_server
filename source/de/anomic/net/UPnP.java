@@ -30,13 +30,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import net.sbbi.upnp.DiscoveryAdvertisement;
-import net.sbbi.upnp.DiscoveryEventHandler;
-import net.sbbi.upnp.devices.UPNPRootDevice;
-import net.sbbi.upnp.impls.InternetGatewayDevice;
-import net.sbbi.upnp.messages.UPNPResponseException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Domains;
+import net.yacy.upnp.DiscoveryAdvertisement;
+import net.yacy.upnp.DiscoveryEventHandler;
+import net.yacy.upnp.devices.UPNPRootDevice;
+import net.yacy.upnp.impls.InternetGatewayDevice;
+import net.yacy.upnp.messages.UPNPResponseException;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 
@@ -55,9 +55,9 @@ public class UPnP {
 	private static String localHostIP = null;;
 	
 	/* Discovery message sender IP /10.100.100.2 does not match device description IP /192.168.1.254 skipping message,
-	set the net.sbbi.upnp.ddos.matchip system property to false to avoid this check
+	set the net.yacy.upnp.ddos.matchip system property to false to avoid this check
 	static {
-		System.setProperty("net.sbbi.upnp.ddos.matchip", "false");
+		System.setProperty("net.yacy.upnp.ddos.matchip", "false");
 	} */
 	
 	public static boolean setIGDs(InternetGatewayDevice[] igds) {

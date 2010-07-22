@@ -35,7 +35,6 @@
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.12-bin.jar"/>
 	<classpathentry kind="lib" path="lib/jcifs-1.3.14.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.4.0-beta-1.jar"/>
-	<classpathentry kind="lib" path="lib/sbbi-upnplib-1.0.4.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/fontbox-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.0.1.jar"/>
