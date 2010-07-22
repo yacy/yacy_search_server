@@ -83,11 +83,11 @@ public class UPNPService {
 
   public UPNPService( JXPathContext serviceCtx, URL baseDeviceURL, UPNPDevice serviceOwnerDevice ) throws MalformedURLException {
     this.serviceOwnerDevice = serviceOwnerDevice;
-    serviceType = (String)serviceCtx.getValue( "serviceType" );
-    serviceId = (String)serviceCtx.getValue( "serviceId" );
-    SCPDURL = UPNPRootDevice.getURL( (String)serviceCtx.getValue( "SCPDURL" ), baseDeviceURL );
-    controlURL = UPNPRootDevice.getURL( (String)serviceCtx.getValue( "controlURL" ), baseDeviceURL );
-    eventSubURL = UPNPRootDevice.getURL( (String)serviceCtx.getValue( "eventSubURL" ), baseDeviceURL );
+    serviceType = (String)serviceCtx.getValue( "upnp:serviceType" );
+    serviceId = (String)serviceCtx.getValue( "upnp:serviceId" );
+    SCPDURL = UPNPRootDevice.getURL( (String)serviceCtx.getValue( "upnp:SCPDURL" ), baseDeviceURL );
+    controlURL = UPNPRootDevice.getURL( (String)serviceCtx.getValue( "upnp:controlURL" ), baseDeviceURL );
+    eventSubURL = UPNPRootDevice.getURL( (String)serviceCtx.getValue( "upnp:eventSubURL" ), baseDeviceURL );
     USN = serviceOwnerDevice.getUDN().concat( "::" ).concat( serviceType );
   }
 
@@ -174,39 +174,43 @@ public class UPNPService {
       DocumentContainer.registerXMLParser( DocumentContainer.MODEL_DOM, new JXPathParser() );
       UPNPService = new DocumentContainer( SCPDURL, DocumentContainer.MODEL_DOM );
       JXPathContext context = JXPathContext.newContext( this );
-      Pointer rootPtr = context.getPointer( "UPNPService/scpd" );
+      context.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
+      Pointer rootPtr = context.getPointer( "UPNPService/scpdns:scpd" );
       JXPathContext rootCtx = context.getRelativeContext( rootPtr );
+      rootCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
   
-      specVersionMajor = Integer.parseInt( (String)rootCtx.getValue( "specVersion/major" ) );
-      specVersionMinor = Integer.parseInt( (String)rootCtx.getValue( "specVersion/minor" ) );
+      specVersionMajor = Integer.parseInt( (String)rootCtx.getValue( "scpdns:specVersion/scpdns:major" ) );
+      specVersionMinor = Integer.parseInt( (String)rootCtx.getValue( "scpdns:specVersion/scpdns:minor" ) );
   
       parseServiceStateVariables( rootCtx );
   
-      Pointer actionsListPtr = rootCtx.getPointer( "actionList" );
+      Pointer actionsListPtr = rootCtx.getPointer( "scpdns:actionList" );
       JXPathContext actionsListCtx = context.getRelativeContext( actionsListPtr );
-      Double arraySize = (Double)actionsListCtx.getValue( "count( action )" );
+      actionsListCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
+      Double arraySize = (Double)actionsListCtx.getValue( "count( scpdns:action )" );
       UPNPServiceActions = new HashMap();
       for ( int i = 1; i <= arraySize.intValue(); i++ ) {
         ServiceAction action = new ServiceAction();
-        action.name = (String)actionsListCtx.getValue( "action["+i+"]/name" );
+        action.name = (String)actionsListCtx.getValue( "scpdns:action["+i+"]/scpdns:name" );
         action.parent = this;
         Pointer argumentListPtr = null;
         try {
-          argumentListPtr = actionsListCtx.getPointer( "action["+i+"]/argumentList" );
+          argumentListPtr = actionsListCtx.getPointer( "scpdns:action["+i+"]/scpdns:argumentList" );
         } catch ( JXPathException ex ) {
           // there is no arguments list.
         }
         if ( argumentListPtr != null ) {
           JXPathContext argumentListCtx = actionsListCtx.getRelativeContext( argumentListPtr );
-          Double arraySizeArgs = (Double)argumentListCtx.getValue( "count( argument )" );
+          argumentListCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
+          Double arraySizeArgs = (Double)argumentListCtx.getValue( "count( scpdns:argument )" );
   
           List orderedActionArguments = new ArrayList();
           for ( int z = 1; z <= arraySizeArgs.intValue(); z++ ) {
             ServiceActionArgument arg = new ServiceActionArgument();
-            arg.name = (String)argumentListCtx.getValue( "argument["+z+"]/name" );
-            String direction = (String)argumentListCtx.getValue( "argument["+z+"]/direction" );
+            arg.name = (String)argumentListCtx.getValue( "scpdns:argument["+z+"]/scpdns:name" );
+            String direction = (String)argumentListCtx.getValue( "scpdns:argument["+z+"]/scpdns:direction" );
             arg.direction = direction.equals( ServiceActionArgument.DIRECTION_IN ) ? ServiceActionArgument.DIRECTION_IN : ServiceActionArgument.DIRECTION_OUT;
-            String stateVarName = (String)argumentListCtx.getValue( "argument["+z+"]/relatedStateVariable" );
+            String stateVarName = (String)argumentListCtx.getValue( "scpdns:argument["+z+"]/scpdns:relatedStateVariable" );
             ServiceStateVariable stateVar = (ServiceStateVariable)UPNPServiceStateVariables.get( stateVarName );
             if ( stateVar == null ) {
               throw new IllegalArgumentException( "Unable to find any state variable named " + stateVarName + " for service " + getServiceId() + " action " + action.name + " argument " + arg.name );
@@ -229,56 +233,58 @@ public class UPNPService {
   }
 
   private void parseServiceStateVariables( JXPathContext rootContext ) {
-    Pointer serviceStateTablePtr = rootContext.getPointer( "serviceStateTable" );
+    Pointer serviceStateTablePtr = rootContext.getPointer( "scpdns:serviceStateTable" );
     JXPathContext serviceStateTableCtx = rootContext.getRelativeContext( serviceStateTablePtr );
-    Double arraySize = (Double)serviceStateTableCtx.getValue( "count( stateVariable )" );
+    serviceStateTableCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
+    Double arraySize = (Double)serviceStateTableCtx.getValue( "count( scpdns:stateVariable )" );
     UPNPServiceStateVariables = new HashMap();
     for ( int i = 1; i <= arraySize.intValue(); i++ ) {
       ServiceStateVariable srvStateVar = new ServiceStateVariable();
       String sendEventsLcl = null;
       try {
-        sendEventsLcl = (String)serviceStateTableCtx.getValue( "stateVariable["+i+"]/@sendEvents" );
+        sendEventsLcl = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:@sendEvents" );
       } catch ( JXPathException defEx ) {
         // sendEvents not provided defaulting according to specs to "yes"
         sendEventsLcl = "yes";
       }
       srvStateVar.parent = this;
       srvStateVar.sendEvents = sendEventsLcl.equalsIgnoreCase( "no" ) ? false : true;
-      srvStateVar.name = (String)serviceStateTableCtx.getValue( "stateVariable["+i+"]/name" );
-      srvStateVar.dataType = (String)serviceStateTableCtx.getValue( "stateVariable["+i+"]/dataType" );
+      srvStateVar.name = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:name" );
+      srvStateVar.dataType = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:dataType" );
       try {
-        srvStateVar.defaultValue = (String)serviceStateTableCtx.getValue( "stateVariable["+i+"]/defaultValue" );
+        srvStateVar.defaultValue = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:defaultValue" );
       } catch ( JXPathException defEx ) {
         // can happend since default value is not
       }
       Pointer allowedValuesPtr = null;
       try {
-        allowedValuesPtr = serviceStateTableCtx.getPointer( "stateVariable["+i+"]/allowedValueList" );
+        allowedValuesPtr = serviceStateTableCtx.getPointer( "scpdns:stateVariable["+i+"]/scpdns:allowedValueList" );
       } catch ( JXPathException ex ) {
         // there is no allowed values list.
       }
       if ( allowedValuesPtr != null ) {
         JXPathContext allowedValuesCtx = serviceStateTableCtx.getRelativeContext( allowedValuesPtr );
-        Double arraySizeAllowed = (Double)allowedValuesCtx.getValue( "count( allowedValue )" );
+        allowedValuesCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
+        Double arraySizeAllowed = (Double)allowedValuesCtx.getValue( "count( scpdns:allowedValue )" );
         srvStateVar.allowedvalues = new HashSet();
         for ( int z = 1; z <= arraySizeAllowed.intValue(); z++ ) {
-          String allowedValue = (String)allowedValuesCtx.getValue( "allowedValue["+z+"]" );
+          String allowedValue = (String)allowedValuesCtx.getValue( "scpdns:allowedValue["+z+"]" );
           srvStateVar.allowedvalues.add( allowedValue );
         }
       }
 
       Pointer allowedValueRangePtr = null;
       try {
-        allowedValueRangePtr = serviceStateTableCtx.getPointer( "stateVariable["+i+"]/allowedValueRange" );
+        allowedValueRangePtr = serviceStateTableCtx.getPointer( "scpdns:stateVariable["+i+"]/scpdns:allowedValueRange" );
       } catch ( JXPathException ex ) {
         // there is no allowed values list, can happen
       }
       if ( allowedValueRangePtr != null ) {
 
-        srvStateVar.minimumRangeValue = (String)serviceStateTableCtx.getValue( "stateVariable["+i+"]/allowedValueRange/minimum" );
-        srvStateVar.maximumRangeValue = (String)serviceStateTableCtx.getValue( "stateVariable["+i+"]/allowedValueRange/maximum" );
+        srvStateVar.minimumRangeValue = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:allowedValueRange/scpdns:minimum" );
+        srvStateVar.maximumRangeValue = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:allowedValueRange/scpdns:maximum" );
         try {
-          srvStateVar.stepRangeValue = (String)serviceStateTableCtx.getValue( "stateVariable["+i+"]/allowedValueRange/step" );
+          srvStateVar.stepRangeValue = (String)serviceStateTableCtx.getValue( "scpdns:stateVariable["+i+"]/scpdns:allowedValueRange/scpdns:step" );
         } catch ( JXPathException stepEx ) {
           // can happend since step is not mandatory
         }
