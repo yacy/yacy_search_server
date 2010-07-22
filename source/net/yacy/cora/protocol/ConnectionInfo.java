@@ -53,6 +53,7 @@ public class ConnectionInfo {
     private final String command;
     private final int id;
     private final long initTime;
+    private final long upbytes;
 
     /**
      * constructor setting all data
@@ -64,12 +65,13 @@ public class ConnectionInfo {
      * @param initTime
      */
     public ConnectionInfo(final String protocol, final String targetHost, final String command, final int id,
-            final long initTime) {
+            final long initTime, final long upbytes) {
         this.protocol = protocol;
         this.targetHost = targetHost;
         this.command = command;
         this.id = id;
         this.initTime = initTime;
+        this.upbytes = upbytes;
     }
 
     /**
@@ -87,10 +89,10 @@ public class ConnectionInfo {
     }
 
     /**
-     * @return dummy 0
+     * @return
      */
-    public int getIdletime() {
-        return 0;
+    public long getUpbytes() {
+        return upbytes;
     }
 
     /**
@@ -144,6 +146,23 @@ public class ConnectionInfo {
     }
     
     /**
+     * removes stale connections
+     */
+    public static long getActiveUpbytes() {
+    	long up = 0L;
+    	try {
+            synchronized (allConnections) {
+                for(final ConnectionInfo con: allConnections) {
+                    up += con.getUpbytes();
+                }
+            }
+        } catch (final java.util.ConcurrentModificationException e) {
+            // there will be another try :-)
+        }
+        return up;
+    }
+    
+    /**
      * gets the max connection count of the Client connection manager
      * 
      * @return max connections
@@ -186,14 +205,14 @@ public class ConnectionInfo {
      * @param id
      */
     protected static void removeConnection(final int id) {
-        removeConnection(new ConnectionInfo(null, null, null, id, 0));
+        removeConnection(new ConnectionInfo(null, null, null, id, 0, 0));
     }
     
     /**
      * removes stale connections
      */
     public static void cleanUp() {
-        try {
+    	try {
             synchronized (allConnections) {
                 for(final ConnectionInfo con: allConnections) {
                     if(con.getLifetime() > staleAfterMillis) {

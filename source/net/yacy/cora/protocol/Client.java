@@ -3,15 +3,18 @@ package net.yacy.cora.protocol;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
@@ -29,6 +32,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -49,6 +53,9 @@ public class Client {
 	private final static int maxcon = 20;
 	private static IdledConnectionEvictor idledConnectionEvictor = null;
 	private static HttpClient httpClient = null;
+	private Header[] headers = null;
+	private HttpResponse httpResponse;
+	private long upbytes = 0L;
 	private int timeout = 10000;
 	private String userAgent = null;
 	private String host = null;
@@ -62,7 +69,7 @@ public class Client {
     
     private static void initConnectionManager() {
 		// Create and initialize HTTP parameters
-		HttpParams httpParams = new BasicHttpParams();
+		final HttpParams httpParams = new BasicHttpParams();
 		/**
 		 * ConnectionManager settings
 		 */
@@ -71,7 +78,7 @@ public class Client {
 		// for statistics same value should also be set here
 		ConnectionInfo.setMaxcount(maxcon);
 		// perhaps we need more than 2(default) connections per host?
-		ConnPerRouteBean connPerRoute = new ConnPerRouteBean(2);
+		final ConnPerRouteBean connPerRoute = new ConnPerRouteBean(2);
 		// Increase max connections for localhost to 100
 		HttpHost localhost = new HttpHost("locahost");
 		connPerRoute.setMaxForRoute(new HttpRoute(localhost), maxcon);
@@ -102,7 +109,7 @@ public class Client {
 		// TODO: testing noreuse - there will be HttpConnectionParams.setSoReuseaddr(HttpParams params, boolean reuseaddr) in core-4.1
 		
 		// Create and initialize scheme registry
-		SchemeRegistry schemeRegistry = new SchemeRegistry();
+		final SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 
@@ -130,6 +137,18 @@ public class Client {
 			httpClient.getConnectionManager().shutdown();
 		}
     	
+    }
+    
+    /**
+     * 
+     * @param entrys to be set as request header
+     */
+    public void setHeader(final Set<Entry<String, String>> entrys) {
+    	int i = 0;
+    	headers = new Header[entrys.size()];
+    	for (final Entry<String, String> entry : entrys) {
+    		headers[i++] = new BasicHeader(entry.getKey(),entry.getValue());
+    	}
     }
     
     /**
@@ -174,8 +193,21 @@ public class Client {
      * @throws IOException 
      */
     public byte[] GETbytes(final String uri, long maxBytes) throws IOException {
-    	HttpGet httpGet = new HttpGet(uri);
+    	final HttpGet httpGet = new HttpGet(uri);
     	return getContentBytes(httpGet, maxBytes);
+    }
+    
+    /**
+     * This method gets HEAD response
+     * 
+     * @param uri the url to Response from
+     * @return the HttpResponse
+     * @throws IOException
+     */
+    public HttpResponse HEADResponse(final String uri) throws IOException {
+    	final HttpHead httpHead = new HttpHead(uri);
+    	getContentBytes(httpHead, Long.MAX_VALUE);
+    	return httpResponse;
     }
     
     /**
@@ -186,29 +218,40 @@ public class Client {
      * @throws IOException 
      */
 	public byte[] POSTbytes(final String uri, LinkedHashMap<String,ContentBody> parts) throws IOException {
-    	HttpPost httpPost = new HttpPost(uri);
+    	final HttpPost httpPost = new HttpPost(uri);
 
-    	MultipartEntity multipartEntity = new MultipartEntity();
+    	final MultipartEntity multipartEntity = new MultipartEntity();
     	for (Entry<String,ContentBody> part : parts.entrySet())
     		multipartEntity.addPart(part.getKey(), part.getValue());
+    	// statistics
+    	upbytes = multipartEntity.getContentLength();
 
     	httpPost.setEntity(multipartEntity);
     	
     	return getContentBytes(httpPost, Long.MAX_VALUE);
     }
+	
+	/**
+	 * 
+	 * @return HttpResponse from call
+	 */
+	public HttpResponse getHttpResponse() {
+		return httpResponse;
+	}
     
     private byte[] getContentBytes(HttpUriRequest httpUriRequest, long maxBytes) throws IOException {
     	byte[] content = null;
     	final HttpContext httpContext = new BasicHttpContext();
+    	setHeaders(httpUriRequest);
     	setParams(httpUriRequest.getParams());
     	setProxy(httpUriRequest.getParams());
     	// statistics
     	storeConnectionInfo(httpUriRequest);
     	try {
     		// execute the method
-        	HttpResponse httpResponse = httpClient.execute(httpUriRequest, httpContext);
+        	httpResponse = httpClient.execute(httpUriRequest, httpContext);
         	// get the response body
-        	HttpEntity httpEntity = httpResponse.getEntity();
+        	final HttpEntity httpEntity = httpResponse.getEntity();
         	if (httpEntity != null) {
         		if (httpEntity.getContentLength()  < maxBytes) {
         			content = EntityUtils.toByteArray(httpEntity);
@@ -224,6 +267,14 @@ public class Client {
 		}
 		ConnectionInfo.removeConnection(httpUriRequest.hashCode());
 		return content;
+    }
+    
+    private void setHeaders(HttpUriRequest httpUriRequest) {
+    	if (headers != null) {
+    		for (Header header : headers) {
+    			httpUriRequest.addHeader(header);
+    		}
+    	}
     }
     
     private void setParams(HttpParams httpParams) {
@@ -243,14 +294,15 @@ public class Client {
     }
     
     private void storeConnectionInfo(HttpUriRequest httpUriRequest) {
-    	int port = httpUriRequest.getURI().getPort();
-    	String thost = httpUriRequest.getURI().getHost();
+    	final int port = httpUriRequest.getURI().getPort();
+    	final String thost = httpUriRequest.getURI().getHost();
     	ConnectionInfo.addConnection(new ConnectionInfo(
     			httpUriRequest.getURI().getScheme(),
     			port == 80 ? thost : thost + ":" + port,
     			httpUriRequest.getMethod() + " " + httpUriRequest.getURI().getPath(),
     			httpUriRequest.hashCode(),
-    			System.currentTimeMillis()));
+    			System.currentTimeMillis(),
+    			upbytes));
     }
     
     /**
@@ -305,12 +357,23 @@ public class Client {
 				e.printStackTrace();
 			}
 		}
-		// Post some
+		// Head some
 		try {
-			System.out.println(new String(client.POSTbytes(url, newparts)));
-		} catch (IOException e1) {
-			e1.printStackTrace();
+			for (Header header: client.HEADResponse(url).getAllHeaders())
+			System.out.println(header.getName() + " : " + header.getValue());
+			System.out.println(client.getHttpResponse().getLocale());
+			System.out.println(client.getHttpResponse().getProtocolVersion());
+			System.out.println(client.getHttpResponse().getStatusLine());
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+		// Post some
+//		try {
+//			System.out.println(new String(client.POSTbytes(url, newparts)));
+//		} catch (IOException e1) {
+//			e1.printStackTrace();
+//		}
+		// Close out connection manager
 		try {
 			Client.closeConnectionManager();
 		} catch (InterruptedException e) {

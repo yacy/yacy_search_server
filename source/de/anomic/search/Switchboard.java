@@ -2121,7 +2121,7 @@ public final class Switchboard extends serverSwitch {
             return false;
         }
         boolean hasDoneSomething = false;
-        
+        final long kbytesUp = ConnectionInfo.getActiveUpbytes() / 1024;
         // accumulate RWIs to transmission cloud
         if (this.dhtDispatcher.cloudSize() > this.peers.scheme.verticalPartitions() * 2) {
         	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
@@ -2131,6 +2131,8 @@ public final class Switchboard extends serverSwitch {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + ConnectionInfo.getCount());
             // close unused connections
 //            Client.cleanup();
+        } else if (kbytesUp > 512) {
+        	log.logInfo("dhtTransferJob: too much upload, currently uploading: " + kbytesUp + " Kb");
         } else {
             byte[] startHash = null, limitHash = null;
             int tries = 10;
@@ -2163,6 +2165,8 @@ public final class Switchboard extends serverSwitch {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + ConnectionInfo.getCount());
             // close unused connections
 //            Client.cleanup();
+        } else if (kbytesUp > 512) {
+        	log.logInfo("dhtTransferJob: too much upload, currently uploading: " + kbytesUp + " Kb");
         } else {
         	boolean dequeued = this.dhtDispatcher.dequeueContainer();
         	hasDoneSomething = hasDoneSomething | dequeued;

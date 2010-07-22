@@ -160,7 +160,7 @@ public final class Connections_p {
         for (final ConnectionInfo conInfo: allConnections) {
             prop.put("clientList_" + c + "_clientProtocol", conInfo.getProtocol());
             prop.putNum("clientList_" + c + "_clientLifetime", conInfo.getLifetime());
-            prop.putNum("clientList_" + c + "_clientIdletime", conInfo.getIdletime());
+            prop.putNum("clientList_" + c + "_clientUpbytes", conInfo.getUpbytes());
             prop.put("clientList_" + c + "_clientTargetHost", conInfo.getTargetHost());
             prop.putHTML("clientList_" + c + "_clientCommand", conInfo.getCommand());
             prop.put("clientList_" + c + "_clientID", conInfo.getID());

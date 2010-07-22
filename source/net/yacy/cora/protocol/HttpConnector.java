@@ -122,6 +122,14 @@ public class HttpConnector {
 	}
         
     
+    /**
+     * get data from the server named by url
+     * 
+     * @param url address of the server
+     * @param timeout in milliseconds
+     * @return response body
+     * @throws IOException
+     */
     public static byte[] wget(final MultiProtocolURI url, final int timeout) throws IOException {
         return wget(url.toNormalform(false, false), url.getHost(), timeout);
     }
