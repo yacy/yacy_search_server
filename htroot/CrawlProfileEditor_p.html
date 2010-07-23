@@ -86,8 +86,8 @@
 </fieldset>
 
 
-<!-- crawl profile editor -->
-    <form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
+    <!-- crawl profile editor -->
+    <form action="CrawlProfileEditor_p.html#edit" method="post" enctype="multipart/form-data">
       <fieldset><legend>Select the profile to edit</legend>
         <select name="handle">#{profiles}# 
           <option value="#[handle]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>#{/profiles}# 
@@ -101,7 +101,8 @@
     #(/error)#
     
     #(edit)#::
-    <form action="/CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data">
+    <a name="edit"></a>
+    <form action="/CrawlProfileEditor_p.html#edit" method="post" enctype="multipart/form-data">
       <fieldset><legend>Edit Profile #[name]#</legend>
         <input type="hidden" name="handle" value="#[handle]#" />
         <dl>#{entries}# 

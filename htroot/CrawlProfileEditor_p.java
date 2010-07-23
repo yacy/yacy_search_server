@@ -43,7 +43,10 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class CrawlProfileEditor_p {
-    
+
+    private final static String CRAWL_PROFILE_PREFIX = "crawlProfiles_";
+    private static final String EDIT_ENTRIES_PREFIX = "edit_entries_";
+
     private static final Set<String> ignoreNames = new HashSet<String>();
     static {
         ignoreNames.add(CrawlSwitchboard.CRAWL_PROFILE_PROXY);
@@ -61,7 +64,7 @@ public class CrawlProfileEditor_p {
         public static final int BOOLEAN = 0;
         public static final int INTEGER = 1;
         public static final int STRING = 2;
-        
+
         public final String name;
         public final String label;
         public final boolean readonly;
@@ -106,7 +109,9 @@ public class CrawlProfileEditor_p {
             if (post.containsKey("terminate")) {
                 // termination of a crawl: shift the crawl from active to passive
                 final CrawlProfile.entry entry = sb.crawler.profilesActiveCrawls.getEntry(handle);
-                if (entry != null) sb.crawler.profilesPassiveCrawls.newEntry(entry.map());
+                if (entry != null) {
+                    sb.crawler.profilesPassiveCrawls.newEntry(entry.map());
+                }
                 sb.crawler.profilesActiveCrawls.removeEntry(handle.getBytes());
                 // delete all entries from the crawl queue that are deleted here
                 try {
@@ -135,11 +140,14 @@ public class CrawlProfileEditor_p {
         entry selentry;
         while (it.hasNext()) {
             selentry = it.next();
-            if (ignoreNames.contains(selentry.name())) continue;
+            if (ignoreNames.contains(selentry.name())) {
+                continue;
+            }
             prop.put("profiles_" + count + "_name", selentry.name());
             prop.put("profiles_" + count + "_handle", selentry.handle());
-            if (handle.equals(selentry.handle()))
+            if (handle.equals(selentry.handle())) {
                 prop.put("profiles_" + count + "_selected", "1");
+            }
             count++;
         }
         prop.put("profiles", count);
@@ -147,23 +155,25 @@ public class CrawlProfileEditor_p {
         assert selentry == null || selentry.handle() != null;
         // read post for change submit
         if ((post != null) && (selentry != null)) {
-			if (post.containsKey("submit")) {
-				try {
-					final Iterator<eentry> lit = labels.iterator();
-					eentry tee;
-					while (lit.hasNext()) {
-						tee = lit.next();
-						final String cval = selentry.map().get(tee.name);
-						final String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
-						if (!cval.equals(val)) sb.crawler.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
-					}
-				} catch (final Exception ex) {
-				    Log.logException(ex);
-					prop.put("error", "1");
-					prop.putHTML("error_message", ex.getMessage());
-				}
-			}
-		}
+            if (post.containsKey("submit")) {
+                try {
+                    final Iterator<eentry> lit = labels.iterator();
+                    eentry tee;
+                    while (lit.hasNext()) {
+                        tee = lit.next();
+                        final String cval = selentry.map().get(tee.name);
+                        final String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
+                        if (!cval.equals(val)) {
+                            sb.crawler.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
+                        }
+                    }
+                } catch (final Exception ex) {
+                    Log.logException(ex);
+                    prop.put("error", "1");
+                    prop.putHTML("error_message", ex.getMessage());
+                }
+            }
+        }
         
         // generate crawl profile table
         count = 0;
@@ -190,7 +200,7 @@ public class CrawlProfileEditor_p {
         }
         prop.put("crawlProfiles", count);
         
-        if(existPassiveCrawls) {
+        if (existPassiveCrawls) {
             prop.put("existPassiveCrawls", "1");
         } else {
             prop.put("existPassiveCrawls", "0");
@@ -200,42 +210,43 @@ public class CrawlProfileEditor_p {
         if (selentry == null) {
         	prop.put("edit", "0");
         } else {
-        	prop.put("edit", "1");
-			prop.put("edit_name", selentry.name());
-			prop.put("edit_handle", selentry.handle());
-			final Iterator<eentry> lit = labels.iterator();
-			count = 0;
-			while (lit.hasNext()) {
-				final eentry ee = lit.next();
-				final String val = selentry.map().get(ee.name);
-				prop.put("edit_entries_" + count + "_readonly", ee.readonly ? "1" : "0");
-				prop.put("edit_entries_" + count + "_readonly_name", ee.name);
-				prop.put("edit_entries_" + count + "_readonly_label", ee.label);
-				prop.put("edit_entries_" + count + "_readonly_type", ee.type);
-				if (ee.type == eentry.BOOLEAN) {
-					prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.parseBoolean(val) ? "1" : "0");
-				} else {
-					prop.put("edit_entries_" + count + "_readonly_type_value", val);
-				}
-				count++;
-			}
-			prop.put("edit_entries", count);
-		}
+            prop.put("edit", "1");
+            prop.put("edit_name", selentry.name());
+            prop.put("edit_handle", selentry.handle());
+            final Iterator<eentry> lit = labels.iterator();
+            count = 0;
+            while (lit.hasNext()) {
+                final eentry ee = lit.next();
+                final String val = selentry.map().get(ee.name);
+                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly", ee.readonly ? "1" : "0");
+                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_name", ee.name);
+                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_label", ee.label);
+                prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type", ee.type);
+                if (ee.type == eentry.BOOLEAN) {
+                    prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_checked", Boolean.parseBoolean(val) ? "1" : "0");
+                } else {
+                    prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_value", val);
+                }
+                count++;
+            }
+            prop.put("edit_entries", count);
+        }
         
         return prop;
     }
     
     private static void putProfileEntry(final servletProperties prop, final CrawlProfile.entry profile, final boolean active, final boolean dark, final int count, final int domlistlength) {
-        prop.put("crawlProfiles_" + count + "_dark", dark ? "1" : "0");
-        prop.put("crawlProfiles_" + count + "_status", active ? "1" : "0");
-        prop.put("crawlProfiles_" + count + "_name", profile.name());
-        prop.putXML("crawlProfiles_" + count + "_startURL", profile.startURL());
-        prop.put("crawlProfiles_" + count + "_handle", profile.handle());
-        prop.put("crawlProfiles_" + count + "_depth", profile.depth());
-        prop.put("crawlProfiles_" + count + "_mustmatch", profile.mustMatchPattern().toString());
-        prop.put("crawlProfiles_" + count + "_mustnotmatch", profile.mustNotMatchPattern().toString());
-        prop.put("crawlProfiles_" + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
-        prop.put("crawlProfiles_" + count + "_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
+
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_status", active ? "1" : "0");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_name", profile.name());
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_startURL", profile.startURL());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_handle", profile.handle());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", profile.depth());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustmatch", profile.mustMatchPattern().toString());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", profile.mustNotMatchPattern().toString());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
 
         // start contrib [MN]
         int i = 0;
@@ -244,22 +255,22 @@ public class CrawlProfileEditor_p {
             if(i == domlistlength){
                 item = item + " ...";
             }
-            prop.putHTML("crawlProfiles_"+count+"_crawlingDomFilterContent_"+i+"_item", item);
+            prop.putHTML(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent_"+i+"_item", item);
             i++;
         }
 
-        prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", i);
+        prop.put(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent", i);
         // end contrib [MN]
 
-        prop.put("crawlProfiles_" + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(profile.domMaxPages()));
-        prop.put("crawlProfiles_" + count + "_withQuery", (profile.crawlingQ()) ? "1" : "0");
-        prop.put("crawlProfiles_" + count + "_storeCache", (profile.storeHTCache()) ? "1" : "0");
-        prop.put("crawlProfiles_" + count + "_indexText", (profile.indexText()) ? "1" : "0");
-        prop.put("crawlProfiles_" + count + "_indexMedia", (profile.indexMedia()) ? "1" : "0");
-        prop.put("crawlProfiles_" + count + "_remoteIndexing", (profile.remoteIndexing()) ? "1" : "0");
-        prop.put("crawlProfiles_" + count + "_terminateButton", (!active || ignoreNames.contains(profile.name())) ? "0" : "1");
-        prop.put("crawlProfiles_" + count + "_terminateButton_handle", profile.handle());
-        prop.put("crawlProfiles_" + count + "_deleteButton", (active) ? "0" : "1");
-        prop.put("crawlProfiles_" + count + "_deleteButton_handle", profile.handle());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(profile.domMaxPages()));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_withQuery", (profile.crawlingQ()) ? "1" : "0");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_storeCache", (profile.storeHTCache()) ? "1" : "0");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", (profile.indexText()) ? "1" : "0");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", (profile.indexMedia()) ? "1" : "0");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", (profile.remoteIndexing()) ? "1" : "0");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", (!active || ignoreNames.contains(profile.name())) ? "0" : "1");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", profile.handle());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", (active) ? "0" : "1");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", profile.handle());
     }
 }
