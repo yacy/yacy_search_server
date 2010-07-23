@@ -78,7 +78,7 @@ function updatepage(str) {
 }
 //]]>
 </script>
-<script src="/js/sorttable.js"></script>
+<script type="text/javascript" src="/js/sorttable.js"></script>
 </head>
 <body>
 <script type="text/javascript">
@@ -90,7 +90,7 @@ if (q != "") search(q);
 #(display)#
 	#%env/templates/simpleheader.template%#
 	<div id="kiosk">
-    <a href="yacyinteractive.html?display=2"\><img src="env/grafics/close.gif" width="16" height="16" alt="close" /></a>
+    <a href="yacyinteractive.html?display=2"><img src="env/grafics/close.gif" width="16" height="16" alt="close" /></a>
     <span>kiosk mode</span>
     </div>
     ::
@@ -104,7 +104,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 	#%env/templates/embeddedheader.template%#
 #(/display)#
 
-<form class="search small" name="searchform" action="yacyinteractive.html" method="get" onkeyup="xmlhttpPost(); return false;">
+<form class="search small" id="searchform" action="yacyinteractive.html" method="get" onkeyup="xmlhttpPost(); return false;">
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo">
     <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch"/></a>
