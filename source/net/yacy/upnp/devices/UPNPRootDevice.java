@@ -297,7 +297,7 @@ public class UPNPRootDevice extends UPNPDevice {
     JXPathContext deviceListCtx = deviceCtx.getRelativeContext( deviceListPtr );
     deviceListCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
     Double arraySize = (Double)deviceListCtx.getValue( "count( upnp:device )" );
-    device.childDevices = new ArrayList();
+    device.childDevices = new ArrayList<UPNPDevice>();
     if ( log.isDebugEnabled() ) log.debug( "child devices count is " + arraySize );
     for ( int i = 1; i <= arraySize.intValue(); i++ ) {
       Pointer devicePtr = deviceListCtx.getPointer( "upnp:device[" + i + "]" );
@@ -344,7 +344,7 @@ public class UPNPRootDevice extends UPNPDevice {
     serviceListCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
     Double arraySize = (Double)serviceListCtx.getValue( "count( upnp:service )" );
     if ( log.isDebugEnabled() ) log.debug( "device services count is " + arraySize );
-    device.services = new ArrayList();
+    device.services = new ArrayList<UPNPService>();
     for ( int i = 1; i <= arraySize.intValue(); i++ ) {
       
       Pointer servicePtr = serviceListCtx.getPointer( "upnp:service["+i+"]" );
@@ -378,7 +378,7 @@ public class UPNPRootDevice extends UPNPDevice {
     iconListCtx.registerNamespace("upnp", "urn:schemas-upnp-org:device-1-0");
     Double arraySize = (Double)iconListCtx.getValue( "count( upnp:icon )" );
     if ( log.isDebugEnabled() ) log.debug( "device icons count is " + arraySize );
-    device.deviceIcons = new ArrayList();
+    device.deviceIcons = new ArrayList<DeviceIcon>();
     for ( int i = 1; i <= arraySize.intValue(); i++ ) {
       
       DeviceIcon ico = new DeviceIcon();

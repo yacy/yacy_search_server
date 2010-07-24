@@ -74,7 +74,7 @@ public class ServiceStateVariable implements ServiceStateVariableTypes {
   protected String minimumRangeValue;
   protected String maximumRangeValue;
   protected String stepRangeValue;
-  protected Set allowedvalues;
+  protected Set<String> allowedvalues;
   protected UPNPService parent;
   
   protected ServiceStateVariable() {

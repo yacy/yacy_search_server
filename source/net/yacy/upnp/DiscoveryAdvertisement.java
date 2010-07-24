@@ -83,9 +83,9 @@ public class DiscoveryAdvertisement implements Runnable {
   private final static String NTS_SSDP_BYE_BYE = "ssdp:byebye";
   private final static String NT_ALL_EVENTS = "DiscoveryAdvertisement:nt:allevents";
   
-  private Map byeByeRegistered = new HashMap();
-  private Map aliveRegistered = new HashMap();
-  private Map USNPerIP = new HashMap();
+  private Map<String, Set<DiscoveryEventHandler>> byeByeRegistered = new HashMap<String, Set<DiscoveryEventHandler>>();
+  private Map<String, Set<DiscoveryEventHandler>> aliveRegistered = new HashMap<String, Set<DiscoveryEventHandler>>();
+  private Map<String, InetAddress> USNPerIP = new HashMap<String, InetAddress>();
   
   private final Object REGISTRATION_PROCESS = new Object();
   
@@ -121,16 +121,16 @@ public class DiscoveryAdvertisement implements Runnable {
       if ( !inService ) startDevicesListenerThread();
       if ( nt == null ) nt = NT_ALL_EVENTS;
       if ( notificationEvent == EVENT_SSDP_ALIVE ) {
-        Set handlers = (Set)aliveRegistered.get( nt );
+        Set<DiscoveryEventHandler> handlers = aliveRegistered.get( nt );
         if ( handlers == null ) {
-          handlers = new HashSet();
+          handlers = new HashSet<DiscoveryEventHandler>();
           aliveRegistered.put( nt, handlers );
         }
         handlers.add( eventHandler );
       } else if ( notificationEvent == EVENT_SSDP_BYE_BYE ) {
-        Set handlers = (Set)byeByeRegistered.get( nt );
+        Set<DiscoveryEventHandler> handlers = byeByeRegistered.get( nt );
         if ( handlers == null ) {
-          handlers = new HashSet();
+          handlers = new HashSet<DiscoveryEventHandler>();
           byeByeRegistered.put( nt, handlers );
         }
         handlers.add( eventHandler );
@@ -152,7 +152,7 @@ public class DiscoveryAdvertisement implements Runnable {
     synchronized( REGISTRATION_PROCESS ) {
       if ( nt == null ) nt = NT_ALL_EVENTS;
       if ( notificationEvent == EVENT_SSDP_ALIVE ) {
-        Set handlers = (Set)aliveRegistered.get( nt );
+        Set handlers = aliveRegistered.get( nt );
         if ( handlers != null ) {
           handlers.remove( eventHandler );
           if ( handlers.size() == 0 ) {
@@ -160,7 +160,7 @@ public class DiscoveryAdvertisement implements Runnable {
           }
         }
       } else if ( notificationEvent == EVENT_SSDP_BYE_BYE ) {
-        Set handlers = (Set)byeByeRegistered.get( nt );
+        Set handlers = byeByeRegistered.get( nt );
         if ( handlers != null ) {
           handlers.remove( eventHandler );
           if ( handlers.size() == 0 ) {
@@ -304,14 +304,14 @@ public class DiscoveryAdvertisement implements Runnable {
          int index = udn.indexOf( "::" );
          if ( index != -1 ) udn = udn.substring( 0, index );
          synchronized( REGISTRATION_PROCESS ) {
-           Set handlers = (Set)aliveRegistered.get( NT_ALL_EVENTS );
+           Set handlers = aliveRegistered.get( NT_ALL_EVENTS );
            if ( handlers != null ) {
              for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
                DiscoveryEventHandler eventHandler = (DiscoveryEventHandler)i.next();
                eventHandler.eventSSDPAlive( usn, udn, nt, maxAge, loc );
              }
            }
-           handlers = (Set)aliveRegistered.get( nt );
+           handlers = aliveRegistered.get( nt );
            if ( handlers != null ) {
              for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
                DiscoveryEventHandler eventHandler = (DiscoveryEventHandler)i.next();
@@ -331,7 +331,7 @@ public class DiscoveryAdvertisement implements Runnable {
            return;
          }
 
-         InetAddress originalAliveSenderIp = (InetAddress)USNPerIP.get( usn );
+         InetAddress originalAliveSenderIp = USNPerIP.get( usn );
          if ( originalAliveSenderIp != null ) {
            // we check that the sender ip of message for the usn
            // match the sender ip of the alive message for wich the usn
@@ -347,14 +347,14 @@ public class DiscoveryAdvertisement implements Runnable {
          int index = udn.indexOf( "::" );
          if ( index != -1 ) udn = udn.substring( 0, index );
          synchronized( REGISTRATION_PROCESS ) {
-           Set handlers = (Set)byeByeRegistered.get( NT_ALL_EVENTS );
+           Set handlers = byeByeRegistered.get( NT_ALL_EVENTS );
            if ( handlers != null ) {
              for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
                DiscoveryEventHandler eventHandler = (DiscoveryEventHandler)i.next();
                eventHandler.eventSSDPByeBye( usn, udn, nt );
              }
            }
-           handlers = (Set)byeByeRegistered.get( nt );
+           handlers = byeByeRegistered.get( nt );
            if ( handlers != null ) {
              for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
                DiscoveryEventHandler eventHandler = (DiscoveryEventHandler)i.next();

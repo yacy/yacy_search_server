@@ -79,7 +79,7 @@ public class ServicesEventing implements Runnable {
   
   private ServerSocket server = null;
   
-  private List registered = new ArrayList();
+  private List<Subscription> registered = new ArrayList<Subscription>();
   
   private ServicesEventing() {
   }

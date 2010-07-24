@@ -226,6 +226,7 @@ public class InternetGatewayDevice {
    * @deprecated use generic {@link #getDevices(int)} or {@link #getDevices(int, int, int, NetworkInterface)} methods since this one is not
    *             usable with all IGD devices ( will only work with devices implementing the urn:schemas-upnp-org:service:WANIPConnection:1 service )
    */
+  @Deprecated
   public static InternetGatewayDevice[] getIPDevices( int timeout ) throws IOException {
     return lookupDeviceDevices( timeout, Discovery.DEFAULT_TTL, Discovery.DEFAULT_MX, true, false, null );
   }
@@ -238,6 +239,7 @@ public class InternetGatewayDevice {
    * @deprecated use generic {@link #getDevices(int)} or {@link #getDevices(int, int, int, NetworkInterface)} methods since this one is not
    *             usable with all IGD devices ( will only work with devices implementing the urn:schemas-upnp-org:service:WANPPPConnection:1 service )
    */
+  @Deprecated
   public static InternetGatewayDevice[] getPPPDevices( int timeout ) throws IOException {
     return lookupDeviceDevices( timeout, Discovery.DEFAULT_TTL, Discovery.DEFAULT_MX, false, true, null );
   }
@@ -252,7 +254,7 @@ public class InternetGatewayDevice {
     }
 
     if ( devices != null ) {
-      Set valid = new HashSet();
+      Set <InternetGatewayDevice> valid = new HashSet<InternetGatewayDevice>();
       for ( int i = 0; i < devices.length; i++ ) {
         try {
           valid.add( new InternetGatewayDevice( devices[i], WANIPConnection, WANPPPConnection ) );

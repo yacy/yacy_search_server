@@ -64,7 +64,7 @@ public class ServiceEventMessageParser extends org.xml.sax.helpers.DefaultHandle
   
   private String currentPropName = null;
   
-  private Map changedStateVars = new HashMap();
+  private Map<String, String> changedStateVars = new HashMap<String, String>();
 
   protected ServiceEventMessageParser() {
   }
@@ -75,7 +75,7 @@ public class ServiceEventMessageParser extends org.xml.sax.helpers.DefaultHandle
 
   public void characters( char[] ch, int start, int length ) {
     if ( currentPropName != null ) {
-      String origChars = (String)changedStateVars.get( currentPropName );
+      String origChars = changedStateVars.get( currentPropName );
       String newChars = new String( ch, start, length );
       if ( origChars == null ) {
         changedStateVars.put( currentPropName, newChars );

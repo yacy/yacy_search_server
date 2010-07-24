@@ -1,7 +1,9 @@
-// serverDNSCache.java
+// Domains.java
 // -----------------------------
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 23.07.2007 on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
 // $LastChangedRevision: 1986 $
@@ -539,9 +541,9 @@ public class Domains {
     }
     
     public static InetAddress myPublicLocalIP() {
+        new localHostAddressLookup().start();
         // list all addresses
-        // for (int i = 0; i < ia.length; i++) System.out.println("IP: " +
-        // ia[i].getHostAddress()); // DEBUG
+        // for (int i = 0; i < localHostAddresses.length; i++) System.out.println("IP: " + localHostAddresses[i].getHostAddress()); // DEBUG
         if (localHostAddresses.length == 0) {
             return localHostAddress;
         }

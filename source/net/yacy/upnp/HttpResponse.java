@@ -58,7 +58,7 @@ import java.util.*;
 public class HttpResponse {
   
   private String header;
-  private Map fields;
+  private Map<String, String> fields;
   private String body;
   
   
@@ -73,7 +73,7 @@ public class HttpResponse {
     }
     boolean bodyParsing = false;
     StringBuffer bodyParsed = new StringBuffer();
-    fields = new HashMap();
+    fields = new HashMap<String, String>();
     String[] lines = rawHttpResponse.split( "\\r\\n" );
     this.header = lines[0].trim();
     
@@ -132,7 +132,7 @@ public class HttpResponse {
   }
   
   public String getHTTPHeaderField( String fieldName ) throws IllegalArgumentException {
-    String field = (String)fields.get( fieldName.toUpperCase() );
+    String field = fields.get( fieldName.toUpperCase() );
     if ( field == null ) {
       throw new IllegalArgumentException( "HTTP field " + fieldName + " is not present");
     }

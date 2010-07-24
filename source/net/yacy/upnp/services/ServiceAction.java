@@ -176,7 +176,7 @@ public class ServiceAction {
   
   private List getListForActionArgument( List args, String direction ) {
     if ( args == null ) return null;
-    List rtrVal = new ArrayList();
+    List<ServiceActionArgument> rtrVal = new ArrayList<ServiceActionArgument>();
     for ( Iterator itr = args.iterator(); itr.hasNext(); ) {
       ServiceActionArgument actArg = (ServiceActionArgument)itr.next();		
       if ( actArg.getDirection() == direction ) {
@@ -189,7 +189,7 @@ public class ServiceAction {
   
   private List getListForActionArgumentNames( List args, String direction ) {
     if ( args == null ) return null;
-    List rtrVal = new ArrayList();
+    List<String> rtrVal = new ArrayList<String>();
     for ( Iterator itr = args.iterator(); itr.hasNext(); ) {
       ServiceActionArgument actArg = (ServiceActionArgument)itr.next();		
       if ( actArg.getDirection() == direction ) {

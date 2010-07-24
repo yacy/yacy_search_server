@@ -74,8 +74,8 @@ public class UPNPService {
   protected URL eventSubURL;
   protected UPNPDevice serviceOwnerDevice;
 
-  protected Map UPNPServiceActions;
-  protected Map UPNPServiceStateVariables;
+  protected Map<String, ServiceAction> UPNPServiceActions;
+  protected Map<String, ServiceStateVariable> UPNPServiceStateVariables;
   private String USN;
 
   private boolean parsedSCPD = false;
@@ -136,7 +136,7 @@ public class UPNPService {
    */
   public ServiceAction getUPNPServiceAction( String actionName ) {
     lazyInitiate();
-    return (ServiceAction)UPNPServiceActions.get( actionName );
+    return UPNPServiceActions.get( actionName );
   }
 
   /**
@@ -146,7 +146,7 @@ public class UPNPService {
    */
   public ServiceStateVariable getUPNPServiceStateVariable( String stateVariableName ) {
     lazyInitiate();
-    return (ServiceStateVariable)UPNPServiceStateVariables.get( stateVariableName );
+    return UPNPServiceStateVariables.get( stateVariableName );
   }
 
   public Iterator getAvailableActionsName() {
@@ -188,7 +188,7 @@ public class UPNPService {
       JXPathContext actionsListCtx = context.getRelativeContext( actionsListPtr );
       actionsListCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
       Double arraySize = (Double)actionsListCtx.getValue( "count( scpdns:action )" );
-      UPNPServiceActions = new HashMap();
+      UPNPServiceActions = new HashMap<String, ServiceAction>();
       for ( int i = 1; i <= arraySize.intValue(); i++ ) {
         ServiceAction action = new ServiceAction();
         action.name = (String)actionsListCtx.getValue( "scpdns:action["+i+"]/scpdns:name" );
@@ -204,14 +204,14 @@ public class UPNPService {
           argumentListCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
           Double arraySizeArgs = (Double)argumentListCtx.getValue( "count( scpdns:argument )" );
   
-          List orderedActionArguments = new ArrayList();
+          List<ServiceActionArgument> orderedActionArguments = new ArrayList<ServiceActionArgument>();
           for ( int z = 1; z <= arraySizeArgs.intValue(); z++ ) {
             ServiceActionArgument arg = new ServiceActionArgument();
             arg.name = (String)argumentListCtx.getValue( "scpdns:argument["+z+"]/scpdns:name" );
             String direction = (String)argumentListCtx.getValue( "scpdns:argument["+z+"]/scpdns:direction" );
             arg.direction = direction.equals( ServiceActionArgument.DIRECTION_IN ) ? ServiceActionArgument.DIRECTION_IN : ServiceActionArgument.DIRECTION_OUT;
             String stateVarName = (String)argumentListCtx.getValue( "scpdns:argument["+z+"]/scpdns:relatedStateVariable" );
-            ServiceStateVariable stateVar = (ServiceStateVariable)UPNPServiceStateVariables.get( stateVarName );
+            ServiceStateVariable stateVar = UPNPServiceStateVariables.get( stateVarName );
             if ( stateVar == null ) {
               throw new IllegalArgumentException( "Unable to find any state variable named " + stateVarName + " for service " + getServiceId() + " action " + action.name + " argument " + arg.name );
             }
@@ -237,7 +237,7 @@ public class UPNPService {
     JXPathContext serviceStateTableCtx = rootContext.getRelativeContext( serviceStateTablePtr );
     serviceStateTableCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
     Double arraySize = (Double)serviceStateTableCtx.getValue( "count( scpdns:stateVariable )" );
-    UPNPServiceStateVariables = new HashMap();
+    UPNPServiceStateVariables = new HashMap<String, ServiceStateVariable>();
     for ( int i = 1; i <= arraySize.intValue(); i++ ) {
       ServiceStateVariable srvStateVar = new ServiceStateVariable();
       String sendEventsLcl = null;
@@ -266,7 +266,7 @@ public class UPNPService {
         JXPathContext allowedValuesCtx = serviceStateTableCtx.getRelativeContext( allowedValuesPtr );
         allowedValuesCtx.registerNamespace("scpdns", "urn:schemas-upnp-org:service-1-0");
         Double arraySizeAllowed = (Double)allowedValuesCtx.getValue( "count( scpdns:allowedValue )" );
-        srvStateVar.allowedvalues = new HashSet();
+        srvStateVar.allowedvalues = new HashSet<String>();
         for ( int z = 1; z <= arraySizeAllowed.intValue(); z++ ) {
           String allowedValue = (String)allowedValuesCtx.getValue( "scpdns:allowedValue["+z+"]" );
           srvStateVar.allowedvalues.add( allowedValue );

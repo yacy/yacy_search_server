@@ -58,18 +58,18 @@ import java.util.*;
  */
 public class ActionResponse {
 
-  private Map outArguments = new HashMap();
-  private Map outArgumentsVals = new HashMap();
+  private Map<String, ServiceActionArgument> outArguments = new HashMap<String, ServiceActionArgument>();
+  private Map<String, String> outArgumentsVals = new HashMap<String, String>();
 
   protected ActionResponse() {
   }
 
   public ServiceActionArgument getOutActionArgument( String actionArgumentName ) {
-    return (ServiceActionArgument)outArguments.get( actionArgumentName );
+    return outArguments.get( actionArgumentName );
   }
 
   public String getOutActionArgumentValue( String actionArgumentName ) {
-    return (String)outArgumentsVals.get( actionArgumentName );
+    return outArgumentsVals.get( actionArgumentName );
   }
   
   public Set getOutActionArgumentNames() {
@@ -91,7 +91,7 @@ public class ActionResponse {
     StringBuffer rtrVal = new StringBuffer();
     for ( Iterator i = outArguments.keySet().iterator(); i.hasNext(); ) {
       String name = (String)i.next();
-      String value = (String)outArgumentsVals.get( name );
+      String value = outArgumentsVals.get( name );
       rtrVal.append( name ).append( "=" ).append( value );
       if ( i.hasNext() ) rtrVal.append( "\n" );
     }

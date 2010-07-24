@@ -73,7 +73,7 @@ public class ActionMessage {
   
   private UPNPService service;
   private ServiceAction serviceAction;
-  private List inputParameters;
+  private List<InputParamContainer> inputParameters;
   
   /**
    * Protected constuctor so that only messages factories can build it
@@ -84,7 +84,7 @@ public class ActionMessage {
     this.service = service;
     this.serviceAction = serviceAction;
     if ( serviceAction.getInputActionArguments() != null ) {
-      inputParameters = new ArrayList();
+      inputParameters = new ArrayList<InputParamContainer>();
     }
   }
   

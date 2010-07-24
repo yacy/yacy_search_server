@@ -80,9 +80,9 @@ public class UPNPDevice {
   protected String USN;
   protected long UPC;
 
-  protected List deviceIcons;
-  protected List services;
-  protected List childDevices;
+  protected ArrayList<DeviceIcon> deviceIcons;
+  protected ArrayList<UPNPService> services;
+  protected ArrayList<UPNPDevice> childDevices;
   
   protected UPNPDevice parent;
   
@@ -160,13 +160,13 @@ public class UPNPDevice {
    * UPNPDevice objects for this device.
    * @return the generated list or null if no child devices bound
    */
-  public List getChildDevices() {
+  public ArrayList<UPNPDevice> getChildDevices() {
     if ( childDevices == null ) return null;
-    List rtrVal = new ArrayList();
+    ArrayList<UPNPDevice> rtrVal = new ArrayList<UPNPDevice>();
     for ( Iterator itr = childDevices.iterator(); itr.hasNext(); ) {
       UPNPDevice device = (UPNPDevice)itr.next();
       rtrVal.add( device );
-      List found = device.getChildDevices();
+      ArrayList<UPNPDevice> found = device.getChildDevices();
       if ( found != null ) {
         rtrVal.addAll( found );
       }
@@ -182,7 +182,7 @@ public class UPNPDevice {
    */
   public List getTopLevelChildDevices() {
     if ( childDevices == null ) return null;
-    List rtrVal = new ArrayList();
+    List<UPNPDevice> rtrVal = new ArrayList<UPNPDevice>();
     for ( Iterator itr = childDevices.iterator(); itr.hasNext(); ) {
       UPNPDevice device = (UPNPDevice)itr.next();
       rtrVal.add( device );
@@ -223,9 +223,9 @@ public class UPNPDevice {
    * Looks for all UPNP device service definitions objects
    * @return A list of all device services
    */
-  public List getServices() {
+  public ArrayList getServices() {
     if ( services == null ) return null;
-    List rtrVal = new ArrayList();
+    ArrayList<UPNPService> rtrVal = new ArrayList<UPNPService>();
     rtrVal.addAll( services );
     return rtrVal;
   }
@@ -273,7 +273,7 @@ public class UPNPDevice {
    */
   public List getServices( String serviceURI ) {
     if ( services == null ) return null;
-    List rtrVal = new ArrayList();
+    List<UPNPService> rtrVal = new ArrayList<UPNPService>();
     if ( log.isDebugEnabled() ) log.debug( "searching for services URI:" + serviceURI );
     for ( Iterator itr = services.iterator(); itr.hasNext(); ) {
       UPNPService service = (UPNPService)itr.next();

@@ -73,7 +73,7 @@ public class DiscoveryListener implements Runnable {
   
   private static final int DEFAULT_TIMEOUT = 250;
  
-  private Map registeredHandlers = new HashMap();
+  private Map<String, Set> registeredHandlers = new HashMap<String, Set>();
   
   private final Object REGISTRATION_PROCESS = new Object();
   
@@ -106,10 +106,11 @@ public class DiscoveryListener implements Runnable {
    * @param searchTarget the search target
    * @throws IOException if some errors occurs during SSDP search response messages listener thread startup
    */
+  @SuppressWarnings("unchecked")
   public void registerResultsHandler( DiscoveryResultsHandler resultsHandler, String searchTarget ) throws IOException {
     synchronized( REGISTRATION_PROCESS ) {
       if ( !inService ) startDevicesListenerThread();
-      Set handlers = (Set)registeredHandlers.get( searchTarget );
+      Set handlers = registeredHandlers.get( searchTarget );
       if ( handlers == null ) {
         handlers = new HashSet();
         registeredHandlers.put( searchTarget, handlers );
@@ -125,7 +126,7 @@ public class DiscoveryListener implements Runnable {
    */
   public void unRegisterResultsHandler( DiscoveryResultsHandler resultsHandler, String searchTarget ) {
     synchronized( REGISTRATION_PROCESS ) {
-      Set handlers = (Set)registeredHandlers.get( searchTarget );
+      Set handlers = registeredHandlers.get( searchTarget );
       if ( handlers != null ) {
         handlers.remove( resultsHandler );
         if ( handlers.size() == 0 ) {
@@ -266,7 +267,7 @@ public class DiscoveryListener implements Runnable {
       int index = udn.indexOf( "::" );
       if ( index != -1 ) udn = udn.substring( 0, index );
       synchronized( REGISTRATION_PROCESS ) {
-        Set handlers = (Set)registeredHandlers.get( st );
+        Set handlers = registeredHandlers.get( st );
         if ( handlers != null ) {
           for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
             DiscoveryResultsHandler handler = (DiscoveryResultsHandler)i.next();

@@ -160,7 +160,7 @@ public class Discovery {
       throw new IllegalArgumentException( "Illegal searchTarget" );
     }
     
-    final Map devices = new HashMap();
+    final Map<String, UPNPRootDevice> devices = new HashMap<String, UPNPRootDevice>();
     
     DiscoveryResultsHandler handler = new DiscoveryResultsHandler() {
 
@@ -171,7 +171,7 @@ public class Discovery {
               UPNPRootDevice device = new UPNPRootDevice( location, maxAge, firmware, usn, udn );
               devices.put( usn, device );
             } catch ( Exception ex ) {
-              log.error( "Error occured during upnp root device object creation from location " + location, ex );
+              log.error( "Error occured during upnp root device object creation from location " + location, ex );             
             }
           }
         }
