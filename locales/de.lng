@@ -1422,6 +1422,9 @@ With this file it is possible to find cities with a population > 1000 all over t
 #>Status<==>Status<
 >not loaded<==>nicht geladen<
 >loaded<==>geladen<
+:deactivated==:deaktiviert
+>Action<==>Aktion<
+>Result<==>Resultat<
 "Load"=="Laden"
 "Deactivate"=="Deaktivieren"
 "Remove"=="Entfernen"

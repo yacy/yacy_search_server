@@ -4,6 +4,7 @@
 .ui-dialog .ui-dialog-buttonpane button {
 	font-size: 14px;
 }
+#yacylivesearch form { display: inline; }
 #ysearch .fancy {
 	height:18px;
 	background: white;

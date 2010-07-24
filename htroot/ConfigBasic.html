@@ -41,19 +41,19 @@
           <fieldset>
           <table border="0">
           <tr>
-            <td width="256"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>
-          	<td width="256"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /><label for="usecasePortal">Search portal for your own web pages</label></td>
-          	<td width="100%"><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /><label for="usecaseIntranet">Intranet Indexing</label></td>
+            <td style="width: 256px;"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>
+          	<td style="width: 256px;"><input type="radio" name="usecase" value="portal" id="usecasePortal" #(portalChecked)#::checked="checked"#(/portalChecked)# /><label for="usecasePortal">Search portal for your own web pages</label></td>
+          	<td><input type="radio" name="usecase" value="intranet" id="usecaseIntranet" #(intranetChecked)#::checked="checked"#(/intranetChecked)# /><label for="usecaseIntranet">Intranet Indexing</label></td>
           </tr>
           <tr>
-            <td><label for="usecaseFreeworld"><img src="/env/grafics/usecase_freeworld.png" /></label></td>
-            <td><label for="usecasePortal"><img src="/env/grafics/usecase_webportal.png" /></label></td>
-            <td><label for="usecaseIntranet"><img src="/env/grafics/usecase_intranet.png" /></label></td>
+            <td><label for="usecaseFreeworld"><img src="/env/grafics/usecase_freeworld.png" alt="Usecase Freeworld" /></label></td>
+            <td><label for="usecasePortal"><img src="/env/grafics/usecase_webportal.png" alt="Usecase Portal" /></label></td>
+            <td><label for="usecaseIntranet"><img src="/env/grafics/usecase_intranet.png" alt="Usecase Intranet" /></label></td>
           </tr>
           <tr>
             <td valign="top"><label for="usecaseFreeworld">Join and support the global network 'freeworld', search the web with an uncensored user-owned search network</label></td>
             <td valign="top"><label for="usecasePortal">Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.</label></td>
-            <td valign="top"><label for="usecaseIntranet">Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt/&lt;path&gt<br/>
+            <td valign="top"><label for="usecaseIntranet">Create a search portal for your intranet or web pages or your (shared) file system. URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form file:///&lt;path&gt; or smb://&lt;server&gt;/&lt;path&gt;<br/>
             Files may also be shared with the YaCy server, assign a path here:
             <input type="text" name="repositoryPath" size="37" value="#[repositoryPath]#" /><br/>
             This path can be accessed at <a href="http://localhost:#[port]#/repository/">http://localhost:#[port]#/repository</a></label>. Use that path as crawl start point.
@@ -88,7 +88,7 @@
                 <label for="enableUpnp">Configure your router for YaCy:&nbsp;</label>
               </dt>
               <dd>
-                <input type="checkbox" name="enableUpnp" id="enableUpnp" align="top" #(enabled)#::checked="checked"#(/enabled)# />
+                <input type="checkbox" name="enableUpnp" id="enableUpnp" #(enabled)#::checked="checked"#(/enabled)# />
                 #(success)#::<img src="/env/grafics/bad.png" height="16" width="16" alt="warning" /> Configuration was not successful. This may take a moment.::<img src="/env/grafics/ok.png" height="16" width="16" alt="ok" />#(/success)#
               </dd>#(/upnp)#
              </dl>
