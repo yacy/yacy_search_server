@@ -18,8 +18,8 @@
     #%env/templates/submenuConfig.template%#
     <h2>Performance Settings</h2>
   
-    <p><img src="PerformanceGraph.png" name="graph" alt="PerformanceGraph" width="660" height="240"/></p>
-    <p><form name="optionreloadGraph" action="" method="get"><input type="checkbox" name="option" id="autoreload"/> <label for="autoreload">refresh graph</label></form></p>
+    <p><img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/></p>
+    <form id="optionreloadGraph" action="" method="get"><p><input type="checkbox" name="option" id="autoreload"/> <label for="autoreload">refresh graph</label></p></form>
   
   
     <form action="Performance_p.html" method="post" enctype="multipart/form-data">
@@ -39,14 +39,14 @@
       <fieldset>
         <legend>Resource Observer</legend>
         <dl>
-          <dt></dt>
+          <dt>&nbsp;</dt>
           <dd>DHT-Trigger #(observerTrigger)#not triggered::<strong>triggered</strong>#(/observerTrigger)# <a href="?resetObserver=">[reset state]</a></dd>
           <dt><label for="diskFree">HDD</label></dt>
           <dd>disable crawls below <input name="diskFree" id="diskFree" type="text" size="4" value="#[diskFree]#" /> MiB free space,<br/>
               disable DHT-in below <input name="diskFreeHardlimit" id="diskFreeHardlimit" type="text" size="4" value="#[diskFreeHardlimit]#" /> MiB free space</dd>
           <dt><label for="memoryAcceptDHT">RAM</label></dt>
           <dd>disable DHT-in below <input name="memoryAcceptDHT" id="memoryAcceptDHT" type="text" size="4" value="#[memoryAcceptDHT]#" /> KiB free space</dd>
-          <dt></dt>
+          <dt>&nbsp;</dt>
           <dd><input type="submit" name="setObserver" value="Save" /></dd>
         </dl>
       </fieldset>
