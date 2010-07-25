@@ -615,7 +615,7 @@ public final class Switchboard extends serverSwitch {
                          SwitchboardConstants.SURROGATES_METHOD_FREEMEM,
                          20000, Long.MAX_VALUE, 0, Long.MAX_VALUE),
                      10000);
-        deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
+        deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", "/IndexCreateWWWRemoteQueue_p.html",
                      new InstantBusyThread(
                          crawlQueues,
                          SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START,
@@ -623,7 +623,7 @@ public final class Switchboard extends serverSwitch {
                          SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM,
                          0, Long.MAX_VALUE, 0, Long.MAX_VALUE),
                      30000);
-        deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", "",
+        deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", null,
                      new InstantBusyThread(
                          crawlQueues,
                          SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START,

@@ -741,6 +741,7 @@ Available Releases==Verfügbare Versionen
 "Download Release"=="Version Herunterladen"
 "Check for new Release"=="Nach neuer Version suchen"
 Downloaded Releases==Heruntergeladene Versionen
+No downloaded releases available for deployment.==Keine heruntergeladenen Releases zum Installieren verfügbar.
 "Install Release"=="Version Installieren"
 "Delete Release"=="Version löschen"
 Automatic Update==Automatische Aktualisierung

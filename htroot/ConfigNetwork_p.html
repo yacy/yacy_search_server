@@ -51,10 +51,10 @@
     #(commitRobinsonWithRemoteIndexing)#::<div class="commit">This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted.</div>#(/commitRobinsonWithRemoteIndexing)#
     #(commitRobinsonWithoutRemoteIndexing)#::<div class="commit">This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it).</div>#(/commitRobinsonWithoutRemoteIndexing)#
     #(commitPasswordWarning)#::<div class="error">With this configuration it is not allowed to authentify automatically from localhost! Please open the <a href="ConfigAccounts_p.html">Account Configuration</a> and set a new password.</div>#(/commitPasswordWarning)#
-    <form name="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>
-        <label for="domain">Network and Domain Specification</label>
+        <label>Network and Domain Specification</label>
       </legend>
       <p>
       YaCy can operate a computing grid of YaCy peers or as a stand-alone node.
@@ -87,7 +87,7 @@
     </form>
     <fieldset>
       <legend>
-        <label for="p2p">Distributed Computing Network for Domain</label>
+        <label>Distributed Computing Network for Domain</label>
       </legend>
       
     <p>
@@ -96,7 +96,7 @@
       a completely independent search engine instance, without any data exchange between your peer and other
       peers, which we call a 'Robinson' peer.
     </p>
-    <form name="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
         <input type="radio" name="network" id="p2p" onclick="EnableP2P()" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />
@@ -216,9 +216,9 @@
           If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.
           <input type="text" id="peertags" name="peertags" value="#[peertags]#" size="40" maxlength="80" />
         </dd>
-      </dl>
-    </fieldset>
+      </dl>    
     <input type="submit" name="save" value="Save" />
+	</fieldset>
     </form>
     </fieldset>
     #%env/templates/footer.template%#

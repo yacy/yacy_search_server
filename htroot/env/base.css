@@ -141,6 +141,10 @@ tt, *.tt {
   font-size:90%;
 }
 
+.hidden {
+	display:hidden;
+}
+
 /* .snippetLoaded {
   font-style:italic;
   color: #666;
