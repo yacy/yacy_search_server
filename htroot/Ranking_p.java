@@ -44,38 +44,38 @@ public class Ranking_p {
 	
 	private static final HashMap<String, String> rankingParameters = new HashMap<String, String>();
 	static {
-            rankingParameters.put(RankingProfile.APP_DC_CREATOR, "Appearance In Author");
-            rankingParameters.put(RankingProfile.APP_DC_TITLE, "Appearance In Title");
-            rankingParameters.put(RankingProfile.APPEMPH, "Appearance In Emphasized Text");
-            rankingParameters.put(RankingProfile.APP_DC_DESCRIPTION, "Appearance In Reference/Anchor Name");
-            rankingParameters.put(RankingProfile.APP_DC_SUBJECT, "Appearance In Tags");
-            rankingParameters.put(RankingProfile.APPURL, "Appearance In URL");
-            rankingParameters.put(RankingProfile.AUTHORITY, "Authority of Domain");
-            rankingParameters.put(RankingProfile.CATHASAPP, "Category App, Appearance");
-            rankingParameters.put(RankingProfile.CATHASAUDIO, "Category Audio Appearance");
-            rankingParameters.put(RankingProfile.CATHASIMAGE, "Category Image Appearance");
-            rankingParameters.put(RankingProfile.CATHASVIDEO, "Category Video Appearance");
-            rankingParameters.put(RankingProfile.CATINDEXOF, "Category Index Page");
-            rankingParameters.put(RankingProfile.DATE, "Date");
-            rankingParameters.put(RankingProfile.DESCRCOMPINTOPLIST, "Description Comp. Appears In Toplist");
-            rankingParameters.put(RankingProfile.DOMLENGTH, "Domain Length");
-            rankingParameters.put(RankingProfile.HITCOUNT, "Hit Count");
-            rankingParameters.put(RankingProfile.LLOCAL, "Links To Local Domain");
-            rankingParameters.put(RankingProfile.LOTHER, "Links To Other Domain");
-            rankingParameters.put(RankingProfile.PHRASESINTEXT, "Phrases In Text");
-            rankingParameters.put(RankingProfile.POSINTEXT, "Position In Text");
-            rankingParameters.put(RankingProfile.POSOFPHRASE, "Position Of Phrase");
-            rankingParameters.put(RankingProfile.POSINPHRASE, "Position In Phrase");
-            rankingParameters.put(RankingProfile.PREFER, "Application Of Prefer Pattern");
-            rankingParameters.put(RankingProfile.TERMFREQUENCY, "Term Frequency");
-            rankingParameters.put(RankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist");
-            rankingParameters.put(RankingProfile.URLCOMPS, "URL Components");
-            rankingParameters.put(RankingProfile.URLLENGTH, "URL Length");
-            rankingParameters.put(RankingProfile.WORDDISTANCE, "Word Distance");
-            rankingParameters.put(RankingProfile.WORDSINTEXT, "Words In Text");
-            rankingParameters.put(RankingProfile.WORDSINTITLE, "Words In Title");
-            rankingParameters.put(RankingProfile.YBR, "YaCy Block Rank");
-            rankingParameters.put(RankingProfile.LANGUAGE, "Preferred Language");
+            rankingParameters.put(RankingProfile.APP_DC_CREATOR, "Appearance In Author;a higher ranking level prefers documents with authors that match the search word");
+            rankingParameters.put(RankingProfile.APP_DC_TITLE, "Appearance In Title;a higher ranking level prefers documents with titles that match the search word");
+            rankingParameters.put(RankingProfile.APPEMPH, "Appearance In Emphasized Text;a higher ranking level prefers documents where the search word is emphasized");
+            rankingParameters.put(RankingProfile.APP_DC_DESCRIPTION, "Appearance In Reference/Anchor Name;a higher ranking level prefers documents where the search word matches in the description text");
+            rankingParameters.put(RankingProfile.APP_DC_SUBJECT, "Appearance In Tags;a higher ranking level prefers documents where the search word is part of subject tags");
+            rankingParameters.put(RankingProfile.APPURL, "Appearance In URL;a higher ranking level prefers documents with urls that match the search word");
+            rankingParameters.put(RankingProfile.AUTHORITY, "Authority of Domain;a higher ranking level prefers documents from domains with a large number of matching documents");
+            rankingParameters.put(RankingProfile.CATHASAPP, "Category App, Appearance;a higher ranking level prefers documents with embedded links to applications");
+            rankingParameters.put(RankingProfile.CATHASAUDIO, "Category Audio Appearance;a higher ranking level prefers documents with embedded links to audio content");
+            rankingParameters.put(RankingProfile.CATHASIMAGE, "Category Image Appearance;a higher ranking level prefers documents with embedded images");
+            rankingParameters.put(RankingProfile.CATHASVIDEO, "Category Video Appearance;a higher ranking level prefers documents with embedded links to video files");
+            rankingParameters.put(RankingProfile.CATINDEXOF, "Category Index Page;a higher ranking level prefers 'index of' (directory listings) pages");
+            rankingParameters.put(RankingProfile.DATE, "Date;a higher ranking level prefers younger documents. The age of a document is measured using the date submitted by the remote server as document date");
+            rankingParameters.put(RankingProfile.DESCRCOMPINTOPLIST, "Description Comp. Appears In Toplist;a higher ranking level prefers documents with words in the document description that match words in the toplist. The toplist is generated dynamically from the search results using a statistic of the most used words. The toplist is a top-10 list of the most used words in URLs and document titles.");
+            rankingParameters.put(RankingProfile.DOMLENGTH, "Domain Length;a higher ranking level prefers documents with a short domain name");
+            rankingParameters.put(RankingProfile.HITCOUNT, "Hit Count;a higher ranking level prefers documents with a large number of matchings for the search word(s)");
+            rankingParameters.put(RankingProfile.LLOCAL, "Links To Local Domain;a higher ranking level prefers documents with a high number of hyperlinks to the same domain as the matching document.");
+            rankingParameters.put(RankingProfile.LOTHER, "Links To Other Domain;a higher ranking level prefers documents with a high number of hyperlinks to domains other than the matching document domain");
+            rankingParameters.put(RankingProfile.PHRASESINTEXT, "Phrases In Text;a higher ranking level prefers documents with a large number of phrases (sentences) in the matching document.");
+            rankingParameters.put(RankingProfile.POSINTEXT, "Position In Text;a higher ranking level prefers documents with a word match position high in the document. This prefers documents where the search wort is at the beginning of a text.");
+            rankingParameters.put(RankingProfile.POSOFPHRASE, "Position Of Phrase;a higher ranking level prefers documents with a phrase match position high in the document. The phrase match is the phrase (sentence) where the matching word appears first. This prefers documents where the search wort is at the beginning of a text.");
+            rankingParameters.put(RankingProfile.POSINPHRASE, "Position In Phrase;a higher ranking level prefers documents with a word match position high in the matching phrase. The phrase match is the phrase (sentence) where the matching word appears first.");
+            rankingParameters.put(RankingProfile.PREFER, "Application Of Prefer Pattern;a higher ranking level prefers documents where the url matches the prefer pattern given in a search request.");
+            rankingParameters.put(RankingProfile.TERMFREQUENCY, "Term Frequency;a higher ranking level prefers documents with a high (number of matching words)/(number of words in document) ratio. This is same ranking as used in lucene and old-age search engines as existed before the year 2000.");
+            rankingParameters.put(RankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist;a higher ranking level prefers documents with words in the url path that match words in the toplist. The toplist is generated dynamically from the search results using a statistic of the most used words. The toplist is a top-10 list of the most used words in URLs and document titles.");
+            rankingParameters.put(RankingProfile.URLCOMPS, "URL Components;a higher ranking level prefers documents with a short number of url components. The number of url components is the number of (sub-) domains plus the number of (sub-) path elements in the file path.");
+            rankingParameters.put(RankingProfile.URLLENGTH, "URL Length;a higher ranking level prefers documents with a short url (domain plus path)");
+            rankingParameters.put(RankingProfile.WORDDISTANCE, "Word Distance;a higher ranking level prefers documents where the search words appear close together. This ranking parameter works like a NEAR operator in more-than-one word searches.");
+            rankingParameters.put(RankingProfile.WORDSINTEXT, "Words In Text;a higher ranking level prefers documents with a large number of words. Be aware that this is a compensation of the term frequency parameter.");
+            rankingParameters.put(RankingProfile.WORDSINTITLE, "Words In Title;a higher ranking level prefers documents with a large number of words in the document title.");
+            rankingParameters.put(RankingProfile.YBR, "YaCy Block Rank;a higher ranking level prefers documents with a higher, statically assigned ranking value on domains. This is like a 'moderated ranking'. The ranking on domains (blocks) was computed using a link analyses on large link graphs.");
+            rankingParameters.put(RankingProfile.LANGUAGE, "Preferred Language;a higher ranking level prefers documents with a language that matches the browser language.");
 	}
 
     private static serverObjects defaultValues() {
@@ -105,11 +105,21 @@ public class Ranking_p {
     
     private static void putRanking(final serverObjects prop, final Map<String, String> map, final String prefix, final String attrExtension) {
     	prop.put("attr" + attrExtension, map.size());
-    	String key;
-    	int i, j = 0;
+    	String key, description, name, info;
+    	int i, j = 0, p;
     	for (final Entry<String, String> entry: map.entrySet()) {
             key = entry.getKey();
-            prop.put("attr" + attrExtension + "_" + j + "_name", rankingParameters.get(key.substring(prefix.length())));
+            description = rankingParameters.get(key.substring(prefix.length()));
+            p = description.indexOf(';');
+            if (p >= 0) {
+                name = description.substring(0, p);
+                info = description.substring(p + 1);
+            } else {
+                name = description;
+                info = "";
+            }
+            prop.put("attr" + attrExtension + "_" + j + "_name", name);
+            prop.put("attr" + attrExtension + "_" + j + "_info", info);
             prop.put("attr" + attrExtension + "_" + j + "_nameorg", key);
             prop.put("attr" + attrExtension + "_" + j + "_select", maxRankingRange);
             for (i=0; i<maxRankingRange; i++) {

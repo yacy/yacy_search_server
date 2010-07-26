@@ -7,22 +7,30 @@
   <body id="Ranking_p">
     #%env/templates/header.template%#
     <h2>Ranking Configuration</h2>
+    <p>The document ranking influences the order of the search result entities.
+    A ranking is computed using a number of attributes from the documents that match with the search word.
+    The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.
+    The ranking coefficient grows exponentially with the ranking levels given in the following table. If you increase a single value by one, then the strength of the parameter doubles.
+    </p>
     <form class="dsearch" action="Ranking_p.html" method="post" enctype="multipart/form-data">
       <fieldset>
         <legend>Pre-Ranking</legend>
         <dl>#{attrPre}# 
-          <dt><label for="#[nameorg]#">#[name]#</label>:</dt>
-          <dd id="#[nameorg]#">#{select}# 
-            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}# 
+          <dt style="width:260px"><label for="#[nameorg]#">#[name]#</label>&nbsp;<div id="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span>#[info]#</span></div></dt>
+          <dd style="width:360px" id="#[nameorg]#">#{select}# 
+            <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}#
             #[value]#
           </dd>#{/attrPre}# 
         </dl>
       </fieldset>
+      <p>There are two ranking stages: first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.
+      The two stages are separated because they need statistical information from the result of the pre-ranking.
+      </p>
       <fieldset>
         <legend>Post-Ranking</legend>
         <dl>#{attrPost}# 
-          <dt><label for="#[nameorg]#">#[name]#</label></dt>
-          <dd id="#[nameorg]#">#{select}# 
+          <dt style="width:260px"><label for="#[nameorg]#">#[name]#</label>&nbsp;<div id="info" style="float:right"><img src="/env/grafics/i16.gif" width="16" height="16" alt="info"/><span>#[info]#</span></div></dt>
+          <dd style="width:360px" id="#[nameorg]#">#{select}# 
             <input type="radio" name="#[nameorg]#" value="#[value]#"#(checked)#:: checked="checked"#(/checked)# />#{/select}# 
             #[value]#
           </dd>#{/attrPost}# 
