@@ -155,6 +155,9 @@
     <!-- apply replacments -->
     <delete file="${build}/de/anomic/yacy/yacyBuildProperties.java" failonerror="false"/>
     <copy file="${src}/de/anomic/yacy/yacyBuildProperties.java" tofile="${build}/de/anomic/yacy/yacyBuildProperties.java" overwrite="true" filtering="true" />
+    
+    <!-- copy log4j config file -->
+    <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="true" />
 
   </target>
 
@@ -176,33 +179,31 @@
         <pathelement location="${build}" />
         <pathelement location="${htroot}" />
     	<pathelement location="${lib}/activation.jar" />
-    	<pathelement location="${lib}/fontbox-1.1.0.jar" />
-    	<pathelement location="${lib}/J7Zip-modified.jar" />
+        <pathelement location="${lib}/apache-mime4j-0.6.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-145.jar" />
     	<pathelement location="${lib}/bzip2.jar" />
-    	<pathelement location="${lib}/commons-codec-1.3.jar" />
+    	<pathelement location="${lib}/commons-codec-1.4.jar" />
     	<pathelement location="${lib}/commons-fileupload-1.2.1.jar" />
     	<pathelement location="${lib}/commons-httpclient-3.1.jar" />
     	<pathelement location="${lib}/commons-io-1.4.jar" />
     	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
     	<pathelement location="${lib}/commons-logging-1.1.1.jar" />
-    	<pathelement location="${lib}/httpclient-4.0.1.jar" />
+    	<pathelement location="${lib}/fontbox-1.1.0.jar" />
+        <pathelement location="${lib}/httpclient-4.0.1.jar" />
         <pathelement location="${lib}/httpcore-4.0.1.jar" />
         <pathelement location="${lib}/httpmime-4.0.1.jar" />
-        <pathelement location="${lib}/apache-mime4j-0.6.jar" />
-    	<pathelement location="${lib}/jakarta-oro-2.0.7.jar" />
+        <pathelement location="${lib}/J7Zip-modified.jar" />
+        <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
     	<pathelement location="${lib}/jcifs-1.3.14.jar" />
     	<pathelement location="${lib}/jsch-0.1.42.jar" />
-    	<pathelement location="${lib}/log4j-1.2.9.jar" />
+    	<pathelement location="${lib}/log4j-1.2.15.jar" />
     	<pathelement location="${lib}/metadata-extractor-2.4.0-beta-1.jar" />
-    	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
+    	<pathelement location="${lib}/mysql-connector-java-5.1.12-bin.jar" />
         <pathelement location="${lib}/pdfbox-1.1.0.jar" />
     	<pathelement location="${lib}/poi-3.6-20091214.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.6-20091214.jar" />
         <pathelement location="${lib}/servlet-api.jar" />
-        <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
-    	<pathelement location="${lib}/tm-extractors-1.0.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
     	<pathelement location="${lib}/xerces.jar" />
     </path>
@@ -309,6 +310,8 @@
       	<include name="getWin32MaxHeap.bat"/>
       </fileset>
     </copy>
+
+    <!-- TODO: check what this file yacy.exe is/was and if it is still needed here ... -->
     <copy todir="${release_main}" file="yacy.exe" failonerror="false"/>
 
     <!-- copy locales  -->
@@ -454,8 +457,10 @@
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
     <delete file="${build}/de/anomic/yacy/yacyBuildProperties.java" failonerror="false"/>
+    <delete file="${build}/log4j.properties" failonerror="false"/>
+    <!-- TODO: check what this file yacy.exe is/was and if it is still needed here ... -->
     <delete file="yacy.exe" failonerror="false"/>
-  	<delete file="${lib}/yacycore.jar" failonerror="false"/>
+    <delete file="${lib}/yacycore.jar" failonerror="false"/>
     <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
     <delete failonerror="false">
@@ -711,7 +716,12 @@
                   replace="yacy (*auto-svn-version*) unstable; urgency=low" />
   </target>
 	
-  <target name="sign" depends="readBuildProperties" description="sign current release file in RELEASE/ with $privateKey">
+  <target name="sign" depends="readBuildProperties" description="sign current release file in RELEASE/ with ${privateKeyFile}">
+    <fail message="There is no release file (${release}/${stdReleaseFile}) that could be signed !">
+        <condition>
+            <not><available file="${stdReleaseFile}" filepath="${release}" type="file" /></not>
+        </condition>
+    </fail>
     <java classname="de.anomic.tools.CryptoLib" failonerror="true">
       <classpath>
         <pathelement location="${build}"/>
@@ -720,11 +730,10 @@
     </java>
   </target>
 
-  <target name="genkey" depends="readBuildProperties" description="generate a pair of keys and write it to $privateKey and $privateKey.pub">
-    <!-- TODO: check doesn't work! why?? -->
-    <fail message="There is already a private Key!!">
+  <target name="genkey" depends="readBuildProperties" description="generate a pair of keys and write it to ${privateKeyFile} and ${privateKeyFile}.pub">
+    <fail message="There is already a private key file (${privateKeyFile})!">
       <condition>
-	<available file="$privateKey" type="file" />
+	<available file="${privateKeyFile}" type="file" />
       </condition>
     </fail>
     <java classname="de.anomic.tools.CryptoLib" failonerror="true">
