@@ -2120,43 +2120,30 @@ Unable to add URL to crawler queue:==Es ist nicht möglich die URL zum Crawler-P
 #File: Ranking_p.html
 #---------------------------
 Ranking Configuration==Ranking Einstellungen
+The document ranking influences the order of the search result entities.==Das Dokument Ranking beeinflusst die Reihenfolge der Suchergebnis Datensätze.
+A ranking is computed using a number of attributes from the documents that match with the search word.==Ein Ranking wird berechnet mit einer Anzahl von Attributen aus den Dokumenten die das gesuchte Wort enthalten.
+The attributes are first normalized over all search results and then the normalized attribut is multiplied with the ranking coefficient computed from this list.==Die Attribute werden zuerst über alle Suchergebnisse normalisiert und dann wird das normalisierte Attribut multpliziert mit dem Ranking Koeffizienten der aus dieser Liste errechnet wird.
+The ranking coefficient grows exponentially with the ranking levels given in the following table.==Der Ranking Koeffizient wächst exponential mit den Ranking Werten die in der folgenden Tabelle festgelegt werden.
+If you increase a single value by one, then the strength of the parameter doubles.==Wenn Sie einen einzelnen Wert um eins erhöhen wird die Stärke des Parameters verdoppelt.
 Pre-Ranking==Vor-Ranking
 
-#auskommentierte Übersetzung, vielleicht später wieder einsetzbar - daburna 04.01.07
+# Aktuell sind die Werte und Hover over Information in der Ranking_p.java hartcodiert und können nicht übersetzt werden
+#
+#Date==Datum
+#a higher ranking level prefers younger documents.==Ein höherer Ranking Level bevorzugt jüngere Dokumente
+#The age of a document is measured using the date submitted by the remote server as document date==Das Alter eines Dokuments wird gemessen anhand des Dokument Datums das der Remote Server übermittelt
 
-#"Domain Length"=="Domain Länge"
-#"YaCy Block Rank"=="YaCY Block Rank"
-#"Date"=="Datum"
-#"Words In Title"=="Wörter im Titel"
-#"Words In Text"=="Wörter im Text"
-#"Phrases In Text"=="Phrasen im Text"
-#"Links To Local Domain"=="Links zu lokaler Domain"
-#"Links To Other Domain"=="Links zu anderer Domain" 
-#"URL Length"=="URL Länge"
-#"URL Components"=="URL Komponenten"
-#"Hit Count"=="Treffer Anzahl"
-#"Position In Text"=="Position im Text"
-#"Position Of Phrase"=="Position der Phrase"
-#"Word Distance"=="Wort Distanz"
-#"Appearance in URL"=="Taucht in URL auf"
-#"Appearance in Description"=="Vorkommen in Beschreibung"
-#"Appearance in Author"=="Vorkommen im Autor"
-#"Appearance in Tags"=="Vorkommen in Tags"
-#"Appearance in Reference"=="Vorkommen in Referenz"
-#"Appearance in Emphasized Text"=="Vork. in hervorgehobenem Text"
-#"Category Index Page"=="Kategorie Index Seite"
-#"Category Image Appearance"=="Vorkommen in Bilder Kategorie" 
-#"Category Audio Appearance"=="Vorkommen in Audio Kategorie"
-#"Category Video Appearance"=="Vorkommen in Video Kategorie"
-#"Category App. Appearance"=="Vorkommen in Anwendungen Kategorie"
+There are two ranking stages:==Es gibt zwei Phasen beim Ranking.
+first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==Zuerst werden alle Resultate nach dem Vor-Ranking geranked und aus der resultierenden Liste werden die Dokumente erneut im Nach-Ranking sortiert.
+The two stages are separated because they need statistical information from the result of the pre-ranking.==Die zwei Phasen sind getrennt weil statistische Informationen aus dem Ergebnis des Vor-Rankings benötigt werden.
+
 Post-Ranking==Nach-Ranking
-#"URL Component Appears In Toplist"=="URL Komponente kommt in Topliste vor"
-#"Description Comp. Appears In Toplist"=="Beschreibung kommt in Topliste vor"
-#"Application Of Prefer Pattern"=="Anwendung der bervorzugten Form"
+
+#Application Of Prefer Pattern==Anwendung eines bevorzugten Musters
+#a higher ranking level prefers documents where the url matches the prefer pattern given in a search request.==Ein höherer Ranking Level bevorzugt Dokumente deren URL auf das bevorzugte Muster einer Suchanfrage passt.
+
 "Set as Default Ranking"=="Als Standard Ranking speichern"
 "Re-Set to Built-In Ranking"=="Auf ursprüngliche Werte zurücksetzen"
-#"delete"=="löschen"
-#Info==Info
 #-----------------------------
 
 #File: Settings_p.html
