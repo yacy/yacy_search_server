@@ -79,7 +79,7 @@ public class Client {
 		ConnManagerParams.setMaxTotalConnections(httpParams, maxcon);
 		// for statistics same value should also be set here
 		ConnectionInfo.setMaxcount(maxcon);
-		// perhaps we need more than 2(default) connections per host?
+		// connections per host (2 default)
 		final ConnPerRouteBean connPerRoute = new ConnPerRouteBean(2);
 		// Increase max connections for localhost to 100
 		HttpHost localhost = new HttpHost("locahost");
@@ -118,6 +118,10 @@ public class Client {
 		ClientConnectionManager clientConnectionManager = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
 
 		httpClient = new DefaultHttpClient(clientConnectionManager, httpParams);
+		// ask for gzip
+		((AbstractHttpClient) httpClient).addRequestInterceptor(new GzipRequestInterceptor());
+		// uncompress gzip
+		((AbstractHttpClient) httpClient).addResponseInterceptor(new GzipResponseInterceptor());
 
 		idledConnectionEvictor = new IdledConnectionEvictor(clientConnectionManager);
 		idledConnectionEvictor.start();
@@ -340,6 +344,13 @@ public class Client {
         return loc;
     }
 
+    /**
+     * @return the systemOST
+     */
+    public static String getSystemOST() {
+        return systemOST;
+    }
+
 	/**
 	 * testing
 	 * 
@@ -371,15 +382,19 @@ public class Client {
 			}
 		}
 		// Head some
-		try {
-			for (Header header: client.HEADResponse(url).getAllHeaders())
-			System.out.println(header.getName() + " : " + header.getValue());
-			System.out.println(client.getHttpResponse().getLocale());
-			System.out.println(client.getHttpResponse().getProtocolVersion());
-			System.out.println(client.getHttpResponse().getStatusLine());
-		} catch (IOException e) {
-			e.printStackTrace();
+//		try {
+//			client.HEADResponse(url);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		for (Header header: client.getHttpResponse().getAllHeaders()) {
+			System.out.println("Header " + header.getName() + " : " + header.getValue());
+//			for (HeaderElement element: header.getElements())
+//				System.out.println("Element " + element.getName() + " : " + element.getValue());
 		}
+		System.out.println(client.getHttpResponse().getLocale());
+		System.out.println(client.getHttpResponse().getProtocolVersion());
+		System.out.println(client.getHttpResponse().getStatusLine());
 		// Post some
 //		try {
 //			System.out.println(new String(client.POSTbytes(url, newparts)));

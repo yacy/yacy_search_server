@@ -53,7 +53,7 @@ public class IndexCreateLoaderQueue_p {
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
                 
-                initiator = sb.peers.getConnected(new String(w[i].initiator()));
+                initiator = sb.peers.getConnected((w[i].initiator() == null) ? "" : new String(w[i].initiator()));
                 prop.put("loader-set_list_"+count+"_dark", dark ? "1" : "0");
                 prop.putHTML("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("loader-set_list_"+count+"_depth", w[i].depth());

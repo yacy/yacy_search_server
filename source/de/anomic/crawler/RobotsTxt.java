@@ -26,8 +26,8 @@
 
 package de.anomic.crawler;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
+//import java.io.BufferedInputStream;
+//import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -36,18 +36,20 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.Client;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
+//import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.FileUtils;
+//import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
+//import de.anomic.http.server.ResponseContainer;
+import de.anomic.http.server.ResponseHeader;
 
 public class RobotsTxt {
     
@@ -341,25 +343,35 @@ public class RobotsTxt {
         
         // setup http-client
         //TODO: adding Traffic statistic for robots download?
-        final Client client = new Client(10000, reqHeaders);
-        ResponseContainer res = null;
+//        final Client client = new Client(10000, reqHeaders);
+//        ResponseContainer res = null;
+        final Client client = new Client();
+        client.setHeader(reqHeaders.entrySet());
         try {
-            // sending the get request
-            res = client.GET(robotsURL.toString());
-            
             // check for interruption
             if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress.");
             
+            // sending the get request
+//            res = client.GET(robotsURL.toString());
+            robotsTxt = client.GETbytes(robotsURL.toString());
+            final int code = client.getHttpResponse().getStatusLine().getStatusCode();
+            final ResponseHeader header = new ResponseHeader(null, client.getHeaderHashMap());
+            
             // check the response status
-            if (res.getStatusLine().startsWith("2")) {
-                if (!res.getResponseHeader().mime().startsWith("text/plain")) {
+//            if (res.getStatusLine().startsWith("2")) {
+            if (code > 199 && code < 300) {
+//                if (!res.getResponseHeader().mime().startsWith("text/plain")) {
+            	if (!header.mime().startsWith("text/plain")) {
                     robotsTxt = null;
-                    if (log.isFinest()) log.logFinest("Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + res.getResponseHeader().mime() + "'.");                    
+//                    if (log.isFinest()) log.logFinest("Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + res.getResponseHeader().mime() + "'.");
+                    if (log.isFinest()) log.logFinest("Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + header.mime() + "'.");
                 } else {
 
                     // getting some metadata
-                    eTag = res.getResponseHeader().containsKey(HeaderFramework.ETAG)?(res.getResponseHeader().get(HeaderFramework.ETAG)).trim():null;
-                    lastMod = res.getResponseHeader().lastModified();                    
+//                    eTag = res.getResponseHeader().containsKey(HeaderFramework.ETAG)?(res.getResponseHeader().get(HeaderFramework.ETAG)).trim():null;
+//                    lastMod = res.getResponseHeader().lastModified();
+                	eTag = header.containsKey(HeaderFramework.ETAG)?(header.get(HeaderFramework.ETAG)).trim():null;
+                    lastMod = header.lastModified();
                     
                     // if the robots.txt file was not changed we break here
                     if ((eTag != null) && (oldEtag != null) && (eTag.equals(oldEtag))) {
@@ -367,25 +379,30 @@ public class RobotsTxt {
                         return null;
                     }
                     
-                    // downloading the content
-                    final ByteBuffer sbb = new ByteBuffer();
-                    try {
-                        FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(sbb));
-                    } finally {
-                        res.closeStream();
-                    }
-                    robotsTxt = sbb.getBytes();
+//                    // downloading the content
+//                    final ByteBuffer sbb = new ByteBuffer();
+//                    try {
+//                        FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(sbb));
+//                    } finally {
+//                        res.closeStream();
+//                    }
+//                    robotsTxt = sbb.getBytes();
                     
                     downloadEnd = System.currentTimeMillis();                    
                     if (log.isFinest()) log.logFinest("Robots.txt successfully loaded from URL '" + robotsURL + "' in " + (downloadEnd-downloadStart) + " ms.");
                 }
-            } else if (res.getStatusCode() == 304) {
+//            } else if (res.getStatusCode() == 304) {
+            } else if (code == 304) {
                 return null;
-            } else if (res.getStatusLine().startsWith("3")) {
+//            } else if (res.getStatusLine().startsWith("3")) {
+            } else if (code > 299 && code < 400) {
                 // getting redirection URL
-                String redirectionUrlString = res.getResponseHeader().get(HeaderFramework.LOCATION);
+//                String redirectionUrlString = res.getResponseHeader().get(HeaderFramework.LOCATION);
+            	String redirectionUrlString = header.get(HeaderFramework.LOCATION);
                 if (redirectionUrlString==null) {
-                    if (log.isFinest()) log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.getStatusLine() + "].");
+//                    if (log.isFinest()) log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.getStatusLine() + "].");
+                	if (log.isFinest())
+                		log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + client.getHttpResponse().getStatusLine() + "].");
                     robotsTxt = null;                    
                 } else {
                 
@@ -399,20 +416,23 @@ public class RobotsTxt {
                             "\nRedirecting request to: " + redirectionUrl);
                     return downloadRobotsTxt(redirectionUrl,redirectionCount,entry);
                 }
-            } else if (res.getStatusCode() == 401 || res.getStatusCode() == 403) {
+//            } else if (res.getStatusCode() == 401 || res.getStatusCode() == 403) {
+            } else if (code == 401 || code == 403) {
                 accessCompletelyRestricted = true;
                 if (log.isFinest()) log.logFinest("Access to Robots.txt not allowed on URL '" + robotsURL + "'.");
             } else {
-                if (log.isFinest()) log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.getStatusLine() + "].");
+//                if (log.isFinest()) log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + res.getStatusLine() + "].");
+            	if (log.isFinest())
+            		log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "'. [" + client.getHttpResponse().getStatusLine() + "].");
                 robotsTxt = null;
             }        
         } catch (final Exception e) {
             throw e;
-        } finally {
-            if(res != null) {
-                // release connection
-                res.closeStream();
-            }
+//        } finally {
+//            if(res != null) {
+//                // release connection
+//                res.closeStream();
+//            }
         }
         return new Object[]{Boolean.valueOf(accessCompletelyRestricted),robotsTxt,eTag,lastMod};
     }

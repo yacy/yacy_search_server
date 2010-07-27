@@ -155,7 +155,7 @@ public final class CrawlStacker {
     public void enqueueEntry(final Request entry) {
 
         // DEBUG
-        if (log.isFinest()) log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + new String(entry.initiator()) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
+        if (log.isFinest()) log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : new String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
 
         if (prefetchHost(entry.url().getHost())) {
             try {

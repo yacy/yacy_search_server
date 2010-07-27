@@ -28,15 +28,17 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.Client;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.Latency;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
+//import de.anomic.http.server.ResponseContainer;
+import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 
@@ -116,21 +118,27 @@ public final class HTTPLoader {
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
         // HTTP-Client
-        final Client client = new Client(socketTimeout, requestHeader);
-        
-        ResponseContainer res = null;
-        try {
+//        final Client client = new Client(socketTimeout, requestHeader);
+//        ResponseContainer res = null;
+        final Client client = new Client();
+        client.setTimout(socketTimeout);
+        client.setHeader(requestHeader.entrySet());
+//        try {
             // send request
-            res = client.GET(request.url().toString(), maxFileSize);
+//            res = client.GET(request.url().toString(), maxFileSize);
+        	final byte[] responseBody = client.GETbytes(request.url().toString(), maxFileSize);
+        	final ResponseHeader header = new ResponseHeader(null, client.getHeaderHashMap());
+        	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
             // FIXME: 30*-handling (bottom) is never reached
             // we always get the final content because httpClient.followRedirects = true
 
-            if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
+//            if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
+        	if (responseBody != null && (code == 200 || code == 203)) {
                 // the transfer is ok
                 
                 // we write the new cache entry to file system directly
-                res.setAccountingName("CRAWLER");
-                final byte[] responseBody = res.getData();
+// TODO:               res.setAccountingName("CRAWLER");
+//                final byte[] responseBody = res.getData();
                 long contentLength = responseBody.length;
 
                 // check length again in case it was not possible to get the length before loading
@@ -143,17 +151,22 @@ public final class HTTPLoader {
                 response = new Response(
                         request,
                         requestHeader,
-                        res.getResponseHeader(), 
-                        res.getStatusLine(),
+//                        res.getResponseHeader(), 
+//                        res.getStatusLine(),
+                        header, 
+                        Integer.toString(code),
                         sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
                         responseBody
                 );
 
                 return response;
-            } else if (res.getStatusLine().startsWith("30")) {
-                if (res.getResponseHeader().containsKey(HeaderFramework.LOCATION)) {
+//            } else if (res.getStatusLine().startsWith("30")) {
+//                if (res.getResponseHeader().containsKey(HeaderFramework.LOCATION)) {
+        	} else if (code > 299 && code < 310) {
+                if (header.containsKey(HeaderFramework.LOCATION)) {
                     // getting redirection URL
-                    String redirectionUrlString = res.getResponseHeader().get(HeaderFramework.LOCATION);
+//                    String redirectionUrlString = res.getResponseHeader().get(HeaderFramework.LOCATION);
+                	String redirectionUrlString = header.get(HeaderFramework.LOCATION);
                     redirectionUrlString = redirectionUrlString.trim();
 
                     if (redirectionUrlString.length() == 0) {
@@ -165,7 +178,8 @@ public final class HTTPLoader {
                     final DigestURI redirectionUrl = new DigestURI(MultiProtocolURI.newURL(request.url(), redirectionUrlString));
 
                     // restart crawling with new url
-                    this.log.logInfo("CRAWLER Redirection detected ('" + res.getStatusLine() + "') for URL " + request.url().toString());
+//                    this.log.logInfo("CRAWLER Redirection detected ('" + res.getStatusLine() + "') for URL " + request.url().toString());
+                    this.log.logInfo("CRAWLER Redirection detected ('" + client.getHttpResponse().getStatusLine() + "') for URL " + request.url().toString());
                     this.log.logInfo("CRAWLER ..Redirecting request to: " + redirectionUrl);
 
                     // if we are already doing a shutdown we don't need to retry crawling
@@ -187,15 +201,17 @@ public final class HTTPLoader {
                 }
             } else {
                 // if the response has not the right response type then reject file
-                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code " + res.getStatusCode() +  ")");
-                throw new IOException("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + request.url().toString());
+//                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code " + res.getStatusCode() +  ")");
+//                throw new IOException("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + request.url().toString());
+            	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code " + code +  ")");
+                throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
             }
-        } finally {
-            if(res != null) {
-                // release connection
-                res.closeStream();
-            }
-        }
+//        } finally {
+//            if(res != null) {
+//                // release connection
+//                res.closeStream();
+//            }
+//        }
         return response;
     }
     
@@ -233,37 +249,48 @@ public final class HTTPLoader {
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);
 
         // HTTP-Client
-        final Client client = new Client(20000, requestHeader);
-        
-        ResponseContainer res = null;
-        try {
+//        final Client client = new Client(20000, requestHeader);
+//        ResponseContainer res = null;
+        final Client client = new Client();
+        client.setTimout(20000);
+        client.setHeader(requestHeader.entrySet());
+//        try {
             // send request
-            res = client.GET(request.url().toString(), Long.MAX_VALUE);
+//            res = client.GET(request.url().toString(), Long.MAX_VALUE);
+        	final byte[] responseBody = client.GETbytes(request.url().toString(), Long.MAX_VALUE);
+        	final ResponseHeader header = new ResponseHeader(null, client.getHeaderHashMap());
+        	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
             // FIXME: 30*-handling (bottom) is never reached
             // we always get the final content because httpClient.followRedirects = true
 
-            if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
+//            if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
+        	if (responseBody != null && (code == 200 || code == 203)) {
                 // the transfer is ok
                 
                 // we write the new cache entry to file system directly
-                res.setAccountingName("CRAWLER");
-                final byte[] responseBody = res.getData();
+// TODO:               res.setAccountingName("CRAWLER");
+//                final byte[] responseBody = res.getData();
 
                 // create a new cache entry
                 response = new Response(
                         request,
                         requestHeader,
-                        res.getResponseHeader(), 
-                        res.getStatusLine(),
+//                        res.getResponseHeader(), 
+//                        res.getStatusLine(),
+                        header, 
+                        Integer.toString(code),
                         null,
                         responseBody
                 );
 
                 return response;
-            } else if (res.getStatusLine().startsWith("30")) {
-                if (res.getResponseHeader().containsKey(HeaderFramework.LOCATION)) {
+//            } else if (res.getStatusLine().startsWith("30")) {
+//                if (res.getResponseHeader().containsKey(HeaderFramework.LOCATION)) {
+            } else if (code > 299 && code < 310) {
+                if (header.containsKey(HeaderFramework.LOCATION)) {
                     // getting redirection URL
-                    String redirectionUrlString = res.getResponseHeader().get(HeaderFramework.LOCATION);
+//                    String redirectionUrlString = res.getResponseHeader().get(HeaderFramework.LOCATION);
+                	String redirectionUrlString = header.get(HeaderFramework.LOCATION);
                     redirectionUrlString = redirectionUrlString.trim();
 
                     if (redirectionUrlString.length() == 0) {
@@ -285,14 +312,15 @@ public final class HTTPLoader {
                 }
             } else {
                 // if the response has not the right response type then reject file
-                throw new IOException("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + request.url().toString());
+//                throw new IOException("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + request.url().toString());
+            	throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
             }
-        } finally {
-            if(res != null) {
-                // release connection
-                res.closeStream();
-            }
-        }
+//        } finally {
+//            if(res != null) {
+//                // release connection
+//                res.closeStream();
+//            }
+//        }
         return response;
     }
     

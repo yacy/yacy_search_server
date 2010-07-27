@@ -1700,7 +1700,7 @@ public final class Switchboard extends serverSwitch {
                 ", maxDepth=" + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth())) +
                 ", must-match=" + ((response.profile() == null) ? "null" : response.profile().mustMatchPattern().toString()) +
                 ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().mustNotMatchPattern().toString()) +
-                ", initiatorHash=" + new String(response.initiator()) +
+                ", initiatorHash=" + ((response.initiator() == null) ? "null" : new String(response.initiator())) +
                 //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                 ", url=" + response.url()); // DEBUG
         
@@ -2362,7 +2362,7 @@ public final class Switchboard extends serverSwitch {
                     final long start = System.currentTimeMillis();
 //                    header = Client.whead(url.toString(), reqHeader); 
                     client.HEADResponse(url.toString());
-                    header = new ResponseHeader(client.getHeaderHashMap());
+                    header = new ResponseHeader(null, client.getHeaderHashMap());
                     final long loadtime = System.currentTimeMillis() - start;
 //                    if (header == null) {
                     if (header == null) {

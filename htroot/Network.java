@@ -36,11 +36,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.protocol.Client;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.MapTools;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;

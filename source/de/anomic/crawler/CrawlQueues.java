@@ -263,7 +263,7 @@ public class CrawlQueues {
 
                 if (this.log.isFine())
                     log.logFine(stats + ": URL=" + urlEntry.url()
-                            + ", initiator=" + new String(urlEntry.initiator())
+                            + ", initiator=" + ((urlEntry.initiator() == null) ? "" : new String(urlEntry.initiator()))
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
                             + ", crawlDepth=" + profile.depth()
