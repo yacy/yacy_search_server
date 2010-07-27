@@ -27,6 +27,7 @@
 package net.yacy.document.parser.images;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,9 +36,19 @@ import java.io.IOException;
 import java.io.InputStream;import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+
+import com.drew.imaging.jpeg.JpegProcessingException;
+import com.drew.imaging.jpeg.JpegSegmentReader;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.Tag;
+import com.drew.metadata.exif.ExifReader;
+import com.drew.metadata.iptc.IptcReader;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
@@ -103,13 +114,65 @@ public class genericImageParser extends AbstractParser implements Parser {
             // http://www.drewnoakes.com/drewnoakes.com/code/exif/
             // javadoc is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/javadoc/
             // a tutorial is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/sampleUsage.html
-            BufferedImage image = null;
+            byte[] b;
             try {
-                image = ImageIO.read(sourceStream);
+                b = FileUtils.read(sourceStream);
             } catch (IOException e) {
+                Log.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             }
-            ii = parseJavaImage(location, image);
+
+            ii = parseJavaImage(location, new ByteArrayInputStream(b));
+            
+            JpegSegmentReader segmentReader;
+            try {
+                segmentReader = new JpegSegmentReader(new ByteArrayInputStream(b));
+
+                byte[] exifSegment = segmentReader.readSegment(JpegSegmentReader.SEGMENT_APP1);
+                byte[] iptcSegment = segmentReader.readSegment(JpegSegmentReader.SEGMENT_APPD);
+                Metadata metadata = new Metadata();
+                new ExifReader(exifSegment).extract(metadata);
+                new IptcReader(iptcSegment).extract(metadata);
+                
+                @SuppressWarnings("unchecked")
+                Iterator<Directory> directories = metadata.getDirectoryIterator();
+                HashMap<String, String> props = new HashMap<String, String>();
+                while (directories.hasNext()) {
+                    Directory directory = directories.next();
+                    @SuppressWarnings("unchecked")
+                    Iterator<Tag> tags = directory.getTagIterator();
+                    while (tags.hasNext()) {
+                        Tag tag = tags.next();
+                        try {
+                            props.put(tag.getTagName(), tag.getDescription());
+                            ii.info.append(tag.getTagName() + ": " + tag.getDescription() + " .\n");
+                        } catch (MetadataException e) {
+                            Log.logException(e);
+                        }
+                    }
+                    title = props.get("Image Description");
+                    if (title == null || title.length() == 0) title = props.get("Headline");
+                    if (title == null || title.length() == 0) title = props.get("Object Name");
+                    
+                    author = props.get("Artist");
+                    if (author == null || author.length() == 0) author = props.get("Writer/Editor");
+                    if (author == null || author.length() == 0) author = props.get("By-line");
+                    if (author == null || author.length() == 0) author = props.get("Credit");
+                    if (author == null || author.length() == 0) author = props.get("Make");
+                    
+                    keywords = props.get("Keywords");
+                    if (keywords == null || keywords.length() == 0) keywords = props.get("Category");
+                    if (keywords == null || keywords.length() == 0) keywords = props.get("Supplemental Category(s)");
+                    
+                    description = props.get("Caption/Abstract");
+                    if (description == null || description.length() == 0) description = props.get("Country/Primary Location");
+                    if (description == null || description.length() == 0) description = props.get("Province/State");
+                    if (description == null || description.length() == 0) description = props.get("Copyright Notice");
+                }
+            } catch (JpegProcessingException e) {
+                Log.logException(e);
+                // just ignore
+            }
         } else {
             ii = parseJavaImage(location, sourceStream);
         }        
