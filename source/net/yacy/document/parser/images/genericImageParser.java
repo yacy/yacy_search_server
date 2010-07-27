@@ -35,20 +35,9 @@ import java.io.IOException;
 import java.io.InputStream;import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
-
-import com.drew.imaging.jpeg.JpegMetadataReader;
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.MetadataException;
-import com.drew.metadata.Tag;
-import com.sun.image.codec.jpeg.ImageFormatException;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGDecodeParam;
-import com.sun.image.codec.jpeg.JPEGImageDecoder;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
@@ -114,54 +103,13 @@ public class genericImageParser extends AbstractParser implements Parser {
             // http://www.drewnoakes.com/drewnoakes.com/code/exif/
             // javadoc is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/javadoc/
             // a tutorial is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/sampleUsage.html
-            JPEGImageDecoder jpegDecoder = JPEGCodec.createJPEGDecoder(sourceStream);
             BufferedImage image = null;
             try {
-                image = jpegDecoder.decodeAsBufferedImage();
-            } catch (ImageFormatException e) {
-                throw new Parser.Failure(e.getMessage(), location);
+                image = ImageIO.read(sourceStream);
             } catch (IOException e) {
                 throw new Parser.Failure(e.getMessage(), location);
             }
-            JPEGDecodeParam decodeParam = jpegDecoder.getJPEGDecodeParam();
-            Metadata metadata = JpegMetadataReader.readMetadata(decodeParam);
             ii = parseJavaImage(location, image);
-            
-            @SuppressWarnings("unchecked")
-            Iterator<Directory> directories = metadata.getDirectoryIterator();
-            HashMap<String, String> props = new HashMap<String, String>();
-            while (directories.hasNext()) {
-                Directory directory = directories.next();
-                @SuppressWarnings("unchecked")
-                Iterator<Tag> tags = directory.getTagIterator();
-                while (tags.hasNext()) {
-                    Tag tag = tags.next();
-                    try {
-                        props.put(tag.getTagName(), tag.getDescription());
-                        ii.info.append(tag.getTagName() + ": " + tag.getDescription() + " .\n");
-                    } catch (MetadataException e) {
-                        Log.logException(e);
-                    }
-                }
-                title = props.get("Image Description");
-                if (title == null || title.length() == 0) title = props.get("Headline");
-                if (title == null || title.length() == 0) title = props.get("Object Name");
-                
-                author = props.get("Artist");
-                if (author == null || author.length() == 0) author = props.get("Writer/Editor");
-                if (author == null || author.length() == 0) author = props.get("By-line");
-                if (author == null || author.length() == 0) author = props.get("Credit");
-                if (author == null || author.length() == 0) author = props.get("Make");
-                
-                keywords = props.get("Keywords");
-                if (keywords == null || keywords.length() == 0) keywords = props.get("Category");
-                if (keywords == null || keywords.length() == 0) keywords = props.get("Supplemental Category(s)");
-                
-                description = props.get("Caption/Abstract");
-                if (description == null || description.length() == 0) description = props.get("Country/Primary Location");
-                if (description == null || description.length() == 0) description = props.get("Province/State");
-                if (description == null || description.length() == 0) description = props.get("Copyright Notice");
-            }
         } else {
             ii = parseJavaImage(location, sourceStream);
         }        
