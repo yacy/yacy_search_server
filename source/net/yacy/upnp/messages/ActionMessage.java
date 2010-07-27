@@ -325,15 +325,15 @@ public class ActionMessage {
     ServiceActionArgument arg = serviceAction.getInputActionArgument( parameterName );
     if ( arg == null ) throw new IllegalArgumentException( "Wrong input argument name for this action:" + parameterName + " available parameters are : " + getInputParameterNames() );
     ServiceStateVariable linkedVar = arg.getRelatedStateVariable();
-    if ( linkedVar.getDataType().equals( ServiceStateVariable.TIME ) ) {
+    if ( linkedVar.getDataType().equals( ServiceStateVariableTypes.TIME ) ) {
       return setInputParameter( parameterName, ISO8601Date.getIsoTime( parameterValue ) );
-    } else if ( linkedVar.getDataType().equals( ServiceStateVariable.TIME_TZ ) ) {
+    } else if ( linkedVar.getDataType().equals( ServiceStateVariableTypes.TIME_TZ ) ) {
       return setInputParameter( parameterName, ISO8601Date.getIsoTimeZone( parameterValue ) );
-    } else if ( linkedVar.getDataType().equals( ServiceStateVariable.DATE ) ) {
+    } else if ( linkedVar.getDataType().equals( ServiceStateVariableTypes.DATE ) ) {
       return setInputParameter( parameterName, ISO8601Date.getIsoDate( parameterValue ) );
-    } else if ( linkedVar.getDataType().equals( ServiceStateVariable.DATETIME ) ) {
+    } else if ( linkedVar.getDataType().equals( ServiceStateVariableTypes.DATETIME ) ) {
       return setInputParameter( parameterName, ISO8601Date.getIsoDateTime( parameterValue ) );
-    } else if ( linkedVar.getDataType().equals( ServiceStateVariable.DATETIME_TZ ) ) {
+    } else if ( linkedVar.getDataType().equals( ServiceStateVariableTypes.DATETIME_TZ ) ) {
       return setInputParameter( parameterName, ISO8601Date.getIsoDateTimeZone( parameterValue ) );
     } else {
       throw new IllegalArgumentException( "Related input state variable " + linkedVar.getName() + " is not of an date type" );
