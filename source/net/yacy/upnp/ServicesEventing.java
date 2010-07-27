@@ -203,8 +203,8 @@ public class ServicesEventing implements Runnable {
   
   private Subscription lookupSubscriber( UPNPService service, ServiceEventHandler handler ) {
     synchronized( registered ) {
-      for ( Iterator i = registered.iterator(); i.hasNext(); ) {
-        Subscription sub = (Subscription)i.next();
+      for ( Iterator<Subscription> i = registered.iterator(); i.hasNext(); ) {
+        Subscription sub = i.next();
         
         if ( sub.handler == handler &&
              sub.sub.getServiceId().hashCode() == service.getServiceId().hashCode() &&
@@ -219,8 +219,8 @@ public class ServicesEventing implements Runnable {
   
   private Subscription lookupSubscriber( String sid, InetAddress deviceIp ) {
     synchronized( registered ) {
-      for ( Iterator i = registered.iterator(); i.hasNext(); ) {
-        Subscription sub = (Subscription)i.next();
+      for ( Iterator<Subscription> i = registered.iterator(); i.hasNext(); ) {
+        Subscription sub = i.next();
         
         if ( sub.sub.getSID().equals( sid ) && sub.sub.getDeviceIp().equals( deviceIp ) ) {
           return sub;
@@ -232,8 +232,8 @@ public class ServicesEventing implements Runnable {
   
   private Subscription lookupSubscriber( String sid ) {
     synchronized( registered ) {
-      for ( Iterator i = registered.iterator(); i.hasNext(); ) {
-        Subscription sub = (Subscription)i.next();
+      for ( Iterator<Subscription> i = registered.iterator(); i.hasNext(); ) {
+        Subscription sub = i.next();
       
         if ( sub.sub.getSID().equals( sid ) ) {
           return sub;
@@ -416,10 +416,10 @@ public class ServicesEventing implements Runnable {
               InputSource src = new InputSource( stringReader );
               parser.parse( src, msgParser );
         
-              Map changedStateVars = msgParser.getChangedStateVars();
-              for ( Iterator i = changedStateVars.keySet().iterator(); i.hasNext(); ) {
-                String stateVarName = (String)i.next();
-                String stateVarNewVal = (String)changedStateVars.get( stateVarName );
+              Map<String, String> changedStateVars = msgParser.getChangedStateVars();
+              for ( Iterator<String> i = changedStateVars.keySet().iterator(); i.hasNext(); ) {
+                String stateVarName = i.next();
+                String stateVarNewVal = changedStateVars.get( stateVarName );
                 subscription.handler.handleStateVariableEvent( stateVarName, stateVarNewVal );
               }
             }

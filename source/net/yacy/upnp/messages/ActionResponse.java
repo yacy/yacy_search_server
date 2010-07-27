@@ -72,7 +72,7 @@ public class ActionResponse {
     return outArgumentsVals.get( actionArgumentName );
   }
   
-  public Set getOutActionArgumentNames() {
+  public Set<String> getOutActionArgumentNames() {
     return outArguments.keySet();
   }
 
@@ -89,8 +89,8 @@ public class ActionResponse {
 
   public String toString() {
     StringBuffer rtrVal = new StringBuffer();
-    for ( Iterator i = outArguments.keySet().iterator(); i.hasNext(); ) {
-      String name = (String)i.next();
+    for ( Iterator<String> i = outArguments.keySet().iterator(); i.hasNext(); ) {
+      String name = i.next();
       String value = outArgumentsVals.get( name );
       rtrVal.append( name ).append( "=" ).append( value );
       if ( i.hasNext() ) rtrVal.append( "\n" );

@@ -180,18 +180,18 @@ public class Discovery {
     
     DiscoveryListener.getInstance().registerResultsHandler( handler, searchTarget );
     if ( ni == null ) {
-      for ( Enumeration e = NetworkInterface.getNetworkInterfaces(); e.hasMoreElements(); ) {
-        NetworkInterface intf = (NetworkInterface)e.nextElement();
-        for ( Enumeration adrs = intf.getInetAddresses(); adrs.hasMoreElements(); ) {
-          InetAddress adr = (InetAddress)adrs.nextElement();
+      for ( Enumeration<NetworkInterface> e = NetworkInterface.getNetworkInterfaces(); e.hasMoreElements(); ) {
+        NetworkInterface intf = e.nextElement();
+        for ( Enumeration<InetAddress> adrs = intf.getInetAddresses(); adrs.hasMoreElements(); ) {
+          InetAddress adr = adrs.nextElement();
           if ( adr instanceof Inet4Address && !adr.isLoopbackAddress()  ) {
             sendSearchMessage( adr, ttl, mx, searchTarget );
           }
         }
       }
     } else {
-      for ( Enumeration adrs = ni.getInetAddresses(); adrs.hasMoreElements(); ) {
-        InetAddress adr = (InetAddress)adrs.nextElement();
+      for ( Enumeration<InetAddress> adrs = ni.getInetAddresses(); adrs.hasMoreElements(); ) {
+        InetAddress adr = adrs.nextElement();
         if ( adr instanceof Inet4Address && !adr.isLoopbackAddress()  ) {
           sendSearchMessage( adr, ttl, mx, searchTarget );
         }
@@ -211,8 +211,8 @@ public class Discovery {
     }
     int j = 0;
     UPNPRootDevice[] rootDevices = new UPNPRootDevice[devices.size()];
-    for ( Iterator i = devices.values().iterator(); i.hasNext(); ) {
-      rootDevices[j++] = (UPNPRootDevice)i.next();
+    for ( Iterator<UPNPRootDevice> i = devices.values().iterator(); i.hasNext(); ) {
+      rootDevices[j++] = i.next();
     }
     return rootDevices;
    

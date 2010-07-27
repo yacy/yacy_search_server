@@ -73,7 +73,7 @@ public class DiscoveryListener implements Runnable {
   
   private static final int DEFAULT_TIMEOUT = 250;
  
-  private Map<String, Set> registeredHandlers = new HashMap<String, Set>();
+  private Map<String, Set<DiscoveryResultsHandler>> registeredHandlers = new HashMap<String, Set<DiscoveryResultsHandler>>();
   
   private final Object REGISTRATION_PROCESS = new Object();
   
@@ -106,13 +106,12 @@ public class DiscoveryListener implements Runnable {
    * @param searchTarget the search target
    * @throws IOException if some errors occurs during SSDP search response messages listener thread startup
    */
-  @SuppressWarnings("unchecked")
   public void registerResultsHandler( DiscoveryResultsHandler resultsHandler, String searchTarget ) throws IOException {
     synchronized( REGISTRATION_PROCESS ) {
       if ( !inService ) startDevicesListenerThread();
-      Set handlers = registeredHandlers.get( searchTarget );
+      Set<DiscoveryResultsHandler> handlers = registeredHandlers.get( searchTarget );
       if ( handlers == null ) {
-        handlers = new HashSet();
+        handlers = new HashSet<DiscoveryResultsHandler>();
         registeredHandlers.put( searchTarget, handlers );
       }
       handlers.add( resultsHandler );
@@ -126,7 +125,7 @@ public class DiscoveryListener implements Runnable {
    */
   public void unRegisterResultsHandler( DiscoveryResultsHandler resultsHandler, String searchTarget ) {
     synchronized( REGISTRATION_PROCESS ) {
-      Set handlers = registeredHandlers.get( searchTarget );
+      Set<DiscoveryResultsHandler> handlers = registeredHandlers.get( searchTarget );
       if ( handlers != null ) {
         handlers.remove( resultsHandler );
         if ( handlers.size() == 0 ) {
@@ -267,10 +266,10 @@ public class DiscoveryListener implements Runnable {
       int index = udn.indexOf( "::" );
       if ( index != -1 ) udn = udn.substring( 0, index );
       synchronized( REGISTRATION_PROCESS ) {
-        Set handlers = registeredHandlers.get( st );
+        Set<DiscoveryResultsHandler> handlers = registeredHandlers.get( st );
         if ( handlers != null ) {
-          for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
-            DiscoveryResultsHandler handler = (DiscoveryResultsHandler)i.next();
+          for ( Iterator<DiscoveryResultsHandler> i = handlers.iterator(); i.hasNext(); ) {
+            DiscoveryResultsHandler handler = i.next();
             handler.discoveredDevice( usn, udn, st, maxAge, loc, server );
           }
         }

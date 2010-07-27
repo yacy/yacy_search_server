@@ -151,7 +151,7 @@ public class UPNPDevice {
    * Access to the device icons definitions
    * @return a list containing DeviceIcon objects or null if no icons defined
    */
-  public List getDeviceIcons() {
+  public List<DeviceIcon> getDeviceIcons() {
     return deviceIcons;
   }
 
@@ -163,8 +163,8 @@ public class UPNPDevice {
   public ArrayList<UPNPDevice> getChildDevices() {
     if ( childDevices == null ) return null;
     ArrayList<UPNPDevice> rtrVal = new ArrayList<UPNPDevice>();
-    for ( Iterator itr = childDevices.iterator(); itr.hasNext(); ) {
-      UPNPDevice device = (UPNPDevice)itr.next();
+    for ( Iterator<UPNPDevice> itr = childDevices.iterator(); itr.hasNext(); ) {
+      UPNPDevice device = itr.next();
       rtrVal.add( device );
       ArrayList<UPNPDevice> found = device.getChildDevices();
       if ( found != null ) {
@@ -180,11 +180,11 @@ public class UPNPDevice {
    * UPNPDevice objects for this device.
    * @return the generated list or null if no child devices bound
    */
-  public List getTopLevelChildDevices() {
+  public List<UPNPDevice> getTopLevelChildDevices() {
     if ( childDevices == null ) return null;
     List<UPNPDevice> rtrVal = new ArrayList<UPNPDevice>();
-    for ( Iterator itr = childDevices.iterator(); itr.hasNext(); ) {
-      UPNPDevice device = (UPNPDevice)itr.next();
+    for ( Iterator<UPNPDevice> itr = childDevices.iterator(); itr.hasNext(); ) {
+      UPNPDevice device = itr.next();
       rtrVal.add( device );
     }
     return rtrVal;
@@ -209,8 +209,8 @@ public class UPNPDevice {
     if ( log.isDebugEnabled() ) log.debug( "searching for device URI:" + deviceURI );
     if ( getDeviceType().equals( deviceURI ) ) return this;
     if ( childDevices == null ) return null;
-    for ( Iterator itr = childDevices.iterator(); itr.hasNext(); ) {
-      UPNPDevice device = (UPNPDevice)itr.next();
+    for ( Iterator<UPNPDevice> itr = childDevices.iterator(); itr.hasNext(); ) {
+      UPNPDevice device = itr.next();
       UPNPDevice found = device.getChildDevice( deviceURI );
       if ( found != null ) {
         return found;
@@ -223,7 +223,7 @@ public class UPNPDevice {
    * Looks for all UPNP device service definitions objects
    * @return A list of all device services
    */
-  public ArrayList getServices() {
+  public ArrayList<UPNPService> getServices() {
     if ( services == null ) return null;
     ArrayList<UPNPService> rtrVal = new ArrayList<UPNPService>();
     rtrVal.addAll( services );
@@ -238,8 +238,8 @@ public class UPNPDevice {
   public UPNPService getService( String serviceURI ) {
     if ( services == null ) return null;
     if ( log.isDebugEnabled() ) log.debug( "searching for service URI:" + serviceURI );
-    for ( Iterator itr = services.iterator(); itr.hasNext(); ) {
-      UPNPService service = (UPNPService)itr.next();
+    for ( Iterator<UPNPService> itr = services.iterator(); itr.hasNext(); ) {
+      UPNPService service = itr.next();
       if ( service.getServiceType().equals( serviceURI ) ) {
         return service;
       }
@@ -255,8 +255,8 @@ public class UPNPDevice {
   public UPNPService getServiceByID( String serviceID ) {
     if ( services == null ) return null;
     if ( log.isDebugEnabled() ) log.debug( "searching for service ID:" + serviceID );
-    for ( Iterator itr = services.iterator(); itr.hasNext(); ) {
-      UPNPService service = (UPNPService)itr.next();
+    for ( Iterator<UPNPService> itr = services.iterator(); itr.hasNext(); ) {
+      UPNPService service = itr.next();
       if ( service.getServiceId().equals( serviceID ) ) {
         return service;
       }
@@ -271,12 +271,12 @@ public class UPNPDevice {
    * @param serviceURI the URI of the service
    * @return A matching List of UPNPService objects or null
    */
-  public List getServices( String serviceURI ) {
+  public List<UPNPService> getServices( String serviceURI ) {
     if ( services == null ) return null;
     List<UPNPService> rtrVal = new ArrayList<UPNPService>();
     if ( log.isDebugEnabled() ) log.debug( "searching for services URI:" + serviceURI );
-    for ( Iterator itr = services.iterator(); itr.hasNext(); ) {
-      UPNPService service = (UPNPService)itr.next();
+    for ( Iterator<UPNPService> itr = services.iterator(); itr.hasNext(); ) {
+      UPNPService service = itr.next();
       if ( service.getServiceType().equals( serviceURI ) ) {
         rtrVal.add( service );
       }

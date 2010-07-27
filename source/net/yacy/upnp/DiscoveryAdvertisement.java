@@ -152,7 +152,7 @@ public class DiscoveryAdvertisement implements Runnable {
     synchronized( REGISTRATION_PROCESS ) {
       if ( nt == null ) nt = NT_ALL_EVENTS;
       if ( notificationEvent == EVENT_SSDP_ALIVE ) {
-        Set handlers = aliveRegistered.get( nt );
+        Set<DiscoveryEventHandler> handlers = aliveRegistered.get( nt );
         if ( handlers != null ) {
           handlers.remove( eventHandler );
           if ( handlers.size() == 0 ) {
@@ -160,7 +160,7 @@ public class DiscoveryAdvertisement implements Runnable {
           }
         }
       } else if ( notificationEvent == EVENT_SSDP_BYE_BYE ) {
-        Set handlers = byeByeRegistered.get( nt );
+        Set<DiscoveryEventHandler> handlers = byeByeRegistered.get( nt );
         if ( handlers != null ) {
           handlers.remove( eventHandler );
           if ( handlers.size() == 0 ) {
@@ -304,17 +304,17 @@ public class DiscoveryAdvertisement implements Runnable {
          int index = udn.indexOf( "::" );
          if ( index != -1 ) udn = udn.substring( 0, index );
          synchronized( REGISTRATION_PROCESS ) {
-           Set handlers = aliveRegistered.get( NT_ALL_EVENTS );
+           Set<DiscoveryEventHandler> handlers = aliveRegistered.get( NT_ALL_EVENTS );
            if ( handlers != null ) {
-             for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
-               DiscoveryEventHandler eventHandler = (DiscoveryEventHandler)i.next();
+             for ( Iterator<DiscoveryEventHandler> i = handlers.iterator(); i.hasNext(); ) {
+               DiscoveryEventHandler eventHandler = i.next();
                eventHandler.eventSSDPAlive( usn, udn, nt, maxAge, loc );
              }
            }
            handlers = aliveRegistered.get( nt );
            if ( handlers != null ) {
-             for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
-               DiscoveryEventHandler eventHandler = (DiscoveryEventHandler)i.next();
+             for ( Iterator<DiscoveryEventHandler> i = handlers.iterator(); i.hasNext(); ) {
+               DiscoveryEventHandler eventHandler = i.next();
                eventHandler.eventSSDPAlive( usn, udn, nt, maxAge, loc );
              }
            }
@@ -347,17 +347,17 @@ public class DiscoveryAdvertisement implements Runnable {
          int index = udn.indexOf( "::" );
          if ( index != -1 ) udn = udn.substring( 0, index );
          synchronized( REGISTRATION_PROCESS ) {
-           Set handlers = byeByeRegistered.get( NT_ALL_EVENTS );
+           Set<DiscoveryEventHandler> handlers = byeByeRegistered.get( NT_ALL_EVENTS );
            if ( handlers != null ) {
-             for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
-               DiscoveryEventHandler eventHandler = (DiscoveryEventHandler)i.next();
+             for ( Iterator<DiscoveryEventHandler> i = handlers.iterator(); i.hasNext(); ) {
+               DiscoveryEventHandler eventHandler = i.next();
                eventHandler.eventSSDPByeBye( usn, udn, nt );
              }
            }
            handlers = byeByeRegistered.get( nt );
            if ( handlers != null ) {
-             for ( Iterator i = handlers.iterator(); i.hasNext(); ) {
-               DiscoveryEventHandler eventHandler = (DiscoveryEventHandler)i.next();
+             for ( Iterator<DiscoveryEventHandler> i = handlers.iterator(); i.hasNext(); ) {
+               DiscoveryEventHandler eventHandler = i.next();
                eventHandler.eventSSDPByeBye( usn, udn, nt );
              }
            }

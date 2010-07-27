@@ -118,8 +118,8 @@ public class ActionMessage {
     
     if ( serviceAction.getInputActionArguments() != null ) {
       // this action requires params so we just set them...
-      for ( Iterator itr = inputParameters.iterator(); itr.hasNext(); ) {
-        InputParamContainer container = (InputParamContainer)itr.next();
+      for ( Iterator<InputParamContainer> itr = inputParameters.iterator(); itr.hasNext(); ) {
+        InputParamContainer container = itr.next();
         body.append( "<" ).append( container.name ).append( ">" ).append( container.value );
         body.append( "</" ).append( container.name ).append( ">" );
       }
@@ -235,7 +235,7 @@ public class ActionMessage {
    * @return a list of required input parameters ServiceActionArgument objects for this message
    *         or null if the message does not require any input params
    */
-  public List getInputParameterNames() {
+  public List<String> getInputParameterNames() {
     return serviceAction.getInputActionArgumentsNames();
   }
   
@@ -244,7 +244,7 @@ public class ActionMessage {
    * @return a list of output parameters ServiceActionArgument objects for this message
    *         or null if the message does not contains any output params.
    */
-  public List getOutputParameterNames() {
+  public List<String> getOutputParameterNames() {
     return serviceAction.getOutputActionArgumentsNames();
   }
   
@@ -296,8 +296,8 @@ public class ActionMessage {
     if ( serviceAction.getInputActionArguments() == null ) throw new IllegalArgumentException( "No input parameters required for this message" );
     ServiceActionArgument arg = serviceAction.getInputActionArgument( parameterName );
     if ( arg == null ) throw new IllegalArgumentException( "Wrong input argument name for this action:" + parameterName + " available parameters are : " + getInputParameterNames() );
-    for ( Iterator i = inputParameters.iterator(); i.hasNext(); ) {
-      InputParamContainer container = (InputParamContainer)i.next();
+    for ( Iterator<InputParamContainer> i = inputParameters.iterator(); i.hasNext(); ) {
+      InputParamContainer container = i.next();
       if ( container.name.equals( parameterName ) ) {
         container.value = parameterValue;
         return this;

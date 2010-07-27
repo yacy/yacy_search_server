@@ -149,7 +149,7 @@ public class UPNPService {
     return UPNPServiceStateVariables.get( stateVariableName );
   }
 
-  public Iterator getAvailableActionsName() {
+  public Iterator<String> getAvailableActionsName() {
     lazyInitiate();
     return UPNPServiceActions.keySet().iterator();
   }
@@ -159,7 +159,7 @@ public class UPNPService {
 	  return UPNPServiceActions.keySet().size();
 	}
 
-  public Iterator getAvailableStateVariableName() {
+  public Iterator<String> getAvailableStateVariableName() {
     lazyInitiate();
     return UPNPServiceStateVariables.keySet().iterator();
   }

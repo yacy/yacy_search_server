@@ -268,8 +268,8 @@ public class InternetGatewayDevice {
       }
       rtrVal = new InternetGatewayDevice[valid.size()];
       int i = 0;
-      for ( Iterator itr = valid.iterator(); itr.hasNext(); ) {
-        rtrVal[i++] = (InternetGatewayDevice)itr.next();
+      for ( Iterator<InternetGatewayDevice> itr = valid.iterator(); itr.hasNext(); ) {
+        rtrVal[i++] = itr.next();
       }
       
     }

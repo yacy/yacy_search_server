@@ -144,7 +144,7 @@ public class ServiceStateVariable implements ServiceStateVariableTypes {
    * The varialbe JAVA data type (using an UPNP->Java mapping)
    * @return the class mapped
    */
-  public Class getDataTypeAsClass() {
+  public Class<?> getDataTypeAsClass() {
     return getDataTypeClassMapping( dataType );
   }
   
@@ -152,7 +152,7 @@ public class ServiceStateVariable implements ServiceStateVariableTypes {
    * A set of allowed values (String objects) for the variable
    * @return the allowed values or null if none
    */
-  public Set getAllowedvalues() {
+  public Set<String> getAllowedvalues() {
     return allowedvalues;
   }
   
@@ -180,7 +180,7 @@ public class ServiceStateVariable implements ServiceStateVariableTypes {
     return stepRangeValue;
   }
   
-  public static Class getDataTypeClassMapping( String dataType ) {
+  public static Class<?> getDataTypeClassMapping( String dataType ) {
     int hash = dataType.hashCode();
     if ( hash == UI1_INT ) return Short.class;
     else if ( hash == UI2_INT ) return Integer.class;

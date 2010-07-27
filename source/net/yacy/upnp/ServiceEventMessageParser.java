@@ -69,7 +69,7 @@ public class ServiceEventMessageParser extends org.xml.sax.helpers.DefaultHandle
   protected ServiceEventMessageParser() {
   }
 
-  public Map getChangedStateVars() {
+  public Map<String, String> getChangedStateVars() {
     return changedStateVars;
   }
 
