@@ -21,6 +21,7 @@
 package net.yacy.cora.document;
 
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -113,7 +114,11 @@ public class RSSFeed implements Iterable<Hit> {
         }
 
         public RSSMessage next() {
-            lastGUID = GUIDiterator.next();
+            try {
+                lastGUID = GUIDiterator.next();
+            } catch (ConcurrentModificationException e) {
+                return null;
+            }
             if (lastGUID == null) return null;
             return messages.get(lastGUID);
         }

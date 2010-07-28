@@ -71,7 +71,7 @@ public class NetworkGraph {
     private static final String COL_MYPEER_LINE    = "FFAAAA";
     private static final String COL_MYPEER_TEXT    = "FFCCCC";
     private static final String COL_DHTOUT         = "440000";
-    private static final String COL_DHTIN          = "004400";
+    private static final String COL_DHTIN          = "008800";
     
     private static final String COL_BORDER         = "000000";
     private static final String COL_NORMAL_TEXT    = "000000";
@@ -294,20 +294,35 @@ public class NetworkGraph {
         PrintTool.arcPrint(img, centerX, centerY, innerradius + linelength, angle, name);
 
         // draw corona around dot for crawling activity
-        int ppm20 = seed.getPPM() / 20;
-        if (coronaangle >= 0 && ppm20 > 0) {
-            double ca = Math.PI * 2.0 * ((double) coronaangle) / 360.0;
-            if (ppm20 > 3) ppm20 = 3;
-            // draw a wave around crawling peers
-            long strength;
-            img.setColor("303030");
-            img.arcArc(centerX, centerY, innerradius, angle, dotsize + 1, dotsize + 1, 0, 360);
-            final int waveradius = innerradius / 2;
-            for (int r = 0; r < waveradius; r++) {
-                strength = (waveradius - r) * (long) (0x08 * ppm20 * (1.0 + Math.sin(ca + Math.PI * 16 * r / waveradius))) / waveradius;
-                //System.out.println("r = " + r + ", Strength = " + strength);
-                img.setColor((strength << 16) | (strength << 8) | strength);
-                img.arcArc(centerX, centerY, innerradius, angle, dotsize + r, dotsize + r, 0, 360);
+        int ppmx = seed.getPPM() / 30;
+        if (coronaangle >= 0 && ppmx > 0) {
+            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, ppmx, coronaangle, true, false, 24, 24, 24); // color = 0..63
+        }
+        
+        // draw corona around dot for query activity
+        int qphx = ((int) (seed.getQPM() * 4.0));
+        if (coronaangle >= 0 && qphx > 0) {
+            drawCorona(img, centerX, centerY, innerradius, angle, dotsize, qphx, coronaangle, false, true, 8, 62, 8); // color = 0..63
+        }
+    }
+    
+    private static void drawCorona(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, int angle, int dotsize, int strength, int coronaangle, boolean inside, boolean split, int r, int g, int b) {
+        double ca = Math.PI * 2.0 * ((double) coronaangle) / 360.0;
+        if (strength > 4) strength = 4;
+        // draw a wave around crawling peers
+        double wave;
+        final int waveradius = innerradius / 2;
+        int segments = 72;
+        for (int radius = 0; radius < waveradius; radius++) {
+            wave = ((double) (waveradius - radius) * strength) * (1.0 + Math.sin(Math.PI * 16 * radius / waveradius + ((inside) ? ca : -ca))) / 2.0 / (double) waveradius;
+            img.setColor(((((long) (r * wave)) & 0xff) << 16) | (((long) ((g * wave)) & 0xff) << 8) | ((((long) (b * wave))) & 0xff));
+            if (split) {
+                for (int i = 0; i < segments; i++) {
+                    int a = (coronaangle + 360 * i) / segments;
+                    img.arcArc(centerX, centerY, innerradius, angle, dotsize + radius, dotsize + radius, a, a + 180/segments);
+                }
+            } else {
+                img.arcArc(centerX, centerY, innerradius, angle, dotsize + radius, dotsize + radius, 0, 360);
             }
         }
     }

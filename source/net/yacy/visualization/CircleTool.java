@@ -114,9 +114,13 @@ public class CircleTool {
         }
     }
     
-    public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, final int fromArc, final int toArc) {
+    public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, int fromArc, int toArc) {
         // draws only a part of a circle
         // arc is given in degree
+        while (fromArc > 360) fromArc -=360;
+        while (fromArc < 0  ) fromArc +=360;
+        while (  toArc > 360)   toArc -=360;
+        while (  toArc < 0  )   toArc +=360;
         if (radius == 0) {
             matrix.plot(xc, yc, 100);
         } else {
@@ -141,8 +145,22 @@ public class CircleTool {
                 c4x[i + 3 * q] =     a2    ; // quadrant 4
                 c4y[i + 3 * q] =     a3    ; // quadrant 4
             }
-            for (int i = q * 4 * fromArc / 360; i < q * 4 * toArc / 360; i++) {
+            if (fromArc == toArc) {
+                int i = q * 4 * fromArc / 360;
                 matrix.plot(xc + c4x[i], yc + c4y[i], 100);
+            } else if (fromArc > toArc) {
+                // draw two parts
+                for (int i = q * 4 * fromArc / 360; i < q * 4; i++) {
+                    matrix.plot(xc + c4x[i], yc + c4y[i], 100);
+                }
+                for (int i = 0; i < q * 4 * toArc / 360; i++) {
+                    matrix.plot(xc + c4x[i], yc + c4y[i], 100);
+                }
+            } else {
+                // can be drawn in one part
+                for (int i = q * 4 * fromArc / 360; i < q * 4 * toArc / 360; i++) {
+                    matrix.plot(xc + c4x[i], yc + c4y[i], 100);
+                }
             }
         }
     }
