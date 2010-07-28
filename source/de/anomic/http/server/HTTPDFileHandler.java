@@ -101,6 +101,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyBuildProperties;
+import de.anomic.yacy.graphics.EncodedImage;
 
 public final class HTTPDFileHandler {
     
@@ -541,6 +542,20 @@ public final class HTTPDFileHandler {
                         nocache = true;
                         final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
                         final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), targetExt);
+
+                        // write the array to the client
+                        HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
+                        if (!method.equals(HeaderFramework.METHOD_HEAD)) {
+                            result.writeTo(out);
+                        }
+                    }
+                    if (img instanceof EncodedImage) {
+                        final EncodedImage yp = (EncodedImage) img;
+                        // send an image to client
+                        targetDate = new Date(System.currentTimeMillis());
+                        nocache = true;
+                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                        final ByteBuffer result = yp.getImage();
 
                         // write the array to the client
                         HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);

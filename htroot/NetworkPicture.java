@@ -24,20 +24,31 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import net.yacy.visualization.RasterPlotter;
+import java.util.TreeMap;
+
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.graphics.EncodedImage;
 import de.anomic.yacy.graphics.NetworkGraph;
 
 /** draw a picture of the yacy network */
 public class NetworkPicture {
     
-    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    private static final TreeMap<Long, EncodedImage> buffer = new TreeMap<Long, EncodedImage>();
+    
+    public static EncodedImage respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final boolean authorized = sb.adminAuthenticated(header) >= 2;
+        
+        long timeSeconds = System.currentTimeMillis() / 1000;
+        EncodedImage bufferedImage = null;
+        synchronized (buffer) {
+            bufferedImage = buffer.get(timeSeconds);
+        }
+        if (bufferedImage != null) return bufferedImage;
         
         int width = 768;
         int height = 576;
@@ -73,7 +84,12 @@ public class NetworkPicture {
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 10000) maxCount = 10000;
-        return NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
+        bufferedImage = new EncodedImage(NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor).getImage(), "png");
+        synchronized (buffer) {
+            buffer.put(timeSeconds, bufferedImage);
+            while (buffer.size() > 8) buffer.remove(buffer.firstKey());
+        }
+        return bufferedImage;
     }
     
 }
