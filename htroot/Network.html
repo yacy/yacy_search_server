@@ -10,21 +10,21 @@
     </style>
     
   <script type="text/javascript">
-    imagestub = "NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&ct=5000&coronaangle=";
-    imageanimindex = 0;
-    imageloadindex = 0;
-    imagecycles = 0;
-    imagearray = new Array(6);
+    var imagestub = "NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF&amp;ct=5000&amp;coronaangle=";
+    var imageanimindex = 0;
+    var imageloadindex = 0;
+    var imagecycles = 0;
+    var imagearray = new Array(6);
     setTimeout("initanimation()", 100);
     setTimeout("doanimation()", 1000);
     function initanimation() {
-      handle = new Date().getTime();
+      var handle = new Date().getTime();
       for (j = 0; j < 6; j++) initanimationphase(j, handle);
     }
     function initanimationphase(phase, handle) {
       imagearray[phase] = new Image(768, 576);
-      angle = phase * 60;
-      imagearray[phase].src = imagestub + angle + "&handle=" + handle;
+      var angle = phase * 60;
+      imagearray[phase].src = imagestub + angle + "&amp;handle=" + handle;
     }
     function doanimation() {
       document.getElementById("NetworkPicture").src = imagearray[imageanimindex].src;
@@ -173,11 +173,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <div class="left">
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">
-        <td rowspan=5 class="TableHeader">Network</td>
-        <td colspan=#(active-switch)#2::3::4::5#(/active-switch)#>Online Peers</td>
-        <td rowspan=2>Number of<br/>Documents</td>
-        <td rowspan=2>Indexing Speed:<br/>Pages Per Minute (PPM)</td>
-        <td rowspan=2>Query Frequency:<br/>Queries Per Hour (QPH)</td>
+        <td rowspan="5" class="TableHeader">Network</td>
+        <td colspan="#(active-switch)#2::3::4::5#(/active-switch)#">Online Peers</td>
+        <td rowspan="2">Number of<br/>Documents</td>
+        <td rowspan="2">Indexing Speed:<br/>Pages Per Minute (PPM)</td>
+        <td rowspan="2">Query Frequency:<br/>Queries Per Hour (QPH)</td>
       </tr>
       <tr class="TableHeader">
         #(active-switch)#::
@@ -185,19 +185,19 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <td>Last Week</td><td>Today</td>::
         <td>Last Month</td><td>Last Week</td><td>Today</td>
         #(/active-switch)#
-        <td colspan=2>Now</td>
+        <td colspan="2">Now</td>
       </tr>
       <tr class="TableCellDark">
         #(active-switch)#::
-        <td align="right" rowspan=3>#[last-day]#</td>::
-        <td align="right" rowspan=3>#[last-week]#</td><td align="right" rowspan=3>#[last-day]#</td>::
-        <td align="right" rowspan=3>#[last-month]#</td><td align="right" rowspan=3>#[last-week]#</td><td align="right" rowspan=3>#[last-day]#</td>
+        <td align="right" rowspan="3">#[last-day]#</td>::
+        <td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td>::
+        <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td>
         #(/active-switch)#
         <td align="left">Active</td>
         <td align="right">#[active-count]#</td>
         <td align="right">#[active-links]#</td>
-        <td align="right" rowspan=3>#[gppm]#</td>
-        <td align="right" rowspan=3>#[gqph]#</td>
+        <td align="right" rowspan="3">#[gppm]#</td>
+        <td align="right" rowspan="3">#[gqph]#</td>
       </tr>
       <tr class="TableCellDark">
         <td align="left">Passive</td>
@@ -219,8 +219,10 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     </div>
     
     <div class="left">
-    <a href="NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&coronaangle=0" alt="The YaCy Network" /></a>
-    </p></div>
+        <p>
+            <a href="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF&amp;coronaangle=0" width="768" height="576" alt="The YaCy Network" /></a>
+        </p>
+    </div>
 	<div class="left">
     <table border="0">
             <tr>
