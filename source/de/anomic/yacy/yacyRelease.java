@@ -27,7 +27,7 @@
 
 package de.anomic.yacy;
 
-import java.io.BufferedInputStream;
+//import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -46,6 +46,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.Client;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
@@ -55,10 +56,11 @@ import net.yacy.kelondro.util.OS;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
+//import de.anomic.http.server.ResponseContainer;
+import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.tools.CryptoLib;
@@ -285,14 +287,19 @@ public final class yacyRelease extends yacyVersion {
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
         
-        ResponseContainer res = null;
+//        ResponseContainer res = null;
         final String name = this.getUrl().getFileName();
         byte[] signatureBytes = null;
+        
+        final Client client = new Client();
+        client.setTimout(6000);
+        client.setHeader(reqHeader.entrySet());
         
         // download signature first, if public key is available
         try {
             if (this.publicKey != null) {
-                final byte[] signatureData = Client.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
+//                final byte[] signatureData = Client.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
+            	final byte[] signatureData = client.GETbytes(this.getUrl().toString());
                 if (signatureData == null) {
                     Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
                 } else try {
@@ -302,10 +309,14 @@ public final class yacyRelease extends yacyVersion {
                 }
                 // in case that the download of a signature file failed (can be caused by bad working http servers), then it is assumed that no signature exists
             }
-            final Client client = new Client(120000, reqHeader);
-            res = client.GET(this.getUrl().toString());
+//            final Client client = new Client(120000, reqHeader);
+//            res = client.GET(this.getUrl().toString());
+            client.setTimout(120000);
+            client.GET(this.getUrl().toString());
+            final ResponseHeader header = new ResponseHeader(null, client.getHeaderHashMap());
 
-            final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
+//            final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
+            final boolean unzipped = header.gzip() && (header.mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
             if ((unzipped) && (name.endsWith(".tar.gz"))) {
                 download = new File(storagePath, name.substring(0, name.length() - 3));
             } else {
@@ -316,7 +327,8 @@ public final class yacyRelease extends yacyVersion {
                 SignatureOutputStream verifyOutput = null;
                 try {
                     verifyOutput = new SignatureOutputStream(new FileOutputStream(download), CryptoLib.signAlgorithm, publicKey);
-                    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(verifyOutput));
+//                    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(verifyOutput));
+                    client.writeTo(new BufferedOutputStream(verifyOutput));
 
                     if (!verifyOutput.verify(signatureBytes)) throw new IOException("Bad Signature!");
                 } catch (NoSuchAlgorithmException e) {
@@ -333,12 +345,13 @@ public final class yacyRelease extends yacyVersion {
                 if ((!signatureFile.exists()) || (signatureFile.length() == 0)) throw new IOException("create signature file failed");
             } else {
                 // just copy into file
-                FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
+//                FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
+                client.writeTo(new BufferedOutputStream(new FileOutputStream(download)));
             }
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + this.getUrl() + " failed");
         } catch (final IOException e) {
             // Saving file failed, abort download
-            if (res != null) res.abort();
+//            if (res != null) res.abort();
             Log.logSevere("yacyVersion", "download of " + this.getName() + " failed: " + e.getMessage());
             if (download != null && download.exists()) {
                 FileUtils.deletedelete(download);
@@ -346,10 +359,15 @@ public final class yacyRelease extends yacyVersion {
             }
             download = null;
         } finally {
-            if (res != null) {
-                // release connection
-                res.closeStream();
-            }
+//            if (res != null) {
+//                // release connection
+//                res.closeStream();
+//            }
+        	try {
+				client.finish();
+			} catch (IOException e) {
+				Log.logSevere("yacyVersion", "finish of " + this.getName() + " failed: " + e.getMessage());
+			}
         }
         this.releaseFile = download;
         Switchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());

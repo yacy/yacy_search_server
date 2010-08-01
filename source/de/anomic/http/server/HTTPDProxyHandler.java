@@ -43,7 +43,7 @@
 package de.anomic.http.server;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
+//import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +71,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.protocol.Client;
 import net.yacy.cora.protocol.ProxySettings;
 import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ContentTransformer;
@@ -87,7 +88,7 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.MultiOutputStream;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -439,7 +440,7 @@ public final class HTTPDProxyHandler {
         
         final GZIPOutputStream gzippedOut = null; 
        
-        ResponseContainer res = null;                
+//        ResponseContainer res = null;                
         try {
             final int reqID = requestHeader.hashCode();
 
@@ -478,17 +479,22 @@ public final class HTTPDProxyHandler {
             
             // send request
             try {
-                res = client.GET(getUrl);
-                if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
+//                res = client.GET(getUrl);
+//                if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
+            	client.GET(getUrl);
+                if (log.isFinest()) log.logFinest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
                 conProp.put(HeaderFramework.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
 
-                final ResponseHeader responseHeader = res.getResponseHeader();
+//                final ResponseHeader responseHeader = res.getResponseHeader();
+                final ResponseHeader responseHeader = new ResponseHeader(null, client.getHeaderHashMap());
                 // determine if it's an internal error of the httpc
                 if (responseHeader.isEmpty()) {
-                    throw new Exception(res.getStatusLine());
+//                    throw new Exception(res.getStatusLine());
+                	throw new Exception(client.getHttpResponse().getStatusLine().toString());
                 }
 
-                final ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), respond);
+//                final ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), respond);
+                final ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, client.getHttpResponse().getStatusLine().getStatusCode(), respond);
 
                 // the cache does either not exist or is (supposed to be) stale
                 long sizeBeforeDelete = -1;
@@ -519,7 +525,8 @@ public final class HTTPDProxyHandler {
                 // handle incoming cookies
                 handleIncomingCookies(responseHeader, host, ip);
 
-                prepareResponseHeader(responseHeader, res.getHttpVer());
+//                prepareResponseHeader(responseHeader, res.getHttpVer());
+                prepareResponseHeader(responseHeader, client.getHttpResponse().getProtocolVersion().toString());
 
                 // sending the respond header back to the client
                 if (chunkedOut != null) {
@@ -527,22 +534,31 @@ public final class HTTPDProxyHandler {
                 }
 
                 if (log.isFinest()) log.logFinest(reqID +"    sending response header: "+ responseHeader);
+//                HTTPDemon.sendRespondHeader(
+//                        conProp,
+//                        respond,
+//                        httpVer,
+//                        res.getStatusCode(),
+//                        res.getStatusLine().substring(4), // status text
+//                        responseHeader);
                 HTTPDemon.sendRespondHeader(
                         conProp,
                         respond,
                         httpVer,
-                        res.getStatusCode(),
-                        res.getStatusLine().substring(4), // status text
+                        client.getHttpResponse().getStatusLine().getStatusCode(),
+                        client.getHttpResponse().getStatusLine().toString(), // status text
                         responseHeader);
 
-                if (hasBody(res.getStatusCode())) {
+//                if (hasBody(res.getStatusCode())) {
+                if (hasBody(client.getHttpResponse().getStatusLine().getStatusCode())) {
 
                     final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
                     final Response response = new Response(
                             request,
                             requestHeader,
                             responseHeader,
-                            res.getStatusLine(),
+//                            res.getStatusLine(),
+                            Integer.toString(client.getHttpResponse().getStatusLine().getStatusCode()),
                             sb.crawler.defaultProxyProfile
                     );
                     final String storeError = response.shallStoreCacheForProxy();
@@ -561,11 +577,13 @@ public final class HTTPDProxyHandler {
                             ((storeHTCache) || (supportError != null))
                     ) {
                         // we don't write actually into a file, only to RAM, and schedule writing the file.
-                        int l = res.getResponseHeader().size();
+//                        int l = res.getResponseHeader().size();
+                    	int l = responseHeader.size();
                         final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);
 
                         final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
-                        FileUtils.copy(res.getDataAsStream(), toClientAndMemory);
+//                        FileUtils.copy(res.getDataAsStream(), toClientAndMemory);
+                        client.writeTo(toClientAndMemory);
                         // cached bytes
                         byte[] cacheArray;
                         if (byteStream.size() > 0) {
@@ -608,7 +626,8 @@ public final class HTTPDProxyHandler {
                                 " StoreHTCache=" + storeHTCache +
                                 " SupportError=" + supportError);
 
-                        FileUtils.copy(res.getDataAsStream(), outStream);
+//                        FileUtils.copy(res.getDataAsStream(), outStream);
+                        client.writeTo(outStream);
 
                         conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     }
@@ -623,17 +642,19 @@ public final class HTTPDProxyHandler {
                 } // end hasBody
             } catch(SocketException se) {
                 // if opened ...
-                if(res != null) {
-                    // client cut proxy connection, abort download
-                    res.abort();
-                }
+//                if(res != null) {
+//                    // client cut proxy connection, abort download
+//                    res.abort();
+//                }
+            	client.finish();
                 handleProxyException(se,conProp,respond,url);
             } finally {
                 // if opened ...
-                if(res != null) {
-                    // ... close connection
-                    res.closeStream();
-                }
+//                if(res != null) {
+//                    // ... close connection
+//                    res.closeStream();
+//                }
+            	client.finish();
             }
         } catch (final Exception e) {
             handleProxyException(e,conProp,respond,url);
@@ -741,7 +762,7 @@ public final class HTTPDProxyHandler {
 
     public static void doHead(final Properties conProp, final RequestHeader requestHeader, OutputStream respond) {
         
-        ResponseContainer res = null;
+//        ResponseContainer res = null;
         DigestURI url = null;
         try {
             final int reqID = requestHeader.hashCode();
@@ -813,28 +834,42 @@ public final class HTTPDProxyHandler {
             final Client client = setupHttpClient(requestHeader, connectHost);
             
             // send request
-            try {
-            res = client.HEAD(getUrl);
-            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
+//            try {
+//            res = client.HEAD(getUrl);
+//            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
+            client.HEADResponse(getUrl);
+            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
             
             // determine if it's an internal error of the httpc
-            final ResponseHeader responseHeader = res.getResponseHeader();
+//            final ResponseHeader responseHeader = res.getResponseHeader();
+//            if (responseHeader.isEmpty()) {
+//                throw new Exception(res.getStatusLine());
+//            }      
+            final ResponseHeader responseHeader = new ResponseHeader(null, client.getHeaderHashMap());
             if (responseHeader.isEmpty()) {
-                throw new Exception(res.getStatusLine());
-            }            
+                throw new Exception(client.getHttpResponse().getStatusLine().toString());
+            } 
             
-            prepareResponseHeader(responseHeader, res.getHttpVer());
+//            prepareResponseHeader(responseHeader, res.getHttpVer());
+            prepareResponseHeader(responseHeader, client.getHttpResponse().getStatusLine().getProtocolVersion().toString());
 
             // sending the server respond back to the client
             if (log.isFinest()) log.logFinest(reqID +"    sending response header: "+ responseHeader);
-            HTTPDemon.sendRespondHeader(conProp,respond,httpVer,res.getStatusCode(),res.getStatusLine().substring(4),responseHeader);
+//            HTTPDemon.sendRespondHeader(conProp,respond,httpVer,res.getStatusCode(),res.getStatusLine().substring(4),responseHeader);
+            HTTPDemon.sendRespondHeader(
+            		conProp,
+            		respond,
+            		httpVer,
+            		client.getHttpResponse().getStatusLine().getStatusCode(),
+            		client.getHttpResponse().getStatusLine().toString(),
+            		responseHeader);
             respond.flush();
-            } finally {
-                if(res != null) {
-                    // ... close connection
-                    res.closeStream();
-                }
-            }
+//            } finally {
+//                if(res != null) {
+//                    // ... close connection
+//                    res.closeStream();
+//                }
+//            }
         } catch (final Exception e) {
             handleProxyException(e,conProp,respond,url); 
         }
@@ -901,6 +936,10 @@ public final class HTTPDProxyHandler {
             final String getUrl = "http://"+ connectHost + remotePath;
             if (log.isFinest()) log.logFinest(reqID +"    using url: "+ getUrl);
             
+            // the CONTENT_LENGTH will be added by entity and cause a ClientProtocolException if set
+            final int contentLength = requestHeader.getContentLength();
+            requestHeader.remove(RequestHeader.CONTENT_LENGTH);
+            
             final Client client = setupHttpClient(requestHeader, connectHost);
             
             // check input
@@ -911,79 +950,95 @@ public final class HTTPDProxyHandler {
             // "if there is a body to the call, we would have a CONTENT-LENGTH tag in the requestHeader"
             // it seems that it is a HTTP/1.1 connection which stays open (the inputStream) and endlessly waits for
             // input so we have to end it to do the request
-            final int contentLength = requestHeader.getContentLength();
-            if (contentLength > -1) {
-                final byte[] bodyData;
-                if(contentLength == 0) {
-                    // no body
-                    bodyData = new byte[0];
-                } else {
-                    // read content-length bytes into memory
-                    bodyData = new byte[contentLength];
-                    int bytes_read = 0;
-                    while(bytes_read < contentLength) {
-                        bytes_read += body.read(bodyData, bytes_read, contentLength-bytes_read);
-                    }
-                }
-                body = new ByteArrayInputStream(bodyData);
-            }
-            ResponseContainer res = null;
+            // this should not be needed anymore - see org.apache.http.entity.InputStreamEntity
+//            final int contentLength = requestHeader.getContentLength();
+//            if (contentLength > -1) {
+//                final byte[] bodyData;
+//                if(contentLength == 0) {
+//                    // no body
+//                    bodyData = new byte[0];
+//                } else {
+//                    // read content-length bytes into memory
+//                    bodyData = new byte[contentLength];
+//                    int bytes_read = 0;
+//                    while(bytes_read < contentLength) {
+//                        bytes_read += body.read(bodyData, bytes_read, contentLength-bytes_read);
+//                    }
+//                }
+//                body = new ByteArrayInputStream(bodyData);
+//            }
+//            ResponseContainer res = null;
             try {
-            // sending the request
-            res = client.POST(getUrl, body);
-            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
-            
-            final ResponseHeader responseHeader = res.getResponseHeader();
-            // determine if it's an internal error of the httpc
-            if (responseHeader.isEmpty()) {
-                throw new Exception(res.getStatusLine());
-            }                                  
-            
-            final ChunkedOutputStream chunked = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), countedRespond);
-            
-            prepareResponseHeader(responseHeader, res.getHttpVer());
-            
-            // sending the respond header back to the client
-            if (chunked != null) {
-                responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
-            }
-            
-            // sending response headers
-            if (log.isFinest()) log.logFinest(reqID +"    sending response header: "+ responseHeader);
-            HTTPDemon.sendRespondHeader(conProp,
-                                    countedRespond,
-                                    httpVer,
-                                    res.getStatusCode(),
-                                    res.getStatusLine().substring(4), // status text
-                                    responseHeader);
-            
-            // respondHeader(respond, res.status, res.responseHeader);
-            // Saver.writeContent(res, (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond));
-            /*
-            // *** (Uebernommen aus Saver-Klasse: warum ist dies hier die einzige Methode, die einen OutputStream statt einen Writer benutzt?)
-            try {
-                serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond));
-            } finally {
-                res.closeStream();
-            }
-            if (chunked != null)  chunked.finish();
-            */
-            final OutputStream outStream = (chunked != null) ? chunked : countedRespond;
-            FileUtils.copy(res.getDataAsStream(), outStream);
-            
-            if (chunked != null) {
-                chunked.finish();
-            }
-            outStream.flush();
+	            // sending the request
+//	            res = client.POST(getUrl, body);
+//	            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
+	            client.POST(getUrl, body, contentLength);
+	            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
+	            
+//	            final ResponseHeader responseHeader = res.getResponseHeader();
+	            final ResponseHeader responseHeader = new ResponseHeader(null, client.getHeaderHashMap());
+	            // determine if it's an internal error of the httpc
+	            if (responseHeader.isEmpty()) {
+//	                throw new Exception(res.getStatusLine());
+	            	throw new Exception(client.getHttpResponse().getStatusLine().toString());
+	            }                                  
+	            
+//	            final ChunkedOutputStream chunked = setTransferEncoding(conProp, responseHeader, res.getStatusCode(), countedRespond);
+	            final ChunkedOutputStream chunked = setTransferEncoding(conProp, responseHeader, client.getHttpResponse().getStatusLine().getStatusCode(), countedRespond);
+	            
+//	            prepareResponseHeader(responseHeader, res.getHttpVer());
+	            prepareResponseHeader(responseHeader, client.getHttpResponse().getProtocolVersion().toString());
+	            
+	            // sending the respond header back to the client
+	            if (chunked != null) {
+	                responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
+	            }
+	            
+	            // sending response headers
+	            if (log.isFinest()) log.logFinest(reqID +"    sending response header: "+ responseHeader);
+//	            HTTPDemon.sendRespondHeader(conProp,
+//	                                    countedRespond,
+//	                                    httpVer,
+//	                                    res.getStatusCode(),
+//	                                    res.getStatusLine().substring(4), // status text
+//	                                    responseHeader);
+	            HTTPDemon.sendRespondHeader(conProp,
+                        countedRespond,
+                        httpVer,
+                        client.getHttpResponse().getStatusLine().getStatusCode(),
+                        client.getHttpResponse().getStatusLine().toString(), // status text
+                        responseHeader);
+	            
+	            // respondHeader(respond, res.status, res.responseHeader);
+	            // Saver.writeContent(res, (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond));
+	            /*
+	            // *** (Uebernommen aus Saver-Klasse: warum ist dies hier die einzige Methode, die einen OutputStream statt einen Writer benutzt?)
+	            try {
+	                serverFileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), (chunked != null) ? new BufferedOutputStream(chunked) : new BufferedOutputStream(respond));
+	            } finally {
+	                res.closeStream();
+	            }
+	            if (chunked != null)  chunked.finish();
+	            */
+	            final OutputStream outStream = (chunked != null) ? chunked : countedRespond;
+//	            FileUtils.copy(res.getDataAsStream(), outStream);
+	            client.writeTo(outStream);
+	            
+	            if (chunked != null) {
+	                chunked.finish();
+	            }
+	            outStream.flush();
             } catch(SocketException se) {
         	// connection closed by client, abort download
-        	res.abort();
+//        	res.abort();
+            	client.finish();
             } finally {
                 // if opened ...
-                if(res != null) {
-                    // ... close connection
-                    res.closeStream();
-                }
+//                if(res != null) {
+//                    // ... close connection
+//                    res.closeStream();
+//                }
+            	client.finish();
             }
         } catch (final Exception e) {
             handleProxyException(e,conProp,countedRespond,url);                 
@@ -1069,8 +1124,12 @@ public final class HTTPDProxyHandler {
      */
     private static Client setupHttpClient(final RequestHeader requestHeader, final String connectHost) {
         // setup HTTP-client
-        final Client client = new Client(timeout, requestHeader);
-        client.setFollowRedirects(false);
+//        final Client client = new Client(timeout, requestHeader);
+//        client.setFollowRedirects(false);
+    	final Client client = new Client();
+    	client.setTimout(timeout);
+    	client.setHeader(requestHeader.entrySet());
+    	client.setRedirecting(false);
         return client;
     }
 
@@ -1240,16 +1299,22 @@ public final class HTTPDProxyHandler {
     
         // possibly branch into PROXY-PROXY connection
         if (ProxySettings.use && ProxySettings.use4ssl) {
-            final Client remoteProxy = new Client(timeout, requestHeader);
-            remoteProxy.setFollowRedirects(false); // should not be needed, but safe is safe 
+//            final Client remoteProxy = new Client(timeout, requestHeader);
+//            remoteProxy.setFollowRedirects(false); // should not be needed, but safe is safe 
+        	final Client remoteProxy = setupHttpClient(requestHeader, host);
     
-            ResponseContainer response = null;
+//            ResponseContainer response = null;
             try {
-                response = remoteProxy.CONNECT(host, port);
+//                response = remoteProxy.CONNECT(host, port);
+            	remoteProxy.HEADResponse("http://" + host + ":" + port);
+            	ResponseHeader header = new ResponseHeader(null, remoteProxy.getHeaderHashMap());
+            	
                 // outputs a logline to the serverlog with the current status
-                log.logInfo("CONNECT-RESPONSE: status=" + response.getStatusLine() + ", header=" + response.getResponseHeader().toString());
-                // (response.getStatusLine().charAt(0) == '2') || (response.getStatusLine().charAt(0) == '3')
-                final boolean success = response.getStatusCode() >= 200 && response.getStatusCode() <= 399;
+//                log.logInfo("CONNECT-RESPONSE: status=" + response.getStatusLine() + ", header=" + response.getResponseHeader().toString());
+//                // (response.getStatusLine().charAt(0) == '2') || (response.getStatusLine().charAt(0) == '3')
+//                final boolean success = response.getStatusCode() >= 200 && response.getStatusCode() <= 399;
+            	log.logInfo("CONNECT-RESPONSE: status=" + remoteProxy.getHttpResponse().getStatusLine() + ", header=" + header.toString());
+            	final boolean success = remoteProxy.getHttpResponse().getStatusLine().getStatusCode() >= 200 && remoteProxy.getHttpResponse().getStatusLine().getStatusCode() <= 399;
                 if (success) {
                     // replace connection details
                     host = ProxySettings.host;
@@ -1257,21 +1322,28 @@ public final class HTTPDProxyHandler {
                     // go on (see below)
                 } else {
                     // pass error response back to client
-                    HTTPDemon.sendRespondHeader(conProp,clientOut,httpVersion,response.getStatusCode(),response.getStatusLine().substring(4),response.getResponseHeader());
+//                    HTTPDemon.sendRespondHeader(conProp,clientOut,httpVersion,response.getStatusCode(),response.getStatusLine().substring(4),response.getResponseHeader());
+                	HTTPDemon.sendRespondHeader(
+                			conProp,
+                			clientOut,
+                			httpVersion,
+                			remoteProxy.getHttpResponse().getStatusLine().getStatusCode(),
+                			remoteProxy.getHttpResponse().getStatusLine().toString(),
+                			header);
                     //respondHeader(clientOut, response.status, response.responseHeader);
                     forceConnectionClose(conProp);
                     return;
                 }
-            } catch (SocketException se) {
-        	// connection closed by client, abort download
-        	response.abort();
+//            } catch (SocketException se) {
+//        	// connection closed by client, abort download
+//        	response.abort();
             } catch (final Exception e) {
                 throw new IOException(e.getMessage());
-            } finally {
-                if(response != null) {
-                    // release connection
-                    response.closeStream();
-                }
+//            } finally {
+//                if(response != null) {
+//                    // release connection
+//                    response.closeStream();
+//                }
             }
         }
     

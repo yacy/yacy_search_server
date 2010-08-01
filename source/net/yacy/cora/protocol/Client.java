@@ -1,6 +1,8 @@
 package net.yacy.cora.protocol;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,11 +15,13 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRouteBean;
@@ -27,6 +31,7 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
@@ -57,10 +62,12 @@ public class Client {
 	private static HttpClient httpClient = null;
 	private Header[] headers = null;
 	private HttpResponse httpResponse = null;
+	private HttpUriRequest currentRequest = null;
 	private long upbytes = 0L;
 	private int timeout = 10000;
 	private String userAgent = null;
 	private String host = null;
+	private boolean redirecting = true;
     
     public Client() {
     	super();
@@ -182,6 +189,14 @@ public class Client {
     }
     
     /**
+     * 
+     * @param redirecting
+     */
+    public void setRedirecting(final boolean redirecting) {
+    	this.redirecting = redirecting;
+    }
+    
+    /**
      * This method GETs a page from the server.
      * 
      * @param uri the url to get
@@ -206,6 +221,21 @@ public class Client {
     }
     
     /**
+     * This method GETs a page from the server.
+     * to be used for streaming out
+     * Please take care to call finish()!
+     * 
+     * @param uri the url to get
+     * @throws IOException
+     */
+    public void GET(final String uri) throws IOException {
+    	if (currentRequest != null) throw new IOException("Client is in use!");
+    	final HttpGet httpGet = new HttpGet(uri);
+    	currentRequest = httpGet;
+    	execute(httpGet);
+    }
+    
+    /**
      * This method gets HEAD response
      * 
      * @param uri the url to Response from
@@ -214,18 +244,42 @@ public class Client {
      */
     public HttpResponse HEADResponse(final String uri) throws IOException {
     	final HttpHead httpHead = new HttpHead(uri);
-    	getContentBytes(httpHead, Long.MAX_VALUE);
+    	execute(httpHead);
+    	finish();
+    	ConnectionInfo.removeConnection(httpHead.hashCode());
     	return httpResponse;
     }
     
     /**
+     * This method POSTs a page from the server.
+     * to be used for streaming out
+     * Please take care to call finish()!
+     * 
+     * @param uri the url to post
+     * @param instream the input to post
+     * @param length the contentlength
+     * @throws IOException 
+     */
+    public void POST(final String uri, final InputStream instream, long length) throws IOException {
+    	if (currentRequest != null) throw new IOException("Client is in use!");
+    	final HttpPost httpPost = new HttpPost(uri);
+    	final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
+    	// statistics
+    	upbytes = length;
+    	httpPost.setEntity(inputStreamEntity);
+    	currentRequest = httpPost;
+    	execute(httpPost);
+    }
+    
+    /**
+     * This method POSTs a page from the server.
      * 
      * @param uri the url to post
      * @param parts to post
      * @return content bytes
      * @throws IOException 
      */
-	public byte[] POSTbytes(final String uri, LinkedHashMap<String,ContentBody> parts) throws IOException {
+	public byte[] POSTbytes(final String uri, final LinkedHashMap<String,ContentBody> parts) throws IOException {
     	final HttpPost httpPost = new HttpPost(uri);
 
     	final MultipartEntity multipartEntity = new MultipartEntity();
@@ -255,18 +309,48 @@ public class Client {
 		}
 		return hmap;
 	}
+	
+	public void writeTo(final OutputStream outputStream) throws IOException {
+		if (httpResponse != null && currentRequest != null) {
+			final HttpEntity httpEntity = httpResponse.getEntity();
+	    	if (httpEntity != null) try {
+	    		httpEntity.writeTo(outputStream);
+	    		outputStream.flush();
+	    		// TODO: The name of this method is misnomer.
+	    		// It will be renamed to #finish() in the next major release of httpcore
+	    		httpEntity.consumeContent();
+				ConnectionInfo.removeConnection(currentRequest.hashCode());
+				currentRequest = null;
+	    	} catch (final IOException e) {
+	    		currentRequest.abort();
+				ConnectionInfo.removeConnection(currentRequest.hashCode());
+				currentRequest = null;
+	    		throw e;
+	    	}
+		}
+	}
+	
+	public void finish() throws IOException {
+		if (httpResponse != null) {
+			final HttpEntity httpEntity = httpResponse.getEntity();
+	    	if (httpEntity != null && httpEntity.isStreaming()) {
+	    		// TODO: The name of this method is misnomer.
+	    		// It will be renamed to #finish() in the next major release of httpcore
+	    		httpEntity.consumeContent();
+	    	}
+		}
+		if (currentRequest != null) {
+			currentRequest.abort();
+			ConnectionInfo.removeConnection(currentRequest.hashCode());
+			currentRequest = null;
+		}
+	}
     
-    private byte[] getContentBytes(HttpUriRequest httpUriRequest, long maxBytes) throws IOException {
+    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final long maxBytes) throws IOException {
     	byte[] content = null;
-    	final HttpContext httpContext = new BasicHttpContext();
-    	setHeaders(httpUriRequest);
-    	setParams(httpUriRequest.getParams());
-    	setProxy(httpUriRequest.getParams());
-    	// statistics
-    	storeConnectionInfo(httpUriRequest);
     	try {
-    		// execute the method
-        	httpResponse = httpClient.execute(httpUriRequest, httpContext);
+    		execute(httpUriRequest);
+    		if (httpResponse == null) return null;
         	// get the response body
         	final HttpEntity httpEntity = httpResponse.getEntity();
         	if (httpEntity != null) {
@@ -286,7 +370,24 @@ public class Client {
 		return content;
     }
     
-    private void setHeaders(HttpUriRequest httpUriRequest) {
+    private void execute(final HttpUriRequest httpUriRequest) throws IOException {
+    	final HttpContext httpContext = new BasicHttpContext();
+    	setHeaders(httpUriRequest);
+    	setParams(httpUriRequest.getParams());
+    	setProxy(httpUriRequest.getParams());
+    	// statistics
+    	storeConnectionInfo(httpUriRequest);
+    	try {
+        	// execute the method
+			httpResponse = httpClient.execute(httpUriRequest, httpContext);
+		} catch (ClientProtocolException e) {
+			httpUriRequest.abort();
+			ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+			throw new IOException("Client can't execute: " + e.getMessage());
+		}
+    }
+    
+    private void setHeaders(final HttpUriRequest httpUriRequest) {
     	if (headers != null) {
     		for (Header header : headers) {
     			httpUriRequest.addHeader(header);
@@ -294,7 +395,8 @@ public class Client {
     	}
     }
     
-    private void setParams(HttpParams httpParams) {
+    private void setParams(final HttpParams httpParams) {
+    	HttpClientParams.setRedirecting(httpParams, redirecting);
     	HttpConnectionParams.setConnectionTimeout(httpParams, timeout);
     	HttpConnectionParams.setSoTimeout(httpParams, timeout);
     	if (userAgent != null)
@@ -303,14 +405,14 @@ public class Client {
     		httpParams.setParameter(HTTP.TARGET_HOST, host);
     }
     
-    private void setProxy(HttpParams httpParams) {
+    private void setProxy(final HttpParams httpParams) {
     	if (ProxySettings.use)
     		ConnRouteParams.setDefaultProxy(httpParams, ProxySettings.getProxyHost());
     	// TODO find a better way for this
     	ProxySettings.setProxyCreds((AbstractHttpClient) httpClient);
     }
     
-    private void storeConnectionInfo(HttpUriRequest httpUriRequest) {
+    private void storeConnectionInfo(final HttpUriRequest httpUriRequest) {
     	final int port = httpUriRequest.getURI().getPort();
     	final String thost = httpUriRequest.getURI().getHost();
     	ConnectionInfo.addConnection(new ConnectionInfo(
@@ -368,7 +470,7 @@ public class Client {
 		}
 		Client client = new Client();
 		client.setUserAgent("foobar");
-		client.setHost("sixcooler");
+		client.setRedirecting(false);
 		// Get some
 		for (int i = 0; i < args.length; i++) {
 			url = args[i];
