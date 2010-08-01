@@ -8,55 +8,60 @@
       float: left;
     }
     </style>
-    
+
   <script type="text/javascript">
-    var imagestub = "NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF&amp;ct=5000&amp;coronaangle=";
-    var imageanimindex = 0;
-    var imageloadindex = 0;
-    var imagecycles = 0;
-    var imagearray = new Array(6);
+  <!--
+    imagestub = "NetworkPicture.png?width=768&height=576&bgcolor=FFFFFF&ct=5000&coronaangle=";
+    imageanimindex = 0;
+    imageloadindex = 0;
+    imagecycles = 0;
+    imagearray = new Array(6);
     setTimeout("initanimation()", 100);
     setTimeout("doanimation()", 1000);
     function initanimation() {
-      var handle = new Date().getTime();
+      handle = new Date().getTime();
       for (j = 0; j < 6; j++) initanimationphase(j, handle);
     }
     function initanimationphase(phase, handle) {
       imagearray[phase] = new Image(768, 576);
-      var angle = phase * 60;
-      imagearray[phase].src = imagestub + angle + "&amp;handle=" + handle;
+      angle = phase * 60;
+      imagearray[phase].src = imagestub + angle + "&handle=" + handle;
     }
     function doanimation() {
-      document.getElementById("NetworkPicture").src = imagearray[imageanimindex].src;
-      imageanimindex++;
-      if (imageanimindex == 6) { imageanimindex = 0; }
-      imagecycles++;
-      if (imagecycles == 25) {
-        initanimationphase(imageloadindex, new Date().getTime());
-        imageloadindex++;
-        if (imageloadindex == 6) { imageloadindex = 0; }
-        imagecycles = 0;
+      var networkPicture = document.getElementById("NetworkPicture");
+      if (networkPicture != null) {
+        networkPicture.src = imagearray[imageanimindex].src;
+        imageanimindex++;
+        if (imageanimindex == 6) { imageanimindex = 0; }
+        imagecycles++;
+        if (imagecycles == 25) {
+          initanimationphase(imageloadindex, new Date().getTime());
+          imageloadindex++;
+          if (imageloadindex == 6) { imageloadindex = 0; }
+          imagecycles = 0;
+        }
+        setTimeout("doanimation()", 100);
       }
-      setTimeout("doanimation()", 100);
     }
+  -->
   </script>
   </head>
   <body id="Network">
-  
+
 <div id="api">
-<script type="text/javascript">
-//<![CDATA[
-document.write("\<a href=\"Network.xml?" + window.location.search.substring(1) + "\"\>")
-//]]>
-</script>
 <script type="text/javascript" src="/js/sorttable.js">
 </script>
-<img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<a href="Network.xml" id="apilink"><img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<script type="text/javascript">
+//<![CDATA[
+document.getElementById('apilink').setAttribute('href', 'Network.xml?' + window.location.search.substring(1));
+//]]>
+</script>
 <span>The information that is presented on this page can also be retrieved as XML
 Click the API icon to see the XML.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
 </div>
-  
+
     #%env/templates/header.template%#
     <div class="SubMenu">
       <h3>YaCy Network</h3>
@@ -137,7 +142,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           #(isCrawling)#::<a href="#[page]#"><img src="/env/grafics/crawl.gif" width="54" height="11" alt="Crawl" /></a>#(/isCrawling)#
         </td>
         <td><a href="http://www.#[fullname]#.yacy">#[shortname]#</a></td>
-        <td>#(type)##(direct)#<img src="/env/grafics/JuniorPassive.gif" width="11" height="11" title="Type: Junior | Contact: passive" alt="Junior passive" />::<img src="/env/grafics/JuniorDirect.gif" width="11" height="11" title="Type: Junior | Contact: direct" alt="Junior direct" /></img>::<img src="/env/grafics/JuniorOffline.gif" width="11" height="11" title="Type: Junior | Contact: offline" alt="Junior offline" />#(/direct)#::#(direct)#<img src="/env/grafics/SeniorPassive.gif" width="11" height="11" title="Type: Senior | Contact: passive" alt="senior passive" />::<img src="/env/grafics/SeniorDirect.gif" width="11" height="11" title="Type: Senior | Contact: direct" alt="Senior direct" />::<img src="/env/grafics/SeniorOffline.gif" width="11" height="11" title="Type: Senior | Contact: offline" alt="Senior offline" />#(/direct)#::<a href="#[url]#">#(direct)#<img src="/env/grafics/PrincipalPassive.gif" width="11" height="11" title="Type: Principal | Contact: passive | Seed download: possible" alt="Principal passive" />::<img src="/env/grafics/PrincipalDirect.gif" width="11" height="11" title="Type: Principal | Contact: direct | Seed download: possible" alt="Principal active" />::<img src="/env/grafics/PrincipalOffline.gif" width="11" height="11" title="Type: Principal | Contact: offline | Seed download: ?" alt="Principal offline" />#(/direct)#</a>#(/type)##(acceptcrawl)#<img src="/env/grafics/CrawlNo.gif" width="11" height="11" title="Accept Crawl: no" alt="no crawl" />::<img src="/env/grafics/CrawlYes.gif" width="11" height="11" title="Accept Crawl: yes" alt="crawl possible" />::<img src="/env/grafics/CrawlYesOffline.gif" width="11" height="11" title="Accept Crawl: yes" alt="crawl possible" />#(/acceptcrawl)##(dhtreceive)#<img src="/env/grafics/DHTReceiveNo.gif" width="11" height="11" title="DHT Receive: no; #[peertags]#" alt="no DHT receive" />::<img src="/env/grafics/DHTReceiveYes.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT receive enabled" />::<img src="/env/grafics/DHTReceiveYesOffline.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT receive enabled" />#(/dhtreceive)##(rankingreceive)#<img src="/env/grafics/RankingReceiveNo.gif" width="11" height="11" title="Ranking Receive: no" alt="no ranking receive" />::<img src="/env/grafics/RankingReceiveYes.gif" width="11" height="11" title="Ranking Receive: yes" alt="Ranking receive enabled" />::<img  src="/env/grafics/RankingCollects.gif" width="11" height="11" title="Ranking Receive: collection" alt="ranking collects" />#(/rankingreceive)#</td>
+        <td>#(type)##(direct)#<img src="/env/grafics/JuniorPassive.gif" width="11" height="11" title="Type: Junior | Contact: passive" alt="Junior passive" />::<img src="/env/grafics/JuniorDirect.gif" width="11" height="11" title="Type: Junior | Contact: direct" alt="Junior direct" />::<img src="/env/grafics/JuniorOffline.gif" width="11" height="11" title="Type: Junior | Contact: offline" alt="Junior offline" />#(/direct)#::#(direct)#<img src="/env/grafics/SeniorPassive.gif" width="11" height="11" title="Type: Senior | Contact: passive" alt="senior passive" />::<img src="/env/grafics/SeniorDirect.gif" width="11" height="11" title="Type: Senior | Contact: direct" alt="Senior direct" />::<img src="/env/grafics/SeniorOffline.gif" width="11" height="11" title="Type: Senior | Contact: offline" alt="Senior offline" />#(/direct)#::<a href="#[url]#">#(direct)#<img src="/env/grafics/PrincipalPassive.gif" width="11" height="11" title="Type: Principal | Contact: passive | Seed download: possible" alt="Principal passive" />::<img src="/env/grafics/PrincipalDirect.gif" width="11" height="11" title="Type: Principal | Contact: direct | Seed download: possible" alt="Principal active" />::<img src="/env/grafics/PrincipalOffline.gif" width="11" height="11" title="Type: Principal | Contact: offline | Seed download: ?" alt="Principal offline" />#(/direct)#</a>#(/type)##(acceptcrawl)#<img src="/env/grafics/CrawlNo.gif" width="11" height="11" title="Accept Crawl: no" alt="no crawl" />::<img src="/env/grafics/CrawlYes.gif" width="11" height="11" title="Accept Crawl: yes" alt="crawl possible" />::<img src="/env/grafics/CrawlYesOffline.gif" width="11" height="11" title="Accept Crawl: yes" alt="crawl possible" />#(/acceptcrawl)##(dhtreceive)#<img src="/env/grafics/DHTReceiveNo.gif" width="11" height="11" title="DHT Receive: no; #[peertags]#" alt="no DHT receive" />::<img src="/env/grafics/DHTReceiveYes.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT receive enabled" />::<img src="/env/grafics/DHTReceiveYesOffline.gif" width="11" height="11" title="DHT Receive: yes" alt="DHT receive enabled" />#(/dhtreceive)##(rankingreceive)#<img src="/env/grafics/RankingReceiveNo.gif" width="11" height="11" title="Ranking Receive: no" alt="no ranking receive" />::<img src="/env/grafics/RankingReceiveYes.gif" width="11" height="11" title="Ranking Receive: yes" alt="Ranking receive enabled" />::<img  src="/env/grafics/RankingCollects.gif" width="11" height="11" title="Ranking Receive: collection" alt="ranking collects" />#(/rankingreceive)#</td>
         <td align="right">#[version]#</td>
         <td align="right">#[ppm]#</td>
         <td align="right">#[qph]#</td>
@@ -191,7 +196,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         #(active-switch)#::
         <td align="right" rowspan="3">#[last-day]#</td>::
         <td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td>::
-        <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan="3">#[last-day]#</td>
+        <td align="right" rowspan="3">#[last-month]#</td><td align="right" rowspan="3">#[last-week]#</td><td align="right" rowspan=3>#[last-day]#</td>
         #(/active-switch)#
         <td align="left">Active</td>
         <td align="right">#[active-count]#</td>
@@ -217,11 +222,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       </tr>
     </table>
     </div>
-    
+
     <div class="left">
-        <p>
-            <a href="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF&amp;coronaangle=0" width="768" height="576" alt="The YaCy Network" /></a>
-        </p>
+      <p>
+        <a href="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF"><img id="NetworkPicture" src="NetworkPicture.png?width=768&amp;height=576&amp;bgcolor=FFFFFF&amp;coronaangle=0" alt="The YaCy Network" width="768" height="576" /></a>
+      </p>
     </div>
 	<div class="left">
     <table border="0">
@@ -318,8 +323,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       </tr>
     </table>
     </div>
-    
-    
+
+
     ::
     #(comment)#
     ::
@@ -334,7 +339,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <code>#[details]#</code>
     </p>
     #(/comment)#
-    
+
     <form action="Network.html" method="get">
       <table>
         <tr>
