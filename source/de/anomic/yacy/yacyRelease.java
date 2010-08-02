@@ -299,7 +299,7 @@ public final class yacyRelease extends yacyVersion {
         try {
             if (this.publicKey != null) {
 //                final byte[] signatureData = Client.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
-            	final byte[] signatureData = client.GETbytes(this.getUrl().toString());
+            	final byte[] signatureData = client.GETbytes(this.getUrl().toString() + ".sig");
                 if (signatureData == null) {
                     Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
                 } else try {
