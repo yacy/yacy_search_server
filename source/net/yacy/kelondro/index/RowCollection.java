@@ -839,12 +839,12 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     }
 	
     private final int pivot(final int L, final int R, final int S) {
-        if ((S == 0) || (S < L)) {
+        if (S == 0 || S < L) {
             // the collection has no ordering
             // or
             // the collection has an ordering, but this is not relevant for this pivot
             // because the ordered zone is outside of ordering zone
-            final int m = picMiddle(new int[]{L, (3 * L + R - 1) / 4, (L + R - 1) / 2, (L + 3 * R - 3) / 4, R - 1}, 5);
+            final int m = picMiddle(L, (3 * L + R - 1) / 4, (L + R - 1) / 2, (L + 3 * R - 3) / 4, R - 1);
             assert L <= m;
             assert m < R;
             return m;
@@ -852,7 +852,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if (S < R) {
             // the collection has an ordering
             // and part of the ordered zone is inside the to-be-ordered zone
-            final int m = picMiddle(new int[]{L, L + (S - L) / 3, (L + R - 1) / 2, S, R - 1}, 5);
+            final int m = picMiddle(L, L + (S - L) / 3, (L + R - 1) / 2, S, R - 1);
             assert L <= m;
             assert m < R;
             return m;
@@ -864,6 +864,25 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return (L + R - 1) / 2;
     }
 
+    private final int picMiddle(final int a, final int b, final int c, final int d, final int e) {
+        return picMiddle(picMiddle(a, b, c), d, e);
+    }
+    
+    private final int picMiddle(final int a, final int b, final int c) {
+        if (a > b) {
+            if (c > a) return a;
+            if (c < b) return b;
+            return c;
+        } else {
+            if (c < a) return a;
+            if (c > b) return b;
+            return c;
+        }
+        //if (c < a && a < b || a > b && c > a) return a;
+        //if (a < b && c > b || c < b && a > b) return b;
+    }
+    
+    /*
     private final int picMiddle(final int[] list, int len) {
         assert len % 2 != 0;
         assert len <= list.length;
@@ -874,7 +893,6 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         assert len == 1;
         return list[0];
     }
-    
     private final void remove(final int[] list, final int len, final int idx) {
         if (idx == len - 1) return;
         list[idx] = list[len - 1]; // shift last element to front
@@ -897,6 +915,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         }
         return f;
     }
+    */
     
     private final void isort(final int L, final int R, final byte[] swapspace) {
         for (int i = L + 1; i < R; i++)
