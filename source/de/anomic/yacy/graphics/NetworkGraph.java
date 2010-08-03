@@ -426,10 +426,10 @@ public class NetworkGraph {
 
         if (!bordercolor.equals("")) {
             bannerPicture.setColor(bordercolor);
-            bannerPicture.line(0,0,0,height-1);
-            bannerPicture.line(0,0,width-1,0);
-            bannerPicture.line(width-1,0,width-1,height-1);
-            bannerPicture.line(0,height-1,width-1,height-1);
+            bannerPicture.line(0, 0, 0, height-1, 100);
+            bannerPicture.line(0, 0, width-1, 0, 100);
+            bannerPicture.line(width-1, 0, width-1, height-1, 100);
+            bannerPicture.line(0, height-1, width-1, height-1, 100);
         }
         
         // set timestamp
