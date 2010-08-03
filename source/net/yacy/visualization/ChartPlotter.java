@@ -99,7 +99,7 @@ public class ChartPlotter extends RasterPlotter {
         final int y1 = (coord_y1 - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
         final int x2 = (coord_x2 - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
         final int y2 = (coord_y2 - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
-        line(leftborder + x1, height - bottomborder - y1, leftborder + x2, height - bottomborder - y2);
+        line(leftborder + x1, height - bottomborder - y1, leftborder + x2, height - bottomborder - y2, 100);
     }
     
     private void drawHorizontalScale(final boolean top, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
@@ -109,17 +109,17 @@ public class ChartPlotter extends RasterPlotter {
         while (x < width - rightborder) {
             if ((colorScale != null) && (x > leftborder) && (x < (width - rightborder))) {
                 setColor(colorScale);
-                line(x, topborder, x, height - bottomborder);
+                line(x, topborder, x, height - bottomborder, 100);
             }
             setColor(colorNaming);
-            line(x, y - 3, x, y + 3);
+            line(x, y - 3, x, y + 3, 100);
             PrintTool.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1);
             x += pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
         PrintTool.print(this, width - rightborder, (top) ? y - 9 : y + 15, 0, name, 1);
-        line(leftborder - 4, y, width - rightborder + 4, y);
+        line(leftborder - 4, y, width - rightborder + 4, y, 100);
     }
     
     private void drawVerticalScale(final boolean left, final int scale, final int pixelperscale, final int offset, final String colorNaming, final String colorScale, final String name) {
@@ -131,10 +131,10 @@ public class ChartPlotter extends RasterPlotter {
         while (y > topborder) {
             if ((colorScale != null) && (y > topborder) && (y < (height - bottomborder))) {
                 setColor(colorScale);
-                line(leftborder, y, width - rightborder, y);
+                line(leftborder, y, width - rightborder, y, 100);
             }
             setColor(colorNaming);
-            line(x - 3, y, x + 3, y);
+            line(x - 3, y, x + 3, y, 100);
             s1 = (s >= 1000000 && s % 10000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
             PrintTool.print(this, (left) ? leftborder - 4 : width - rightborder + 4, y, 0, s1, (left) ? 1 : -1);
@@ -143,7 +143,7 @@ public class ChartPlotter extends RasterPlotter {
         }
         setColor(colorNaming);
         PrintTool.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, topborder, 90, name, 1);
-        line(x, topborder - 4, x, height - bottomborder + 4);
+        line(x, topborder - 4, x, height - bottomborder + 4, 100);
     }
    
     public static void main(final String[] args) {

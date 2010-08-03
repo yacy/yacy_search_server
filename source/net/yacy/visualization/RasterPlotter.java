@@ -41,7 +41,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -165,56 +164,44 @@ public class RasterPlotter {
         			cc[0] = defaultColR;
             		cc[1] = defaultColG;
             		cc[2] = defaultColB;
+                    grid.setPixel(x, y, cc);
         		} else {
-        			int[] c = new int[3];
-            		c = grid.getPixel(x, y, c);
-        			cc[0] = (intensity * defaultColR + (100 - intensity) * c[0]) / 100;
-        			cc[1] = (intensity * defaultColG + (100 - intensity) * c[1]) / 100;
-        			cc[2] = (intensity * defaultColB + (100 - intensity) * c[2]) / 100;
+        			int[] c = grid.getPixel(x, y, cc);
+        			c[0] = (intensity * defaultColR + (100 - intensity) * c[0]) / 100;
+        			c[1] = (intensity * defaultColG + (100 - intensity) * c[1]) / 100;
+        			c[2] = (intensity * defaultColB + (100 - intensity) * c[2]) / 100;
+                    grid.setPixel(x, y, c);
         		}
         	} else if (this.defaultMode == MODE_ADD) {
-        		int[] c = new int[3];
-        		c = grid.getPixel(x, y, c);
+        		int[] c = grid.getPixel(x, y, cc);
         		if (intensity == 100) {
-        			cc[0] = (0xff & c[0]) + defaultColR; if (cc[0] > 255) cc[0] = 255;
-        			cc[1] = (0xff & c[1]) + defaultColG; if (cc[1] > 255) cc[1] = 255;
-        			cc[2] = (0xff & c[2]) + defaultColB; if (cc[2] > 255) cc[2] = 255;
+        			c[0] = (0xff & c[0]) + defaultColR; if (cc[0] > 255) cc[0] = 255;
+        			c[1] = (0xff & c[1]) + defaultColG; if (cc[1] > 255) cc[1] = 255;
+        			c[2] = (0xff & c[2]) + defaultColB; if (cc[2] > 255) cc[2] = 255;
         		} else {
-        			cc[0] = (0xff & c[0]) + (intensity * defaultColR / 100); if (cc[0] > 255) cc[0] = 255;
-        			cc[1] = (0xff & c[1]) + (intensity * defaultColG / 100); if (cc[1] > 255) cc[1] = 255;
-        			cc[2] = (0xff & c[2]) + (intensity * defaultColB / 100); if (cc[2] > 255) cc[2] = 255;
+        			c[0] = (0xff & c[0]) + (intensity * defaultColR / 100); if (cc[0] > 255) cc[0] = 255;
+        			c[1] = (0xff & c[1]) + (intensity * defaultColG / 100); if (cc[1] > 255) cc[1] = 255;
+        			c[2] = (0xff & c[2]) + (intensity * defaultColB / 100); if (cc[2] > 255) cc[2] = 255;
         		}
+                grid.setPixel(x, y, c);
         	} else if (this.defaultMode == MODE_SUB) {
-        		int[] c = new int[3];
-        		c = grid.getPixel(x, y, c);
+        		int[] c = grid.getPixel(x, y, cc);
         		if (intensity == 100) {
-        			cc[0] = (0xff & c[0]) - defaultColR; if (cc[0] < 0) cc[0] = 0;
-        			cc[1] = (0xff & c[1]) - defaultColG; if (cc[1] < 0) cc[1] = 0;
-        			cc[2] = (0xff & c[2]) - defaultColB; if (cc[2] < 0) cc[2] = 0;
+        			c[0] = (0xff & c[0]) - defaultColR; if (cc[0] < 0) cc[0] = 0;
+        			c[1] = (0xff & c[1]) - defaultColG; if (cc[1] < 0) cc[1] = 0;
+        			c[2] = (0xff & c[2]) - defaultColB; if (cc[2] < 0) cc[2] = 0;
         		} else {
-        			cc[0] = (0xff & c[0]) - (intensity * defaultColR / 100); if (cc[0] < 0) cc[0] = 0;
-        			cc[1] = (0xff & c[1]) - (intensity * defaultColG / 100); if (cc[1] < 0) cc[1] = 0;
-        			cc[2] = (0xff & c[2]) - (intensity * defaultColB / 100); if (cc[2] < 0) cc[2] = 0;
+        			c[0] = (0xff & c[0]) - (intensity * defaultColR / 100); if (cc[0] < 0) cc[0] = 0;
+        			c[1] = (0xff & c[1]) - (intensity * defaultColG / 100); if (cc[1] < 0) cc[1] = 0;
+        			c[2] = (0xff & c[2]) - (intensity * defaultColB / 100); if (cc[2] < 0) cc[2] = 0;
         		}
+                grid.setPixel(x, y, c);
         	}
-        	grid.setPixel(x, y, cc);
         }
     }
     
-    
-    public void line(final int Ax, final int Ay, final int Bx, final int By) {
-        if (this.defaultMode == MODE_REPLACE) {
-            List<int[]> points = linex(Ax * 2, Ay * 2, Bx * 2, By * 2);
-            for (int[] point: points) plot(point[0] / 2, point[1] / 2, 100);
-        } else {
-            List<int[]> points = linex(Ax * 2, Ay * 2, Bx * 2, By * 2);
-            for (int[] point: points) plot(point[0] / 2, point[1] / 2, 50);
-        }
-    }
-    
-    private List<int[]> linex(int Ax, int Ay, final int Bx, final int By) {
+    public void line(int Ax, int Ay, final int Bx, final int By, final int intensity) {
         // Bresenham's line drawing algorithm
-        ArrayList<int[]> points = new ArrayList<int[]>();
         int dX = Math.abs(Bx-Ax);
         int dY = Math.abs(By-Ay);
         int Xincr, Yincr;
@@ -225,7 +212,7 @@ public class RasterPlotter {
             final int dPru = dPr - (dX<<1);
             int P    = dPr - dX;
             for (; dX>=0; dX--) {
-                points.add(new int[]{Ax, Ay});
+                plot(Ax, Ay, intensity);
                 if (P > 0) {
                     Ax+=Xincr;
                     Ay+=Yincr;
@@ -240,7 +227,7 @@ public class RasterPlotter {
             final int dPru = dPr - (dY<<1);
             int P    = dPr - dY;
             for (; dY>=0; dY--) {
-                points.add(new int[]{Ax, Ay});
+                plot(Ax, Ay, intensity);
                 if (P > 0) {
                     Ax+=Xincr;
                     Ay+=Yincr;
@@ -251,7 +238,6 @@ public class RasterPlotter {
                 }
             }
         }
-        return points;
     }
     
     public void lineDot(final int x0, final int y0, final int x1, final int y1, final int radius, final int distance, final long lineColor, final long dotColor) {
@@ -275,7 +261,7 @@ public class RasterPlotter {
         final int x3 = x0 + ((int) (rc * Math.cos(angle)));
         final int y3 = y0 - ((int) (rc * Math.sin(angle)));
         setColor(lineColor);
-        line(x0, y0, x3, y3);
+        line(x0, y0, x3, y3, 100);
         setColor(dotColor);
         dot(x2, y2, radius, true);
     }
@@ -305,7 +291,7 @@ public class RasterPlotter {
         final int yi = cy - (int) (innerRadius * sina);
         final int xo = cx + (int) (outerRadius * cosa);
         final int yo = cy - (int) (outerRadius * sina);
-        line(xi, yi, xo, yo);
+        line(xi, yi, xo, yo, 100);
     }
     
     public void arcDot(final int cx, final int cy, final int arcRadius, final int angle, final int dotRadius) {
@@ -322,7 +308,7 @@ public class RasterPlotter {
         final int y1 = cy - (int) (arcRadius * Math.sin(a1));
         final int x2 = cx + (int) (arcRadius * Math.cos(a2));
         final int y2 = cy - (int) (arcRadius * Math.sin(a2));
-        line(x1, y1, x2, y2);
+        line(x1, y1, x2, y2, 100);
     }
     
     public void arcArc(final int cx, final int cy, final int arcRadius, final int angle, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
@@ -644,17 +630,17 @@ public class RasterPlotter {
     
     public static void demoPaint(final RasterPlotter m) {
         m.setColor(GREY);
-        m.line(0,  70, 100,  70); PrintTool.print(m, 0,  65, 0, "Grey", -1);
-        m.line(65, 0,   65, 300);
+        m.line(0,  70, 100,  70, 100); PrintTool.print(m, 0,  65, 0, "Grey", -1);
+        m.line(65, 0,   65, 300, 100);
         m.setColor(RED);
-        m.line(0,  90, 100,  90); PrintTool.print(m, 0,  85, 0, "Red", -1);
-        m.line(70, 0,   70, 300);
+        m.line(0,  90, 100,  90, 100); PrintTool.print(m, 0,  85, 0, "Red", -1);
+        m.line(70, 0,   70, 300, 100);
         m.setColor(GREEN);
-        m.line(0, 110, 100, 110); PrintTool.print(m, 0, 105, 0, "Green", -1);
-        m.line(75, 0,   75, 300);
+        m.line(0, 110, 100, 110, 100); PrintTool.print(m, 0, 105, 0, "Green", -1);
+        m.line(75, 0,   75, 300, 100);
         m.setColor(BLUE);
-        m.line(0, 130, 100, 130); PrintTool.print(m, 0, 125, 0, "Blue", -1);
-        m.line(80, 0,   80, 300);
+        m.line(0, 130, 100, 130, 100); PrintTool.print(m, 0, 125, 0, "Blue", -1);
+        m.line(80, 0,   80, 300, 100);
     }
 /*
     private static class imageBuffer {

@@ -76,7 +76,7 @@ public class Captcha extends RasterPlotter {
             setColor(((random.nextInt(128)+64)<<16) + ((random.nextInt(128)+64)<<8) + random.nextInt(128)+64);
             x = random.nextInt(width);
             y = random.nextInt(height);
-            line(x, y, x + random.nextInt(5), y + random.nextInt(5));
+            line(x, y, x + random.nextInt(5), y + random.nextInt(5), 100);
         }
 
     }

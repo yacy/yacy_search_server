@@ -44,12 +44,12 @@ public class NetworkPicture {
         final boolean authorized = sb.adminAuthenticated(header) >= 2;
         
         long timeSeconds = System.currentTimeMillis() / 1000;
-        if (buffer != null && timeSeconds - lastAccessSeconds < 2) {
+        if (buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
             //System.out.println("*** NetworkPicture: cache hit (1)");
             return buffer;
         }
         synchronized (sync) {
-            if (buffer != null && timeSeconds - lastAccessSeconds < 2)  {
+            if (buffer != null && !authorized  && timeSeconds - lastAccessSeconds < 2)  {
                 //System.out.println("*** NetworkPicture: cache hit (2)");
                 return buffer;
             }
