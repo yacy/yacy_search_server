@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.index.Cache;
+import net.yacy.kelondro.index.ObjectIndexCache;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
@@ -117,9 +118,35 @@ public class PerformanceMemory_p {
         prop.putNum("EcoIndexTotalMem", totalmem / (1024 * 1024d));
         
         // write object cache table
+        Iterator<Map.Entry<String, ObjectIndexCache>> oi = ObjectIndexCache.objects();
+        c = 0;
+        mem = 0;
+        Map.Entry<String, ObjectIndexCache> oie;
+        ObjectIndexCache cache;
+        long hitmem, totalhitmem = 0;
+        while (oi.hasNext()) {
+            oie = oi.next();
+            filename = oie.getKey();
+            cache = oie.getValue();
+            prop.put("indexcache_" + c + "_Name", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
+            
+            hitmem = cache.mem();
+            totalhitmem += hitmem;
+            prop.put("indexcache_" + c + "_ChunkSize", cache.row().objectsize);
+            prop.putNum("indexcache_" + c + "_Count", cache.size());
+            prop.put("indexcache_" + c + "_NeededMem", cache.size() * cache.row().objectsize);
+            prop.put("indexcache_" + c + "_UsedMem", hitmem);
+            
+            c++;
+        }
+        prop.put("indexcache", c);
+        prop.putNum("indexcacheTotalMem", totalhitmem / (1024 * 1024d));
+        
+        // write object cache table
         i = Cache.filenames();
         c = 0;
-        long hitmem, missmem, totalhitmem = 0, totalmissmem = 0;
+        long missmem, totalmissmem = 0;
+        totalhitmem = 0;
         while (i.hasNext()) {
             filename = i.next();
             map = Cache.memoryStats(filename);

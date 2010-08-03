@@ -389,14 +389,6 @@ public final class Row {
         }
         
         @Deprecated
-        public final void setCol(final String nickname, final char c) {
-            if (nickref == null) genNickRef();
-            final Object[] ref = nickref.get(nickname);
-            if (ref == null) return;
-            rowinstance[offset + ((Integer) ref[1]).intValue()] = (byte) c;
-        }
-        
-        @Deprecated
         public final void setCol(final String nickname, final byte[] cell) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -443,17 +435,6 @@ public final class Row {
             else
                 try {
                     setCol(column, (cell == null) ? null : cell.getBytes(encoding));
-                } catch (final UnsupportedEncodingException e) {
-                    Log.logSevere("Row", "", e);
-                }
-        }
-        
-        public final void setCol(final String nick, final String cell, final String encoding) {
-            if (encoding == null)
-                setCol(nick, cell.getBytes());
-            else
-                try {
-                    setCol(nick, cell.getBytes(encoding));
                 } catch (final UnsupportedEncodingException e) {
                     Log.logSevere("Row", "", e);
                 }
@@ -506,26 +487,6 @@ public final class Row {
             throw new kelondroException("ROW", "addCol did not find appropriate encoding");
         }
         
-        @Deprecated
-        public final byte[] getCol(final String nickname, final byte[] dflt) {
-            if (nickref == null) genNickRef();
-            final Object[] ref = nickref.get(nickname);
-            if (ref == null) return dflt;
-            final Column col = (Column) ref[0];
-            final byte[] cell = new byte[col.cellwidth];
-            System.arraycopy(rowinstance, offset + ((Integer) ref[1]).intValue(), cell, 0, cell.length);
-            return cell;
-        }
-        
-        @Deprecated
-        public final String getColString(final String nickname, final String dflt, final String encoding) {
-            if (nickref == null) genNickRef();
-            final Object[] ref = nickref.get(nickname);
-            if (ref == null) return dflt;
-            final Column col = (Column) ref[0];
-            return getColString(((Integer) ref[1]).intValue(), col.cellwidth, encoding);
-        }
-        
         public final String getColString(final int column, final String encoding) {
             return getColString(colstart[column], row[column].cellwidth, encoding);
         }
@@ -543,16 +504,6 @@ public final class Row {
             } catch (final UnsupportedEncodingException e) {
                 return "";
             }
-        }
-        
-        @Deprecated
-        public final long getColLong(final String nickname, final long dflt) {
-            if (nickref == null) genNickRef();
-            final Object[] ref = nickref.get(nickname);
-            if (ref == null) return dflt;
-            final Column col = (Column) ref[0];
-            final int clstrt = ((Integer) ref[1]).intValue();
-            return getColLong(col.encoder, clstrt, col.cellwidth);
         }
         
         public final long getColLong(final int column) {
@@ -582,14 +533,6 @@ public final class Row {
             throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
         }
         
-        @Deprecated
-        public final byte getColByte(final String nickname, final byte dflt) {
-            if (nickref == null) genNickRef();
-            final Object[] ref = nickref.get(nickname);
-            if (ref == null) return dflt;
-            return rowinstance[offset + ((Integer) ref[1]).intValue()];
-        }
-        
         public final byte getColByte(final int column) {
             return rowinstance[offset + colstart[column]];
         }
@@ -616,13 +559,6 @@ public final class Row {
             }
             final byte[] c = new byte[w];
             System.arraycopy(rowinstance, offset + clstrt, c, 0, w);
-            return c;
-        }
-        
-        public final char[] getColChars(final int column) {
-            final int w = row[column].cellwidth;
-            final char[] c = new char[w];
-            System.arraycopy(rowinstance, offset + colstart[column], c, 0, w);
             return c;
         }
         

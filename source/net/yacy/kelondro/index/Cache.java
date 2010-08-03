@@ -98,6 +98,10 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         this.hasnotDelete = 0;
     }
     
+    public long mem() {
+        return this.index.mem() + this.readHitCache.mem() + this.readMissCache.mem();
+    }
+    
     public final int writeBufferSize() {
         return 0;
     }

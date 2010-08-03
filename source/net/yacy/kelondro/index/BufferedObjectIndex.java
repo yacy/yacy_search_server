@@ -72,6 +72,10 @@ public class BufferedObjectIndex implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
+    public long mem() {
+        return this.backend.mem() + this.buffer.mem();
+    }
+    
     /**
      * check size of buffer in such a way that a put into the buffer is possible
      * afterwards without exceeding the given maximal buffersize

@@ -408,6 +408,7 @@ public class URLAnalysis {
             System.out.println("INDEX REFERENCE COLLECTION starting dump of statistics");
             idx.dump(new File(statisticPath));
             System.out.println("INDEX REFERENCE COLLECTION finished dump, wrote " + idx.size() + " entries to " + statisticPath);
+            idx.close();
         } catch (Exception e) {
             Log.logException(e);
         }
@@ -433,6 +434,7 @@ public class URLAnalysis {
                 update = System.currentTimeMillis();
             }
         }
+        idx.close();
         mr.close();
         System.out.println("INDEX DIFF URL-COL finished diff, starting dump to " + diffFile);
         count = hs.dump(new File(diffFile));

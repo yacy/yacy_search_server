@@ -123,7 +123,7 @@ public final class CharBuffer extends Writer {
 
     private void grow() {
         int newsize = buffer.length * 2 + 1;
-        if (newsize < 256) newsize = 256;
+        if (newsize < 32) newsize = 32;
         char[] tmp = new char[newsize];
         System.arraycopy(buffer, offset, tmp, 0, length);
         buffer = tmp;
@@ -173,7 +173,9 @@ public final class CharBuffer extends Writer {
     }
 
     public CharBuffer append(final String s) {
-        return append(s,0,s.length());
+        final char[] temp = new char[s.length()];
+        s.getChars(0, temp.length, temp, 0);        
+        return append(temp);
     }    
     
     public CharBuffer append(final String s, final int off, final int len) {

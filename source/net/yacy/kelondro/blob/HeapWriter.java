@@ -80,7 +80,7 @@ public final class HeapWriter {
         this.heapFileTMP = temporaryHeapFile;
         this.heapFileREADY = readyHeapFile;
         this.keylength = keylength;
-        this.index = new HandleMap(keylength, ordering, 8, 100000);
+        this.index = new HandleMap(keylength, ordering, 8, 100000, readyHeapFile.getAbsolutePath());
         this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), outBuffer));
         this.seek = 0;
     }

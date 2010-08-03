@@ -498,7 +498,9 @@ public class Balancer {
         Request request;
     	while (i.hasNext()) {
     	    handle = i.next();
-    	    request = new Request(this.urlFileIndex.get(handle));
+    	    Row.Entry entry = this.urlFileIndex.get(handle);
+    	    if (entry == null) continue;
+    	    request = new Request(entry);
     	    host = request.url().getHost();
     		try {
                 pushHashToDomainStacks(host, handle);

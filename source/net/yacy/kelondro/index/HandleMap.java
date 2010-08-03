@@ -63,9 +63,9 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param objectOrder
      * @param space
      */
-    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
+    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace, String name) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
-        this.index = new RowSetArray(rowdef, spread(expectedspace));
+        this.index = new RowSetArray(name, rowdef, spread(expectedspace));
     }
 
     /**
@@ -77,7 +77,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @throws RowSpaceExceededException 
      */
     public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final File file) throws IOException, RowSpaceExceededException {
-        this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)));
+        this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)), file.getAbsolutePath());
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
         if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
@@ -95,8 +95,12 @@ public final class HandleMap implements Iterable<Row.Entry> {
         assert this.index.size() == file.length() / (keylength + idxbytes);
     }
     
+    public long mem() {
+        return index.mem();
+    }
+    
     private static final int spread(int expectedspace) {
-        return Math.min(Runtime.getRuntime().availableProcessors() * 2, Math.max(1, expectedspace / 3000));
+        return Math.min(Runtime.getRuntime().availableProcessors(), Math.max(1, expectedspace / 3000));
     }
     
     public final int[] saturation() {
@@ -304,8 +308,8 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param bufferSize
      * @return
      */
-    public final static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
-        final initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, expectedspace));
+    public final static initDataConsumer asynchronusInitializer(String name, final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
+        final initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, expectedspace, name));
         final ExecutorService service = Executors.newSingleThreadExecutor();
         initializer.setResult(service.submit(initializer));
         service.shutdown();
@@ -389,6 +393,9 @@ public final class HandleMap implements Iterable<Row.Entry> {
             return map;
         }
         
+        public void close() {
+            this.map.close();
+        }
     }
 
 	public Iterator<Row.Entry> iterator() {

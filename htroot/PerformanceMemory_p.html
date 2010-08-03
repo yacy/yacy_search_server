@@ -99,6 +99,30 @@
       </tr>
     </table>
     
+    <p><strong>Object Index Caches:</strong></p>
+    <table border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Table</td>
+        <td>Size</td>
+        <td>Chunk Size</td>
+        <td>Needed Memory</td>
+        <td>Used Memory</td>
+        <!-- <td>Flushes</td> -->
+      </tr>
+      #{indexcache}#
+      <tr class="TableCellLight">
+        <td align="left" class="TableCellDark">#[Name]#</td>
+        <td align="right">#[Count]#</td>
+        <td align="right">#[ChunkSize]#</td>
+        <td align="right">#[NeededMem]#</td>
+        <td align="right">#[UsedMem]#</td>
+      </tr>
+      #{/indexcache}#
+      <tr class="TableCellDark">
+        <td colspan="9">Total Mem: #[indexcacheTotalMem]# MB</td>
+      </tr>
+    </table>
+    
     <p><strong>Object Read Caches:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">

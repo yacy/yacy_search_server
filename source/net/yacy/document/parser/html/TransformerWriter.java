@@ -245,7 +245,7 @@ public final class TransformerWriter extends Writer {
 					} catch (IOException e) {
 					    Log.logException(e);
 					}
-                    filterCont = new CharBuffer();
+                    if (filterCont == null) filterCont = new CharBuffer(); else filterCont.reset();
                     return new char[0];
                 } else {
                      // we ignore that thing and return it again

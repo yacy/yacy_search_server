@@ -113,7 +113,7 @@ public class IndexTest {
         Runtime.getRuntime().gc();
         final long freeStartKelondro = MemoryControl.available();
         HandleMap ii = null;
-        ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count);
+        ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count, "test");
         for (int i = 0; i < count; i++)
             try {
                 ii.putUnique(tests[i], 1);
@@ -128,7 +128,7 @@ public class IndexTest {
         for (int i = 0; i < count; i++) if (ii.get(tests[i]) != 1) bugs++;
         Runtime.getRuntime().gc();
         final long freeEndKelondro = MemoryControl.available();
-        ii.clear(); ii = null;
+        ii.clear(); ii.close(); ii = null;
         final long t7 = System.currentTimeMillis();
         System.out.println("time   for HandleMap<byte[]> test: " + (t7 - t6) + ", " + bugs + " bugs");
         System.out.println("memory for HandleMap<byte[]>: " + (freeStartKelondro - freeEndKelondro) / mb + " MB\n");

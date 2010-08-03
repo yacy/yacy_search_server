@@ -189,7 +189,7 @@ public class HeapReader {
         Log.logInfo("HeapReader", "generating index for " + heapFile.toString() + ", " + (file.length() / 1024 / 1024) + " MB. Please wait.");
         
         this.free = new Gap();
-        HandleMap.initDataConsumer indexready = HandleMap.asynchronusInitializer(keylength, this.ordering, 8, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
+        HandleMap.initDataConsumer indexready = HandleMap.asynchronusInitializer(this.name() + ".initializer", keylength, this.ordering, 8, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
         byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;
@@ -248,7 +248,6 @@ public class HeapReader {
             Log.logException(e);
         }
         Log.logInfo("HeapReader", "finished index generation for " + heapFile.toString() + ", " + index.size() + " entries, " + free.size() + " gaps.");
-        
     }
     
     private void mergeFreeEntries() throws IOException {

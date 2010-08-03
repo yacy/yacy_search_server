@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -37,35 +39,39 @@ import net.yacy.kelondro.order.StackIterator;
 
 public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
     
+    private static final TreeMap<String, ObjectIndexCache> objectTracker = new TreeMap<String, ObjectIndexCache>();
+    
+    private final String name;
     private final Row rowdef;
     private RowSet index0;
     private RowSet index1;
     private final Row.EntryComparator entryComparator;
     //private final int spread;
     
-    public ObjectIndexCache(final Row rowdef, final int expectedspace) {
+    public ObjectIndexCache(String name, final Row rowdef, final int expectedspace) {
+        this.name = name;
         this.rowdef = rowdef;
         this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
         //this.spread = Math.max(10, expectedspace / 3000);
         reset();
+        objectTracker.put(name, this);
     }
     
-    public ObjectIndexCache(final Row rowdef, final int expectedspace, final int initialspace) throws RowSpaceExceededException {
-        this.rowdef = rowdef;
-        this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
-        //this.spread = Math.max(10, expectedspace / 3000);
-        reset(initialspace);
-    }
-    
-    private ObjectIndexCache(final Row rowdef, RowSet index0, RowSet index1, Row.EntryComparator entryComparator) {
+    private ObjectIndexCache(String name, final Row rowdef, RowSet index0, RowSet index1, Row.EntryComparator entryComparator) {
+        this.name = name;
         this.rowdef = rowdef;
         this.index0 = index0;
         this.index1 = index1;
         this.entryComparator = entryComparator;
+        objectTracker.put(name, this);
+    }
+
+    public static final Iterator<Map.Entry<String, ObjectIndexCache>> objects() {
+        return objectTracker.entrySet().iterator();
     }
     
     public ObjectIndexCache clone() {
-        return new ObjectIndexCache(this.rowdef, index0.clone(), index1.clone(), entryComparator);
+        return new ObjectIndexCache(this.name + ".clone", this.rowdef, index0.clone(), index1.clone(), entryComparator);
     }
     
     public void clear() {
@@ -247,6 +253,17 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         return list;
     }
     
+    public long mem() {
+        if (index0 != null && index1 == null) {
+            return index0.mem();
+        }
+        if (index0 == null && index1 != null) {
+            return index1.mem();
+        }
+        assert (index0 != null && index1 != null);
+        return index0.mem() + index1.mem();
+    }
+    
     public final synchronized int size() {
         if (index0 != null && index1 == null) {
             return index0.size();
@@ -359,6 +376,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
     public final synchronized void close() {
         if (index0 != null) index0.close();
         if (index1 != null) index1.close();
+        objectTracker.remove(this.name);
     }
 
 	public final String filename() {

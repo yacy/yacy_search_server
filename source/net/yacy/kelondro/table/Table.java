@@ -124,7 +124,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
             // initialize index and copy table
             final int  records = Math.max(fileSize, initialSpace);
             final long neededRAM4table = (records) * ((rowdef.objectsize) + 4L) * 3L;
-            table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
+            this.table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
                      (useTailCache && MemoryControl.available() > neededRAM4table + 200 * 1024 * 1024)) ?
                     new RowSet(taildef, records) : null;
             Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, needed: " + (neededRAM4table/1024/1024 + 200) + "MB, allocating space for " + records + " entries");
@@ -134,18 +134,18 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
                 Log.logSevere("TABLE", tablefile.getName() + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
-                table = null; System.gc();
+                this.table = null; System.gc();
                 Log.logSevere("TABLE", tablefile.getName() + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
-            index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records);
-            HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records);
+            this.index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, tablefile.getAbsolutePath());
+            HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, tablefile.getAbsolutePath() + ".errors");
             Log.logInfo("TABLE", tablefile + ": TABLE " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
             Log.logInfo("TABLE", "initializing RAM index for TABLE " + tablefile.getName() + ", please wait.");
             int i = 0;
             byte[] key;
-            if (table == null) {
+            if (this.table == null) {
                 final Iterator<byte[]> ki = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.primaryKeyLength);
                 while (ki.hasNext()) {
                     key = ki.next();
@@ -153,7 +153,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                     assert key != null;
                     if (key == null) {i++; continue;}
                     if (rowdef.objectOrder.wellformed(key)) {
-                        index.putUnique(key, i++);
+                        this.index.putUnique(key, i++);
                     } else {
                         errors.putUnique(key, i++);
                     }
@@ -173,13 +173,13 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                         index.putUnique(key, i++);
                         // write the tail into the table
                         try {
-                            table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
+                            this.table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
                         } catch (RowSpaceExceededException e) {
-                            table = null;
+                            this.table = null;
                             break;
                         }
                         if (abandonTable()) {
-                            table = null;
+                            this.table = null;
                             break;
                         }
                     } else {
@@ -201,7 +201,8 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                 Log.logWarning("Table", "removing not well-formed entry " + idx + " with key: " + NaturalOrder.arrayList(key, 0, key.length) + ", " + errorcc++ + "/" + errorc);
                 removeInFile(idx);
             }
-            assert index.size() == this.file.size() : "index.size() = " + index.size() + ", this.file.size() = " + this.file.size();
+            errors.close();
+            assert this.index.size() == this.file.size() : "index.size() = " + index.size() + ", this.file.size() = " + this.file.size();
             
             // remove doubles
             if (!freshFile) {
@@ -215,9 +216,9 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                     final byte[] record = new byte[rowdef.objectsize];
                     key = new byte[rowdef.primaryKeyLength];
                     for (final Long[] ds: doubles) {
-                        file.get(ds[0].intValue(), record, 0);
+                        this.file.get(ds[0].intValue(), record, 0);
                         System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
-                        index.putUnique(key, ds[0].intValue());
+                        this.index.putUnique(key, ds[0].intValue());
                     }
                     // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
                     // first aggregate all the delete positions because the elements from the top positions must be removed first
@@ -245,6 +246,10 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         
         // track this table
         tableTracker.put(tablefile.toString(), this);
+    }
+    
+    public long mem() {
+        return index.mem() + ((table == null) ? 0 : table.mem());
     }
     
     private boolean abandonTable() {
@@ -427,7 +432,9 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
     public void close() {
         this.file.close();
         this.file = null;
+        if (this.table != null) this.table.close();
         this.table = null;
+        if (this.index != null) this.index.close();
         this.index = null;
     }
     
@@ -783,7 +790,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         
         // initialize index and copy table
         table = (table == null) ? null : new RowSet(taildef);
-        index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, 100000);        
+        index.clear();        
     }
 
     public Row row() {

@@ -36,19 +36,22 @@ import net.yacy.kelondro.order.StackIterator;
 
 public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Cloneable {
 
-    private final Row      rowdef;
+    private final String             name;
+    private final Row                rowdef;
     private final ObjectIndexCache[] array;
     
-    public RowSetArray(final Row rowdef, final int arraySize) {
+    public RowSetArray(String name, final Row rowdef, final int arraySize) {
         //assert arraySize < 100 : arraySize;
+        this.name = name;
         this.array = new ObjectIndexCache[arraySize];
         this.rowdef = rowdef;
         for (int i = 0; i < arraySize; i++) {
-            this.array[i] = new ObjectIndexCache(rowdef, 0);
+            this.array[i] = new ObjectIndexCache(name + "." + i, rowdef, 0);
         }
     }
     
-    private RowSetArray(final Row rowdef, final ObjectIndexCache[] array) {
+    private RowSetArray(String name, final Row rowdef, final ObjectIndexCache[] array) {
+        this.name = name;
         this.array = array;
         this.rowdef = rowdef;
     }
@@ -58,15 +61,15 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
         for (int i = 0; i < this.array.length; i++) {
             a[i] = this.array[i].clone();
         }
-        return new RowSetArray(this.rowdef, a);
+        return new RowSetArray(this.name + ".clone", this.rowdef, a);
     }
     
     private final int indexFor(final byte[] key) {
-        return (int) (this.rowdef.objectOrder.cardinal(key) % ((long) array.length));
+        return (int) ((this.rowdef.objectOrder.cardinal(key) / 17) % ((long) array.length));
     }
     
     private final int indexFor(final Entry row) {
-        return (int) (this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) % ((long) array.length));
+        return (int) ((this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) / 17) % ((long) array.length));
     }
     
     public final byte[] smallestKey() {
@@ -96,7 +99,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
     private final ObjectIndexCache accessArray(final int i) {
         ObjectIndexCache r = this.array[i];
         if (r == null) synchronized (this.array) {
-            r = new ObjectIndexCache(this.rowdef, 0);
+            r = new ObjectIndexCache(name + "." + i, this.rowdef, 0);
             this.array[i] = r;
         }
         return r;
@@ -114,15 +117,15 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
 
     public final void clear() {
         synchronized (this.array) {
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) this.array[i].clear();
-                this.array[i] = null;
-            }
+            for (ObjectIndexCache c: this.array) if (c != null) c.clear();
         }
     }
 
     public final void close() {
         clear();
+        synchronized (this.array) {
+            for (ObjectIndexCache c: this.array) if (c != null) c.close();
+        }
     }
 
     public final void deleteOnExit() {
@@ -265,6 +268,19 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
         return c;
     }
 
+
+    public long mem() {
+        long m = 0;
+        synchronized (this.array) {
+            for (int i = 0; i < this.array.length; i++) {
+                if (this.array[i] != null) {
+                    m += this.array[i].mem();
+                }
+            }
+        }
+        return m;
+    }
+    
     public final boolean isEmpty() {
         synchronized (this.array) {
             for (int i = 0; i < this.array.length; i++) {

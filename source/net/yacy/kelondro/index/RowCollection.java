@@ -167,6 +167,14 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         this.chunkcount = 0;
         this.sortBound = 0;
 	}
+	
+	/**
+	 * calculate the memory that the structure occupies in ram
+	 * @return number of bytes in use
+	 */
+	public long mem() {
+	    return this.chunkcache.length;
+	}
    
     private static final Row exportMeasureRow = exportRow(0 /* no relevance */);
 

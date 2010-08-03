@@ -80,7 +80,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     private long  fileSizeLimit;
     private boolean useTailCache;
     private boolean exceed134217727;
-    
+
     public SplitTable(
             final File path, 
             final String tablename, 
@@ -107,6 +107,12 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         this.exceed134217727 = exceed134217727;
         this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
         init();
+    }
+    
+    public long mem() {
+        long m = 0;
+        for (ObjectIndex i: tables.values()) m += i.mem();
+        return m;
     }
     
     public final byte[] smallestKey() {

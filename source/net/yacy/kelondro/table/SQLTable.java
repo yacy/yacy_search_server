@@ -102,7 +102,11 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
         }
         
     }
-
+    
+    public long mem() {
+        return 0;
+    }
+    
     public byte[] smallestKey() {
         return null;
     }
