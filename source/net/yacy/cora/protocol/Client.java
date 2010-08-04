@@ -89,7 +89,7 @@ public class Client {
 		ConnectionInfo.setMaxcount(maxcon);
 		// connections per host (2 default)
 		final ConnPerRouteBean connPerRoute = new ConnPerRouteBean(2);
-		// Increase max connections for localhost to 100
+		// Increase max connections for localhost
 		HttpHost localhost = new HttpHost("locahost");
 		connPerRoute.setMaxForRoute(new HttpRoute(localhost), maxcon);
 		ConnManagerParams.setMaxConnectionsPerRoute(httpParams, connPerRoute);
@@ -101,6 +101,7 @@ public class Client {
 		HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
 		// UserAgent
 		HttpProtocolParams.setUserAgent(httpParams, "yacy (" + systemOST +") yacy.net");
+		HttpProtocolParams.setUseExpectContinue(httpParams, true);
 		/**
 		 * HTTP connection settings
 		 */
@@ -124,7 +125,7 @@ public class Client {
 		schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 		
 		// cookie policy
-		HttpClientParams.setCookiePolicy(httpParams, CookiePolicy.BEST_MATCH);
+		HttpClientParams.setCookiePolicy(httpParams, CookiePolicy.RFC_2965);
 
 		ClientConnectionManager clientConnectionManager = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
 
