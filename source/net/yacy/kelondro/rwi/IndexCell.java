@@ -249,36 +249,40 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public int remove(byte[] termHash, HandleSet urlHashes) throws IOException {
         int removed = this.ram.remove(termHash, urlHashes);
         int reduced;
+        //final long am = this.array.mem();
         try {
-            reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
+            reduced = this.array.reduce(termHash, new RemoveReducer<ReferenceType>(urlHashes));
         } catch (RowSpaceExceededException e) {
             reduced = 0;
             Log.logWarning("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
         }
+        //assert this.array.mem() <= am : "am = " + am + ", array.mem() = " + this.array.mem();
         return removed + (reduced / this.array.rowdef().objectsize);
     }
 
     public boolean remove(byte[] termHash, byte[] urlHashBytes) throws IOException {
         boolean removed = this.ram.remove(termHash, urlHashBytes);
         int reduced;
+        //final long am = this.array.mem();
         try {
-            reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashBytes));
+            reduced = this.array.reduce(termHash, new RemoveReducer<ReferenceType>(urlHashBytes));
         } catch (RowSpaceExceededException e) {
             reduced = 0;
             Log.logWarning("IndexCell", "not possible to remove urlHashes from a RWI because of too low memory. Remove was not applied. Please increase RAM assignment");
         }
+        //assert this.array.mem() <= am : "am = " + am + ", array.mem() = " + this.array.mem();
         return removed || (reduced > 0);
     }
 
-    private static class RemoveRewriter<ReferenceType extends Reference> implements ReferenceContainerArray.ContainerRewriter<ReferenceType> {
+    private static class RemoveReducer<ReferenceType extends Reference> implements ReferenceContainerArray.ContainerReducer<ReferenceType> {
         
         HandleSet urlHashes;
         
-        public RemoveRewriter(HandleSet urlHashes) {
+        public RemoveReducer(HandleSet urlHashes) {
             this.urlHashes = urlHashes;
         }
         
-        public RemoveRewriter(byte[] urlHashBytes) {
+        public RemoveReducer(byte[] urlHashBytes) {
             this.urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             try {
                 this.urlHashes.put(urlHashBytes);
@@ -287,7 +291,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             }
         }
         
-        public ReferenceContainer<ReferenceType> rewrite(ReferenceContainer<ReferenceType> container) {
+        public ReferenceContainer<ReferenceType> reduce(ReferenceContainer<ReferenceType> container) {
             container.sort();
             container.removeEntries(urlHashes);
             return container;

@@ -46,7 +46,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -61,7 +61,7 @@ import net.yacy.repository.Blacklist;
 public final class MetadataRepository implements Iterable<byte[]> {
 
     // class objects
-    protected ObjectIndex         urlIndexFile;
+    protected Index               urlIndexFile;
     private   Export              exportthread; // will have a export thread assigned if exporter is running
     private   File                location;
     private   ArrayList<hostStat> statsDump;
@@ -72,7 +72,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.location = path;
-        ObjectIndex backupIndex = null;
+        Index backupIndex = null;
         try {
             backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
         } catch (RowSpaceExceededException e) {

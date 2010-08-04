@@ -55,7 +55,7 @@ import java.util.Properties;
 import java.util.Map.Entry;
 
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -73,7 +73,7 @@ public class yacyNewsDB {
     private final File path;
     private final Row rowdef;
     protected final int attributesMaxLength;
-    protected ObjectIndex news;
+    protected Index news;
 
     private  static final int categoryStringLength = 8;
     public  static final int idLength = DateFormatter.PATTERN_SHORT_SECOND.length() + Word.commonHashLength;

@@ -1,26 +1,26 @@
-// ObjectIndexCache.java
-// (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 07.01.2008 on http://yacy.net
-//
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  RAMIndex
+ *  Copyright 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  First released 07.01.2008 at http://yacy.net
+ *  
+ *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
+ *  $LastChangedRevision: 6922 $
+ *  $LastChangedBy: orbiter $
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.kelondro.index;
 
@@ -37,9 +37,9 @@ import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.StackIterator;
 
 
-public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
+public final class RAMIndex implements Index, Iterable<Row.Entry> {
     
-    private static final TreeMap<String, ObjectIndexCache> objectTracker = new TreeMap<String, ObjectIndexCache>();
+    private static final TreeMap<String, RAMIndex> objectTracker = new TreeMap<String, RAMIndex>();
     
     private final String name;
     private final Row rowdef;
@@ -48,7 +48,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
     private final Row.EntryComparator entryComparator;
     //private final int spread;
     
-    public ObjectIndexCache(String name, final Row rowdef, final int expectedspace) {
+    public RAMIndex(String name, final Row rowdef, final int expectedspace) {
         this.name = name;
         this.rowdef = rowdef;
         this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
@@ -57,7 +57,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         objectTracker.put(name, this);
     }
     
-    private ObjectIndexCache(String name, final Row rowdef, RowSet index0, RowSet index1, Row.EntryComparator entryComparator) {
+    private RAMIndex(String name, final Row rowdef, RowSet index0, RowSet index1, Row.EntryComparator entryComparator) {
         this.name = name;
         this.rowdef = rowdef;
         this.index0 = index0;
@@ -66,17 +66,22 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         objectTracker.put(name, this);
     }
 
-    public static final Iterator<Map.Entry<String, ObjectIndexCache>> objects() {
+    public static final Iterator<Map.Entry<String, RAMIndex>> objects() {
         return objectTracker.entrySet().iterator();
     }
     
-    public ObjectIndexCache clone() {
-        return new ObjectIndexCache(this.name + ".clone", this.rowdef, index0.clone(), index1.clone(), entryComparator);
+    public RAMIndex clone() {
+        return new RAMIndex(this.name + ".clone", this.rowdef, index0.clone(), index1.clone(), entryComparator);
     }
     
     public void clear() {
 		reset();
 	}
+    
+    public void trim() {
+        if (this.index0 != null) this.index0.trim();
+        if (this.index1 != null) this.index1.trim();
+    }
     
     public final synchronized void reset() {
         this.index0 = null; // first flush RAM to make room
@@ -223,13 +228,17 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
     public final synchronized Row.Entry remove(final byte[] key) {
         finishInitialization();
         // if the new entry is within the initialization part, just delete it
+        int s = index0.size();
         final Row.Entry indexentry = index0.remove(key);
         if (indexentry != null) {
+            assert index0.size() < s: "s = " + s + ", index0.size() = " + index0.size(); 
             assert index0.get(key) == null; // check if remove worked
             return indexentry;
         }
         // else remove it from the index1
+        s = index1.size();
         final Row.Entry removed = index1.remove(key);
+        assert removed == null || index1.size() < s: "s = " + s + ", index1.size() = " + index1.size(); 
         assert index1.get(key) == null : "removed " + ((removed == null) ? " is null" : " is not null") + ", and index entry still exists"; // check if remove worked
         return removed;
     }

@@ -877,15 +877,14 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     }
     
     private final int picMiddle(final int a, final int b, final int c) {
-        if (a > b) {
-            if (c > a) return a;
-            if (c < b) return b;
-            return c;
+        if (compare(a, b) > 0) {
+            if (compare(c, a) > 0) return a;
+            if (compare(b, c) > 0) return b;
         } else {
-            if (c < a) return a;
-            if (c > b) return b;
-            return c;
+            if (compare(a, c) > 0) return a;
+            if (compare(c, b) > 0) return b;
         }
+        return c;
         //if (c < a && a < b || a > b && c > a) return a;
         //if (a < b && c > b || c < b && a > b) return b;
     }

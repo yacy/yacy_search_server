@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -40,7 +40,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 public class Relations {
 
     private final File baseDir;
-    private HashMap<String, ObjectIndex> relations;
+    private HashMap<String, Index> relations;
     private final boolean useTailCache;
     private final boolean exceed134217727;
     
@@ -81,7 +81,7 @@ public class Relations {
     
     public void declareRelation(final String name, final int keysize, final int payloadsize) throws RowSpaceExceededException {
         // try to get the relation from the relation-cache
-        final ObjectIndex relation = relations.get(name);
+        final Index relation = relations.get(name);
         if (relation != null) return;
         // try to find the relation as stored on file
         final String[] list = baseDir.list();
@@ -91,7 +91,7 @@ public class Relations {
                 if (!list[i].equals(targetfilename)) continue;
                 final Row row = rowdef(list[i]);
                 if (row.primaryKeyLength != keysize || row.column(1).cellwidth != payloadsize) continue; // a wrong table
-                ObjectIndex table;
+                Index table;
                 try {
                     table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
                 } catch (RowSpaceExceededException e) {
@@ -103,7 +103,7 @@ public class Relations {
         }
         // the relation does not exist, create it
         final Row row = rowdef(keysize, payloadsize);
-        ObjectIndex table;
+        Index table;
         try {
             table = new Table(new File(baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
         } catch (RowSpaceExceededException e) {
@@ -112,16 +112,16 @@ public class Relations {
         relations.put(name, table);
     }
     
-    public ObjectIndex getRelation(final String name) throws RowSpaceExceededException {
+    public Index getRelation(final String name) throws RowSpaceExceededException {
         // try to get the relation from the relation-cache
-        final ObjectIndex relation = relations.get(name);
+        final Index relation = relations.get(name);
         if (relation != null) return relation;
         // try to find the relation as stored on file
         final String[] list = baseDir.list();
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {
                 final Row row = rowdef(list[i]);
-                ObjectIndex table;
+                Index table;
                 try {
                     table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
                 } catch (RowSpaceExceededException e) {
@@ -142,7 +142,7 @@ public class Relations {
     }
     
     public byte[] putRelation(final String name, final byte[] key, final byte[] value) throws IOException, RowSpaceExceededException {
-        final ObjectIndex table = getRelation(name);
+        final Index table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.row().newEntry();
         entry.setCol(0, key);
@@ -161,7 +161,7 @@ public class Relations {
     }
     
     public byte[] getRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {
-        final ObjectIndex table = getRelation(name);
+        final Index table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.get(key);
         if (entry == null) return null;
@@ -169,13 +169,13 @@ public class Relations {
     }
     
     public boolean hasRelation(final String name, final byte[] key) throws RowSpaceExceededException {
-        final ObjectIndex table = getRelation(name);
+        final Index table = getRelation(name);
         if (table == null) return false;
         return table.has(key);
     }
     
     public byte[] removeRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {
-        final ObjectIndex table = getRelation(name);
+        final Index table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.remove(key);
         if (entry == null) return null;

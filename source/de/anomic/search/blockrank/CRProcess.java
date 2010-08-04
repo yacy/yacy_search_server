@@ -32,7 +32,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -169,7 +169,7 @@ public class CRProcess {
         return true;
     }
     
-    public static boolean accumulate_upd(final File f, final ObjectIndex acc) throws IOException, RowSpaceExceededException {
+    public static boolean accumulate_upd(final File f, final Index acc) throws IOException, RowSpaceExceededException {
         // open file
         AttrSeq source_cr = null;
         try {
@@ -275,7 +275,7 @@ public class CRProcess {
         
         // open target file
         AttrSeq acc = null;
-        ObjectIndex newacc = null;
+        Index newacc = null;
         IndexCell<WordReference> newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place

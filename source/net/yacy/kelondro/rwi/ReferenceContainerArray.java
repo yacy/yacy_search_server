@@ -71,7 +71,8 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             prefix,
             payloadrow.primaryKeyLength,
             termOrder,
-            0);
+            0,
+            true);
         assert merger != null;
         this.merger = merger;
     }
@@ -82,6 +83,10 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     
     public void clear() throws IOException {
     	this.array.clear();
+    }
+    
+    public long mem() {
+        return array.mem();
     }
     
     public int[] sizes() {
@@ -249,34 +254,36 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	array.remove(termHash);
     }
     
-    public int replace(final byte[] termHash, ContainerRewriter<ReferenceType> rewriter) throws IOException, RowSpaceExceededException {
-        return array.replace(termHash, new BLOBRewriter(termHash, rewriter));
+    public int reduce(final byte[] termHash, ContainerReducer<ReferenceType> reducer) throws IOException, RowSpaceExceededException {
+        return array.reduce(termHash, new BLOBReducer(termHash, reducer));
     }
     
-    public class BLOBRewriter implements BLOB.Rewriter {
+    public class BLOBReducer implements BLOB.Reducer {
 
-        ContainerRewriter<ReferenceType> rewriter;
+        ContainerReducer<ReferenceType> rewriter;
         byte[] wordHash;
         
-        public BLOBRewriter(byte[] wordHash, ContainerRewriter<ReferenceType> rewriter) {
+        public BLOBReducer(byte[] wordHash, ContainerReducer<ReferenceType> rewriter) {
             this.rewriter = rewriter;
             this.wordHash = wordHash;
         }
         
         public byte[] rewrite(byte[] b) {
             if (b == null) return null;
-            ReferenceContainer<ReferenceType> c = rewriter.rewrite(new ReferenceContainer<ReferenceType>(factory, this.wordHash, RowSet.importRowSet(b, payloadrow)));
+            ReferenceContainer<ReferenceType> c = rewriter.reduce(new ReferenceContainer<ReferenceType>(factory, this.wordHash, RowSet.importRowSet(b, payloadrow)));
             if (c == null) return null;
-            return c.exportCollection();
+            byte bb[] = c.exportCollection();
+            assert bb.length <= b.length;
+            return bb;
         }
     }
 
-    public interface ContainerRewriter<ReferenceType extends Reference> {
+    public interface ContainerReducer<ReferenceType extends Reference> {
         
-        public ReferenceContainer<ReferenceType> rewrite(ReferenceContainer<ReferenceType> container);
+        public ReferenceContainer<ReferenceType> reduce(ReferenceContainer<ReferenceType> container);
         
     }
-    
+   
     public int entries() {
         return this.array.entries();
     }

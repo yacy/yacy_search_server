@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -59,7 +59,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
-public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
+public class SplitTable implements Index, Iterable<Row.Entry> {
 
     // this is a set of kelondro tables
     // the set is divided into tables with different entry date
@@ -70,7 +70,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     // the thread pool for the keeperOf executor service
     private ExecutorService executor;
     
-    private Map<String, ObjectIndex> tables; // a map from a date string to a kelondroIndex object
+    private Map<String, Index> tables; // a map from a date string to a kelondroIndex object
     private final Row rowdef;
     private final File path;
     private final String prefix;
@@ -111,13 +111,13 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public long mem() {
         long m = 0;
-        for (ObjectIndex i: tables.values()) m += i.mem();
+        for (Index i: tables.values()) m += i.mem();
         return m;
     }
     
     public final byte[] smallestKey() {
         HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
-        for (ObjectIndex oi: this.tables.values()) try {
+        for (Index oi: this.tables.values()) try {
             keysort.put(oi.smallestKey());
         } catch (RowSpaceExceededException e) {
             Log.logException(e);
@@ -127,7 +127,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public final byte[] largestKey() {
         HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.tables.size());
-        for (ObjectIndex oi: this.tables.values()) try {
+        for (Index oi: this.tables.values()) try {
             keysort.put(oi.largestKey());
         } catch (RowSpaceExceededException e) {
             Log.logException(e);
@@ -143,7 +143,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         current = null;
 
         // initialized tables map
-        this.tables = new HashMap<String, ObjectIndex>();
+        this.tables = new HashMap<String, Index>();
         if (!(path.exists())) path.mkdirs();
         String[] tablefile = path.list();
         
@@ -193,7 +193,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         Map.Entry<String, Long> entry;
         String maxf;
         long maxram;
-        ObjectIndex table;
+        Index table;
         while (!t.isEmpty()) {
             // find maximum table
             maxram = 0;
@@ -272,21 +272,21 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     }
     
     public int size() {
-        final Iterator<ObjectIndex> i = tables.values().iterator();
+        final Iterator<Index> i = tables.values().iterator();
         int s = 0;
         while (i.hasNext()) s += i.next().size();
         return s;
     }
     
     public boolean isEmpty() {
-        final Iterator<ObjectIndex> i = tables.values().iterator();
+        final Iterator<Index> i = tables.values().iterator();
         while (i.hasNext()) if (!i.next().isEmpty()) return false;
         return true;
     }
     
     public int writeBufferSize() {
         int s = 0;
-        for (final ObjectIndex index : tables.values()) {
+        for (final Index index : tables.values()) {
             if (index instanceof Cache) s += ((Cache) index).writeBufferSize();
         }
         return s;
@@ -301,12 +301,12 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     }
     
     public Row.Entry get(final byte[] key) throws IOException {
-        final ObjectIndex keeper = keeperOf(key);
+        final Index keeper = keeperOf(key);
         if (keeper == null) return null;
         return keeper.get(key);
     }
     
-    private ObjectIndex newTable() {
+    private Index newTable() {
         this.current = newFilename();
         final File f = new File(path, this.current);
         Table table = null;
@@ -324,7 +324,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return table;
     }
     
-    private ObjectIndex checkTable(ObjectIndex table) {
+    private Index checkTable(Index table) {
         // check size and age of given table; in case it is too large or too old
         // create a new table
         assert table != null;
@@ -344,7 +344,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        ObjectIndex keeper = keeperOf(row.getColBytes(0, true));
+        Index keeper = keeperOf(row.getColBytes(0, true));
         if (keeper != null) return keeper.replace(row);
         synchronized (this.tables) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
@@ -356,7 +356,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public void put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        ObjectIndex keeper = keeperOf(row.getColBytes(0, true));
+        Index keeper = keeperOf(row.getColBytes(0, true));
         if (keeper != null) {keeper.put(row); return;}
         synchronized (this.tables) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
@@ -366,9 +366,9 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     }
     
 
-    private ObjectIndex keeperOf(final byte[] key) {
+    private Index keeperOf(final byte[] key) {
         if (key == null) return null;
-        for (ObjectIndex oi: tables.values()) {
+        for (Index oi: tables.values()) {
             if (oi.has(key)) return oi;
         }
         return null;
@@ -376,7 +376,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        ObjectIndex table = (this.current == null) ? null : tables.get(this.current);
+        Index table = (this.current == null) ? null : tables.get(this.current);
         synchronized (this.tables) {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             if (table == null) table = newTable(); else table = checkTable(table);
@@ -385,7 +385,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     }
     
     public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
-        final Iterator<ObjectIndex> i = tables.values().iterator();
+        final Iterator<Index> i = tables.values().iterator();
         final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
         while (i.hasNext()) {
             report.addAll(i.next().removeDoubles());
@@ -394,20 +394,20 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     }
     
     public boolean delete(final byte[] key) throws IOException {
-        final ObjectIndex table = keeperOf(key);
+        final Index table = keeperOf(key);
         if (table == null) return false;
         return table.delete(key);
     }
     
     public Row.Entry remove(final byte[] key) throws IOException {
-        final ObjectIndex table = keeperOf(key);
+        final Index table = keeperOf(key);
         if (table == null) return null;
         return table.remove(key);
     }
     
     public Row.Entry removeOne() throws IOException {
-        final Iterator<ObjectIndex> i = tables.values().iterator();
-        ObjectIndex table, maxtable = null;
+        final Iterator<Index> i = tables.values().iterator();
+        Index table, maxtable = null;
         int maxcount = -1;
         while (i.hasNext()) {
             table = i.next();
@@ -423,8 +423,8 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     }
     
     public List<Row.Entry> top(int count) throws IOException {
-        final Iterator<ObjectIndex> i = tables.values().iterator();
-        ObjectIndex table, maxtable = null;
+        final Iterator<Index> i = tables.values().iterator();
+        Index table, maxtable = null;
         int maxcount = -1;
         while (i.hasNext()) {
             table = i.next();
@@ -441,7 +441,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(tables.size());
-        final Iterator<ObjectIndex> i = tables.values().iterator();
+        final Iterator<Index> i = tables.values().iterator();
         CloneableIterator<byte[]> k;
         while (i.hasNext()) {
             k = i.next().keys(up, firstKey);
@@ -452,7 +452,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<Row.Entry>> c = new ArrayList<CloneableIterator<Row.Entry>>(tables.size());
-        final Iterator<ObjectIndex> i = tables.values().iterator();
+        final Iterator<Index> i = tables.values().iterator();
         while (i.hasNext()) {
             c.add(i.next().rows(up, firstKey));
         }
@@ -470,7 +470,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     @SuppressWarnings("unchecked")
     public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
         final CloneableIterator<Row.Entry>[] c = new CloneableIterator[tables.size()];
-        final Iterator<ObjectIndex> i = tables.values().iterator();
+        final Iterator<Index> i = tables.values().iterator();
         int d = 0;
         while (i.hasNext()) {
             c[d++] = i.next().rows();
@@ -486,7 +486,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         } catch (final InterruptedException e) {
         }
         this.executor = null;
-        final Iterator<ObjectIndex> i = tables.values().iterator();
+        final Iterator<Index> i = tables.values().iterator();
         while (i.hasNext()) {
             i.next().close();
         }
@@ -494,7 +494,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     }
 
     public void deleteOnExit() {
-        for (ObjectIndex i: this.tables.values()) i.deleteOnExit();
+        for (Index i: this.tables.values()) i.deleteOnExit();
     }
     
 }

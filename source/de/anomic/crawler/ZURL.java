@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -63,7 +63,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     );
 
     // the class object
-    protected ObjectIndex urlIndex;
+    protected Index urlIndex;
     protected final ConcurrentLinkedQueue<byte[]> stack;
     
     public ZURL(

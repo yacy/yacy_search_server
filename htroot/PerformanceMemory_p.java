@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.index.Cache;
-import net.yacy.kelondro.index.ObjectIndexCache;
+import net.yacy.kelondro.index.RAMIndex;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
@@ -118,11 +118,11 @@ public class PerformanceMemory_p {
         prop.putNum("EcoIndexTotalMem", totalmem / (1024 * 1024d));
         
         // write object cache table
-        Iterator<Map.Entry<String, ObjectIndexCache>> oi = ObjectIndexCache.objects();
+        Iterator<Map.Entry<String, RAMIndex>> oi = RAMIndex.objects();
         c = 0;
         mem = 0;
-        Map.Entry<String, ObjectIndexCache> oie;
-        ObjectIndexCache cache;
+        Map.Entry<String, RAMIndex> oie;
+        RAMIndex cache;
         long hitmem, totalhitmem = 0;
         while (oi.hasNext()) {
             oie = oi.next();

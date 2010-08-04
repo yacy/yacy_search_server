@@ -60,6 +60,18 @@ public interface BLOB {
     public void clear() throws IOException;
     
     /**
+     * trim the index of the database: this releases memory not currently used
+     * @throws IOException
+     */
+    public void trim();
+    
+    /**
+     * calculate the memory in RAM that the BLOB occupies
+     * @return number of bytes that is used
+     */
+    public long mem();
+    
+    /**
      * ask for the number of entries
      * @return the number of entries in the table
      */
@@ -139,12 +151,22 @@ public interface BLOB {
      * It is therefore necessary that it is known that the new entry will be smaller than the
      * old entry before calling this method.
      * @param key  the primary key
-     * @param b
+     * @param rewriter
      * @return the number of bytes that the rewriter reduced the BLOB
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
     public int replace(byte[] key, Rewriter rewriter) throws IOException, RowSpaceExceededException;
+
+    /**
+     * a reduce method is the same as the replace. A replace subsumes a reduce method. A reduce method may be more simple.
+     * @param key  the primary key
+     * @param reducer
+     * @return the number of bytes that the rewriter reduced the BLOB
+     * @throws IOException
+     * @throws RowSpaceExceededException 
+     */
+    public int reduce(byte[] key, Reducer reducer) throws IOException, RowSpaceExceededException;
     
     /**
      * remove a BLOB
@@ -168,6 +190,16 @@ public interface BLOB {
          * @return an array that is equal or smaller in size than b
          */
         public byte[] rewrite(byte[] b);
+        
+    }
+    
+    public interface Reducer extends Rewriter {
+        
+        /**
+         * A Reducer is a rewriter that reduced the content. There are no additional methods in this interface.
+         * The interface shall be used in replacement of a Rewriter to simply state the fact that the rewritement
+         * also reduces the content of a BLOB entry or may also keep the size the same;
+         */
         
     }
     

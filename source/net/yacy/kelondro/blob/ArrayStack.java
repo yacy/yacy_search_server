@@ -91,6 +91,7 @@ public class ArrayStack implements BLOB {
     protected     List<blobItem> blobs;
     private final String         prefix;
     private final int            buffersize;
+    private final boolean        trimall;
     
     // the thread pool for the keeperOf executor service
     private final ExecutorService executor;
@@ -100,7 +101,8 @@ public class ArrayStack implements BLOB {
             final String prefix,
             final int keylength,
             final ByteOrder ordering,
-            final int buffersize) throws IOException {
+            final int buffersize,
+            final boolean trimall) throws IOException {
         this.keylength = keylength;
         this.prefix = prefix;
         this.ordering = ordering;
@@ -110,6 +112,7 @@ public class ArrayStack implements BLOB {
         this.fileSizeLimit = (long) Integer.MAX_VALUE;
         this.repositoryAgeMax = Long.MAX_VALUE;
         this.repositorySizeMax = Long.MAX_VALUE;
+        this.trimall = trimall;
 
         // init the thread pool for the keeperOf executor service
         this.executor = new ThreadPoolExecutor(
@@ -187,7 +190,12 @@ public class ArrayStack implements BLOB {
                    d = DateFormatter.parseShortMilliSecond(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
-                   oneBlob = (time == maxtime) ? new Heap(f, keylength, ordering, buffersize) : new HeapModifier(f, keylength, ordering);
+                   if (time == maxtime && !trimall) {
+                       oneBlob = new Heap(f, keylength, ordering, buffersize);
+                   } else {
+                       oneBlob = new HeapModifier(f, keylength, ordering);
+                       oneBlob.trim(); // no writings here, can be used with minimum memory
+                   }
                    sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
                } catch (ParseException e) {continue;}
             }
@@ -198,6 +206,19 @@ public class ArrayStack implements BLOB {
         for (blobItem bi : sortedItems.values()) {
             blobs.add(bi);
         }
+    }
+    
+    public long mem() {
+        long m = 0;
+        for (blobItem b: this.blobs) m += b.blob.mem();
+        return m;
+    }
+    
+    public void trim() {
+        // trim shall not be called for ArrayStacks because the characteristics of an ArrayStack is that the 'topmost' BLOB on the stack
+        // is used for write operations and all other shall be trimmed automatically since they are not used for writing. And the
+        // topmost BLOB must not be trimmed to support fast writings.
+        throw new UnsupportedOperationException();
     }
     
     /**
@@ -213,7 +234,13 @@ public class ArrayStack implements BLOB {
         } catch (ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }
-        BLOB oneBlob = (full && buffersize > 0) ? new Heap(location, keylength, ordering, buffersize) : new HeapModifier(location, keylength, ordering);
+        BLOB oneBlob;
+        if (full && buffersize > 0 && !trimall) {
+            oneBlob = new Heap(location, keylength, ordering, buffersize);
+        } else {
+            oneBlob = new HeapModifier(location, keylength, ordering);
+            oneBlob.trim();
+        }
         blobs.add(new blobItem(d, location, oneBlob));
     }
     
@@ -321,25 +348,6 @@ public class ArrayStack implements BLOB {
         return unmount(idx);
     }
     
-    /*
-    public synchronized File unmountSimilarSizeBLOB(long otherSize) {
-        if (this.blobs.isEmpty() || otherSize == 0) return null;
-        blobItem b;
-        double delta, bestDelta = Double.MAX_VALUE;
-        int bestIndex = -1;
-        for (int i = 0; i < this.blobs.size(); i++) {
-            b = this.blobs.get(i);
-            if (b.location.length() == 0) continue;
-            delta = ((double) b.location.length()) / ((double) otherSize);
-            if (delta < 1.0) delta = 1.0 / delta;
-            if (delta < bestDelta) {
-                bestDelta = delta;
-                bestIndex = i;
-            }
-        }
-        return unmount(bestIndex);
-    }
-    */
     /**
      * return the number of BLOB files in this array
      * @return
@@ -684,7 +692,7 @@ public class ArrayStack implements BLOB {
     }
     
     /**
-     * replace a BLOB entry with another which must be smaller or same size
+     * replace a BLOB entry with another
      * @param key  the primary key
      * @throws IOException
      * @throws RowSpaceExceededException 
@@ -698,12 +706,28 @@ public class ArrayStack implements BLOB {
     }
     
     /**
+     * replace a BLOB entry with another which must be smaller or same size
+     * @param key  the primary key
+     * @throws IOException
+     * @throws RowSpaceExceededException 
+     */
+    public synchronized int reduce(byte[] key, Reducer reduce) throws IOException, RowSpaceExceededException {
+        int d = 0;
+        for (blobItem bi: blobs) {
+            d += bi.blob.reduce(key, reduce);
+        }
+        return d;
+    }
+    
+    /**
      * remove a BLOB
      * @param key  the primary key
      * @throws IOException
      */
     public synchronized void remove(byte[] key) throws IOException {
+        long m = this.mem();
         for (blobItem bi: blobs) bi.blob.remove(key);
+        assert this.mem() <= m : "m = " + m + ", mem() = " + mem();
     }
     
     /**
@@ -971,7 +995,7 @@ public class ArrayStack implements BLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final ArrayStack heap = new ArrayStack(f, "test", 12, NaturalOrder.naturalOrder, 512 * 1024);
+            final ArrayStack heap = new ArrayStack(f, "test", 12, NaturalOrder.naturalOrder, 512 * 1024, false);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());

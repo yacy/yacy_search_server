@@ -1,23 +1,26 @@
-// RowSetArray.java
-// --------------------------
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://yacy.net
-// Frankfurt, Germany, 2009
-// last major change: 12.03.2009
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  RAMIndexCluster
+ *  Copyright 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  First released 12.03.2009 at http://yacy.net
+ *  
+ *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
+ *  $LastChangedRevision: 6922 $
+ *  $LastChangedBy: orbiter $
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.kelondro.index;
 
@@ -34,48 +37,52 @@ import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.StackIterator;
 
 
-public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Cloneable {
+public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Cloneable {
 
     private final String             name;
     private final Row                rowdef;
-    private final ObjectIndexCache[] array;
+    private final RAMIndex[] cluster;
     
-    public RowSetArray(String name, final Row rowdef, final int arraySize) {
+    public RAMIndexCluster(String name, final Row rowdef, final int clusterSize) {
         //assert arraySize < 100 : arraySize;
         this.name = name;
-        this.array = new ObjectIndexCache[arraySize];
+        this.cluster = new RAMIndex[clusterSize];
         this.rowdef = rowdef;
-        for (int i = 0; i < arraySize; i++) {
-            this.array[i] = new ObjectIndexCache(name + "." + i, rowdef, 0);
+        for (int i = 0; i < clusterSize; i++) {
+            this.cluster[i] = new RAMIndex(name + "." + i, rowdef, 0);
         }
     }
     
-    private RowSetArray(String name, final Row rowdef, final ObjectIndexCache[] array) {
+    private RAMIndexCluster(String name, final Row rowdef, final RAMIndex[] array) {
         this.name = name;
-        this.array = array;
+        this.cluster = array;
         this.rowdef = rowdef;
     }
     
-    public RowSetArray clone() {
-        ObjectIndexCache[] a = new ObjectIndexCache[this.array.length];
-        for (int i = 0; i < this.array.length; i++) {
-            a[i] = this.array[i].clone();
+    public void trim() {
+        for (RAMIndex i: this.cluster) if (i != null)  i.trim();
+    }
+    
+    public RAMIndexCluster clone() {
+        RAMIndex[] a = new RAMIndex[this.cluster.length];
+        for (int i = 0; i < this.cluster.length; i++) {
+            a[i] = this.cluster[i].clone();
         }
-        return new RowSetArray(this.name + ".clone", this.rowdef, a);
+        return new RAMIndexCluster(this.name + ".clone", this.rowdef, a);
     }
     
     private final int indexFor(final byte[] key) {
-        return (int) ((this.rowdef.objectOrder.cardinal(key) / 17) % ((long) array.length));
+        return (int) ((this.rowdef.objectOrder.cardinal(key) / 17) % ((long) cluster.length));
     }
     
     private final int indexFor(final Entry row) {
-        return (int) ((this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) / 17) % ((long) array.length));
+        return (int) ((this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) / 17) % ((long) cluster.length));
     }
     
     public final byte[] smallestKey() {
-        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.array.length);
-        synchronized (this.array) {
-            for (ObjectIndexCache rs: this.array) try {
+        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.cluster.length);
+        synchronized (this.cluster) {
+            for (RAMIndex rs: this.cluster) try {
                 keysort.put(rs.smallestKey());
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
@@ -85,9 +92,9 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
     }
     
     public final byte[] largestKey() {
-        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.array.length);
-        synchronized (this.array) {
-            for (ObjectIndexCache rs: this.array) try {
+        HandleSet keysort = new HandleSet(this.rowdef.primaryKeyLength, this.rowdef.objectOrder, this.cluster.length);
+        synchronized (this.cluster) {
+            for (RAMIndex rs: this.cluster) try {
                 keysort.put(rs.largestKey());
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
@@ -96,11 +103,11 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
         return keysort.largestKey();
     }
     
-    private final ObjectIndexCache accessArray(final int i) {
-        ObjectIndexCache r = this.array[i];
-        if (r == null) synchronized (this.array) {
-            r = new ObjectIndexCache(name + "." + i, this.rowdef, 0);
-            this.array[i] = r;
+    private final RAMIndex accessArray(final int i) {
+        RAMIndex r = this.cluster[i];
+        if (r == null) synchronized (this.cluster) {
+            r = new RAMIndex(name + "." + i, this.rowdef, 0);
+            this.cluster[i] = r;
         }
         return r;
     }
@@ -116,15 +123,15 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
     }
 
     public final void clear() {
-        synchronized (this.array) {
-            for (ObjectIndexCache c: this.array) if (c != null) c.clear();
+        synchronized (this.cluster) {
+            for (RAMIndex c: this.cluster) if (c != null) c.clear();
         }
     }
 
     public final void close() {
         clear();
-        synchronized (this.array) {
-            for (ObjectIndexCache c: this.array) if (c != null) c.close();
+        synchronized (this.cluster) {
+            for (RAMIndex c: this.cluster) if (c != null) c.close();
         }
     }
 
@@ -140,7 +147,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
     public final Entry get(final byte[] key) {
         final int i = indexFor(key);
         if (i < 0) return null;
-        final ObjectIndexCache r = this.array[i];
+        final RAMIndex r = this.cluster[i];
         if (r == null) return null;
         return r.get(key);
     }
@@ -148,17 +155,17 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
     public final boolean has(final byte[] key) {
         final int i = indexFor(key);
         if (i < 0) return false;
-        final ObjectIndexCache r = this.array[i];
+        final RAMIndex r = this.cluster[i];
         if (r == null) return false;
         return r.has(key);
     }
 
     public final CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
-        synchronized (this.array) {
+        synchronized (this.cluster) {
             final Collection<CloneableIterator<byte[]>> col = new ArrayList<CloneableIterator<byte[]>>();
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) {
-                    col.add(this.array[i].keys(up, firstKey));
+            for (int i = 0; i < this.cluster.length; i++) {
+                if (this.cluster[i] != null) {
+                    col.add(this.cluster[i].keys(up, firstKey));
                 }
             }
             return MergeIterator.cascade(col, this.rowdef.objectOrder, MergeIterator.simpleMerge, up);
@@ -185,11 +192,11 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
 
     public final ArrayList<RowCollection> removeDoubles() throws RowSpaceExceededException {
         final ArrayList<RowCollection> col = new ArrayList<RowCollection>();
-        synchronized (this.array) {
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) {
-                    col.addAll(this.array[i].removeDoubles());
-                    if (this.array[i].isEmpty()) this.array[i] = null;
+        synchronized (this.cluster) {
+            for (int i = 0; i < this.cluster.length; i++) {
+                if (this.cluster[i] != null) {
+                    col.addAll(this.cluster[i].removeDoubles());
+                    if (this.cluster[i].isEmpty()) this.cluster[i] = null;
                 }
             }
         }
@@ -197,11 +204,11 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
     }
 
     public final Entry removeOne() {
-        synchronized (this.array) {
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) {
-                    final Entry entry = this.array[i].removeOne();
-                    if (this.array[i].isEmpty()) this.array[i] = null;
+        synchronized (this.cluster) {
+            for (int i = 0; i < this.cluster.length; i++) {
+                if (this.cluster[i] != null) {
+                    final Entry entry = this.cluster[i].removeOne();
+                    if (this.cluster[i].isEmpty()) this.cluster[i] = null;
                     return entry;
                 }
             }
@@ -211,11 +218,11 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
 
     public List<Row.Entry> top(int count) {
         List<Row.Entry> list = new ArrayList<Row.Entry>();
-        synchronized (this.array) {
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) {
+        synchronized (this.cluster) {
+            for (int i = 0; i < this.cluster.length; i++) {
+                if (this.cluster[i] != null) {
                     try {
-                        List<Row.Entry> list0 = this.array[i].top(count - list.size());
+                        List<Row.Entry> list0 = this.cluster[i].top(count - list.size());
                         list.addAll(list0);
                     } catch (IOException e) {
                         continue;
@@ -239,13 +246,13 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
 
     @SuppressWarnings("unchecked")
     public final CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) {
-        synchronized (this.array) {
-            final CloneableIterator<Entry>[] col = new CloneableIterator[this.array.length];
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] == null) {
+        synchronized (this.cluster) {
+            final CloneableIterator<Entry>[] col = new CloneableIterator[this.cluster.length];
+            for (int i = 0; i < this.cluster.length; i++) {
+                if (this.cluster[i] == null) {
                     col[i] = null;
                 } else {
-                    col[i] = this.array[i].rows(up, firstKey);
+                    col[i] = this.cluster[i].rows(up, firstKey);
                 }
             }
             return StackIterator.stack(col);
@@ -258,36 +265,23 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry>, Clon
 
     public final int size() {
         int c = 0;
-        synchronized (this.array) {
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) {
-                    c += this.array[i].size();
-                }
-            }
+        synchronized (this.cluster) {
+            for (RAMIndex i: this.cluster) if (i != null) c += i.size();
         }
         return c;
     }
 
-
     public long mem() {
         long m = 0;
-        synchronized (this.array) {
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) {
-                    m += this.array[i].mem();
-                }
-            }
+        synchronized (this.cluster) {
+            for (RAMIndex i: this.cluster) if (i != null)  m += i.mem();
         }
         return m;
     }
     
     public final boolean isEmpty() {
-        synchronized (this.array) {
-            for (int i = 0; i < this.array.length; i++) {
-                if (this.array[i] != null) {
-                    if (!this.array[i].isEmpty()) return false;
-                }
-            }
+        synchronized (this.cluster) {
+            for (RAMIndex i: this.cluster) if (i != null && !i.isEmpty()) return false;
         }
         return true;
     }

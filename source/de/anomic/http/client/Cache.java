@@ -84,7 +84,7 @@ public final class Cache {
             Log.logException(e);
         }
         try {
-            fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
+            fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2, false);
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new Compressor(fileDBunbuffered, 2 * 1024 * 1024);
         } catch (IOException e) {

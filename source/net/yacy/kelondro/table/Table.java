@@ -40,7 +40,7 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.HandleMap;
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.RowSet;
@@ -66,7 +66,7 @@ import net.yacy.kelondro.util.kelondroException;
  * The content cache can also be deleted during run-time, if the available RAM gets too low.
  */
 
-public class Table implements ObjectIndex, Iterable<Row.Entry> {
+public class Table implements Index, Iterable<Row.Entry> {
 
     // static tracker objects
     private final static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
@@ -660,12 +660,14 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
             if (i == index.size() - 1) {
                 // element is at last entry position
                 ix = (int) index.remove(key);
+                assert index.size() < i + 1 : "index.size() = " + index.size() + ", i = " + i;
                 assert ix == i;
                 file.cleanLast(b, 0);
             } else {
                 // remove entry from index
-                assert i < index.size() - 1;
+                assert i < index.size() - 1 : "index.size() = " + index.size() + ", i = " + i;
                 ix = (int) index.remove(key);
+                assert i < index.size() : "index.size() = " + index.size() + ", i = " + i;
                 assert ix == i;
                 
                 // read element that shall be removed
@@ -693,12 +695,14 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
             if (i == index.size() - 1) {
                 // special handling if the entry is the last entry in the file
                 ix = (int) index.remove(key);
+                assert index.size() < i + 1  : "index.size() = " + index.size() + ", i = " + i;
                 assert ix == i;
                 table.removeRow(i, false);
                 file.cleanLast();
             } else {
                 // remove entry from index
                 ix = (int) index.remove(key);
+                assert i < index.size() : "index.size() = " + index.size() + ", i = " + i;
                 assert ix == i;
 
                 // switch values:
@@ -742,7 +746,12 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         file.cleanLast(le, 0);
         assert file.size() < fsb : "file.size() = " + file.size();
         final Row.Entry lr = rowdef.newEntry(le);
+        assert lr != null;
+        assert lr.getPrimaryKeyBytes() != null;
+        final int is = index.size();
+        assert index.has(lr.getPrimaryKeyBytes());
         final int i = (int) index.remove(lr.getPrimaryKeyBytes());
+        assert i < 0 || index.size() < is : "index.size() = " + index.size() + ", is = " + is;
         assert i >= 0;
         if (table != null) table.removeOne();
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();

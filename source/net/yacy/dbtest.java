@@ -11,7 +11,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -89,21 +89,21 @@ public class dbtest {
     }
 
     public static abstract class STJob implements Runnable {
-        private final ObjectIndex table_test, table_reference;
+        private final Index table_test, table_reference;
 
         private final long source;
 
-        public STJob(final ObjectIndex table_test, final ObjectIndex table_reference, final long aSource) {
+        public STJob(final Index table_test, final Index table_reference, final long aSource) {
             this.table_test = table_test;
             this.table_reference = table_reference;
             this.source = aSource;
         }
 
-        public ObjectIndex getTable_test() {
+        public Index getTable_test() {
             return this.table_test;
         }
 
-        public ObjectIndex getTable_reference() {
+        public Index getTable_reference() {
             return this.table_reference;
         }
 
@@ -115,7 +115,7 @@ public class dbtest {
     }
 
     public static final class WriteJob extends STJob {
-        public WriteJob(final ObjectIndex table_test, final ObjectIndex table_reference, final long aSource) {
+        public WriteJob(final Index table_test, final Index table_reference, final long aSource) {
             super(table_test, table_reference, aSource);
         }
 
@@ -138,7 +138,7 @@ public class dbtest {
     }
 
     public static final class RemoveJob extends STJob {
-        public RemoveJob(final ObjectIndex table_test, final ObjectIndex table_reference, final long aSource) {
+        public RemoveJob(final Index table_test, final Index table_reference, final long aSource) {
             super(table_test, table_reference, aSource);
         }
 
@@ -157,7 +157,7 @@ public class dbtest {
     }
 
     public static final class ReadJob extends STJob {
-        public ReadJob(final ObjectIndex table_test, final ObjectIndex table_reference, final long aSource) {
+        public ReadJob(final Index table_test, final Index table_reference, final long aSource) {
             super(table_test, table_reference, aSource);
         }
 
@@ -194,7 +194,7 @@ public class dbtest {
         }
     }
     
-    public static ObjectIndex selectTableType(final String dbe, final String tablename, final Row testRow) throws Exception {
+    public static Index selectTableType(final String dbe, final String tablename, final Row testRow) throws Exception {
         if (dbe.equals("kelondroRowSet")) {
             return new RowSet(testRow, 0);
         }
@@ -214,7 +214,7 @@ public class dbtest {
         return null;
     }
     
-    public static boolean checkEquivalence(final ObjectIndex test, final ObjectIndex reference) throws IOException {
+    public static boolean checkEquivalence(final Index test, final Index reference) throws IOException {
         if (reference == null) return true;
         if (test.size() == reference.size()) {
             System.out.println("* Testing equivalence of test table to reference table, " + test.size() + " entries");
@@ -288,8 +288,8 @@ public class dbtest {
             
             // create the database access
             final Row testRow = new Row("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, Base64Order.enhancedCoder);
-            final ObjectIndex table_test = selectTableType(dbe_test, tablename_test, testRow);
-            final ObjectIndex table_reference = (dbe_reference == null) ? null : selectTableType(dbe_reference, tablename_reference, testRow);
+            final Index table_test = selectTableType(dbe_test, tablename_test, testRow);
+            final Index table_reference = (dbe_reference == null) ? null : selectTableType(dbe_reference, tablename_reference, testRow);
             
             final long afterinit = System.currentTimeMillis();
             System.out.println("Test for db-engine " + dbe_test +  " started to create file " + tablename_test + " with test " + command);

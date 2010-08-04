@@ -112,7 +112,15 @@ public class HeapReader {
         this.file.close();
         // the file will be opened again automatically when the next access to it comes.
     }
+    
+    public long mem() {
+        return index.mem(); // don't add the memory for free here since then the asserts for memory management don't work
+    }
 
+    public void trim() {
+        this.index.trim();
+    }
+    
     protected byte[] normalizeKey(byte[] key) {
         // check size of key: zero-filled keys are only possible of the ordering is
         // an instance of the natural ordering. Base64-orderings cannot use zeros in keys.

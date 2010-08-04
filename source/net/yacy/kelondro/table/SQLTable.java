@@ -37,7 +37,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.Row.Entry;
@@ -58,7 +58,7 @@ import net.yacy.kelondro.order.NaturalOrder;
  * grant ALL on yacy.* to yacy;
  */
 
-public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
+public class SQLTable implements Index, Iterable<Row.Entry> {
 
     private static final String db_driver_str_mysql = "org.gjt.mm.mysql.Driver";
     private static final String db_driver_str_pgsql = "org.postgresql.Driver";

@@ -1,26 +1,26 @@
-// HandleMap.java
-// (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 08.04.2008 on http://yacy.net
-//
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  HandleMap
+ *  Copyright 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  First released 08.04.2008 at http://yacy.net
+ *  
+ *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
+ *  $LastChangedRevision: 6922 $
+ *  $LastChangedBy: orbiter $
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.kelondro.index;
 
@@ -53,7 +53,7 @@ import net.yacy.kelondro.order.CloneableIterator;
 public final class HandleMap implements Iterable<Row.Entry> {
     
     private   final Row rowdef;
-    private RowSetArray index;
+    private RAMIndexCluster index;
     
     /**
      * initialize a HandleMap
@@ -65,7 +65,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
      */
     public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace, String name) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
-        this.index = new RowSetArray(name, rowdef, spread(expectedspace));
+        this.index = new RAMIndexCluster(name, rowdef, spread(expectedspace));
     }
 
     /**
@@ -93,6 +93,10 @@ public final class HandleMap implements Iterable<Row.Entry> {
         is.close();
         is = null;
         assert this.index.size() == file.length() / (keylength + idxbytes);
+    }
+    
+    public void trim() {
+        this.index.trim();
     }
     
     public long mem() {
@@ -266,7 +270,14 @@ public final class HandleMap implements Iterable<Row.Entry> {
     
     public final synchronized long remove(final byte[] key) {
         assert (key != null);
+        final boolean exist = index.has(key);
+        if (!exist) return -1;
+        final int s = index.size();
+        final long m = index.mem();
         final Row.Entry indexentry = index.remove(key);
+        assert (indexentry != null);
+        assert index.size() < s : "s = " + s + ", index.size() = " + index.size();
+        assert index.mem() <= m : "m = " + m + ", index.mem() = " + index.mem();
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }

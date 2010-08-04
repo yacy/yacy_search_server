@@ -3,7 +3,9 @@
  *  Copyright 2010 by Michael Peter Christen
  *  First released 18.4.2010 at http://yacy.net
  *  
- *  This file is part of YaCy
+ *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
+ *  $LastChangedRevision: 6922 $
+ *  $LastChangedBy: orbiter $
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -37,14 +39,14 @@ import net.yacy.kelondro.order.MergeIterator;
  * @author Michael Peter Christen
  *
  */
-public class BufferedObjectIndex implements ObjectIndex, Iterable<Row.Entry> {
+public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
 
-    private final ObjectIndex backend;
+    private final Index backend;
     private final RowSet buffer;
     private final int buffersize;
     private final Row.EntryComparator entryComparator;
     
-    public BufferedObjectIndex(ObjectIndex backend, int buffersize) {
+    public BufferedObjectIndex(Index backend, int buffersize) {
         this.backend = backend;
         this.buffersize = buffersize;
         this.buffer = new RowSet(backend.row());

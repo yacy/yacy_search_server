@@ -239,14 +239,20 @@ public class HeapModifier extends HeapReader implements BLOB {
 	}
 
 	public int replace(byte[] key, final Rewriter rewriter) throws IOException {
-	    key = normalizeKey(key);
-	    assert key.length == this.keylength;
-	 
-	    // pre-check before synchronization
+	    throw new UnsupportedOperationException();
+    }
+	
+	public int reduce(byte[] key, final Reducer reducer) throws IOException {
+        key = normalizeKey(key);
+        assert key.length == this.keylength;
+     
+        // pre-check before synchronization
         long pos = index.get(key);
         if (pos < 0) return 0;
         
         synchronized (this) {
+            long m = this.mem();
+            
             // check again if the index contains the key
             pos = index.get(key);
             if (pos < 0) return 0;
@@ -271,7 +277,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             file.readFully(blob, 0, blob.length);
             
             // rewrite the entry
-            blob = rewriter.rewrite(blob);
+            blob = reducer.rewrite(blob);
             int reduction = len - blob.length;
             if (reduction == 0) {
                 // even if the reduction is zero then it is still be possible that the record has been changed
@@ -302,8 +308,10 @@ public class HeapModifier extends HeapReader implements BLOB {
             
             // add a new free entry
             this.free.put(pos + 4 + blob.length + key.length, newfreereclen);
+            
+            assert mem() <= m : "m = " + m + ", mem() = " + mem();
             return reduction;
-	    }
+        }
     }
 
 }

@@ -70,6 +70,14 @@ public class Compressor implements BLOB {
         initBuffer();
     }
     
+    public long mem() {
+        return backend.mem();
+    }
+    
+    public void trim() {
+        this.backend.trim();
+    }
+    
     private static class Entity implements Map.Entry<String, byte[]> {
         private String key;
         private byte[] payload;
@@ -355,6 +363,17 @@ public class Compressor implements BLOB {
         byte[] b = get(key);
         if (b == null) return 0;
         byte[] c = rewriter.rewrite(b);
+        int reduction = c.length - b.length;
+        assert reduction >= 0;
+        if (reduction == 0) return 0;
+        this.put(key, c);
+        return reduction;
+    }
+    
+    public int reduce(byte[] key, Reducer reducer) throws IOException, RowSpaceExceededException {
+        byte[] b = get(key);
+        if (b == null) return 0;
+        byte[] c = reducer.rewrite(b);
         int reduction = c.length - b.length;
         assert reduction >= 0;
         if (reduction == 0) return 0;

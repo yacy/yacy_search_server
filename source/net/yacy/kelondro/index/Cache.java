@@ -1,29 +1,26 @@
-// Cache.java
-// (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 26.10.2006 on http://www.anomic.de
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
+/**
+ *  Cache.java
+ *  Copyright 2006 by Michael Peter Christen
+ *  First released 26.10.2006 at http://yacy.net
+ *  
+ *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
+ *  $LastChangedRevision: 6922 $
+ *  $LastChangedBy: orbiter $
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package net.yacy.kelondro.index;
 
@@ -41,7 +38,7 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
+public final class Cache implements Index, Iterable<Row.Entry> {
 
     // this is a combined read cache and write buffer
     // we maintain four tables:
@@ -57,7 +54,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     private static final long memStartShrink = 20 * 1024 * 1024; // a limit for the node cache to start with shrinking if less than this memory amount is available
     
     // class objects
-    private final ObjectIndex index;         // the back-end of the cache
+    private final Index index;         // the back-end of the cache
     private       RowSet      readHitCache;  // contains a complete copy of the cached objects
     private       RowSet      readMissCache; // contains only the keys of the objects that had been a miss
     private       Row         keyrow;
@@ -72,7 +69,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
      * @param hitLimit a limit of cache hit entries. If given as value <= 0, then only the RAM limits the size
      * @param missLimit a limit of cache miss entries. If given as value <= 0, then only the RAM limits the size
      */
-    public Cache(final ObjectIndex backupIndex, final int hitLimit, final int missLimit) {
+    public Cache(final Index backupIndex, final int hitLimit, final int missLimit) {
         this.index = backupIndex;
         this.hitLimit = hitLimit;
         this.missLimit = missLimit;
