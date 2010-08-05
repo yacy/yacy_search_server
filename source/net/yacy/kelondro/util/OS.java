@@ -25,8 +25,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -62,15 +60,6 @@ public final class OS {
 	public static int maxPathLength = 65535;
 
 	// Macintosh-specific statics
-	private static Class<?>    macMRJFileUtils = null;
-	private static Class<?>    macMRJOSType = null;
-	private static Constructor<?> macMRJOSTypeConstructor = null;
-	private static Object      macMRJOSNullObj = null;
-	private static Method      macGetFileCreator = null;
-	private static Method      macGetFileType = null;
-	private static Method      macSetFileCreator = null;
-	private static Method      macSetFileType = null;
-	private static Method      macOpenURL = null;
 	public  static final Hashtable<String, String> macFSTypeCache = new Hashtable<String, String>();
 	public  static final Hashtable<String, String> macFSCreatorCache = new Hashtable<String, String>();
 
@@ -91,129 +80,10 @@ public final class OS {
 		isWindows = (systemOS == systemWindows);
 		isWin32 = (isWindows && System.getProperty("os.arch", "").contains("x86"));
 
-		// set up the MRJ Methods through reflection
-		if (isMacArchitecture) try {
-			macMRJFileUtils = Class.forName("com.apple.mrj.MRJFileUtils");
-			macMRJOSType = Class.forName("com.apple.mrj.MRJOSType");
-			macGetFileType = macMRJFileUtils.getMethod("getFileType", new Class[] {Class.forName("java.io.File")});
-			macGetFileCreator = macMRJFileUtils.getMethod("getFileCreator", new Class[] {Class.forName("java.io.File")});
-			macSetFileType = macMRJFileUtils.getMethod("setFileType", new Class[] {Class.forName("java.io.File"), macMRJOSType});
-			macSetFileCreator = macMRJFileUtils.getMethod("setFileCreator", new Class[] {Class.forName("java.io.File"), macMRJOSType});
-			macMRJOSTypeConstructor = macMRJOSType.getConstructor(new Class[] {Class.forName("java.lang.String")});
-			macOpenURL = macMRJFileUtils.getMethod("openURL", new Class[] {Class.forName("java.lang.String")});
-			final byte[] nullb = new byte[4];
-			for (int i = 0; i < 4; i++) nullb[i] = 0;
-			macMRJOSNullObj = macMRJOSTypeConstructor.newInstance(new Object[] {new String(nullb)});
-		} catch (final Exception e) {
-			//Log.logException(e);
-			macMRJFileUtils = null; macMRJOSType = null;
-		}
-
 		// set up maximum path length according to system
 		if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
 	}
 
-	public static Object getMacOSTS(final String s) {
-		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
-			if ((s == null) || (s.equals(blankTypeString))) return macMRJOSNullObj;
-			return macMRJOSTypeConstructor.newInstance(new Object[] {s});
-		} catch (final Exception e) {
-			return macMRJOSNullObj;
-		}
-		return null;
-	}
-
-	public static String getMacFSType(final File f) {
-		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
-			final String s = macGetFileType.invoke(null, new Object[] {f}).toString();
-			if (s == null || (s.length() > 0 && s.charAt(0) == 0)) return blankTypeString;
-			return s;
-		} catch (final Exception e) {
-			return null;
-		}
-		return null;
-	}
-
-	public static String getMacFSCreator(final File f) {
-		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
-			final String s = macGetFileCreator.invoke(null, new Object[] {f}).toString();
-			if (s == null || (s.length() > 0 && s.charAt(0) == 0)) return blankTypeString;
-			return s;
-		} catch (final Exception e) {
-			return null;
-		}
-		return null;
-	}
-
-	public static void setMacFSType(final File f, final String t) {
-		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
-			macSetFileType.invoke(null, new Object[] {f, getMacOSTS(t)});
-		} catch (final Exception e) {/*System.out.println(e.getMessage()); Log.logException(e);*/}
-	}
-
-	public static void setMacFSCreator(final File f, final String t) {
-		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
-			macSetFileCreator.invoke(null, new Object[] {f, getMacOSTS(t)});
-		} catch (final Exception e) {/*System.out.println(e.getMessage()); Log.logException(e);*/}
-	}
-
-	public static boolean aquireMacFSType(final File f) {
-		if ((!(isMacArchitecture)) || (macMRJFileUtils == null)) return false;
-		final String name = f.toString();
-
-		// check file type
-		final int dot = name.lastIndexOf(".");
-		if ((dot < 0) || (dot + 1 >= name.length())) return false;
-		final String type = getMacFSType(f);
-		if ((type == null) || (type.equals(blankTypeString))) return false;
-		final String ext = name.substring(dot + 1).toLowerCase();
-		final String oldType = macFSTypeCache.get(ext);
-		if ((oldType != null) && (oldType.equals(type))) return false;
-		macFSTypeCache.put(ext, type);
-		return true;
-	}
-
-	public static boolean aquireMacFSCreator(final File f) {
-		if ((!(isMacArchitecture)) || (macMRJFileUtils == null)) return false;
-		final String name = f.toString();
-
-		// check creator
-		final String creator = getMacFSCreator(f);
-		if ((creator == null) || (creator.equals(blankTypeString))) return false;
-		final String oldCreator = macFSCreatorCache.get(name);
-		if ((oldCreator != null) && (oldCreator.equals(creator))) return false;
-		macFSCreatorCache.put(name, creator);
-		return true;
-	}
-
-	public static boolean applyMacFSType(final File f) {
-		if ((!(isMacArchitecture)) || (macMRJFileUtils == null)) return false;
-		final String name = f.toString();
-
-		// reconstruct file type
-		final int dot = name.lastIndexOf(".");
-		if ((dot < 0) || (dot + 1 >= name.length())) return false;
-		final String type = macFSTypeCache.get(name.substring(dot + 1).toLowerCase());
-		if (type == null) return false;
-		final String oldType = getMacFSType(f);
-		if ((oldType != null) && (oldType.equals(type))) return false;
-		setMacFSType(f, type);
-		return getMacFSType(f).equals(type);
-	}
-
-	public static boolean applyMacFSCreator(final File f) {
-		if ((!(isMacArchitecture)) || (macMRJFileUtils == null)) return false;
-		final String name = f.toString();
-
-		// reconstruct file creator
-		final String creator = macFSCreatorCache.get(name);
-		if (creator == null) return false;
-		final String oldCreator = getMacFSCreator(f);
-		if ((oldCreator != null) && (oldCreator.equals(creator))) return false;
-		//System.out.println("***Setting creator for " + f.toString() + " to " + creator);
-		setMacFSCreator(f, creator);
-		return getMacFSCreator(f).equals(creator); // this is not always true! I guess it's caused by deprecation of the interface in 1.4er Apple Extensions
-	}
 	
 	/**
 	 * finds the maximum possible heap (may cause high system load)
@@ -276,87 +146,6 @@ public final class OS {
 		return s;
 	}
 
-	private static String errorResponse(final Process p) {
-		final BufferedReader err = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-		String line, error = "";
-		try {
-			while ((line = err.readLine()) != null) {
-				error = line + "\n";
-			}
-			return error;
-		} catch (final IOException e) {
-			return null;
-		} finally {
-			try {
-				err.close();
-			} catch (IOException e) {
-			    Log.logException(e);
-			}
-		}
-	}
-
-	/*
-    public static void openBrowser(URL url) {
-	if (openBrowserJNLP(url)) return;
-	openBrowserExec(url.toString(), "firefox");
-    }
-
-    private static boolean openBrowserJNLP(URL url) {
-       try {
-           // Lookup the javax.jnlp.BasicService object
-           javax.jnlp.BasicService bs = (javax.jnlp.BasicService) javax.jnlp.ServiceManager.lookup("javax.jnlp.BasicService");
-           // Invoke the showDocument method
-           return bs.showDocument(url);
-       } catch (Exception ue) {
-           // Service is not supported
-           return false;
-       }
-    }
-	 */
-
-	public static void openBrowser(final String url) {
-		openBrowser(url, "firefox");
-	}
-
-	public static void openBrowser(final String url, final String app) {
-		try {
-			String cmd;
-			Process p;
-			if (systemOS != systemUnknown) {
-				if (systemOS == systemMacOSC) {
-					if ((isMacArchitecture) && (macMRJFileUtils != null)) {
-						macOpenURL.invoke(null, new Object[] {url});
-					}
-				} else if (systemOS == systemMacOSX) {
-					p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
-					p.waitFor();
-					if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
-				} else if (systemOS == systemUnix) {
-					cmd = app + " -remote openURL(" + url + ")";
-					p = Runtime.getRuntime().exec(cmd);
-					p.waitFor();
-					if (p.exitValue() != 0) {
-						cmd = app + " "  + url;
-						p = Runtime.getRuntime().exec(cmd);
-						// no error checking, because it blocks until firefox is closed
-					}
-				} else if (systemOS == systemWindows) {
-					// see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
-					if (System.getProperty("os.name").contains("2000")) cmd = "rundll32 url.dll,FileProtocolHandler " + url;
-					else cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
-					//cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
-					p = Runtime.getRuntime().exec(cmd);
-					p.waitFor();
-					if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
-				}
-			}
-		} catch (final Exception e) {
-		    System.err.println("ERROR "+ e.getClass() +" in openBrowser(): "+ e.getMessage());
-		    // browser could not be started automatically, tell user to do it
-		    System.out.println("please start your browser and open the following location: " + url);
-		}
-	}
-
 	public static void deployScript(final File scriptFile, final String theScript) throws IOException {
 		FileUtils.copy(theScript.getBytes(), scriptFile);
 		if(!isWindows){ // set executable
@@ -406,15 +195,6 @@ public final class OS {
 	}
 
 	public static void main(final String[] args) {
-		//try{System.getProperties().list(new PrintStream(new FileOutputStream(new File("system.properties.txt"))));} catch (FileNotFoundException e) {}
-		//System.out.println("nullstr=" + macMRJOSNullObj.toString());
-		if (args[0].equals("-f")) {
-			final File f = new File(args[1]);
-			System.out.println("File " + f.toString() + ": creator = " + getMacFSCreator(f) + "; type = " + getMacFSType(f));
-		}
-		if (args[0].equals("-u")) {
-			openBrowser(args[1]);
-		}
 		if (args[0].equals("-m")) {
 			System.out.println("Maximum possible memory: " + Integer.toString(getWin32MaxHeap()) + "m");
 		}

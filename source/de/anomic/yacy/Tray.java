@@ -37,6 +37,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.OS;
 
@@ -158,7 +159,7 @@ public final class Tray {
 	protected static void openBrowser(final String browserPopUpPage){
 		if(isIntegrated) return;
 		// no need for https, because we are on localhost
-		OS.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);
+		Browser.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);
 	}
 	
 	public static void removeTray(){
