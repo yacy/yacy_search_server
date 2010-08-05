@@ -1148,6 +1148,7 @@ public final class Switchboard extends serverSwitch {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         MemoryTracker.stopSystemProfiling();
         terminateAllThreads(true);
+        net.yacy.gui.framework.Switchboard.shutdown();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
         indexingDocumentProcessor.announceShutdown();

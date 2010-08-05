@@ -1,5 +1,5 @@
 cd `dirname $0`
-./startYACY.sh &
+./startYACY.sh --gui &
 echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
 echo "**** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****"
 echo "****   USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/   ****"

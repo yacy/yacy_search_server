@@ -44,13 +44,14 @@ Options
   -l, --logging		save the output of YaCy to yacy.log
   -d, --debug		show the output of YaCy on the console
   -p, --print-out	only print the command, which would be executed to start YaCy
+  -g, --gui			start a gui for YaCy
 USAGE
 }
 
 #startup YaCy
 cd "`dirname $0`"
 
-options="`getopt -n YaCy -o h,d,l,p,t -l help,debug,logging,print-out,tail-log -- $@`"
+options="`getopt -n YaCy -o h,d,l,p,t,g -l help,debug,logging,print-out,tail-log,gui -- $@`"
 if [ $? -ne 0 ];then
 	exit 1;
 fi
@@ -62,6 +63,7 @@ LOGGING=0
 DEBUG=0
 PRINTONLY=0
 TAILLOG=0
+GUI=0
 for option in $options;do
 	if [ $isparameter -ne 1 ];then #option
 		case $option in
@@ -92,6 +94,9 @@ for option in $options;do
 				;;
 			-t|--tail-log)
 				TAILLOG=1
+				;;
+			-g|--gui)
+				GUI=1
 				;;
 		esac #case option 
 	else #parameter
@@ -172,6 +177,10 @@ for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH=".:htroot:$CLASSPATH"
 
 cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH net.yacy.yacy";
+if [ $GUI -eq 1 ] #gui
+then
+	cmdline="$cmdline -gui"
+fi
 if [ $DEBUG -eq 1 ] #debug
 then
 	cmdline=$cmdline

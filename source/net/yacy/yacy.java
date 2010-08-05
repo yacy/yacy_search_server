@@ -46,6 +46,7 @@ import java.util.concurrent.Semaphore;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.yacy.gui.YaCyApp;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -154,7 +155,7 @@ public final class yacy {
     * @param homePath Root-path where all information is to be found.
     * @param startupFree free memory at startup time, to be used later for statistics
     */
-    private static void startup(final File homePath, final long startupMemFree, final long startupMemTotal) {
+    private static void startup(final File homePath, final long startupMemFree, final long startupMemTotal, boolean gui) {
         try {
             // start up
             System.out.println(copyright);
@@ -225,19 +226,22 @@ public final class yacy {
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);
             sb.setConfig("memoryTotalAfterStartup", startupMemTotal);
             
+            // start gui if wanted
+            if (gui) YaCyApp.start("localhost", (int) sb.getConfigLong("port", 8080));
+            
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
 
             int oldRev;
-	    try {
+    	    try {
                 oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
             } catch (NumberFormatException e) {
                 oldRev = 0;
-	    }
+    	    }
             int newRev = Integer.parseInt(yacyBuildProperties.getSVNRevision());
             sb.setConfig("svnRevision", yacyBuildProperties.getSVNRevision());
 
-	    // TODO: remove!
+            // TODO: remove!
             //sb.setConfig("version", Double.toString(version));
             //sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
             //sb.setConfig("vdate", (vDATE.startsWith("@")) ? DateFormatter.formatShortDay() : vDATE);
@@ -959,7 +963,11 @@ public final class yacy {
         final long startupMemTotal = MemoryControl.total();
         
         // go into headless awt mode
-        System.setProperty("java.awt.headless", "true");
+        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
+            System.setProperty("java.awt.headless", "false");
+        } else {
+            System.setProperty("java.awt.headless", "true");
+        }
         
         File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
         //System.out.println("args.length=" + args.length);
@@ -967,7 +975,10 @@ public final class yacy {
         if ((args.length >= 1) && ((args[0].toLowerCase().equals("-startup")) || (args[0].equals("-start")))) {
             // normal start-up of yacy
             if (args.length == 2) applicationRoot= new File(args[1]);
-            startup(applicationRoot, startupMemFree, startupMemTotal);
+            startup(applicationRoot, startupMemFree, startupMemTotal, false);
+        } else if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
+            // start-up of yacy with gui
+            startup(applicationRoot, startupMemFree, startupMemTotal, true);
         } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
             // normal shutdown of yacy
             if (args.length == 2) applicationRoot= new File(args[1]);
@@ -1023,7 +1034,7 @@ public final class yacy {
             RWIHashList(applicationRoot, outfile, domain, format);
         } else {
             if (args.length == 1) applicationRoot= new File(args[0]);
-            startup(applicationRoot, startupMemFree, startupMemTotal);
+            startup(applicationRoot, startupMemFree, startupMemTotal, false);
         }
     }
 }
