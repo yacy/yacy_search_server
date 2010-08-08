@@ -1,28 +1,26 @@
-// ymageOSM.java
-// (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 12.02.2008 on http://yacy.net
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  OSMTile
+ *  Copyright 2008 by Michael Peter Christen
+ *  First released 12.02.2008 at http://yacy.net
+ *  
+ *  $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+ *  $LastChangedRevision: 1986 $
+ *  $LastChangedBy: orbiter $
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 package de.anomic.yacy.graphics;
 
@@ -31,6 +29,8 @@ import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -48,28 +48,55 @@ public class OSMTile {
     
     // helper methods to load map images from openstreetmap.org
     
-    public static RasterPlotter getCombinedTiles(final tileCoordinates t11) {
-        tileCoordinates t00, t10, t20, t01, t21, t02, t12, t22;
-        t00 = new tileCoordinates(t11.xtile - 1, t11.ytile - 1, t11.zoom);
-        t10 = new tileCoordinates(t11.xtile    , t11.ytile - 1, t11.zoom);
-        t20 = new tileCoordinates(t11.xtile + 1, t11.ytile - 1, t11.zoom);
-        t01 = new tileCoordinates(t11.xtile - 1, t11.ytile    , t11.zoom);
-        t21 = new tileCoordinates(t11.xtile + 1, t11.ytile    , t11.zoom);
-        t02 = new tileCoordinates(t11.xtile - 1, t11.ytile + 1, t11.zoom);
-        t12 = new tileCoordinates(t11.xtile    , t11.ytile + 1, t11.zoom);
-        t22 = new tileCoordinates(t11.xtile + 1, t11.ytile + 1, t11.zoom);
-        final RasterPlotter m = new RasterPlotter(768, 768, RasterPlotter.MODE_REPLACE, "FFFFFF");
-        BufferedImage bi;
-        bi = getSingleTile(t00); if (bi != null) m.insertBitmap(getSingleTile(t00),   0,   0);
-        bi = getSingleTile(t10); if (bi != null) m.insertBitmap(getSingleTile(t10), 256,   0);
-        bi = getSingleTile(t20); if (bi != null) m.insertBitmap(getSingleTile(t20), 512,   0);
-        bi = getSingleTile(t01); if (bi != null) m.insertBitmap(getSingleTile(t01),   0, 256);
-        bi = getSingleTile(t11); if (bi != null) m.insertBitmap(getSingleTile(t11), 256, 256);
-        bi = getSingleTile(t21); if (bi != null) m.insertBitmap(getSingleTile(t21), 512, 256);
-        bi = getSingleTile(t02); if (bi != null) m.insertBitmap(getSingleTile(t02),   0, 512);
-        bi = getSingleTile(t12); if (bi != null) m.insertBitmap(getSingleTile(t12), 256, 512);
-        bi = getSingleTile(t22); if (bi != null) m.insertBitmap(getSingleTile(t22), 512, 512);
+    /**
+     * generate a image according to a given coordinate of a middle tile
+     * and a width and height of tile numbers. The tile number width and height must
+     * always be impair since the given tile must be always in the middle
+     * @param t the middle tile
+     * @param width number of tiles
+     * @param height number of tiles
+     * @return the image
+     */
+    public static RasterPlotter getCombinedTiles(final tileCoordinates t, int width, int height) {
+        final int w = (width - 1) / 2;
+        width = w * 2 + 1;
+        final int h = (height - 1) / 2;
+        height = h * 2 + 1;
+        final RasterPlotter m = new RasterPlotter(256 * width, 256 * height, RasterPlotter.MODE_REPLACE, "FFFFFF");
+        List<Place> tileLoader = new ArrayList<Place>();
+        Place place;
+        // start tile loading concurrently
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                place = new Place(m, t.xtile - w + i, t.ytile - h + j, 256 * i, 256 * j, t.zoom);
+                place.start();
+                tileLoader.add(place);
+            }
+        }
+        // wait until all tiles are loaded
+        for (Place p: tileLoader) try { p.join(); } catch (InterruptedException e) {}
         return m;
+    }
+    
+    static class Place extends Thread {
+        RasterPlotter m;
+        int xt, yt, xc, yc, z;
+        public Place(RasterPlotter m, int xt, int yt, int xc, int yc, int z) {
+            this.m = m; this.xt = xt; this.yt = yt; this.xc = xc; this.yc = yc; this.z = z;
+        }
+        public void run() {
+            tileCoordinates t = new tileCoordinates(xt, yt, z);
+            BufferedImage bi = null;
+            for (int i = 0; i < 5; i++) {
+                bi = getSingleTile(t);
+                if (bi != null) {
+                    m.insertBitmap(bi, xc, yc);
+                    return;
+                }
+                // don't DoS OSM when trying again
+                try {Thread.sleep(300 + 100 * i);} catch (InterruptedException e) {}
+            }
+        }
     }
     
     public static BufferedImage getSingleTile(final tileCoordinates tile) {
@@ -102,7 +129,7 @@ public class OSMTile {
         }
     }
 
-    public static final Random r = new Random(System.currentTimeMillis()); // to selet tile server
+    public static final Random r = new Random(System.currentTimeMillis()); // to select tile server
     public static class tileCoordinates {
         
         int xtile, ytile, zoom;
