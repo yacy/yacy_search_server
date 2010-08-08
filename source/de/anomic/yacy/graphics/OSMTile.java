@@ -71,6 +71,7 @@ public class OSMTile {
                 place = new Place(m, t.xtile - w + i, t.ytile - h + j, 256 * i, 256 * j, t.zoom);
                 place.start();
                 tileLoader.add(place);
+                if (t.zoom >= 17) try {Thread.sleep(100);} catch (InterruptedException e) {} // be nice with tile server for uncached tiles
             }
         }
         // wait until all tiles are loaded
@@ -88,7 +89,7 @@ public class OSMTile {
             tileCoordinates t = new tileCoordinates(xt, yt, z);
             BufferedImage bi = null;
             for (int i = 0; i < 5; i++) {
-                bi = getSingleTile(t);
+                bi = getSingleTile(t, i);
                 if (bi != null) {
                     m.insertBitmap(bi, xc, yc);
                     return;
@@ -99,10 +100,10 @@ public class OSMTile {
         }
     }
     
-    public static BufferedImage getSingleTile(final tileCoordinates tile) {
+    public static BufferedImage getSingleTile(final tileCoordinates tile, int retry) {
         DigestURI tileURL;
         try {
-            tileURL = new DigestURI(tile.url(), null);
+            tileURL = new DigestURI(tile.url(retry), null);
         } catch (final MalformedURLException e) {
             return null;
         }
@@ -114,7 +115,7 @@ public class OSMTile {
             try {
                 entry = Switchboard.getSwitchboard().loader.load(Switchboard.getSwitchboard().loader.request(tileURL, false, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
             } catch (IOException e) {
-                Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
+                Log.logWarning("OSMTile", "cannot load: " + e.getMessage());
                 return null;
             }
             tileb = entry.getContent();
@@ -135,6 +136,7 @@ public class OSMTile {
         int xtile, ytile, zoom;
 
         public tileCoordinates(final double lat, final double lon, final int zoom) {
+            // see http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
             this.zoom = zoom;
             this.xtile = (int) Math.floor((lon + 180) / 360 * (1 << zoom));
             this.ytile = (int) Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * (1 << zoom));
@@ -146,9 +148,13 @@ public class OSMTile {
             this.ytile = ytile;
         }
         
-        public String url() {
-            char server = (char) ((int)'a' + r.nextInt(3));
-            return("http://" + server + ".tile.openstreetmap.org/" + zoom + "/" + xtile + "/" + ytile + ".png");
+        public String url(int retry) {
+            // see http://wiki.openstreetmap.org/wiki/Public_Domain_Map
+            int hash = (xtile + 7 * ytile + 13 * zoom + retry) % 4;
+            String host = (hash == 3) ? "tile.openstreetmap.org" : ((char) ((int)'a' + r.nextInt(3))) + ".tile.openstreetmap.org";
+            String url = "http://" + host + "/" + zoom + "/" + xtile + "/" + ytile + ".png";
+            //System.out.println("OSM URL = " + url);
+            return url;
         }
 
     }
