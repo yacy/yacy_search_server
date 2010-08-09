@@ -586,6 +586,10 @@ public class Domains {
     }
      
     public static boolean isLocal(final String host) {
+        return isLocal(host, true);
+    }
+    
+    private static boolean isLocal(final String host, boolean recursive) {
         if (host == null || host.length() == 0) return true;
 
         // FIXME IPv4 only
@@ -601,7 +605,8 @@ public class Domains {
         }
 
         // check dns lookup: may be a local address even if the domain name looks global
+        if (!recursive) return false;
         InetAddress a = dnsResolve(host);
-        return a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress();
+        return a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress() || isLocal(a.getHostAddress(), false);
     }
 }
