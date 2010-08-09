@@ -405,6 +405,7 @@ public final class yacy {
                 server.terminate(false);
                 server.interrupt();
                 server.close();
+                /*
                 if (server.isAlive()) try {
                     // TODO only send request, don't read response (cause server is already down resulting in error)
                     final DigestURI u = new DigestURI((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
@@ -413,6 +414,7 @@ public final class yacy {
                 } catch (final IOException ee) {
                     Log.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
                 }
+                */
                 Client.closeAllConnections();
                 MultiThreadedHttpConnectionManager.shutdownAll();
                 

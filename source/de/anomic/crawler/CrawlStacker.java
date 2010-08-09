@@ -362,8 +362,8 @@ public final class CrawlStacker {
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
         return (local) ?
-            ("the host '" + host + "' is local, but local addresses are not accepted") :
-            ("the host '" + host + "' is global, but global addresses are not accepted");
+            ("the host '" + host + "' is local, but local addresses are not accepted: " + Domains.dnsResolve(host).getHostAddress()) :
+            ("the host '" + host + "' is global, but global addresses are not accepted: " + Domains.dnsResolve(host).getHostAddress());
     }
     
     public String urlInAcceptedDomainHash(final byte[] urlhash) {

@@ -108,10 +108,10 @@ public final class SearchEvent {
         this.IAneardhthash = null;
         this.localSearchThread = null;
         this.order = new ReferenceOrder(query.ranking, query.targetlang);
-        
+        boolean remote = (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) || (query.domType == QueryParams.SEARCHDOM_CLUSTERALL);
+        if (remote && peers.sizeConnected() == 0) remote = false;
         final long start = System.currentTimeMillis();
-        if ((query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ||
-            (query.domType == QueryParams.SEARCHDOM_CLUSTERALL)) {
+        if (remote) {
         	final int fetchpeers = 12;
             
         	// initialize a ranking process that is the target for data
