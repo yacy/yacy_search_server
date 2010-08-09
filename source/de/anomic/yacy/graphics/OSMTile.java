@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -130,7 +129,6 @@ public class OSMTile {
         }
     }
 
-    public static final Random r = new Random(System.currentTimeMillis()); // to select tile server
     public static class tileCoordinates {
         
         int xtile, ytile, zoom;
@@ -151,7 +149,7 @@ public class OSMTile {
         public String url(int retry) {
             // see http://wiki.openstreetmap.org/wiki/Public_Domain_Map
             int hash = (xtile + 7 * ytile + 13 * zoom + retry) % 4;
-            String host = (hash == 3) ? "tile.openstreetmap.org" : ((char) ((int)'a' + r.nextInt(3))) + ".tile.openstreetmap.org";
+            String host = (hash == 3) ? "tile.openstreetmap.org" : ((char) ((int)'a' + hash)) + ".tile.openstreetmap.org";
             String url = "http://" + host + "/" + zoom + "/" + xtile + "/" + ytile + ".png";
             //System.out.println("OSM URL = " + url);
             return url;
