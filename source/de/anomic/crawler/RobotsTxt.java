@@ -355,7 +355,7 @@ public class RobotsTxt {
 //            res = client.GET(robotsURL.toString());
             robotsTxt = client.GETbytes(robotsURL.toString());
             final int code = client.getHttpResponse().getStatusLine().getStatusCode();
-            final ResponseHeader header = new ResponseHeader(null, client.getHeaderHashMap());
+            final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
             
             // check the response status
 //            if (res.getStatusLine().startsWith("2")) {

@@ -2133,8 +2133,8 @@ public final class Switchboard extends serverSwitch {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + ConnectionInfo.getCount());
             // close unused connections
 //            Client.cleanup();
-        } else if (kbytesUp > 512) {
-        	log.logInfo("dhtTransferJob: too much upload, currently uploading: " + kbytesUp + " Kb");
+        } else if (kbytesUp > 128) {
+        	log.logInfo("dhtTransferJob: too much upload(1), currently uploading: " + kbytesUp + " Kb");
         } else {
             byte[] startHash = null, limitHash = null;
             int tries = 10;
@@ -2167,8 +2167,8 @@ public final class Switchboard extends serverSwitch {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + ConnectionInfo.getCount());
             // close unused connections
 //            Client.cleanup();
-        } else if (kbytesUp > 512) {
-        	log.logInfo("dhtTransferJob: too much upload, currently uploading: " + kbytesUp + " Kb");
+        } else if (kbytesUp > 256) {
+        	log.logInfo("dhtTransferJob: too much upload(2), currently uploading: " + kbytesUp + " Kb");
         } else {
         	boolean dequeued = this.dhtDispatcher.dequeueContainer();
         	hasDoneSomething = hasDoneSomething | dequeued;
@@ -2363,7 +2363,7 @@ public final class Switchboard extends serverSwitch {
                     final long start = System.currentTimeMillis();
 //                    header = Client.whead(url.toString(), reqHeader); 
                     client.HEADResponse(url.toString());
-                    header = new ResponseHeader(null, client.getHeaderHashMap());
+                    header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
                     final long loadtime = System.currentTimeMillis() - start;
 //                    if (header == null) {
                     if (header == null) {

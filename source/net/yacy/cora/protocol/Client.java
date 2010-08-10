@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -46,7 +45,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnManagerParams;
@@ -148,9 +146,6 @@ public class Client {
 		final SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 		schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-		
-		// cookie policy
-		HttpClientParams.setCookiePolicy(httpParams, CookiePolicy.RFC_2965);
 
 		ClientConnectionManager clientConnectionManager = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
 
@@ -329,15 +324,6 @@ public class Client {
 	 */
 	public HttpResponse getHttpResponse() {
 		return httpResponse;
-	}
-	
-	public HashMap<String, String> getHeaderHashMap() {
-		if (httpResponse == null) return null;
-		final HashMap<String, String> hmap = new HashMap<String, String>();
-		for (Header h : httpResponse.getAllHeaders()) {
-			hmap.put(h.getName(), h.getValue());
-		}
-		return hmap;
 	}
 	
 	public void writeTo(final OutputStream outputStream) throws IOException {

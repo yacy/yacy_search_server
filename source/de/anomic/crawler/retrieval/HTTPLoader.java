@@ -127,7 +127,7 @@ public final class HTTPLoader {
             // send request
 //            res = client.GET(request.url().toString(), maxFileSize);
         	final byte[] responseBody = client.GETbytes(request.url().toString(), maxFileSize);
-        	final ResponseHeader header = new ResponseHeader(null, client.getHeaderHashMap());
+        	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
         	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
             // FIXME: 30*-handling (bottom) is never reached
             // we always get the final content because httpClient.followRedirects = true
@@ -258,7 +258,7 @@ public final class HTTPLoader {
             // send request
 //            res = client.GET(request.url().toString(), Long.MAX_VALUE);
         	final byte[] responseBody = client.GETbytes(request.url().toString(), Long.MAX_VALUE);
-        	final ResponseHeader header = new ResponseHeader(null, client.getHeaderHashMap());
+        	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
         	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
             // FIXME: 30*-handling (bottom) is never reached
             // we always get the final content because httpClient.followRedirects = true

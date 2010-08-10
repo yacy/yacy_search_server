@@ -486,7 +486,7 @@ public final class HTTPDProxyHandler {
                 conProp.put(HeaderFramework.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
 
 //                final ResponseHeader responseHeader = res.getResponseHeader();
-                final ResponseHeader responseHeader = new ResponseHeader(null, client.getHeaderHashMap());
+                final ResponseHeader responseHeader = new ResponseHeader(client.getHttpResponse().getAllHeaders());
                 // determine if it's an internal error of the httpc
                 if (responseHeader.isEmpty()) {
 //                    throw new Exception(res.getStatusLine());
@@ -845,7 +845,7 @@ public final class HTTPDProxyHandler {
 //            if (responseHeader.isEmpty()) {
 //                throw new Exception(res.getStatusLine());
 //            }      
-            final ResponseHeader responseHeader = new ResponseHeader(null, client.getHeaderHashMap());
+            final ResponseHeader responseHeader = new ResponseHeader(client.getHttpResponse().getAllHeaders());
             if (responseHeader.isEmpty()) {
                 throw new Exception(client.getHttpResponse().getStatusLine().toString());
             } 
@@ -976,7 +976,7 @@ public final class HTTPDProxyHandler {
 	            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
 	            
 //	            final ResponseHeader responseHeader = res.getResponseHeader();
-	            final ResponseHeader responseHeader = new ResponseHeader(null, client.getHeaderHashMap());
+	            final ResponseHeader responseHeader = new ResponseHeader(client.getHttpResponse().getAllHeaders());
 	            // determine if it's an internal error of the httpc
 	            if (responseHeader.isEmpty()) {
 //	                throw new Exception(res.getStatusLine());
@@ -1307,7 +1307,7 @@ public final class HTTPDProxyHandler {
             try {
 //                response = remoteProxy.CONNECT(host, port);
             	remoteProxy.HEADResponse("http://" + host + ":" + port);
-            	ResponseHeader header = new ResponseHeader(null, remoteProxy.getHeaderHashMap());
+            	ResponseHeader header = new ResponseHeader(remoteProxy.getHttpResponse().getAllHeaders());
             	
                 // outputs a logline to the serverlog with the current status
 //                log.logInfo("CONNECT-RESPONSE: status=" + response.getStatusLine() + ", header=" + response.getResponseHeader().toString());

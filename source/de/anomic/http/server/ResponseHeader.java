@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.http.Header;
+
 import net.yacy.kelondro.logging.Log;
 
 
@@ -41,6 +43,13 @@ public class ResponseHeader extends HeaderFramework {
 
     public ResponseHeader() {
         super();
+    }
+
+    public ResponseHeader(Header[] headers) {
+        super();
+        for (final Header h : headers) {
+        	this.add(h.getName(), h.getValue());
+        }
     }
     
     public ResponseHeader(final HashMap<String, String> reverseMappingCache) {
