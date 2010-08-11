@@ -131,19 +131,17 @@ public class CrawlQueues {
     }
     
     /**
-     * tests if hash occurrs in any database
+     * tests if hash occurs in any database
      * @param hash
      * @return if the hash exists, the name of the database is returned, otherwise null is returned
      */
     public String urlExists(final byte[] hash) {
         if (delegatedURL.exists(hash)) return "delegated";
         if (errorURL.exists(hash)) return "errors";
-        /*
         if (noticeURL.existsInStack(hash)) return "crawler";
         for (final crawlWorker worker: workers.values()) {
-            if (worker.request.url().hash().equals(hash)) return "worker";
+            if (Base64Order.enhancedCoder.equal(worker.request.url().hash(), hash)) return "worker";
         }
-        */
         return null;
     }
     
@@ -539,7 +537,7 @@ public class CrawlQueues {
                 // checking robots.txt for http(s) resources
                 this.request.setStatus("worker-checkingrobots", WorkflowJob.STATUS_STARTED);
                 if ((request.url().getProtocol().equals("http") || request.url().getProtocol().equals("https")) && sb.robots.isDisallowed(request.url())) {
-                    if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
+                    //if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     errorURL.push(
                             this.request,
                             sb.peers.mySeed().hash.getBytes(),

@@ -32,6 +32,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.BufferedObjectIndex;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
@@ -56,6 +57,7 @@ public class Balancer {
     private final ConcurrentHashMap<String, HandleSet> domainStacks; // a map from host name to lists with url hashs
     private final ConcurrentLinkedQueue<byte[]> top;
     private final TreeMap<Long, byte[]> delayed;
+    private final HandleSet ddc;
     private BufferedObjectIndex  urlFileIndex;
     private final File   cacheStacksPath;
     private long         minimumLocalDelta;
@@ -77,6 +79,7 @@ public class Balancer {
         this.minimumLocalDelta = minimumLocalDelta;
         this.minimumGlobalDelta = minimumGlobalDelta;
         this.domStackInitSize = Integer.MAX_VALUE;
+        this.ddc = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
@@ -208,8 +211,10 @@ public class Balancer {
        return removedCounter;
     }
     
-    public boolean has(final String urlhash) {
-        return urlFileIndex.has(urlhash.getBytes());
+    public boolean has(final byte[] urlhashb) {
+        synchronized (this) {
+            return this.urlFileIndex.has(urlhashb) || this.ddc.has(urlhashb);
+        }
     }
     
     public boolean notEmpty() {
@@ -240,15 +245,13 @@ public class Balancer {
         assert entry != null;
         final byte[] hash = entry.url().hash();
         synchronized (this) {
-    	    if (urlFileIndex.has(hash)) {
-                return;
-            }
+    	    if (this.urlFileIndex.has(hash) || this.ddc.has(hash)) return;
         
             // add to index
-            final int s = urlFileIndex.size();
-	        urlFileIndex.put(entry.toRow());
-	        assert s < urlFileIndex.size() : "hash = " + new String(hash) + ", s = " + s + ", size = " + urlFileIndex.size();
-	        assert urlFileIndex.has(hash) : "hash = " + new String(hash);
+            final int s = this.urlFileIndex.size();
+            this.urlFileIndex.put(entry.toRow());
+	        assert s < this.urlFileIndex.size() : "hash = " + new String(hash) + ", s = " + s + ", size = " + this.urlFileIndex.size();
+	        assert this.urlFileIndex.has(hash) : "hash = " + new String(hash);
 
 	        // add the hash to a queue
 	        pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
@@ -409,6 +412,8 @@ public class Balancer {
 		        }
 		        break;
 	    	}
+    		if (crawlEntry != null)
+                try { this.ddc.put(crawlEntry.url().hash()); } catch (RowSpaceExceededException e) {}
     	}
     	if (crawlEntry == null) return null;
     	
@@ -430,6 +435,7 @@ public class Balancer {
                 try {synchronized(this) { this.wait(3000); }} catch (final InterruptedException e) {}
             }
         }
+        this.ddc.remove(crawlEntry.url().hash());
         Latency.update(crawlEntry.url());
         return crawlEntry;
     }

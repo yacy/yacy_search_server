@@ -190,7 +190,8 @@ public class Table implements Index, Iterable<Row.Entry> {
             
             // open the file
             this.file = new BufferedRecords(new Records(tablefile, rowdef.objectsize), this.buffersize);
- 
+            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
+            
             // clean up the file by cleaning badly formed entries
             int errorc = errors.size();
             int errorcc = 0;
@@ -202,7 +203,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 removeInFile(idx);
             }
             errors.close();
-            assert this.index.size() == this.file.size() : "index.size() = " + index.size() + ", this.file.size() = " + this.file.size();
+            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
             
             // remove doubles
             if (!freshFile) {
@@ -449,8 +450,8 @@ public class Table implements Index, Iterable<Row.Entry> {
     public Entry get(final byte[] key) throws IOException {
         if ((file == null) || (index == null)) return null;
         synchronized (this) {
-            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-            assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
+            assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
         }
         Entry e = get0(key);
         if (e != null && this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes())) return e;
@@ -543,8 +544,8 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
     
     public synchronized void put(final Entry row) throws IOException, RowSpaceExceededException {
-        assert file == null || file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        assert file == null || file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
         assert row != null;
         assert row.bytes() != null;
         if (file == null || row == null || row.bytes() == null) return;

@@ -322,14 +322,14 @@ public final class CrawlStacker {
         } else {
             final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
             if (recrawl) {
-                if (this.log.isFine()) 
-                    this.log.logFine("RE-CRAWL of URL '" + url.toString() + "': this url was crawled " +
+                if (this.log.isInfo()) 
+                    this.log.logInfo("RE-CRAWL of URL '" + url.toString() + "': this url was crawled " +
                         ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
             } else {
                 if (dbocc == null) {
                     return "double in: LURL-DB";
                 } else {
-                    if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
+                    if (this.log.isInfo()) this.log.logInfo("URL '" + url.toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time:");
                     if (dbocc.equals("errors")) {
                         ZURL.Entry errorEntry = nextQueue.errorURL.get(url.hash());
                         return "double in: errors (" + errorEntry.anycause() + ")";

@@ -142,12 +142,12 @@ public class NoticedURL {
         }
     }
 
-    public boolean existsInStack(final String urlhash) {
+    public boolean existsInStack(final byte[] urlhashb) {
         return
-            coreStack.has(urlhash) ||
-            limitStack.has(urlhash) ||
-            //overhangStack.has(urlhash) || 
-            remoteStack.has(urlhash);
+            coreStack.has(urlhashb) ||
+            limitStack.has(urlhashb) ||
+            //overhangStack.has(urlhashb) || 
+            remoteStack.has(urlhashb);
     }
     
     public void push(final int stackType, final Request entry) {

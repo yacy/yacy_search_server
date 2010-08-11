@@ -1238,7 +1238,7 @@ public final class Switchboard extends serverSwitch {
         if (noIndexReason != null) {
             // log cause and close queue
             final DigestURI referrerURL = response.referrerURL();
-            if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
+            //if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
             addURLtoErrorDB(response.url(), (referrerURL == null) ? null : referrerURL.hash(), response.initiator(), response.name(), noIndexReason);
             // finish this entry
             return "not allowed: " + noIndexReason;
@@ -1714,7 +1714,7 @@ public final class Switchboard extends serverSwitch {
             b = Cache.getContent(response.url());
             if (b == null) {
                 this.log.logWarning("the resource '" + response.url() + "' is missing in the cache.");
-                addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), "missing");
+                addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), "missing in cache");
                 return null;
             }
         }
@@ -1790,6 +1790,7 @@ public final class Switchboard extends serverSwitch {
         for (Document document: in.documents) {
             if (document.indexingDenied()) {
                 if (log.isInfo()) log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': denied by document-attached noindexing rule");
+                addURLtoErrorDB(in.queueEntry.url(), in.queueEntry.referrerHash(), in.queueEntry.initiator(), in.queueEntry.name(), "denied by document-attached noindexing rule");
                 continue;
             }
             doclist.add(document);
@@ -1850,14 +1851,14 @@ public final class Switchboard extends serverSwitch {
         if (process == Segments.Process.SURROGATES) processCase = EventOrigin.SURROGATES;
 
         if (condenser == null || document.indexingDenied()) {
-            if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by rule in document");
+            //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by rule in document, process case=" + processCase);
             return;
         }
         
         if (!queueEntry.profile().indexText() && !queueEntry.profile().indexMedia()) {
-            if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by profile rule");
+            //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             return;
         }
         
@@ -1878,8 +1879,8 @@ public final class Switchboard extends serverSwitch {
                     searchEvent);
             yacyChannel.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
-            if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage());
+            //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase + ", error = " + e.getMessage());
             return;
         }
         
@@ -2360,19 +2361,17 @@ public final class Switchboard extends serverSwitch {
                 try {
                     
                     url = new DigestURI(seedListFileURL, null);
-                    final long start = System.currentTimeMillis();
-//                    header = Client.whead(url.toString(), reqHeader); 
+                    //final long start = System.currentTimeMillis();
                     client.HEADResponse(url.toString());
                     header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
-                    final long loadtime = System.currentTimeMillis() - start;
-//                    if (header == null) {
-                    if (header == null) {
+                    //final long loadtime = System.currentTimeMillis() - start;
+                    /*if (header == null) {
                         if (loadtime > getConfigLong("bootstrapLoadTimeout", 6000)) {
                             yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, time-out after " + loadtime + " milliseconds");
                         } else {
                             yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not available, no content");
                         }
-                    } else if (header.lastModified() == null) {
+                    } else*/ if (header.lastModified() == null) {
                         yacyCore.log.logWarning("BOOTSTRAP: seed-list URL " + seedListFileURL + " not usable, last-modified is missing");
                     } else if ((header.age() > 86400000) && (ssc > 0)) {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
