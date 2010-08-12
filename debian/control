@@ -7,7 +7,7 @@ Standards-Version: 3.7.2
 
 Package: yacy
 Architecture: all
-Depends: java-virtual-machine, java2-runtime, sudo, debconf
+Depends: java2-runtime, sudo, debconf
 Description: P2P Web Search Engine
  YaCy is a Java-based peer-2-peer search engine.
  It provoids a personal websearch engine, which is
