@@ -132,7 +132,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
         put(entry);
         stack.add(entry.hash());
-        Log.logInfo("URL Errors", bentry.url().toNormalform(false, false) + " - " + anycause);
+        Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + anycause);
         while (stack.size() > maxStackSize) stack.poll();
     }
     

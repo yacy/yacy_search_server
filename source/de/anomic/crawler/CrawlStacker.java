@@ -28,6 +28,7 @@
 
 package de.anomic.crawler;
 
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
@@ -361,9 +362,10 @@ public final class CrawlStacker {
         // check if this is a local address and we are allowed to index local pages:
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
+        InetAddress ia = Domains.dnsResolve(host);
         return (local) ?
-            ("the host '" + host + "' is local, but local addresses are not accepted: " + Domains.dnsResolve(host).getHostAddress()) :
-            ("the host '" + host + "' is global, but global addresses are not accepted: " + Domains.dnsResolve(host).getHostAddress());
+            ("the host '" + host + "' is local, but local addresses are not accepted: " + ((ia == null) ? "null" : ia.getHostAddress())) :
+            ("the host '" + host + "' is global, but global addresses are not accepted: " + ((ia == null) ? "null" : ia.getHostAddress()));
     }
     
     public String urlInAcceptedDomainHash(final byte[] urlhash) {
