@@ -601,8 +601,8 @@ cleanup.deletionPublishedNews = true
 # not for first startup of YaCy
 
 # -Xmx<size> and -Xms<size> maximum/init Java heap size
-# both values should be equal,
-# othervise the YaCy-internal memory supervision does not work
+# if a high performance for large search indexes is wanted, then setting the values to equal number is recommended
+# if YaCy shall be nice in not-only-yacy environments, then the Xms value may be lower
 javastart_Xmx=Xmx600m
 javastart_Xms=Xms180m
 
