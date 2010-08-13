@@ -26,6 +26,8 @@
 
 package de.anomic.search;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -357,6 +359,15 @@ public final class QueryParams {
     	return ret;
     }
     
+    public String queryStringForUrl() {
+    	try {
+			return URLEncoder.encode(this.queryString, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return this.queryString;
+		}
+    }
+    
     public TreeSet<String>[] queryWords() {
         return cleanQuery(this.queryString);
     }
@@ -445,7 +456,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("query=");
-        sb.append(theQuery.queryString(true).replace(' ', '+'));
+        sb.append(theQuery.queryStringForUrl());
         sb.append((addToQuery == null) ? "" : "+" + addToQuery);
 
         sb.append(ampersand);
@@ -489,7 +500,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("former=");
-        sb.append(theQuery.queryString(true));
+        sb.append(theQuery.queryStringForUrl());
 
         return sb.toString();
     }
