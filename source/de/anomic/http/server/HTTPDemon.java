@@ -687,8 +687,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // Textfield1=default+value+Textfield+1&Textfield2=default+value+Textfield+2&selection1=sel1&selection2=othervalue1&selection2=sel2&selection3=sel3&Menu1=SubEnry11&radio1=button1&check1=button2&check1=button3&hidden1=&sButton1=enter+%281%29
         while (argsString.length() > 0) {
             eqp = argsString.indexOf('=');
-            sep = argsString.indexOf('&');
-            if ((eqp <= 0) || (sep <= 0)) break;
+            if (eqp <= 0) break;
+            sep = argsString.indexOf('&', eqp + 1);
+            if (sep <= 0) break;
             // resulting equations are inserted into the property args with leading '&'
             args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
             argsString = argsString.substring(sep + 1);
