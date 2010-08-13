@@ -1807,11 +1807,11 @@ Connects<br/>per hour==Verbindungen<br/>pro Stunde
 
 Version==Version
 Own/Other==Eigene/Andere
-dark font==schwarze Schrift
+dark green font==dunkelgrüne Schrift
 senior/principal peers==Senior/Principal Peers
-lightred font==hellrote Schrift
+light green font==hellgrüne Schrift
 >passive peers<==>passive Peers<
-turquoise font==türkise Schrift
+pink font==türkise Schrift
 junior peers==Junior Peers
 red point==roter Punkt
 this peer==Ihr Peer
