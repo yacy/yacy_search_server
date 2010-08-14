@@ -1811,12 +1811,14 @@ dark green font==dunkelgrüne Schrift
 senior/principal peers==Senior/Principal Peers
 light green font==hellgrüne Schrift
 >passive peers<==>passive Peers<
-pink font==türkise Schrift
+pink font==rosa Schrift
 junior peers==Junior Peers
 red point==roter Punkt
 this peer==Ihr Peer
->waves<==>Wellen<
+>grey waves<==>graue Wellen<
+>green radiation<==>grüne Radiation<
 >crawling activity<==>Crawl Aktivität<
+>strong query activity<==>starke Abfrage Aktivität<
 >red lines<==>rote Linien<
 >DHT-out<==>DHT ausgehend<
 >green lines<==>grüne Linien<
