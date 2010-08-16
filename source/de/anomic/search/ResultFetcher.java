@@ -164,6 +164,7 @@ public class ResultFetcher {
     
                     // get next entry
                     page = rankedCache.takeURL(true, taketimeout);
+                    //if (page == null) page = rankedCache.takeURL(false, taketimeout);
                     if (page == null) break;
                     if (failedURLs.has(page.hash())) continue;
                     

@@ -364,10 +364,19 @@ public final class Log {
             // generating the root logger
             /*Logger logger =*/ Logger.getLogger("");
 
-//          System.setOut(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDOUT"), Level.FINEST)));
-//          System.setErr(new PrintStream(new LoggerOutputStream(Logger.getLogger("STDERR"), Level.SEVERE)));
             logRunnerThread = new logRunner();
             logRunnerThread.start();
+            
+            // redirect uncaught exceptions to logging
+            final Log exceptionLog = new Log("UNCAUGHT-EXCEPTION");
+            Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
+                public void uncaughtException(final Thread t, final Throwable e) {
+                    String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
+                    exceptionLog.logWarning(msg);
+                    System.err.print("Exception in thread \"" + t.getName() + "\" ");
+                    e.printStackTrace(System.err);
+                }
+            });
         } finally {
             if (fileIn != null) try {fileIn.close();}catch(final Exception e){}
         }
@@ -398,5 +407,4 @@ public final class Log {
         for (int i = 0; i < alength; i++) if (a[astart + i] != 0) return false;
         return true;
     }
-
 }
