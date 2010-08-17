@@ -43,13 +43,6 @@ public class GraphPlotter {
 
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
-
-    public  static final long color_back = 0xFFFFFF;
-    public  static final long color_text = 0x888888;
-    private static final long color_dot = 0x11BB11;
-    private static final long color_line = 0x222222;
-    private static final long color_lineend = 0x333333;
-    
     
     HashMap<String, coordinate> points;
     HashSet<String> borders;
@@ -132,8 +125,23 @@ public class GraphPlotter {
         }
     }
     
-    public RasterPlotter draw(final int width, final int height, final int leftborder, final int rightborder, final int topborder, final int bottomborder) {
-        final RasterPlotter image = new RasterPlotter(width, height, RasterPlotter.MODE_SUB, color_back);
+    public RasterPlotter draw(
+            final int width,
+            final int height,
+            final int leftborder,
+            final int rightborder,
+            final int topborder,
+            final int bottomborder,
+            final String color_back,
+            final String color_dot,
+            final String color_line,
+            final String color_lineend,
+            final String color_text
+            ) {
+        RasterPlotter.DrawMode drawMode = RasterPlotter.DrawMode.MODE_SUB;
+        if (RasterPlotter.darkColor(color_back)) drawMode = RasterPlotter.DrawMode.MODE_ADD;
+        
+        final RasterPlotter image = new RasterPlotter(width, height, drawMode, color_back);
         final double xfactor = ((rightmost - leftmost) == 0.0) ? 0.0 : (width - leftborder - rightborder) / (rightmost - leftmost);
         final double yfactor = ((topmost - bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (topmost - bottommost);
         
@@ -154,7 +162,7 @@ public class GraphPlotter {
             image.setColor(color_text);
             PrintTool.print(image, x, y + 10, 0, name.toUpperCase(), 0);
         }
-        
+
         // draw lines
         final Iterator<String> j = borders.iterator();
         coordinate[] border;

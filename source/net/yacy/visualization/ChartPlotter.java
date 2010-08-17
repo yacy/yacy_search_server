@@ -53,7 +53,7 @@ public class ChartPlotter extends RasterPlotter {
     public ChartPlotter(final int width, final int height, final String backgroundColor, final String foregroundColor, final String lightColor,
                       final int leftborder, final int rightborder, final int topborder, final int bottomborder,
                       final String name, final String subline) {
-        super(width, height, RasterPlotter.MODE_REPLACE, backgroundColor);
+        super(width, height, RasterPlotter.DrawMode.MODE_REPLACE, backgroundColor);
         this.leftborder = leftborder;
         this.rightborder = rightborder;
         this.topborder = topborder;

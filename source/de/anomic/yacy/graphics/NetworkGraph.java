@@ -171,7 +171,7 @@ public class NetworkGraph {
 
     private static RasterPlotter drawNetworkPicture(final yacySeedDB seedDB, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final int coronaangle, final long communicationTimeout, final String networkName, final String networkTitle, final String bgcolor) {
 
-        RasterPlotter networkPicture = new RasterPlotter(width, height, (bgcolor.equals("000000")) ? RasterPlotter.MODE_ADD : RasterPlotter.MODE_SUB, bgcolor);
+        RasterPlotter networkPicture = new RasterPlotter(width, height, (bgcolor.equals("000000")) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB, bgcolor);
         if (seedDB == null) return networkPicture; // no other peers known
         
         final int innerradius = Math.min(width, height) / 5;
@@ -404,7 +404,7 @@ public class NetworkGraph {
 
         final int exprlength = 19;
         logo = newLogo;
-        bannerPicture = new RasterPlotter(width, height, RasterPlotter.MODE_REPLACE, bgcolor);
+        bannerPicture = new RasterPlotter(width, height, RasterPlotter.DrawMode.MODE_REPLACE, bgcolor);
 
         // draw description
         bannerPicture.setColor(textcolor);
@@ -423,7 +423,7 @@ public class NetworkGraph {
         if (logo != null) {
             final int x = (100/2 - logo.getWidth()/2);
             final int y = (height/2 - logo.getHeight()/2);
-            bannerPicture.insertBitmap(logo, x, y, 0, 0, RasterPlotter.FILTER_ANTIALIASING);
+            bannerPicture.insertBitmap(logo, x, y, 0, 0, RasterPlotter.FilterMode.FILTER_ANTIALIASING);
         }
 
         if (!bordercolor.equals("")) {

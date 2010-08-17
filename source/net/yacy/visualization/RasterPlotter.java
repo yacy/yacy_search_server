@@ -57,13 +57,13 @@ public class RasterPlotter {
     public static final long BLUE   = 0x0000FF;
     public static final long GREY   = 0x888888;
     
-    public static final byte MODE_REPLACE = 0;
-    public static final byte MODE_ADD = 1;
-    public static final byte MODE_SUB = 2;
+    public static enum DrawMode {
+        MODE_REPLACE, MODE_ADD, MODE_SUB;
+    }
     
-    public static final byte FILTER_ANTIALIASING = 0;
-    public static final byte FILTER_BLUR = 1;
-    public static final byte FILTER_INVERT = 2;
+    public static enum FilterMode {
+        FILTER_ANTIALIASING, FILTER_BLUR, FILTER_INVERT;
+    }
     
     protected final int            width, height;
     private final   int[]          cc;
@@ -71,13 +71,13 @@ public class RasterPlotter {
     private final   WritableRaster grid;
     private         int            defaultColR, defaultColG, defaultColB;
     private final   long           backgroundCol;
-    private final   byte           defaultMode;
+    private         DrawMode       defaultMode;
     
-    public RasterPlotter(final int width, final int height, final byte drawMode, final String backgroundColor) {
+    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final String backgroundColor) {
         this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
     }
     
-    public RasterPlotter(final int width, final int height, final byte drawMode, final long backgroundColor) {
+    public RasterPlotter(final int width, final int height, final DrawMode drawMode, final long backgroundColor) {
         if (!(MemoryControl.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + MemoryControl.available() + ") available");
         this.cc = new int[3];
         this.width = width;
@@ -119,6 +119,10 @@ public class RasterPlotter {
         */
     }
     
+    public void setDrawMode(DrawMode drawMode) {
+        this.defaultMode = drawMode;
+    }
+    
     public BufferedImage getImage() {
         return this.image;
     }
@@ -131,8 +135,19 @@ public class RasterPlotter {
         return height;
     }
     
+    public static boolean darkColor(final String s) {
+        return darkColor(Long.parseLong(s, 16));
+    }
+    
+    public static boolean darkColor(final long c) {
+        final int r = (int) (c >> 16);
+        final int g = (int) ((c >> 8) & 0xff);
+        final int b = (int) (c & 0xff);
+        return r + g + b < 384;
+    }
+    
     public void setColor(final long c) {
-    	if (this.defaultMode == MODE_SUB) {
+    	if (this.defaultMode == DrawMode.MODE_SUB) {
     		final int r = (int) (c >> 16);
             final int g = (int) ((c >> 8) & 0xff);
             final int b = (int) (c & 0xff);
@@ -159,7 +174,7 @@ public class RasterPlotter {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
         synchronized (cc) {
-        	if (this.defaultMode == MODE_REPLACE) {
+        	if (this.defaultMode == DrawMode.MODE_REPLACE) {
         		if (intensity == 100) {
         			cc[0] = defaultColR;
             		cc[1] = defaultColG;
@@ -172,7 +187,7 @@ public class RasterPlotter {
         			c[2] = (intensity * defaultColB + (100 - intensity) * c[2]) / 100;
                     grid.setPixel(x, y, c);
         		}
-        	} else if (this.defaultMode == MODE_ADD) {
+        	} else if (this.defaultMode == DrawMode.MODE_ADD) {
         		int[] c = grid.getPixel(x, y, cc);
         		if (intensity == 100) {
         			c[0] = (0xff & c[0]) + defaultColR; if (cc[0] > 255) cc[0] = 255;
@@ -184,7 +199,7 @@ public class RasterPlotter {
         			c[2] = (0xff & c[2]) + (intensity * defaultColB / 100); if (cc[2] > 255) cc[2] = 255;
         		}
                 grid.setPixel(x, y, c);
-        	} else if (this.defaultMode == MODE_SUB) {
+        	} else if (this.defaultMode == DrawMode.MODE_SUB) {
         		int[] c = grid.getPixel(x, y, cc);
         		if (intensity == 100) {
         			c[0] = (0xff & c[0]) - defaultColR; if (cc[0] < 0) cc[0] = 0;
@@ -238,6 +253,10 @@ public class RasterPlotter {
                 }
             }
         }
+    }
+    
+    public void lineDot(final int x0, final int y0, final int x1, final int y1, final int radius, final int distance, final String lineColor, final String dotColor) {
+        lineDot(x0, y0, x1, y1, radius, distance, Long.parseLong(lineColor, 16), Long.parseLong(dotColor, 16));
     }
     
     public void lineDot(final int x0, final int y0, final int x1, final int y1, final int radius, final int distance, final long lineColor, final long dotColor) {
@@ -337,7 +356,7 @@ public class RasterPlotter {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final byte filter) {
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final FilterMode filter) {
         insertBitmap(bitmap, x, y, -1, filter);
     }    
     
@@ -366,7 +385,7 @@ public class RasterPlotter {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final int xx, final int yy, final byte filter) {
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final int xx, final int yy, final FilterMode filter) {
         insertBitmap(bitmap, x, y, bitmap.getRGB(xx, yy), filter);
     }        
     
@@ -409,13 +428,13 @@ public class RasterPlotter {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final int transRGB, final byte filter) {
+    public void insertBitmap(final BufferedImage bitmap, final int x, final int y, final int transRGB, final FilterMode filter) {
         insertBitmap(bitmap, x, y, transRGB);
 
         final int bitmapWidth = bitmap.getWidth();
         final int bitmapHeight = bitmap.getHeight();        
         
-        if (filter == FILTER_ANTIALIASING) {
+        if (filter == FilterMode.FILTER_ANTIALIASING) {
             
             int transX = -1;
             int transY = -1;
@@ -463,7 +482,7 @@ public class RasterPlotter {
      * @author Marc Nause
      */
     public void antialiasing(final int lox, final int loy, final int rux, final int ruy, final int bgcolor) {
-        filter(lox, loy, rux, ruy, FILTER_ANTIALIASING, bgcolor);
+        filter(lox, loy, rux, ruy, FilterMode.FILTER_ANTIALIASING, bgcolor);
     }
 
     /**
@@ -475,7 +494,7 @@ public class RasterPlotter {
      * @author Marc Nause
      */
     public void blur(final int lox, final int loy, final int rux, final int ruy) {
-        filter(lox, loy, rux, ruy, FILTER_BLUR, -1);
+        filter(lox, loy, rux, ruy, FilterMode.FILTER_BLUR, -1);
     }
 
     /**
@@ -487,7 +506,7 @@ public class RasterPlotter {
      * @author Marc Nause
      */
     public void invert(final int lox, final int loy, final int rux, final int ruy) {
-        filter(lox, loy, rux, ruy, FILTER_INVERT, -1);
+        filter(lox, loy, rux, ruy, FilterMode.FILTER_INVERT, -1);
     }
     
     /**
@@ -499,7 +518,7 @@ public class RasterPlotter {
      * @param filter chooses filter 
      * @author Marc Nause
      */
-    private void filter(int lox, int loy, int rux, int ruy, final byte filter, final int bgcolor) {
+    private void filter(int lox, int loy, int rux, int ruy, final FilterMode filter, final int bgcolor) {
 
         // taking care that all values are legal
         if (lox < 0) { lox = 0; }
@@ -539,7 +558,7 @@ public class RasterPlotter {
                 rgbG = 0;
                 rgbB = 0;  
                 
-                if (filter == FILTER_ANTIALIASING || filter == FILTER_BLUR) {
+                if (filter == FilterMode.FILTER_ANTIALIASING || filter == FilterMode.FILTER_BLUR) {
                     // taking samples from neighbours of pixel
                     if (i > lox) {
                         rgb = image.getRGB(i - 1, j);
@@ -589,7 +608,7 @@ public class RasterPlotter {
                 // add value of pixel
                 // in case filter is used for antialiasing this will only be done if
                 // the pixel is on the edge to the background color
-                if ((filter == FILTER_ANTIALIASING && border) || (filter == FILTER_BLUR)) {
+                if (filter == FilterMode.FILTER_ANTIALIASING && border || filter == FilterMode.FILTER_BLUR) {
                     rgbR += (rgb >> 16 & 0xff);
                     rgbG += (rgb >> 8 & 0xff);
                     rgbB += (rgb & 0xff);
@@ -597,14 +616,14 @@ public class RasterPlotter {
                     border = false;
                 } 
                 // set to value of pixel => keep value
-                else if (filter == FILTER_ANTIALIASING) {
+                else if (filter == FilterMode.FILTER_ANTIALIASING) {
                     rgbR = (rgb >> 16 & 0xff);
                     rgbG = (rgb >> 8 & 0xff);
                     rgbB = (rgb & 0xff);
                     numberOfNeighbours = 1;
                 }
                 // set value of pixel to inverted value (using XOR)
-                else if (filter == FILTER_INVERT) {
+                else if (filter == FilterMode.FILTER_INVERT) {
                     rgb = rgb ^ 0xffffff;
                     rgbR = (rgb >> 16 & 0xff);
                     rgbG = (rgb >> 8 & 0xff);
@@ -736,7 +755,7 @@ public class RasterPlotter {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
         
-        final RasterPlotter m = new RasterPlotter(200, 300, MODE_SUB, "FFFFFF");
+        final RasterPlotter m = new RasterPlotter(200, 300, DrawMode.MODE_SUB, "FFFFFF");
         demoPaint(m);
         final File file = new File("/Users/admin/Desktop/testimage.png");
         try {

@@ -1139,7 +1139,7 @@ public class AnimGifEncoder {
     public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "true");
         
-        final RasterPlotter m = new RasterPlotter(200, 300, RasterPlotter.MODE_SUB, "FFFFFF");
+        final RasterPlotter m = new RasterPlotter(200, 300, RasterPlotter.DrawMode.MODE_SUB, "FFFFFF");
         RasterPlotter.demoPaint(m);
         final File file = new File("/Users/admin/Desktop/testimage.gif");
         

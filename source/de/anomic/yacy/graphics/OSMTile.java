@@ -61,7 +61,7 @@ public class OSMTile {
         width = w * 2 + 1;
         final int h = (height - 1) / 2;
         height = h * 2 + 1;
-        final RasterPlotter m = new RasterPlotter(256 * width, 256 * height, RasterPlotter.MODE_REPLACE, "FFFFFF");
+        final RasterPlotter m = new RasterPlotter(256 * width, 256 * height, RasterPlotter.DrawMode.MODE_REPLACE, "FFFFFF");
         List<Place> tileLoader = new ArrayList<Place>();
         Place place;
         // start tile loading concurrently

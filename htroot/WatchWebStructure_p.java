@@ -18,6 +18,12 @@ public class WatchWebStructure_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+
+        String color_text    = "888888";
+        String color_back    = "FFFFFF";
+        String color_dot     = "11BB11";
+        String color_line    = "222222";
+        String color_lineend = "333333";
         
         int width = 768;
         int height = 576;
@@ -28,12 +34,17 @@ public class WatchWebStructure_p {
         String besthost;
         
         if (post != null) {
-            width = post.getInt("width", 768);
-            height = post.getInt("height", 576);
-            depth = post.getInt("depth", 3);
-            nodes = post.getInt("nodes", width * height * 100 / 768 / 576);
-            time = post.getInt("time", -1);
-            host = post.get("host", "auto");
+            width         = post.getInt("width", 768);
+            height        = post.getInt("height", 576);
+            depth         = post.getInt("depth", 3);
+            nodes         = post.getInt("nodes", width * height * 100 / 768 / 576);
+            time          = post.getInt("time", -1);
+            host          = post.get("host", "auto");
+            color_text    = post.get("colortext",    color_text);
+            color_back    = post.get("colorback",    color_back);
+            color_dot     = post.get("colordot",     color_dot);
+            color_line    = post.get("colorline",    color_line);
+            color_lineend = post.get("colorlineend", color_lineend);
         }
         
         if (host.equals("auto")) {
@@ -76,7 +87,12 @@ public class WatchWebStructure_p {
         prop.put("timed", (time < 0) ? 9000 : Math.max(1000, time - 1000));
         prop.put("width", width);
         prop.put("height", height);
-        
+
+        prop.put("colortext",    color_text);
+        prop.put("colorback",    color_back);
+        prop.put("colordot",     color_dot);
+        prop.put("colorline",    color_line);
+        prop.put("colorlineend", color_lineend);
         return prop;
     }
 }

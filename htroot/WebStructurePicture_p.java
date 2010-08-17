@@ -51,6 +51,12 @@ public class WebStructurePicture_p {
     public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         
+        String color_text    = "888888";
+        String color_back    = "FFFFFF";
+        String color_dot     = "11BB11";
+        String color_line    = "222222";
+        String color_lineend = "333333";
+        
         int width = 768;
         int height = 576;
         int depth = 3;
@@ -59,12 +65,17 @@ public class WebStructurePicture_p {
         String host = null;
         
         if (post != null) {
-            width = post.getInt("width", 768);
-            height = post.getInt("height", 576);
-            depth = post.getInt("depth", 3);
-            nodes = post.getInt("nodes", width * height * 100 / 768 / 576);
-            time = post.getInt("time", -1);
-            host = post.get("host", null);
+            width         = post.getInt("width", 768);
+            height        = post.getInt("height", 576);
+            depth         = post.getInt("depth", 3);
+            nodes         = post.getInt("nodes", width * height * 100 / 768 / 576);
+            time          = post.getInt("time", -1);
+            host          = post.get("host", null);
+            color_text    = post.get("colortext",    color_text);
+            color_back    = post.get("colorback",    color_back);
+            color_dot     = post.get("colordot",     color_dot);
+            color_line    = post.get("colorline",    color_line);
+            color_lineend = post.get("colorlineend", color_lineend);
         }
         
         // too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
@@ -86,7 +97,7 @@ public class WebStructurePicture_p {
         RasterPlotter graphPicture;
         if (host == null) {
             // probably no information available
-            graphPicture = new RasterPlotter(width, height, RasterPlotter.MODE_SUB, GraphPlotter.color_back);
+            graphPicture = new RasterPlotter(width, height, RasterPlotter.DrawMode.MODE_SUB, color_back);
             PrintTool.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0);
             PrintTool.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0);
         } else {
@@ -102,10 +113,10 @@ public class WebStructurePicture_p {
             if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
             //graph.print();
             
-            graphPicture = graph.draw(width, height, 40, 40, 16, 16);
+            graphPicture = graph.draw(width, height, 40, 40, 16, 16, color_back, color_dot, color_line, color_lineend, color_text);
         }
         // print headline
-        graphPicture.setColor(GraphPlotter.color_text);
+        graphPicture.setColor(color_text);
         PrintTool.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
         if (host != null) PrintTool.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + host.toUpperCase(), -1);
         PrintTool.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);

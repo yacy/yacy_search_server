@@ -48,7 +48,7 @@ public class DemoApplet extends Applet implements Runnable {
 
     public void update(final Graphics g) {
         final Dimension d = getSize();
-        offGraphics = new RasterPlotter(d.width, d.height, RasterPlotter.MODE_REPLACE, "FFFFFF");
+        offGraphics = new RasterPlotter(d.width, d.height, RasterPlotter.DrawMode.MODE_REPLACE, "FFFFFF");
         paintFrame(offGraphics);
         g.drawImage(offGraphics.getImage(), 0, 0, null);
     }

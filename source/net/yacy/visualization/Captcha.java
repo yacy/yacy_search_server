@@ -32,7 +32,7 @@ import net.yacy.kelondro.logging.Log;
 
 public class Captcha extends RasterPlotter {
 
-    public Captcha(final int width, final int height, final byte displayMode, final String code) {
+    public Captcha(final int width, final int height, final DrawMode displayMode, final String code) {
         super(width, height, displayMode, "FFFFFF");
         this.create(code);
     }
@@ -85,7 +85,7 @@ public class Captcha extends RasterPlotter {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
 
-        final Captcha m = new Captcha(200, 70, RasterPlotter.MODE_REPLACE, args[1]);
+        final Captcha m = new Captcha(200, 70, RasterPlotter.DrawMode.MODE_REPLACE, args[1]);
         try {
             ImageIO.write(m.getImage(), "png", new java.io.File(args[0]));
         } catch (final java.io.IOException e) {
