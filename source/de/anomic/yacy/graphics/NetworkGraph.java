@@ -238,6 +238,7 @@ public class NetworkGraph {
             for (Hit event: yacyChannel.channels(yacyChannel.DHTRECEIVE)) {
                 assert event != null;
                 assert event.getPubDate() != null;
+                if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTRECEIVE: " + event.getLink());
                     drawNetworkPictureConnection(networkPicture, width / 2, height / 2 + 20, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTIN);
@@ -246,6 +247,7 @@ public class NetworkGraph {
             for (Hit event: yacyChannel.channels(yacyChannel.DHTSEND)) {
                 assert event != null;
                 assert event.getPubDate() != null;
+                if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTSEND: " + event.getLink());
                     drawNetworkPictureConnection(networkPicture, width / 2, height / 2 + 20, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTOUT);
