@@ -24,6 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.concurrent.Semaphore;
+
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -35,7 +37,7 @@ import de.anomic.yacy.graphics.NetworkGraph;
 /** draw a picture of the yacy network */
 public class NetworkPicture {
     
-    private static final Object sync = new Object();
+    private static final Semaphore sync = new Semaphore(1);
     private static EncodedImage buffer = null;
     private static long lastAccessSeconds = 0;
     
@@ -48,7 +50,9 @@ public class NetworkPicture {
             //System.out.println("*** NetworkPicture: cache hit (1)");
             return buffer;
         }
-        synchronized (sync) {
+        if (buffer != null && sync.availablePermits() == 0) return buffer;
+        try {
+            sync.acquire();
             if (buffer != null && !authorized  && timeSeconds - lastAccessSeconds < 2)  {
                 //System.out.println("*** NetworkPicture: cache hit (2)");
                 return buffer;
@@ -89,6 +93,9 @@ public class NetworkPicture {
             if (maxCount > 10000) maxCount = 10000;
             buffer = new EncodedImage(NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor).getImage(), "png");
             lastAccessSeconds = System.currentTimeMillis() / 1000;
+            sync.release();
+        } catch (InterruptedException e) {
+            if (sync.availablePermits() == 0) sync.release();
         }
         return buffer;
     }
