@@ -313,6 +313,9 @@ User changed:==Benutzer geändert:
 Generic error.==Genereller Fehler.
 Passwords do not match.==Passwörter stimmen nicht überein.
 Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als vier Zeichen sein.
+With an intranet indexing configuration it is not allowed to authentify automatically from localhost!==Die Intranet Indexier Konfiguration erlaubt keine automatische Authentifikation von localhost!
+No password is set for the administration account.==Für den Administrator Zugang ist kein Passwort gesetzt.
+Please define a password for the admin account.==Bitte setzen Sie ein Passwort für das admin Konto.
 Admin Account==Admin Konto
 Access from localhost without account==Zugriff von localhost ohne Konto
 Access to your peer from your own computer \(localhost access\) is granted. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert. Sie brauchen kein Administratorkonto erstellen.
@@ -517,6 +520,8 @@ For Robinson Mode, index distribution and receive is switched off==Im Robinson-M
 This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
 Network and Domain Specification==Netzwerk und Domain Spezifikation
+With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
+Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
 YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Sie können an einem verteiltem Netz aus YaCy Peers mitwirken oder einen eigenständigen Peer betreiben.
 To control that all participants within a web indexing domain have access to the same domain,==Um zu kontrollieren, dass alle Teilnehmer innerhalb einer Indexierungs Domain Zugriff zu der selben Domain haben, 
 this network definition must be equal to all members of the same YaCy network.==müssen diese Netzwerkdefinitionen bei allen Mitgliedern des YaCy Netzwerkes gleich sein.
@@ -742,6 +747,7 @@ Available Releases==Verfügbare Versionen
 "Check for new Release"=="Nach neuer Version suchen"
 Downloaded Releases==Heruntergeladene Versionen
 No downloaded releases available for deployment.==Keine heruntergeladenen Releases zum Installieren verfügbar.
+no&nbsp;automated installation on development environments==Keine automatische Installation in Entwicklungsumgebungen
 "Install Release"=="Version Installieren"
 "Delete Release"=="Version löschen"
 Automatic Update==Automatische Aktualisierung
@@ -1718,7 +1724,7 @@ You cannot call this page directly. Instead, use a link on the <a href="Network.
 
 #File: Network.html
 #---------------------------
-YaCy Network==YaCy Netzwerk
+YaCy Network<==YaCy Netzwerk<
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
@@ -1786,6 +1792,7 @@ Queries Per Hour \(QPH\)==Abfragen pro Stunde (QPH)
 >Potential<==>Potentiell<
 >This Peer<==>Dieser Peer<
 URLs for<br/>Remote Crawl==URLs zum<br/>Remote Crawlen
+"The YaCy Network"=="Das YaCy Netzwerk"
 
 Indexing<br/>PPM==Indexier<br/>PPM
 \(public&nbsp;local\)==öffentlich&nbsp;lokal
@@ -1804,20 +1811,19 @@ Received<br/>Words==Empfangene<br/>Wörter
 Received<br/>URLs==Empfangene<br/>URLs
 Known<br/>Seeds==Bekannte<br/>Seeds
 Connects<br/>per hour==Verbindungen<br/>pro Stunde
-
-Version==Version
+#Version==Version
 Own/Other==Eigene/Andere
-dark green font==dunkelgrüne Schrift
+>dark green font<==>dunkelgrüne Schrift<
 senior/principal peers==Senior/Principal Peers
-light green font==hellgrüne Schrift
+>light green font<==>hellgrüne Schrift<
 >passive peers<==>passive Peers<
-pink font==rosa Schrift
+>pink font<==>pinke Schrift<
 junior peers==Junior Peers
 red point==roter Punkt
 this peer==Ihr Peer
 >grey waves<==>graue Wellen<
->green radiation<==>grüne Radiation<
 >crawling activity<==>Crawl Aktivität<
+>green radiation<==>grüne Strahlung<
 >strong query activity<==>starke Abfrage Aktivität<
 >red lines<==>rote Linien<
 >DHT-out<==>DHT ausgehend<

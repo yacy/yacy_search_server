@@ -6,30 +6,30 @@
     <script type="text/javascript">
     <!--
       function CheckForRobinson() {
-         var dist = document.ConfigForm.indexDistribute.checked;
-         var recv = document.ConfigForm.indexReceive.checked;
+         var dist = document.getElementById("ConfigForm").indexDistribute.checked;
+         var recv = document.getElementById("ConfigForm").indexReceive.checked;
          if(!(dist || recv)) {
             //robinson-mode
-            document.ConfigForm.network[1].checked = true;
+            document.getElementById("ConfigForm").network[1].checked = true;
          }
          else {
             //p2p-mode
-            document.ConfigForm.network[0].checked = true;
+            document.getElementById("ConfigForm").network[0].checked = true;
          }
       }
       
       function EnableRobinson() {
-         if(document.ConfigForm.network[1].checked) {
-            document.ConfigForm.indexDistribute.checked = false;
-            document.ConfigForm.indexReceive.checked = false;
+         if(document.getElementById("ConfigForm").network[1].checked) {
+            document.getElementById("ConfigForm").indexDistribute.checked = false;
+            document.getElementById("ConfigForm").indexReceive.checked = false;
          }
       }
       
       function EnableP2P() {
-         if(document.ConfigForm.network[0].checked) {
-            document.ConfigForm.indexDistribute.checked = true;
-            document.ConfigForm.indexReceive.checked = true;
-            document.ConfigForm.crawlResponse.checked = true;
+         if(document.getElementById("ConfigForm").network[0].checked) {
+            document.getElementById("ConfigForm").indexDistribute.checked = true;
+            document.getElementById("ConfigForm").indexReceive.checked = true;
+            document.getElementById("ConfigForm").crawlResponse.checked = true;
          }
       }
     //-->
@@ -51,7 +51,7 @@
     #(commitRobinsonWithRemoteIndexing)#::<div class="commit">This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted.</div>#(/commitRobinsonWithRemoteIndexing)#
     #(commitRobinsonWithoutRemoteIndexing)#::<div class="commit">This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it).</div>#(/commitRobinsonWithoutRemoteIndexing)#
     #(commitPasswordWarning)#::<div class="error">With this configuration it is not allowed to authentify automatically from localhost! Please open the <a href="ConfigAccounts_p.html">Account Configuration</a> and set a new password.</div>#(/commitPasswordWarning)#
-    <form name="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>
         <label>Network and Domain Specification</label>
@@ -96,7 +96,7 @@
       a completely independent search engine instance, without any data exchange between your peer and other
       peers, which we call a 'Robinson' peer.
     </p>
-    <form name="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
       <legend>
         <input type="radio" name="network" id="p2p" onclick="EnableP2P()" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />
