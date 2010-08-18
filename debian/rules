@@ -41,9 +41,10 @@ binary-indep: install
 
 # Build architecture-dependent files here.
 binary-arch: install
+	dh_installdebconf
 	dh_installchangelogs 
 	dh_installdocs
-	dh_installinit -- defaults 95 05
+	dh_installinit
 #	dh_installman
 	dh_installdeb
 	dh_gencontrol

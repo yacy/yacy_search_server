@@ -27,7 +27,7 @@ ifdef(`openSUSE', `
 # Default-Start:     3 5
 ')dnl
 ifdef(`Debian', `
-# Default-Start:     2
+# Default-Start:     2 3 4 5
 ')dnl
 ifdef(`Fedora', `
 # Default-Start:     3 5
@@ -35,7 +35,7 @@ ifdef(`Fedora', `
 ifdef(`Mandriva', `
 # Default-Start:     3 5
 ')dnl
-# Default-Stop:
+# Default-Stop:      0 1 6
 # Short-Description: Distributed web search engine
 # Description:       yacy is a distributed search engine
 #                    config-file is /etc/yacy/yacy.conf

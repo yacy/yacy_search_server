@@ -1,0 +1,50 @@
+Template: yacy/peername
+Type: string
+Description: name for YaCy-peer
+
+Template: yacy/password
+Type: password
+Description: Admin password
+ Please choose an admin password for YaCy
+ .
+ If you leave this blank, YaCy's admin interface is accessable
+ from localhost without password. If you already set
+ a password, the old password won't be changed.
+
+Template: yacy/network
+Type: select
+Choices: freeworld, intranet, allip, webportal, url
+Default: freeworld
+Description: Choose network to participate
+ Choose a network:
+  * freeworld: public general purpose YaCy network
+  * intranet: index local (private) ips only
+  * allip: private peer for all websites
+  * webportal: public peer for specific websites
+  * url: give custom network definition file via url
+
+Template: yacy/network-url
+Type: string
+Description: URL for custom network definition file
+ Use this to configure your own YaCy-network
+
+Template: yacy/memory-start
+Type: string
+Default: 180
+Description: Initial java memory setting
+ Initial memory (in MB) for java virtual machine, you are ask for the maximum memory usage in the next question.
+ .
+ If a high performance for large search indexes is wanted, then setting the values to equal number is recommended.
+ .
+ If YaCy shall be nice in not-only-yacy environments, then the Xms value may be lower
+
+Template: yacy/memory-max
+Type: string
+Default: 600
+Description: Maximum java memory
+ Maximum memory (in MB) for java virtual machine
+ .
+ If a high performance for large search indexes is wanted, then setting the values to equal number is recommended
+ .
+ If YaCy shall be nice in not-only-yacy environments, then the Xms value may be lower
+

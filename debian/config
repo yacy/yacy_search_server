@@ -1,0 +1,89 @@
+#!/bin/sh
+set -e
+
+# if we do not have debconf, we just skip this
+. /usr/share/debconf/confmodule || exit 0
+
+CONFIGFILE=/var/lib/yacy/SETTINGS/yacy.conf
+
+if [ ! -e $CONFIGFILE ]; then
+  db_set yacy/peername $(hostname)
+else
+  db_set yacy/peername $(grep "^peerName=" $CONFIGFILE | sed -e "s/peerName=\(.*\)/\1/")
+  NETWORK_URL=$(grep "^network\.unit\.definition=" $CONFIGFILE | sed -e "s/network\.unit\.definition=\(.*\)/\1/")
+  case "$NETWORK_URL" in
+    defaults/yacy.network.freeworld.unit)
+      db_set yacy/network freeworld
+      ;;
+    defaults/yacy.network.intranet.unit)
+      db_set yacy/network intranet
+      ;;
+    defaults/yacy.network.allip.unit)
+      db_set yacy/network allip
+      ;;
+    defaults/yacy.network.webportal.unit)
+      db_set yacy/network webportal
+      ;;
+    *)
+      db_set yacy/network url
+      db_set yacy/network-url "$NETWORK_URL"
+      ;;
+  esac
+  db_set yacy/memory-start  $(grep "^javastart_Xms=" $CONFIGFILE | sed -e "s/javastart_Xms=Xms\(.*\)m/\1/")
+  db_set yacy/memory-max  $(grep "^javastart_Xmx=" $CONFIGFILE | sed -e "s/javastart_Xmx=Xmx\(.*\)m/\1/")
+fi
+
+db_capb backup
+
+# use state machine to support step back
+
+STATE=1
+while true; do
+    case "$STATE" in
+    1)
+	 # Two unrelated questions.
+	 db_input high yacy/peername || true
+	 db_input high yacy/password || true
+	 db_input high yacy/network || true
+    ;;
+    2)
+	 # Only ask this question if the
+	 # first question was answered with
+         # url
+	 db_get yacy/network
+	 if [ "$RET" = "url" ]; then
+	      db_input high yacy/network-url || true
+	 fi
+    ;;
+    3)
+	 db_input high yacy/memory-start || true
+	 db_input high yacy/memory-max || true
+    ;;
+    *)
+	 # The default case catches when $STATE is greater than the
+	 # last implemented state, and breaks out of the loop. This
+	 # requires that states be numbered consecutively from 1
+	 # with no gaps, as the default case will also be entered
+	 # if there is a break in the numbering
+	 break # exits the enclosing "while" loop
+    ;;
+    esac
+
+    if db_go; then
+	 STATE=$(($STATE + 1))
+    else
+	 STATE=$(($STATE - 1))
+    fi
+done
+
+if [ $STATE -eq 0 ]; then
+    # The user has asked to back up from the first
+    # question. This case is problematical. Regular
+    # dpkg and apt package installation isn't capable
+    # of backing up questions between packages as this
+    # is written, so this will exit leaving the package
+    # unconfigured - probably the best way to handle
+    # the situation.
+    exit 10
+fi
+

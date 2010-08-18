@@ -38,6 +38,73 @@ add_user_if_missing() {
 add_group_if_missing
 add_user_if_missing
 
+###### debconf stuff 
+
+CONFIGFILE=/var/lib/yacy/SETTINGS/yacy.conf
+
+. /usr/share/debconf/confmodule
+
+# Generate config file, if it doesn't exist.
+if [ ! -e $CONFIGFILE ]; then
+    mkdir -p /var/lib/yacy/SETTINGS
+    echo "# Initial configfile from debconf" > $CONFIGFILE
+    echo "peerName=$HOSTNAME" >> $CONFIGFILE
+    echo "adminAccountBase64MD5=" >> $CONFIGFILE
+    echo "network.unit.definition=defaults/yacy.network.freeworld.unit" >> $CONFIGFILE
+    echo "adminAccountForLocalhost=false" >> $CONFIGFILE
+    echo "javastart_Xmx=Xmx600m" >> $CONFIGFILE
+    echo "javastart_Xms=Xmx180m" >> $CONFIGFILE
+fi
+
+# Substitute in the values from the debconf db.
+# There are obvious optimizations possible here.
+# The cp before the sed ensures we do not mess up
+# the config file's ownership and permissions.
+db_get yacy/peername
+PEERNAME="$RET"
+db_get yacy/password
+PASSWORD="$RET"
+if [ "$PASSWORD" != "" ]; then
+  BASE64=$(java -cp /usr/share/java/yacy/yacycore.jar net.yacy.kelondro.order.Base64Order -es "admin:$PASSWORD")
+  B64MD5=$(java -cp /usr/share/java/yacy/yacycore.jar net.yacy.kelondro.order.Digest  -strfhex "$BASE64")
+  PASSWORD_HASH=$(echo $B64MD5 | sed "s/\(\S\) .*/\1/")
+  db_set yacy/password ""
+else
+  PASSWORD_HASH=$(grep "^adminAccountBase64MD5=" $CONFIGFILE | sed -e "s/^adminAccountBase64MD5=\(.*\)/\1/")
+fi
+db_get yacy/network
+NETWORK="$RET"
+
+if [ "$NETWORK" = "url" ]; then
+  db_get yacy/network-url
+  NETWORK="$RET"
+else
+  NETWORK="defaults/yacy\\.network\\.$NETWORK\\.unit"
+fi
+
+db_get yacy/memory-start
+MEMORY_START="$RET"
+db_get yacy/memory-max
+MEMORY_MAX="$RET"
+cp -a -f $CONFIGFILE $CONFIGFILE.tmp
+
+# If the admin deleted or commented some variables but then set
+# them via debconf, (re-)add them to the conffile.
+#test -z "$FOO" || grep -Eq '^ *FOO=' $CONFIGFILE || \
+#    echo "FOO=" >> $CONFIGFILE
+#test -z "$BAR" || grep -Eq '^ *BAR=' $CONFIGFILE || \
+#    echo "BAR=" >> $CONFIGFILE
+
+sed -e "s,^ *peerName=.*,peerName=$PEERNAME," \
+    -e "s,^ *adminAccountBase64MD5=.*,adminAccountBase64MD5=$PASSWORD_HASH," \
+    -e "s,^ *network\.unit\.definition=.*,network\.unit\.definition=$NETWORK," \
+    -e "s,^ *javastart_Xms=.*,javastart_Xms=Xms${MEMORY_START}m," \
+    -e "s,^ *javastart_Xmx=.*,javastart_Xmx=Xmx${MEMORY_MAX}m," \
+    < $CONFIGFILE > $CONFIGFILE.tmp
+mv -f $CONFIGFILE.tmp $CONFIGFILE
+
+#### debconf stuff end
+
 chown yacy:yacy -R /var/lib/yacy
 
 case "$1" in
