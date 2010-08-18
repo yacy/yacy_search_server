@@ -359,7 +359,21 @@ public class Domains {
          "PRO=Credentialed professionals",
          "TEL=Published contact data",
          "TRAVEL=The travel industry",
-         "INT=International"
+         "INT=International",
+         // domains from the OpenNIC project, http://www.opennicproject.org, see also http://wiki.opennic.glue/OpenNICNamespaces
+         "GLUE=OpenNIC Internal Architectural use",
+         "BBS=OpenNIC Bulletin Board System servers",
+         "FREE=OpenNIC NAMESPACE, CERT AUTH",
+         "FUR=OpenNIC Furries, Furry Fandom and other Anthropormorphic interest",
+         "GEEK=OpenNIC Geek-oriented sites",
+         "INDY=OpenNIC independent media and arts",
+         "NULL=OpenNIC the DNS version of Usenet's alt. hierarchy",
+         "OSS=OpenNIC reserved exclusively for Open Source Software projects",
+         "PARODY=OpenNIC non-commercial parody work",
+         "DNY=OpenNIC",
+         "ING=OpenNIC",
+         "GOPHER=OpenNIC",
+         "MICRO=OpenNIC"
      };
 
     private static Map<String, Integer> TLDID = new ConcurrentHashMap<String, Integer>(32);
