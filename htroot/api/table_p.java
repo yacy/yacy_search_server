@@ -95,7 +95,7 @@ public class table_p {
                 prop.put("showtable_list_" + count + "_showpk_pk", new String(trow.getPK()));
                 prop.put("showtable_list_" + count + "_count", count);
                 for (int i = 0; i < columns.size(); i++) {
-                    cell = trow.from(columns.get(i));
+                    cell = trow.get(columns.get(i));
                     prop.putHTML("showtable_list_" + count + "_columns_" + i + "_column", columns.get(i));
                     prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
                 }

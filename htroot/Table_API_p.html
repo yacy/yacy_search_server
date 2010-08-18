@@ -41,17 +41,23 @@
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
           <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
-          <td>Date</td>
           <td>Type</td>
           <td>Comment</td>
+          <td>Call<br/>Count</td>
+          <td>Recording<br/>Date</td>
+          <td>Last&nbsp;Exec<br/>Date</td>
+          <td>Next&nbsp;Exec<br/>Date</td>
           <td>URL</td>
         </tr>
         #{list}#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
           <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
-          <td>#[date]#</td>
           <td>#[type]#</td>
           <td>#[comment]#</td>
+          <td>#[callcount]#</td>
+          <td>#[dateRecording]#</td>
+          <td>#[dateLastExec]#</td>
+          <td>#[dateNextExec]#</td>
           <td>#[url]#</td>
         </tr>
         #{/list}#

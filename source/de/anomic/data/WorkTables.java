@@ -45,8 +45,15 @@ public class WorkTables extends Tables {
     
     public final static String TABLE_API_COL_TYPE = "type";
     public final static String TABLE_API_COL_COMMENT = "comment";
-    public final static String TABLE_API_COL_DATE = "date";
+    public final static String TABLE_API_COL_DATE_RECORDING = "date_recording"; // if not present default to old date field
+    public final static String TABLE_API_COL_DATE_LAST_EXEC = "date_last_exec"; // if not present default to old date field
+    public final static String TABLE_API_COL_DATE_NEXT_EXEC = "date_next_exec"; // if not present default to zero
+    public final static String TABLE_API_COL_DATE = "date"; // old date; do not set in new records
     public final static String TABLE_API_COL_URL = "url";
+    public final static String TABLE_API_COL_APICALL_PK = "apicall_pk"; // the primary key for the table entry of that api call (not really a database field, only a name in the apicall)
+    public final static String TABLE_API_COL_APICALL_COUNT = "apicall_count"; // counts how often the API was called (starts with 1)
+    public final static String TABLE_API_COL_APICALL_SCHEDULE_TIME = "apicall_schedule_time"; // factor for SCHEULE_UNIT time units
+    public final static String TABLE_API_COL_APICALL_SCHEDULE_UNIT= "apicall_schedule_unit"; // may be 'minutes', 'hours', 'days'
     
     public final static String TABLE_ROBOTS_NAME = "robots";
     
@@ -56,15 +63,60 @@ public class WorkTables extends Tables {
     }
     
     public void recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
+        // remove the apicall attributes from the post object
+        String pk    = post.remove(TABLE_API_COL_APICALL_PK);
+        String count = post.remove(TABLE_API_COL_APICALL_COUNT);
+        if (count == null) count = "1";
+        String time  = post.remove(TABLE_API_COL_APICALL_SCHEDULE_TIME);
+        String unit  = post.remove(TABLE_API_COL_APICALL_SCHEDULE_UNIT);
+        if (time == null || unit == null || unit.length() == 0 || "minues,hours,days".indexOf(unit) < 0) {
+            time = ""; unit = "";
+        }
+        
+        // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
+
+        // read old entry from the apicall table (if exists)
+        Row row = null;
         try {
-            super.insert(
-                    TABLE_API_NAME,
-                    TABLE_API_COL_TYPE, type.getBytes(),
-                    TABLE_API_COL_COMMENT, comment.getBytes(),
-                    TABLE_API_COL_DATE, DateFormatter.formatShortMilliSecond(new Date()).getBytes(),
-                    TABLE_API_COL_URL, apiurl.getBytes()
-                    );
+            row = (pk == null) ? null : super.select(TABLE_API_NAME, pk.getBytes());
+        } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        
+        // insert or update entry
+        try {
+            if (row != null) {
+                // modify and update existing entry
+
+                // modify date attributes and patch old values
+                row.put(TABLE_API_COL_DATE_LAST_EXEC, DateFormatter.formatShortMilliSecond(new Date()).getBytes());
+                if (!row.containsKey(TABLE_API_COL_DATE_RECORDING)) row.put(TABLE_API_COL_DATE_RECORDING, row.get(TABLE_API_COL_DATE));
+                row.remove(TABLE_API_COL_DATE);
+                
+                // insert APICALL attributes 
+                row.put(TABLE_API_COL_APICALL_COUNT, count.getBytes());
+                row.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, time.getBytes());
+                row.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, unit.getBytes());
+                super.update(TABLE_API_NAME, row);
+            } else {
+                // create and insert new entry
+                Data data = new Data();
+                data.put(TABLE_API_COL_TYPE, type.getBytes());
+                data.put(TABLE_API_COL_COMMENT, comment.getBytes());
+                byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
+                data.put(TABLE_API_COL_DATE_RECORDING, date);
+                data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
+                data.put(TABLE_API_COL_URL, apiurl.getBytes());
+                
+                // insert APICALL attributes 
+                data.put(TABLE_API_COL_APICALL_COUNT, count.getBytes());
+                data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, time.getBytes());
+                data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, unit.getBytes());
+                super.insert(TABLE_API_NAME, data);
+            }
         } catch (IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {

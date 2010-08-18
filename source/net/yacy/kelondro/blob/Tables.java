@@ -29,10 +29,13 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +44,7 @@ import java.util.regex.Pattern;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
 
@@ -135,9 +139,9 @@ public class Tables {
         if (row == null) {
             // table counter entry in pkcounter table does not exist: make a new table entry
             row = new Row(tablename.getBytes(), system_table_pkcounter_counterName, int2key(0).getBytes());
-            insert(system_table_pkcounter, row);
+            update(system_table_pkcounter, row);
         }
-        byte[] pk = row.from(system_table_pkcounter_counterName);
+        byte[] pk = row.get(system_table_pkcounter_counterName);
         int pki;
         if (pk == null) {
             pki = size(tablename);
@@ -170,110 +174,13 @@ public class Tables {
      */
     public byte[] insert(final String tablename, Map<String, byte[]> map) throws IOException, RowSpaceExceededException {
         byte[] uk = ukey(tablename);
-        insert(tablename, uk, map);
-        insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
+        update(tablename, uk, map);
+        BEncodedHeap heap = getHeap(system_table_pkcounter);
+        heap.put(tablename.getBytes(), system_table_pkcounter_counterName, uk);
         return uk;
     }
 
-    public byte[] insert(final String tablename, String key, byte[] value) throws IOException, RowSpaceExceededException {
-        byte[] uk = ukey(tablename);
-        insert(tablename, uk, key, value);
-        insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
-        return uk;
-    }
-    
-    public byte[] insert(final String tablename,
-            String key0, byte[] value0,
-            String key1, byte[] value1
-            ) throws IOException, RowSpaceExceededException {
-        byte[] uk = ukey(tablename);
-        insert(tablename, uk,
-            key0, value0,
-            key1, value1
-            );
-        insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
-        return uk;
-    }
-    
-    public byte[] insert(final String tablename,
-            String key0, byte[] value0,
-            String key1, byte[] value1,
-            String key2, byte[] value2
-            ) throws IOException, RowSpaceExceededException {
-        byte[] uk = ukey(tablename);
-        insert(tablename, uk,
-            key0, value0,
-            key1, value1,
-            key2, value2
-            );
-        insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
-        return uk;
-    }
-    
-    public byte[] insert(final String tablename,
-            String key0, byte[] value0,
-            String key1, byte[] value1,
-            String key2, byte[] value2,
-            String key3, byte[] value3
-            ) throws IOException, RowSpaceExceededException {
-        byte[] uk = ukey(tablename);
-        insert(tablename, uk,
-            key0, value0,
-            key1, value1,
-            key2, value2,
-            key3, value3
-            );
-        insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
-        return uk;
-    }
-
-    public void insert(final String table, byte[] pk,
-            String key, byte[] value
-            ) throws IOException {
-        BEncodedHeap heap = getHeap(table);
-        heap.put(pk, key, value);
-    }
-
-    public void insert(final String table, byte[] pk,
-            String key0, byte[] value0,
-            String key1, byte[] value1
-            ) throws IOException {
-        BEncodedHeap heap = getHeap(table);
-        heap.put(pk,
-            key0, value0,
-            key1, value1
-            );
-    }
-    
-    public void insert(final String table, byte[] pk,
-            String key0, byte[] value0,
-            String key1, byte[] value1,
-            String key2, byte[] value2
-            ) throws IOException {
-        BEncodedHeap heap = getHeap(table);
-        heap.put(pk,
-            key0, value0,
-            key1, value1,
-            key2, value2
-            );
-    }
-    
-    public void insert(final String table, byte[] pk,
-            String key0, byte[] value0,
-            String key1, byte[] value1,
-            String key2, byte[] value2,
-            String key3, byte[] value3
-            ) throws IOException {
-        BEncodedHeap heap = getHeap(table);
-        heap.put(pk,
-            key0, value0,
-            key1, value1,
-            key2, value2,
-            key3, value3
-            );
-    }
-
-    public void insert(final String table, byte[] pk, Map<String, byte[]> map) throws IOException {
+    public void update(final String table, byte[] pk, Map<String, byte[]> map) throws IOException {
         BEncodedHeap heap = getHeap(table);
         try {
             heap.put(pk, map);
@@ -282,10 +189,10 @@ public class Tables {
         }
     }
 
-    public void insert(final String table, Row row) throws IOException {
+    public void update(final String table, Row row) throws IOException {
         BEncodedHeap heap = getHeap(table);
         try {
-            heap.put(row.pk, row.map);
+            heap.put(row.pk, row);
         } catch (RowSpaceExceededException e) {
             throw new IOException(e.getMessage());
         }
@@ -348,9 +255,12 @@ public class Tables {
         byte[] r;
         while ((maxcount < 0 || maxcount-- > 0) && rowIterator.hasNext()) {
             row = rowIterator.next();
-            r = row.from(sortColumn);
-            if (r == null) continue;
-            sortTree.put(new String(r) + new String(row.pk), row);
+            r = row.get(sortColumn);
+            if (r == null) {
+                sortTree.put("0000" + new String(row.pk), row);
+            } else {
+                sortTree.put(new String(r) + new String(row.pk), row);
+            }
         }
         return sortTree.values();
     }
@@ -432,7 +342,7 @@ public class Tables {
             while (i.hasNext()) {
                 Row r = new Row(i.next());
                 if (this.whereValue != null) {
-                    if (ByteBuffer.equals(r.from(this.whereColumn), this.whereValue)) return r;
+                    if (ByteBuffer.equals(r.get(this.whereColumn), this.whereValue)) return r;
                 } else if (this.wherePattern != null) {
                     if (this.whereColumn == null) {
                         // shall match any column
@@ -441,7 +351,7 @@ public class Tables {
                         }
                     } else {
                         // must match the given column
-                        if (this.wherePattern.matcher(new String(r.from(this.whereColumn))).matches()) return r;
+                        if (this.wherePattern.matcher(new String(r.get(this.whereColumn))).matches()) return r;
                     }
                 } else {
                     return r;
@@ -452,60 +362,119 @@ public class Tables {
         
     }
     
-    public class Row {
+    public class Data extends LinkedHashMap<String, byte[]> {
         
-        final byte[] pk;
-        final Map<String, byte[]> map;
+        private static final long serialVersionUID = 978426054043749337L;
         
-        public Row(final Map.Entry<byte[], Map<String, byte[]>> entry) {
+        public Data() {
+            super();
+        }
+        
+        private Data(final Map<String, byte[]> map) {
+            super();
+            assert map != null;
+            this.putAll(map);
+        }
+        
+        public void put(String colname, String value) {
+            super.put(colname, value.getBytes());
+        }
+        
+        public void put(String colname, int value) {
+            super.put(colname, Integer.toString(value).getBytes());
+        }
+        
+        public void put(String colname, long value) {
+            super.put(colname, Long.toString(value).getBytes());
+        }
+        
+        public void put(String colname, Date value) {
+            super.put(colname, DateFormatter.formatShortMilliSecond(value).getBytes());
+        }
+        
+        public byte[] get(String colname, byte[] dflt) {
+            byte[] r = this.get(colname);
+            if (r == null) return dflt;
+            return r;
+        }
+        
+        public String get(String colname, String dflt) {
+            byte[] r = this.get(colname);
+            if (r == null) return dflt;
+            return new String(r);
+        }
+        
+        public int get(String colname, int dflt) {
+            byte[] r = this.get(colname);
+            if (r == null) return dflt;
+            try {
+                return Integer.parseInt(new String(r));
+            } catch (NumberFormatException e) {
+                return dflt;
+            }
+        }
+        
+        public long get(String colname, long dflt) {
+            byte[] r = this.get(colname);
+            if (r == null) return dflt;
+            try {
+                return Long.parseLong(new String(r));
+            } catch (NumberFormatException e) {
+                return dflt;
+            }
+        }
+        
+        public Date get(String colname, Date dflt) {
+            byte[] r = this.get(colname);
+            if (r == null) return dflt;
+            try {
+                return DateFormatter.parseShortMilliSecond(new String(r));
+            } catch (ParseException e) {
+                return dflt;
+            }
+        }
+    }
+    
+    public class Row extends Data {
+        
+        private static final long serialVersionUID = 978426054043749338L;
+        
+        private final byte[] pk;
+        
+        private Row(final Map.Entry<byte[], Map<String, byte[]>> entry) {
+            super(entry.getValue());
             assert entry != null;
             assert entry.getKey() != null;
             assert entry.getValue() != null;
             this.pk = entry.getKey();
-            this.map = entry.getValue();
         }
         
-        public Row(final byte[] pk, final Map<String, byte[]> map) {
+        private Row(final byte[] pk, final Map<String, byte[]> map) {
+            super(map);
             assert pk != null;
             assert map != null;
             this.pk = pk;
-            this.map = map;
         }
         
-        public Row(final byte[] pk, String k0, byte[] v0) {
+        private Row(final byte[] pk, String k0, byte[] v0) {
+            super();
             assert k0 != null;
             assert v0 != null;
-            Map<String, byte[]> map = new ConcurrentHashMap<String, byte[]>();
-            map.put(k0, v0);
+            this.put(k0, v0);
             this.pk = pk;
-            this.map = map;
         }
         
         public byte[] getPK() {
             return this.pk;
         }
         
-        public byte[] from(String colname) {
-            return this.map.get(colname);
-        }
-        
-        public byte[] from(String colname, byte[] dflt) {
-            byte[] r = this.map.get(colname);
-            if (r == null) return dflt;
-            return r;
-        }
-        
-        protected Collection<byte[]> values() {
-            return this.map.values();
-        }
-        
         public String toString() {
-            StringBuilder sb = new StringBuilder(keymaxlen + 20 * map.size());
-            sb.append(new String(pk)).append(":").append(map.toString());
+            StringBuilder sb = new StringBuilder(keymaxlen + 20 * this.size());
+            sb.append(new String(pk)).append(":").append(super.toString());
             return sb.toString();
         }
     }
-    
+
     public static void main(String[] args) {
         // test the class
         File f = new File(new File("maptest").getAbsolutePath());
@@ -516,11 +485,11 @@ public class Tables {
             // put some values into the map
             Map<String, byte[]> m = new HashMap<String, byte[]>();
             m.put("k", "000".getBytes());
-            map.insert("testdao", "123".getBytes(), m);
+            map.update("testdao", "123".getBytes(), m);
             m.put("k", "111".getBytes());
-            map.insert("testdao", "456".getBytes(), m);
+            map.update("testdao", "456".getBytes(), m);
             m.put("k", "222".getBytes());
-            map.insert("testdao", "789".getBytes(), m);
+            map.update("testdao", "789".getBytes(), m);
             // iterate over keys
             Iterator<Row> i = map.iterator("testdao");
             while (i.hasNext()) {

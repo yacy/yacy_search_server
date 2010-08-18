@@ -120,7 +120,7 @@ public class Tables_p {
                 }
             }
             try {
-                sb.tables.insert(table, pk.getBytes(), map);
+                sb.tables.update(table, pk.getBytes(), map);
             } catch (IOException e) {
                 Log.logException(e);
             }
@@ -192,7 +192,7 @@ public class Tables_p {
                         prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
                         prop.put("showtable_list_" + count + "_count", count);
                         for (int i = 0; i < columns.size(); i++) {
-                            cell = row.from(columns.get(i));
+                            cell = row.get(columns.get(i));
                             prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
                         }
                         prop.put("showtable_list_" + count + "_columns", columns.size());
@@ -223,7 +223,7 @@ public class Tables_p {
         int count = 0;
         byte[] cell;
         for (String col: columns) {
-            cell = row.from(col);
+            cell = row.get(col);
             prop.put("showedit_list_" + count + "_key", col);
             prop.put("showedit_list_" + count + "_value", cell == null ? "" : new String(cell));
             count++;

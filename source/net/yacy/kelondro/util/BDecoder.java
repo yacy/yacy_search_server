@@ -169,63 +169,15 @@ public class BDecoder {
         public void toStream(OutputStream os) throws IOException {
             os.write(_d);
             for (Map.Entry<String, BObject> e: this.m.entrySet()) {
-                new BStringObject(e.getKey().getBytes()).toStream(os);
+                BStringObject.toStream(os, e.getKey());
                 e.getValue().toStream(os);
             }
             os.write(_e);
         }
-        public static void toStream(
-                OutputStream os,
-                String key, byte[] value
-                ) throws IOException {
+        public static void toStream(OutputStream os, String key, byte[] value) throws IOException {
             os.write(_d);
             BStringObject.toStream(os, key);
             BStringObject.toStream(os, value);
-            os.write(_e);
-        }
-        public static void toStream(
-                OutputStream os,
-                String key0, byte[] value0,
-                String key1, byte[] value1
-                ) throws IOException {
-            os.write(_d);
-            BStringObject.toStream(os, key0);
-            BStringObject.toStream(os, value0);
-            BStringObject.toStream(os, key1);
-            BStringObject.toStream(os, value1);
-            os.write(_e);
-        }
-        public static void toStream(
-                OutputStream os,
-                String key0, byte[] value0,
-                String key1, byte[] value1,
-                String key2, byte[] value2
-                ) throws IOException {
-            os.write(_d);
-            BStringObject.toStream(os, key0);
-            BStringObject.toStream(os, value0);
-            BStringObject.toStream(os, key1);
-            BStringObject.toStream(os, value1);
-            BStringObject.toStream(os, key2);
-            BStringObject.toStream(os, value2);
-            os.write(_e);
-        }
-        public static void toStream(
-                OutputStream os,
-                String key0, byte[] value0,
-                String key1, byte[] value1,
-                String key2, byte[] value2,
-                String key3, byte[] value3
-                ) throws IOException {
-            os.write(_d);
-            BStringObject.toStream(os, key0);
-            BStringObject.toStream(os, value0);
-            BStringObject.toStream(os, key1);
-            BStringObject.toStream(os, value1);
-            BStringObject.toStream(os, key2);
-            BStringObject.toStream(os, value2);
-            BStringObject.toStream(os, key3);
-            BStringObject.toStream(os, value3);
             os.write(_e);
         }
     }

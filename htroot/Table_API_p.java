@@ -18,19 +18,20 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.cora.protocol.Client;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.WorkTables;
-import de.anomic.http.client.Client;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -66,17 +67,21 @@ public class Table_API_p {
             }
             
             // now call the api URLs and store the result status
-            final RequestHeader reqHeader = new RequestHeader();
-            final Client client = new Client(120000, reqHeader);
-            ResponseContainer result;
+            final Client client = new Client();
+            client.setRealm(sb.getConfig("adminAccountBase64MD5", ""));
+            client.setTimout(120000);
             LinkedHashMap<String, Integer> l = new LinkedHashMap<String, Integer>();
             for (String pk: pks) {
                 try {
                     Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
                     if (row != null) {
-                        String url = "http://localhost:" + sb.getConfig("port", "8080") + new String(row.from(WorkTables.TABLE_API_COL_URL));
-                        result = client.GET(url, Long.MAX_VALUE, sb.getConfig("adminAccountBase64MD5", ""));
-                        l.put(url, result.getStatusCode());
+                        String url = "http://localhost:" + sb.getConfig("port", "8080") + new String(row.get(WorkTables.TABLE_API_COL_URL));
+                        url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + pk;
+                        url += "&" + WorkTables.TABLE_API_COL_APICALL_COUNT + "=" + (row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1) + 1);
+                        url += "&" + WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME + "=" + row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, "");
+                        url += "&" + WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT + "=" + row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "");
+                        client.GETbytes(url);
+                        l.put(url, client.getStatusCode());
                     }
                 } catch (IOException e) {
                     Log.logException(e);
@@ -110,19 +115,28 @@ public class Table_API_p {
         int count = 0;
         try {
             final Iterator<Tables.Row> plainIterator = sb.tables.iterator(WorkTables.TABLE_API_NAME);
-            final Iterator<Tables.Row> mapIterator = sb.tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE).iterator();
+            final Iterator<Tables.Row> mapIterator = sb.tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
             Tables.Row row;
             boolean dark = true;
             while (mapIterator.hasNext()) {
                 row = mapIterator.next();
                 if (row == null) continue;
+                Date dfltdate = new Date();
+                Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, dfltdate) : null;
+                Date date_recording = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, date);
+                Date date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
+                Date date_next_exec = row.containsKey(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC) ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, dfltdate) : null;
+                int callcount = row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1);
                 prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
                 prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
                 prop.put("showtable_list_" + count + "_count", count);
-                prop.put("showtable_list_" + count + "_date", row.from(WorkTables.TABLE_API_COL_DATE));
-                prop.put("showtable_list_" + count + "_type", row.from(WorkTables.TABLE_API_COL_TYPE));
-                prop.put("showtable_list_" + count + "_comment", row.from(WorkTables.TABLE_API_COL_COMMENT));
-                prop.put("showtable_list_" + count + "_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8080") + new String(row.from(WorkTables.TABLE_API_COL_URL)));
+                prop.put("showtable_list_" + count + "_callcount", callcount);
+                prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : DateFormatter.formatHTML(date_recording));
+                prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : DateFormatter.formatHTML(date_last_exec));
+                prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : DateFormatter.formatHTML(date_next_exec));
+                prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
+                prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
+                prop.put("showtable_list_" + count + "_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8080") + new String(row.get(WorkTables.TABLE_API_COL_URL)));
                 count++;
             }
         } catch (IOException e) {

@@ -92,6 +92,7 @@ public class Client {
 	private String userAgent = null;
 	private String host = null;
 	private boolean redirecting = true;
+	private String realm = null;
     
     public Client() {
     	super();
@@ -222,6 +223,14 @@ public class Client {
     }
     
     /**
+     * set the authorization realm
+     * @param realm
+     */
+    public void setRealm(final String realm) {
+        this.realm = realm;
+    }
+    
+    /**
      * This method GETs a page from the server.
      * 
      * @param uri the url to get
@@ -254,12 +263,12 @@ public class Client {
      * @throws IOException
      */
     public void GET(final String uri) throws IOException {
-    	if (currentRequest != null) throw new IOException("Client is in use!");
-    	final HttpGet httpGet = new HttpGet(uri);
-    	currentRequest = httpGet;
-    	execute(httpGet);
+        if (currentRequest != null) throw new IOException("Client is in use!");
+        final HttpGet httpGet = new HttpGet(uri);
+        currentRequest = httpGet;
+        execute(httpGet);
     }
-    
+
     /**
      * This method gets HEAD response
      * 
@@ -325,6 +334,15 @@ public class Client {
 	public HttpResponse getHttpResponse() {
 		return httpResponse;
 	}
+	
+	/**
+	 * 
+	 * @return status code from http request
+	 */
+	public int getStatusCode() {
+	    return httpResponse.getStatusLine().getStatusCode();
+	}
+	
 	
 	public void writeTo(final OutputStream outputStream) throws IOException {
 		if (httpResponse != null && currentRequest != null) {
@@ -409,6 +427,8 @@ public class Client {
     			httpUriRequest.addHeader(header);
     		}
     	}
+        if (realm != null)
+            httpUriRequest.setHeader("Authorization", "realm=" + realm);
     }
     
     private void setParams(final HttpParams httpParams) {

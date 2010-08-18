@@ -115,61 +115,10 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
         this.columnames.addAll(map.keySet());
     }
     
-    public void put(
-            byte[] pk,
-            String key, byte[] value
-            ) throws IOException {
+    public void put(byte[] pk, String key, byte[] value) throws IOException {
         byte[] b = BEncoder.encodeMap(key, value);
         this.table.put(pk, b);
         this.columnames.add(key);
-    }
-    public void put(
-            byte[] pk,
-            String key0, byte[] value0,
-            String key1, byte[] value1
-            ) throws IOException {
-        byte[] b = BEncoder.encodeMap(
-                key0, value0,
-                key1, value1
-                );
-        this.table.put(pk, b);
-        this.columnames.add(key0);
-        this.columnames.add(key1);
-    }
-    public void put(
-            byte[] pk,
-            String key0, byte[] value0,
-            String key1, byte[] value1,
-            String key2, byte[] value2
-            ) throws IOException {
-        byte[] b = BEncoder.encodeMap(
-                key0, value0,
-                key1, value1,
-                key2, value2
-                );
-        this.table.put(pk, b);
-        this.columnames.add(key0);
-        this.columnames.add(key1);
-        this.columnames.add(key2);
-    }
-    public void put(
-            byte[] pk,
-            String key0, byte[] value0,
-            String key1, byte[] value1,
-            String key2, byte[] value2,
-            String key3, byte[] value3
-            ) throws IOException {
-        byte[] b = BEncoder.encodeMap(
-                key0, value0,
-                key1, value1,
-                key2, value2,
-                key3, value3
-                );
-        this.table.put(pk, b);
-        this.columnames.add(key0);
-        this.columnames.add(key1);
-        this.columnames.add(key2);
-        this.columnames.add(key3);
     }
     
     /**
