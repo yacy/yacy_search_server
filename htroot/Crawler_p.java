@@ -140,9 +140,6 @@ public class Crawler_p {
                     try {crawlingStartURL = new DigestURI(crawlingStart, null);} catch (final MalformedURLException e1) {}
                     crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                    
-                    // store this call as api call
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + crawlingStart);
-                    
                     // set new properties
                     final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
                     final boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
@@ -167,12 +164,37 @@ public class Crawler_p {
                     env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                     if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
                     
-                    final boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
-                    final int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
-                    final String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year");
-                    final long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);                    
-                    env.setConfig("crawlingIfOlder", crawlingIfOlder);
+                    // recrawl
+                    final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
+                    boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
+                    int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
+                    String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year"); // year, month, day, hour
+                    int repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
+                    final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
                     
+                    if (recrawl.equals("scheduler")) {
+                        // set crawlingIfOlder attributes that are appropriate for scheduled crawling 
+                        crawlingIfOlderCheck = true;
+                        crawlingIfOlderNumber = repeat_unit.equals("selminutes") ? 1 : repeat_unit.equals("selhours") ? repeat_time / 2 : repeat_time * 12;
+                        crawlingIfOlderUnit = "hour";
+                    } else if (recrawl.equals("reload")) {
+                        repeat_time = -1;
+                        crawlingIfOlderCheck = true;
+                    } else if (recrawl.equals("nodoubles")) {
+                        repeat_time = -1;
+                        crawlingIfOlderCheck = false;
+                    }
+                    long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);
+                    env.setConfig("crawlingIfOlder", crawlingIfOlder);
+
+                    // store this call as api call
+                    if (repeat_time > 0) {
+                        // store as scheduled api call
+                        sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + crawlingStart, repeat_time, repeat_unit.substring(3));
+                    } else {
+                        // store just a protocol
+                        sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + crawlingStart);
+                    }                    
                     final boolean crawlingDomFilterCheck = post.get("crawlingDomFilterCheck", "off").equals("on");
                     final int crawlingDomFilterDepth = (crawlingDomFilterCheck) ? Integer.parseInt(post.get("crawlingDomFilterDepth", "-1")) : -1;
                     env.setConfig("crawlingDomFilterDepth", Integer.toString(crawlingDomFilterDepth));

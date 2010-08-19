@@ -433,6 +433,17 @@ public class Tables {
                 return dflt;
             }
         }
+        
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append('{');
+            for (Map.Entry<String, byte[]> entry: this.entrySet()) {
+                sb.append(entry.getKey()).append('=').append(new String(entry.getValue())).append(", ");
+            }
+            if (sb.length() > 1) sb.setLength(sb.length() - 2);
+            sb.append('}');
+            return sb.toString();
+        }
     }
     
     public class Row extends Data {

@@ -315,7 +315,7 @@ public class SitemapParser extends DefaultHandler {
         return this.sb.crawler.profilesActiveCrawls.newEntry(
                 domainName, sitemapURL,
                 // crawling Filter
-                CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_BAD_URL,
+                CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
                 // Depth
                 0,
                 // force recrawling

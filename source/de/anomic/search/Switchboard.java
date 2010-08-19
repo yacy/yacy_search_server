@@ -137,7 +137,6 @@ import de.anomic.data.userDB;
 import de.anomic.data.wiki.wikiBoard;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
-//import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HeaderFramework;
@@ -211,7 +210,7 @@ public final class Switchboard extends serverSwitch {
     public  boolean                        rankingOn;
     public  CRDistribution                 rankingOwnDistribution;
     public  CRDistribution                 rankingOtherDistribution;
-    public  Map<String, Object[]>      outgoingCookies, incomingCookies;
+    public  Map<String, Object[]>          outgoingCookies, incomingCookies;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
     public  ResourceObserver               observer;
@@ -608,7 +607,7 @@ public final class Switchboard extends serverSwitch {
                          SwitchboardConstants.CLEANUP_METHOD_JOBCOUNT,
                          SwitchboardConstants.CLEANUP_METHOD_FREEMEM,
                          60000, Long.MAX_VALUE, 10000, Long.MAX_VALUE),
-                     600000); // all 5 Minutes, wait 10 minutes until first run
+                     60000); // all 5 Minutes, wait 1 minute until first run
         deployThread(SwitchboardConstants.SURROGATES, "Surrogates", "A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.", null,
                      new InstantBusyThread(
                          this,

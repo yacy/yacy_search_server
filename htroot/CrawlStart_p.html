@@ -54,7 +54,7 @@
               <tr>
                 <td><label for="file"><span class="nobr">From File</span></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="file" value="file" /></td>
-                <td><input type="file" name="crawlingFile" size="28" onfocus="check('file')" /></td>
+                <td><input type="file" name="crawlingFile" size="18" onfocus="check('file')" /></td>
               </tr>
               <tr>
               	<td colspan="3" class="commit">
@@ -70,42 +70,65 @@
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </td>
         </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Create Bookmark</td>
-          <td>
-	          <label for="createBookmark">Use</label>:
-	          <input type="checkbox" name="createBookmark" id="createBookmark" />
-	          &nbsp;&nbsp;&nbsp;(works with "Starting Point: From URL" only)
-	          <br /><br />
-			  <label for="bookmarkTitle"> Title</label>:&nbsp;&nbsp;&nbsp; 
-			  <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="100" /><br /><br />
-			  <label for="bookmarkFolder"> Folder</label>:
-			  <input name="bookmarkFolder" id="bookmarkFolder" type="text" size="50" maxlength="100" value="/crawlStart" />
-			  <br />&nbsp;          	  
-          </td>
-          <td>
-            This option lets you create a bookmark from your crawl start URL. For automatic re-crawling you can use the following default folders:<br/>
-            <ul>
-	            <li>/autoReCrawl/hourly</li>
-	            <li>/autoReCrawl/daily</li>
-	            <li>/autoReCrawl/weekly</li>
-	            <li>/autoReCrawl/monthly</li>
-            </ul>
-            Attention: recrawl settings depend on the folder. They can be adjusted in /DATA/SETTINGS/autoReCrawl.conf.
-          </td>
-        </tr>
         <tr valign="top" class="TableCellLight">
           <td><label for="crawlingDepth">Crawling Depth</label>:</td>
           <td><input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" /></td>
           <td>
-            This defines how often the Crawler will follow links embedded in websites.<br />
-            A minimum of 0 is recommended and means that the page you enter under "Starting Point" will be added
-            to the index, but no linked content is indexed. 2-4 is good for normal indexing.
-            Be careful with the depth. Consider a branching factor of average 20;
-            A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.
+            This defines how often the Crawler will follow links (of links..) embedded in websites.
+            0 means that only the page you enter under "Starting Point" will be added
+            to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will
+            index approximately 25.600.000.000 pages, maybe this is the whole WWW.
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">
+          <td>Scheduled re-crawl</td>
+          <td>
+            <dl>
+            <dt>no&nbsp;doubles<input type="radio" name="recrawl" value="nodoubles" #(crawlingIfOlderCheck)#checked="checked"::#(/crawlingIfOlderCheck)#/></dt>
+            <dd>run this crawl once and never load any page that is already known, only the start-url may be loaded again.</dd>
+			<dt>re-load<input type="radio" name="recrawl" value="reload"/ #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)#></dt>
+			<dd>run this crawl once, but treat urls that are known since<br/>
+			<select name="crawlingIfOlderNumber" id="crawlingIfOlderNumber">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+              <option value="7" selected="selected">7</option>
+              <option value="8">8</option><option value="9">9</option><option value="10">10</option>
+              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
+              <option value="28">28</option><option value="30">30</option>
+			</select>
+			<select name="crawlingIfOlderUnit">
+              <option value="year"   #(crawlingIfOlderUnitYearCheck)#::selected="selected"#(/crawlingIfOlderUnitYearCheck)#>years</option>
+              <option value="month"  #(crawlingIfOlderUnitMonthCheck)#::selected="selected"#(/crawlingIfOlderUnitMonthCheck)#>months</option>
+              <option value="day"    #(crawlingIfOlderUnitDayCheck)#::selected="selected"#(/crawlingIfOlderUnitDayCheck)#>days</option>
+              <option value="hour"   #(crawlingIfOlderUnitHourCheck)#::selected="selected"#(/crawlingIfOlderUnitHourCheck)#>hours</option>
+			</select> not as double and load them again. No scheduled re-crawl.
+			</dd>
+			<dt>scheduled<input type="radio" name="recrawl" value="scheduler"/></dt>
+			<dd>after starting this crawl, repeat the crawl every<br/>
+			<select name="repeat_time">
+              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+              <option value="7" selected="selected">7</option>
+              <option value="8">8</option><option value="9">9</option><option value="10">10</option>
+              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
+              <option value="28">28</option><option value="30">30</option>
+			</select>
+			<select name="repeat_unit">
+              <option value="selminutes">minutes</option>
+              <option value="selhours">hours</option>
+              <option value="seldays" selected="selected">days</option>
+            </select> automatically.
+			</dd>
+            </dl>
+          </td>
+          <td>
+            A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
+            then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
+            to use that check the 'once' option. When you want that this web crawl is repeated automatically, then check the 'scheduled' option.
+            In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
           <td><label for="mustmatch">Must-Match Filter</label>:</td>
           <td>
 			<input type="radio" name="range" value="wide" checked="checked" />Use filter&nbsp;&nbsp;
@@ -132,26 +155,6 @@
           </td>
         </tr>
         <tr valign="top" class="TableCellLight">
-          <td>Re-crawl known URLs:</td>
-          <td>
-            <label for="crawlingIfOlderChecked">Use</label>:
-            <input type="checkbox" name="crawlingIfOlderCheck" id="crawlingIfOlderChecked" #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)# />&nbsp;&nbsp;
-            <label for="crawlingIfOlderNumber">If older than</label>:
-			<input name="crawlingIfOlderNumber" id="crawlingIfOlderNumber" type="text" size="7" maxlength="7" value="#[crawlingIfOlderNumber]#" />
-			<select name="crawlingIfOlderUnit">
-              <option value="year"   #(crawlingIfOlderUnitYearCheck)#::selected="selected"#(/crawlingIfOlderUnitYearCheck)#>Year(s)</option>
-              <option value="month"  #(crawlingIfOlderUnitMonthCheck)#::selected="selected"#(/crawlingIfOlderUnitMonthCheck)#>Month(s)</option>
-              <option value="day"    #(crawlingIfOlderUnitDayCheck)#::selected="selected"#(/crawlingIfOlderUnitDayCheck)#>Day(s)</option>
-              <option value="hour"   #(crawlingIfOlderUnitHourCheck)#::selected="selected"#(/crawlingIfOlderUnitHourCheck)#>Hour(s)</option>
-			</select>
-          </td>
-          <td>
-            If you use this option, web pages that are already existent in your database are crawled and indexed again.
-            It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given
-            date, the page is crawled again, otherwise it is treated as 'double' and not loaded or indexed again.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
           <td>Auto-Dom-Filter:</td>
           <td>
             <label for="crawlingDomFilterCheck">Use</label>:
@@ -167,7 +170,7 @@
             The default value 0 gives no restrictions.
           </td>
         </tr>
-        <tr valign="top" class="TableCellLight">
+        <tr valign="top" class="TableCellDark">
           <td>Maximum Pages per Domain:</td>
           <td>
             <label for="crawlingDomMaxCheck">Use</label>:
@@ -181,7 +184,7 @@
             the given depth. Domains outside the given depth are then sorted-out anyway.
           </td>
         </tr>
-        <tr valign="top" class="TableCellDark">
+        <tr valign="top" class="TableCellLight">
           <td><label for="crawlingQ">Accept URLs with '?' / dynamic URLs</label>:</td>
           <td><input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /></td>
           <td>
@@ -189,7 +192,7 @@
             is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
           </td>
         </tr>
-        <tr valign="top" class="TableCellLight">
+        <tr valign="top" class="TableCellDark">
           <td><label for="storeHTCache">Store to Web Cache</label>:</td>
           <td><input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# /></td>
           <td>
@@ -275,6 +278,23 @@
           </td>
         </tr>
         -->
+        <tr valign="top" class="TableCellLight">
+          <td>Create Bookmark</td>
+          <td>
+	          <label for="createBookmark">Use</label>:
+	          <input type="checkbox" name="createBookmark" id="createBookmark" />
+	          &nbsp;&nbsp;&nbsp;(works with "Starting Point: From URL" only)
+	          <br /><br />
+			  <label for="bookmarkTitle"> Title</label>:&nbsp;&nbsp;&nbsp; 
+			  <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="100" /><br /><br />
+			  <label for="bookmarkFolder"> Folder</label>:
+			  <input name="bookmarkFolder" id="bookmarkFolder" type="text" size="50" maxlength="100" value="/crawlStart" />
+			  <br />&nbsp;          	  
+          </td>
+          <td>
+            This option lets you create a bookmark from your crawl start URL.
+          </td>
+        </tr>
         <tr valign="top" class="TableCellLight">
           <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" /></td>
         </tr>

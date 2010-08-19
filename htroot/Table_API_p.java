@@ -62,7 +62,7 @@ public class Table_API_p {
             if (action.equals("on")) {
                 Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
                 if (row != null) {
-                    row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
+                    row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 7);
                     row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
                     WorkTables.calculateAPIScheduler(row, false);
                     sb.tables.update(WorkTables.TABLE_API_NAME, row);

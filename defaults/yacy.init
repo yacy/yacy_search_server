@@ -579,11 +579,6 @@ filterOutStopwordsFromTopwords=true
 90_cleanup_busysleep=300000
 90_cleanup_memprereq=0
 
-# autoReCrawl Options
-autoReCrawl_idlesleep = 3600000
-autoReCrawl_busysleep = 3600000
-autoReCrawl_memprereq = -1
-
 # additional attributes:
 # performanceIO is a percent-value. a value of 10 means, that 10% of the busysleep time
 # is used to flush the RAM cache, which is the major part of the IO in YaCy

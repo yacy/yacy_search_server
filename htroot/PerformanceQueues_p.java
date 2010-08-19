@@ -207,13 +207,12 @@ public class PerformanceQueues_p {
                 busysleep = sb.getConfigLong(threadName + "_busysleep", busysleep);
             }
             if (setProfile) {
-                if (threadName.equals(SwitchboardConstants.PEER_PING)
-                		|| threadName.equals(SwitchboardConstants.SEED_UPLOAD)
-                		|| threadName.equals(SwitchboardConstants.CLEANUP)
-                		|| threadName.equals("autoReCrawl")
-                		) { /* do not change any values */ }
-                else if (threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER)
-                		|| threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+                if (threadName.equals(SwitchboardConstants.PEER_PING) ||
+                    threadName.equals(SwitchboardConstants.SEED_UPLOAD) ||
+                    threadName.equals(SwitchboardConstants.CLEANUP)) {
+                    /* do not change any values */
+                } else if (threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER) ||
+                		   threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
                 	sb.setRemotecrawlPPM(Math.max(1, (int) (sb.getConfigLong("network.unit.remotecrawl.speed", 60) / multiplier)));
                 }
                 else {

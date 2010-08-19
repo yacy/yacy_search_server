@@ -77,13 +77,6 @@ public class WorkTables extends Tables {
     public void recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
         // remove the apicall attributes from the post object
         String pk    = post.remove(TABLE_API_COL_APICALL_PK);
-        String count = post.remove(TABLE_API_COL_APICALL_COUNT);
-        if (count == null) count = "1";
-        String time  = post.remove(TABLE_API_COL_APICALL_SCHEDULE_TIME);
-        String unit  = post.remove(TABLE_API_COL_APICALL_SCHEDULE_UNIT);
-        if (time == null || unit == null || unit.length() == 0 || "minutes,hours,days".indexOf(unit) < 0) {
-            time = ""; unit = "";
-        }
         
         // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
@@ -100,20 +93,7 @@ public class WorkTables extends Tables {
         
         // insert or update entry
         try {
-            if (row != null) {
-                // modify and update existing entry
-
-                // modify date attributes and patch old values
-                row.put(TABLE_API_COL_DATE_LAST_EXEC, DateFormatter.formatShortMilliSecond(new Date()).getBytes());
-                if (!row.containsKey(TABLE_API_COL_DATE_RECORDING)) row.put(TABLE_API_COL_DATE_RECORDING, row.get(TABLE_API_COL_DATE));
-                row.remove(TABLE_API_COL_DATE);
-                
-                // insert APICALL attributes 
-                row.put(TABLE_API_COL_APICALL_COUNT, count.getBytes());
-                row.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, time.getBytes());
-                row.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, unit.getBytes());
-                super.update(TABLE_API_NAME, row);
-            } else {
+            if (row == null) {
                 // create and insert new entry
                 Data data = new Data();
                 data.put(TABLE_API_COL_TYPE, type.getBytes());
@@ -124,11 +104,70 @@ public class WorkTables extends Tables {
                 data.put(TABLE_API_COL_URL, apiurl.getBytes());
                 
                 // insert APICALL attributes 
-                data.put(TABLE_API_COL_APICALL_COUNT, count.getBytes());
-                data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, time.getBytes());
-                data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, unit.getBytes());
+                data.put(TABLE_API_COL_APICALL_COUNT, "1");
                 super.insert(TABLE_API_NAME, data);
+            } else {
+                // modify and update existing entry
+
+                // modify date attributes and patch old values
+                row.put(TABLE_API_COL_DATE_LAST_EXEC, DateFormatter.formatShortMilliSecond(new Date()).getBytes());
+                if (!row.containsKey(TABLE_API_COL_DATE_RECORDING)) row.put(TABLE_API_COL_DATE_RECORDING, row.get(TABLE_API_COL_DATE));
+                row.remove(TABLE_API_COL_DATE);
+                
+                // insert APICALL attributes 
+                row.put(TABLE_API_COL_APICALL_COUNT, row.get(TABLE_API_COL_APICALL_COUNT, 1) + 1);
+                super.update(TABLE_API_NAME, row);
             }
+        } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        Log.logInfo("APICALL", apiurl);
+    }
+    
+    /**
+     * store a API call and set attributes to schedule a re-call of that API call according to a given frequence
+     * This is the same as the previous method but it also computes a re-call time and stores that additionally
+     * @param post the post arguments of the api call
+     * @param servletName the name of the servlet
+     * @param type name of the servlet category
+     * @param comment visual description of the process
+     * @param time the time until next scheduled execution of this api call
+     * @param unit the time unit for the scheduled call
+     */
+    public void recordAPICall(final serverObjects post, final String servletName, final String type, final String comment, int time, String unit) {
+        if (post.containsKey(TABLE_API_COL_APICALL_PK)) {
+            // this api call has already been stored somewhere.
+            recordAPICall(post, servletName, type, comment);
+            return;
+        }
+        if (time < 0 || unit == null || unit.length() == 0 || "minutes,hours,days".indexOf(unit) < 0) {
+            time = 0; unit = "";
+        } else {
+            if (unit.equals("minutes") && time < 10) time = 10;
+        }
+        
+        // generate the apicall url - without the apicall attributes
+        final String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
+
+        // insert entry
+        try {
+            // create and insert new entry
+            Data data = new Data();
+            data.put(TABLE_API_COL_TYPE, type.getBytes());
+            data.put(TABLE_API_COL_COMMENT, comment.getBytes());
+            byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
+            data.put(TABLE_API_COL_DATE_RECORDING, date);
+            data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
+            data.put(TABLE_API_COL_URL, apiurl.getBytes());
+            
+            // insert APICALL attributes 
+            data.put(TABLE_API_COL_APICALL_COUNT, "1".getBytes());
+            data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, Integer.toString(time).getBytes());
+            data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, unit.getBytes());
+            calculateAPIScheduler(data, false); // set next execution time
+            super.insert(TABLE_API_NAME, data);
         } catch (IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {
@@ -164,9 +203,6 @@ public class WorkTables extends Tables {
             if (row == null) continue;
             String url = "http://" + host + ":" + port + new String(row.get(WorkTables.TABLE_API_COL_URL));
             url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + new String(row.getPK());
-            url += "&" + WorkTables.TABLE_API_COL_APICALL_COUNT + "=" + (row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1) + 1);
-            url += "&" + WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME + "=" + row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, "");
-            url += "&" + WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT + "=" + row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "");
             try {
                 client.GETbytes(url);
                 l.put(url, client.getStatusCode());
@@ -197,8 +233,9 @@ public class WorkTables extends Tables {
     /**
      * calculate the execution time in a api call table based on given scheduling time and last execution time
      * @param row the database row in the api table
+     * @param update if true then the next execution time is based on the latest computed execution time; othervise it is based on the last execution time
      */
-    public static void calculateAPIScheduler(Tables.Row row, boolean update) {
+    public static void calculateAPIScheduler(Tables.Data row, boolean update) {
         Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, new Date()) : null;
         date = update ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, date) : row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
         int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
@@ -208,10 +245,11 @@ public class WorkTables extends Tables {
         }
         String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
         long d = date.getTime();
-        if (unit.equals("minutes")) d += 60000L * time;
+        if (unit.equals("minutes")) d += 60000L * Math.max(10, time);
         if (unit.equals("hours"))   d += 60000L * 60L * time;
         if (unit.equals("days"))    d += 60000L * 60L * 24L * time;
         if (d < System.currentTimeMillis()) d = System.currentTimeMillis() + 600000L;
+        d -= d % 60000; // remove seconds
         row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
     }
     
