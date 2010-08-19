@@ -28,8 +28,13 @@ package de.anomic.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import net.yacy.cora.protocol.Client;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -62,6 +67,13 @@ public class WorkTables extends Tables {
         super(workPath, 12);
     }
     
+    /**
+     * recording of a api call. stores the call parameters into the API database table
+     * @param post the post arguments of the api call
+     * @param servletName the name of the servlet
+     * @param type name of the servlet category
+     * @param comment visual description of the process
+     */
     public void recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
         // remove the apicall attributes from the post object
         String pk    = post.remove(TABLE_API_COL_APICALL_PK);
@@ -69,7 +81,7 @@ public class WorkTables extends Tables {
         if (count == null) count = "1";
         String time  = post.remove(TABLE_API_COL_APICALL_SCHEDULE_TIME);
         String unit  = post.remove(TABLE_API_COL_APICALL_SCHEDULE_UNIT);
-        if (time == null || unit == null || unit.length() == 0 || "minues,hours,days".indexOf(unit) < 0) {
+        if (time == null || unit == null || unit.length() == 0 || "minutes,hours,days".indexOf(unit) < 0) {
             time = ""; unit = "";
         }
         
@@ -124,5 +136,84 @@ public class WorkTables extends Tables {
         }
         Log.logInfo("APICALL", apiurl);
     }
+    
+    /**
+     * execute an API call using a api table row which contains all essentials
+     * to access the server also the host, port and the authentication realm must be given
+     * @param pks a collection of primary keys denoting the rows in the api table
+     * @param host the host where the api shall be called
+     * @param port the port on the host
+     * @param realm authentification realm
+     * @return a map of the called urls and the http status code of the api call or -1 if any other IOException occurred
+     */
+    public Map<String, Integer> execAPICall(Collection<String> pks, String host, int port, String realm) {
+        // now call the api URLs and store the result status
+        final Client client = new Client();
+        client.setRealm(realm);
+        client.setTimout(120000);
+        LinkedHashMap<String, Integer> l = new LinkedHashMap<String, Integer>();
+        for (String pk: pks) {
+            Tables.Row row = null;
+            try {
+                row = select(WorkTables.TABLE_API_NAME, pk.getBytes());
+            } catch (IOException e) {
+                Log.logException(e);
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
+            if (row == null) continue;
+            String url = "http://" + host + ":" + port + new String(row.get(WorkTables.TABLE_API_COL_URL));
+            url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + new String(row.getPK());
+            url += "&" + WorkTables.TABLE_API_COL_APICALL_COUNT + "=" + (row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1) + 1);
+            url += "&" + WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME + "=" + row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, "");
+            url += "&" + WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT + "=" + row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "");
+            try {
+                client.GETbytes(url);
+                l.put(url, client.getStatusCode());
+            } catch (IOException e) {
+                Log.logException(e);
+                l.put(url, -1);
+            }
+        }
+        return l;
+    }
+    
+    /**
+     * simplified call to execute a single entry in the api database table
+     * @param pk the primary key of the entry
+     * @param host the host where the api shall be called
+     * @param port the port on the host
+     * @param realm authentification realm
+     * @return the http status code of the api call or -1 if any other IOException occurred
+     */
+    public int execAPICall(String pk, String host, int port, String realm) {
+        ArrayList<String> pks = new ArrayList<String>();
+        pks.add(pk);
+        Map<String, Integer> m = execAPICall(pks, host, port, realm);
+        if (m.isEmpty()) return -1;
+        return m.values().iterator().next().intValue();
+    }
+
+    /**
+     * calculate the execution time in a api call table based on given scheduling time and last execution time
+     * @param row the database row in the api table
+     */
+    public static void calculateAPIScheduler(Tables.Row row, boolean update) {
+        Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, new Date()) : null;
+        date = update ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, date) : row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
+        int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
+        if (time <= 0) {
+            row.remove(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC);
+            return;
+        }
+        String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
+        long d = date.getTime();
+        if (unit.equals("minutes")) d += 60000L * time;
+        if (unit.equals("hours"))   d += 60000L * 60L * time;
+        if (unit.equals("days"))    d += 60000L * 60L * 24L * time;
+        if (d < System.currentTimeMillis()) d = System.currentTimeMillis() + 600000L;
+        row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
+    }
+    
     
 }

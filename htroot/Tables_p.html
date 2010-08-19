@@ -34,16 +34,16 @@
       <fieldset><legend>Table Selection</legend>
       <dl>
         <dt class="TableCellDark">Select Table:
-          <select name="table" size="1">
+          <select name="table" onchange='this.form.submit()'>
             #{tables}#
             <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
             #{/tables}#
           </select>
         </dt>
-        <dd><input type="submit" name="edittable" value="Show Table" /></dd>
+        <dd>&nbsp;</dd>
         <dt>
           show max.
-          <select name="count" size="1">
+          <select name="count" onchange='this.form.submit()'>
             <option value="10">10</option>
             <option value="100" selected="selected">100</option>
             <option value="1000">1000</option>
@@ -56,7 +56,7 @@
           search rows for
           <input type="text" name="search" value="#[pattern]#" />
         </dt>
-        <dd>&nbsp;</dd>
+        <dd><input type="submit" name="edittable" value="Search" /></dd>
       </dl>
     </fieldset>
     </form>

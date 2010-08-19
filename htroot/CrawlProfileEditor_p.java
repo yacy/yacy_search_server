@@ -238,8 +238,11 @@ public class CrawlProfileEditor_p {
     private static void putProfileEntry(final servletProperties prop, final CrawlProfile.entry profile, final boolean active, final boolean dark, final int count, final int domlistlength) {
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_status", active ? "1" : "0");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_name", profile.name());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", (!active || ignoreNames.contains(profile.name())) ? "0" : "1");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", profile.handle());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", (active) ? "0" : "1");
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", profile.handle());
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_startURL", profile.startURL());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_handle", profile.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", profile.depth());
@@ -268,9 +271,5 @@ public class CrawlProfileEditor_p {
         prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", (profile.indexText()) ? "1" : "0");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", (profile.indexMedia()) ? "1" : "0");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", (profile.remoteIndexing()) ? "1" : "0");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", (!active || ignoreNames.contains(profile.name())) ? "0" : "1");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", profile.handle());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", (active) ? "0" : "1");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", profile.handle());
     }
 }

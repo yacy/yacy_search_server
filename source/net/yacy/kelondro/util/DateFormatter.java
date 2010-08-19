@@ -43,9 +43,6 @@ public final class DateFormatter {
     /** minimal date format including milliseconds (fixed width: 17) */
     public static final String PATTERN_SHORT_MILSEC = "yyyyMMddHHmmssSSS";
     
-    /** special time format for two-line display in html tables **/
-    public static final String PATTERN_HTML = "dd'&nbsp;'MMM'&nbsp;'yyyy HH:mm:ss";
-    
     /** default HTTP 1.1 header date format pattern */
     public static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
     public static final String PATTERN_RFC1123_SHORT = "EEE, dd MMM yyyy";
@@ -70,9 +67,6 @@ public final class DateFormatter {
     private static final SimpleDateFormat FORMAT_SHORT_SECOND = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
     /** Date formatter/parser for minimal yyyyMMddHHmmssSSS pattern */
     private static final SimpleDateFormat FORMAT_SHORT_MILSEC = new SimpleDateFormat(PATTERN_SHORT_MILSEC, Locale.US);
-    
-    /** special time format for two-line display in html tables **/
-    private static final SimpleDateFormat FORMAT_HTML = new SimpleDateFormat(PATTERN_HTML, Locale.US);
     
     /** Date formatter/non-sloppy parser for W3C datetime (ISO8601) in GMT/UTC */
     private static final SimpleDateFormat FORMAT_ISO8601      = new SimpleDateFormat(PATTERN_ISO8601, Locale.US);
@@ -174,11 +168,6 @@ public final class DateFormatter {
     public static String formatRFC1123_short(final Date date) {
         if (date == null) return "";
         return FORMAT_RFC1123_SHORT.format(date);
-    }
-    
-    public static String formatHTML(final Date date) {
-        if (date == null) return "";
-        return FORMAT_HTML.format(date);
     }
     
     

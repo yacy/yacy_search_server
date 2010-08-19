@@ -82,11 +82,13 @@ import net.yacy.document.TextParser;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
+import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -1436,8 +1438,6 @@ public final class Switchboard extends serverSwitch {
     
     public boolean cleanupJob() {
         try {
-            boolean hasDoneSomething = false;
-            
             // clear caches if necessary
             if (!MemoryControl.request(8000000L, false)) {
                 for (Segment indexSegment: this.indexSegments) indexSegment.urlMetadata().clearCache();
@@ -1486,6 +1486,40 @@ public final class Switchboard extends serverSwitch {
                 Log.logException(e);
             }
             
+            // execute scheduled API actions
+            Tables.Row row;
+            ArrayList<String> pks = new ArrayList<String>();
+            Date now = new Date();
+            try {
+                Iterator<Tables.Row> plainIterator = this.tables.iterator(WorkTables.TABLE_API_NAME);
+                final Iterator<Tables.Row> mapIterator = this.tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
+                while (mapIterator.hasNext()) {
+                    row = mapIterator.next();
+                    if (row == null) continue;
+                    Date date_next_exec = row.containsKey(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC) ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, now) : null;
+                    if (date_next_exec == null) continue;
+                    if (date_next_exec.after(now)) continue;
+                    pks.add(new String(row.getPK()));              
+                }
+            } catch (IOException e) {
+                Log.logException(e);
+            }
+            for (String pk: pks) try {
+                row = this.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
+                WorkTables.calculateAPIScheduler(row, true); // calculate next update time  
+                this.tables.update(WorkTables.TABLE_API_NAME, row);
+            } catch (IOException e) {
+                Log.logException(e);
+                continue;
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+                continue;
+            }
+            Map<String, Integer> callResult = this.tables.execAPICall(pks, "localhost", (int) this.getConfigLong("port", 8080), this.getConfig("adminAccountBase64MD5", ""));
+            for (Map.Entry<String, Integer> call: callResult.entrySet()) {
+                log.logInfo("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
+            }
+            
             // close unused connections
             de.anomic.http.client.Client.cleanup();
             ConnectionInfo.cleanUp();
@@ -1505,7 +1539,6 @@ public final class Switchboard extends serverSwitch {
             if ((crawlQueues.delegatedURL.stackSize() > 1000)) {
                 if (this.log.isFine()) log.logFine("Cleaning Delegated-URLs report stack, " + crawlQueues.delegatedURL.stackSize() + " entries on stack");
                 crawlQueues.delegatedURL.clearStack();
-                hasDoneSomething = true;
             }
             
             // clean up error stack
@@ -1513,7 +1546,6 @@ public final class Switchboard extends serverSwitch {
             if ((crawlQueues.errorURL.stackSize() > 1000)) {
                 if (this.log.isFine()) log.logFine("Cleaning Error-URLs report stack, " + crawlQueues.errorURL.stackSize() + " entries on stack");
                 crawlQueues.errorURL.clearStack();
-                hasDoneSomething = true;
             }
             
             // clean up loadedURL stack
@@ -1522,21 +1554,21 @@ public final class Switchboard extends serverSwitch {
                 if (crawlResults.getStackSize(origin) > 1000) {
                     if (this.log.isFine()) log.logFine("Cleaning Loaded-URLs report stack, " + crawlResults.getStackSize(origin) + " entries on stack " + origin.getCode());
                     crawlResults.clearStack(origin);
-                    hasDoneSomething = true;
                 }
             }
+            
             // clean up image stack
             ResultImages.clearQueues();
             
             // clean up profiles
             checkInterruption();
-            if (cleanProfiles()) hasDoneSomething = true;
+            cleanProfiles();
 
             // clean up news
             checkInterruption();
             try {                
                 if (this.log.isFine()) log.logFine("Cleaning Incoming News, " + this.peers.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
-                if (this.peers.newsPool.automaticProcess(peers) > 0) hasDoneSomething = true;
+                this.peers.newsPool.automaticProcess(peers);
             } catch (final Exception e) {
                 Log.logException(e);
             }
@@ -1548,33 +1580,31 @@ public final class Switchboard extends serverSwitch {
             }
             
             // clean up seed-dbs
-            if(getConfigBool("routing.deleteOldSeeds.permission",true)) {
+            if (getConfigBool("routing.deleteOldSeeds.permission",true)) {
             	final long deleteOldSeedsTime = getConfigLong("routing.deleteOldSeeds.time",7)*24*3600000;
                 Iterator<yacySeed> e = this.peers.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
                 yacySeed seed = null;
                 final ArrayList<String> deleteQueue = new ArrayList<String>();
                 checkInterruption();
-                //clean passive seeds
-                while(e.hasNext()) {
+                // clean passive seeds
+                while (e.hasNext()) {
                 	seed = e.next();
-                	if(seed != null) {
+                	if (seed != null) {
                 		//list is sorted -> break when peers are too young to delete
-                		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime))
-                				break;
+                		if (seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime)) break;
                 		deleteQueue.add(seed.hash);
                 	}
                 }
-                for(int i=0;i<deleteQueue.size();++i) this.peers.removeDisconnected(deleteQueue.get(i));
+                for (int i = 0; i < deleteQueue.size(); ++i) this.peers.removeDisconnected(deleteQueue.get(i));
                 deleteQueue.clear();
                 e = this.peers.seedsSortedPotential(true,yacySeed.LASTSEEN);
                 checkInterruption();
-                //clean potential seeds
-                while(e.hasNext()) {
+                // clean potential seeds
+                while (e.hasNext()) {
                 	seed = e.next();
-                	if(seed != null) {
+                	if (seed != null) {
                 		//list is sorted -> break when peers are too young to delete
-                		if(seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime))
-                				break;
+                		if (seed.getLastSeenUTC() > (System.currentTimeMillis() - deleteOldSeedsTime)) break;
                 		deleteQueue.add(seed.hash);
                 	}
                 }
@@ -1627,7 +1657,7 @@ public final class Switchboard extends serverSwitch {
             // after all clean up is done, check the resource usage
             observer.resourceObserverJob();
             
-            return hasDoneSomething;
+            return true;
         } catch (final InterruptedException e) {
             this.log.logInfo("cleanupJob: Shutdown detected");
             return false;

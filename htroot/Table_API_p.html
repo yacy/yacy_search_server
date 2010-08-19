@@ -26,14 +26,15 @@
     <script type="text/javascript" src="/js/sorttable.js"></script>
   </head>
   <body id="Tables">
-    #%env/templates/header.template%#
+    <div id="fullcontent">
+  	#(inline)##%env/templates/header.template%#
     
     <h2>Steering of API Actions</h2>
     <p>This table shows actions that had been issued on the YaCy interface
     to change the configuration or to request crawl actions.
     These recorded actions can be used to repeat specific actions and to send them
     to a scheduler for a periodic execution.
-    </p>
+    </p>::#(/inline)#
     #(showtable)#::
     <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist">
       <fieldset>
@@ -47,7 +48,8 @@
           <td>Recording<br/>Date</td>
           <td>Last&nbsp;Exec<br/>Date</td>
           <td>Next&nbsp;Exec<br/>Date</td>
-          <td>URL</td>
+          <td>Scheduler</td>
+          #(inline)#<td>URL</td>::#(/inline)#
         </tr>
         #{list}#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
@@ -58,7 +60,40 @@
           <td>#[dateRecording]#</td>
           <td>#[dateLastExec]#</td>
           <td>#[dateNextExec]#</td>
-          <td>#[url]#</td>
+          <td>
+          #(scheduler)#
+          <form action="Table_API_p.html" method="post" enctype="multipart/form-data" name="modify_repeat">
+            <select name="repeat_select" onchange='this.form.submit()'>
+              <option value="off" selected="selected">no repetition</option>
+              <option value="on">activate scheduler</option>
+            </select>
+            <input type="hidden" name="pk" value="#[pk]#" />
+            <input type="hidden" name="inline" value="#[inline]#" />
+            <input type="hidden" name="filter" value="#[filter]#" />
+          </form>
+          ::
+          <form action="Table_API_p.html" method="post" enctype="multipart/form-data" name="modify_repeat">
+            <table><tr><td>
+            <select name="repeat_time" onchange='this.form.submit()'>
+            #{scale}#
+              <option value="#[time]#" #(selected)#::selected="selected"#(/selected)#>#[time]#</option>
+            #{/scale}#
+            </select>
+            </td><td>
+            <select name="repeat_unit" onchange='this.form.submit()'>
+              <option value="selminutes" #(selectedMinutes)#::selected="selected"#(/selectedMinutes)#>minutes</option>
+              <option value="selhours" #(selectedHours)#::selected="selected"#(/selectedHours)#>hours</option>
+              <option value="seldays" #(selectedDays)#::selected="selected"#(/selectedDays)#>days</option>
+            </select>
+            </td></tr></table>
+            <input type="hidden" name="pk" value="#[pk]#" />
+            <input type="hidden" name="inline" value="#[inline]#" />
+            <input type="hidden" name="filter" value="#[filter]#" />
+            <noscript><input type="submit" value="Submit"></noscript>
+          </form>
+          #(/scheduler)#
+          </td>
+          #(inline)#<td>#[url]#</td>::#(/inline)#
         </tr>
         #{/list}#
       </table>
@@ -89,6 +124,16 @@
       </fieldset>
     </form>
     #(/showexec)#
-    #%env/templates/footer.template%#
+    #(showschedulerhint)#::
+    Scheduled actions are executed after the next execution date has arrived within a time frame of #[tfminutes]# minutes.
+    #(/showschedulerhint)#
+    #(inline)##%env/templates/footer.template%#::#(/inline)#
+    </div>
+    <script type="text/javascript">
+    <!--
+      parentPage = parent.document.getElementById('APITable');
+      if (parentPage != null) parentPage.height = document.getElementById('fullcontent').offsetHeight + 30;
+    -->
+    </script>
   </body>
 </html>
