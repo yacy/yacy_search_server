@@ -158,7 +158,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    private void flushBuffer() throws IOException {
+    public void flushBuffer() throws IOException {
         // check size of buffer
         Iterator<Map.Entry<byte[], byte[]>> i = this.buffer.entrySet().iterator();
         int l = 0;

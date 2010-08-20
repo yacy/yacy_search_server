@@ -184,23 +184,25 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
 
     /**
      * iterate all rows of the table.
-     * Be aware that this first closes the table to force flushing of all elements in 
-     * the write buffer. After that an iterator on the closed file is generated and then
-     * the file is opened again.
      */
     public Iterator<Map.Entry<byte[], Map<String, byte[]>>> iterator() {
         File location = this.table.location();
         int keylen = this.table.keylength();
-        ByteOrder order = this.table.ordering();
-        int buffermax = this.table.getBuffermax();
-        this.table.close();
         try {
-            Iterator<Map.Entry<byte[], Map<String, byte[]>>> iter = new EntryIter(location, keylen);
-            this.table = new Heap(location, keylen, order, buffermax);
-            return iter;
-        } catch (IOException e) {
-            Log.logSevere("PropertiesTable", e.getMessage(), e);
-            return null;
+            this.table.flushBuffer();
+            return new EntryIter(location, keylen);
+        } catch (IOException e1) {
+            ByteOrder order = this.table.ordering();
+            int buffermax = this.table.getBuffermax();
+            this.table.close();
+            try {
+                Iterator<Map.Entry<byte[], Map<String, byte[]>>> iter = new EntryIter(location, keylen);
+                this.table = new Heap(location, keylen, order, buffermax);
+                return iter;
+            } catch (IOException e) {
+                Log.logSevere("PropertiesTable", e.getMessage(), e);
+                return null;
+            }
         }
     }
     
