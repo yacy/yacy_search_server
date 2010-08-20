@@ -40,7 +40,6 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -644,7 +643,6 @@ public class RasterPlotter {
         
         // insert new version of area into image
         insertBitmap(image2, lox, loy);
-        
     }
     
     public static void demoPaint(final RasterPlotter m) {
@@ -661,85 +659,11 @@ public class RasterPlotter {
         m.line(0, 130, 100, 130, 100); PrintTool.print(m, 0, 125, 0, "Blue", -1);
         m.line(80, 0,   80, 300, 100);
     }
-/*
-    private static class imageBuffer {
-    	protected BufferedImage  image;
-    	protected long           access;
-    	public imageBuffer(BufferedImage image) {
-    		this.image = image;
-    		this.access = System.currentTimeMillis();
-    	}
-    	public boolean sameSize(int width, int height) {
-    		return (this.image.getWidth() == width) && (this.image.getHeight() == height);
-    	}
-    	public boolean olderThan(long timeout) {
-    		return System.currentTimeMillis() - this.access > timeout;
-    	}
-    }
-    private static final ArrayList imagePool = new ArrayList();
-    private static BufferedImage imageFromPool(int width, int height, long timeout) {
-    	// returns an Image object from the image pool
-    	// if the pooled Image was created recently (before timeout), it is not used
-    	synchronized (imagePool) {
-    		imageBuffer buffer;
-    		for (int i = 0; i < imagePool.size(); i++) {
-    			buffer = (imageBuffer) imagePool.get(i);
-    			if ((buffer.sameSize(width, height)) && (buffer.olderThan(timeout))) {
-    				// use this buffer
-    				System.out.println("### using imageBuffer from pool " + i);
-    				buffer.access = System.currentTimeMillis();
-    				return buffer.image;
-    			}
-    		}
-    		// no buffered image found, create a new one
-    		buffer = new imageBuffer(new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB));
-    		imagePool.add(buffer);
-    		return buffer.image;
-    	}
-    }
-*/  
-    private static class sbbBuffer {
-    	protected ByteBuffer buffer;
-    	protected int              pixel;
-    	protected long             access;
-    	public sbbBuffer(final int width, final int height) {
-    		this.buffer = new ByteBuffer();
-    		this.access = System.currentTimeMillis();
-    		this.pixel = width * height;
-    	}
-    	public boolean enoughSize(final int width, final int height) {
-    		return this.pixel >= width * height;
-    	}
-    	public boolean olderThan(final long timeout) {
-    		return System.currentTimeMillis() - this.access > timeout;
-    	}
-    }
-    private static final ArrayList<sbbBuffer> sbbPool = new ArrayList<sbbBuffer>();
-    private static ByteBuffer sbbFromPool(final int width, final int height, final long timeout) {
-    	// returns an Image object from the image pool
-    	// if the pooled Image was created recently (before timeout), it is not used
-    	synchronized (sbbPool) {
-    		sbbBuffer b;
-    		for (int i = 0; i < sbbPool.size(); i++) {
-    			b = sbbPool.get(i);
-    			if ((b.enoughSize(width, height)) && (b.olderThan(timeout))) {
-    				// use this buffer
-    				b.access = System.currentTimeMillis();
-    				b.buffer.clear(); // this makes only sense if the byteBuffer keeps its buffer
-    				return b.buffer;
-    			}
-    		}
-    		// no buffered image found, create a new one
-    		b = new sbbBuffer(width, height);
-    		sbbPool.add(b);
-    		return b.buffer;
-    	}
-    }
     
     public static ByteBuffer exportImage(final BufferedImage image, final String targetExt) {
     	// generate an byte array from the given image
     	//serverByteBuffer baos = new serverByteBuffer();
-    	final ByteBuffer baos = sbbFromPool(image.getWidth(), image.getHeight(), 1000);
+    	final ByteBuffer baos = new ByteBuffer();
     	ImageIO.setUseCache(false);
     	try {
     		ImageIO.write(image, targetExt, baos);
