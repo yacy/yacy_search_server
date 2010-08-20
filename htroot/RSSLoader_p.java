@@ -25,13 +25,12 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 
-import net.yacy.document.Document;
-import net.yacy.document.Parser;
-import net.yacy.document.parser.rssParser;
+import net.yacy.cora.document.RSSReader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
@@ -77,14 +76,11 @@ public class RSSLoader_p {
         }
         
         // now parse the content as rss
-        ByteArrayInputStream bais = new ByteArrayInputStream(resource);
-        rssParser parser = new rssParser();
-        Document[] doc;
+        RSSReader rss;
         try {
-            doc = parser.parse(url, "text/rss", "UTF-8", bais);
-        } catch (Parser.Failure e) {
-            return prop;
-        } catch (InterruptedException e) {
+            rss = RSSReader.parse(resource);
+        } catch (IOException e) {
+            Log.logException(e);
             return prop;
         }
         

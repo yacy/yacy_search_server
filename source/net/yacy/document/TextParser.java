@@ -45,7 +45,6 @@ import net.yacy.document.parser.ooxmlParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.pptParser;
 import net.yacy.document.parser.psParser;
-import net.yacy.document.parser.rssParser;
 import net.yacy.document.parser.rtfParser;
 import net.yacy.document.parser.sevenzipParser;
 import net.yacy.document.parser.swfParser;
@@ -82,7 +81,6 @@ public final class TextParser {
         initParser(new pdfParser());
         initParser(new pptParser());
         initParser(new psParser());
-        initParser(new rssParser());
         initParser(new rtfParser());
         initParser(new sevenzipParser());
         initParser(new swfParser());

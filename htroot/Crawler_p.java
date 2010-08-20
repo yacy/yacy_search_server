@@ -172,7 +172,7 @@ public class Crawler_p {
                     int repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
                     final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
                     
-                    if (recrawl.equals("scheduler")) {
+                    if (recrawl.equals("scheduler") && repeat_time > 0) {
                         // set crawlingIfOlder attributes that are appropriate for scheduled crawling 
                         crawlingIfOlderCheck = true;
                         crawlingIfOlderNumber = repeat_unit.equals("selminutes") ? 1 : repeat_unit.equals("selhours") ? repeat_time / 2 : repeat_time * 12;
