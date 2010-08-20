@@ -120,6 +120,11 @@ public class RSSReader extends DefaultHandler {
             item = new RSSMessage();
             parsingChannel = true;
         } else if ("item".equals(tag)) {
+            if (parsingChannel) {
+                // the channel ends with the first item not with the channel close tag
+                theChannel.setChannel(item);
+                parsingChannel = false;
+            }
             item = new RSSMessage();
             parsingItem = true;
         } else if ("image".equals(tag)) {
@@ -132,7 +137,6 @@ public class RSSReader extends DefaultHandler {
         if (tag == null) return;
         if ("channel".equals(tag)) {
             parsingChannel = false;
-            theChannel.setChannel(item);
         } else if ("item".equals(tag)) {
             theChannel.addMessage(item);
             parsingItem = false;

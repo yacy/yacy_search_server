@@ -2,8 +2,9 @@
   <h3>Index Creation</h3>
   <ul class="SubMenu">
     <li><a href="/CrawlStart_p.html" class="MenuItemLink lock">Crawl Start (Advanced)</a></li>
-    <li><a href="/ConfigWikiSearch.html" class="MenuItemLink">Indexing of Media Wikis</a></li>
-    <li><a href="/ConfigPHPBB3Search.html" class="MenuItemLink">Indexing of phpBB3 Forums</a></li>
+    <li><a href="/Load_MediawikiWiki.html" class="MenuItemLink">Indexing of Media Wikis</a></li>
+    <li><a href="/Load_PHPBB3.html" class="MenuItemLink">Indexing of phpBB3 Forums</a></li>
+    <li><a href="/Load_RSS_p.html" class="MenuItemLink lock">Indexing of RSS Feeds</a></li>
     <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Scraping Proxy Configuration</a></li>
   </ul>
 </div>

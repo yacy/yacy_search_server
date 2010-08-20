@@ -39,7 +39,7 @@ public class RSSMessage implements Hit {
         title("title"),
         link("link"),
         description("description"),
-        pubDate("pubDate"),
+        pubDate("pubDate,lastBuildDate"),
         copyright("copyright,dc:publisher,publisher"),
         author("author,dc:creator,creator"),
         subject("subject,dc:subject"),
@@ -47,6 +47,7 @@ public class RSSMessage implements Hit {
         referrer("referrer,referer"),
         language("language"),
         guid("guid"),
+        ttl("ttl"),
         docs("docs");
         
         private Set<String> keys;
@@ -157,6 +158,10 @@ public class RSSMessage implements Hit {
     
     public String getGuid() {
         return Token.guid.valueFrom(this.map);
+    }
+    
+    public String getTTL() {
+        return Token.ttl.valueFrom(this.map);
     }
     
     public String getDocs() {

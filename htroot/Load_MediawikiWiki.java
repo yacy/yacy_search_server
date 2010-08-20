@@ -1,6 +1,6 @@
-// ConfigPHPBB3Search.java
+// ConfigWikiSearch.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 09.06.2009 as IndexCreate_p.java on http://yacy.net
+// first published 03.06.2009 as IndexCreate_p.java on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -30,7 +30,7 @@ import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class ConfigPHPBB3Search {
+public class Load_MediawikiWiki {
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
