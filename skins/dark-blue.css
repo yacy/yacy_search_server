@@ -188,4 +188,8 @@ font-weight:bold;
 
 div.ProgressBarFill {
   background-color:#71D500;
-} 
+}
+
+.snippetLoaded b {
+  color: #999999;
+}

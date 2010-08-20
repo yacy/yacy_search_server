@@ -73,6 +73,7 @@ a.bookmarkAction		{ color: #999999; }
 .searchresults		{ border-top: 1px #000 dashed; }
 .searchresults .url a	{ color: #008000; }
 .snippetLoading		{ color: #999999; }
+.snippetLoaded b { color: #999999; }
 .snippetError		{ color: red; }
 .searchHighlight1	{ font-weight: bold; color: #FFFF64; }
 .searchHighlight2	{ font-weight: bold; color: #FF9B9B; }
