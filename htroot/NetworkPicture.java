@@ -26,6 +26,8 @@
 
 import java.util.concurrent.Semaphore;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -55,6 +57,7 @@ public class NetworkPicture {
             sync.acquire();
             if (buffer != null && !authorized  && timeSeconds - lastAccessSeconds < 2)  {
                 //System.out.println("*** NetworkPicture: cache hit (2)");
+                sync.release();
                 return buffer;
             }
             int width = 768;
@@ -93,10 +96,11 @@ public class NetworkPicture {
             if (maxCount > 10000) maxCount = 10000;
             buffer = new EncodedImage(NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor).getImage(), "png");
             lastAccessSeconds = System.currentTimeMillis() / 1000;
-            sync.release();
-        } catch (InterruptedException e) {
-            if (sync.availablePermits() == 0) sync.release();
+            
+        } catch (Exception e) {
+            Log.logException(e);
         }
+        sync.release();
         return buffer;
     }
     
