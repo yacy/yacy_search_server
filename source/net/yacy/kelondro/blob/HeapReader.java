@@ -283,12 +283,12 @@ public class HeapReader {
                     lastFree = nextFree;
                 }
             }
-            Log.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": merged " + merged + " free records");
+            Log.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.toString() + ": merged " + merged + " free records");
         }
     }
     
     public String name() {
-        return this.heapFile.getName();
+        return this.heapFile.toString();
     }
     
     public File location() {

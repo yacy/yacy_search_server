@@ -430,13 +430,10 @@ public final class Switchboard extends serverSwitch {
             RankingProcess.loadYBR(YBRPath, 15);
         }
         
-        // loading the robots.txt db
+        // load the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
-        final File robotsDBFile = new File(queuesRoot, "crawlRobotsTxt.heap");
         robots = new RobotsTxt(this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME));
-        this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
-        ", " + robots.size() + " entries" +
-        ", " + ppRamString(robotsDBFile.length()/1024));
+        this.log.logConfig("Loaded robots.txt DB: " +  robots.size() + " entries");
         
         // start a cache manager
         log.logConfig("Starting HT Cache Manager");
@@ -901,13 +898,6 @@ public final class Switchboard extends serverSwitch {
 
             // create new web structure
             this.webStructure = new WebStructureGraph(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", CRDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));
-
-            // load the robots.txt database
-            this.log.logConfig("Initializing robots.txt DB");
-            final File robotsDBFile = new File(this.queuesRoot, "crawlRobotsTxt.heap");
-            this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
-            ", " + robots.size() + " entries" +
-            ", " + ppRamString(robotsDBFile.length()/1024));
             
             this.crawlStacker = new CrawlStacker(
                     this.crawlQueues,

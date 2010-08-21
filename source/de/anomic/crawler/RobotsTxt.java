@@ -67,9 +67,11 @@ public class RobotsTxt {
     public RobotsTxt(final BEncodedHeap robotsTable) {
         this.robotsTable = robotsTable;
         syncObjects = new ConcurrentHashMap<String, DomSync>();
+        log.logInfo("initiated robots table: " + robotsTable.getFile());
     }
     
     public void clear() {
+        log.logInfo("clearing robots table");
         try {
             this.robotsTable.clear();
         } catch (IOException e) {
@@ -174,7 +176,7 @@ public class RobotsTxt {
                     int sz = this.robotsTable.size();
                     addEntry(robotsTxt4Host);
                     if (this.robotsTable.size() <= sz) {
-                    	Log.logSevere("RobotsTxt", "new entry in robots.txt table failed, resetting database");
+                    	log.logSevere("new entry in robots.txt table failed, resetting database");
                     	this.clear();
                     	addEntry(robotsTxt4Host);
                     }
