@@ -94,7 +94,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     public  static final Class<?>[] sessionCallType = {String.class, Session.class}; //  set up some reflection
     public  static final long startupTime = System.currentTimeMillis();
     private static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    private static final Map<String, Object> commandObjMethodCache = new ConcurrentHashMap<String, Object>(5);
+    private static final Map<String, Method> commandObjMethodCache = new ConcurrentHashMap<String, Method>(5);
     
     /**
      * will be increased with each session and is used to return a hash code
@@ -713,7 +713,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         this.controlSocket.setSoTimeout(this.socketTimeout);
                         
                         // exec command and return value
-                        Object commandMethod = commandObjMethodCache.get(reqProtocol + "_" + reqCmd);
+                        Method commandMethod = commandObjMethodCache.get(reqProtocol + "_" + reqCmd);
                         if (commandMethod == null) {
                             try {
                                 commandMethod = this.commandObj.getClass().getMethod(reqCmd, sessionCallType);
@@ -724,7 +724,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                             }
                         }
                         //long commandStart = System.currentTimeMillis();
-                        Object result = ((Method)commandMethod).invoke(this.commandObj, parameter);
+                        Object result = commandMethod.invoke(this.commandObj, parameter);
                         //announceMoreExecTime(commandStart - System.currentTimeMillis()); // shall be negative!
                         //this.log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                         this.out.flush();

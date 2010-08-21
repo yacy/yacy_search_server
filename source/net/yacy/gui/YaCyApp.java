@@ -57,6 +57,7 @@ public class YaCyApp {
     static {
         try {
             javax.swing.UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
             if (splashFile != null) splashImg = ImageIO.read(splashFile);
         } catch(Exception e) {
             e.printStackTrace();

@@ -463,6 +463,7 @@ final class memprofiler extends Thread {
         } catch (final Exception e) {
             Log.logException(e);
         }
+        ImageIO.setUseCache(false);
         try {
             ImageIO.write(memChart.getImage(), "png", outputFile);
         } catch (final IOException e) {

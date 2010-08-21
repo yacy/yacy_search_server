@@ -1192,26 +1192,6 @@ public final class HTTPDFileHandler {
     
     public static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         // debug functions: for special servlets call them without reflection to get better stack trace results
-        /*
-        if (targetClass.getName().equals("transferURL.class")) {
-            try {
-                return transferURL.respond(request, args, switchboard);
-            } catch (Exception e) {
-                Log.logException(e);
-                Log.logSevere("HTTPFileHandler", "fail of transferURL", e);
-                throw new InvocationTargetException(e);
-            }
-        }
-        if (targetClass.getName().equals("crawlReceipt.class")) {
-            try {
-                return crawlReceipt.respond(request, args, switchboard);
-            } catch (Exception e) {
-                Log.logException(e);
-                Log.logSevere("HTTPFileHandler", "fail of crawlReceipt", e);
-                throw new InvocationTargetException(e);
-            }
-        }
-        */
         Object result;
         if (safeServletsMode) synchronized (switchboard) {
             result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
