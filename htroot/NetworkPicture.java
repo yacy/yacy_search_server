@@ -39,7 +39,7 @@ import de.anomic.yacy.graphics.NetworkGraph;
 /** draw a picture of the yacy network */
 public class NetworkPicture {
     
-    private static final Semaphore sync = new Semaphore(1);
+    private static final Semaphore sync = new Semaphore(1, true);
     private static EncodedImage buffer = null;
     private static long lastAccessSeconds = 0;
     
@@ -49,57 +49,56 @@ public class NetworkPicture {
         
         long timeSeconds = System.currentTimeMillis() / 1000;
         if (buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
-            //System.out.println("*** NetworkPicture: cache hit (1)");
+            Log.logInfo("NetworkPicture", "cache hit (1); authorized = " + (authorized ? "true" : "false") + ", timeSeconds - lastAccessSeconds = " + (timeSeconds - lastAccessSeconds));
             return buffer;
         }
+        
         if (buffer != null && sync.availablePermits() == 0) return buffer;
-        try {
-            sync.acquire();
-            if (buffer != null && !authorized  && timeSeconds - lastAccessSeconds < 2)  {
-                //System.out.println("*** NetworkPicture: cache hit (2)");
-                sync.release();
-                return buffer;
-            }
-            int width = 768;
-            int height = 576;
-            int passiveLimit = 720; // 12 hours
-            int potentialLimit = 720;
-            int maxCount = 1000;
-            String bgcolor = NetworkGraph.COL_BACKGROUND;
-            boolean corona = true;
-            int coronaangle = 0;
-            long communicationTimeout = -1;
-            
-            if (post != null) {
-                width = post.getInt("width", 768);
-                height = post.getInt("height", 576);
-                passiveLimit = post.getInt("pal", 1440);
-                potentialLimit = post.getInt("pol", 1440);
-                maxCount = post.getInt("max", 1000);
-                corona = post.get("corona", "true").equals("true");
-                coronaangle = (corona) ? post.getInt("coronaangle", 0) : -1;
-                communicationTimeout = post.getLong("ct", -1);
-                bgcolor = post.get("bgcolor", bgcolor);
-            }
-            
-            //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
-            if (width < 320 ) width = 320;
-            if (width > 1920) width = 1920;
-            if (height < 240) height = 240;
-            if (height > 1920) height = 1920;
-            if (!authorized) {
-                width = Math.min(768, width);
-                height = Math.min(576, height);
-            }
-            if (passiveLimit > 1000000) passiveLimit = 1000000;
-            if (potentialLimit > 1000000) potentialLimit = 1000000;
-            if (maxCount > 10000) maxCount = 10000;
-            buffer = new EncodedImage(NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor).getImage(), "png");
-            lastAccessSeconds = System.currentTimeMillis() / 1000;
-            
-        } catch (Exception e) {
-            Log.logException(e);
+        sync.acquireUninterruptibly();
+        
+        if (buffer != null && !authorized  && timeSeconds - lastAccessSeconds < 2)  {
+            Log.logInfo("NetworkPicture", "cache hit (2); authorized = " + (authorized ? "true" : "false") + ", timeSeconds - lastAccessSeconds = " + (timeSeconds - lastAccessSeconds));
+            sync.release();
+            return buffer;
         }
+        
+        int width = 768;
+        int height = 576;
+        int passiveLimit = 720; // 12 hours
+        int potentialLimit = 720;
+        int maxCount = 1000;
+        String bgcolor = NetworkGraph.COL_BACKGROUND;
+        boolean corona = true;
+        int coronaangle = 0;
+        long communicationTimeout = -1;
+        
+        if (post != null) {
+            width = post.getInt("width", 768);
+            height = post.getInt("height", 576);
+            passiveLimit = post.getInt("pal", 1440);
+            potentialLimit = post.getInt("pol", 1440);
+            maxCount = post.getInt("max", 1000);
+            corona = post.get("corona", "true").equals("true");
+            coronaangle = (corona) ? post.getInt("coronaangle", 0) : -1;
+            communicationTimeout = post.getLong("ct", -1);
+            bgcolor = post.get("bgcolor", bgcolor);
+        }
+        
+        //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
+        if (width < 320 ) width = 320;
+        if (width > 1920) width = 1920;
+        if (height < 240) height = 240;
+        if (height > 1920) height = 1920;
+        if (!authorized) {
+            width = Math.min(768, width);
+            height = Math.min(576, height);
+        }
+        if (passiveLimit > 1000000) passiveLimit = 1000000;
+        if (potentialLimit > 1000000) potentialLimit = 1000000;
+        if (maxCount > 10000) maxCount = 10000;
+        buffer = new EncodedImage(NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, coronaangle, communicationTimeout, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor).getImage(), "png");
+        lastAccessSeconds = System.currentTimeMillis() / 1000;
+        
         sync.release();
         return buffer;
     }
