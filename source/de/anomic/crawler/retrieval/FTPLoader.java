@@ -94,8 +94,7 @@ public class FTPLoader {
         final ByteArrayOutputStream berr = new ByteArrayOutputStream();
 
         // create new ftp client
-        final PrintStream err = new PrintStream(berr);
-        final FTPClient ftpClient = new FTPClient(System.in, null, err);
+        final FTPClient ftpClient = new FTPClient();
         ftpClient.setDataTimeoutByMaxFilesize(maxFileSize);
         
         // get a connection
