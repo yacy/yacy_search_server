@@ -145,7 +145,7 @@ public class ConnectionInfo {
     }
     
     /**
-     * removes stale connections
+     * @return how many bytes queued up
      */
     public static long getActiveUpbytes() {
     	long up = 0L;

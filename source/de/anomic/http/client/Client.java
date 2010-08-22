@@ -67,6 +67,7 @@ import de.anomic.http.server.ResponseHeader;
  * HttpClient implementation which uses Jakarta Commons HttpClient 3.x {@link http://hc.apache.org/httpclient-3.x/}
  * 
  * @author danielr
+ * @deprecated please use net.yacy.cora.protocol.Client instead
  * 
  */
 public class Client {

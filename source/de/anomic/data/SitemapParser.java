@@ -34,6 +34,7 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.cora.protocol.Client;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.io.ByteCountInputStream;
@@ -47,10 +48,11 @@ import org.xml.sax.helpers.DefaultHandler;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
+//import de.anomic.http.server.ResponseContainer;
+import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 
@@ -156,22 +158,36 @@ public class SitemapParser extends DefaultHandler {
         // download document
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        final Client client = new Client(5000, requestHeader);
-        ResponseContainer res = null;
+//        final Client client = new Client(5000, requestHeader);
+//        ResponseContainer res = null;
+        final Client client = new Client();
+        client.setTimout(5000);
+        client.setHeader(requestHeader.entrySet());
         try {
-            res = client.GET(siteMapURL.toString());
-            if (res.getStatusCode() != 200) {
-                logger.logWarning("Unable to download the sitemap file " + this.siteMapURL +
-                        "\nServer returned status: " + res.getStatusLine());
-                return;
-            }
+//            res = client.GET(siteMapURL.toString());
+//            if (res.getStatusCode() != 200) {
+//                logger.logWarning("Unable to download the sitemap file " + this.siteMapURL +
+//                        "\nServer returned status: " + res.getStatusLine());
+//                return;
+//            }
+        	try {
+	        	client.GET(siteMapURL.toString());
+	            if (client.getStatusCode() != 200) {
+	                logger.logWarning("Unable to download the sitemap file " + this.siteMapURL +
+	                        "\nServer returned status: " + client.getHttpResponse().getStatusLine());
+	                return;
+	            }
 
             // getting some metadata
-            final String contentMimeType = res.getResponseHeader().mime();
-            this.contentLength = res.getResponseHeader().getContentLength();
+//            final String contentMimeType = res.getResponseHeader().mime();
+//            this.contentLength = res.getResponseHeader().getContentLength();
+	            final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
+	            final String contentMimeType = header.mime();
+	            this.contentLength = header.getContentLength();
 
-            try {
-                InputStream contentStream = res.getDataAsStream();
+//            try {
+//                InputStream contentStream = res.getDataAsStream();
+	            InputStream contentStream = client.getContentstream();
                 if ((contentMimeType != null) &&
                         (contentMimeType.equals("application/x-gzip") || contentMimeType.equals("application/gzip"))) {
                     if (logger.isFine()) logger.logFine("Sitemap file has mimetype " + contentMimeType);
@@ -186,15 +202,16 @@ public class SitemapParser extends DefaultHandler {
                 saxParser.parse(counterStream, this);
                 streamCounter += counterStream.getCount();
             } finally {
-                res.closeStream();
+//                res.closeStream();
+            	client.finish();
             }
         } catch (final Exception e) {
             logger.logWarning("Unable to parse sitemap file " + this.siteMapURL, e);
-        } finally {
-            if (res != null) {
-                // release connection
-                res.closeStream();
-            }
+//        } finally {
+//            if (res != null) {
+//                // release connection
+//                res.closeStream();
+//            }
         }
     }
 

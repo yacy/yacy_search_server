@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -46,7 +47,7 @@ import net.yacy.kelondro.workflow.WorkflowJob;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.yacy.yacyClient;
@@ -353,7 +354,7 @@ public class CrawlQueues {
         }
         // check again
         if (this.workers.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.workers.size() + "), httpClients = " + Client.connectionCount());
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.workers.size() + "), httpClients = " + ConnectionInfo.getCount());
             return false;
         }
         
@@ -593,7 +594,7 @@ public class CrawlQueues {
                         1,
                         e.getMessage() + " - in worker");
                 Log.logException(e);
-                Client.initConnectionManager();
+//                Client.initConnectionManager();
                 this.request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);
             } finally {
                 crawlWorker w = workers.remove(code);

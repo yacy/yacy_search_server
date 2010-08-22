@@ -101,6 +101,10 @@ public class Client {
     	}
     }
     
+    public static void setDefaultUserAgent(final String defaultAgent) {
+    	HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
+    }
+    
     private static void initConnectionManager() {
 		// Create and initialize HTTP parameters
 		final HttpParams httpParams = new BasicHttpParams();
@@ -162,7 +166,9 @@ public class Client {
     }
     
     /**
-     * this should be called just before shutdown
+     * This method should be called just before shutdown
+     * to stop the ConnectionManager and idledConnectionEvictor
+     * 
      * @throws InterruptedException 
      */
     public static void closeConnectionManager() throws InterruptedException {
@@ -179,6 +185,7 @@ public class Client {
     }
     
     /**
+     * This method sets the Header used for the request
      * 
      * @param entrys to be set as request header
      */
@@ -193,6 +200,7 @@ public class Client {
     }
     
     /**
+     * This method sets the timeout of the Connection and Socket
      * 
      * @param timeout in milliseconds
      */
@@ -201,6 +209,8 @@ public class Client {
     }
     
     /**
+     * This method sets the UserAgent to be used for the request
+     * 
      * @param userAgent
      */
     public void setUserAgent(final String userAgent) {
@@ -208,6 +218,8 @@ public class Client {
     }
     
     /**
+     * This method sets the host to be called at the request
+     * 
      * @param host
      */
     public void setHost(final String host) {
@@ -215,6 +227,7 @@ public class Client {
     }
     
     /**
+     * This method sets if requests should follow redirects
      * 
      * @param redirecting
      */
@@ -223,7 +236,8 @@ public class Client {
     }
     
     /**
-     * set the authorization realm
+     * This method sets the authorization realm for the request
+     * 
      * @param realm
      */
     public void setRealm(final String realm) {
@@ -343,7 +357,36 @@ public class Client {
 	    return httpResponse.getStatusLine().getStatusCode();
 	}
 	
+	/**
+	 * This method gets direct access to the content-stream
+	 * Since this way is uncontrolled by the Client think of using 'writeTo' instead!
+     * Please take care to call finish()!
+	 * 
+	 * @return the content as InputStream
+	 * @throws IOException
+	 */
+	public InputStream getContentstream() throws IOException {
+		if (httpResponse != null && currentRequest != null) {
+			final HttpEntity httpEntity = httpResponse.getEntity();
+			if (httpEntity != null) try {
+				return httpEntity.getContent();
+			} catch (final IOException e) {
+	    		ConnectionInfo.removeConnection(currentRequest.hashCode());
+	    		currentRequest.abort();
+				currentRequest = null;
+	    		throw e;
+	    	}
+		}
+		return null;
+	}
 	
+	/**
+	 * This method streams the content to the outputStream
+     * Please take care to call finish()!
+	 * 
+	 * @param outputStream
+	 * @throws IOException
+	 */
 	public void writeTo(final OutputStream outputStream) throws IOException {
 		if (httpResponse != null && currentRequest != null) {
 			final HttpEntity httpEntity = httpResponse.getEntity();
@@ -356,14 +399,20 @@ public class Client {
 				ConnectionInfo.removeConnection(currentRequest.hashCode());
 				currentRequest = null;
 	    	} catch (final IOException e) {
+	    		ConnectionInfo.removeConnection(currentRequest.hashCode());
 	    		currentRequest.abort();
-				ConnectionInfo.removeConnection(currentRequest.hashCode());
 				currentRequest = null;
 	    		throw e;
 	    	}
 		}
 	}
 	
+	/**
+	 * This method ensures correct finish of client-connections
+	 * This method should be used after every use of GET or POST and writeTo or getContentstream!
+	 * 
+	 * @throws IOException
+	 */
 	public void finish() throws IOException {
 		if (httpResponse != null) {
 			final HttpEntity httpEntity = httpResponse.getEntity();
@@ -374,8 +423,8 @@ public class Client {
 	    	}
 		}
 		if (currentRequest != null) {
-			currentRequest.abort();
 			ConnectionInfo.removeConnection(currentRequest.hashCode());
+			currentRequest.abort();
 			currentRequest = null;
 		}
 	}
@@ -396,8 +445,8 @@ public class Client {
         		httpEntity.consumeContent();
         	}
 		} catch (final IOException e) {
-			httpUriRequest.abort();
 			ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+			httpUriRequest.abort();
 			throw e;
 		}
 		ConnectionInfo.removeConnection(httpUriRequest.hashCode());
@@ -415,8 +464,8 @@ public class Client {
         	// execute the method
 			httpResponse = httpClient.execute(httpUriRequest, httpContext);
 		} catch (ClientProtocolException e) {
-			httpUriRequest.abort();
 			ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+			httpUriRequest.abort();
 			throw new IOException("Client can't execute: " + e.getMessage());
 		}
     }

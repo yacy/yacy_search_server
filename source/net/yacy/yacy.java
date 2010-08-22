@@ -24,11 +24,11 @@ package net.yacy;
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-import java.io.BufferedInputStream;
+//import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
+//import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -46,10 +46,11 @@ import java.util.concurrent.Semaphore;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.yacy.cora.protocol.Client;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.blob.MapDataMining;
-import net.yacy.kelondro.data.meta.DigestURI;
+//import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -65,13 +66,13 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.ScoreCluster;
 import net.yacy.kelondro.util.OS;
 
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+//import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseContainer;
+//import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.MetadataRepository;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
@@ -298,7 +299,8 @@ public final class yacy {
             // set user-agent
             final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "
                     + Client.getSystemOST() + ")";
-            Client.setUserAgent(userAgent);
+//            Client.setUserAgent(userAgent);
+            Client.setDefaultUserAgent(userAgent);
             
             // start main threads
             final String port = sb.getConfig("port", "8080");
@@ -415,16 +417,16 @@ public final class yacy {
                     Log.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
                 }
                 */
-                Client.closeAllConnections();
-                MultiThreadedHttpConnectionManager.shutdownAll();
+//                Client.closeAllConnections();
+//                MultiThreadedHttpConnectionManager.shutdownAll();
                 
                 // idle until the processes are down
                 if (server.isAlive()) {
                     //Thread.sleep(2000); // wait a while
                     server.interrupt();
-                    MultiThreadedHttpConnectionManager.shutdownAll();
+//                    MultiThreadedHttpConnectionManager.shutdownAll();
                 }
-                MultiThreadedHttpConnectionManager.shutdownAll();
+//                MultiThreadedHttpConnectionManager.shutdownAll();
                 Log.logConfig("SHUTDOWN", "server has terminated");
                 sb.close();
             } catch (final Exception e) {
@@ -558,32 +560,37 @@ public final class yacy {
         // send 'wget' to web interface
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(RequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
-        final Client con = new Client(10000, requestHeader);
-        ResponseContainer res = null;
+//        final Client con = new Client(10000, requestHeader);
+        final Client con = new Client();
+        con.setHeader(requestHeader.entrySet());
+//        ResponseContainer res = null;
         try {
-            res = con.GET("http://localhost:"+ port +"/" + path);
+//            res = con.GET("http://localhost:"+ port +"/" + path);
+            con.GETbytes("http://localhost:"+ port +"/" + path);
 
             // read response
-            if (res.getStatusLine().startsWith("2")) {
+//            if (res.getStatusLine().startsWith("2")) {
+            if (con.getStatusCode() > 199 && con.getStatusCode() < 300) {
                 Log.logConfig("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
-                final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                try {
-                    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
-                } finally {
-                    res.closeStream();
-                }
+//                final ByteArrayOutputStream bos = new ByteArrayOutputStream(); //This is stream is not used???
+//                try {
+//                    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
+//                } finally {
+//                    res.closeStream();
+//                }
             } else {
-                Log.logSevere("COMMAND-STEERING", "error response from YACY socket: " + res.getStatusLine());
+//                Log.logSevere("COMMAND-STEERING", "error response from YACY socket: " + res.getStatusLine());
+            	Log.logSevere("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
                 System.exit(-1);
             }
         } catch (final IOException e) {
             Log.logSevere("COMMAND-STEERING", "could not establish connection to YACY socket: " + e.getMessage());
             System.exit(-1);
-        } finally {
-            // release connection
-            if(res != null) {
-                res.closeStream();
-            }
+//        } finally {
+//            // release connection
+//            if(res != null) {
+//                res.closeStream();
+//            }
         }
 
         // finished

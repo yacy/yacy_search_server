@@ -87,7 +87,7 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.crawler.retrieval.HTTPLoader;
 //import de.anomic.http.client.DefaultCharsetStringPart;
-import de.anomic.http.client.Client;
+//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.RankingProfile;
@@ -1153,8 +1153,17 @@ public final class yacyClient {
             
             final RequestHeader reqHeader = new RequestHeader();
             reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
-            final byte[] content = Client.wget(
-                                              "http://" + target.getPublicAddress() + "/yacy/search.html" +
+//            final byte[] content = Client.wget(
+//                                              "http://" + target.getPublicAddress() + "/yacy/search.html" +
+//                                                      "?myseed=" + sb.peers.mySeed().genSeedStr(null) +
+//                                                      "&youare=" + target.hash + "&key=" +
+//                                                      "&myseed=" + sb.peers.mySeed() .genSeedStr(null) +
+//                                                      "&count=10" +
+//                                                      "&resource=global" +
+//                                                      "&query=" + new String(wordhashe) +
+//                                                      "&network.unit.name=" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT),
+//                                                      reqHeader, 10000, target.getHexHash() + ".yacyh");            
+            final byte[] content = HttpConnector.wget("http://" + target.getPublicAddress() + "/yacy/search.html" +
                                                       "?myseed=" + sb.peers.mySeed().genSeedStr(null) +
                                                       "&youare=" + target.hash + "&key=" +
                                                       "&myseed=" + sb.peers.mySeed() .genSeedStr(null) +
@@ -1162,7 +1171,7 @@ public final class yacyClient {
                                                       "&resource=global" +
                                                       "&query=" + new String(wordhashe) +
                                                       "&network.unit.name=" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT),
-                                                      reqHeader, 10000, target.getHexHash() + ".yacyh");            
+                                                      reqHeader.entrySet(), 10000, target.getHexHash() + ".yacyh");            
             final Map<String, String> result = FileUtils.table(content);
             System.out.println("Result=" + result.toString());
         } catch (final Exception e) {

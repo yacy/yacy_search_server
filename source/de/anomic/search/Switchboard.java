@@ -1154,7 +1154,7 @@ public final class Switchboard extends serverSwitch {
         indexingStorageProcessor.awaitShutdown(12000);
         crawlStacker.close();
         this.dbImportManager.close();
-        de.anomic.http.client.Client.closeAllConnections();
+//        de.anomic.http.client.Client.closeAllConnections();
         wikiDB.close();
         blogDB.close();
         blogCommentDB.close();
@@ -1510,7 +1510,7 @@ public final class Switchboard extends serverSwitch {
             }
             
             // close unused connections
-            de.anomic.http.client.Client.cleanup();
+//            de.anomic.http.client.Client.cleanup();
             ConnectionInfo.cleanUp();
             
             // do transmission of CR-files
