@@ -46,7 +46,7 @@ import java.util.concurrent.Semaphore;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.blob.MapDataMining;
@@ -298,9 +298,9 @@ public final class yacy {
             
             // set user-agent
             final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "
-                    + Client.getSystemOST() + ")";
+                    + HTTPClient.getSystemOST() + ")";
 //            Client.setUserAgent(userAgent);
-            Client.setDefaultUserAgent(userAgent);
+            HTTPClient.setDefaultUserAgent(userAgent);
             
             // start main threads
             final String port = sb.getConfig("port", "8080");
@@ -561,7 +561,7 @@ public final class yacy {
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(RequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
 //        final Client con = new Client(10000, requestHeader);
-        final Client con = new Client();
+        final HTTPClient con = new HTTPClient();
         con.setHeader(requestHeader.entrySet());
 //        ResponseContainer res = null;
         try {

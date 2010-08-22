@@ -46,7 +46,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
@@ -291,7 +291,7 @@ public final class yacyRelease extends yacyVersion {
         final String name = this.getUrl().getFileName();
         byte[] signatureBytes = null;
         
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setTimout(6000);
         client.setHeader(reqHeader.entrySet());
         

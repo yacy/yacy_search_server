@@ -71,8 +71,8 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
-import net.yacy.cora.protocol.Client;
-import net.yacy.cora.protocol.ProxySettings;
+import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ContentTransformer;
 import net.yacy.document.parser.html.Transformer;
@@ -474,7 +474,7 @@ public final class HTTPDProxyHandler {
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
             
-            final Client client = setupHttpClient(requestHeader, connectHost);
+            final HTTPClient client = setupHttpClient(requestHeader, connectHost);
             
             // send request
             try {
@@ -830,7 +830,7 @@ public final class HTTPDProxyHandler {
             final String getUrl = "http://"+ connectHost + remotePath;
             if (log.isFinest()) log.logFinest(reqID +"    using url: "+ getUrl);
             
-            final Client client = setupHttpClient(requestHeader, connectHost);
+            final HTTPClient client = setupHttpClient(requestHeader, connectHost);
             
             // send request
 //            try {
@@ -939,7 +939,7 @@ public final class HTTPDProxyHandler {
             final int contentLength = requestHeader.getContentLength();
             requestHeader.remove(RequestHeader.CONTENT_LENGTH);
             
-            final Client client = setupHttpClient(requestHeader, connectHost);
+            final HTTPClient client = setupHttpClient(requestHeader, connectHost);
             
             // check input
             if(body == null) {
@@ -1121,11 +1121,11 @@ public final class HTTPDProxyHandler {
      * @param connectHost may be 'host:port' or 'host:port/path'
      * @return
      */
-    private static Client setupHttpClient(final RequestHeader requestHeader, final String connectHost) {
+    private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final String connectHost) {
         // setup HTTP-client
 //        final Client client = new Client(timeout, requestHeader);
 //        client.setFollowRedirects(false);
-    	final Client client = new Client();
+    	final HTTPClient client = new HTTPClient();
     	client.setTimout(timeout);
     	client.setHeader(requestHeader.entrySet());
     	client.setRedirecting(false);
@@ -1300,7 +1300,7 @@ public final class HTTPDProxyHandler {
         if (ProxySettings.use && ProxySettings.use4ssl) {
 //            final Client remoteProxy = new Client(timeout, requestHeader);
 //            remoteProxy.setFollowRedirects(false); // should not be needed, but safe is safe 
-        	final Client remoteProxy = setupHttpClient(requestHeader, host);
+        	final HTTPClient remoteProxy = setupHttpClient(requestHeader, host);
     
 //            ResponseContainer response = null;
             try {

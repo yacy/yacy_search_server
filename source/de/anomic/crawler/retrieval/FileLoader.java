@@ -29,11 +29,11 @@ import java.util.List;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;
-import de.anomic.net.ftpc;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.data.MimeTable;
 
+import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -77,7 +77,7 @@ public class FileLoader {
                 list.add(u + ((u.endsWith("/") || u.endsWith("\\")) ? "" : "/") + s);
             }
          
-            StringBuilder content = ftpc.dirhtml(u, null, null, null, list, true);
+            StringBuilder content = FTPClient.dirhtml(u, null, null, null, list, true);
             
             ResponseHeader responseHeader = new ResponseHeader();
             responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date()));

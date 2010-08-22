@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 //import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.http.HTTPClient;
 
 //import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.http.entity.mime.content.ContentBody;
@@ -97,7 +98,7 @@ public class HttpConnector {
      * @throws IOException
      */
     public static byte[] wput(final String url, final String vhost, LinkedHashMap<String,ContentBody> post, final int timeout) throws IOException {
-		final Client client = new Client();
+		final HTTPClient client = new HTTPClient();
 		client.setTimout(timeout);
 		client.setUserAgent(HTTPLoader.yacyUserAgent);
 		client.setHost(vhost);
@@ -128,7 +129,7 @@ public class HttpConnector {
      * @throws IOException
      */
     public static byte[] wget(final String url, final String vhost, final int timeout) throws IOException {
-		final Client client = new Client();
+		final HTTPClient client = new HTTPClient();
         client.setTimout(timeout);
 		client.setUserAgent(HTTPLoader.yacyUserAgent);
         client.setHost(vhost);
@@ -160,7 +161,7 @@ public class HttpConnector {
      * @throws IOException
      */
     public static byte[] wget(final String url, final Set<Entry<String, String>> entrys, final int timeout, final String vhost) throws IOException {
-    	final Client client = new Client();
+    	final HTTPClient client = new HTTPClient();
     	client.setHeader(entrys);
         client.setTimout(timeout);
         client.setHost(vhost);

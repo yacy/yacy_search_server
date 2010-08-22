@@ -34,7 +34,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -187,7 +187,7 @@ public class WorkTables extends Tables {
      */
     public Map<String, Integer> execAPICall(Collection<String> pks, String host, int port, String realm) {
         // now call the api URLs and store the result status
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setRealm(realm);
         client.setTimout(120000);
         LinkedHashMap<String, Integer> l = new LinkedHashMap<String, Integer>();

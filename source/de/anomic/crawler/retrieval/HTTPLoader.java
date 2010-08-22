@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
@@ -49,8 +49,8 @@ public final class HTTPLoader {
     private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
     public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
     public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
-    public  static final String crawlerUserAgent = "yacybot (" + Client.getSystemOST() +") http://yacy.net/bot.html";
-    public  static final String yacyUserAgent = "yacy (" + Client.getSystemOST() +") yacy.net";
+    public  static final String crawlerUserAgent = "yacybot (" + HTTPClient.getSystemOST() +") http://yacy.net/bot.html";
+    public  static final String yacyUserAgent = "yacy (" + HTTPClient.getSystemOST() +") yacy.net";
     
     /**
      * The socket timeout that should be used
@@ -120,7 +120,7 @@ public final class HTTPLoader {
         // HTTP-Client
 //        final Client client = new Client(socketTimeout, requestHeader);
 //        ResponseContainer res = null;
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setTimout(socketTimeout);
         client.setHeader(requestHeader.entrySet());
 //        try {
@@ -251,7 +251,7 @@ public final class HTTPLoader {
         // HTTP-Client
 //        final Client client = new Client(20000, requestHeader);
 //        ResponseContainer res = null;
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setTimout(20000);
         client.setHeader(requestHeader.entrySet());
 //        try {

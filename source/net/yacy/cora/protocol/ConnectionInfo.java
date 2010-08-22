@@ -176,7 +176,7 @@ public class ConnectionInfo {
      * 
      * @param max connections
      */
-    protected static void setMaxcount(final int max) {
+    public static void setMaxcount(final int max) {
     	if (max > 0) maxcount = max;
     }
 
@@ -185,7 +185,7 @@ public class ConnectionInfo {
      * 
      * @param conInfo
      */
-    protected static void addConnection(final ConnectionInfo conInfo) {
+    public static void addConnection(final ConnectionInfo conInfo) {
         allConnections.add(conInfo);
     }
 
@@ -203,7 +203,7 @@ public class ConnectionInfo {
      * 
      * @param id
      */
-    protected static void removeConnection(final int id) {
+    public static void removeConnection(final int id) {
         removeConnection(new ConnectionInfo(null, null, null, id, 0, 0));
     }
     

@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -269,7 +269,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             }
             log.logInfo("URLs vorher: " + urlIndexFile.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
 
-            final Client client = new Client();
+            final HTTPClient client = new HTTPClient();
             final Iterator<String> eiter2 = damagedURLS.iterator();
             byte[] urlHashBytes;
             while (eiter2.hasNext()) {

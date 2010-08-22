@@ -27,7 +27,8 @@ package de.anomic.yacy.seedUpload;
 
 import java.io.File;
 
-import de.anomic.net.ftpc;
+import net.yacy.cora.protocol.ftp.FTPClient;
+
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacySeedUploader;
@@ -53,7 +54,7 @@ public class yacySeedUploadFtp implements yacySeedUploader {
             final File    seedFTPPath     = new File(sb.getConfig(CONFIG_FTP_PATH,null));       
         
             if ((seedFTPServer != null) && (seedFTPAccount != null) && (seedFTPPassword != null) && (seedFTPPath != null)) {
-                final String log = ftpc.put(seedFTPServer, seedFile, seedFTPPath.getParent(), seedFTPPath.getName(), seedFTPAccount, seedFTPPassword);
+                final String log = FTPClient.put(seedFTPServer, seedFile, seedFTPPath.getParent(), seedFTPPath.getName(), seedFTPAccount, seedFTPPassword);
                 return log;
             } 
             throw new Exception ("Seed upload settings not configured properly. password-len=" +

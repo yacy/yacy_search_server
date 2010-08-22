@@ -34,7 +34,7 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.io.ByteCountInputStream;
@@ -160,7 +160,7 @@ public class SitemapParser extends DefaultHandler {
         requestHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
 //        final Client client = new Client(5000, requestHeader);
 //        ResponseContainer res = null;
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setTimout(5000);
         client.setHeader(requestHeader.entrySet());
         try {

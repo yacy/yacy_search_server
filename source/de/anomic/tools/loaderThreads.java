@@ -24,7 +24,7 @@ package de.anomic.tools;
 import java.util.Hashtable;
 
 import net.yacy.cora.protocol.HttpConnector;
-import net.yacy.cora.protocol.ProxySettings;
+import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.retrieval.HTTPLoader;

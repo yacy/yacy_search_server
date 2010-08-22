@@ -36,7 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.MapTools;
 
@@ -149,7 +149,7 @@ public class Network {
                 prop.put("table_my-url", seed.get(yacySeed.SEEDLIST, ""));
                 
                 // generating the location string
-                prop.putHTML("table_my-location", Client.generateLocation());
+                prop.putHTML("table_my-location", HTTPClient.generateLocation());
             }
 
             // overall results: Network statistics
@@ -364,7 +364,7 @@ public class Network {
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 userAgent = HTTPLoader.yacyUserAgent;
-                                location = Client.generateLocation();
+                                location = HTTPClient.generateLocation();
                             } else {
                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
                                location = parseLocationInUserAgent(userAgent);

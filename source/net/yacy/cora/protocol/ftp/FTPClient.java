@@ -1,34 +1,30 @@
-// ftpc.java
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2002, 2004, 2006
-// main implementation finished: 28.05.2002
-// last major change: 06.05.2004
-// added html generation for directories: 5.9.2006
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
-//
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  FTPClient
+ *  Copyright 2002, 2004, 2006, 2010 by Michael Peter Christen
+ *  first published on http://yacy.net
+ *  main implementation finished: 28.05.2002
+ *  last major change: 06.05.2004
+ *  added html generation for directories: 5.9.2006
+ *  migrated to the cora package and re-licensed under lgpl: 23.08.2010
+ *  
+ *  This file is part of YaCy Content Integration
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package de.anomic.net;
+package net.yacy.cora.protocol.ftp;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -69,7 +65,7 @@ import java.util.regex.Pattern;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Domains;
 
-public class ftpc {
+public class FTPClient {
 
     private static final String vDATE = "20040506";
     private static final String logPrefix = "FTPC: ";
@@ -126,11 +122,11 @@ public class ftpc {
 
     // TODO: implement RFC 2640 Internationalization
 
-    public ftpc() {
+    public FTPClient() {
         this(System.in, System.out, System.err);
     }
 
-    public ftpc(final java.io.InputStream ins, final java.io.PrintStream outs, final java.io.PrintStream errs) {
+    public FTPClient(final java.io.InputStream ins, final java.io.PrintStream outs, final java.io.PrintStream errs) {
 
         // try {
         // System.setSecurityManager(new sm());
@@ -2561,7 +2557,7 @@ public class ftpc {
     public static List<String> dir(final String host, final String remotePath, final String account,
             final String password, final boolean extended) {
         try {
-            final ftpc c = new ftpc();
+            final FTPClient c = new FTPClient();
             c.cmd = new String[] { "open", host };
             c.OPEN();
             c.cmd = new String[] { "user", account, password };
@@ -2582,7 +2578,7 @@ public class ftpc {
 
     public static void dir(final String host, final String remotePath, final String account, final String password) {
         try {
-            final ftpc c = new ftpc();
+            final FTPClient c = new FTPClient();
             c.exec("open " + host, false);
             c.exec("user " + account + " " + password, false);
             c.exec("cd " + remotePath, false);
@@ -2620,7 +2616,7 @@ public class ftpc {
             final String account, final String password) {
         // opens a new connection and returns a directory listing as html
         try {
-            final ftpc c = new ftpc(System.in, null, System.err);
+            final FTPClient c = new FTPClient(System.in, null, System.err);
             c.open(host, port);
             c.login(account, password);
             c.sys();
@@ -2720,7 +2716,7 @@ public class ftpc {
             final ByteArrayOutputStream berr = new ByteArrayOutputStream();
             final PrintStream err = new PrintStream(berr);
 
-            final ftpc c = new ftpc(System.in, out, err);
+            final FTPClient c = new FTPClient(System.in, out, err);
             c.exec("open " + host, false);
             c.exec("user " + account + " " + password, false);
             if (remotePath != null) {
@@ -2758,7 +2754,7 @@ public class ftpc {
     public static void get(final String host, String remoteFile, final File localPath, final String account,
             final String password) {
         try {
-            final ftpc c = new ftpc();
+            final FTPClient c = new FTPClient();
             if (remoteFile.length() == 0) {
                 remoteFile = "/";
             }
@@ -2836,12 +2832,12 @@ public class ftpc {
         System.out.println(logPrefix + "try -h for command line options");
         System.out.println(logPrefix);
         if (args.length == 0) {
-            (new ftpc()).shell(null);
+            (new FTPClient()).shell(null);
         } else if (args.length == 1) {
             if (args[0].equals("-h")) {
                 printHelp();
             } else {
-                (new ftpc()).shell(args[0]);
+                (new FTPClient()).shell(args[0]);
             }
         } else if (args.length == 2) {
             printHelp();

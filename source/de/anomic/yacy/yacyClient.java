@@ -1223,7 +1223,7 @@ public final class yacyClient {
 			}
         }
 		try {
-			net.yacy.cora.protocol.Client.closeConnectionManager();
+			net.yacy.cora.protocol.http.HTTPClient.closeConnectionManager();
 		} catch (InterruptedException e) {
 			Log.logException(e);
 		}

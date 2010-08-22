@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.util.Date;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -42,7 +43,6 @@ import de.anomic.crawler.Latency;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;
-import de.anomic.net.ftpc;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 
@@ -95,7 +95,7 @@ public class FTPLoader {
 
         // create new ftp client
         final PrintStream err = new PrintStream(berr);
-        final ftpc ftpClient = new ftpc(System.in, null, err);
+        final FTPClient ftpClient = new FTPClient(System.in, null, err);
         ftpClient.setDataTimeoutByMaxFilesize(maxFileSize);
         
         // get a connection
@@ -162,7 +162,7 @@ public class FTPLoader {
     /**
      * @param ftpClient
      */
-    private void closeConnection(final ftpc ftpClient) {
+    private void closeConnection(final FTPClient ftpClient) {
         // closing connection
         ftpClient.exec("close", false);
         ftpClient.exec("exit", false);
@@ -171,7 +171,7 @@ public class FTPLoader {
     /**
      * establish a connection to the ftp server (open, login, set transfer mode)
      */
-    private boolean openConnection(final ftpc ftpClient, final DigestURI entryUrl) {
+    private boolean openConnection(final FTPClient ftpClient, final DigestURI entryUrl) {
         // get username and password
         final String userInfo = entryUrl.getUserInfo();
         String userName = "anonymous", userPwd = "anonymous";
@@ -208,7 +208,7 @@ public class FTPLoader {
         return true;
     }
 
-    private Response getFile(final ftpc ftpClient, final Request request, boolean acceptOnlyParseable) throws Exception {
+    private Response getFile(final FTPClient ftpClient, final Request request, boolean acceptOnlyParseable) throws Exception {
         // determine the mimetype of the resource
         final DigestURI url = request.url();
         final String mime = TextParser.mimeOf(url);

@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -347,7 +347,7 @@ public class RobotsTxt {
         //TODO: adding Traffic statistic for robots download?
 //        final Client client = new Client(10000, reqHeaders);
 //        ResponseContainer res = null;
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeaders.entrySet());
         try {
             // check for interruption

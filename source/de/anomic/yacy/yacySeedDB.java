@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.protocol.Client;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -875,7 +875,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
 //                res.closeStream();
 //            }
 //        }
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
         byte[] content = null;
         try {

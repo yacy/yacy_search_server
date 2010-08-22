@@ -72,9 +72,9 @@ import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.protocol.Client;
 import net.yacy.cora.protocol.ConnectionInfo;
-import net.yacy.cora.protocol.ProxySettings;
+import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -1173,7 +1173,7 @@ public final class Switchboard extends serverSwitch {
         UPnP.deletePortMapping();
         Tray.removeTray();
         try {
-			Client.closeConnectionManager();
+			HTTPClient.closeConnectionManager();
 		} catch (InterruptedException e) {
 			Log.logException(e);
 		}
@@ -2359,7 +2359,7 @@ public final class Switchboard extends serverSwitch {
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
         reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
         reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
         client.setTimout((int) getConfigLong("bootstrapLoadTimeout", 20000));
         
@@ -2510,7 +2510,7 @@ public final class Switchboard extends serverSwitch {
     public static Map<String, String> loadFileAsMap(final DigestURI url) {
     	final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-        final Client client = new Client();
+        final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
     	try {
             // sending request
