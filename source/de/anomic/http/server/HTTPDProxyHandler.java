@@ -87,7 +87,6 @@ import net.yacy.repository.Blacklist;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.MultiOutputStream;
 //import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Switchboard;

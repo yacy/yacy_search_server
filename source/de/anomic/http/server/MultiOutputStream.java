@@ -2,7 +2,7 @@
  * MultiOutputStream.java
  * @since 26.08.2008
  */
-package de.anomic.http.client;
+package de.anomic.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
