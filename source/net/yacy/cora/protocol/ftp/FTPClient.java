@@ -1509,7 +1509,7 @@ public class FTPClient {
         return true;
     }
 
-    private void open(final String host, final int port) throws IOException {
+    public void open(final String host, final int port) throws IOException {
         if (ControlSocket != null) {
             exec("close", false); // close any existing connections first
         }
@@ -2678,8 +2678,7 @@ public class FTPClient {
         }
     }
 
-    public static void get(final String host, String remoteFile, final File localPath, final String account,
-            final String password) {
+    public static void get(final String host, String remoteFile, final File localPath, final String account, final String password) {
         try {
             final FTPClient c = new FTPClient();
             if (remoteFile.length() == 0) {

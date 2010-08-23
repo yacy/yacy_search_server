@@ -302,7 +302,7 @@ public final class HTTPDProxyHandler {
 
             DigestURI url = null;
             try {
-                url = HeaderFramework.getRequestURL(conProp);
+                url = new DigestURI(HeaderFramework.getRequestURL(conProp));
                 if (log.isFine()) log.logFine(reqID +" GET "+ url);
                 if (log.isFinest()) log.logFinest(reqID +"    header: "+ requestHeader);
 

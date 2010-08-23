@@ -327,7 +327,7 @@ public final class yacyClient {
             parts.put("count", new StringBody(Integer.toString(maxCount)));
             parts.put("time", new StringBody(Long.toString(maxTime)));
             final byte[] result = HTTPConnector.getConnector(HTTPLoader.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts); 
-            final RSSReader reader = RSSReader.parse(result);
+            final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
                 target.put(yacySeed.RCOUNT, "0");

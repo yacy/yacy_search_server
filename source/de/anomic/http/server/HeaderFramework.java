@@ -41,19 +41,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.Collator;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.util.DateFormatter;
-
-
+import net.yacy.cora.document.MultiProtocolURI;
 
 public class HeaderFramework extends TreeMap<String, String> implements Map<String, String> {
 
@@ -243,7 +244,56 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         if (othermap != null) this.putAll(othermap);
     }
 
+    /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
+    private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
+    private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
+    private static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
+    private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
+    private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US); 
+    private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US); 
+    private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
+    private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
+    
+    /**
+     * RFC 2616 requires that HTTP clients are able to parse all 3 different
+     * formats. All times MUST be in GMT/UTC, but ...
+     */
+    private static final SimpleDateFormat[] FORMATS_HTTP = new SimpleDateFormat[] {
+            // RFC 1123/822 (Standard) "Mon, 12 Nov 2007 10:11:12 GMT"
+            FORMAT_RFC1123,
+            // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
+            FORMAT_RFC1036,
+            // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
+            FORMAT_ANSIC,
+    };
 
+    /** Initialization of static formats */
+    static {
+        // 2-digit dates are automatically parsed by SimpleDateFormat,
+        // we need to detect the real year by adding 1900 or 2000 to
+        // the year value starting with 1970
+        CAL_GMT.setTimeInMillis(0);
+        
+        for (SimpleDateFormat format: FORMATS_HTTP) {
+            format.setTimeZone(TZ_GMT);
+            format.set2DigitYearStart(CAL_GMT.getTime());
+        }
+    }
+
+    /**
+     * Parse a HTTP string representation of a date into a Date instance.
+     * @param s The date String to parse.
+     * @return The Date instance if successful, <code>null</code> otherwise.
+     */
+    public static Date parseHTTPDate(String s) {
+        s = s.trim();
+        if (s == null || s.length() < 9) return null;
+        for (SimpleDateFormat format: FORMATS_HTTP) synchronized (format) {
+            try { return format.parse(s); } catch (final ParseException e) {}
+        }
+        return null;
+    }
+    
     // we override the put method to make use of the reverseMappingCache
     @Override
     public String put(final String key, final String value) {
@@ -386,7 +436,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     
     protected Date headerDate(final String kind) {
         if (containsKey(kind)) {
-            Date parsedDate = DateFormatter.parseHTTPDate(get(kind));
+            Date parsedDate = parseHTTPDate(get(kind));
             if (parsedDate == null) parsedDate = new Date();
             return parsedDate;
         }
@@ -461,7 +511,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         theHeader.append("\r\n");                
     }    
     
-    public static DigestURI getRequestURL(final Properties conProp) throws MalformedURLException {
+    public static MultiProtocolURI getRequestURL(final Properties conProp) throws MalformedURLException {
         String host =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
         final String path =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
         final String args =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
@@ -475,7 +525,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             host = host.substring(0, pos);
         }
         
-        final DigestURI url = new DigestURI("http", host, port, (args == null) ? path : path + "?" + args);
+        final MultiProtocolURI url = new MultiProtocolURI("http", host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
 

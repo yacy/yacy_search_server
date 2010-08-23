@@ -56,7 +56,7 @@ public class rssParser extends AbstractParser implements Parser {
     public Document[] parse(MultiProtocolURI url, String mimeType, String charset, InputStream source) throws Failure, InterruptedException {
         RSSReader rssReader;
         try {
-            rssReader = new RSSReader(source);
+            rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source);
         } catch (IOException e) {
             throw new Parser.Failure("Load error:" + e.getMessage(), url);
         }

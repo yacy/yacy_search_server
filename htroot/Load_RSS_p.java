@@ -64,7 +64,7 @@ public class Load_RSS_p {
             prop.put("url", url.toNormalform(true, false));
             Response entry = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
             byte[] resource = entry == null ? null : entry.getContent();
-            rss = resource == null ? null : RSSReader.parse(resource);
+            rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (IOException e) {
             Log.logException(e);
         }

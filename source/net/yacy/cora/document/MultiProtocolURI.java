@@ -41,6 +41,7 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 
 import net.yacy.cora.document.Punycode.PunycodeException;
+import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.util.Domains;
 
@@ -940,6 +941,13 @@ public class MultiProtocolURI implements Serializable {
     public InputStream getInputStream(final String userAgent, final int timeout) throws IOException {
         if (isFile()) return new FileInputStream(getFSFile());
         if (isSMB()) return new SmbFileInputStream(getSmbFile());
+        if (isFTP()) {
+            FTPClient client = new FTPClient();
+            client.open(this.host, this.port < 0 ? 21 : this.port);
+            byte[] b = client.get(this.path);
+            client.CLOSE();
+            return new ByteArrayInputStream(b);
+        }
         if (isHTTP() || isHTTPS()) {
                 final HTTPClient client = new HTTPClient();
                 client.setTimout(timeout);
@@ -954,6 +962,13 @@ public class MultiProtocolURI implements Serializable {
     public byte[] get(final String userAgent, final int timeout) throws IOException {
         if (isFile()) return read(new FileInputStream(getFSFile()));
         if (isSMB()) return read(new SmbFileInputStream(getSmbFile()));
+        if (isFTP()) {
+            FTPClient client = new FTPClient();
+            client.open(this.host, this.port < 0 ? 21 : this.port);
+            byte[] b = client.get(this.path);
+            client.CLOSE();
+            return b;
+        }
         if (isHTTP() || isHTTPS()) {
                 final HTTPClient client = new HTTPClient();
                 client.setTimout(timeout);
@@ -1002,6 +1017,7 @@ public class MultiProtocolURI implements Serializable {
           new String[]{null, "http://www.anomic.de/home/test?x=1"},
           new String[]{null, "http://www.anomic.de/home/test#home"},
           new String[]{null, "ftp://ftp.anomic.de/home/test#home"},
+          new String[]{null, "ftp://bob:builder@ftp.anomic.de/home/test.gif"},
           new String[]{null, "http://www.anomic.de/home/../abc/"},
           new String[]{null, "mailto:abcdefg@nomailnomail.com"},
           new String[]{"http://www.anomic.de/home", "test"},

@@ -31,7 +31,6 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.server.serverCore;
 
@@ -106,7 +105,7 @@ public class RequestHeader extends HeaderFramework {
     
     public Object ifRange() {
         if (containsKey(IF_RANGE)) {
-            final Date rangeDate = DateFormatter.parseHTTPDate(get(IF_RANGE));
+            final Date rangeDate = parseHTTPDate(get(IF_RANGE));
             if (rangeDate != null) 
                 return rangeDate;
             

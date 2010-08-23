@@ -34,10 +34,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.Latency;
-//import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
-//import de.anomic.http.server.ResponseContainer;
 import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

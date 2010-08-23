@@ -31,8 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.Header;
-
-import net.yacy.kelondro.logging.Log;
+import org.apache.log4j.Logger;
 
 
 public class ResponseHeader extends HeaderFramework {
@@ -40,6 +39,7 @@ public class ResponseHeader extends HeaderFramework {
     // response header properties
    
     private static final long serialVersionUID = 0L;
+    private static Logger log = Logger.getLogger(ResponseHeader.class);
 
     public ResponseHeader() {
         super();
@@ -133,16 +133,16 @@ public class ResponseHeader extends HeaderFramework {
         // maybe the charset is valid but not installed on this computer
         try {
             if(!Charset.isSupported(charSetName)) {
-                Log.logWarning("httpHeader", "charset '"+ charSetName +"' is not supported on this machine, using default ("+ Charset.defaultCharset().name() +")");
+                log.warn("charset '"+ charSetName +"' is not supported on this machine, using default ("+ Charset.defaultCharset().name() +")");
                 // use system default
                 return Charset.defaultCharset();
             }
         } catch(IllegalCharsetNameException e) {
-            Log.logSevere("httpHeader", "Charset in header is illegal: '"+ charSetName +"'\n    "+ toString() + "\n" + e.getMessage());
+            log.warn("Charset in header is illegal: '"+ charSetName +"'\n    "+ toString() + "\n" + e.getMessage());
             // use system default
             return Charset.defaultCharset();
         } catch (UnsupportedCharsetException e) {
-        	Log.logSevere("httpHeader", "Charset in header is unsupported: '"+ charSetName +"'\n    "+ toString() + "\n" + e.getMessage());
+            log.warn("Charset in header is unsupported: '"+ charSetName +"'\n    "+ toString() + "\n" + e.getMessage());
             // use system default
             return Charset.defaultCharset();
         }

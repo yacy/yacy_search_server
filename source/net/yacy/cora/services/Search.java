@@ -130,7 +130,7 @@ public class Search {
             parts.put("resource", new StringBody(global ? "global" : "local"));
             final byte[] result = HTTPConnector.getConnector(HTTPLoader.yacyUserAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
             //String debug = new String(result); System.out.println("*** DEBUG: " + debug);
-            final RSSReader reader = RSSReader.parse(result);
+            final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {
                 throw new IOException("cora.Search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (1), reader == null");
             }

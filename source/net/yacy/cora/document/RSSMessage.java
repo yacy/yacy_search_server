@@ -27,6 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.http.server.HeaderFramework;
+
 import net.yacy.kelondro.util.DateFormatter;
 
 public class RSSMessage implements Hit {
@@ -150,7 +152,7 @@ public class RSSMessage implements Hit {
             try {
                 date = DateFormatter.parseISO8601(dateString);
             } catch (ParseException e1) {
-                date = DateFormatter.parseHTTPDate(dateString);
+                date = HeaderFramework.parseHTTPDate(dateString);
             }
         }
         return date;

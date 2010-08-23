@@ -41,8 +41,8 @@ public class RSSReader extends DefaultHandler {
     private boolean parsingChannel, parsingImage, parsingItem;
     private final RSSFeed theChannel;
     
-    public RSSReader() {
-        theChannel = new RSSFeed();
+    public RSSReader(int maxsize) {
+        theChannel = new RSSFeed(maxsize);
         buffer = new StringBuilder();
         item = null;
         parsingChannel = false;
@@ -50,8 +50,8 @@ public class RSSReader extends DefaultHandler {
         parsingItem = false;
     }
     
-    public RSSReader(final String path) throws IOException {
-        this();
+    public RSSReader(int maxsize, final String path) throws IOException {
+        this(maxsize);
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
             final SAXParser saxParser = factory.newSAXParser();
@@ -63,8 +63,8 @@ public class RSSReader extends DefaultHandler {
         }
     }
     
-    public RSSReader(final InputStream stream) throws IOException {
-        this();
+    public RSSReader(int maxsize, final InputStream stream) throws IOException {
+        this(maxsize);
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
             final SAXParser saxParser = factory.newSAXParser();
@@ -76,7 +76,7 @@ public class RSSReader extends DefaultHandler {
         }
     }
     
-    public static RSSReader parse(final byte[] a) throws IOException {
+    public static RSSReader parse(int maxsize, final byte[] a) throws IOException {
 
         // check integrity of array
         if ((a == null) || (a.length == 0)) {
@@ -99,7 +99,7 @@ public class RSSReader extends DefaultHandler {
         // parse stream
         RSSReader reader = null;
         try {
-            reader = new RSSReader(bais);
+            reader = new RSSReader(maxsize, bais);
         } catch (final Exception e) {
             throw new IOException("parse exception: " + e.getMessage(), e);
         }

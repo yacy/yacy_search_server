@@ -73,23 +73,10 @@ public final class DateFormatter {
     
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
     private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
-    private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US); 
     private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US); 
     
     private static final SimpleDateFormat FORMAT_RFC1123_SHORT = new SimpleDateFormat(PATTERN_RFC1123_SHORT, Locale.US);
     
-    /**
-     * RFC 2616 requires that HTTP clients are able to parse all 3 different
-     * formats. All times MUST be in GMT/UTC, but ...
-     */
-    private static final SimpleDateFormat[] FORMATS_HTTP = new SimpleDateFormat[] {
-            // RFC 1123/822 (Standard) "Mon, 12 Nov 2007 10:11:12 GMT"
-            FORMAT_RFC1123,
-            // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
-            FORMAT_RFC1036,
-            // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
-            new SimpleDateFormat(PATTERN_ANSIC, Locale.US),
-    };
     
     /** Initialization of static formats */
     static {
@@ -98,12 +85,6 @@ public final class DateFormatter {
         // the year value starting with 1970
         CAL_GMT.setTimeInMillis(0);
         
-        for (int i = 0; i < DateFormatter.FORMATS_HTTP.length; i++) {
-            final SimpleDateFormat f = DateFormatter.FORMATS_HTTP[i];
-            f.setTimeZone(TZ_GMT);
-            f.set2DigitYearStart(CAL_GMT.getTime());
-        }
-        
         // we want GMT times on the SHORT formats as well as they don't support any timezone
         FORMAT_SHORT_DAY.setTimeZone(TZ_GMT);
         FORMAT_SHORT_SECOND.setTimeZone(TZ_GMT);
@@ -111,27 +92,6 @@ public final class DateFormatter {
         FORMAT_ISO8601.setTimeZone(TZ_GMT);
     }
 
-    /**
-     * Parse a HTTP string representation of a date into a Date instance.
-     * @param s The date String to parse.
-     * @return The Date instance if successful, <code>null</code> otherwise.
-     */
-    public static Date parseHTTPDate(String s) {
-        s = s.trim();
-        if ((s == null) || (s.length() < 9)) return null;
-    
-        for (int i = 0; i < FORMATS_HTTP.length; i++) {
-            try {
-                return parse(FORMATS_HTTP[i], s);
-            } catch (final ParseException e) {
-                // on ParseException try again with next parser
-            }
-        }
-    
-        // the method didn't return a Date, so we got an illegal String
-        //serverLog.logSevere("HTTPC-header", "DATE ERROR (Parse): " + s);
-        return null;
-    }
 
     /**
      * Creates a String representation of a Date using the format defined

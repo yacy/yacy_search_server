@@ -28,28 +28,20 @@ import java.util.Map;
 
 public class RSSFeed implements Iterable<Hit> {
 
+    public static final int DEFAULT_MAXSIZE = 1000;
+    
     // class variables
     private RSSMessage channel;
     private String imageURL;
     private Map<String, RSSMessage> messages; // a guid:Item map
     private int maxsize;
     
-    public RSSFeed() {
-        messages = Collections.synchronizedMap(new LinkedHashMap<String, RSSMessage>());
-        channel = null;
-        maxsize = Integer.MAX_VALUE;
-    }
-
     public RSSFeed(final int maxsize) {
-        this();
+        this.messages = Collections.synchronizedMap(new LinkedHashMap<String, RSSMessage>());
+        this.channel = null;
         this.maxsize = maxsize;
     }
 
-    public void setMaxsize(final int maxsize) {
-        this.maxsize = maxsize;
-        while (messages.size() > this.maxsize) pollMessage();
-    }
-    
     public void setChannel(final RSSMessage channelItem) {
         this.channel = channelItem;
     }
@@ -69,6 +61,7 @@ public class RSSFeed implements Iterable<Hit> {
     public void addMessage(final RSSMessage item) {
         final String guid = item.getGuid();
         messages.put(guid, item);
+        // in case that the feed is full (size > maxsize) flush the oldest element
         while (messages.size() > this.maxsize) pollMessage();
     }
     
@@ -103,17 +96,21 @@ public class RSSFeed implements Iterable<Hit> {
         
         Iterator<String> GUIDiterator;
         String lastGUID;
+        int t;
         
         public messageIterator() {
+            t = messages.size(); // termination counter
             GUIDiterator = messages.keySet().iterator();
             lastGUID = null;
         }
 
         public boolean hasNext() {
+            if (t <= 0) return false; // ensure termination
             return GUIDiterator.hasNext();
         }
 
         public RSSMessage next() {
+            t--; // ensure termination
             try {
                 lastGUID = GUIDiterator.next();
             } catch (ConcurrentModificationException e) {
