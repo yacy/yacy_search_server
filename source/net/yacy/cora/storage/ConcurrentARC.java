@@ -20,6 +20,13 @@
 
 package net.yacy.cora.storage;
 
+import java.util.AbstractMap;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 
 /**
  * This is a simple cache using two generations of hashtables to store the content with a LFU strategy.
@@ -30,7 +37,7 @@ package net.yacy.cora.storage;
  * at the same size.
  */
 
-public final class ConcurrentARC<K, V> implements ARC<K, V> {
+public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, Iterable<Map.Entry<K, V>>, ARC<K, V> {
 
     private final int mask;
     private final ARC<K, V> arc[];
@@ -39,10 +46,20 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
 	public ConcurrentARC(final int cacheSize, final int partitions) {
     	int m = 1;
     	while (m < partitions) m = m * 2;
-    	this.arc = new SimpleARC[m];
-    	for (int i = 0; i < this.arc.length; i++) this.arc[i] = new SimpleARC<K, V>(cacheSize / m);
+    	this.arc = new HashARC[m];
+    	for (int i = 0; i < this.arc.length; i++) this.arc[i] = new HashARC<K, V>(cacheSize / m);
     	m -= 1;
     	this.mask = m;
+    }
+    
+    @SuppressWarnings("unchecked")
+    public ConcurrentARC(final int cacheSize, final int partitions, Comparator<? super K> comparator) {
+        int m = 1;
+        while (m < partitions) m = m * 2;
+        this.arc = new ComparableARC[m];
+        for (int i = 0; i < this.arc.length; i++) this.arc[i] = new ComparableARC<K, V>(cacheSize / m, comparator);
+        m -= 1;
+        this.mask = m;
     }
     
     /**
@@ -50,8 +67,17 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @param v
      */
-    public final void put(final K s, final V v) {
-    	this.arc[s.hashCode() & mask].put(s, v);
+    public final void insert(final K s, final V v) {
+        this.arc[s.hashCode() & mask].put(s, v);
+    }
+    
+    /**
+     * put a value to the cache.
+     * @param s
+     * @param v
+     */
+    public final V put(final K s, final V v) {
+        return this.arc[s.hashCode() & mask].put(s, v);
     }
     
     /**
@@ -59,8 +85,9 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the value
      */
-    public final V get(final K s) {
-    	return this.arc[s.hashCode() & mask].get(s);
+    @SuppressWarnings("unchecked")
+    public final V get(final Object s) {
+    	return this.arc[s.hashCode() & mask].get((K) s);
     }
     
     /**
@@ -68,8 +95,9 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return
      */
-    public final boolean containsKey(final K s) {
-    	return this.arc[s.hashCode() & mask].containsKey(s);
+    @SuppressWarnings("unchecked")
+    public final boolean containsKey(final Object s) {
+    	return this.arc[s.hashCode() & mask].containsKey((K) s);
     }
     
     /**
@@ -77,8 +105,9 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the old value
      */
-    public final V remove(final K s) {
-    	return this.arc[s.hashCode() & mask].remove(s);
+    @SuppressWarnings("unchecked")
+    public final V remove(final Object s) {
+    	return this.arc[s.hashCode() & mask].remove((K) s);
     }
     
     /**
@@ -88,9 +117,44 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
     	for (ARC<K, V> a: this.arc) a.clear();
     }
 
+    /**
+     * get the size of the ARC.
+     * @return the complete number of entries in the ARC cache
+     */
     public final int size() {
         int s = 0;
         for (ARC<K, V> a: this.arc) s += a.size();
         return s;
+    }
+
+    /**
+     * iterator implements the Iterable interface
+     */
+    public Iterator<java.util.Map.Entry<K, V>> iterator() {
+        return entrySet().iterator();
+    }
+
+    /**
+     * Return a Set view of the mappings contained in this map.
+     * This method is the basis for all methods that are implemented
+     * by a AbstractMap implementation
+     *
+     * @return a set view of the mappings contained in this map
+     */
+    @Override
+    public Set<java.util.Map.Entry<K, V>> entrySet() {
+        Set<Map.Entry<K, V>> m = new HashSet<Map.Entry<K, V>>();
+        for (ARC<K, V> a: this.arc) {
+            for (Map.Entry<K, V> entry: a.entrySet()) m.add(entry);
+        }
+        return m;
+    }
+    
+    /**
+     * a hash code for this ARC
+     * @return a hash code
+     */
+    public int hashCode() {
+        return this.arc.hashCode();
     }
 }

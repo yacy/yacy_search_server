@@ -187,7 +187,6 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @param name
      * @return true if the row exists
      */
-    @Override
     public boolean containsKey(Object key) {
         if (key instanceof byte[]) return containsKey((byte[]) key);
         return false;
@@ -197,7 +196,6 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * the containsValue method cannot be used in this method
      * and is only here to implement the Map interface
      */
-    @Override
     public boolean containsValue(Object value) {
         // this method shall not be used because it is not appropriate for this kind of data
         throw new UnsupportedOperationException();
@@ -222,7 +220,6 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @param name
      * @return the map if one found or NULL if no entry exists or the entry is corrupt
      */
-    @Override
     public Map<String, byte[]> get(Object key) {
         if (key instanceof byte[])
             try {
@@ -315,7 +312,6 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
         return value;
     }
 
-    @Override
     public Map<String, byte[]> remove(Object key) {
         if (key instanceof byte[])
             try {

@@ -21,8 +21,11 @@
 
 package net.yacy.cora.storage;
 
-import java.util.LinkedHashMap;
+import java.util.AbstractMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -32,37 +35,21 @@ import java.util.Map;
  * or http://en.wikipedia.org/wiki/Adaptive_Replacement_Cache
  * This version omits the ghost entry handling which is described in ARC, and keeps both cache levels
  * at the same size.
+ * 
+ * This class is defined abstract because it shall be used with either the HashARC or the ComparableARC classes
  */
 
-public final class SimpleARC<K, V> implements ARC<K, V> {
+abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, Iterable<Map.Entry<K, V>>, ARC<K, V> {
 
-    public    final static boolean accessOrder = false; // if false, then a insertion-order is used
-    
-    protected final int cacheSize;
-    private   final Map<K, V> levelA, levelB;
-    
-    public SimpleARC(final int cacheSize) {
-        this.cacheSize = cacheSize / 2;
-        this.levelA = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
-            private static final long serialVersionUID = 1L;
-            @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
-                return size() > SimpleARC.this.cacheSize;
-            }
-        };
-        this.levelB = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
-            private static final long serialVersionUID = 1L;
-            @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
-                return size() > SimpleARC.this.cacheSize;
-            }
-        };
-    }
+    protected int cacheSize;
+    protected Map<K, V> levelA, levelB;
     
     /**
      * put a value to the cache.
      * @param s
      * @param v
      */
-    public final synchronized void put(final K s, final V v) {
+    public final synchronized void insert(final K s, final V v) {
         if (this.levelB.containsKey(s)) {
         	this.levelB.put(s, v);
             assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
@@ -73,18 +60,36 @@ public final class SimpleARC<K, V> implements ARC<K, V> {
     }
     
     /**
+     * put a value to the cache.
+     * @param s
+     * @param v
+     */
+    public final synchronized V put(final K s, final V v) {
+        V r = null;
+        if (this.levelB.containsKey(s)) {
+            r = this.levelB.put(s, v);
+            assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
+        } else {
+            r = this.levelA.put(s, v);
+            assert (this.levelA.size() <= cacheSize); // the cache should shrink automatically
+        }
+        return r;
+    }
+    
+    /**
      * get a value from the cache.
      * @param s
      * @return the value
      */
-    public final synchronized V get(final K s) {
+    @SuppressWarnings("unchecked")
+    public final synchronized V get(final Object s) {
         V v = this.levelB.get(s);
         if (v != null) return v;
         v = this.levelA.remove(s);
         if (v == null) return null;
         // move value from A to B; since it was already removed from A, just put it to B
         //System.out.println("ARC: moving A->B, size(A) = " + this.levelA.size() + ", size(B) = " + this.levelB.size());
-        this.levelB.put(s, v);
+        this.levelB.put((K) s, v);
         assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
         return v;
     }
@@ -94,17 +99,18 @@ public final class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @return
      */
-    public final synchronized boolean containsKey(final K s) {
+    public final synchronized boolean containsKey(final Object s) {
         if (this.levelB.containsKey(s)) return true;
         return this.levelA.containsKey(s);
     }
+   
     
     /**
      * remove an entry from the cache
      * @param s
      * @return the old value
      */
-    public final synchronized V remove(final K s) {
+    public final synchronized V remove(final Object s) {
         final V r = this.levelB.remove(s);
         if (r != null) return r;
         return this.levelA.remove(s);
@@ -124,5 +130,35 @@ public final class SimpleARC<K, V> implements ARC<K, V> {
      */
     public final synchronized int size() {
         return this.levelA.size() + this.levelB.size();
+    }
+    
+    /**
+     * iterator implements the Iterable interface
+     */
+    public Iterator<Map.Entry<K, V>> iterator() {
+        return entrySet().iterator();
+    }
+
+    /**
+     * Return a Set view of the mappings contained in this map.
+     * This method is the basis for all methods that are implemented
+     * by a AbstractMap implementation
+     *
+     * @return a set view of the mappings contained in this map
+     */
+    @Override
+    public Set<Map.Entry<K, V>> entrySet() {
+        Set<Map.Entry<K, V>> m = new HashSet<Map.Entry<K, V>>();
+        for (Map.Entry<K, V> entry: this.levelA.entrySet()) m.add(entry);
+        for (Map.Entry<K, V> entry: this.levelB.entrySet()) m.add(entry);
+        return m;
+    }
+    
+    /**
+     * a hash code for this ARC
+     * @return the hash code of one of the ARC partial hash tables
+     */
+    public int hashCode() {
+        return this.levelA.hashCode();
     }
 }

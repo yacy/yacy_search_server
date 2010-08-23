@@ -21,6 +21,10 @@
 
 package net.yacy.cora.storage;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * This is a simple cache using two generations of hashtables to store the content with a LFU strategy.
  * The Algorithm is described in a slightly more complex version as Adaptive Replacement Cache, "ARC".
@@ -30,7 +34,7 @@ package net.yacy.cora.storage;
  * at the same size.
  */
 
-public interface ARC<K, V> {
+public interface ARC<K, V> extends Iterable<Map.Entry<K, V>> {
 
     /**
      * get the size of the ARC. this returns the sum of main and ghost cache
@@ -43,7 +47,14 @@ public interface ARC<K, V> {
      * @param s
      * @param v
      */
-    public void put(K s, V v);
+    public void insert(K s, V v);
+    
+    /**
+     * put a value to the cache.
+     * @param s
+     * @param v
+     */
+    public V put(K s, V v);
     
     /**
      * get a value from the cache.
@@ -70,4 +81,25 @@ public interface ARC<K, V> {
      * clear the cache
      */
     public void clear();
+    
+    /**
+     * iterator implements the Iterable interface
+     * the method can easily be implemented using the entrySet method
+     */
+    public Iterator<Map.Entry<K, V>> iterator();
+
+    /**
+     * Return a Set view of the mappings contained in this map.
+     * This method is the basis for all methods that are implemented
+     * by a AbstractMap implementation
+     *
+     * @return a set view of the mappings contained in this map
+     */
+    public Set<Map.Entry<K, V>> entrySet();
+    
+    /**
+     * a hash code for this ARC
+     * @return a hash code
+     */
+    int hashCode();
 }
