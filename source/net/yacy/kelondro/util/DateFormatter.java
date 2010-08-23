@@ -72,7 +72,6 @@ public final class DateFormatter {
     private static final SimpleDateFormat FORMAT_ISO8601      = new SimpleDateFormat(PATTERN_ISO8601, Locale.US);
     
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
-    private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
     private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US); 
     
     private static final SimpleDateFormat FORMAT_RFC1123_SHORT = new SimpleDateFormat(PATTERN_RFC1123_SHORT, Locale.US);
@@ -108,21 +107,6 @@ public final class DateFormatter {
     public static final String formatANSIC(final Date date) {
         if (date == null) return "";
         return format(FORMAT_ANSIC, date);
-    }
-
-    private static long lastRFC1123long = 0;
-    private static String lastRFC1123string = "";
-    
-    public static final String formatRFC1123(final Date date) {
-        if (date == null) return "";
-        if (Math.abs(date.getTime() - lastRFC1123long) < 1000) {
-            //System.out.println("date cache hit - " + lastRFC1123string);
-            return lastRFC1123string;
-        }
-        String s = format(FORMAT_RFC1123, date);
-        lastRFC1123long = date.getTime();
-        lastRFC1123string = s;
-        return s;
     }
     
     public static String formatRFC1123_short(final Date date) {

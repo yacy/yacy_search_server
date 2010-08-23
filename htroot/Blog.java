@@ -37,12 +37,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
-import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.data.blogBoard;
 import de.anomic.data.userDB;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -348,7 +347,7 @@ public class Blog {
         }
 
         prop.put("mode_entries_" + number + "_date", dateString(entry.getDate()));
-        prop.put("mode_entries_" + number + "_rfc822date", DateFormatter.formatRFC1123(entry.getDate()));
+        prop.put("mode_entries_" + number + "_rfc822date", HeaderFramework.formatRFC1123(entry.getDate()));
         prop.put("mode_entries_" + number + "_pageid", entry.getKey());
         prop.put("mode_entries_" + number + "_address", address);
         prop.put("mode_entries_" + number + "_ip", entry.getIp());

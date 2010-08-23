@@ -33,13 +33,13 @@ import java.net.URLEncoder;
 import java.util.Set;
 
 import net.yacy.cora.protocol.ConnectionInfo;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
 //import de.anomic.http.client.ConnectionInfo;
 //import de.anomic.http.client.Client;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;

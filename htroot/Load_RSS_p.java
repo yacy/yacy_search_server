@@ -26,12 +26,12 @@ import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

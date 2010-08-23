@@ -30,14 +30,14 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

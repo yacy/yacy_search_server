@@ -28,13 +28,13 @@
 import java.io.File;
 import java.util.HashSet;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.workflow.BusyThread;
 
 import de.anomic.data.WorkTables;
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

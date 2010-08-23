@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -50,7 +51,6 @@ import de.anomic.data.BookmarkHelper;
 import de.anomic.data.WorkTables;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

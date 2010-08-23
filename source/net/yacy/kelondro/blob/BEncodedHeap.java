@@ -48,7 +48,7 @@ import net.yacy.kelondro.util.BDecoder.BObject;
  * store a table of properties (instead of fixed-field entries)
  * this is realized using blobs and BEncoded property lists
  */
-public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte[]>>> {
+public class BEncodedHeap implements /* Map<byte[], Map<String, byte[]>>,*/ Iterable<Map.Entry<byte[], Map<String, byte[]>>> {
 
     private Heap table;
     private LinkedHashSet<String> columnames;

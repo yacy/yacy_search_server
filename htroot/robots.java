@@ -7,7 +7,8 @@
 import java.io.File;
 import java.util.ArrayList;
 
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader;
+
 import de.anomic.http.server.RobotsTxtConfig;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;

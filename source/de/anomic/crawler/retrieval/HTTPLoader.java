@@ -28,15 +28,15 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.Latency;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 

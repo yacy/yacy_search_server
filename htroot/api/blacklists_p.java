@@ -2,11 +2,11 @@
 import java.io.File;
 import java.util.List;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.data.listManager;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

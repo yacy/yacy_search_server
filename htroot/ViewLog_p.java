@@ -33,11 +33,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.logging.LogalizerHandler;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

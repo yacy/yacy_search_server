@@ -29,6 +29,9 @@ package de.anomic.crawler.retrieval;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Classification;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -37,9 +40,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseHeader;
 
 public class Response {
     

@@ -29,7 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader;
+
 import de.anomic.search.ContentDomain;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEventCache;

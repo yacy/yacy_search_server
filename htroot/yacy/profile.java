@@ -35,8 +35,9 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
 
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

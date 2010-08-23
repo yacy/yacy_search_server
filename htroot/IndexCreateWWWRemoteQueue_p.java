@@ -29,10 +29,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import net.yacy.cora.protocol.RequestHeader;
+
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

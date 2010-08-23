@@ -39,6 +39,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -47,8 +49,6 @@ import de.anomic.data.blogBoardComments;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.blogBoard.BlogEntry;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

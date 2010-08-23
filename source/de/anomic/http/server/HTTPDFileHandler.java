@@ -79,6 +79,10 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Classification;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.ContentScraper;
@@ -87,7 +91,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
@@ -224,7 +227,7 @@ public final class HTTPDFileHandler {
             ext = path.substring(pos + 1).toLowerCase();
         }
         headers.put(HeaderFramework.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(HeaderFramework.DATE, DateFormatter.formatRFC1123(new Date()));
+        headers.put(HeaderFramework.DATE, HeaderFramework.formatRFC1123(new Date()));
         if(!(Classification.isMediaExtension(ext))){
             headers.put(HeaderFramework.PRAGMA, "no-cache");         
         }

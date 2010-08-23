@@ -32,11 +32,11 @@
 import java.io.File;
 import java.net.MalformedURLException;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.data.listManager;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

@@ -29,9 +29,9 @@
 import java.util.HashSet;
 import java.util.Hashtable;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.LogParser;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

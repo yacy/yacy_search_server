@@ -62,7 +62,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.yacy.kelondro.util.Domains;
+import net.yacy.cora.protocol.Domains;
 
 import org.apache.log4j.Logger;
 

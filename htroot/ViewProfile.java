@@ -40,10 +40,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

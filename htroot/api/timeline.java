@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.HandleSet;
@@ -38,7 +39,6 @@ import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.ISO639;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;

@@ -2,11 +2,12 @@
 import java.util.HashMap;
 import java.util.Set;
 
+import net.yacy.cora.protocol.RequestHeader;
+
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

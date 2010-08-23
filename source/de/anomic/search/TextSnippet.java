@@ -31,6 +31,8 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.storage.ARC;
+import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -38,8 +40,6 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.ARC;
-import net.yacy.kelondro.index.ConcurrentARC;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;

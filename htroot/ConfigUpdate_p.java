@@ -29,12 +29,12 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TreeSet;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

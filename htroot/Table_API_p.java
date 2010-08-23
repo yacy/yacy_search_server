@@ -24,12 +24,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.data.WorkTables;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

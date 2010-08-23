@@ -1,5 +1,5 @@
 
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

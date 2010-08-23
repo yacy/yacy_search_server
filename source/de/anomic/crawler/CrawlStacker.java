@@ -32,11 +32,11 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.Blacklist;
 

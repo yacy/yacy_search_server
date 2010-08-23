@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -45,8 +47,6 @@ import net.yacy.repository.Blacklist;
 
 import de.anomic.data.WorkTables;
 import de.anomic.data.listManager;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

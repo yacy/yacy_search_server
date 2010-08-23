@@ -1,38 +1,35 @@
-// RequestHeader.java 
-// -----------------------
-// (C) 2008 by Michael Peter Christen; mc@yacy.net
-// first published on http://yacy.net
-// Frankfurt, Germany, 22.08.2008
-//
-// last major change: $LastChangedDate$ by $LastChangedBy$
-// Revision: $LastChangedRevision$
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  RequestHeader
+ *  Copyright 2008 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
+ *  First released 22.08.2008 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package de.anomic.http.server;
+package net.yacy.cora.protocol;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import de.anomic.http.server.HTTPDemon;
+
 import net.yacy.cora.document.MultiProtocolURI;
 
-import de.anomic.server.serverCore;
 
 public class RequestHeader extends HeaderFramework {
 
@@ -232,36 +229,6 @@ public class RequestHeader extends HeaderFramework {
         prop.setProperty(CONNECTION_PROP_EXT, ext);
         
         return prop;
-    }    
-    
-    public static RequestHeader readHeader(final Properties prop, final serverCore.Session theSession) throws IOException {
-        
-        // reading all headers
-        final RequestHeader header = new RequestHeader(HTTPDemon.reverseMappingCache);
-        int p;
-        String line;
-        while ((line = theSession.readLineAsString()) != null) {
-            if (line.length() == 0) break; // this separates the header of the HTTP request from the body
-            // parse the header line: a property separated with the ':' sign
-            if ((p = line.indexOf(':')) >= 0) {
-                // store a property
-                header.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
-            }
-        }
-        
-        /* 
-         * doing some header validation here ...
-         */
-        final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
-        if (httpVersion.equals("HTTP/1.1") && !header.containsKey(HeaderFramework.HOST)) {
-            // the HTTP/1.1 specification requires that an HTTP/1.1 server must reject any  
-            // HTTP/1.1 message that does not contain a Host header.            
-            HTTPDemon.sendRespondError(prop,theSession.out,0,400,null,null,null);
-            throw new IOException("400 Bad request");
-        }     
-        
-        return header;
     }
-    
     
 }

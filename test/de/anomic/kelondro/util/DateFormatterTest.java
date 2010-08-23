@@ -2,7 +2,8 @@ package de.anomic.kelondro.util;
 
 import java.util.Date;
 
-import de.anomic.http.server.HeaderFramework;
+import net.yacy.cora.protocol.HeaderFramework;
+
 
 import junit.framework.TestCase;
 

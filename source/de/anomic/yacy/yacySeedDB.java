@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -54,8 +56,6 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 //import de.anomic.http.client.Client;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.AlternativeDomainNames;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 //import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;

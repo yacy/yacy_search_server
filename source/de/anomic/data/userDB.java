@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -45,7 +46,6 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.http.server.RequestHeader;
 
 public final class userDB {
     

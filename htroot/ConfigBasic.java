@@ -31,15 +31,15 @@
 import java.io.File;
 import java.util.regex.Pattern;
 
-import net.yacy.kelondro.util.Domains;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 
 import de.anomic.data.WorkTables;
 import de.anomic.data.translator;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HTTPDFileHandler;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.net.UPnP;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;

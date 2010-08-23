@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.kelondro.util.Domains;
+import net.yacy.cora.protocol.Domains;
 
 import de.anomic.search.Switchboard;
 

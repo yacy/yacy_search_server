@@ -29,7 +29,7 @@
 // javac -classpath .:../classes ConfigRobotsTxt_p.java
 // if the shell's current path is HTROOT
 
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.http.server.RobotsTxtConfig;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;

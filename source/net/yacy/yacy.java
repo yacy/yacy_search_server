@@ -46,6 +46,7 @@ import java.util.concurrent.Semaphore;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
@@ -71,7 +72,6 @@ import net.yacy.kelondro.util.OS;
 import de.anomic.data.translator;
 //import de.anomic.http.client.Client;
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.http.server.RequestHeader;
 //import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.MetadataRepository;
 import de.anomic.search.Segment;

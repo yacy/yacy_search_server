@@ -28,10 +28,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.EventTracker;
 
 import de.anomic.data.LibraryProvider;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Navigator;
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;

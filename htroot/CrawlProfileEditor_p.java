@@ -30,13 +30,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.CrawlProfile.entry;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

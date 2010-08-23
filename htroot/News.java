@@ -28,10 +28,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -117,7 +118,7 @@ public class News {
                     prop.put("table_list_" + i + "_id", record.id());
                     prop.putHTML("table_list_" + i + "_ori", (seed == null) ? record.originator() : seed.getName());
                     prop.put("table_list_" + i + "_cre", DateFormatter.formatShortSecond(record.created()));
-                    prop.put("table_list_" + i + "_crerfcdate", DateFormatter.formatRFC1123(record.created()));
+                    prop.put("table_list_" + i + "_crerfcdate", HeaderFramework.formatRFC1123(record.created()));
                     prop.putHTML("table_list_" + i + "_cat", category);
                     prop.put("table_list_" + i + "_rec", (record.received() == null) ? "-" : DateFormatter.formatShortSecond(record.received()));
                     prop.put("table_list_" + i + "_dis", record.distributed());

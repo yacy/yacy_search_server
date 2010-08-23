@@ -34,13 +34,13 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.listManager;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
 import java.util.List;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 
 public class BlacklistImpExp_p {

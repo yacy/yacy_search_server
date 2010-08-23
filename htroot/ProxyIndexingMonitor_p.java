@@ -30,10 +30,10 @@
 import java.io.File;
 import java.io.IOException;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.client.Cache;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

@@ -6,8 +6,9 @@
 
 import java.util.Iterator;
 
+import net.yacy.cora.protocol.RequestHeader;
+
 import de.anomic.crawler.CrawlProfile.entry;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

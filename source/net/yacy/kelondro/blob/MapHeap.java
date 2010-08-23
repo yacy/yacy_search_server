@@ -37,8 +37,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.index.ARC;
-import net.yacy.kelondro.index.ConcurrentARC;
+import net.yacy.cora.storage.ARC;
+import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;

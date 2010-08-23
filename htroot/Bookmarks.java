@@ -37,6 +37,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -49,7 +51,6 @@ import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -305,7 +306,7 @@ public class Bookmarks {
 	       			prop.putHTML("display_bookmarks_"+count+"_title", bookmark.getTitle());
 	       			prop.putHTML("display_bookmarks_"+count+"_description", bookmark.getDescription());
 	       			prop.put("display_bookmarks_"+count+"_date", DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())));
-	       			prop.put("display_bookmarks_"+count+"_rfc822date", DateFormatter.formatRFC1123(new Date(bookmark.getTimeStamp())));
+	       			prop.put("display_bookmarks_"+count+"_rfc822date", HeaderFramework.formatRFC1123(new Date(bookmark.getTimeStamp())));
 	       			prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
 	            
 	       			//List Tags.

@@ -32,11 +32,11 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteArray;
-import net.yacy.kelondro.util.Domains;
 
 
 public class DigestURI extends MultiProtocolURI implements Serializable {

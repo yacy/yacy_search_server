@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.http.server.HeaderFramework;
 
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.kelondro.util.DateFormatter;
 
 public class RSSMessage implements Hit {

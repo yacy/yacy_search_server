@@ -34,6 +34,9 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -49,10 +52,7 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 //import de.anomic.http.client.Client;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 //import de.anomic.http.server.ResponseContainer;
-import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 

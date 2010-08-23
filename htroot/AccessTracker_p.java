@@ -36,8 +36,9 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.text.SimpleDateFormat;
 
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+
 import de.anomic.net.natLib;
 import de.anomic.search.QueryParams;
 import de.anomic.search.Switchboard;

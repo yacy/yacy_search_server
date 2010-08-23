@@ -28,7 +28,7 @@
 //import java.net.*;
 //import java.io.*;
 //import de.anomic.tools.*;
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

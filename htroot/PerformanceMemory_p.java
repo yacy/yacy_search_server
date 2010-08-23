@@ -29,15 +29,15 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.RAMIndex;
 import net.yacy.kelondro.table.Table;
-import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

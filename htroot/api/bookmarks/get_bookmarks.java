@@ -3,13 +3,14 @@
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.userDB;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -141,7 +142,7 @@ public class get_bookmarks {
 	       			prop.put("display_bookmarks_"+count+"_id",count);
 	       			prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
 	       			prop.put("display_bookmarks_"+count+"_date", DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())));
-	       			prop.put("display_bookmarks_"+count+"_rfc822date", DateFormatter.formatRFC1123(new Date(bookmark.getTimeStamp())));
+	       			prop.put("display_bookmarks_"+count+"_rfc822date", HeaderFramework.formatRFC1123(new Date(bookmark.getTimeStamp())));
 	       			prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "0" : "1"));
 	       			prop.put("display_bookmarks_"+count+"_hash", bookmark.getUrlHash());
 	       			prop.put("display_bookmarks_"+count+"_comma", ",");

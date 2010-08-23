@@ -41,9 +41,9 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 
 import net.yacy.cora.document.Punycode.PunycodeException;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.kelondro.util.Domains;
 
 /**
  * MultiProtocolURI provides a URL object for multiple protocols like http, https, ftp, smb and file

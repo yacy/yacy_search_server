@@ -33,16 +33,14 @@ import java.io.PrintStream;
 import java.util.Date;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.crawler.Latency;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 
@@ -124,7 +122,7 @@ public class FTPLoader {
                     response = null;
                 } else {
                     ResponseHeader responseHeader = new ResponseHeader();
-                    responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date()));
+                    responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
                     response = new Response(
                             request, 
@@ -220,7 +218,7 @@ public class FTPLoader {
         RequestHeader requestHeader = new RequestHeader();
         if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash()).toNormalform(true, false));
         ResponseHeader responseHeader = new ResponseHeader();
-        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
+        responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(fileDate));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
         
         // if the mimetype and file extension is supported we start to download the file

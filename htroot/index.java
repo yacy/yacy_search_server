@@ -29,7 +29,7 @@
 // if the shell's current path is HTROOT
 
 
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;

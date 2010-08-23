@@ -36,6 +36,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -47,8 +49,6 @@ import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.Navigator;

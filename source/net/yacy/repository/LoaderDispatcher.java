@@ -39,6 +39,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
@@ -56,9 +59,6 @@ import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.crawler.retrieval.SMBLoader;
 import de.anomic.http.client.Cache;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 

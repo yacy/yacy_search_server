@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -38,7 +39,6 @@ import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
 import net.yacy.visualization.GraphPlotter;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

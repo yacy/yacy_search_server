@@ -34,13 +34,13 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Date;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

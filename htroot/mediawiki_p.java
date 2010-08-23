@@ -27,9 +27,9 @@
 import java.io.File;
 import java.io.IOException;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.MediawikiImporter;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

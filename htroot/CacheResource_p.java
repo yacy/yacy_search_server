@@ -24,11 +24,11 @@
 
 import java.net.MalformedURLException;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.client.Cache;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

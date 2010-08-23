@@ -28,13 +28,13 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
 
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.MediaSnippet;
 import de.anomic.search.QueryParams;
@@ -128,7 +128,7 @@ public class yacysearchitem {
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(resulthashString));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
             prop.put("content_date", DateFormatter.formatRFC1123_short(result.modified()));
-            prop.put("content_date822", DateFormatter.formatRFC1123(result.modified()));
+            prop.put("content_date822", HeaderFramework.formatRFC1123(result.modified()));
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));

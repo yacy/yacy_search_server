@@ -39,18 +39,17 @@ import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.data.MimeTable;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
 public class SMBLoader {
@@ -99,7 +98,7 @@ public class SMBLoader {
             StringBuilder content = FTPClient.dirhtml(u, null, null, null, list, true);
             
             ResponseHeader responseHeader = new ResponseHeader();
-            responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date()));
+            responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
             Response response = new Response(
                     request, 
@@ -115,7 +114,7 @@ public class SMBLoader {
         // create response header
         String mime = MimeTable.ext2mime(url.getFileExtension());
         ResponseHeader responseHeader = new ResponseHeader();
-        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date(url.lastModified())));
+        responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
         
         // check mime type and availability of parsers

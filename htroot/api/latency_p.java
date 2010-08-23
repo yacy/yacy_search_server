@@ -25,12 +25,12 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.Latency;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.Latency.Host;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

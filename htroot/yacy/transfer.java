@@ -27,12 +27,12 @@
 import java.io.File;
 import java.io.IOException;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.blockrank.CRDistribution;
 import de.anomic.server.serverObjects;

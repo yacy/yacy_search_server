@@ -31,10 +31,10 @@ import java.util.Iterator;
 
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.Hit;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

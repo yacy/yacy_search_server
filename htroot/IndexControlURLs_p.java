@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -39,7 +40,6 @@ import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.MetadataRepository;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;

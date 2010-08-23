@@ -30,8 +30,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.Domains;
 import net.yacy.upnp.DiscoveryAdvertisement;
 import net.yacy.upnp.DiscoveryEventHandler;
 import net.yacy.upnp.devices.UPNPRootDevice;

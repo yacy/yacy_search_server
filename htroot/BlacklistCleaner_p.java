@@ -44,13 +44,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.data.listManager;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import java.util.Set;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;

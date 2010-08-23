@@ -31,9 +31,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.yacy.kelondro.util.DateFormatter;
-
-import de.anomic.http.server.RequestHeader;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -82,7 +81,7 @@ public class CookieMonitorOutgoing_p {
             prop.put("list_" + entCount + "_dark", dark ? "1" : "0" ); 
             dark =! dark;
             prop.put("list_" + entCount + "_host", host);
-            prop.put("list_" + entCount + "_date", DateFormatter.formatRFC1123(date));
+            prop.put("list_" + entCount + "_date", HeaderFramework.formatRFC1123(date));
             prop.put("list_" + entCount + "_client", client);
             while (tmpCount < cookies.length){
                 prop.putHTML("list_" + entCount + "_cookies_" + tmpCount + "_item", ((String) cookies[tmpCount]));

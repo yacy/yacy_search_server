@@ -1,39 +1,24 @@
-// HeaderFramework.java 
-// -----------------------
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-//
-// last major change: $LastChangedDate$ by $LastChangedBy$
-// Revision: $LastChangedRevision$
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  HeaderFramework
+ *  Copyright 2004 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
+ *  First released 2004 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-/*
-   Documentation:
-   this class implements a key-value mapping, as a hashtable
-   The difference to ordinary hashtable implementations is that the
-   keys are not compared by the equal() method, but are always
-   treated as string and compared as
-   key.uppercase().equal(.uppercase(comparator))
-   You use this class by first creation of a static HashMap
-   that then is used a the reverse mapping cache for every new
-   instance of this class.
-*/
-
-package de.anomic.http.server;
+package net.yacy.cora.protocol;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -54,8 +39,21 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.http.server.HTTPDemon;
+
 import net.yacy.cora.document.MultiProtocolURI;
 
+
+/**
+ * this class implements a key-value mapping, as a hashtable
+ * The difference to ordinary hashtable implementations is that the
+ * keys are not compared by the equal() method, but are always
+ * treated as string and compared as
+ * key.uppercase().equal(.uppercase(comparator))
+ * You use this class by first creation of a static HashMap
+ * that then is used a the reverse mapping cache for every new
+ * instance of this class.
+ */
 public class HeaderFramework extends TreeMap<String, String> implements Map<String, String> {
 
     
@@ -243,7 +241,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         // load with data
         if (othermap != null) this.putAll(othermap);
     }
-
+    
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
     private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
     private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
@@ -266,6 +264,24 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
             FORMAT_ANSIC,
     };
+    
+
+    private static long lastRFC1123long = 0;
+    private static String lastRFC1123string = "";
+    
+    public static final String formatRFC1123(final Date date) {
+        if (date == null) return "";
+        if (Math.abs(date.getTime() - lastRFC1123long) < 1000) {
+            //System.out.println("date cache hit - " + lastRFC1123string);
+            return lastRFC1123string;
+        }
+        synchronized (FORMAT_RFC1123) {
+            String s = FORMAT_RFC1123.format(date);
+            lastRFC1123long = date.getTime();
+            lastRFC1123string = s;
+            return s;
+        }
+    }
 
     /** Initialization of static formats */
     static {

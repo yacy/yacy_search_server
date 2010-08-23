@@ -25,9 +25,9 @@
 // javac -classpath .:../Classes Settings_p.java
 // if the shell's current path is HTROOT
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

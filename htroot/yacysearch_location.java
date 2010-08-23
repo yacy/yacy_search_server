@@ -23,11 +23,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.Search;
 import net.yacy.document.geolocalization.Location;
 import de.anomic.data.LibraryProvider;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -35,7 +35,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 import java.util.Date;
-import net.yacy.kelondro.util.DateFormatter;
 
 public class yacysearch_location {
     
@@ -140,7 +139,7 @@ public class yacysearch_location {
             final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
             final boolean global = post.get("kml_resource", "local").equals("global");
 
-            prop.put("kml_date822", DateFormatter.formatRFC1123(new Date()));
+            prop.put("kml_date822", HeaderFramework.formatRFC1123(new Date()));
             prop.put("kml_promoteSearchPageGreeting", promoteSearchPageGreeting);
             prop.put("kml_rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.gif");
             prop.put("kml_searchBaseURL", "http://" + hostName + "/yacysearch_location.rss");

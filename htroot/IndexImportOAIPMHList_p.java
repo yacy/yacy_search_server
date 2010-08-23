@@ -25,10 +25,10 @@
 import java.util.ArrayList;
 import java.util.Set;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.importer.OAIPMHImporter;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

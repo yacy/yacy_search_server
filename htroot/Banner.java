@@ -31,9 +31,9 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.visualization.RasterPlotter;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

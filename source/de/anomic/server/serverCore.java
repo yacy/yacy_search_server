@@ -58,9 +58,9 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.kelondro.workflow.BusyThread;
 

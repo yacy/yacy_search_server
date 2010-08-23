@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.ByteBuffer;
 
 

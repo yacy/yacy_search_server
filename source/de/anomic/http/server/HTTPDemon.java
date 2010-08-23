@@ -50,14 +50,16 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.MapTools;
@@ -394,7 +396,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
             final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9)) 
             			      ? new RequestHeader(reverseMappingCache) 
-                              : RequestHeader.readHeader(prop, session);                  
+                              : readHeader(prop, session);                  
             
             // handling transparent proxy support
             HeaderFramework.handleTransparentProxySupport(header, prop, virtualHost, HTTPDProxyHandler.isTransparentProxy); 
@@ -460,7 +462,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             RequestHeader header;
             final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
             if (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9)) header = new RequestHeader(reverseMappingCache);
-            else  header = RequestHeader.readHeader(prop,session);
+            else  header = readHeader(prop,session);
             
             // handle transparent proxy support
             HeaderFramework.handleTransparentProxySupport(header, prop, virtualHost, HTTPDProxyHandler.isTransparentProxy);
@@ -506,7 +508,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             RequestHeader header;
             final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
             if (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))  header = new RequestHeader(reverseMappingCache);
-            else header = RequestHeader.readHeader(prop, session);
+            else header = readHeader(prop, session);
             
             // handle transfer-coding
             final InputStream sessionIn;
@@ -596,7 +598,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         prop.setProperty(HeaderFramework.CONNECTION_PROP_URL, "");        
         
         // parse remaining lines
-        final RequestHeader header = RequestHeader.readHeader(prop,session);               
+        final RequestHeader header = readHeader(prop,session);               
         
         if (!(allowProxy(session))) {
             // not authorized through firewall blocking (ip does not match filter)          
@@ -1107,7 +1109,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             
             // Generated Tue, 23 Aug 2005 11:19:14 GMT by brain.wg (squid/2.5.STABLE3)
             // adding some system information
-            final String systemDate = DateFormatter.formatRFC1123(new Date());
+            final String systemDate = HeaderFramework.formatRFC1123(new Date());
             tp.put("date", systemDate);
             
             // rewrite the file
@@ -1179,12 +1181,12 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         final Date now = new Date(System.currentTimeMillis());
         
         headers.put(HeaderFramework.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(HeaderFramework.DATE, DateFormatter.formatRFC1123(now));
+        headers.put(HeaderFramework.DATE, HeaderFramework.formatRFC1123(now));
         if (moddate.after(now)) {
             //System.out.println("*** DEBUG: correcting moddate = " + moddate.toString() + " to now = " + now.toString());
             moddate = now;
         }
-        headers.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(moddate));
+        headers.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(moddate));
         
         if (nocache) {
             if (httpVersion.toUpperCase().equals(HeaderFramework.HTTP_VERSION_1_1)) headers.put(HeaderFramework.CACHE_CONTROL, "no-cache");
@@ -1195,7 +1197,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         headers.put(HeaderFramework.CONTENT_TYPE, contentType);  
         if (contentLength > 0)   headers.put(HeaderFramework.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
-        if (expires != null)     headers.put(HeaderFramework.EXPIRES, DateFormatter.formatRFC1123(expires));
+        if (expires != null)     headers.put(HeaderFramework.EXPIRES, HeaderFramework.formatRFC1123(expires));
         if (contentEnc != null)  headers.put(HeaderFramework.CONTENT_ENCODING, contentEnc);
         if (transferEnc != null) headers.put(HeaderFramework.TRANSFER_ENCODING, transferEnc);
         
@@ -1246,7 +1248,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
                 // prepare header
                 if (!responseHeader.containsKey(HeaderFramework.DATE)) 
-                    responseHeader.put(HeaderFramework.DATE, DateFormatter.formatRFC1123(new Date()));
+                    responseHeader.put(HeaderFramework.DATE, HeaderFramework.formatRFC1123(new Date()));
                 if (!responseHeader.containsKey(HeaderFramework.CONTENT_TYPE)) 
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html; charset=UTF-8"); // fix this
                 if (!responseHeader.containsKey(RequestHeader.CONNECTION) && conProp.containsKey(HeaderFramework.CONNECTION_PROP_PERSISTENT))
@@ -1428,5 +1430,36 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      */
     static AlternativeDomainNames getAlternativeResolver() {
         return alternativeResolver;
-    }       
+    }
+    
+
+    public static RequestHeader readHeader(final Properties prop, final serverCore.Session theSession) throws IOException {
+        
+        // reading all headers
+        final RequestHeader header = new RequestHeader(HTTPDemon.reverseMappingCache);
+        int p;
+        String line;
+        while ((line = theSession.readLineAsString()) != null) {
+            if (line.length() == 0) break; // this separates the header of the HTTP request from the body
+            // parse the header line: a property separated with the ':' sign
+            if ((p = line.indexOf(':')) >= 0) {
+                // store a property
+                header.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
+            }
+        }
+        
+        /* 
+         * doing some header validation here ...
+         */
+        final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        if (httpVersion.equals("HTTP/1.1") && !header.containsKey(HeaderFramework.HOST)) {
+            // the HTTP/1.1 specification requires that an HTTP/1.1 server must reject any  
+            // HTTP/1.1 message that does not contain a Host header.            
+            HTTPDemon.sendRespondError(prop,theSession.out,0,400,null,null,null);
+            throw new IOException("400 Bad request");
+        }     
+        
+        return header;
+    }
+    
 }

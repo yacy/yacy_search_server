@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

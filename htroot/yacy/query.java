@@ -29,11 +29,11 @@
 
 import java.io.IOException;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

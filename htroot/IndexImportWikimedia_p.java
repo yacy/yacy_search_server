@@ -25,10 +25,10 @@
 import java.io.File;
 import java.net.MalformedURLException;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.MediawikiImporter;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

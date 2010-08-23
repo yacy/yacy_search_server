@@ -40,6 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.Compressor;
 import net.yacy.kelondro.blob.MapHeap;
@@ -49,7 +50,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
-import de.anomic.http.server.ResponseHeader;
 
 public final class Cache {
     

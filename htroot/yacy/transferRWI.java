@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleSet;
@@ -38,7 +39,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;

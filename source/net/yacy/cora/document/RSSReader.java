@@ -41,7 +41,7 @@ public class RSSReader extends DefaultHandler {
     private boolean parsingChannel, parsingImage, parsingItem;
     private final RSSFeed theChannel;
     
-    public RSSReader(int maxsize) {
+    private RSSReader(int maxsize) {
         theChannel = new RSSFeed(maxsize);
         buffer = new StringBuilder();
         item = null;

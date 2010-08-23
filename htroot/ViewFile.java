@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -46,7 +47,6 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

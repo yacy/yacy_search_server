@@ -71,6 +71,10 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.document.TextParser;
@@ -79,8 +83,6 @@ import net.yacy.document.parser.html.Transformer;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
@@ -278,7 +280,7 @@ public final class HTTPDProxyHandler {
      * @param conProp a collection of properties about the connection, like URL
      * @param requestHeader The header lines of the connection from the request
      * @param respond the OutputStream to the client
-     * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.server.HeaderFramework, java.io.OutputStream)
+     * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, net.yacy.cora.protocol.HeaderFramework, java.io.OutputStream)
      */
     public static void doGet(final Properties conProp, final RequestHeader requestHeader, final OutputStream respond) {
         ByteCountOutputStream countedRespond = null;
@@ -696,18 +698,7 @@ public final class HTTPDProxyHandler {
             prepareResponseHeader(cachedResponseHeader, httpVer);               
 
             // replace date field in old header by actual date, this is according to RFC
-            cachedResponseHeader.put(HeaderFramework.DATE, DateFormatter.formatRFC1123(new Date()));
-            
-//          if (((String)requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
-//          chunked = new httpChunkedOutputStream(respond);
-//          zipped = new GZIPOutputStream(chunked);
-//          cachedResponseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
-//          cachedResponseHeader.put(httpHeader.CONTENT_ENCODING, "gzip");                    
-//          } else {                
-            // maybe the content length is missing
-//            if (!(cachedResponseHeader.containsKey(httpHeader.CONTENT_LENGTH)))
-//                cachedResponseHeader.put(httpHeader.CONTENT_LENGTH, Long.toString(cacheFile.length()));
-//          }
+            cachedResponseHeader.put(HeaderFramework.DATE, HeaderFramework.formatRFC1123(new Date()));
             
             // check if we can send a 304 instead the complete content
             if (requestHeader.containsKey(RequestHeader.IF_MODIFIED_SINCE)) {

@@ -31,8 +31,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 
-import net.yacy.kelondro.index.ARC;
-import net.yacy.kelondro.index.ConcurrentARC;
+import net.yacy.cora.storage.ARC;
+import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;

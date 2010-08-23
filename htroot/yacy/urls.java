@@ -27,13 +27,13 @@
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

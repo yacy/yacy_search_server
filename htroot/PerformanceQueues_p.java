@@ -29,14 +29,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

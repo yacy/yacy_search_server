@@ -30,7 +30,8 @@
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.server.ResponseHeader;
+import net.yacy.cora.protocol.ResponseHeader;
+
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;

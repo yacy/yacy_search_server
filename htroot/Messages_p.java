@@ -33,12 +33,11 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
 
-import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.data.messageBoard;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -134,7 +133,7 @@ public class Messages_p {
                     	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
 
                     	// set the rfc822 date
-                    	prop.put("mode_messages_"+count+"_rfc822Date", DateFormatter.formatRFC1123(message.date()));
+                    	prop.put("mode_messages_"+count+"_rfc822Date", HeaderFramework.formatRFC1123(message.date()));
 
                     	// also write out the message body (needed for the RSS feed)
                         try {
