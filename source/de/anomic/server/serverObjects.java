@@ -92,7 +92,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      *              If value is <code>null</code>, then the element at <code>key</code>
      *              is removed from the map.
      * @return The value that was added to the map. 
-     * @see java.util.Hashtable#put(K, V)
+     * @see java.util.Hashtable#insert(K, V)
      */
     @Override
     public String put(final String key, final String value) {

@@ -67,10 +67,7 @@ public class RobotsTxt {
     
     public void clear() {
         log.info("clearing robots table");
-        try {
-            this.robotsTable.clear();
-        } catch (IOException e) {
-        }
+        this.robotsTable.clear();
         syncObjects.clear();
     }
     
@@ -221,7 +218,7 @@ public class RobotsTxt {
     private String addEntry(final RobotsEntry entry) {
         // writes a new page and returns key
         try {
-            this.robotsTable.put(this.robotsTable.encodedKey(entry.hostName), entry.getMem());
+            this.robotsTable.insert(this.robotsTable.encodedKey(entry.hostName), entry.getMem());
             return entry.hostName;
         } catch (final Exception e) {
             log.warn("cannot write robots.txt entry", e);

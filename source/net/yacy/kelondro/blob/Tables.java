@@ -176,14 +176,14 @@ public class Tables {
         byte[] uk = ukey(tablename);
         update(tablename, uk, map);
         BEncodedHeap heap = getHeap(system_table_pkcounter);
-        heap.put(tablename.getBytes(), system_table_pkcounter_counterName, uk);
+        heap.insert(tablename.getBytes(), system_table_pkcounter_counterName, uk);
         return uk;
     }
 
     public void update(final String table, byte[] pk, Map<String, byte[]> map) throws IOException {
         BEncodedHeap heap = getHeap(table);
         try {
-            heap.put(pk, map);
+            heap.insert(pk, map);
         } catch (RowSpaceExceededException e) {
             throw new IOException(e.getMessage());
         }
@@ -192,7 +192,7 @@ public class Tables {
     public void update(final String table, Row row) throws IOException {
         BEncodedHeap heap = getHeap(table);
         try {
-            heap.put(row.pk, row);
+            heap.insert(row.pk, row);
         } catch (RowSpaceExceededException e) {
             throw new IOException(e.getMessage());
         }
@@ -204,7 +204,7 @@ public class Tables {
     
     public Row select(final String table, byte[] pk) throws IOException, RowSpaceExceededException {
         BEncodedHeap heap = getHeap(table);
-        if (heap.has(pk)) return new Row(pk, heap.get(pk));
+        if (heap.containsKey(pk)) return new Row(pk, heap.get(pk));
         return null;
     }
 
@@ -215,7 +215,7 @@ public class Tables {
 
     public boolean has(String table, byte[] key) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        return heap.has(key);
+        return heap.containsKey(key);
     }
 
     public Iterator<byte[]> keys(String table) throws IOException {
