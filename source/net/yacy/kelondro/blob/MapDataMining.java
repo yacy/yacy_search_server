@@ -399,7 +399,6 @@ public class MapDataMining extends MapHeap {
                     Log.logException(e);
                     continue;
                 }
-                assert map != null;
                 if (map == null) continue; // circumvention of a modified exception
                 map.put("key", new String(nextKey));
                 return map;
