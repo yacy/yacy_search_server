@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.server.serverCore;
@@ -84,18 +84,18 @@ public class RequestHeader extends HeaderFramework {
         super(reverseMappingCache, othermap);
     }
     
-    public DigestURI referer() {
+    public MultiProtocolURI referer() {
         String referer = get(REFERER, null);
         if (referer == null) return null;
         try {
-            return new DigestURI(referer, null);
+            return new MultiProtocolURI(referer);
         } catch (MalformedURLException e) {
             return null;
         }
     }
     
     public String refererHost() {
-        final DigestURI url = referer();
+        final MultiProtocolURI url = referer();
         if (url == null) return null;
         return url.getHost();
     }

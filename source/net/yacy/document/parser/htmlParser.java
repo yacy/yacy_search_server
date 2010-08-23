@@ -28,8 +28,9 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
+import de.anomic.crawler.retrieval.HTTPLoader;
+
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.protocol.HttpConnector;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -233,7 +234,7 @@ public class htmlParser extends AbstractParser implements Parser {
         MultiProtocolURI url;
         try {
             url = new MultiProtocolURI(args[0]);
-            byte[] content = HttpConnector.wget(url, 3000);
+            byte[] content = url.get(HTTPLoader.crawlerUserAgent, 3000);
             Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
             String title = document[0].dc_title();
             System.out.println(title);

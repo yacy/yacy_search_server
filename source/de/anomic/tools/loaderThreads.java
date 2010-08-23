@@ -23,14 +23,10 @@ package de.anomic.tools;
 
 import java.util.Hashtable;
 
-import net.yacy.cora.protocol.HttpConnector;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-//import de.anomic.http.client.Client;
-import de.anomic.http.server.HeaderFramework;
-import de.anomic.http.server.RequestHeader;
 
 public class loaderThreads {
     
@@ -120,10 +116,7 @@ public class loaderThreads {
 
         public void run() {
             try {
-                final RequestHeader reqHeader = new RequestHeader();
-                reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
-//                page = Client.wget(url.toString(), reqHeader, timeout);
-                page = HttpConnector.wget(url.toString(), reqHeader.entrySet(), timeout);
+                page = url.get(HTTPLoader.crawlerUserAgent, timeout);
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {

@@ -281,12 +281,7 @@ public class serverSwitch {
         File ret;
         final String path = getConfig(key, dflt).replace('\\', '/');
         final File f = new File(path);
-        if (f == null) {
-            ret = null;
-        } else {
-            ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.rootPath, path));
-        }
-        
+        ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.rootPath, path));
         return ret;
     }
 

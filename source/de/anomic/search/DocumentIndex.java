@@ -122,7 +122,7 @@ public class DocumentIndex extends Segment {
         if (!url.canRead()) throw new IOException("cannot read file");
         Document[] documents;
         try {
-            documents = TextParser.parseSource(url, null, null, url.length(), url.getInputStream());
+            documents = TextParser.parseSource(url, null, null, url.length(), url.getInputStream(null, -1));
         } catch (Exception e) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }

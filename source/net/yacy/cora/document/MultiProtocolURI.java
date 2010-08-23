@@ -21,6 +21,8 @@
 
 package net.yacy.cora.document;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -39,6 +41,7 @@ import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
 
 import net.yacy.cora.document.Punycode.PunycodeException;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.util.Domains;
 
 /**
@@ -934,11 +937,44 @@ public class MultiProtocolURI implements Serializable {
         return null;
     }
     
-    public InputStream getInputStream() throws IOException {
+    public InputStream getInputStream(final String userAgent, final int timeout) throws IOException {
         if (isFile()) return new FileInputStream(getFSFile());
         if (isSMB()) return new SmbFileInputStream(getSmbFile());
+        if (isHTTP() || isHTTPS()) {
+                final HTTPClient client = new HTTPClient();
+                client.setTimout(timeout);
+                client.setUserAgent(userAgent);
+                client.setHost(this.getHost());
+                return new ByteArrayInputStream(client.GETbytes(this.toNormalform(false, false)));
+        }
+        
         return null;
     }
+    
+    public byte[] get(final String userAgent, final int timeout) throws IOException {
+        if (isFile()) return read(new FileInputStream(getFSFile()));
+        if (isSMB()) return read(new SmbFileInputStream(getSmbFile()));
+        if (isHTTP() || isHTTPS()) {
+                final HTTPClient client = new HTTPClient();
+                client.setTimout(timeout);
+                client.setUserAgent(userAgent);
+                client.setHost(this.getHost());
+                return client.GETbytes(this.toNormalform(false, false));
+        }
+        
+        return null;
+    }
+    
+    public static byte[] read(final InputStream source) throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final byte[] buffer = new byte[2048];
+        int c;
+        while ((c = source.read(buffer, 0, 2048)) > 0) baos.write(buffer, 0, c);
+        baos.flush();
+        baos.close();
+        return baos.toByteArray();
+    }
+    
     
     //---------------------
     

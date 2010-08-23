@@ -555,7 +555,6 @@ public class Domains {
     }
     
     public static InetAddress myPublicLocalIP() {
-        new localHostAddressLookup().start();
         // list all addresses
         // for (int i = 0; i < localHostAddresses.length; i++) System.out.println("IP: " + localHostAddresses[i].getHostAddress()); // DEBUG
         if (localHostAddresses.length == 0) {

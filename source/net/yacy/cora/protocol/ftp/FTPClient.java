@@ -2048,14 +2048,14 @@ public class FTPClient {
 
         // save ip address in high byte order
         // byte[] Bytes = LocalIp.getAddress();
-        final byte[] Bytes = Domains.myPublicLocalIP().getHostAddress().getBytes();
+        final byte[] b = Domains.myPublicLocalIP().getHostAddress().getBytes();
 
         // bytes greater than 127 should not be printed as negative
-        final short[] Shorts = new short[4];
+        final short[] s = new short[4];
         for (int i = 0; i < 4; i++) {
-            Shorts[i] = Bytes[i];
-            if (Shorts[i] < 0) {
-                Shorts[i] += 256;
+            s[i] = b[i];
+            if (s[i] < 0) {
+                s[i] += 256;
             }
         }
 
@@ -2064,7 +2064,7 @@ public class FTPClient {
         send("PORT "
                 +
                 // "127,0,0,1," +
-                Shorts[0] + "," + Shorts[1] + "," + Shorts[2] + "," + Shorts[3] + "," + ((DataPort & 0xff00) >> 8)
+                s[0] + "," + s[1] + "," + s[2] + "," + s[3] + "," + ((DataPort & 0xff00) >> 8)
                 + "," + (DataPort & 0x00ff));
 
         // read status of the command from the control port

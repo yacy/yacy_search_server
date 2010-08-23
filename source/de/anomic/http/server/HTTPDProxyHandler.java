@@ -385,7 +385,7 @@ public final class HTTPDProxyHandler {
             	final Request request = new Request(
             			null, 
                         url, 
-                        requestHeader.referer() == null ? null : requestHeader.referer().hash(), 
+                        requestHeader.referer() == null ? null : new DigestURI(requestHeader.referer()).hash(), 
                         "", 
                         cachedResponseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
@@ -512,7 +512,7 @@ public final class HTTPDProxyHandler {
                 final Request request = new Request(
             			null, 
                         url, 
-                        requestHeader.referer() == null ? null : requestHeader.referer().hash(), 
+                        requestHeader.referer() == null ? null : new DigestURI(requestHeader.referer()).hash(), 
                         "", 
                         responseHeader.lastModified(),
                         sb.crawler.defaultProxyProfile.handle(),
@@ -937,7 +937,7 @@ public final class HTTPDProxyHandler {
             
             // the CONTENT_LENGTH will be added by entity and cause a ClientProtocolException if set
             final int contentLength = requestHeader.getContentLength();
-            requestHeader.remove(RequestHeader.CONTENT_LENGTH);
+            requestHeader.remove(HeaderFramework.CONTENT_LENGTH);
             
             final HTTPClient client = setupHttpClient(requestHeader, connectHost);
             

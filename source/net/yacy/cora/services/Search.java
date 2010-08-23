@@ -34,12 +34,14 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
-import net.yacy.cora.protocol.HttpConnector;
+import net.yacy.cora.protocol.http.HTTPConnector;
 
 //import org.apache.commons.httpclient.methods.multipart.Part;
 //import org.apache.commons.httpclient.methods.multipart.StringPart;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
+
+import de.anomic.crawler.retrieval.HTTPLoader;
 
 public class Search {
     
@@ -118,24 +120,15 @@ public class Search {
             throw new IOException("cora.Search failed asking peer '" + rssSearchServiceURL + "': bad url, " + e.getMessage());
         }
         
-        // prepare request
-//        final List<Part> post = new ArrayList<Part>();
-//        post.add(new StringPart("query", query, Charset.defaultCharset().name()));
-//        post.add(new StringPart("startRecord", Integer.toString(startRecord), Charset.defaultCharset().name()));
-//        post.add(new StringPart("maximumRecords", Long.toString(maximumRecords), Charset.defaultCharset().name()));
-//        post.add(new StringPart("verify", verify ? "true" : "false", Charset.defaultCharset().name()));
-//        post.add(new StringPart("resource", global ? "global" : "local", Charset.defaultCharset().name()));
-        
         // send request
         try {
-//            final byte[] result = HttpConnector.wput(rssSearchServiceURL, uri.getHost(), post, (int) timeout);
             final LinkedHashMap<String,ContentBody> parts = new LinkedHashMap<String,ContentBody>();
             parts.put("query", new StringBody(query));
             parts.put("startRecord", new StringBody(Integer.toString(startRecord)));
             parts.put("maximumRecords", new StringBody(Long.toString(maximumRecords)));
             parts.put("verify", new StringBody(verify ? "true" : "false"));
             parts.put("resource", new StringBody(global ? "global" : "local"));
-            final byte[] result = HttpConnector.wput(rssSearchServiceURL, uri.getHost(), parts, (int) timeout);
+            final byte[] result = HTTPConnector.getConnector(HTTPLoader.yacyUserAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
             //String debug = new String(result); System.out.println("*** DEBUG: " + debug);
             final RSSReader reader = RSSReader.parse(result);
             if (reader == null) {

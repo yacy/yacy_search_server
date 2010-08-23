@@ -127,7 +127,7 @@ public class FileLoader {
         }
         
         // load the resource
-        InputStream is = url.getInputStream();
+        InputStream is = url.getInputStream(null, -1);
         byte[] b = FileUtils.read(is);
         is.close();
         

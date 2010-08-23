@@ -329,7 +329,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException 
      */
-	public byte[] POSTbytes(final String uri, final LinkedHashMap<String,ContentBody> parts) throws IOException {
+	public byte[] POSTbytes(final String uri, final LinkedHashMap<String, ContentBody> parts) throws IOException {
     	final HttpPost httpPost = new HttpPost(uri);
 
     	final MultipartEntity multipartEntity = new MultipartEntity();
