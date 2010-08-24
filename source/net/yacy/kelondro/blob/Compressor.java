@@ -110,7 +110,7 @@ public class Compressor implements BLOB {
             try {
                 while ((entry = writeQueue.take()) != poisonWorkerEntry) {
                     try {
-                        Compressor.this.backend.put(entry.getKey().getBytes(), compress(entry.getValue()));
+                        Compressor.this.backend.insert(entry.getKey().getBytes(), compress(entry.getValue()));
                     } catch (IOException e) {
                         Log.logException(e);
                         buffer.put(entry.getKey(), entry.getValue());
@@ -250,9 +250,21 @@ public class Compressor implements BLOB {
         return decompress(b);
     }
 
-    public synchronized boolean has(byte[] key) {
+    public byte[] get(Object key) {
+        if (!(key instanceof byte[])) return null;
+        try {
+            return get((byte[]) key);
+        } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        return null;
+    }
+    
+    public synchronized boolean containsKey(byte[] key) {
         return 
-          this.buffer.containsKey(new String(key)) || this.backend.has(key);
+          this.buffer.containsKey(new String(key)) || this.backend.containsKey(key);
     }
 
     public int keylength() {
@@ -287,10 +299,10 @@ public class Compressor implements BLOB {
         return 0;
     }
     
-    public void put(byte[] key, byte[] b) throws IOException {
+    public void insert(byte[] key, byte[] b) throws IOException {
         
         // first ensure that the files do not exist anywhere
-        remove(key);
+        delete(key);
         
         // check if the buffer is full or could be full after this write
         if (this.bufferlength + b.length * 2 > this.maxbufferlength) synchronized (this) {
@@ -312,8 +324,8 @@ public class Compressor implements BLOB {
         }
     }
 
-    public synchronized void remove(byte[] key) throws IOException {
-        this.backend.remove(key);
+    public synchronized void delete(byte[] key) throws IOException {
+        this.backend.delete(key);
         long rx = removeFromQueues(key);
         if (rx > 0) this.bufferlength -= rx;
     }
@@ -366,7 +378,7 @@ public class Compressor implements BLOB {
         int reduction = c.length - b.length;
         assert reduction >= 0;
         if (reduction == 0) return 0;
-        this.put(key, c);
+        this.insert(key, c);
         return reduction;
     }
     
@@ -377,7 +389,7 @@ public class Compressor implements BLOB {
         int reduction = c.length - b.length;
         assert reduction >= 0;
         if (reduction == 0) return 0;
-        this.put(key, c);
+        this.insert(key, c);
         return reduction;
     }
 

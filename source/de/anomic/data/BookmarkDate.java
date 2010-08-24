@@ -144,13 +144,13 @@ public class BookmarkDate {
         public void setDatesTable() {
             if (this.size() >0) {
                 try {
-                    datesTable.put(getDateString().getBytes(), mem);
+                    datesTable.insert(getDateString().getBytes(), mem);
                 } catch (Exception e) {
                     Log.logException(e);
                 }
             } else {
                 try {
-                    datesTable.remove(getDateString().getBytes());
+                    datesTable.delete(getDateString().getBytes());
                 } catch (IOException e) {
                     Log.logException(e);
                 }

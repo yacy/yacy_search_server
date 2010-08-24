@@ -85,7 +85,7 @@ public final class userDB {
     
     public void removeEntry(final String hostName) {
         try {
-            userTable.remove(hostName.toLowerCase().getBytes());
+            userTable.delete(hostName.toLowerCase().getBytes());
         } catch (final IOException e) {}
     }        
     
@@ -114,7 +114,7 @@ public final class userDB {
     
     public String addEntry(final Entry entry) {
         try {
-            userTable.put(entry.userName.getBytes(), entry.mem);
+            userTable.insert(entry.userName.getBytes(), entry.mem);
             return entry.userName;
         } catch (final Exception e) {
             Log.logException(e);
@@ -488,7 +488,7 @@ public final class userDB {
             }
             
             try {
-                userDB.this.userTable.put(getUserName().getBytes(), this.mem); 
+                userDB.this.userTable.insert(getUserName().getBytes(), this.mem); 
             } catch(final Exception e){
                 Log.logException(e);
             }
@@ -505,7 +505,7 @@ public final class userDB {
         
         public void setProperty(final String propName, final String newValue) throws IOException, RowSpaceExceededException {
             this.mem.put(propName,  newValue);
-            userDB.this.userTable.put(getUserName().getBytes(), this.mem);
+            userDB.this.userTable.insert(getUserName().getBytes(), this.mem);
         }
         
         public String getProperty(final String propName, final String defaultValue) {

@@ -81,7 +81,7 @@ public class blogBoard {
      * @return true if the database contains the element, else false
      */
     public boolean contains(final String key) {
-        return database.has(key.getBytes());
+        return database.containsKey(key.getBytes());
     }
     
     public void close() {
@@ -122,7 +122,7 @@ public class blogBoard {
     public String writeBlogEntry(final BlogEntry page) {
         String ret = null;
         try {
-            database.put(page.key.getBytes(), page.record);
+            database.insert(page.key.getBytes(), page.record);
             ret = page.key;
         } catch (IOException ex) {
             Log.logException(ex);
@@ -240,7 +240,7 @@ public class blogBoard {
     
     public void deleteBlogEntry(final String key) {
     	try {
-            database.remove(normalize(key).getBytes());
+            database.delete(normalize(key).getBytes());
         } catch (final IOException e) { }
     }
     

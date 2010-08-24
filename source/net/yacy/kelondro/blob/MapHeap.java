@@ -32,9 +32,12 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.storage.ARC;
@@ -51,7 +54,7 @@ import net.yacy.kelondro.util.kelondroException;
 
 
 
-public class MapHeap {
+public class MapHeap implements Map<byte[], Map<String, String>> {
 
     private BLOB blob;
     private ARC<String, Map<String, String>> cache;
@@ -82,8 +85,12 @@ public class MapHeap {
      * clears the content of the database
      * @throws IOException
      */
-    public synchronized void clear() throws IOException {
-    	this.blob.clear();
+    public synchronized void clear() {
+    	try {
+            this.blob.clear();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
         this.cache.clear();
     }
 
@@ -129,7 +136,7 @@ public class MapHeap {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public void put(byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
+    public void insert(byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
         assert key != null;
         assert key.length > 0;
         assert newMap != null;
@@ -139,11 +146,24 @@ public class MapHeap {
         byte[] sb = s.getBytes();
         synchronized (this) {
             // write entry
-        	if (blob != null) blob.put(key, sb);
+        	if (blob != null) blob.insert(key, sb);
     
             // write map to cache
             if (cache != null) cache.put(new String(key), newMap);
         }
+    }
+    
+    public Map<String, String> put(byte[] key, final Map<String, String> newMap) {
+        Map<String, String> v = null;
+        try {
+            v = this.get(key);
+            insert(key, newMap);
+        } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        return v;
     }
 
     /**
@@ -151,7 +171,7 @@ public class MapHeap {
      * @param key  the primary key
      * @throws IOException
      */
-    public void remove(byte[] key) throws IOException {
+    public void delete(byte[] key) throws IOException {
         // update elementCount
         if (key == null) return;
         key = normalizeKey(key);
@@ -161,8 +181,19 @@ public class MapHeap {
             cache.remove(new String(key));
     
             // remove from file
-            blob.remove(key);
+            blob.delete(key);
         }
+    }
+    
+    public Map<String, String> remove(Object key)  {
+        Map<String, String> v = null;
+        try {
+            v = this.get(key);
+            this.delete((byte[]) key);
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+        return v;
     }
     
     /**
@@ -172,13 +203,14 @@ public class MapHeap {
      * @throws IOException
      */
     
-    public boolean has(byte[] key) {
-        assert key != null;
+    public boolean containsKey(Object k) {
+        if (!(k instanceof byte[])) return false;
+        assert k != null;
         if (cache == null) return false; // case may appear during shutdown
-        key = normalizeKey(key);
+        byte[] key = normalizeKey((byte[]) k);
         boolean h;
         synchronized (this) {
-            h = this.cache.containsKey(new String(key)) || this.blob.has(key);
+            h = this.cache.containsKey(new String(key)) || this.blob.containsKey(key);
         }
         return h;
     }
@@ -192,6 +224,18 @@ public class MapHeap {
     public Map<String, String> get(final byte[] key) throws IOException, RowSpaceExceededException {
         if (key == null) return null;
         return get(key, true);
+    }
+    
+    public Map<String, String> get(final Object key) {
+        if (key == null) return null;
+        try {
+            return get((byte[]) key);
+        } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        return null;
     }
 
     private byte[] normalizeKey(byte[] key) {
@@ -360,7 +404,43 @@ public class MapHeap {
             throw new UnsupportedOperationException();
         }
     } // class mapIterator
-    
+
+    public void putAll(Map<? extends byte[], ? extends Map<String, String>> map) {
+        for (Map.Entry<? extends byte[], ? extends Map<String, String>> me: map.entrySet()) {
+            try {
+                this.insert(me.getKey(), me.getValue());
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            } catch (IOException e) {
+                Log.logException(e);
+            }
+        }
+    }
+
+    public Set<byte[]> keySet() {
+        TreeSet<byte[]> set = new TreeSet<byte[]>(this.blob.ordering());
+        try {
+            Iterator<byte[]> i = this.blob.keys(true, false);
+            while (i.hasNext()) set.add(i.next());
+        } catch (IOException e) {}
+        return set;
+    }
+
+    public Collection<Map<String, String>> values() {
+        // this method shall not be used because it is not appropriate for this kind of data
+        throw new UnsupportedOperationException();
+    }
+
+    public Set<java.util.Map.Entry<byte[], Map<String, String>>> entrySet() {
+        // this method shall not be used because it is not appropriate for this kind of data
+        throw new UnsupportedOperationException();
+    }
+
+    public boolean containsValue(Object value) {
+        // this method shall not be used because it is not appropriate for this kind of data
+        throw new UnsupportedOperationException();
+    }
+
     public static void main(String[] args) {
         // test the class
         File f = new File("maptest");
@@ -370,9 +450,9 @@ public class MapHeap {
             MapHeap map = new MapHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024, 1024, '_');
             // put some values into the map
             Map<String, String> m = new HashMap<String, String>();
-            m.put("k", "000"); map.put("123".getBytes(), m);
-            m.put("k", "111"); map.put("456".getBytes(), m);
-            m.put("k", "222"); map.put("789".getBytes(), m);
+            m.put("k", "000"); map.insert("123".getBytes(), m);
+            m.put("k", "111"); map.insert("456".getBytes(), m);
+            m.put("k", "222"); map.insert("789".getBytes(), m);
             // iterate over keys
             Iterator<byte[]> i = map.keys(true, false);
             while (i.hasNext()) {
@@ -386,5 +466,4 @@ public class MapHeap {
             Log.logException(e);
         }
     }
-    
 }

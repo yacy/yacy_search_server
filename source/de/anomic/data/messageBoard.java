@@ -183,7 +183,7 @@ public class messageBoard {
     public String write(final entry message) {
         // writes a message and returns key
         try {
-            database.put(message.key.getBytes(), message.record);
+            database.insert(message.key.getBytes(), message.record);
             return message.key;
         } catch (final Exception e) {
             Log.logException(e);
@@ -207,7 +207,7 @@ public class messageBoard {
     
     public void remove(final String key) {
         try {
-            database.remove(key.getBytes());
+            database.delete(key.getBytes());
         } catch (final IOException e) {
         }
     }

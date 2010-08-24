@@ -121,7 +121,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @return true if the key exists, false otherwise
      */
     @Override
-    public boolean has(byte[] key) {
+    public boolean containsKey(byte[] key) {
         assert index != null;
         key = normalizeKey(key);
         synchronized (this) {
@@ -130,7 +130,7 @@ public final class Heap extends HeapModifier implements BLOB {
             if (buffer == null) {
                 if (this.buffer.containsKey(key)) return true;
             }
-            return super.has(key);
+            return super.containsKey(key);
         }
     }
     
@@ -322,7 +322,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws RowSpaceExceededException 
      */
     @Override
-    public void put(byte[] key, final byte[] b) throws IOException {
+    public void insert(byte[] key, final byte[] b) throws IOException {
         key = normalizeKey(key);
         
         // we do not write records of length 0 into the BLOB
@@ -331,7 +331,7 @@ public final class Heap extends HeapModifier implements BLOB {
         synchronized (this) {
             // first remove the old entry (removes from buffer and file)
             // TODO: this can be enhanced!
-            this.remove(key);
+            this.delete(key);
             
             // then look if we can use a free entry
             try {
@@ -456,7 +456,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public void remove(byte[] key) throws IOException {
+    public void delete(byte[] key) throws IOException {
         key = normalizeKey(key);
         
         synchronized (this) {
@@ -470,7 +470,7 @@ public final class Heap extends HeapModifier implements BLOB {
                 }
             }
             
-            super.remove(key);
+            super.delete(key);
         }
     }
     
@@ -510,10 +510,10 @@ public final class Heap extends HeapModifier implements BLOB {
         try {
             //f.delete();
             final Heap heap = new Heap(f, 12, NaturalOrder.naturalOrder, 1024 * 512);
-            heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
-            heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
-            heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
-            heap.put("aaaaaaaaaaad".getBytes(), "zehn elf zwoelf".getBytes());
+            heap.insert("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
+            heap.insert("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
+            heap.insert("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
+            heap.insert("aaaaaaaaaaad".getBytes(), "zehn elf zwoelf".getBytes());
             // iterate over keys
             Iterator<byte[]> i = heap.index.keys(true, null);
             while (i.hasNext()) {
@@ -523,9 +523,9 @@ public final class Heap extends HeapModifier implements BLOB {
             while (i.hasNext()) {
                 System.out.println("key_b: " + new String(i.next()));
             }
-            heap.remove("aaaaaaaaaaab".getBytes());
-            heap.remove("aaaaaaaaaaac".getBytes());
-            heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
+            heap.delete("aaaaaaaaaaab".getBytes());
+            heap.delete("aaaaaaaaaaac".getBytes());
+            heap.insert("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
             Log.logException(e);
@@ -543,13 +543,13 @@ public final class Heap extends HeapModifier implements BLOB {
         try {
             //f.delete();
             final MapHeap heap = new MapHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512, 500, '_');
-            heap.put("aaaaaaaaaaaa".getBytes(), map("aaaaaaaaaaaa", "eins zwei drei"));
-            heap.put("aaaaaaaaaaab".getBytes(), map("aaaaaaaaaaab", "vier fuenf sechs"));
-            heap.put("aaaaaaaaaaac".getBytes(), map("aaaaaaaaaaac", "sieben acht neun"));
-            heap.put("aaaaaaaaaaad".getBytes(), map("aaaaaaaaaaad", "zehn elf zwoelf"));
-            heap.remove("aaaaaaaaaaab".getBytes());
-            heap.remove("aaaaaaaaaaac".getBytes());
-            heap.put("aaaaaaaaaaaX".getBytes(), map("aaaaaaaaaaad", "WXYZ"));
+            heap.insert("aaaaaaaaaaaa".getBytes(), map("aaaaaaaaaaaa", "eins zwei drei"));
+            heap.insert("aaaaaaaaaaab".getBytes(), map("aaaaaaaaaaab", "vier fuenf sechs"));
+            heap.insert("aaaaaaaaaaac".getBytes(), map("aaaaaaaaaaac", "sieben acht neun"));
+            heap.insert("aaaaaaaaaaad".getBytes(), map("aaaaaaaaaaad", "zehn elf zwoelf"));
+            heap.delete("aaaaaaaaaaab".getBytes());
+            heap.delete("aaaaaaaaaaac".getBytes());
+            heap.insert("aaaaaaaaaaaX".getBytes(), map("aaaaaaaaaaad", "WXYZ"));
             heap.close();
         } catch (final IOException e) {
             Log.logException(e);

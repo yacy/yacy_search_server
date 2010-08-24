@@ -93,7 +93,7 @@ public class HeapModifier extends HeapReader implements BLOB {
      * @param key  the primary key
      * @throws IOException
      */
-    public void remove(byte[] key) throws IOException {
+    public void delete(byte[] key) throws IOException {
         key = normalizeKey(key);
 
         // pre-check before synchronization
@@ -234,7 +234,7 @@ public class HeapModifier extends HeapReader implements BLOB {
         }
     }
 
-	public void put(byte[] key, byte[] b) throws IOException {
+	public void insert(byte[] key, byte[] b) throws IOException {
 		throw new UnsupportedOperationException("put is not supported in BLOBHeapModifier");
 	}
 

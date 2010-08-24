@@ -197,7 +197,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @throws IOException 
      */
     public boolean has(final byte[] termHash) {
-        return this.array.has(termHash);
+        return this.array.containsKey(termHash);
     }
     
     /**
@@ -251,7 +251,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      */
     public void delete(final byte[] termHash) throws IOException {
         // returns the index that had been deleted
-    	array.remove(termHash);
+    	array.delete(termHash);
     }
     
     public int reduce(final byte[] termHash, ContainerReducer<ReferenceType> reducer) throws IOException, RowSpaceExceededException {

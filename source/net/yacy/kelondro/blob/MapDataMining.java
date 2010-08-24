@@ -150,7 +150,7 @@ public class MapDataMining extends MapHeap {
     }
 
     @Override
-    public synchronized void clear() throws IOException {
+    public synchronized void clear() {
     	super.clear();
         if (sortfields == null) sortClusterMap = null; else {
             sortClusterMap = new HashMap<String, ScoreCluster<String>>();
@@ -178,7 +178,7 @@ public class MapDataMining extends MapHeap {
     }
     
     @Override
-    public synchronized void put(final byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
+    public synchronized void insert(final byte[] key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
         assert (key != null);
         assert (key.length > 0);
         assert (newMap != null);
@@ -195,7 +195,7 @@ public class MapDataMining extends MapHeap {
             updateAcc(newMap, true);
         }
 
-        super.put(key, newMap);
+        super.insert(key, newMap);
         
         // update sortCluster
         if (sortClusterMap != null) updateSortCluster(new String(key), newMap);
@@ -251,7 +251,7 @@ public class MapDataMining extends MapHeap {
     }
 
     @Override
-    public synchronized void remove(final byte[] key) throws IOException {
+    public synchronized void delete(final byte[] key) throws IOException {
         if (key == null) return;
         
         // update elementCount
@@ -272,7 +272,7 @@ public class MapDataMining extends MapHeap {
                 Log.logException(e);
             }
         }
-        super.remove(key);
+        super.delete(key);
     }
     
     private void deleteSortCluster(final String key) {

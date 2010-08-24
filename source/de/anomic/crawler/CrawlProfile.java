@@ -136,7 +136,7 @@ public class CrawlProfile {
    
     public void removeEntry(final byte[] handle) {
         try {
-            profileTable.remove(handle);
+            profileTable.delete(handle);
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -145,11 +145,11 @@ public class CrawlProfile {
     public entry newEntry(final Map<String, String> mem) {
         final entry ne = new entry(mem);
         try {
-            profileTable.put(ne.handle().getBytes(), ne.map());
+            profileTable.insert(ne.handle().getBytes(), ne.map());
         } catch (final Exception e) {
             clear();
             try {
-                profileTable.put(ne.handle().getBytes(), ne.map());
+                profileTable.insert(ne.handle().getBytes(), ne.map());
             } catch (final Exception ee) {
                 Log.logException(e);
                 System.exit(0);
@@ -182,11 +182,11 @@ public class CrawlProfile {
                              xsstopw, xdstopw, xpstopw,
                              cacheStrategy);
         try {
-            profileTable.put(ne.handle().getBytes(), ne.map());
+            profileTable.insert(ne.handle().getBytes(), ne.map());
         } catch (final Exception e) {
             clear();
             try {
-                profileTable.put(ne.handle().getBytes(), ne.map());
+                profileTable.insert(ne.handle().getBytes(), ne.map());
             } catch (final Exception ee) {
                 Log.logException(e);
                 System.exit(0);
@@ -196,7 +196,7 @@ public class CrawlProfile {
     }
     
     public boolean hasEntry(final String handle) {
-        return profileTable.has(handle.getBytes());
+        return profileTable.containsKey(handle.getBytes());
     }
 
     public entry getEntry(final String handle) {
@@ -218,7 +218,7 @@ public class CrawlProfile {
     public void changeEntry(final entry e, final String propName, final String newValue) throws IOException, RowSpaceExceededException {
         e.mem.put(propName,  newValue);
         assert e.handle() != null;
-        profileTable.put(e.handle().getBytes(), e.mem);
+        profileTable.insert(e.handle().getBytes(), e.mem);
     }
     
     public long getRecrawlDate(final long oldTimeMinutes) {

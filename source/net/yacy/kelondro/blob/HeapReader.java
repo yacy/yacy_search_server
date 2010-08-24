@@ -317,7 +317,7 @@ public class HeapReader {
      * @param key
      * @return true if the key exists, false otherwise
      */
-    public boolean has(byte[] key) {
+    public boolean containsKey(byte[] key) {
         assert index != null;
         key = normalizeKey(key);
         
@@ -426,6 +426,18 @@ public class HeapReader {
             
             return blob;
         }
+    }
+
+    public byte[] get(Object key) {
+        if (!(key instanceof byte[])) return null;
+        try {
+            return get((byte[]) key);
+        } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        return null;
     }
     
     protected boolean checkKey(byte[] key, final long pos) throws IOException {

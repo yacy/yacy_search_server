@@ -178,7 +178,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @return true if the row exists
      */
     public boolean containsKey(byte[] pk) {
-        return this.table.has(pk);
+        return this.table.containsKey(pk);
     }
     
     /**
@@ -260,13 +260,13 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      */
     public void insert(byte[] pk, Map<String, byte[]> map) throws RowSpaceExceededException, IOException {
         byte[] b = BEncoder.encode(BEncoder.transcode(map));
-        this.table.put(pk, b);
+        this.table.insert(pk, b);
         this.columnames.addAll(map.keySet());
     }
     
     public void insert(byte[] pk, String key, byte[] value) throws IOException {
         byte[] b = BEncoder.encodeMap(key, value);
-        this.table.put(pk, b);
+        this.table.insert(pk, b);
         this.columnames.add(key);
     }
 
@@ -279,7 +279,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
         try {
             Map<String, byte[]> entry = this.get(pk);
             byte[] b = BEncoder.encode(BEncoder.transcode(map));
-            this.table.put(pk, b);
+            this.table.insert(pk, b);
             this.columnames.addAll(map.keySet());
             return entry;
         } catch (IOException e) {
@@ -297,7 +297,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
      * @throws IOException
      */
     public void delete(byte[] pk) throws IOException {
-        this.table.remove(pk);
+        this.table.delete(pk);
     }
     
     /**
@@ -339,7 +339,6 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
                 Log.logException(e);
             } catch (IOException e) {
                 Log.logException(e);
-                e.printStackTrace();
             }
         }
     }

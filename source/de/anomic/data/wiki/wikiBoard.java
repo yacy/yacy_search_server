@@ -266,9 +266,9 @@ public class wikiBoard {
             //System.out.println("key = " + page.key);
             //System.out.println("oldDate = " + oldDate);
             //System.out.println("record = " + oldEntry.record.toString());
-            bkpbase.put((page.key + dateString(oldDate)).getBytes(), oldEntry.record);
+            bkpbase.insert((page.key + dateString(oldDate)).getBytes(), oldEntry.record);
             // write the new page
-            datbase.put(page.key.getBytes(), page.record);
+            datbase.insert(page.key.getBytes(), page.record);
             return page.key;
         } catch (final Exception e) {
             Log.logException(e);

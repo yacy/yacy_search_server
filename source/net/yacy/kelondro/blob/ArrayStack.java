@@ -521,7 +521,7 @@ public class ArrayStack implements BLOB {
      * @return
      * @throws IOException
      */
-    public synchronized boolean has(byte[] key) {
+    public synchronized boolean containsKey(byte[] key) {
     	blobItem bi = keeperOf(key);
     	return bi != null;
         //for (blobItem bi: blobs) if (bi.blob.has(key)) return true;
@@ -541,7 +541,7 @@ public class ArrayStack implements BLOB {
             try {
                 cs.submit(new Callable<blobItem>() {
                     public blobItem call() {
-                        if (bi.blob.has(key)) return bi;
+                        if (bi.blob.containsKey(key)) return bi;
                         return null;
                     }
                 });
@@ -549,7 +549,7 @@ public class ArrayStack implements BLOB {
             } catch (final RejectedExecutionException e) {
                 // the executor is either shutting down or the blocking queue is full
                 // execute the search direct here without concurrency
-                if (bi.blob.has(key)) return bi;
+                if (bi.blob.containsKey(key)) return bi;
             }
         }
 
@@ -594,6 +594,18 @@ public class ArrayStack implements BLOB {
         }
         return null;
         
+    }
+    
+    public byte[] get(Object key) {
+        if (!(key instanceof byte[])) return null;
+        try {
+            return get((byte[]) key);
+        } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        return null;
     }
     
     /**
@@ -671,7 +683,7 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public synchronized void put(byte[] key, byte[] b) throws IOException {
+    public synchronized void insert(byte[] key, byte[] b) throws IOException {
         blobItem bi = (blobs.isEmpty()) ? null : blobs.get(blobs.size() - 1);
         /*
         if (bi == null)
@@ -687,7 +699,7 @@ public class ArrayStack implements BLOB {
             blobs.add(bi);
         }
         assert bi.blob instanceof Heap;
-        bi.blob.put(key, b);
+        bi.blob.insert(key, b);
         executeLimits();
     }
     
@@ -724,9 +736,9 @@ public class ArrayStack implements BLOB {
      * @param key  the primary key
      * @throws IOException
      */
-    public synchronized void remove(byte[] key) throws IOException {
+    public synchronized void delete(byte[] key) throws IOException {
         long m = this.mem();
-        for (blobItem bi: blobs) bi.blob.remove(key);
+        for (blobItem bi: blobs) bi.blob.delete(key);
         assert this.mem() <= m : "m = " + m + ", mem() = " + mem();
     }
     
@@ -996,18 +1008,18 @@ public class ArrayStack implements BLOB {
         try {
             //f.delete();
             final ArrayStack heap = new ArrayStack(f, "test", 12, NaturalOrder.naturalOrder, 512 * 1024, false);
-            heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
-            heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
-            heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
-            heap.put("aaaaaaaaaaad".getBytes(), "zehn elf zwoelf".getBytes());
+            heap.insert("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
+            heap.insert("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
+            heap.insert("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
+            heap.insert("aaaaaaaaaaad".getBytes(), "zehn elf zwoelf".getBytes());
             // iterate over keys
             Iterator<byte[]> i = heap.keys(true, false);
             while (i.hasNext()) {
                 System.out.println("key_b: " + new String(i.next()));
             }
-            heap.remove("aaaaaaaaaaab".getBytes());
-            heap.remove("aaaaaaaaaaac".getBytes());
-            heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
+            heap.delete("aaaaaaaaaaab".getBytes());
+            heap.delete("aaaaaaaaaaac".getBytes());
+            heap.insert("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
             Log.logException(e);

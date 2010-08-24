@@ -131,7 +131,7 @@ public class bookmarksDB {
     // adding a bookmark to the bookmarksDB
     public void saveBookmark(final Bookmark bookmark){
     	try {
-            bookmarks.put(bookmark.getUrlHash().getBytes(), bookmark.entry);
+            bookmarks.insert(bookmark.getUrlHash().getBytes(), bookmark.entry);
         } catch (final Exception e) {
             Log.logException(e);
         }
@@ -171,7 +171,7 @@ public class bookmarksDB {
         Bookmark b;
         try {
             b = getBookmark(urlHash);
-            bookmarks.remove(urlHash.getBytes());
+            bookmarks.delete(urlHash.getBytes());
         } catch (final IOException e) {
             b = null;
         }

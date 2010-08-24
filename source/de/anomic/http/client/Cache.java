@@ -56,7 +56,7 @@ public final class Cache {
     private static final String RESPONSE_HEADER_DB_NAME = "responseHeader.heap";
     private static final String FILE_DB_NAME = "file.array";
 
-    private static MapHeap responseHeaderDB = null;
+    private static Map<byte[], Map<String, String>> responseHeaderDB = null;
     private static Compressor fileDB = null;
     private static ArrayStack fileDBunbuffered = null;
     
@@ -105,7 +105,9 @@ public final class Cache {
      * close the databases
      */
     public static void close() {
-        responseHeaderDB.close();
+        if (responseHeaderDB instanceof MapHeap) {
+            ((MapHeap) responseHeaderDB).close();
+        }
         fileDB.close(true);
     }
     
@@ -119,14 +121,18 @@ public final class Cache {
         hm.putAll(responseHeader);
         hm.put("@@URL", url.toNormalform(true, false));
         try {
-            responseHeaderDB.put(url.hash(), hm);
+            if (responseHeaderDB instanceof MapHeap) {
+                ((MapHeap) responseHeaderDB).insert(url.hash(), hm);
+            } else {
+                responseHeaderDB.put(url.hash(), hm);
+            }
         } catch (Exception e) {
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
         
         // store the file
         try {
-            fileDB.put(url.hash(), file);
+            fileDB.insert(url.hash(), file);
         } catch (UnsupportedEncodingException e) {
             throw new IOException("Cache.store: cannot write to fileDB (1): " + e.getMessage());
         } catch (IOException e) {
@@ -142,18 +148,22 @@ public final class Cache {
      */
     public static boolean has(final DigestURI url) {
         boolean headerExists;
-        headerExists = responseHeaderDB.has(url.hash());
-        boolean fileExists = fileDB.has(url.hash());
+        headerExists = responseHeaderDB.containsKey(url.hash());
+        boolean fileExists = fileDB.containsKey(url.hash());
         if (headerExists && fileExists) return true;
         if (!headerExists && !fileExists) return false;
         // if not both is there then we do a clean-up
         if (headerExists) try {
             log.logWarning("header but not content of url " + url.toString() + " in cache; cleaned up");
-            responseHeaderDB.remove(url.hash());
+            if (responseHeaderDB instanceof MapHeap) {
+                ((MapHeap) responseHeaderDB).delete(url.hash());
+            } else {
+                responseHeaderDB.remove(url.hash());
+            }
         } catch (IOException e) {}
         if (fileExists) try {
             log.logWarning("content but not header of url " + url.toString() + " in cache; cleaned up");
-            fileDB.remove(url.hash());
+            fileDB.delete(url.hash());
         } catch (IOException e) {}
         return false;
     }
@@ -171,15 +181,7 @@ public final class Cache {
         
         // loading data from database
         Map<String, String> hdb;
-        try {
-            hdb = responseHeaderDB.get(url.hash());
-        } catch (final IOException e) {
-            Log.logException(e);
-            return null;
-        } catch (RowSpaceExceededException e) {
-            Log.logException(e);
-            return null;
-        }
+        hdb = responseHeaderDB.get(url.hash());
         if (hdb == null) return null;
         
         return new ResponseHeader(null, hdb);
@@ -219,7 +221,11 @@ public final class Cache {
      * @throws IOException
      */
     public static void delete(final DigestURI url) throws IOException {
-        responseHeaderDB.remove(url.hash());
-        fileDB.remove(url.hash());
+        if (responseHeaderDB instanceof MapHeap) {
+            ((MapHeap) responseHeaderDB).delete(url.hash());
+        } else {
+            responseHeaderDB.remove(url.hash());
+        }
+        fileDB.delete(url.hash());
     }
 }

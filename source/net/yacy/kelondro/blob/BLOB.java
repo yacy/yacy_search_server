@@ -107,7 +107,7 @@ public interface BLOB {
      * @return
      * @throws IOException
      */
-    public boolean has(byte[] key);
+    public boolean containsKey(byte[] key);
     
     /**
      * retrieve the whole BLOB from the table
@@ -116,6 +116,7 @@ public interface BLOB {
      * @throws IOException
      */
     public byte[] get(byte[] key) throws IOException, RowSpaceExceededException;
+    public byte[] get(Object key);
     
     /**
      * retrieve the size of the database
@@ -140,7 +141,7 @@ public interface BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public void put(byte[] key, byte[] b) throws IOException;
+    public void insert(byte[] key, byte[] b) throws IOException;
     
     /**
      * replace an existing entry in the BLOB with a new entry
@@ -173,7 +174,7 @@ public interface BLOB {
      * @param key  the primary key
      * @throws IOException
      */
-    public void remove(byte[] key) throws IOException;
+    public void delete(byte[] key) throws IOException;
     
     /**
      * close the BLOB table

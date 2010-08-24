@@ -112,7 +112,7 @@ public class blogBoardComments {
     public String write(final CommentEntry page) {
         // writes a new page and returns key
     	try {
-    	    database.put(page.key.getBytes(), page.record);
+    	    database.insert(page.key.getBytes(), page.record);
     	    return page.key;
     	} catch (final Exception e) {
     	    Log.logException(e);
@@ -231,7 +231,7 @@ public class blogBoardComments {
 
     public void delete(final String key) {
     	try {
-            database.remove(normalize(key).getBytes());
+            database.delete(normalize(key).getBytes());
         }
         catch (final IOException e) { }
     }

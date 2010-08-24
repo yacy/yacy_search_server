@@ -94,7 +94,7 @@ public class Stack {
      */
     public synchronized long push(final byte[] b) throws IOException, RowSpaceExceededException {
         long handle = nextHandle();
-        this.stack.put(NaturalOrder.encodeLong(handle, 8), b);
+        this.stack.insert(NaturalOrder.encodeLong(handle, 8), b);
         return handle;
     }
     
@@ -108,7 +108,7 @@ public class Stack {
      * @throws RowSpaceExceededException 
      */
     protected synchronized void push(final Entry e) throws IOException, RowSpaceExceededException {
-        this.stack.put(NaturalOrder.encodeLong(e.h, 8), e.b);
+        this.stack.insert(NaturalOrder.encodeLong(e.h, 8), e.b);
     }
     
     /**
@@ -137,7 +137,7 @@ public class Stack {
         byte[] k = NaturalOrder.encodeLong(handle, 8);
         byte[] b = this.stack.get(k);
         if (b == null) return null;
-        this.stack.remove(k);
+        this.stack.delete(k);
         return b;
     }
     
@@ -193,7 +193,7 @@ public class Stack {
         }
         assert b != null;
         if (b == null) return null;
-        if (remove) this.stack.remove(k);
+        if (remove) this.stack.delete(k);
         return new Entry(k, b);
     }
     
