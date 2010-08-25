@@ -67,6 +67,7 @@ public class Document {
     private final StringBuilder description;    // an abstract, if present: short content description
     private Object text;                        // the clear text, all that is visible
     private final Map<MultiProtocolURI, String> anchors; // all links embedded as clickeable entities (anchor tags)
+    private final Map<MultiProtocolURI, String> rss; // all embedded rss feeds
     private final HashMap<MultiProtocolURI, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
@@ -83,7 +84,10 @@ public class Document {
     public Document(final MultiProtocolURI location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author, final String publisher,
                     final String[] sections, final String abstrct,
-                    final Object text, final Map<MultiProtocolURI, String> anchors, final HashMap<MultiProtocolURI, ImageEntry> images,
+                    final Object text,
+                    final Map<MultiProtocolURI, String> anchors,
+                    final Map<MultiProtocolURI, String> rss,
+                    final HashMap<MultiProtocolURI, ImageEntry> images,
                     boolean indexingDenied) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
@@ -94,6 +98,7 @@ public class Document {
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
         this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
         this.anchors = (anchors == null) ? new HashMap<MultiProtocolURI, String>(0) : anchors;
+        this.rss = (rss == null) ? new HashMap<MultiProtocolURI, String>(0) : rss;
         this.images =  (images == null) ? new HashMap<MultiProtocolURI, ImageEntry>() : images;
         this.publisher = publisher;
         this.hyperlinks = null;
@@ -285,6 +290,12 @@ dc_rights
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return anchors;
+    }
+    
+    public Map<MultiProtocolURI, String> getRSS() {
+        // returns all links embedded as anchors (clickeable entities)
+        // this is a url(String)/text(String) map
+        return rss;
     }
     
     
@@ -504,8 +515,9 @@ dc_rights
                 this.text = new ByteArrayOutputStream();
             }
             FileUtils.copy(doc.getText(), (ByteArrayOutputStream) this.text);
-            
+
             anchors.putAll(doc.getAnchors());
+            rss.putAll(doc.getRSS());
             ContentScraper.addAllImages(images, doc.getImages());
         }
     }
@@ -618,8 +630,9 @@ dc_rights
         final StringBuilder      title         = new StringBuilder();
         final StringBuilder      description   = new StringBuilder();
         final LinkedList<String> sectionTitles = new LinkedList<String>();
-        
+
         final Map<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
+        final Map<MultiProtocolURI, String> rss = new HashMap<MultiProtocolURI, String>();
         final HashMap<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
         
         for (Document doc: docs) {
@@ -659,6 +672,7 @@ dc_rights
                 }
             }
             anchors.putAll(doc.getAnchors());
+            rss.putAll(doc.getRSS());
             ContentScraper.addAllImages(images, doc.getImages());
         }
         return new Document(
@@ -674,6 +688,7 @@ dc_rights
                 description.toString(),
                 content.getBytes(),
                 anchors,
+                rss,
                 images,
                 false);
     }

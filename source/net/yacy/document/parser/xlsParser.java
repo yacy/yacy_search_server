@@ -125,6 +125,7 @@ public class xlsParser extends AbstractParser implements Parser {
                         contents.getBytes("UTF-8"),
                         null,
                         null,
+                        null,
                         false)};
             } catch (final Exception e) { 
                 if (e instanceof InterruptedException) throw (InterruptedException) e;

@@ -95,6 +95,7 @@ public class pptParser extends AbstractParser implements Parser {
                     contents.getBytes("UTF-8"),
                     null,
                     null,
+                    null,
                     false)};
             return docs;
         } catch (final Exception e) { 

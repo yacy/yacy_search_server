@@ -157,6 +157,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 contentBytes,
                 null,
                 null,
+                null,
                 false)};
     }
     

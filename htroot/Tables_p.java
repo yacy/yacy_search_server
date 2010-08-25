@@ -39,52 +39,35 @@ public class Tables_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+
+        prop.put("showtable", 0);
+        prop.put("showedit", 0);
+        prop.put("showselection", 0);
         
-        if (post == null) {
-            prop.put("pattern", "");
-            
-            // show table selection
-            int count = 0;
-            Iterator<String> ti = sb.tables.tables();
-            String tablename;
-            while (ti.hasNext()) {
-                tablename = ti.next();
-                prop.put("tables_" + count + "_name", tablename);
-                prop.put("tables_" + count + "_selected", 0);
-                count++;
-            }
-            prop.put("tables", count);
-            
-            // generate table
-            prop.put("showtable", 0);
-            prop.put("showedit", 0);
-            
-            // the peer address
-            prop.put("address", sb.peers.mySeed().getPublicAddress());
-            
-            // return rewrite properties
-            return prop;
-        }
-        
-        String table = post.get("table", null);
+        String table = (post == null) ? null : post.get("table", null);
         if (table != null && !sb.tables.hasHeap(table)) table = null;
-        String counts = post.get("count", null);
-        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : Integer.parseInt(counts);
-        String pattern = post.get("search", "");
-        Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
-        prop.put("pattern", pattern);
         
         // show table selection
         int count = 0;
         Iterator<String> ti = sb.tables.tables();
         String tablename;
+        prop.put("showselection", 1);
         while (ti.hasNext()) {
             tablename = ti.next();
-            prop.put("tables_" + count + "_name", tablename);
-            prop.put("tables_" + count + "_selected", (table != null && table.equals(tablename)) ? 1 : 0);
+            prop.put("showselection_tables_" + count + "_name", tablename);
+            prop.put("showselection_tables_" + count + "_selected", (table != null && table.equals(tablename)) ? 1 : 0);
             count++;
         }
-        prop.put("tables", count);
+        prop.put("showselection_tables", count);
+        prop.put("showselection_pattern", "");
+
+        if (post == null) return prop; // return rewrite properties
+        
+        String counts = post.get("count", null);
+        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : Integer.parseInt(counts);
+        String pattern = post.get("search", "");
+        Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+        prop.put("pattern", pattern);
         
         List<String> columns = null;
         if (table != null) try {

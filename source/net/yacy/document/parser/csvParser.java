@@ -68,6 +68,7 @@ public class csvParser extends AbstractParser implements Parser {
                     sb.toString().getBytes(charset),
                     null,
                     null,
+                    null,
                     false)};
         } catch (UnsupportedEncodingException e) {
             throw new Parser.Failure("error in csvParser, getBytes: " + e.getMessage(), location);

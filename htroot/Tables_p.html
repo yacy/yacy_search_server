@@ -28,7 +28,7 @@
   <body id="Tables">
     #%env/templates/header.template%#
     #%env/templates/submenuConfig.template%#
-    
+    #(showselection)#::
     <h2>Table Administration</h2>
     <form action="Tables_p.html" method="get">
       <fieldset><legend>Table Selection</legend>
@@ -60,6 +60,7 @@
       </dl>
     </fieldset>
     </form>
+    #(/showselection)#
     #(showtable)#::
     <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="tablelisting">
       <fieldset>

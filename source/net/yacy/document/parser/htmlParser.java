@@ -142,6 +142,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getDescription(),
                 scraper.getText(),
                 scraper.getAnchors(),
+                scraper.getRSS(),
                 scraper.getImages(),
                 scraper.indexingDenied())};
         //scraper.close();            

@@ -65,7 +65,6 @@ public class swfParser extends AbstractParser implements Parser {
                 Log.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             } catch (IOException e) {
-                Log.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             } catch (Exception e) {
                 Log.logException(e);
@@ -116,6 +115,7 @@ public class swfParser extends AbstractParser implements Parser {
                     abstrct,     // an abstract
                     contents.getBytes("UTF-8"),     // the parsed document text
                     anchors,      // a map of extracted anchors
+                    null,
                     null,
                     false)};      // a treeset of image URLs
         } catch (final Exception e) { 

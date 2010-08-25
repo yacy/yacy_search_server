@@ -97,6 +97,7 @@ public class torrentParser extends AbstractParser implements Parser {
                     filenames.toString().getBytes(charset),
                     null,
                     null,
+                    null,
                     false)};
         } catch (UnsupportedEncodingException e) {
             throw new Parser.Failure("error in torrentParser, getBytes: " + e.getMessage(), location);

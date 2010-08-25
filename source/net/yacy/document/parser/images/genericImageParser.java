@@ -199,6 +199,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              description == null ? "" : description, // description
              infoString.getBytes(), // content text
              anchors, // anchors
+             null,
              images,
              false)}; // images
     }

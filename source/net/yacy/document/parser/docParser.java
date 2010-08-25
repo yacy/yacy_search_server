@@ -98,6 +98,7 @@ public class docParser extends AbstractParser implements Parser {
                       contents.toString().getBytes("UTF-8"),
                       null,
                       null,
+                      null,
                       false)};
         } catch (UnsupportedEncodingException e) {
             throw new Parser.Failure("error in docParser, getBytes: " + e.getMessage(), location);

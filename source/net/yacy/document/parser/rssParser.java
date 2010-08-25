@@ -87,6 +87,7 @@ public class rssParser extends AbstractParser implements Parser {
                     item.getDescription(),
                     null,
                     anchors,
+                    null,
                     new HashMap<MultiProtocolURI, ImageEntry>(),
                     false);
             docs.add(doc);

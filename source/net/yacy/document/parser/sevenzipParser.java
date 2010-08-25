@@ -56,7 +56,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
     }
     
     public Document parse(final MultiProtocolURI location, final String mimeType, final String charset, final IInStream source) throws Parser.Failure, InterruptedException {
-        final Document doc = new Document(location, mimeType, charset, null, null, null, null, null, null, null, (Object)null, null, null, false);
+        final Document doc = new Document(location, mimeType, charset, null, null, null, null, null, null, null, (Object)null, null, null, null, false);
         Handler archive;
         super.log.logFine("opening 7zip archive...");
         try {

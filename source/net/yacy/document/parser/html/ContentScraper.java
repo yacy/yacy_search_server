@@ -79,6 +79,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     // class variables: collectors for links
+    private HashMap<MultiProtocolURI, String> rss;
     private HashMap<MultiProtocolURI, String> anchors;
     private HashMap<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
     private final HashMap<String, String> metas;
@@ -104,6 +105,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         this.root = root;
+        this.rss = new HashMap<MultiProtocolURI, String>();
         this.anchors = new HashMap<MultiProtocolURI, String>();
         this.images = new HashMap<MultiProtocolURI, ImageEntry>();
         this.metas = new HashMap<String, String>();
@@ -188,14 +190,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final MultiProtocolURI newLink = absolutePath(tagopts.getProperty("href", ""));
 
             if (newLink != null) {
-                final String type = tagopts.getProperty("rel", "");
+                final String rel = tagopts.getProperty("rel", "");
                 final String linktitle = tagopts.getProperty("title", "");
+                final String type = tagopts.getProperty("type", "");
 
-                if (type.equalsIgnoreCase("shortcut icon")) {
+                if (rel.equalsIgnoreCase("shortcut icon")) {
                     final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
                     images.put(ie.url(), ie);    
                     this.favicon = newLink;
-                } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
+                } else if (rel.equalsIgnoreCase("alternate") && type.equalsIgnoreCase("application/rss+xml")) {
+                    rss.put(newLink, linktitle);
+                } else if (!rel.equalsIgnoreCase("stylesheet") && !rel.equalsIgnoreCase("alternate stylesheet")) {
                     anchors.put(newLink, linktitle);
                 }
             }
@@ -353,6 +358,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public Map<MultiProtocolURI, String> getAnchors() {
         // returns a url (String) / name (String) relation
         return anchors;
+    }
+
+    public Map<MultiProtocolURI, String> getRSS() {
+        // returns a url (String) / name (String) relation
+        return rss;
     }
 
     /**

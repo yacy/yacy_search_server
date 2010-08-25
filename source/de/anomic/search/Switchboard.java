@@ -1903,6 +1903,23 @@ public final class Switchboard extends serverSwitch {
             return;
         }
         
+        // store rss feeds in document into rss table
+        for (Map.Entry<MultiProtocolURI, String> rssEntry : document.getRSS().entrySet()) {
+            Tables.Data rssRow = new Tables.Data();
+            rssRow.put("referrer", queueEntry.url().hash());
+            rssRow.put("url", rssEntry.getKey().toNormalform(true, false).getBytes());
+            rssRow.put("title", rssEntry.getValue().getBytes());
+            rssRow.put("recording_date", new Date());
+            //rssRow.put("last_load_date", "".getBytes());
+            //rssRow.put("last_load_count", "".getBytes());
+            //rssRow.put("avg_upd_per_day", "".getBytes());
+            try {
+                this.tables.update("rss", new DigestURI(rssEntry.getKey()).hash(), rssRow);
+            } catch (IOException e) {
+                Log.logException(e);
+            }
+        }
+        
         // update url result list statistics
         crawlResults.stack(
                 newEntry,                            // loaded url db entry
@@ -1970,17 +1987,14 @@ public final class Switchboard extends serverSwitch {
      */
     public void addToIndex(final DigestURI url, final SearchEvent searchEvent, final String heuristicName) throws IOException, Parser.Failure {
         final Segments.Process process = Segments.Process.LOCALCRAWLING;
-        if (indexSegments.segment(process).urlMetadata.exists(url.hash())) {
-            searchEvent.addHeuristic(url.hash(), heuristicName, true);
-            return; // don't do double-work
-        }
+        if (searchEvent != null) searchEvent.addHeuristic(url.hash(), heuristicName, true);
+        if (indexSegments.segment(process).urlMetadata.exists(url.hash())) return; // don't do double-work
         final Request request = loader.request(url, true, true);
         String acceptedError = this.crawlStacker.checkAcceptance(url, this.crawler.profilesActiveCrawls.getEntry(request.profileHandle()), 0);
         if (acceptedError != null) {
-            log.logInfo("Heuristic: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);
+            log.logWarning("addToIndex: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);
             return;
         }
-        searchEvent.addHeuristic(url.hash(), heuristicName, false);
         new Thread() {public void run() {
             try {
                 Response response = loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE);
@@ -1994,12 +2008,12 @@ public final class Switchboard extends serverSwitch {
                     ResultImages.registerImages(url, document, true);
                     webStructure.generateCitationReference(url, document, condenser, response.lastModified());
                     storeDocumentIndex(process, response, document, condenser, searchEvent);
-                    log.logInfo("heuristic fill of url " + url.toNormalform(true, true) + " finished");
+                    log.logInfo("addToIndex fill of url " + url.toNormalform(true, true) + " finished");
                 }
             } catch (IOException e) {
-                //Log.logException(e);
+                log.logWarning("addToIndex: failed loading " + url.toNormalform(false, false) + ": " + e.getMessage());
             } catch (Parser.Failure e) {
-                //Log.logException(e);
+                log.logWarning("addToIndex: failed parsing " + url.toNormalform(false, false) + ": " + e.getMessage());
             }
         }}.start();
     }

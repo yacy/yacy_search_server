@@ -169,6 +169,7 @@ public class odtParser extends AbstractParser implements Parser {
                     contentBytes,
                     null,
                     null,
+                    null,
                     false)};
             return docs;
         } catch (final Exception e) {            

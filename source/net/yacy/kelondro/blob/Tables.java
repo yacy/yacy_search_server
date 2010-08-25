@@ -362,7 +362,7 @@ public class Tables {
         
     }
     
-    public class Data extends LinkedHashMap<String, byte[]> {
+    public static class Data extends LinkedHashMap<String, byte[]> {
         
         private static final long serialVersionUID = 978426054043749337L;
         

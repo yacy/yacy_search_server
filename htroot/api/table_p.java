@@ -36,12 +36,14 @@ public class table_p {
         final serverObjects prop = new serverObjects();
         String table = (post == null) ? null : post.get("table", null);
         if (table != null && !sb.tables.hasHeap(table)) table = null;
-        if (table == null) {
-            prop.put("showtable", 0);
-            return prop;
-        }
+        prop.put("showtable", 0);
+        
+        if (table == null) return prop;
         
         boolean showpk = post.containsKey("pk");
+        
+        String selectKey = post.containsKey("selectKey") ? post.get("selectKey") : null;
+        String selectValue = (selectKey != null && post.containsKey("selectValue")) ? post.get("selectValue") : null;
         
         ArrayList<String> columns = null;
         try {
@@ -86,8 +88,8 @@ public class table_p {
             final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(plainIterator, maxCount).iterator();
             Tables.Row trow;
             boolean dark = true;
-            byte[] cell;
-            while ((mapIterator.hasNext()) && (count < maxCount)) {
+            String cellName, cellValue;
+            rowloop: while ((mapIterator.hasNext()) && (count < maxCount)) {
                 trow = mapIterator.next();
                 if (row == null) continue;
                 prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
@@ -95,9 +97,13 @@ public class table_p {
                 prop.put("showtable_list_" + count + "_showpk_pk", new String(trow.getPK()));
                 prop.put("showtable_list_" + count + "_count", count);
                 for (int i = 0; i < columns.size(); i++) {
-                    cell = trow.get(columns.get(i));
-                    prop.putHTML("showtable_list_" + count + "_columns_" + i + "_column", columns.get(i));
-                    prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
+                    cellName = columns.get(i);
+                    cellValue = new String(trow.get(cellName));
+                    if (selectKey != null && cellName.equals(selectKey) && !cellValue.matches(selectValue)) {
+                        continue rowloop;
+                    }
+                    prop.putHTML("showtable_list_" + count + "_columns_" + i + "_column", cellName);
+                    prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cellValue);
                 }
                 prop.put("showtable_list_" + count + "_columns", columns.size());
                 

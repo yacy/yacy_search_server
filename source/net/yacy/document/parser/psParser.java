@@ -111,6 +111,7 @@ public class psParser extends AbstractParser implements Parser {
                     null,     // abstract
                     outputFile, // fulltext
                     null,     // anchors
+                    null,     // rss
                     null,     // images
                     false)};  // indexingdenied
             

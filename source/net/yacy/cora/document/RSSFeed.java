@@ -26,7 +26,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class RSSFeed implements Iterable<Hit> {
+public class RSSFeed implements Iterable<RSSMessage> {
 
     public static final int DEFAULT_MAXSIZE = 1000;
     
@@ -78,7 +78,7 @@ public class RSSFeed implements Iterable<Hit> {
         return messages.size();
     }
     
-    public Iterator<Hit> iterator() {
+    public Iterator<RSSMessage> iterator() {
         return new messageIterator();
     }
     
@@ -92,7 +92,7 @@ public class RSSFeed implements Iterable<Hit> {
         }
     }
 
-    public class messageIterator implements Iterator<Hit>{
+    public class messageIterator implements Iterator<RSSMessage>{
         
         Iterator<String> GUIDiterator;
         String lastGUID;

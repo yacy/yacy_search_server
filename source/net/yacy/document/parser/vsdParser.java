@@ -113,6 +113,7 @@ public class vsdParser extends AbstractParser implements Parser {
                     abstrct,      // an abstract
                     contents.getBytes("UTF-8"),     // the parsed document text
                     null,         // a map of extracted anchors
+                    null,
                     null,         // a treeset of image URLs
                     false)};
         } catch (final Exception e) { 

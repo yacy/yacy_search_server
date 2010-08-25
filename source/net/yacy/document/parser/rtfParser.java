@@ -79,6 +79,7 @@ public class rtfParser extends AbstractParser implements Parser {
                     bodyText.getBytes("UTF-8"),
                     null,
                     null,
+                    null,
                     false)};        
 		}
 		catch (final Exception e) {			

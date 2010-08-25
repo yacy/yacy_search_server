@@ -212,6 +212,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     "vCard",                    // an abstract
                     text,                       // the parsed document text
                     anchors,                    // a map of extracted anchors
+                    null,
                     null,                       // a treeset of image URLs
                     false)};
         } catch (final Exception e) { 

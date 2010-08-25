@@ -33,9 +33,6 @@ import net.yacy.kelondro.util.DateFormatter;
 
 public class RSSMessage implements Hit {
 
-    // statics for item generation and automatic categorization
-    private static int guidcount = 0;
-
     public static enum Token {
 
         title("title"),
@@ -73,7 +70,8 @@ public class RSSMessage implements Hit {
             return this.keys;
         }
     }
-    
+
+    private static String artificialGuidPrefix = "c0_";
     public static final RSSMessage POISON = new RSSMessage("", "", "");
     
     public static final HashSet<String> tags = new HashSet<String>();
@@ -86,21 +84,25 @@ public class RSSMessage implements Hit {
     private final Map<String, String> map;
 
     public RSSMessage(final String title, final String description, final String link) {
-        this();
-        setValue("title", title);
-        setValue("description", description);
-        setValue("link", link);
-        setValue("pubDate", DateFormatter.formatShortSecond(new Date()));
-        setValue("guid", Integer.toHexString((title + description + link).hashCode()));
+        this.map = new ConcurrentHashMap<String, String>();
+        map.put("title", title);
+        map.put("description", description);
+        map.put("link", link);
+        map.put("pubDate", DateFormatter.formatShortSecond(new Date()));
+        map.put("guid", artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
     
     public RSSMessage() {
         this.map = new ConcurrentHashMap<String, String>();
-        this.map.put("guid", Long.toHexString(System.currentTimeMillis()) + ":" + guidcount++);
     }
     
     public void setValue(final String name, final String value) {
         map.put(name, value);
+        // if possible generate a guid if not existent so far
+        if ((name.equals("title") || name.equals("description") || name.equals("link")) &&
+            (!map.containsKey("guid") || map.get("guid").startsWith(artificialGuidPrefix))) {
+            map.put("guid", artificialGuidPrefix + Integer.toHexString((getTitle() + getDescription() + getLink()).hashCode()));
+        }
     }
     
     public String getTitle() {

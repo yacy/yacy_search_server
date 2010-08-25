@@ -361,7 +361,7 @@ public class Segment {
                 document.outboundLinks(),                     // outbound links
                 searchEvent                                   // a search event that can have results directly
         );
-            
+        
         final long indexingEndTime = System.currentTimeMillis();
         
         if (log.isInfo()) {
