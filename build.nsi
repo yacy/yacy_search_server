@@ -1,7 +1,7 @@
 ;yacy.nsi
 ; ----------------------------------------
 ;(C) 2004-2006 by Alexander Schier
-;(C) 2008 by David Wieditz
+;(C) 2008-2010 by David Wieditz
 /*----------------------------------------
 MANUALS
 http://nsis.sourceforge.net/Docs/
@@ -36,8 +36,8 @@ OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe
 InstallDir "$PROFILE\YaCy"
 InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString"
 
-;requested execution level on Vista
-RequestExecutionLevel user
+;requested execution level on Vista / 7
+RequestExecutionLevel admin
 
 SetCompressor /SOLID LZMA
 !insertmacro MUI_RESERVEFILE_LANGDLL ;loads faster
@@ -49,6 +49,8 @@ SetCompressor /SOLID LZMA
 !define JRE_VERSION6 "1.6"
 !define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=37718" ;jre-6u18-windows-i586.exe
 !define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=37401" ;jre-6u18-windows-x64.exe
+;!define JRE_32 "http://yacyweb.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
+;!define JRE_64 "http://yacyweb.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
 
 ; ----------------------------------------
 ; GENERAL APPEARANCE
@@ -205,7 +207,7 @@ SectionEnd
 ; FUNCTIONS
 
 Function GetJRE
-; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script	
+; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
     ${If} ${RunningX64}
     StrCpy $3 ${JRE_64}
     ${Else}
@@ -214,7 +216,7 @@ Function GetJRE
     
 	userInfo::getAccountType
 	Pop $0
-		StrCmp $0 "Admin" download
+		StrCmp $0 "Admin" download ; download without message if admin
 		MessageBox MB_ICONEXCLAMATION "$(noAdminForJava)" /SD IDOK
     download:
 	SetShellVarContext all
@@ -225,7 +227,7 @@ Function GetJRE
 		StrCmp $R0 "success" +3
 		MessageBox MB_OK "Download failed: $R0" /SD IDOK
 		Return
-	StrCmp $0 "Admin" install
+	StrCmp $0 "Admin" install ; install if admin
 		CreateShortCut "$DESKTOP\Install Java for YaCy.lnk" "$2"
 		Return ; don't delete if not admin
     install:
