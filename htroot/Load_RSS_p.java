@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.Hit;
@@ -32,7 +33,10 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ComparableARC;
 import net.yacy.document.Parser.Failure;
+import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -53,11 +57,111 @@ public class Load_RSS_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
 
-        prop.put("showitems", 0);
         prop.put("showload", 0);
+        prop.put("showitems", 0);
+        prop.put("shownewfeeds", 0);
+        prop.put("showscheduledfeeds", 0);
         prop.put("url", "");
+
+        if (post != null && (post.containsKey("removeSelectedFeedNewList") || post.containsKey("removeSelectedFeedScheduler"))) {
+            for (Map.Entry<String, String> entry: post.entrySet()) {
+                if (entry.getValue().startsWith("mark_")) try {
+                    sb.tables.delete("rss", entry.getValue().substring(5).getBytes());
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
+            }
+        }
         
-        if (post == null) return prop;
+        if (post != null && post.containsKey("addSelectedFeedScheduler")) {
+            for (Map.Entry<String, String> entry: post.entrySet()) {
+                if (entry.getValue().startsWith("mark_")) try {
+                    Row row = sb.tables.select("rss", entry.getValue().substring(5).getBytes());
+                    RSSReader rss = null;
+                    DigestURI url = new DigestURI(row.get("url", ""));
+                    try {
+                        Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+                        byte[] resource = response == null ? null : response.getContent();
+                        rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
+                    } catch (IOException e) {
+                        Log.logException(e);
+                    }
+                    if (rss == null) {
+                        Log.logWarning("Load_RSS", "no rss for url" + url.toNormalform(true, false));
+                    } else {
+                        RSSFeed feed = rss.getFeed();
+                        indexAllRssFeed(sb, url, feed);
+                    
+                        // add the feed also to the scheduler
+                        recordAPI(sb, url, rss.getFeed(), 1, "seldays");
+                    }
+                } catch (IOException e) {
+                    Log.logException(e);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
+            }
+        }
+        
+        if (post == null || (post != null && (post.containsKey("addSelectedFeedScheduler") || post.containsKey("removeSelectedFeedNewList") || post.containsKey("removeSelectedFeedScheduler")))) {
+            try {
+                // get list of primary keys from the api table with scheduled feed loading requests
+                Tables.Row row;
+                String messageurl;
+                
+                // check feeds
+                int newc = 0, apic = 0;
+                Iterator<Row> plainIterator = sb.tables.iterator("rss");
+                while (plainIterator.hasNext()) {
+                    row = plainIterator.next();
+                    if (row == null) continue;
+                    messageurl = row.get("url", "");
+                    if (messageurl.length() == 0) continue;
+                    // get referrer
+                    DigestURI referrer = sb.getURL(Segments.Process.LOCALCRAWLING, row.get("referrer", "").getBytes());
+                    // check if feed is registered in scheduler
+                    byte[] api_pk = row.get("api_pk");
+                    Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
+                    if (r != null && r.get("comment", "").matches(".*\\Q" + messageurl + "\\E.*")) {
+                        // this is a recorded entry
+                        Date date_next_exec = r.containsKey(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC) ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date()) : null;
+                        prop.put("showscheduledfeeds_list_" + apic + "_pk", new String(row.getPK()));
+                        prop.put("showscheduledfeeds_list_" + apic + "_count", apic);
+                        prop.put("showscheduledfeeds_list_" + apic + "_rss", messageurl);
+                        prop.put("showscheduledfeeds_list_" + apic + "_title", row.get("title", ""));
+                        prop.put("showscheduledfeeds_list_" + apic + "_referrer", referrer == null ? "" : referrer.toNormalform(true, false));
+                        prop.put("showscheduledfeeds_list_" + apic + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
+                        prop.put("showscheduledfeeds_list_" + apic + "_lastload", DateFormat.getDateTimeInstance().format(row.get("last_load_date", new Date())));
+                        prop.put("showscheduledfeeds_list_" + apic + "_nextload", date_next_exec == null ? "" : DateFormat.getDateTimeInstance().format(date_next_exec));
+                        prop.put("showscheduledfeeds_list_" + apic + "_lastcount", row.get("last_load_count", 0));
+                        prop.put("showscheduledfeeds_list_" + apic + "_allcount", row.get("all_load_count", 0));
+                        prop.put("showscheduledfeeds_list_" + apic + "_updperday", row.get("avg_upd_per_day", 0));
+                        apic++;
+                    } else {
+                        // this is a new entry
+                        prop.put("shownewfeeds_list_" + newc + "_pk", new String(row.getPK()));
+                        prop.put("shownewfeeds_list_" + newc + "_count", newc);
+                        prop.put("shownewfeeds_list_" + newc + "_rss", messageurl);
+                        prop.put("shownewfeeds_list_" + newc + "_title", row.get("title", ""));
+                        prop.put("shownewfeeds_list_" + newc + "_referrer", referrer == null ? "" : referrer.toNormalform(true, false));
+                        prop.put("shownewfeeds_list_" + newc + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
+                        newc++;
+                    }
+                }
+                prop.put("showscheduledfeeds_list" , apic);
+                prop.put("showscheduledfeeds_num", apic);
+                prop.put("showscheduledfeeds", apic > 0 ? apic : 0);
+                prop.put("shownewfeeds_list" , newc);
+                prop.put("shownewfeeds_num", newc);
+                prop.put("shownewfeeds", newc > 0 ? 1 : 0);
+            } catch (IOException e) {
+                Log.logException(e);
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
+            
+            return prop;
+        }
 
         prop.put("url", post.get("url", ""));
         
@@ -78,8 +182,8 @@ public class Load_RSS_p {
         RSSReader rss = null;
         if (url != null) try {
             prop.put("url", url.toNormalform(true, false));
-            Response entry = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
-            byte[] resource = entry == null ? null : entry.getContent();
+            Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+            byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (IOException e) {
             Log.logException(e);
@@ -103,33 +207,16 @@ public class Load_RSS_p {
                 }
             }
         }
+        
         if (rss != null && post.containsKey("indexAllItemContent")) {
             record_api = true;
             RSSFeed feed = rss.getFeed();
-            loop: for (RSSMessage message: feed) {
-                try {
-                    DigestURI messageurl = new DigestURI(message.getLink());
-                    if (indexTriggered.containsKey(messageurl.hash()) && post.containsKey("indexSelectedItemContent")) continue loop;
-                    if (sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null) continue loop;
-                    sb.addToIndex(messageurl, null, null);
-                    indexTriggered.put(messageurl.hash(), new Date());
-                } catch (IOException e) {
-                    Log.logException(e);
-                } catch (Failure e) {
-                    Log.logException(e);
-                }
-            }
+            indexAllRssFeed(sb, url, feed);
         }
         
-        if (record_api) {
+        if (record_api && rss != null && rss.getFeed() != null && rss.getFeed().getChannel() != null) {
             // record API action
-            if (repeat_time > 0) {
-                // store as scheduled api call
-                sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true, false), repeat_time, repeat_unit.substring(3));
-            } else {
-                // store just a protocol
-                sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true, false));
-            }
+            recordAPI(sb, url, rss.getFeed(), repeat_time, repeat_unit);
         }
         
         // show items from rss
@@ -137,16 +224,16 @@ public class Load_RSS_p {
             prop.put("showitems", 1);
             RSSFeed feed = rss.getFeed();
             RSSMessage channel = feed.getChannel();
-            prop.putHTML("showitems_title", channel.getTitle());
-            String author = channel.getAuthor();
-            if (author == null || author.length() == 0) author = channel.getCopyright();
-            Date pubDate = channel.getPubDate();
+            prop.putHTML("showitems_title", channel == null ? "" : channel.getTitle());
+            String author = channel == null ? "" : channel.getAuthor();
+            if (author == null || author.length() == 0) author = channel == null ? "" : channel.getCopyright();
+            Date pubDate = channel == null ? null : channel.getPubDate();
             prop.putHTML("showitems_author", author == null ? "" : author);
-            prop.putHTML("showitems_description", channel.getDescription());
-            prop.putHTML("showitems_language", channel.getLanguage());
+            prop.putHTML("showitems_description", channel == null ? "" : channel.getDescription());
+            prop.putHTML("showitems_language", channel == null ? "" : channel.getLanguage());
             prop.putHTML("showitems_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
-            prop.putHTML("showitems_ttl", channel.getTTL());
-            prop.putHTML("showitems_docs", channel.getDocs());
+            prop.putHTML("showitems_ttl", channel == null ? "" : channel.getTTL());
+            prop.putHTML("showitems_docs", channel == null ? "" : channel.getDocs());
             
             int i = 0;
             for (final Hit item: feed) {
@@ -182,4 +269,71 @@ public class Load_RSS_p {
         return prop;
     }
     
+    private static void indexAllRssFeed(Switchboard sb, DigestURI url, RSSFeed feed) {
+        int loadCount = 0;
+        loop: for (RSSMessage message: feed) {
+            try {
+                DigestURI messageurl = new DigestURI(message.getLink());
+                if (indexTriggered.containsKey(messageurl.hash())) continue loop;
+                if (sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null) continue loop;
+                sb.addToIndex(messageurl, null, null);
+                indexTriggered.put(messageurl.hash(), new Date());
+                loadCount++;
+            } catch (IOException e) {
+                Log.logException(e);
+            } catch (Failure e) {
+                Log.logException(e);
+            }
+        }
+        // update info for loading
+
+        try {
+            Tables.Data rssRow = sb.tables.select("rss", url.hash());
+            if (rssRow == null) rssRow = new Tables.Data();
+            Date lastLoadDate = rssRow.get("last_load_date", new Date(0));
+            long deltaTime = Math.min(System.currentTimeMillis() - lastLoadDate.getTime(), 1000 * 60 * 60 * 24);
+            int allLoadCount = rssRow.get("all_load_count", 0);
+            int lastAvg = rssRow.get("avg_upd_per_day", 0);
+            long thisAvg = 1000 * 60 * 60 * 24 / deltaTime * loadCount;
+            long nextAvg = lastAvg == 0 ? thisAvg : (thisAvg + lastAvg * 2) / 3;
+            rssRow.put("url", url.toNormalform(true, false).getBytes());
+            rssRow.put("title", feed.getChannel().getTitle());
+            rssRow.put("last_load_date", new Date());
+            rssRow.put("last_load_count", loadCount);
+            rssRow.put("all_load_count", allLoadCount + loadCount);
+            rssRow.put("avg_upd_per_day", nextAvg);
+            sb.tables.update("rss", url.hash(), rssRow);
+        } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+    }
+    
+    
+    private static void recordAPI(Switchboard sb, DigestURI url, RSSFeed feed, int repeat_time, String repeat_unit) {
+        // record API action
+        byte[] pk = null;
+        serverObjects post = new serverObjects();
+        post.put("url", url.toNormalform(true, false));
+        post.put("indexAllItemContent", "");
+        if (repeat_time > 0) {
+            // store as scheduled api call
+            pk = sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true, false), repeat_time, repeat_unit.substring(3));
+        } else {
+            // store just a protocol
+            pk = sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true, false));
+        }
+        // store pk of api table into rss table to show that the entry has been recorded
+        assert pk != null;            
+        Tables.Data rssRow = new Tables.Data();
+        rssRow.put("url", url.toNormalform(true, false).getBytes());
+        rssRow.put("title", feed.getChannel().getTitle());
+        rssRow.put("api_pk", pk);
+        try {
+            sb.tables.update("rss", url.hash(), rssRow);
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+    }
 }

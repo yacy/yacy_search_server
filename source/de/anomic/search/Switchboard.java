@@ -1910,9 +1910,6 @@ public final class Switchboard extends serverSwitch {
             rssRow.put("url", rssEntry.getKey().toNormalform(true, false).getBytes());
             rssRow.put("title", rssEntry.getValue().getBytes());
             rssRow.put("recording_date", new Date());
-            //rssRow.put("last_load_date", "".getBytes());
-            //rssRow.put("last_load_count", "".getBytes());
-            //rssRow.put("avg_upd_per_day", "".getBytes());
             try {
                 this.tables.update("rss", new DigestURI(rssEntry.getKey()).hash(), rssRow);
             } catch (IOException e) {

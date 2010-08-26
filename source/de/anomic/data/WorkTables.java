@@ -73,10 +73,12 @@ public class WorkTables extends Tables {
      * @param servletName the name of the servlet
      * @param type name of the servlet category
      * @param comment visual description of the process
+     * @return the pk of the new entry in the api table
      */
-    public void recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
+    public byte[] recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
         // remove the apicall attributes from the post object
-        String pk    = post.remove(TABLE_API_COL_APICALL_PK);
+        String pks = post.remove(TABLE_API_COL_APICALL_PK);
+        byte[] pk = pks == null ? null : pks.getBytes();
         
         // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
@@ -84,7 +86,7 @@ public class WorkTables extends Tables {
         // read old entry from the apicall table (if exists)
         Row row = null;
         try {
-            row = (pk == null) ? null : super.select(TABLE_API_NAME, pk.getBytes());
+            row = (pk == null) ? null : super.select(TABLE_API_NAME, pk);
         } catch (IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {
@@ -105,7 +107,7 @@ public class WorkTables extends Tables {
                 
                 // insert APICALL attributes 
                 data.put(TABLE_API_COL_APICALL_COUNT, "1");
-                super.insert(TABLE_API_NAME, data);
+                pk = super.insert(TABLE_API_NAME, data);
             } else {
                 // modify and update existing entry
 
@@ -117,6 +119,7 @@ public class WorkTables extends Tables {
                 // insert APICALL attributes 
                 row.put(TABLE_API_COL_APICALL_COUNT, row.get(TABLE_API_COL_APICALL_COUNT, 1) + 1);
                 super.update(TABLE_API_NAME, row);
+                assert pk != null;
             }
         } catch (IOException e) {
             Log.logException(e);
@@ -124,6 +127,7 @@ public class WorkTables extends Tables {
             Log.logException(e);
         }
         Log.logInfo("APICALL", apiurl);
+        return pk;
     }
     
     /**
@@ -135,12 +139,12 @@ public class WorkTables extends Tables {
      * @param comment visual description of the process
      * @param time the time until next scheduled execution of this api call
      * @param unit the time unit for the scheduled call
+     * @return the pk of the new entry in the api table
      */
-    public void recordAPICall(final serverObjects post, final String servletName, final String type, final String comment, int time, String unit) {
+    public byte[] recordAPICall(final serverObjects post, final String servletName, final String type, final String comment, int time, String unit) {
         if (post.containsKey(TABLE_API_COL_APICALL_PK)) {
             // this api call has already been stored somewhere.
-            recordAPICall(post, servletName, type, comment);
-            return;
+            return recordAPICall(post, servletName, type, comment);
         }
         if (time < 0 || unit == null || unit.length() == 0 || "minutes,hours,days".indexOf(unit) < 0) {
             time = 0; unit = "";
@@ -150,7 +154,7 @@ public class WorkTables extends Tables {
         
         // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
-
+        byte[] pk = null;
         // insert entry
         try {
             // create and insert new entry
@@ -167,13 +171,14 @@ public class WorkTables extends Tables {
             data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, Integer.toString(time).getBytes());
             data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, unit.getBytes());
             calculateAPIScheduler(data, false); // set next execution time
-            super.insert(TABLE_API_NAME, data);
+            pk = super.insert(TABLE_API_NAME, data);
         } catch (IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }
         Log.logInfo("APICALL", apiurl);
+        return pk;
     }
     
     /**

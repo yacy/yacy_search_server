@@ -183,7 +183,7 @@ public class Tables {
     public void update(final String table, byte[] pk, Map<String, byte[]> map) throws IOException {
         BEncodedHeap heap = getHeap(table);
         try {
-            heap.insert(pk, map);
+            heap.update(pk, map);
         } catch (RowSpaceExceededException e) {
             throw new IOException(e.getMessage());
         }
@@ -192,7 +192,7 @@ public class Tables {
     public void update(final String table, Row row) throws IOException {
         BEncodedHeap heap = getHeap(table);
         try {
-            heap.insert(row.pk, row);
+            heap.update(row.pk, row);
         } catch (RowSpaceExceededException e) {
             throw new IOException(e.getMessage());
         }

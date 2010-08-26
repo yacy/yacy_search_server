@@ -136,6 +136,7 @@ public class RSSReader extends DefaultHandler {
     public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
         if ("channel".equals(tag)) {
+            if (parsingChannel) theChannel.setChannel(item);
             parsingChannel = false;
         } else if ("item".equals(tag)) {
             theChannel.addMessage(item);

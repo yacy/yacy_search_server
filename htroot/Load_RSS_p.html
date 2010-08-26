@@ -68,6 +68,69 @@
       </fieldset>
     </form>
 
+	#(showscheduledfeeds)#::
+	<form name="scheduledfeeds"><fieldset>
+	  <legend><label for="table">List of Scheduled RSS Feed Load Targets</label></legend>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
+          <td>Title</td>
+          <td>URL/Referrer</td>
+          <td>Recording</td>
+          <td>Last Load</td>
+          <td>Next Load</td>
+          <td>Last Count</td>
+          <td>All Count</td>
+          <td>Avg. Update/Day</td>
+        </tr>
+        #{list}#
+        <tr class="TableCellLight">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td><a href="/Load_RSS_p.html?showrss=&url=#[rss]#">#[title]#</a></td>
+          <td><a href="/Load_RSS_p.html?showrss=&url=#[rss]#">#[rss]#</a><br/><a href="#[referrer]#">#[referrer]#</a></td>
+          <td>#[recording]#</td>
+          <td>#[lastload]#</td>
+          <td>#[nextload]#</td>
+          <td>#[lastcount]#</td>
+          <td>#[allcount]#</td>
+          <td>#[updperday]#</td>
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="removeSelectedFeedScheduler" value="Remove Selected Feeds from Scheduler" /></dt>
+      </p>
+    </fieldset></form>
+	#(/showscheduledfeeds)#
+	
+	#(shownewfeeds)#::
+	<form name="newfeeds"><fieldset>
+	  <legend><label for="table">Available RSS Feed List</label></legend>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
+          <td>Title</td>
+          <td>URL/Referrer</td>
+          <td>Recording</td>
+        </tr>
+        #{list}#
+        <tr class="TableCellLight">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td><a href="/Load_RSS_p.html?showrss=&url=#[rss]#">#[title]#</a></td>
+          <td><a href="/Load_RSS_p.html?showrss=&url=#[rss]#">#[rss]#</a><br/><a href="#[referrer]#">#[referrer]#</a></td>
+          <td>#[recording]#</td>
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="removeSelectedFeedNewList" value="Remove Selected Feeds from Feed List" /></dt>
+      <input type="submit" name="addSelectedFeedScheduler" value="Add Selected Feeds to Scheduler" /></dt>
+      </p>
+    </fieldset></form>
+	#(/shownewfeeds)#
+	
 	#(showitems)#::
 	<form name="rssfeed"><fieldset>
 	  <legend><label for="table">RSS Feed of #[rss]#</label></legend>

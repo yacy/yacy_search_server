@@ -34,6 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -250,6 +251,53 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
     }
 
     /**
+     * select all rows from a table where a given matcher matches with elements in a given row
+     * this method makes a full-table scan of the whole table
+     * @param columnName the name of the column where the matcher shall match
+     * @param columnMatcher the matcher for the elements of the column
+     * @return a set of primary keys where the matcher matched
+     */
+    public Set<byte[]> select(String columnName, Pattern columnMatcher) {
+        Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = iterator();
+        Map.Entry<byte[], Map<String, byte[]>> row;
+        Map<String, byte[]> prop;
+        byte[] val;
+        Set<byte[]> pks = new TreeSet<byte[]>(this.table.ordering);
+        while (i.hasNext()) {
+            row = i.next();
+            prop = row.getValue();
+            val = prop.get(columnName);
+            if (val != null) {
+                if (columnMatcher.matcher(new String(val)).matches()) pks.add(row.getKey());
+            }
+        }
+        return pks;
+    }
+
+    /**
+     * select one row from a table where a given matcher matches with elements in a given row
+     * this method stops the full-table scan as soon as a first matcher was found
+     * @param columnName the name of the column where the matcher shall match
+     * @param columnMatcher the matcher for the elements of the column
+     * @return the row where the matcher matched the given column
+     */
+    public Map.Entry<byte[], Map<String, byte[]>> selectOne(String columnName, Pattern columnMatcher) {
+        Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = iterator();
+        Map.Entry<byte[], Map<String, byte[]>> row;
+        Map<String, byte[]> prop;
+        byte[] val;
+        while (i.hasNext()) {
+            row = i.next();
+            prop = row.getValue();
+            val = prop.get(columnName);
+            if (val != null) {
+                if (columnMatcher.matcher(new String(val)).matches()) return row;
+            }
+        }
+        return null;
+    }
+    
+    /**
      * insert a map into the table
      * this method shall be used in exchange of the get method if the
      * previous entry value is not needed.
@@ -268,6 +316,28 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
         byte[] b = BEncoder.encodeMap(key, value);
         this.table.insert(pk, b);
         this.columnames.add(key);
+    }
+    
+    public void update(byte[] pk, Map<String, byte[]> map) throws RowSpaceExceededException, IOException {
+        Map<String, byte[]> entry = this.get(pk);
+        if (entry == null) {
+            insert(pk, map);
+        } else {
+            entry.putAll(map);
+            insert(pk, entry);
+        }
+    }
+    
+    public void update(byte[] pk, String key, byte[] value) throws RowSpaceExceededException, IOException  {
+        Map<String, byte[]> entry = this.get(pk);
+        if (entry == null) {
+            entry = new HashMap<String, byte[]>();
+            entry.put(key, value);
+            insert(pk, entry);
+        } else {
+            entry.put(key, value);
+            insert(pk, entry);
+        }
     }
 
     /**
