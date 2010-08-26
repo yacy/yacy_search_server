@@ -174,7 +174,7 @@ public class Table_API_p {
                 Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, now) : null;
                 Date date_recording = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, date);
                 Date date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
-                Date date_next_exec = row.containsKey(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC) ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, now) : null;
+                Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                 int callcount = row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1);
                 String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
                 int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);

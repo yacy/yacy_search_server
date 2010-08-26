@@ -180,6 +180,24 @@ public class Tables {
         return uk;
     }
 
+    public void insert(final String table, byte[] pk, Map<String, byte[]> map) throws IOException {
+        BEncodedHeap heap = getHeap(table);
+        try {
+            heap.insert(pk, map);
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+
+    public void insert(final String table, Row row) throws IOException {
+        BEncodedHeap heap = getHeap(table);
+        try {
+            heap.insert(row.pk, row);
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
     public void update(final String table, byte[] pk, Map<String, byte[]> map) throws IOException {
         BEncodedHeap heap = getHeap(table);
         try {

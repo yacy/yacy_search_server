@@ -241,11 +241,11 @@ public class WorkTables extends Tables {
      * @param update if true then the next execution time is based on the latest computed execution time; othervise it is based on the last execution time
      */
     public static void calculateAPIScheduler(Tables.Data row, boolean update) {
-        Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, new Date()) : null;
+        Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, (Date) null) : null;
         date = update ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, date) : row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
         int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
         if (time <= 0) {
-            row.remove(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC);
+            row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, "");
             return;
         }
         String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");

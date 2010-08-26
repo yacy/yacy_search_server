@@ -1485,7 +1485,7 @@ public final class Switchboard extends serverSwitch {
                 while (mapIterator.hasNext()) {
                     row = mapIterator.next();
                     if (row == null) continue;
-                    Date date_next_exec = row.containsKey(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC) ? row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, now) : null;
+                    Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                     if (date_next_exec == null) continue;
                     if (date_next_exec.after(now)) continue;
                     pks.add(new String(row.getPK()));              
