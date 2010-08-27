@@ -55,6 +55,7 @@
   <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
   <property name="release_main" location="${release}/MAIN"/>
   <property name="release_windows" location="${release}/WINDOWS"/>
+  <property name="release_mac" location="addon/YaCy.app/Contents/Resources/Java"/>
   <property name="svnEntriesFile" location=".svn/entries"/>
   <property name="defaults" location="defaults"/>
   <!-- variables for installonlinux target-->
@@ -698,6 +699,11 @@
   	
     <delete dir="${release_main}"/>
     <delete dir="${release_windows}" failonerror="false" />
+  </target>
+
+  <target name="distMacApp" depends="copyMain4Dist" description="Creates a YaCy.app">
+  	<delete dir="${release_mac}" failonerror="false" verbose="false"/>
+  	<move file="${release_main}" tofile="${release_mac}" verbose="true" />
   </target>
 
   <target name="deb" depends="init" description="Creates a debian package">
