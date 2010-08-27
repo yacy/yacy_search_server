@@ -164,7 +164,7 @@ then
 #		JAVA_ARGS="-$i $JAVA_ARGS";
 #	done
 else
-    JAVA_ARGS="-Xmx250m -Xms250m $JAVA_ARGS";
+    JAVA_ARGS="-Xmx600m -Xms180m $JAVA_ARGS";
     PORT="8080"
 fi
 
