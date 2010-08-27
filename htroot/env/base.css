@@ -129,7 +129,7 @@ tt, *.tt {
 
 .info {
   font-weight:bold;
-  color:yellow;
+  color:olive;
 }
 
 .commit {
@@ -142,7 +142,7 @@ tt, *.tt {
 }
 
 .hidden {
-	display:hidden;
+  display:hidden;
 }
 
 /* .snippetLoaded {
