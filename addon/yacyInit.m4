@@ -261,17 +261,19 @@ ifdef(`ArchLinux', `
 			let timeout=$timeout-1
 			if [ $timeout -eq 0 ]; then
 				kill -9 $pid &>/dev/null
-				# dont forget to kill shutdown process if necessary
-				shutdown_pid=$( ps ax | grep $shutdown_pid | awk '{ print $1 }' | grep $shutdown_pid )
-				if [ -n "$shutdown_pid" ] ; then
-					kill -9 $shutdown_pid
-				fi
 				break
 			fi
 			echo -n  "."
 			sleep 1
 			pidno=$( ps ax | grep $pid | awk '{ print $1 }' | grep $pid )
 		done
+
+		# dont forget to kill shutdown process if necessary
+		shutdown_pid=$( ps ax | grep $shutdown_pid | awk '{ print $1 }' | grep $shutdown_pid )
+		if [ -n "$shutdown_pid" ] ; then
+			kill -9 $shutdown_pid
+		fi
+
 		if [ "$2" != "--leave-pidfile" ]; then
 			rm $PID_FILE
 ifdef(`ArchLinux', `
