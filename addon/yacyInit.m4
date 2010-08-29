@@ -260,16 +260,7 @@ ifdef(`ArchLinux', `
 		while [ -n "$pidno" ]; do
 			let timeout=$timeout-1
 			if [ $timeout -eq 0 ]; then
-define(`KILL_YACY_WITH_START_STOP_DAEMON',`dnl
-				start-stop-daemon --stop --pidfile $PID_FILE --oknodo
-')dnl
-define(`KILL_YACY_WITH_SUDO', `dnl
 				kill -9 $pid &>/dev/null
-')dnl
-ifdef(`ArchLinux', KILL_YACY_WITH_SUDO())dnl
-ifdef(`openSUSE', `KILL_YACY_WITH_SUDO()')dnl
-ifdef(`Fedora', `KILL_YACY_WITH_SUDO()')dnl
-ifdef(`Debian', `KILL_YACY_WITH_START_STOP_DAEMON()')dnl
 				# dont forget to kill shutdown process if necessary
 				shutdown_pid=$( ps ax | grep $shutdown_pid | awk '{ print $1 }' | grep $shutdown_pid )
 				if [ -n "$shutdown_pid" ] ; then
