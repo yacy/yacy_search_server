@@ -592,6 +592,12 @@ public final class yacy {
 //                res.closeStream();
 //            }
         }
+        
+        try {
+			HTTPClient.closeConnectionManager();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
         // finished
         Log.logConfig("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
