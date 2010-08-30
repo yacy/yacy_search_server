@@ -14,17 +14,18 @@ public final class yacyBuildProperties {
 	 * returns the SVN-Revision Number as a String
 	 */
 	public static String getSVNRevision() {
-		if ("@REPL_REVISION_NR@".contains("@")) {
+		final String revision = "@REPL_REVISION_NR@";
+		if (revision.contains("@") || revision.contains("$")) {
 			return "0";
 		}
-		return "@REPL_REVISION_NR@";
+		return revision;
 	}
 
 	/**
 	 * returns the version String (e. g. 0.9)
 	 */
 	public static String getVersion() {
-		if ("@REPL_VERSION@".contains("@")) {
+		if ("@REPL_VERSION@".contains("@") ) {
 			return "0.1";
 		}
 		return "@REPL_VERSION@";
