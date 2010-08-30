@@ -83,6 +83,8 @@ ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 
 !insertmacro MUI_PAGE_INSTFILES
 
+!define MUI_FINISHPAGE_SHOWREADME http://www.yacy-websuche.de/wiki/index.php/InstallerFinished
+!define MUI_FINISHPAGE_SHOWREADME_TEXT $(finishPage)
 !insertmacro MUI_PAGE_FINISH
 
 ; ----------------------------------------
@@ -102,14 +104,17 @@ ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 LangString stillRunning ${LANG_ENGLISH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
 LangString noAdminForJava 0 "You need Administrator privileges to install Java. Java will now be downloaded to the shared documents folder. YaCy won't run without Java."
+LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
 
 LangString stillRunning ${LANG_FRENCH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
 LangString noAdminForJava 0 "You need Administrator privileges to install Java. Java will now be downloaded to the shared documents folder. YaCy won't run without Java."
+LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
 
 LangString stillRunning ${LANG_GERMAN} "YaCy ist noch aktiv. Bitte beenden Sie YaCy."
 LangString keepData 0 "Moechten Sie die Daten behalten?"
 LangString noAdminForJava 0 "Sie benoetigen Administrator-Rechte um Java zu installieren. Java wird nun in 'Gemeinsame Dokumente' gespeichert. YaCy benoetigt Java zur Ausfuehrung."
+LangString finishPage 0 "Zeige die Windows Firewall Konfiguration fuer YaCy."
 
 ; ----------------------------------------
 ; INSTALLABLE MODULES
