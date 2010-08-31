@@ -4,11 +4,9 @@
 //$LastChangedBy$
 //
 
-import java.util.Iterator;
-
 import net.yacy.cora.protocol.RequestHeader;
 
-import de.anomic.crawler.CrawlProfile.entry;
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -50,10 +48,9 @@ public class WatchWebStructure_p {
         
         if (host.equals("auto")) {
         	// try to find the host from the crawl profiles
-        	final Iterator<entry> it = sb.crawler.profilesActiveCrawls.profiles(true);
-            entry e;
-            while (it.hasNext()) {
-                e = it.next();
+        	CrawlProfile e;
+            for (byte[] handle: sb.crawler.profilesActiveCrawls.keySet()) {
+                e = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(handle));
                 if (e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
                     e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
                     e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||

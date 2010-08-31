@@ -35,7 +35,7 @@ public class SitemapImporter extends AbstractImporter implements Importer {
 	private final DigestURI sitemapURL;
 	private final ImporterManager superviser;
 	
-	public SitemapImporter(final Switchboard sb, final ImporterManager importManager, final DigestURI sitemapURL, final CrawlProfile.entry profileEntry) throws ImporterException {
+	public SitemapImporter(final Switchboard sb, final ImporterManager importManager, final DigestURI sitemapURL, final CrawlProfile profileEntry) throws ImporterException {
 		super("sitemap");
 		this.superviser = importManager;
         try {

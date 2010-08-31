@@ -31,6 +31,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
+import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -40,6 +41,7 @@ import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.Latency;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -124,12 +126,13 @@ public class FTPLoader {
                     ResponseHeader responseHeader = new ResponseHeader();
                     responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
+                    final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
                     response = new Response(
                             request, 
                             requestHeader,
                             responseHeader,
                             "200",
-                            sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                            mp == null ? null : new CrawlProfile(mp),
                             dirList.toString().getBytes());
                 }
             } else {
@@ -237,12 +240,13 @@ public class FTPLoader {
             
             // create response with metadata only
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
+            final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
             Response response = new Response(
                     request, 
                     requestHeader,
                     responseHeader,
                     "200",
-                    sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                    mp == null ? null : new CrawlProfile(mp),
                     url.toNormalform(true, true).getBytes());
             return response;
         }
@@ -254,12 +258,13 @@ public class FTPLoader {
         byte[] b = ftpClient.get(path);
         
         // create a response
+        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
         Response response = new Response(
                 request, 
                 requestHeader,
                 responseHeader,
                 "200",
-                sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                mp == null ? null : new CrawlProfile(mp),
                 b);
         return response;
     }

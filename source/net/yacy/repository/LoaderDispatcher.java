@@ -159,8 +159,8 @@ public final class LoaderDispatcher {
         if (url.isLocal() && sb.getConfigBool("adminAccountForLocalhost", false)) throw new IOException("access to localhost not granted for url " + url);
         
         // check if we have the page in the cache
-
-        CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
+        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
+        CrawlProfile crawlProfile = mp == null ? null : new CrawlProfile(mp);
         if (crawlProfile != null && cacheStrategy != CrawlProfile.CacheStrategy.NOCACHE) {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry

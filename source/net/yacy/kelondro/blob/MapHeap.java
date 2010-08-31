@@ -52,8 +52,6 @@ import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
-
-
 public class MapHeap implements Map<byte[], Map<String, String>> {
 
     private BLOB blob;
@@ -229,7 +227,8 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
     public Map<String, String> get(final Object key) {
         if (key == null) return null;
         try {
-            return get((byte[]) key);
+            if (key instanceof byte[]) return get((byte[]) key);
+            if (key instanceof String) return get(((String) key).getBytes());
         } catch (IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {

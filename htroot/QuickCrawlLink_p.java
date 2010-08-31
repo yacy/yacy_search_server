@@ -143,9 +143,9 @@ public class QuickCrawlLink_p {
             sb.crawlQueues.errorURL.remove(urlhash);
             
             // create crawling profile
-            CrawlProfile.entry pe = null;
+            CrawlProfile pe = null;
             try {
-                pe = sb.crawler.profilesActiveCrawls.newEntry(
+                pe = new CrawlProfile(
                         crawlingStartURL.getHost(), 
                         crawlingStartURL,
                         crawlingMustMatch,
@@ -163,8 +163,8 @@ public class QuickCrawlLink_p {
                         xsstopw,
                         xdstopw,
                         xpstopw,
-                        CrawlProfile.CacheStrategy.IFFRESH
-                );
+                        CrawlProfile.CacheStrategy.IFFRESH);
+                sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
             } catch (final Exception e) {
                 // mist
                 prop.put("mode_status", "2");//Error with url

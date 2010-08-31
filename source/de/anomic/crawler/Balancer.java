@@ -320,7 +320,7 @@ public class Balancer {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public Request pop(final boolean delay, final CrawlProfile profile) throws IOException {
+    public Request pop(final boolean delay, final Map<byte[], Map<String, String>> profiles) throws IOException {
         // returns a crawl entry from the stack and ensures minimum delta times
         
     	try {
@@ -384,7 +384,8 @@ public class Balancer {
 		        
 		        // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
 		        // if not: return null. A calling method must handle the null value and try again
-		        final CrawlProfile.entry profileEntry = (profile == null) ? null : profile.getEntry(crawlEntry.profileHandle());
+		        final Map<String, String> mp = profiles == null ? null : profiles.get(crawlEntry.profileHandle());
+		        final CrawlProfile profileEntry = mp == null ? null : new CrawlProfile(mp);
 		        if (profileEntry == null) {
 		        	Log.logWarning("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
 		        	return null;

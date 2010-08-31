@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -213,18 +214,18 @@ public class NoticedURL {
         }
     }
     
-    public Request pop(final int stackType, final boolean delay, CrawlProfile profile) throws IOException {
+    public Request pop(final int stackType, final boolean delay, Map<byte[], Map<String, String>> profiles) throws IOException {
         switch (stackType) {
-            case STACK_TYPE_CORE:     return pop(coreStack, delay, profile);
-            case STACK_TYPE_LIMIT:    return pop(limitStack, delay, profile);
-            case STACK_TYPE_REMOTE:   return pop(remoteStack, delay, profile);
+            case STACK_TYPE_CORE:     return pop(coreStack, delay, profiles);
+            case STACK_TYPE_LIMIT:    return pop(limitStack, delay, profiles);
+            case STACK_TYPE_REMOTE:   return pop(remoteStack, delay, profiles);
             default: return null;
         }
     }
 
-    public void shift(final int fromStack, final int toStack, CrawlProfile profile) {
+    public void shift(final int fromStack, final int toStack, Map<byte[], Map<String, String>> profiles) {
         try {
-            final Request entry = pop(fromStack, false, profile);
+            final Request entry = pop(fromStack, false, profiles);
             if (entry != null) push(toStack, entry);
         } catch (final IOException e) {
             return;
@@ -241,14 +242,14 @@ public class NoticedURL {
             }
     }
     
-    private Request pop(final Balancer balancer, final boolean delay, CrawlProfile profile) throws IOException {
+    private Request pop(final Balancer balancer, final boolean delay, Map<byte[], Map<String, String>> profiles) throws IOException {
         // this is a filo - pop
         int s;
         Request entry;
         int errors = 0;
         synchronized (balancer) {
             while ((s = balancer.size()) > 0) {
-                entry = balancer.pop(delay, profile);
+                entry = balancer.pop(delay, profiles);
                 if (entry == null) {
                     if (s > balancer.size()) continue;
                     errors++;

@@ -27,7 +27,6 @@
 
 package de.anomic.yacy;
 
-//import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,8 +58,6 @@ import net.yacy.kelondro.util.OS;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
-//import de.anomic.http.client.Client;
-//import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.tools.CryptoLib;

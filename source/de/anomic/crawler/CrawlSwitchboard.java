@@ -28,11 +28,12 @@ package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.Map;
 
-import de.anomic.crawler.CrawlProfile.CacheStrategy;
-
+import net.yacy.kelondro.blob.MapHeap;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
@@ -56,14 +57,14 @@ public final class CrawlSwitchboard {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
     
-    private final Log             log;
-    public        CrawlProfile    profilesActiveCrawls, profilesPassiveCrawls;
-    public  CrawlProfile.entry    defaultProxyProfile;
-    public  CrawlProfile.entry    defaultRemoteProfile;
-    public  CrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
-    public  CrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
-    public  CrawlProfile.entry    defaultSurrogateProfile;
-    private final File            queuesRoot;
+    private final Log       log;
+    public        Map<byte[], Map<String, String>>   profilesActiveCrawls, profilesPassiveCrawls;
+    public  CrawlProfile    defaultProxyProfile;
+    public  CrawlProfile    defaultRemoteProfile;
+    public  CrawlProfile    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
+    public  CrawlProfile    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
+    public  CrawlProfile    defaultSurrogateProfile;
+    private final File      queuesRoot;
     
     public CrawlSwitchboard(
             final String networkName,
@@ -82,42 +83,43 @@ public final class CrawlSwitchboard {
         this.queuesRoot = queuesRoot;
         this.queuesRoot.mkdirs();
         this.log.logConfig("Initializing Crawl Profiles");
+        
         final File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
-        if (!profilesActiveFile.exists()) {
-            // migrate old file
-            final File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesActive1.db");
-            if (oldFile.exists()) oldFile.renameTo(profilesActiveFile);
-        }
         try {
-            this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
+            this.profilesActiveCrawls = new MapHeap(profilesActiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         } catch (IOException e) {
             Log.logException(e);Log.logException(e);
             FileUtils.deletedelete(profilesActiveFile);
             try {
-                this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
+                this.profilesActiveCrawls = new MapHeap(profilesActiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
             } catch (IOException e1) {
                 Log.logException(e1);
                 this.profilesActiveCrawls = null;
             }
         }
+        for (byte[] handle: this.profilesActiveCrawls.keySet()) {
+            CrawlProfile p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
+            Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
+        }
         initActiveCrawlProfiles();
         log.logInfo("Loaded active crawl profiles from file " + profilesActiveFile.getName() + ", " + this.profilesActiveCrawls.size() + " entries");
+        
         final File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
-        if (!profilesPassiveFile.exists()) {
-            // migrate old file
-            final File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "crawlProfilesPassive1.db");
-            if (oldFile.exists()) oldFile.renameTo(profilesPassiveFile);
-        }
         try {
-            this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
+            this.profilesPassiveCrawls = new MapHeap(profilesPassiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         } catch (IOException e) {
-            FileUtils.deletedelete(profilesPassiveFile);
+            Log.logException(e);Log.logException(e);
+            FileUtils.deletedelete(profilesActiveFile);
             try {
-                this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
+                this.profilesPassiveCrawls = new MapHeap(profilesPassiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
             } catch (IOException e1) {
                 Log.logException(e1);
                 this.profilesPassiveCrawls = null;
             }
+        }
+        for (byte[] handle: this.profilesPassiveCrawls.keySet()) {
+            CrawlProfile p = new CrawlProfile(this.profilesPassiveCrawls.get(handle));
+            Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
         }
         log.logInfo("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
                 ", " + this.profilesPassiveCrawls.size() + " entries" +
@@ -135,12 +137,11 @@ public final class CrawlSwitchboard {
         this.defaultMediaSnippetLocalProfile = null;
         this.defaultMediaSnippetGlobalProfile = null;
         this.defaultSurrogateProfile = null;
-        final Iterator<CrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
-        CrawlProfile.entry profile;
+        CrawlProfile profile;
         String name;
         try {
-            while (i.hasNext()) {
-                profile = i.next();
+            for (byte[] handle: this.profilesActiveCrawls.keySet()) {
+                profile = new CrawlProfile(this.profilesActiveCrawls.get(handle));
                 name = profile.name();
                 if (name.equals(CRAWL_PROFILE_PROXY)) this.defaultProxyProfile = profile;
                 if (name.equals(CRAWL_PROFILE_REMOTE)) this.defaultRemoteProfile = profile;
@@ -163,45 +164,52 @@ public final class CrawlSwitchboard {
         
         if (this.defaultProxyProfile == null) {
             // generate new default entry for proxy crawling
-            this.defaultProxyProfile = this.profilesActiveCrawls.newEntry("proxy", null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
+            this.defaultProxyProfile = new CrawlProfile("proxy", null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
                     0 /*Integer.parseInt(getConfig(PROXY_PREFETCH_DEPTH, "0"))*/,
-                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, -1, false,
+                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE), -1, -1, false,
                     true /*getConfigBool(PROXY_INDEXING_LOCAL_TEXT, true)*/,
                     true /*getConfigBool(PROXY_INDEXING_LOCAL_MEDIA, true)*/,
                     true, true,
                     false /*getConfigBool(PROXY_INDEXING_REMOTE, false)*/, true, true, true,
                     CrawlProfile.CacheStrategy.IFFRESH);
+            this.profilesActiveCrawls.put(this.defaultProxyProfile.handle().getBytes(), this.defaultProxyProfile);
         }
         if (this.defaultRemoteProfile == null) {
             // generate new default entry for remote crawling
-            defaultRemoteProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_REMOTE, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+            this.defaultRemoteProfile = new CrawlProfile(CRAWL_PROFILE_REMOTE, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
                     -1, -1, -1, true, true, true, false, true, false, true, true, false, CrawlProfile.CacheStrategy.IFFRESH);
+            this.profilesActiveCrawls.put(this.defaultRemoteProfile.handle().getBytes(), this.defaultRemoteProfile);
         }
         if (this.defaultTextSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultTextSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
-                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE), -1, -1, true, false, false, true, true, false, true, true, false, CrawlProfile.CacheStrategy.IFFRESH);
+            this.defaultTextSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE), -1, -1, true, false, false, true, true, false, true, true, false, CrawlProfile.CacheStrategy.IFFRESH);
+            this.profilesActiveCrawls.put(this.defaultTextSnippetLocalProfile.handle().getBytes(), this.defaultTextSnippetLocalProfile);
         }
         if (this.defaultTextSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultTextSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
-                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE), -1, -1, true, true, true, true, true, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
+            this.defaultTextSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE), -1, -1, true, true, true, true, true, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
+            this.profilesActiveCrawls.put(this.defaultTextSnippetGlobalProfile.handle().getBytes(), this.defaultTextSnippetGlobalProfile);
         }
-        this.defaultTextSnippetGlobalProfile.setCacheStrategy(CacheStrategy.IFEXIST);
+        this.defaultTextSnippetGlobalProfile.setCacheStrategy(CrawlProfile.CacheStrategy.IFEXIST);
         if (this.defaultMediaSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultMediaSnippetLocalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
-                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, false, true, false, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
+            this.defaultMediaSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, false, true, false, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
+            this.profilesActiveCrawls.put(this.defaultMediaSnippetLocalProfile.handle().getBytes(), this.defaultMediaSnippetLocalProfile);
         }
         if (this.defaultMediaSnippetGlobalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
-            defaultMediaSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
-                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, true, true, true, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
+            this.defaultMediaSnippetGlobalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, true, true, true, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
+            this.profilesActiveCrawls.put(this.defaultMediaSnippetGlobalProfile.handle().getBytes(), this.defaultMediaSnippetGlobalProfile);
         }
         if (this.defaultSurrogateProfile == null) {
             // generate new default entry for surrogate parsing
-            defaultSurrogateProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SURROGATE, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
-                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE), -1, -1, true, true, false, false, false, false, true, true, false, CrawlProfile.CacheStrategy.NOCACHE);
+            this.defaultSurrogateProfile = new CrawlProfile(CRAWL_PROFILE_SURROGATE, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE), -1, -1, true, true, false, false, false, false, true, true, false, CrawlProfile.CacheStrategy.NOCACHE);
+            this.profilesActiveCrawls.put(this.defaultSurrogateProfile.handle().getBytes(), this.defaultSurrogateProfile);
         }
     }
     
@@ -209,24 +217,24 @@ public final class CrawlSwitchboard {
         final File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         if (pdb.exists()) FileUtils.deletedelete(pdb);
         try {
-            profilesActiveCrawls = new CrawlProfile(pdb);
-        } catch (IOException e) {
-            Log.logException(e);
+            this.profilesActiveCrawls = new MapHeap(pdb, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+        } catch (IOException e1) {
+            Log.logException(e1);
+            this.profilesActiveCrawls = null;
         }
         initActiveCrawlProfiles();
     }
     
     public boolean cleanProfiles() throws InterruptedException {
-        final Iterator<CrawlProfile.entry> iter = profilesActiveCrawls.profiles(true);
-        CrawlProfile.entry entry;
+        CrawlProfile entry;
         boolean hasDoneSomething = false;
         try {
-            while (iter.hasNext()) {
+            for (byte[] handle: profilesActiveCrawls.keySet()) {
                 // check for interruption
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
                 
                 // getting next profile
-                entry = iter.next();
+                entry = new CrawlProfile(profilesActiveCrawls.get(handle));
                 if (!((entry.name().equals(CRAWL_PROFILE_PROXY))  ||
                       (entry.name().equals(CRAWL_PROFILE_REMOTE)) ||
                       (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))  ||
@@ -234,8 +242,9 @@ public final class CrawlSwitchboard {
                       (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) ||
                       (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) ||
                       (entry.name().equals(CRAWL_PROFILE_SURROGATE)))) {
-                    profilesPassiveCrawls.newEntry(entry.map());
-                    iter.remove();
+                    CrawlProfile p = new CrawlProfile(entry);
+                    profilesPassiveCrawls.put(p.handle().getBytes(), p);
+                    profilesActiveCrawls.remove(handle);
                     hasDoneSomething = true;
                 }
             }
@@ -248,8 +257,8 @@ public final class CrawlSwitchboard {
 
     
     public void close() {
-        this.profilesActiveCrawls.close();
-        this.profilesPassiveCrawls.close();
+        ((MapHeap) this.profilesActiveCrawls).close();
+        ((MapHeap) this.profilesPassiveCrawls).close();
     }
 
 }

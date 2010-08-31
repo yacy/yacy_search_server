@@ -28,15 +28,15 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlSwitchboard;
-import de.anomic.crawler.CrawlProfile.entry;
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -80,23 +80,23 @@ public class CrawlProfileEditor_p {
     
     private static final ArrayList <eentry> labels = new ArrayList<eentry>();
     static {
-        labels.add(new eentry(entry.NAME,                "Name",                  true,  eentry.STRING));
-        labels.add(new eentry(entry.START_URL,           "Start URL",             true,  eentry.STRING));
-        labels.add(new eentry(entry.FILTER_MUSTMATCH,    "Must-Match Filter",     false, eentry.STRING));
-        labels.add(new eentry(entry.FILTER_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
-        labels.add(new eentry(entry.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
-        labels.add(new eentry(entry.RECRAWL_IF_OLDER,    "Recrawl If Older",      false, eentry.INTEGER));
-        labels.add(new eentry(entry.DOM_FILTER_DEPTH,    "Domain Filter Depth",   false, eentry.INTEGER));
-        labels.add(new eentry(entry.DOM_MAX_PAGES,       "Domain Max. Pages",     false, eentry.INTEGER));
-        labels.add(new eentry(entry.CRAWLING_Q,          "CrawlingQ / '?'-URLs",  false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.INDEX_TEXT,          "Index Text",            false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.INDEX_MEDIA,         "Index Media",           false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.STORE_HTCACHE,       "Store in HTCache",      false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.STORE_TXCACHE,       "Store in TXCache",      false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.REMOTE_INDEXING,     "Remote Indexing",       false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.XSSTOPW,             "Static stop-words",     false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.XDSTOPW,             "Dynamic stop-words",    false, eentry.BOOLEAN));
-        labels.add(new eentry(entry.XPSTOPW,             "Parent stop-words",     false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.NAME,                "Name",                  true,  eentry.STRING));
+        labels.add(new eentry(CrawlProfile.START_URL,           "Start URL",             true,  eentry.STRING));
+        labels.add(new eentry(CrawlProfile.FILTER_MUSTMATCH,    "Must-Match Filter",     false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.FILTER_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
+        labels.add(new eentry(CrawlProfile.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
+        labels.add(new eentry(CrawlProfile.RECRAWL_IF_OLDER,    "Recrawl If Older",      false, eentry.INTEGER));
+        labels.add(new eentry(CrawlProfile.DOM_FILTER_DEPTH,    "Domain Filter Depth",   false, eentry.INTEGER));
+        labels.add(new eentry(CrawlProfile.DOM_MAX_PAGES,       "Domain Max. Pages",     false, eentry.INTEGER));
+        labels.add(new eentry(CrawlProfile.CRAWLING_Q,          "CrawlingQ / '?'-URLs",  false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.INDEX_TEXT,          "Index Text",            false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.INDEX_MEDIA,         "Index Media",           false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.STORE_HTCACHE,       "Store in HTCache",      false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.STORE_TXCACHE,       "Store in TXCache",      false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.REMOTE_INDEXING,     "Remote Indexing",       false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.XSSTOPW,             "Static stop-words",     false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.XDSTOPW,             "Dynamic stop-words",    false, eentry.BOOLEAN));
+        labels.add(new eentry(CrawlProfile.XPSTOPW,             "Parent stop-words",     false, eentry.BOOLEAN));
     }
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -106,40 +106,32 @@ public class CrawlProfileEditor_p {
         // read post for handle
         final String handle = (post == null) ? "" : post.get("handle", "");
         if (post != null) {
-            if (post.containsKey("terminate")) {
+            if (post.containsKey("terminate")) try {
                 // termination of a crawl: shift the crawl from active to passive
-                final CrawlProfile.entry entry = sb.crawler.profilesActiveCrawls.getEntry(handle);
-                if (entry != null) {
-                    sb.crawler.profilesPassiveCrawls.newEntry(entry.map());
-                }
-                sb.crawler.profilesActiveCrawls.removeEntry(handle.getBytes());
+                final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(handle.getBytes());
+                if (mp != null) sb.crawler.profilesPassiveCrawls.put(handle.getBytes(), new CrawlProfile(mp));
                 // delete all entries from the crawl queue that are deleted here
-                try {
-                    sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-                }
+                sb.crawler.profilesActiveCrawls.remove(handle.getBytes());
+                sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000); 
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
             }
             if (post.containsKey("delete")) {
                 // deletion of a terminated crawl profile
-                sb.crawler.profilesPassiveCrawls.removeEntry(handle.getBytes());
+                sb.crawler.profilesPassiveCrawls.remove(handle.getBytes());
             }
             if (post.containsKey("deleteTerminatedProfiles")) {
-                Iterator<CrawlProfile.entry> profiles = sb.crawler.profilesPassiveCrawls.profiles(false);
-                while (profiles.hasNext()) {
-                    profiles.next();
-                    profiles.remove();
-                    profiles = sb.crawler.profilesPassiveCrawls.profiles(false);
+                for (byte[] h: sb.crawler.profilesPassiveCrawls.keySet()) {
+                    sb.crawler.profilesPassiveCrawls.remove(h);
                 }
             }
         }
         
         // generate handle list
         int count = 0;
-        Iterator<CrawlProfile.entry> it = sb.crawler.profilesActiveCrawls.profiles(true);
-        entry selentry;
-        while (it.hasNext()) {
-            selentry = it.next();
+        CrawlProfile selentry;
+        for (byte[] h: sb.crawler.profilesActiveCrawls.keySet()) {
+            selentry = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(h));
             if (ignoreNames.contains(selentry.name())) {
                 continue;
             }
@@ -151,7 +143,8 @@ public class CrawlProfileEditor_p {
             count++;
         }
         prop.put("profiles", count);
-        selentry = sb.crawler.profilesActiveCrawls.getEntry(handle);
+        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(handle.getBytes());
+        selentry = mp == null ? null : new CrawlProfile(mp);
         assert selentry == null || selentry.handle() != null;
         // read post for change submit
         if ((post != null) && (selentry != null)) {
@@ -161,10 +154,11 @@ public class CrawlProfileEditor_p {
                     eentry tee;
                     while (lit.hasNext()) {
                         tee = lit.next();
-                        final String cval = selentry.map().get(tee.name);
+                        final String cval = selentry.get(tee.name);
                         final String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
                         if (!cval.equals(val)) {
-                            sb.crawler.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
+                            selentry.put(tee.name, val);
+                            sb.crawler.profilesActiveCrawls.put(selentry.handle().getBytes(), selentry);
                         }
                     }
                 } catch (final Exception ex) {
@@ -179,20 +173,18 @@ public class CrawlProfileEditor_p {
         count = 0;
         boolean dark = true;
         final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
-        CrawlProfile.entry profile;
+        CrawlProfile profile;
         // put active crawls into list
-        it = sb.crawler.profilesActiveCrawls.profiles(true);
-        while (it.hasNext()) {
-            profile = it.next();
+        for (byte[] h: sb.crawler.profilesActiveCrawls.keySet()) {
+            profile = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(h));
             putProfileEntry(prop, profile, true, dark, count, domlistlength);
             dark = !dark;
             count++;
         }
         // put passive crawls into list
         boolean existPassiveCrawls = false;
-        it = sb.crawler.profilesPassiveCrawls.profiles(true);
-        while (it.hasNext()) {
-            profile = it.next();
+        for (byte[] h: sb.crawler.profilesPassiveCrawls.keySet()) {
+            profile = new CrawlProfile(sb.crawler.profilesPassiveCrawls.get(h));
             putProfileEntry(prop, profile, false, dark, count, domlistlength);
             dark = !dark;
             count++;
@@ -217,7 +209,7 @@ public class CrawlProfileEditor_p {
             count = 0;
             while (lit.hasNext()) {
                 final eentry ee = lit.next();
-                final String val = selentry.map().get(ee.name);
+                final String val = selentry.get(ee.name);
                 prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly", ee.readonly ? "1" : "0");
                 prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_name", ee.name);
                 prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_label", ee.label);
@@ -235,7 +227,7 @@ public class CrawlProfileEditor_p {
         return prop;
     }
     
-    private static void putProfileEntry(final servletProperties prop, final CrawlProfile.entry profile, final boolean active, final boolean dark, final int count, final int domlistlength) {
+    private static void putProfileEntry(final servletProperties prop, final CrawlProfile profile, final boolean active, final boolean dark, final int count, final int domlistlength) {
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_name", profile.name());

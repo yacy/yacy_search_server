@@ -47,7 +47,6 @@ import net.yacy.kelondro.workflow.WorkflowJob;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-//import de.anomic.http.client.Client;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.yacy.yacyClient;
@@ -252,14 +251,14 @@ public class CrawlQueues {
      * @return
      */
     private void generateCrawl(Request urlEntry, final String stats, final String profileHandle) {
-        final CrawlProfile.entry profile = sb.crawler.profilesActiveCrawls.getEntry(profileHandle);
-        if (profile != null) {
+        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(profileHandle.getBytes());
+        if (mp != null) {
 
             // check if the protocol is supported
             final DigestURI url = urlEntry.url();
             final String urlProtocol = url.getProtocol();
             if (sb.loader.isSupportedProtocol(urlProtocol)) {
-
+                CrawlProfile profile = new CrawlProfile(mp);
                 if (this.log.isFine())
                     log.logFine(stats + ": URL=" + urlEntry.url()
                             + ", initiator=" + ((urlEntry.initiator() == null) ? "" : new String(urlEntry.initiator()))
@@ -556,7 +555,8 @@ public class CrawlQueues {
                     try {
                         request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-                        CrawlProfile.entry e = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
+                        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
+                        CrawlProfile e = mp == null ? null : new CrawlProfile(mp);
                         Response response = sb.loader.load(request, e == null ? CrawlProfile.CacheStrategy.IFEXIST : e.cacheStrategy(), maxFileSize);
                         if (response == null) {
                             request.setStatus("error", WorkflowJob.STATUS_FINISHED);

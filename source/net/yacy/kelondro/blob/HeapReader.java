@@ -71,6 +71,7 @@ public class HeapReader {
         this.keylength = keylength;
         this.index = null; // will be created as result of initialization process
         this.free = null; // will be initialized later depending on existing idx/gap file
+        this.heapFile.getParentFile().mkdirs();
         this.file = new CachedFileWriter(this.heapFile);
         
         // read or initialize the index

@@ -254,8 +254,8 @@ public class Crawler_p {
                             sb.crawlQueues.errorURL.remove(urlhash);
                             
                             // stack url
-                            sb.crawler.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
-                            final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
+                            sb.crawler.profilesPassiveCrawls.remove(crawlingStartURL.hash()); // if there is an old entry, delete it
+                            final CrawlProfile pe = new CrawlProfile(
                                     (crawlingStartURL.getHost() == null) ? Long.toHexString(System.currentTimeMillis()) : crawlingStartURL.getHost(),
                                     crawlingStartURL,
                                     newcrawlingMustMatch,
@@ -265,6 +265,7 @@ public class Crawler_p {
                                     crawlingQ,
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, cachePolicy);
+                            sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
                             final String reasonString = sb.crawlStacker.stackCrawl(new Request(
                                     sb.peers.mySeed().hash.getBytes(),
                                     url,
@@ -297,7 +298,7 @@ public class Crawler_p {
                                 
                                 // generate a YaCyNews if the global flag was set
                                 if (crawlOrder) {
-                                    final Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
+                                    final Map<String, String> m = new HashMap<String, String>(pe); // must be cloned
                                     m.remove("specificDepth");
                                     m.remove("indexText");
                                     m.remove("indexMedia");
@@ -371,7 +372,7 @@ public class Crawler_p {
                                 
                                 // creating a crawler profile
                                 final DigestURI crawlURL = new DigestURI("file://" + file.toString(), null);
-                                final CrawlProfile.entry profile = sb.crawler.profilesActiveCrawls.newEntry(
+                                final CrawlProfile profile = new CrawlProfile(
                                         fileName, crawlURL,
                                         newcrawlingMustMatch,
                                         CrawlProfile.MATCH_NEVER,
@@ -387,6 +388,7 @@ public class Crawler_p {
                                         crawlOrder,
                                         xsstopw, xdstopw, xpstopw,
                                         cachePolicy);
+                                sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
                                 
                                 // pause local crawl here
                                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
@@ -435,7 +437,7 @@ public class Crawler_p {
                     		final DigestURI sitemapURL = new DigestURI(sitemapURLStr, null);
                             
                     		// create a new profile
-                    		final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
+                    		final CrawlProfile pe = new CrawlProfile(
                     				sitemapURLStr, sitemapURL,
                     				newcrawlingMustMatch,
                     				CrawlProfile.MATCH_NEVER,
@@ -446,6 +448,7 @@ public class Crawler_p {
                     				storeHTCache, true, crawlOrder,
                     				xsstopw, xdstopw, xpstopw,
                     				cachePolicy);
+                    		sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
                     		
                     		// create a new sitemap importer
                     		final SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new DigestURI(sitemapURLStr, null), pe);

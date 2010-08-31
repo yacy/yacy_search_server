@@ -123,7 +123,6 @@ import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.CrawlProfile.CacheStrategy;
-import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
@@ -1102,12 +1101,12 @@ public final class Switchboard extends serverSwitch {
     }
 
     /**
-     * {@link CrawlProfile Crawl Profiles} are saved independently from the queues themselves
+     * {@link CrawlProfiles Crawl Profiles} are saved independently from the queues themselves
      * and therefore have to be cleaned up from time to time. This method only performs the clean-up
      * if - and only if - the {@link IndexingStack switchboard},
      * {@link LoaderDispatcher loader} and {@link plasmaCrawlNURL local crawl} queues are all empty.
      * <p>
-     *   Then it iterates through all existing {@link CrawlProfile crawl profiles} and removes
+     *   Then it iterates through all existing {@link CrawlProfiles crawl profiles} and removes
      *   all profiles which are not hard-coded.
      * </p>
      * <p>
@@ -1442,34 +1441,47 @@ public final class Switchboard extends serverSwitch {
             
             // refresh recrawl dates
             try{
-            	Iterator<CrawlProfile.entry> it = crawler.profilesActiveCrawls.profiles(true);
-                entry selentry;
-                while (it.hasNext()) {
-                    selentry = it.next();
+            	CrawlProfile selentry;
+                for (byte[] handle: crawler.profilesActiveCrawls.keySet()) {
+                    selentry = new CrawlProfile(crawler.profilesActiveCrawls.get(handle));
                     assert selentry.handle() != null : "profile.name = " + selentry.name();
                     if (selentry.handle() == null) {
-                        it.remove();
+                        crawler.profilesActiveCrawls.remove(handle);
                         continue;
                     }
-                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY))
-                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
+                    boolean insert = false;
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY)) {
+                    	selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
+                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
+                        insert = true;
+                    }
                     // if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE));
-                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))
-                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
-                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT))
-                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
-                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA))
-                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
-                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
-                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
-                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE))
-                        crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                                Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)) {
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
+                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
+                        insert = true;
+                    }
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) {
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
+                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
+                        insert = true;
+                    }
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) {
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
+                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
+                        insert = true;
+                    }
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) {
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
+                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
+                        insert = true;
+                    }
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE)) {
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
+                        insert = true;
+                    }
+                    if (insert) crawler.profilesActiveCrawls.put(selentry.handle().getBytes(), selentry);
                 }
             } catch (final Exception e) {
                 Log.logException(e);
@@ -1827,7 +1839,7 @@ public final class Switchboard extends serverSwitch {
                 // update image result list statistics
                 // its good to do this concurrently here, because it needs a DNS lookup
                 // to compute a URL hash which is necessary for a double-check
-                final CrawlProfile.entry profile = in.queueEntry.profile();
+                final CrawlProfile profile = in.queueEntry.profile();
                 ResultImages.registerImages(in.queueEntry.url(), in.documents[i], (profile == null) ? true : !profile.remoteIndexing());
 
             } catch (final UnsupportedEncodingException e) {
@@ -1987,7 +1999,8 @@ public final class Switchboard extends serverSwitch {
         if (searchEvent != null) searchEvent.addHeuristic(url.hash(), heuristicName, true);
         if (indexSegments.segment(process).urlMetadata.exists(url.hash())) return; // don't do double-work
         final Request request = loader.request(url, true, true);
-        String acceptedError = this.crawlStacker.checkAcceptance(url, this.crawler.profilesActiveCrawls.getEntry(request.profileHandle()), 0);
+        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
+        String acceptedError = this.crawlStacker.checkAcceptance(url, mp == null ? null : new CrawlProfile(mp), 0);
         if (acceptedError != null) {
             log.logWarning("addToIndex: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);
             return;

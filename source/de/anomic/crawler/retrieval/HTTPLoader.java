@@ -26,6 +26,7 @@ package de.anomic.crawler.retrieval;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -36,6 +37,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.Latency;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -146,6 +148,7 @@ public final class HTTPLoader {
                 }
 
                 // create a new cache entry
+                final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
                 response = new Response(
                         request,
                         requestHeader,
@@ -153,7 +156,7 @@ public final class HTTPLoader {
 //                        res.getStatusLine(),
                         header, 
                         Integer.toString(code),
-                        sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                        mp == null ? null : new CrawlProfile(mp),
                         responseBody
                 );
 

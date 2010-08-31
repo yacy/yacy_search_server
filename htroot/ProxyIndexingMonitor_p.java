@@ -28,7 +28,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
-import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
@@ -102,46 +101,41 @@ public class ProxyIndexingMonitor_p {
                 if (sb.crawler.defaultProxyProfile == null) {
                     prop.put("info", "1"); //delete DATA/PLASMADB/crawlProfiles0.db
                 } else {
-                    try {
-                        assert sb.crawler.defaultProxyProfile.handle() != null;
-                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "generalDepth", Integer.toString(newProxyPrefetchDepth));
-                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "storeHTCache", (proxyStoreHTCache) ? "true": "false");
-                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "remoteIndexing",proxyIndexingRemote ? "true":"false");
-                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "indexText",proxyIndexingLocalText ? "true":"false");
-                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "indexMedia",proxyIndexingLocalMedia ? "true":"false");
-                        
-                        prop.put("info", "2");//new proxyPrefetchdepth
-                        prop.put("info_message", newProxyPrefetchDepth);
-                        prop.put("info_caching", proxyStoreHTCache ? "1" : "0");
-                        prop.put("info_indexingLocalText", proxyIndexingLocalText ? "1" : "0");
-                        prop.put("info_indexingLocalMedia", proxyIndexingLocalMedia ? "1" : "0");
-                        prop.put("info_indexingRemote", proxyIndexingRemote ? "1" : "0");
+                    assert sb.crawler.defaultProxyProfile.handle() != null;
+                    sb.crawler.defaultProxyProfile.put("generalDepth", Integer.toString(newProxyPrefetchDepth));
+                    sb.crawler.defaultProxyProfile.put("storeHTCache", (proxyStoreHTCache) ? "true": "false");
+                    sb.crawler.defaultProxyProfile.put("remoteIndexing",proxyIndexingRemote ? "true":"false");
+                    sb.crawler.defaultProxyProfile.put("indexText",proxyIndexingLocalText ? "true":"false");
+                    sb.crawler.defaultProxyProfile.put("indexMedia",proxyIndexingLocalMedia ? "true":"false");
+                    sb.crawler.profilesActiveCrawls.put(sb.crawler.defaultProxyProfile.handle().getBytes(), sb.crawler.defaultProxyProfile);
+                    
+                    prop.put("info", "2");//new proxyPrefetchdepth
+                    prop.put("info_message", newProxyPrefetchDepth);
+                    prop.put("info_caching", proxyStoreHTCache ? "1" : "0");
+                    prop.put("info_indexingLocalText", proxyIndexingLocalText ? "1" : "0");
+                    prop.put("info_indexingLocalMedia", proxyIndexingLocalMedia ? "1" : "0");
+                    prop.put("info_indexingRemote", proxyIndexingRemote ? "1" : "0");
 
-                        // proxyCache - only display on change
-                        if (oldProxyCachePath.equals(newProxyCachePath)) {
-                            prop.put("info_path", "0");
-                            prop.putHTML("info_path_return", oldProxyCachePath);
-                        } else {
-                            prop.put("info_path", "1");
-                            prop.putHTML("info_path_return", newProxyCachePath);
-                        }
-                        // proxyCacheSize - only display on change
-                        if (oldProxyCacheSize.equals(newProxyCacheSize)) {
-                            prop.put("info_size", "0");
-                            prop.put("info_size_return", oldProxyCacheSize);
-                        } else {
-                            prop.put("info_size", "1");
-                            prop.put("info_size_return", newProxyCacheSize);
-                        }
-                        // proxyCache, proxyCacheSize we need a restart
-                        prop.put("info_restart", "0");
-                        prop.put("info_restart_return", "0");
-                        if (!oldProxyCachePath.equals(newProxyCachePath)) prop.put("info_restart", "1");
-
-                    } catch (final IOException e) {
-                        prop.put("info", "3"); //Error: errmsg
-                        prop.putHTML("info_error", e.getMessage());
+                    // proxyCache - only display on change
+                    if (oldProxyCachePath.equals(newProxyCachePath)) {
+                        prop.put("info_path", "0");
+                        prop.putHTML("info_path_return", oldProxyCachePath);
+                    } else {
+                        prop.put("info_path", "1");
+                        prop.putHTML("info_path_return", newProxyCachePath);
                     }
+                    // proxyCacheSize - only display on change
+                    if (oldProxyCacheSize.equals(newProxyCacheSize)) {
+                        prop.put("info_size", "0");
+                        prop.put("info_size_return", oldProxyCacheSize);
+                    } else {
+                        prop.put("info_size", "1");
+                        prop.put("info_size_return", newProxyCacheSize);
+                    }
+                    // proxyCache, proxyCacheSize we need a restart
+                    prop.put("info_restart", "0");
+                    prop.put("info_restart_return", "0");
+                    if (!oldProxyCachePath.equals(newProxyCachePath)) prop.put("info_restart", "1");
                 }
 
             } catch (final Exception e) {

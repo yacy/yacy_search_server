@@ -94,7 +94,7 @@ public class SitemapParser extends DefaultHandler {
     /**
      * The crawling profile used to parse the URLs contained in the sitemap file
      */
-    private CrawlProfile.entry crawlingProfile = null;
+    private CrawlProfile crawlingProfile = null;
 
     /**
      * Name of the current XML element
@@ -137,7 +137,7 @@ public class SitemapParser extends DefaultHandler {
     private Date lastMod = null;
     private final Switchboard sb;
     
-    public SitemapParser(final Switchboard sb, final DigestURI sitemap, final CrawlProfile.entry theCrawlingProfile) {
+    public SitemapParser(final Switchboard sb, final DigestURI sitemap, final CrawlProfile theCrawlingProfile) {
         assert sitemap != null;
         this.sb = sb;
         this.siteMapURL = sitemap;
@@ -328,8 +328,8 @@ public class SitemapParser extends DefaultHandler {
         }
     }
 
-    private CrawlProfile.entry createProfile(final String domainName, final DigestURI sitemapURL) {
-        return this.sb.crawler.profilesActiveCrawls.newEntry(
+    private CrawlProfile createProfile(final String domainName, final DigestURI sitemapURL) {
+        CrawlProfile p = new CrawlProfile(
                 domainName, sitemapURL,
                 // crawling Filter
                 CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
@@ -352,5 +352,7 @@ public class SitemapParser extends DefaultHandler {
                 // exclude stop-words
                 true, true, true,
                 CrawlProfile.CacheStrategy.IFFRESH);
+        this.sb.crawler.profilesActiveCrawls.put(p.handle().getBytes(), p);
+        return p;
     }
 }

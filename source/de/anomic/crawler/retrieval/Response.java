@@ -61,7 +61,7 @@ public class Response {
     private final  RequestHeader      requestHeader;
     private final  ResponseHeader     responseHeader;
     private final  String             responseStatus;
-    private final  CrawlProfile.entry profile;
+    private final  CrawlProfile profile;
     private        byte[]             content;
     private        int                status;          // tracker indexing status, see status defs below
     
@@ -148,7 +148,7 @@ public class Response {
             final RequestHeader requestHeader,
             final ResponseHeader responseHeader,
             final String responseStatus,
-            final CrawlProfile.entry profile,
+            final CrawlProfile profile,
             final byte[] content) {
         this.request = request;
         // request and response headers may be zero in case that we process surrogates
@@ -165,7 +165,7 @@ public class Response {
             final RequestHeader requestHeader,
             final ResponseHeader responseHeader,
             final String responseStatus,
-            final CrawlProfile.entry profile) {
+            final CrawlProfile profile) {
         this(request, requestHeader, responseHeader, responseStatus, profile, null);
     }
 
@@ -216,7 +216,7 @@ public class Response {
         return this.url().language();
     }
 
-    public CrawlProfile.entry profile() {
+    public CrawlProfile profile() {
         return this.profile;
     }
 

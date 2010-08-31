@@ -59,8 +59,11 @@ public class WorkTables extends Tables {
     public final static String TABLE_API_COL_APICALL_COUNT = "apicall_count"; // counts how often the API was called (starts with 1)
     public final static String TABLE_API_COL_APICALL_SCHEDULE_TIME = "apicall_schedule_time"; // factor for SCHEULE_UNIT time units
     public final static String TABLE_API_COL_APICALL_SCHEDULE_UNIT= "apicall_schedule_unit"; // may be 'minutes', 'hours', 'days'
-    
+
     public final static String TABLE_ROBOTS_NAME = "robots";
+    
+    public final static String TABLE_ACTIVECRAWLS_NAME = "crawljobsActive";
+    public final static String TABLE_PASSIVECRAWLS_NAME = "crawljobsPassive";
     
     
     public WorkTables(final File workPath) {

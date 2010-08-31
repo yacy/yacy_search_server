@@ -31,6 +31,7 @@ package de.anomic.crawler;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Map;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -180,7 +181,8 @@ public final class CrawlStacker {
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
        
-        final CrawlProfile.entry profile = crawler.profilesActiveCrawls.getEntry(entry.profileHandle());
+        final Map<String, String> mp = crawler.profilesActiveCrawls.get(entry.profileHandle().getBytes());
+        CrawlProfile profile = mp == null ? null : new CrawlProfile(mp);
         String error;
         if (profile == null) {
             error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
@@ -248,7 +250,7 @@ public final class CrawlStacker {
         return null;
     }
 
-    public String checkAcceptance(final DigestURI url, final CrawlProfile.entry profile, int depth) {
+    public String checkAcceptance(final DigestURI url, final CrawlProfile profile, int depth) {
         
         // check if the protocol is supported
         final String urlProtocol = url.getProtocol();

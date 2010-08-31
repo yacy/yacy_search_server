@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -95,10 +96,9 @@ public class IndexCreateWWWLocalQueue_p {
                         if (option == PROFILE) {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
                             // XXX: what to do about the annoying LOST PROFILE messages in the log?
-                            final Iterator<CrawlProfile.entry> it = sb.crawler.profilesActiveCrawls.profiles(true);
-                            CrawlProfile.entry entry;
-                            while (it.hasNext()) {
-                                entry = it.next();
+                            CrawlProfile entry;
+                            for (byte[] handle: sb.crawler.profilesActiveCrawls.keySet()) {
+                                entry = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(handle));
                                 final String name = entry.name();
                                 if (name.equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
                                         name.equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
@@ -108,9 +108,7 @@ public class IndexCreateWWWLocalQueue_p {
                                         name.equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
                                         name.equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE))
                                     continue;
-                                if (compiledPattern.matcher(name).find()) {
-                                    sb.crawler.profilesActiveCrawls.removeEntry(entry.handle().getBytes());
-                                }
+                                if (compiledPattern.matcher(name).find()) sb.crawler.profilesActiveCrawls.remove(entry.handle().getBytes());
                             }
                         } else {
                             // iterating through the list of URLs
@@ -165,14 +163,15 @@ public class IndexCreateWWWLocalQueue_p {
             boolean dark = true;
             yacySeed initiator;
             String profileHandle;
-            CrawlProfile.entry profileEntry;
+            CrawlProfile profileEntry;
             int i;
             for (i = 0; (i < crawlerList.size()) && (showNum < showLimit); i++) {
                 urle = crawlerList.get(i);
                 if ((urle != null)&&(urle.url()!=null)) {
                     initiator = sb.peers.getConnected(urle.initiator() == null ? "" : new String(urle.initiator()));
                     profileHandle = urle.profileHandle();
-                    profileEntry = (profileHandle == null) ? null : sb.crawler.profilesActiveCrawls.getEntry(profileHandle);
+                    final Map<String, String> mp = profileHandle == null ? null : sb.crawler.profilesActiveCrawls.get(profileHandle.getBytes());
+                    profileEntry = mp == null ? null : new CrawlProfile(mp);
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");
                     prop.putHTML("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));
