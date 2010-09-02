@@ -38,6 +38,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -187,12 +188,15 @@ public class PerformanceMemory_p {
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024 * 1024d));
         
         // other caching structures
-        long amount = Domains.nameCacheHitSize();
-        prop.putNum("namecache.hit", amount);
-        amount = Domains.nameCacheNoCachingListSize();
-        prop.putNum("namecache.noCache", amount);
-        amount = Switchboard.urlBlacklist.blacklistCacheSize();
-        prop.putNum("blacklistcache.size", amount);
+        prop.putNum("namecacheHit.size", Domains.nameCacheHitSize());
+        prop.putNum("namecacheMiss.size", Domains.nameCacheMissSize());
+        prop.putNum("namecache.noCache", Domains.nameCacheNoCachingListSize());
+        prop.putNum("blacklistcache.size", Switchboard.urlBlacklist.blacklistCacheSize());
+        prop.putNum("searchevent.size", SearchEventCache.size());
+        prop.putNum("searchevent.hit", SearchEventCache.cacheHit);
+        prop.putNum("searchevent.miss", SearchEventCache.cacheMiss);
+        prop.putNum("searchevent.insert", SearchEventCache.cacheInsert);
+        prop.putNum("searchevent.delete", SearchEventCache.cacheDelete);
         // return rewrite values for templates
         return prop;
     }

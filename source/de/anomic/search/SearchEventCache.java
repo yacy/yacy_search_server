@@ -26,10 +26,14 @@
 
 package de.anomic.search;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.storage.ARC;
+import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.ResultURLs;
@@ -37,33 +41,43 @@ import de.anomic.yacy.yacySeedDB;
 
 public class SearchEventCache {
 
-    private static ConcurrentHashMap<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
-    public static final long eventLifetime = 60000; // the time an event will stay in the cache, 1 Minute
-
+    private static ARC<String, SearchEvent> lastEvents = new ConcurrentARC<String, SearchEvent>(1000, Runtime.getRuntime().availableProcessors() * 4); // a cache for objects from this class: re-use old search requests
+    public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
+    public static final long memlimit = 100 * 1024 * 1024; // 100 MB
     public static String lastEventID = "";
+    public static long cacheInsert = 0, cacheHit = 0, cacheMiss = 0, cacheDelete = 0;
+    
+    public static int size() {
+        return lastEvents.size();
+    }
     
     public static void put(String eventID, SearchEvent event) {
         lastEventID = eventID;
-        lastEvents.put(eventID, event);
+        SearchEvent oldEvent = lastEvents.put(eventID, event);
+        if (oldEvent == null) cacheInsert++;
     }
     
     public static void cleanupEvents(final boolean all) {
         // remove old events in the event cache
-        final Iterator<SearchEvent> i = lastEvents.values().iterator();
-        SearchEvent event;
-        while (i.hasNext()) {
-            event = i.next();
-            if (all || event.getEventTime() + eventLifetime < System.currentTimeMillis()) {
-                event.cleanup();
-                
-                // remove the event
-                i.remove();
+        List<String> delete = new ArrayList<String>();
+        // the less memory is there, the less time is acceptable for elements in the cache
+        long memx = MemoryControl.available();
+        long acceptTime = memx > memlimit ? eventLifetime : memx  * eventLifetime / memlimit;
+        for (Map.Entry<String, SearchEvent> event: lastEvents) {
+            if (all || event.getValue().getEventTime() + acceptTime < System.currentTimeMillis()) {
+                event.getValue().cleanup();
+                delete.add(event.getKey());
             }
         }
+        // remove the events
+        cacheDelete += delete.size();
+        for (String k: delete) lastEvents.remove(k);
     }
 
     public static SearchEvent getEvent(final String eventID) {
-        return lastEvents.get(eventID);
+        SearchEvent event = lastEvents.get(eventID);
+        if (event == null) cacheMiss++; else cacheHit++;
+        return event;
     }
     
     public static SearchEvent getEvent(
@@ -76,11 +90,13 @@ public class SearchEventCache {
         
         String id = query.id(false);
         SearchEvent event = SearchEventCache.lastEvents.get(id);
+        if (event == null) cacheMiss++; else cacheHit++;
         if (Switchboard.getSwitchboard() != null && !Switchboard.getSwitchboard().crawlQueues.noticeURL.isEmpty() && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
             // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
             // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
             // once a minute
             SearchEventCache.lastEvents.remove(id);
+            cacheDelete++;
             event = null;
         } else {
             if (event != null) {

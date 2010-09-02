@@ -184,19 +184,51 @@
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
         <td>Type</td>
-        <td>Amount</td>
+        <td>Size</td>
+        <td>Hit</td>
+        <td>Miss</td>
+        <td>Insert</td>
+        <td>Delete</td>
       </tr>
       <tr class="TableCellLight">
         <td>DNSCache</td>
-        <td>#[namecache.hit]#</td>
+        <td>#[namecacheHit.size]#</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr class="TableCellLight">
+        <td>DNSCache</td>
+        <td>#[namecacheMiss.size]#</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
       </tr>
       <tr class="TableCellDark">
         <td>DNSNoCache</td>
+        <td></td>
         <td>#[namecache.noCache]#</td>
+        <td></td>
+        <td></td>
+        <td></td>
       </tr>
       <tr class="TableCellLight">
         <td>HashBlacklistedCache</td>
         <td>#[blacklistcache.size]#</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+      <tr class="TableCellLight">
+        <td>Search Event Cache</td>
+        <td>#[searchevent.size]#</td>
+        <td>#[searchevent.hit]#</td>
+        <td>#[searchevent.miss]#</td>
+        <td>#[searchevent.insert]#</td>
+        <td>#[searchevent.delete]#</td>
       </tr>
     </table>
     
