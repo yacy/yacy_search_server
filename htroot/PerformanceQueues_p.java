@@ -60,7 +60,7 @@ public class PerformanceQueues_p {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        File defaultSettingsFile = new File(sb.getRootPath(), "defaults/yacy.init");
+        File defaultSettingsFile = new File(sb.getAppPath(), "defaults/yacy.init");
         
         // get segment
         Segment indexSegment = null;
@@ -77,7 +77,7 @@ public class PerformanceQueues_p {
         if(post != null) {
         	if(post.containsKey("defaultFile")){
 	            // TODO check file-path!
-	            final File value = new File(sb.getRootPath(), post.get("defaultFile", "defaults/yacy.init"));
+	            final File value = new File(sb.getAppPath(), post.get("defaultFile", "defaults/yacy.init"));
 	            // check if value is readable file
 	            if(value.exists() && value.isFile() && value.canRead()) {
 	                defaultSettingsFile = value;

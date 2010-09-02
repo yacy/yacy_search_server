@@ -62,7 +62,7 @@ public class OAIListFriendsLoader {
         }
     }
     
-    public static Map<String, File> loadListFriendsSources(File initFile) {
+    public static Map<String, File> loadListFriendsSources(File initFile, File dataPath) {
         Properties p = new Properties();
         Map<String, File> m = new HashMap<String, File>();
         try {
@@ -71,7 +71,7 @@ public class OAIListFriendsLoader {
             Log.logException(e);
             return m;
         }
-        for (Entry<Object, Object> e: p.entrySet()) m.put((String) e.getKey(), new File((String) e.getValue()));
+        for (Entry<Object, Object> e: p.entrySet()) m.put((String) e.getKey(), new File(dataPath, (String) e.getValue()));
         return m;
     }
     

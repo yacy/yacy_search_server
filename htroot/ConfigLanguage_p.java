@@ -58,7 +58,7 @@ public class ConfigLanguage_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
-        final String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
+        final String langPath = env.getDataPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
 
         //Fallback
         //prop.put("currentlang", ""); //is done by Translationtemplate

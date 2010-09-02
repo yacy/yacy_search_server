@@ -1113,7 +1113,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             tp.put("date", systemDate);
             
             // rewrite the file
-            final File htRootPath = new File(switchboard.getRootPath(), switchboard.getConfig("htRootPath","htroot"));
+            final File htRootPath = new File(switchboard.getAppPath(), switchboard.getConfig("htRootPath","htroot"));
             
             TemplateEngine.writeTemplate(
                     fis = new FileInputStream(new File(htRootPath, "/proxymsg/error.html")), 

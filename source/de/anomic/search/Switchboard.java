@@ -251,8 +251,8 @@ public final class Switchboard extends serverSwitch {
     
     private static Switchboard sb = null;
     
-    public Switchboard(final File rootPath, final String initPath, final String configPath) throws IOException {
-        super(rootPath, initPath, configPath);
+    public Switchboard(final File dataPath, final File appPath, final String initPath, final String configPath) throws IOException {
+        super(dataPath, appPath, initPath, configPath);
         MemoryTracker.startSystemProfiling();
         sb=this;
         
@@ -276,24 +276,24 @@ public final class Switchboard extends serverSwitch {
         if (MemoryControl.available() > 1024 * 1024 * 1024 * 2) this.exceed134217727 = true;
         
         // load values from configs        
-        final File indexPath = getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
+        final File indexPath = getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
         this.log.logConfig("Index Primary Path: " + indexPath.toString());
-        this.listsPath      = getConfigPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
+        this.listsPath      = getDataPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
-        this.htDocsPath   = getConfigPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
+        this.htDocsPath   = getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
         this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
-        this.rankingPath   = getConfigPath(SwitchboardConstants.RANKING_PATH, SwitchboardConstants.RANKING_PATH_DEFAULT);
+        this.rankingPath   = getDataPath(SwitchboardConstants.RANKING_PATH, SwitchboardConstants.RANKING_PATH_DEFAULT);
         this.log.logConfig("Ranking Path:    " + this.rankingPath.toString());
         this.rankingPermissions = new HashMap<String, String>(); // mapping of permission - to filename.
-        this.workPath   = getConfigPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
+        this.workPath   = getDataPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
         this.log.logConfig("Work Path:    " + this.workPath.toString());
-        this.dictionariesPath = getConfigPath(SwitchboardConstants.DICTIONARY_SOURCE_PATH, SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
+        this.dictionariesPath = getDataPath(SwitchboardConstants.DICTIONARY_SOURCE_PATH, SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
         this.log.logConfig("Dictionaries Path:" + this.dictionariesPath.toString());
 
         // init sessionid name file
-        final String sessionidNamesFile = getConfig("sessionidNamesFile","");
+        final String sessionidNamesFile = getConfig("sessionidNamesFile","defaults/sessionid.names");
         this.log.logConfig("Loading sessionid file " + sessionidNamesFile);
-        MultiProtocolURI.initSessionIDNames(FileUtils.loadList(new File(getRootPath(), sessionidNamesFile)));
+        MultiProtocolURI.initSessionIDNames(FileUtils.loadList(new File(getAppPath(), sessionidNamesFile)));
 
         // init tables
         this.tables = new WorkTables(this.workPath);
@@ -397,7 +397,7 @@ public final class Switchboard extends serverSwitch {
         
         // load blacklist
         this.log.logConfig("Loading blacklist ...");
-        final File blacklistsPath = getConfigPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
+        final File blacklistsPath = getDataPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
         urlBlacklist = new Blacklist(blacklistsPath);
         listManager.switchboard = this;
         listManager.listsPath = blacklistsPath;        
@@ -405,7 +405,7 @@ public final class Switchboard extends serverSwitch {
 
         // load badwords (to filter the topwords)
         if (badwords == null || badwords.isEmpty()) {
-            final File badwordsFile = new File(rootPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
+            final File badwordsFile = new File(appPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
             badwordHashes = Word.words2hashesHandles(badwords);
             this.log.logConfig("loaded badwords from file " + badwordsFile.getName() +
@@ -415,7 +415,7 @@ public final class Switchboard extends serverSwitch {
 
         // load stopwords
         if (stopwords == null || stopwords.isEmpty()) {
-            final File stopwordsFile = new File(rootPath, SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
+            final File stopwordsFile = new File(appPath, SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
             stopwordHashes = Word.words2hashesHandles(stopwords);
             this.log.logConfig("loaded stopwords from file " + stopwordsFile.getName() + ", " +
@@ -424,7 +424,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // load ranking tables
-        final File YBRPath = new File(rootPath, "ranking/YBR");
+        final File YBRPath = new File(appPath, "ranking/YBR");
         if (YBRPath.exists()) {
             RankingProcess.loadYBR(YBRPath, 15);
         }
@@ -438,21 +438,21 @@ public final class Switchboard extends serverSwitch {
         log.logConfig("Starting HT Cache Manager");
         
         // create the cache directory
-        htCachePath = getConfigPath(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
+        htCachePath = getDataPath(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         final long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
         Cache.init(htCachePath, peers.mySeed().hash, maxCacheSize);
         
         // create the surrogates directories
-        surrogatesInPath = getConfigPath(SwitchboardConstants.SURROGATES_IN_PATH, SwitchboardConstants.SURROGATES_IN_PATH_DEFAULT);
+        surrogatesInPath = getDataPath(SwitchboardConstants.SURROGATES_IN_PATH, SwitchboardConstants.SURROGATES_IN_PATH_DEFAULT);
         this.log.logInfo("surrogates.in Path = " + surrogatesInPath.getAbsolutePath());
         surrogatesInPath.mkdirs();
-        surrogatesOutPath = getConfigPath(SwitchboardConstants.SURROGATES_OUT_PATH, SwitchboardConstants.SURROGATES_OUT_PATH_DEFAULT);
+        surrogatesOutPath = getDataPath(SwitchboardConstants.SURROGATES_OUT_PATH, SwitchboardConstants.SURROGATES_OUT_PATH_DEFAULT);
         this.log.logInfo("surrogates.out Path = " + surrogatesOutPath.getAbsolutePath());
         surrogatesOutPath.mkdirs();
         
         // create the release download directory
-        releasePath = getConfigPath(SwitchboardConstants.RELEASE_PATH, SwitchboardConstants.RELEASE_PATH_DEFAULT);
+        releasePath = getDataPath(SwitchboardConstants.RELEASE_PATH, SwitchboardConstants.RELEASE_PATH_DEFAULT);
         releasePath.mkdirs();
         this.log.logInfo("RELEASE Path = " + releasePath.getAbsolutePath());
        
@@ -467,7 +467,7 @@ public final class Switchboard extends serverSwitch {
         
         // Init User DB
         this.log.logConfig("Loading User DB");
-        final File userDbFile = new File(getRootPath(), "DATA/SETTINGS/user.heap");
+        final File userDbFile = new File(getDataPath(), "DATA/SETTINGS/user.heap");
         this.userDB = new userDB(userDbFile);
         this.log.logConfig("Loaded User DB from file " + userDbFile.getName() +
         ", " + this.userDB.size() + " entries" +
@@ -483,7 +483,7 @@ public final class Switchboard extends serverSwitch {
         // start a loader
         log.logConfig("Starting Crawl Loader");
         this.loader = new LoaderDispatcher(this);
-        Map<String, File> oaiFriends = OAIListFriendsLoader.loadListFriendsSources(new File("defaults/oaiListFriendsSource.xml"));
+        Map<String, File> oaiFriends = OAIListFriendsLoader.loadListFriendsSources(new File("defaults/oaiListFriendsSource.xml"), getDataPath());
         OAIListFriendsLoader.init(this.loader, oaiFriends);
         this.crawlQueues = new CrawlQueues(this, queuesRoot);
         this.crawlQueues.noticeURL.setMinimumDelta(
@@ -518,8 +518,8 @@ public final class Switchboard extends serverSwitch {
         this.remoteSearches = new ArrayList<QueryParams>();
         
         // init messages: clean up message symbol
-        final File notifierSource = new File(getRootPath(), getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");
-        final File notifierDest = new File(getConfigPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT), "notifier.gif");
+        final File notifierSource = new File(getAppPath(), getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");
+        final File notifierDest = new File(getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT), "notifier.gif");
         try {
             FileUtils.copy(notifierSource, notifierDest);
         } catch (final IOException e) {
@@ -740,7 +740,7 @@ public final class Switchboard extends serverSwitch {
                 } catch (final MalformedURLException e) {}
             }
         } else {
-            final File networkUnitDefinitionFile = (networkUnitDefinition.length() > 0 && networkUnitDefinition.charAt(0) == '/') ? new File(networkUnitDefinition) : new File(getRootPath(), networkUnitDefinition);
+            final File networkUnitDefinitionFile = (networkUnitDefinition.length() > 0 && networkUnitDefinition.charAt(0) == '/') ? new File(networkUnitDefinition) : new File(getAppPath(), networkUnitDefinition);
             if (networkUnitDefinitionFile.exists()) {
                 initProps = FileUtils.loadMap(networkUnitDefinitionFile);
                 setConfig(initProps);
@@ -751,7 +751,7 @@ public final class Switchboard extends serverSwitch {
             	setConfig(Switchboard.loadFileAsMap(new DigestURI(networkGroupDefinition, null)));
             } catch (final MalformedURLException e) { }
         } else {
-            final File networkGroupDefinitionFile = new File(getRootPath(), networkGroupDefinition);
+            final File networkGroupDefinitionFile = new File(getAppPath(), networkGroupDefinition);
             if (networkGroupDefinitionFile.exists()) {
                 initProps = FileUtils.loadMap(networkGroupDefinitionFile);
                 setConfig(initProps);
@@ -850,7 +850,7 @@ public final class Switchboard extends serverSwitch {
             // new properties
             setConfig("network.unit.definition", networkDefinition);
             overwriteNetworkDefinition();
-            final File indexPrimaryPath = getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
+            final File indexPrimaryPath = getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
             final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
             final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
@@ -1619,7 +1619,7 @@ public final class Switchboard extends serverSwitch {
                 // there is a version that is more recent. Load it and re-start with it
                 log.logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
                 final File downloaded = updateVersion.downloadRelease();
-                final boolean devenvironment = new File(this.getRootPath(), ".svn").exists();
+                final boolean devenvironment = new File(this.getAppPath(), ".svn").exists();
                 if (devenvironment) {
                     log.logInfo("AUTO-UPDATE: omiting update because this is a development environment");
                 } else if ((downloaded == null) || (!downloaded.exists()) || (downloaded.length() == 0)) {

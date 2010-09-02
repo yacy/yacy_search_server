@@ -78,6 +78,7 @@ public class Threaddump_p {
     	bufferappend(buffer, plain, "");
     	
     	int multipleCount = 100;
+    	File appPath = sb.getAppPath();
         if (post != null && post.containsKey("multipleThreaddump")) {
         	multipleCount = post.getInt("count", multipleCount);
             final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();
@@ -85,24 +86,24 @@ public class Threaddump_p {
                 traces.add(Thread.getAllStackTraces());
                 if (MemoryControl.available() < 20 * 1024 * 1024) break;
             }
-            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, null);
+            appendStackTraceStats(appPath, buffer, traces, plain, null);
             /*
-            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.BLOCKED);
-            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.RUNNABLE);
-            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.TIMED_WAITING);
-            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.WAITING);
-            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.NEW);
-            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.TERMINATED);
+            appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.BLOCKED);
+            appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.RUNNABLE);
+            appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.TIMED_WAITING);
+            appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.WAITING);
+            appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.NEW);
+            appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.TERMINATED);
             */
         } else {
             // generate a single thread dump
             final Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
-            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.BLOCKED);
-            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.RUNNABLE);
-            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.TIMED_WAITING);
-            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.WAITING);
-            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.NEW);
-            appendStackTraces(sb.getRootPath(), buffer, stackTraces, plain, Thread.State.TERMINATED);
+            appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.BLOCKED);
+            appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.RUNNABLE);
+            appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.TIMED_WAITING);
+            appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.WAITING);
+            appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.NEW);
+            appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.TERMINATED);
         }
         
     	bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
@@ -180,8 +181,8 @@ public class Threaddump_p {
         return result;
     }
     
-    private static HashMap<String, SortedSet<String>> dumpCollection(final File rootPath, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
-        final File classPath = new File(rootPath, "source");
+    private static HashMap<String, SortedSet<String>> dumpCollection(final File appPath, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
+        final File classPath = new File(appPath, "source");
   
         Thread thread;
         // collect single dumps

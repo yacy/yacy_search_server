@@ -50,7 +50,7 @@ public class ResourceObserver {
     
     public ResourceObserver(final Switchboard sb) {
         this.sb = sb;
-        this.path = sb.getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, "");
+        this.path = sb.getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, "");
     }
     
     public static void initThread() {

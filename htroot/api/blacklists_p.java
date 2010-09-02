@@ -16,7 +16,7 @@ public class blacklists_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         
-        listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        listManager.listsPath = new File(listManager.switchboard.getDataPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         final List<String> dirlist = FileUtils.getDirListing(listManager.listsPath);
         int blacklistCount=0;
 

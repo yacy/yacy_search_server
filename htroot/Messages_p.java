@@ -95,8 +95,8 @@ public class Messages_p {
         messageBoard.entry message;
 
         // first reset notification
-        final File notifierSource = new File(sb.getRootPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
-        final File notifierDest = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
+        final File notifierSource = new File(sb.getAppPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");
+        final File notifierDest = new File(sb.getDataPath("htDocsPath", "DATA/HTDOCS"), "notifier.gif");
         try {
             FileUtils.copy(notifierSource, notifierDest);
         } catch (final IOException e) {

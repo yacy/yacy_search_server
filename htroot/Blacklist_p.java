@@ -64,7 +64,7 @@ public class Blacklist_p {
         
         // initialize the list manager
         listManager.switchboard = (Switchboard) env;
-        listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        listManager.listsPath = new File(listManager.switchboard.getDataPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
         // get the list of supported blacklist types
         final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;

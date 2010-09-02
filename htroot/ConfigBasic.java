@@ -61,7 +61,7 @@ public class ConfigBasic {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        final String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
+        final String langPath = env.getDataPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
         String lang = env.getConfig("locale.language", "default");
         
         final int authentication = sb.adminAuthenticated(header);
@@ -179,7 +179,7 @@ public class ConfigBasic {
             }
             if (post.get("usecase", "").equals("intranet")) {
                 String repositoryPath = post.get("repositoryPath", "/DATA/HTROOT/repository");
-                File repository = ((repositoryPath.length() > 0 && repositoryPath.charAt(0) == '/') || (repositoryPath.length() > 1 && repositoryPath.charAt(1) == ':')) ? new File(repositoryPath) : new File(sb.getRootPath(), repositoryPath);
+                File repository = ((repositoryPath.length() > 0 && repositoryPath.charAt(0) == '/') || (repositoryPath.length() > 1 && repositoryPath.charAt(1) == ':')) ? new File(repositoryPath) : new File(sb.getDataPath(), repositoryPath);
                 if (repository.exists() && repository.isDirectory()) {
                 	sb.setConfig("repositoryPath", repositoryPath);
                 }

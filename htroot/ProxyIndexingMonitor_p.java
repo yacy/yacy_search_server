@@ -87,7 +87,7 @@ public class ProxyIndexingMonitor_p {
                     newProxyCachePath = newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
                 }
                 env.setConfig(SwitchboardConstants.HTCACHE_PATH, newProxyCachePath);
-                final File cache = env.getConfigPath(SwitchboardConstants.HTCACHE_PATH, oldProxyCachePath);
+                final File cache = env.getDataPath(SwitchboardConstants.HTCACHE_PATH, oldProxyCachePath);
                 if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
 
                 // proxyCacheSize 

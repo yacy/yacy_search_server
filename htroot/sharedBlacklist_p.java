@@ -88,7 +88,7 @@ public class sharedBlacklist_p {
             
             // initialize the list manager
             listManager.switchboard = (Switchboard) env;
-            listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+            listManager.listsPath = new File(listManager.switchboard.getDataPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
             
             // loading all blacklist files located in the directory

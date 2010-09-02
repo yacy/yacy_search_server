@@ -52,7 +52,7 @@ public class PerformanceMemory_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
-            defaultSettings = FileUtils.loadMap(new File(env.getRootPath(), "defaults/yacy.init"));
+            defaultSettings = FileUtils.loadMap(new File(env.getAppPath(), "defaults/yacy.init"));
         }
         
         prop.put("gc", "0");

@@ -148,7 +148,7 @@ public final class HTTPDFileHandler {
                 // load the mime table
                 final String mimeTablePath = theSwitchboard.getConfig("mimeTable","");
                 Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-                MimeTable.init(new File(theSwitchboard.getRootPath(), mimeTablePath));
+                MimeTable.init(new File(theSwitchboard.getAppPath(), mimeTablePath));
             }
             
             // create default files array
@@ -156,13 +156,13 @@ public final class HTTPDFileHandler {
             
             // create a htRootPath: system pages
             if (htRootPath == null) {
-                    htRootPath = new File(theSwitchboard.getRootPath(), theSwitchboard.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
+                    htRootPath = new File(theSwitchboard.getAppPath(), theSwitchboard.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
                     if (!(htRootPath.exists())) htRootPath.mkdir();
             }
             
             // create a htDocsPath: user defined pages
             if (htDocsPath == null) {
-                htDocsPath = theSwitchboard.getConfigPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
+                htDocsPath = theSwitchboard.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
                 if (!(htDocsPath.exists())) htDocsPath.mkdirs();
             }
             
@@ -172,15 +172,15 @@ public final class HTTPDFileHandler {
             
             // create a htTemplatePath
             if (htTemplatePath == null) {
-                htTemplatePath = theSwitchboard.getConfigPath("htTemplatePath","htroot/env/templates");
+                htTemplatePath = theSwitchboard.getAppPath("htTemplatePath","htroot/env/templates");
                 if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
             }
             //This is now handles by #%env/templates/foo%#
             //if (templates.isEmpty()) templates.putAll(httpTemplate.loadTemplates(htTemplatePath));
             
             // create htLocaleDefault, htLocalePath
-            if (htDefaultPath == null) htDefaultPath = theSwitchboard.getConfigPath("htDefaultPath", "htroot");
-            if (htLocalePath == null) htLocalePath = theSwitchboard.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot");
+            if (htDefaultPath == null) htDefaultPath = theSwitchboard.getAppPath("htDefaultPath", "htroot");
+            if (htLocalePath == null) htLocalePath = theSwitchboard.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
         }
         
     }
@@ -623,7 +623,7 @@ public final class HTTPDFileHandler {
 //                env.put("AUTH_TYPE", "");         // TODO: implement
 //                env.put("REMOTE_USER", "");       // TODO: implement
 //                env.put("REMOTE_IDENT", "");      // I don't think we need this
-                env.put("DOCUMENT_ROOT", switchboard.getRootPath().getAbsolutePath() + fileSeparator + switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
+                env.put("DOCUMENT_ROOT", switchboard.getAppPath().getAbsolutePath() + fileSeparator + switchboard.getConfig("htDocsPath", "DATA/HTDOCS"));
                 if (requestHeader.getContentType() != null) {
                     env.put("CONTENT_TYPE", requestHeader.getContentType());
                 }

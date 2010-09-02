@@ -54,7 +54,7 @@ public class ConfigAppearance_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        final String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
+        final String skinPath = new File(env.getDataPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
 
         // Fallback
         prop.put("currentskin", "");
@@ -140,7 +140,7 @@ public class ConfigAppearance_p {
     }
 
     private static boolean changeSkin(final Switchboard sb, final String skinPath, final String skin) {
-        final File htdocsDir = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "env");
+        final File htdocsDir = new File(sb.getDataPath("htDocsPath", "DATA/HTDOCS"), "env");
         final File styleFile = new File(htdocsDir, "style.css");
         final File skinFile = new File(skinPath, skin);
 

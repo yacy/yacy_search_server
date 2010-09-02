@@ -47,7 +47,7 @@ public class BlacklistTest_p {
         
         // initialize the list manager
         listManager.switchboard = (Switchboard) env;
-        listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        listManager.listsPath = new File(listManager.switchboard.getDataPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
 
         final serverObjects prop = new serverObjects();
         prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());

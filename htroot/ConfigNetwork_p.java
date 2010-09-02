@@ -49,7 +49,7 @@ public class ConfigNetwork_p {
         int commit = 0;
         
         // load all options for network definitions
-        final File networkBootstrapLocationsFile = new File(new File(sb.getRootPath(), "defaults"), "yacy.networks");
+        final File networkBootstrapLocationsFile = new File(new File(sb.getAppPath(), "defaults"), "yacy.networks");
         final HashSet<String> networkBootstrapLocations = FileUtils.loadList(networkBootstrapLocationsFile);
         
         

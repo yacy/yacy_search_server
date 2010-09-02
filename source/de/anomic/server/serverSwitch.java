@@ -45,7 +45,8 @@ public class serverSwitch {
     // configuration management
     private   final File    configFile;
     private   final String  configComment;
-    private   final File    rootPath;
+    private   final File    dataPath;
+    private   final File    appPath;
     protected       boolean firstInit;
     protected       Log     log;
     protected       int     serverJobs;
@@ -56,17 +57,18 @@ public class serverSwitch {
     private   final TreeMap<String, serverSwitchAction>  switchActions;
     private   final serverAccessTracker                  accessTracker;
     
-    public serverSwitch(final File rootPath, final String initPath, final String configPath) {
+    public serverSwitch(final File dataPath, final File appPath, final String initPath, final String configPath) {
         // we initialize the switchboard with a property file,
         // but maintain these properties then later in a new 'config' file
         // to reset all changed configs, the config file must
         // be deleted, but not the init file
         // the only attribute that will always be read from the init is the
         // file name of the config file
-    	this.rootPath = rootPath;
+        this.dataPath = dataPath;
+        this.appPath = appPath;
     	this.configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
-        final File initFile = new File(rootPath, initPath);
-        this.configFile = new File(rootPath, configPath); // propertiesFile(config);
+        final File initFile = new File(appPath, initPath);
+        this.configFile = new File(dataPath, configPath); // propertiesFile(config);
         firstInit = !configFile.exists(); // this is true if the application was started for the first time
         new File(configFile.getParent()).mkdir();
 
@@ -277,11 +279,19 @@ public class serverSwitch {
      * returned File is derived from this setting only. Otherwise the path's file
      * is constructed from the applications root path + the relative path setting.
      */
-    public File getConfigPath(final String key, final String dflt) {
+    public File getDataPath(final String key, final String dflt) {
         File ret;
         final String path = getConfig(key, dflt).replace('\\', '/');
         final File f = new File(path);
-        ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.rootPath, path));
+        ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.dataPath, path));
+        return ret;
+    }
+    
+    public File getAppPath(final String key, final String dflt) {
+        File ret;
+        final String path = getConfig(key, dflt).replace('\\', '/');
+        final File f = new File(path);
+        ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.appPath, path));
         return ret;
     }
 
@@ -511,8 +521,12 @@ public class serverSwitch {
 	return rights.indexOf(right) >= 0;
     }
 
-    public File getRootPath() {
-       return rootPath;
+    public File getDataPath() {
+       return this.dataPath;
+    }
+
+    public File getAppPath() {
+       return this.appPath;
     }
     
     public String toString() {

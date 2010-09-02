@@ -84,8 +84,8 @@ public class migration {
      * copy skins from the release to DATA/SKINS.
      */
     public static void installSkins(final Switchboard sb){
-        final File skinsPath = sb.getConfigPath("skinPath", "DATA/SKINS");
-        final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
+        final File skinsPath = sb.getDataPath("skinPath", "DATA/SKINS");
+        final File defaultSkinsPath = new File(sb.getAppPath(), "skins");
         if (defaultSkinsPath.exists()) {
             final List<String> skinFiles = FileUtils.getDirListing(defaultSkinsPath.getAbsolutePath());
             mkdirs(skinsPath);
@@ -103,9 +103,9 @@ public class migration {
         if(skin.equals("")){
             skin="default";
         }
-        final File skinsDir=sb.getConfigPath("skinPath", "DATA/SKINS");
+        final File skinsDir=sb.getDataPath("skinPath", "DATA/SKINS");
         final File skinFile=new File(skinsDir, skin+".css");
-        final File htdocsPath=new File(sb.getConfigPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT), "env");
+        final File htdocsPath=new File(sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT), "env");
         final File styleFile=new File(htdocsPath, "style.css");
         if(!skinFile.exists()){
             if(styleFile.exists()){
@@ -155,7 +155,7 @@ public class migration {
 			Log.logWarning("MIGRATION", "could not delete "+ filename);
 	}
     public static void migrateWorkFiles(final Switchboard sb){
-        File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");
+        File file=new File(sb.getDataPath(), "DATA/SETTINGS/wiki.db");
         File file2;
         if (file.exists()) {
             Log.logInfo("MIGRATION", "Migrating wiki.db to "+ sb.workPath);
@@ -167,7 +167,7 @@ public class migration {
             } catch (final IOException e) {
             }
             
-            file = new File(sb.getRootPath(), "DATA/SETTINGS/wiki-bkp.db");
+            file = new File(sb.getDataPath(), "DATA/SETTINGS/wiki-bkp.db");
             if (file.exists()) {
                 Log.logInfo("MIGRATION", "Migrating wiki-bkp.db to "+ sb.workPath);
                 file2 = new File(sb.workPath, "wiki-bkp.db");
@@ -184,7 +184,7 @@ public class migration {
         }
         
         
-        file=new File(sb.getRootPath(), "DATA/SETTINGS/message.db");
+        file=new File(sb.getDataPath(), "DATA/SETTINGS/message.db");
         if(file.exists()){
             Log.logInfo("MIGRATION", "Migrating message.db to "+ sb.workPath);
             sb.messageDB.close();

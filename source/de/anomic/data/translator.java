@@ -234,8 +234,8 @@ public class translator {
             ret = true;
         } else {
             final String htRootPath = env.getConfig("htRootPath", "htroot");
-            final File sourceDir = new File(env.getRootPath(), htRootPath);
-            final File destDir = new File(env.getConfigPath("locale.translated_html","DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
+            final File sourceDir = new File(env.getAppPath(), htRootPath);
+            final File destDir = new File(env.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang.substring(0, lang.length() - 4));// cut
             // .lng
             //File destDir = new File(env.getRootPath(), htRootPath + "/locale/" + lang.substring(0, lang.length() - 4));// cut
             // .lng

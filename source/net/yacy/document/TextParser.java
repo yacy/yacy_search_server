@@ -185,7 +185,7 @@ public final class TextParser {
             log.logWarning(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         }
-        assert !idioms.isEmpty();
+        assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true, false);
         
         // if we do not have more than one parser or the content size is over MaxInt
         // then we use only one stream-oriented parser.

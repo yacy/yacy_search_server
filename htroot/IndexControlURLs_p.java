@@ -102,7 +102,7 @@ public class IndexControlURLs_p {
             prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
-            prop.put("lurlexport_exportfile", sb.getRootPath() + "/DATA/EXPORT/" + DateFormatter.formatShortSecond());
+            prop.put("lurlexport_exportfile", sb.getDataPath() + "/DATA/EXPORT/" + DateFormatter.formatShortSecond());
             if (export == null) {
                 // there has never been an export
                 prop.put("lurlexportfinished", 0);

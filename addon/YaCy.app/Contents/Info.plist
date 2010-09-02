@@ -31,7 +31,7 @@
 		<key>JVMVersion</key>
 		<string>1.5+</string>
 		<key>Arguments</key>
-		<string>-gui</string>
+		<string>-gui Library/YaCy</string>
 		<key>ClassPath</key>
 			<array>
 			<string>$JAVAROOT/lib/bcmail-jdk15-145.jar</string>

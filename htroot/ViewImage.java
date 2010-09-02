@@ -99,7 +99,7 @@ public class ViewImage {
                 if (urlString.endsWith(".ico")) {
                     // load default favicon dfltfvcn.ico
                     if (defaulticonb == null) try {
-                        imgb = FileUtils.read(new File(sb.getRootPath(), defaulticon));
+                        imgb = FileUtils.read(new File(sb.getAppPath(), defaulticon));
                     } catch (final IOException e) {
                         return null;
                     } else {

@@ -157,7 +157,7 @@ public final class yacy {
     * @param homePath Root-path where all information is to be found.
     * @param startupFree free memory at startup time, to be used later for statistics
     */
-    private static void startup(final File homePath, final long startupMemFree, final long startupMemTotal, boolean gui) {
+    private static void startup(final File dataHome, final File appHome, final long startupMemFree, final long startupMemTotal, boolean gui) {
         try {
             // start up
             System.out.println(copyright);
@@ -173,38 +173,39 @@ public final class yacy {
             }
             
             // ensure that there is a DATA directory, if not, create one and if that fails warn and die
-            File f = homePath;
-            mkdirsIfNeseccary(f);
-            f = new File(homePath, "DATA/");
+            mkdirsIfNeseccary(dataHome);
+            mkdirsIfNeseccary(appHome);
+            File f = new File(dataHome, "DATA/");
             mkdirsIfNeseccary(f);
 			if (!(f.exists())) { 
-				System.err.println("Error creating DATA-directory in " + homePath.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
+				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
 				System.exit(-1); 
 			}
             
             // setting up logging
-			f = new File(homePath, "DATA/LOG/");
+			f = new File(dataHome, "DATA/LOG/");
             mkdirsIfNeseccary(f);
-			f = new File(homePath, "DATA/LOG/yacy.logging");
+			f = new File(dataHome, "DATA/LOG/yacy.logging");
 			//if (!f.exists()) try {
-			    FileUtils.copy(new File(homePath, "yacy.logging"), f);
+			    FileUtils.copy(new File(appHome, "yacy.logging"), f);
             //} catch (final IOException e){
             //    System.out.println("could not copy yacy.logging");
             //}
             try{
-                Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));
+                Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));
             } catch (final IOException e) {
-                System.out.println("could not find logging properties in homePath=" + homePath);
+                System.out.println("could not find logging properties in homePath=" + dataHome);
                 Log.logException(e);
             }
             Log.logConfig("STARTUP", "YaCy version: " + yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision());
             Log.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
             Log.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
-            Log.logConfig("STARTUP", "Application root-path: " + homePath);
+            Log.logConfig("STARTUP", "Application root-path: " + appHome);
+            Log.logConfig("STARTUP", "Data root-path: " + dataHome);
             Log.logConfig("STARTUP", "Time zone: UTC" + DateFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             Log.logConfig("STARTUP", "Maximum file system path length: " + OS.maxPathLength);
             
-            f = new File(homePath, "DATA/yacy.running");
+            f = new File(dataHome, "DATA/yacy.running");
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
                 Log.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running");
                 delete(f);
@@ -215,13 +216,13 @@ public final class yacy {
             
             final String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
             final String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
-            final File oldconffile = new File(homePath, oldconf);
+            final File oldconffile = new File(dataHome, oldconf);
             if (oldconffile.exists()) {
-            	final File newconfFile = new File(homePath, newconf);
+            	final File newconfFile = new File(dataHome, newconf);
                 if(!oldconffile.renameTo(newconfFile))
                     Log.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
             }
-            sb = new Switchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf);
+            sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), newconf);
             //sbSync.V(); // signal that the sb reference was set
             
             // save information about available memory at startup time
@@ -247,15 +248,16 @@ public final class yacy {
             //sb.setConfig("version", Double.toString(version));
             //sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
             //sb.setConfig("vdate", (vDATE.startsWith("@")) ? DateFormatter.formatShortDay() : vDATE);
-            sb.setConfig("applicationRoot", homePath.toString());
+            sb.setConfig("applicationRoot", appHome.toString());
+            sb.setConfig("dataRoot", dataHome.toString());
             yacyVersion.latestRelease = version;
 
             // read environment
             final int timeout = Math.max(5000, Integer.parseInt(sb.getConfig("httpdTimeout", "5000")));
 
             // create some directories
-            final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));
-            final File htDocsPath = sb.getConfigPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
+            final File htRootPath = new File(appHome, sb.getConfig("htRootPath", "htroot"));
+            final File htDocsPath = sb.getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
             mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
@@ -334,8 +336,8 @@ public final class yacy {
                 Tray.lockBrowserPopup = false;
 
                 // Copy the shipped locales into DATA, existing files are overwritten
-                final File locale_work   = sb.getConfigPath("locale.work", "DATA/LOCALE/locales");
-                final File locale_source = sb.getConfigPath("locale.source", "locales");
+                final File locale_work   = sb.getDataPath("locale.work", "DATA/LOCALE/locales");
+                final File locale_source = sb.getAppPath("locale.source", "locales");
                 try{
                     final File[] locale_source_files = locale_source.listFiles();
                     mkdirsIfNeseccary(locale_work);
@@ -357,7 +359,7 @@ public final class yacy {
                 if (!lang.equals("") && !lang.equals("default")) { //locale is used
                     String currentRev = "";
                     try{
-                        final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
+                        final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang+"/version" ))));
                         currentRev = br.readLine();
                         br.close();
                     }catch(final IOException e){
@@ -366,7 +368,7 @@ public final class yacy {
 
                     if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
                         final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
-                        final File destDir = new File(sb.getConfigPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
+                        final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
                         if (translator.translateFilesRecursive(sourceDir, destDir, new File(locale_work, lang + ".lng"), "html,template,inc", "locale")){ //translate it
                             //write the new Versionnumber
                             final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
@@ -517,16 +519,6 @@ public final class yacy {
         return config;
     }
     
-    public static void shutdown(String reason) {
-    	if (sb != null) {
-    		// YaCy is running in the same runtime. we can shutdown via interrupt
-    		sb.terminate(reason);
-    	} else {    	
-    		final File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
-    		shutdown(applicationRoot);
-    	}
-    }
-    
     /**
     * Call the shutdown-page of YaCy to tell it to shut down. This method is
     * called if you start yacy with the argument -shutdown.
@@ -654,11 +646,11 @@ public final class yacy {
      * @param homePath path to the YaCy directory
      * @param networkName 
      */
-    public static void minimizeUrlDB(final File homePath, final String networkName) {
+    public static void minimizeUrlDB(final File dataHome, final File appHome, final String networkName) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
-        try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
-        final File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
-        final File indexRoot2 = new File(homePath, "DATA/INDEX2");
+        try {Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
+        final File indexPrimaryRoot = new File(dataHome, "DATA/INDEX");
+        final File indexRoot2 = new File(dataHome, "DATA/INDEX2");
         final Log log = new Log("URL-CLEANUP");
         try {
             log.logInfo("STARTING URL CLEANUP");
@@ -846,23 +838,23 @@ public final class yacy {
      *
      * @param homePath Root-Path where all information is to be found.
      */
-    private static void urldbcleanup(final File homePath, final String networkName) {
-        final File root = homePath;
+    private static void urldbcleanup(final File dataHome, final File appHome, final String networkName) {
+        final File root = dataHome;
         final File indexroot = new File(root, "DATA/INDEX");
-        try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
+        try {Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
         final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexroot, networkName), "TEXT"), "text.urlmd", false, false);
         currentUrlDB.deadlinkCleaner();
         currentUrlDB.close();
     }
     
-    private static void RWIHashList(final File homePath, final String targetName, final String resource, final String format) {
+    private static void RWIHashList(final File dataHome, final File appHome, final String targetName, final String resource, final String format) {
         Segment WordIndex = null;
         final Log log = new Log("HASHLIST");
-        final File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
+        final File indexPrimaryRoot = new File(dataHome, "DATA/INDEX");
         final String wordChunkStartHash = "AAAAAAAAAAAA";
-        try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
+        try {Log.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
-        final File root = homePath;
+        final File root = dataHome;
         try {
             Iterator<ReferenceContainer<WordReference>> indexContainerIterator = null;
             if (resource.equals("all")) {
@@ -985,16 +977,20 @@ public final class yacy {
             System.setProperty("java.awt.headless", "true");
         }
         
+        System.out.print(">"); for (String a: args) System.out.print(a + " "); System.out.println();
+        
         File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
+        File dataRoot = applicationRoot;
         //System.out.println("args.length=" + args.length);
         //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
-        if ((args.length >= 1) && ((args[0].toLowerCase().equals("-startup")) || (args[0].equals("-start")))) {
+        if ((args.length >= 1) && (args[0].toLowerCase().equals("-startup") || args[0].equals("-start"))) {
             // normal start-up of yacy
-            if (args.length == 2) applicationRoot= new File(args[1]);
-            startup(applicationRoot, startupMemFree, startupMemTotal, false);
+            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
         } else if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
             // start-up of yacy with gui
-            startup(applicationRoot, startupMemFree, startupMemTotal, true);
+            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
         } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
             // normal shutdown of yacy
             if (args.length == 2) applicationRoot= new File(args[1]);
@@ -1010,7 +1006,7 @@ public final class yacy {
                 args = shift(args, 1, 2);
             }
             if (args.length == 2) applicationRoot= new File(args[1]);
-            minimizeUrlDB(applicationRoot, "freeworld");
+            minimizeUrlDB(dataRoot, applicationRoot, "freeworld");
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-testpeerdb"))) {
             if (args.length == 2) {
                 applicationRoot = new File(args[1]);
@@ -1038,7 +1034,7 @@ public final class yacy {
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= new File(args[1]);
-            urldbcleanup(applicationRoot, "freeworld");
+            urldbcleanup(dataRoot, applicationRoot, "freeworld");
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-rwihashlist"))) {
             // generate a url list and save it in a file
             String domain = "all";
@@ -1047,10 +1043,10 @@ public final class yacy {
             if (args.length >= 3) format= args[2];
             if (args.length == 4) applicationRoot= new File(args[3]);
             final String outfile = "rwihashlist_" + System.currentTimeMillis();
-            RWIHashList(applicationRoot, outfile, domain, format);
+            RWIHashList(dataRoot, applicationRoot, outfile, domain, format);
         } else {
             if (args.length == 1) applicationRoot= new File(args[0]);
-            startup(applicationRoot, startupMemFree, startupMemTotal, false);
+            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
         }
     }
 }

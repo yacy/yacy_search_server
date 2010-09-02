@@ -28,9 +28,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+
 
 public final class Log {
 
@@ -55,7 +57,7 @@ public final class Log {
     public static final char LOGTOKEN_FINEST  = 'D';
 
     private final Logger theLogger;
-
+    
     public Log(final String appName) {
         this.theLogger = Logger.getLogger(appName);
         //this.theLogger.setLevel(Level.FINEST); // set a default level
@@ -341,7 +343,7 @@ public final class Log {
         }
     }
     
-    public final static void configureLogging(final File homePath, final File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
+    public final static void configureLogging(final File dataPath, final File appPath, final File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
         FileInputStream fileIn = null;
         try {
             System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());
@@ -352,17 +354,23 @@ public final class Log {
             logManager.readConfiguration(fileIn);
 
             // creating the logging directory
-            final String logPattern = logManager.getProperty("java.util.logging.FileHandler.pattern");
+            String logPattern = logManager.getProperty("java.util.logging.FileHandler.pattern");
             int stripPos = logPattern.lastIndexOf('/');
+            if (!new File(logPattern).isAbsolute()) logPattern = new File(dataPath, logPattern).getAbsolutePath();
             if (stripPos < 0) stripPos = logPattern.lastIndexOf(File.pathSeparatorChar);
             File log = new File(logPattern.substring(0, stripPos));
-            if (!log.isAbsolute()) log = new File(homePath, log.getPath());
+            if (!log.isAbsolute()) log = new File(dataPath, log.getPath());
             if (!log.canRead()) log.mkdir();
 
-            // TODO: changing the pattern settings for the file handlers
-            
             // generating the root logger
-            /*Logger logger =*/ Logger.getLogger("");
+            Logger logger = Logger.getLogger("");
+            logger.setUseParentHandlers(false);
+            
+            //for (Handler h: logger.getHandlers()) logger.removeHandler(h);
+            if (!dataPath.getAbsolutePath().equals(appPath.getAbsolutePath())) {
+                FileHandler handler = new FileHandler(logPattern, 1024*1024, 20, true);
+                logger.addHandler(handler); 
+            }
 
             logRunnerThread = new logRunner();
             logRunnerThread.start();

@@ -64,7 +64,7 @@ public class cytag {
         
         String defaultimage = "redpillmini.png";
         if (post != null && post.get("icon", "").equals("invisible")) defaultimage = "invisible.png";
-        File iconfile = new File(sb.getRootPath(), "/htroot/env/grafics/" + defaultimage);
+        File iconfile = new File(sb.getAppPath(), "/htroot/env/grafics/" + defaultimage);
         
         byte[] imgb = null;
         try {

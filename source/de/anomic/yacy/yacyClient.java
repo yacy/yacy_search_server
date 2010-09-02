@@ -1034,7 +1034,7 @@ public final class yacyClient {
         if(args.length > 1) {
         System.out.println("yacyClient Test");
         try {
-            final Switchboard sb = new Switchboard(new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf");
+            final Switchboard sb = new Switchboard(new File(args[0]), new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf");
             /*final yacyCore core =*/ new yacyCore(sb);
             sb.loadSeedLists();
             final yacySeed target = sb.peers.getConnected(args[1]);

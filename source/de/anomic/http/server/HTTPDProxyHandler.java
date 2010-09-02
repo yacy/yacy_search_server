@@ -122,7 +122,24 @@ public final class HTTPDProxyHandler {
      * Do logging configuration for special proxy access log file
      */
     static {
-        // Doing logger initialization
+
+        // get a switchboard
+        sb = Switchboard.getSwitchboard();
+        if (sb != null) {
+            
+        isTransparentProxy = Boolean.parseBoolean(sb.getConfig("isTransparentProxy","false"));
+            
+        // set timeout
+        timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "10000"));
+            
+        // create a htRootPath: system pages
+        htRootPath = new File(sb.getAppPath(), sb.getConfig("htRootPath","htroot"));
+        if (!(htRootPath.exists())) {
+            if(!htRootPath.mkdir())
+                Log.logSevere("PROXY", "could not create htRoot "+ htRootPath);
+        }
+        
+        // do logger initialization
         try {
             log.logInfo("Configuring proxy access logging ...");            
             
@@ -138,6 +155,8 @@ public final class HTTPDProxyHandler {
                 int limit = 1024*1024, count = 20;
                 String pattern = manager.getProperty(className + ".logging.FileHandler.pattern");
                 if (pattern == null) pattern = "DATA/LOG/proxyAccess%u%g.log";
+                // make pattern absolute
+                if (!new File(pattern).isAbsolute()) pattern = new File(sb.getDataPath(), pattern).getAbsolutePath();
                 
                 final String limitStr = manager.getProperty(className + ".logging.FileHandler.limit");
                 if (limitStr != null) try { limit = Integer.parseInt(limitStr); } catch (final NumberFormatException e) {}
@@ -150,7 +169,7 @@ public final class HTTPDProxyHandler {
                 proxyLogger.setUseParentHandlers(false);
                 proxyLogger.setLevel(Level.FINEST);
                 
-                final FileHandler txtLog = new FileHandler(pattern,limit,count,true);
+                final FileHandler txtLog = new FileHandler(pattern, limit, count, true);
                 txtLog.setFormatter(new ProxyLogFormatter());
                 txtLog.setLevel(Level.FINEST);
                 proxyLogger.addHandler(txtLog);     
@@ -166,25 +185,10 @@ public final class HTTPDProxyHandler {
         } catch (final Exception e) { 
             log.logSevere("Unable to configure proxy access logging.",e);        
         }
-        
-        sb = Switchboard.getSwitchboard();
-        if (sb != null) {
-            
-        isTransparentProxy = Boolean.parseBoolean(sb.getConfig("isTransparentProxy","false"));
-            
-        // set timeout
-        timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "10000"));
-            
-        // create a htRootPath: system pages
-        htRootPath = new File(sb.getRootPath(), sb.getConfig("htRootPath","htroot"));
-        if (!(htRootPath.exists())) {
-            if(!htRootPath.mkdir())
-                Log.logSevere("PROXY", "could not create htRoot "+ htRootPath);
-        }
             
         // load a transformer
         transformer = new ContentTransformer();
-        transformer.init(new File(sb.getRootPath(), sb.getConfig(SwitchboardConstants.LIST_BLUE, "")).toString());
+        transformer.init(new File(sb.getAppPath(), sb.getConfig(SwitchboardConstants.LIST_BLUE, "")).toString());
             
         // load the yellow-list
         final String f = sb.getConfig("proxyYellowList", null);

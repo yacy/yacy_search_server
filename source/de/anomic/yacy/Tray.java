@@ -68,7 +68,7 @@ public final class Tray {
 				System.setProperty("java.awt.headless", "false");
 
 				if(nativeTrayIcon.isSupported()) {
-					final String iconpath = sb.getRootPath().toString() + "/addon/YaCy_TrayIcon.png".replace("/", File.separator);
+					final String iconpath = sb.getAppPath().toString() + "/addon/YaCy_TrayIcon.png".replace("/", File.separator);
 					ActionListener al = new ActionListener() {
 						public void actionPerformed(final ActionEvent e) {
 							trayClickAction();
