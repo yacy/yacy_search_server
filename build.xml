@@ -55,7 +55,7 @@
   <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
   <property name="release_main" location="${release}/MAIN"/>
   <property name="release_windows" location="${release}/WINDOWS"/>
-  <property name="release_mac" location="addon/YaCy.app/Contents/Resources/Java"/>
+  <property name="release_mac" location="${release}/MAC"/>
   <property name="svnEntriesFile" location=".svn/entries"/>
   <property name="defaults" location="defaults"/>
   <!-- variables for installonlinux target-->
@@ -702,8 +702,13 @@
   </target>
 
   <target name="distMacApp" depends="copyMain4Dist" description="Creates a YaCy.app">
-  	<delete dir="${release_mac}" failonerror="false" verbose="false"/>
-  	<move file="${release_main}" tofile="${release_mac}" verbose="true" />
+  	<copy todir="${release_mac}/YaCy.app">
+  		<fileset dir="${addon}/YaCy.app"></fileset>
+  	</copy>
+  	<copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
+  	<move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/Resources/Java" verbose="false" />
+  	<zip destfile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.app.zip" basedir="${release_mac}" level="9"></zip>
+  	<delete dir="${release_mac}" failonerror="false" verbose="false" />
   </target>
 
   <target name="deb" depends="init" description="Creates a debian package">

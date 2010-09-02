@@ -7,7 +7,7 @@
 	<key>CFBundleIdentifier</key>
 	<string>net.yacy.yacy</string>
 	<key>CFBundleVersion</key>
-	<string>0.96</string>
+	<string>@REPL_VERSION@</string>
 	<key>CFBundleAllowMixedLocalizations</key>
 	<string>true</string>
 	<key>CFBundleExecutable</key>
