@@ -98,9 +98,11 @@ public class table_p {
                 prop.put("showtable_list_" + count + "_count", count);
                 for (int i = 0; i < columns.size(); i++) {
                     cellName = columns.get(i);
-                    cellValue = new String(trow.get(cellName));
-                    if (selectKey != null && cellName.equals(selectKey) && !cellValue.matches(selectValue)) {
-                        continue rowloop;
+                    if (trow.containsKey(cellName)) {
+                        cellValue = new String(trow.get(cellName));
+                        if (selectKey != null && cellName.equals(selectKey) && !cellValue.matches(selectValue)) continue rowloop;
+                    } else {
+                        cellValue = "";
                     }
                     prop.putHTML("showtable_list_" + count + "_columns_" + i + "_column", cellName);
                     prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cellValue);
