@@ -707,7 +707,10 @@
   	</copy>
   	<copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
   	<move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/Resources/Java" verbose="false" />
-  	<zip destfile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.app.zip" basedir="${release_mac}" level="9"></zip>
+    <chmod file="${release_mac}/YaCy.app/Contents/MacOS/JavaApplicationStub" perm="755"/>
+  	<exec executable="hdiutil">
+  	  	<arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>
+  	</exec>
   	<delete dir="${release_mac}" failonerror="false" verbose="false" />
   </target>
 
