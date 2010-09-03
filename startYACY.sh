@@ -95,8 +95,9 @@ for option in $options;do
 			-t|--tail-log)
 				TAILLOG=1
 				;;
-			-g|--gui)
+			-gui)
 				GUI=1
+				isparameter=1
 				;;
 		esac #case option 
 	else #parameter
@@ -179,7 +180,7 @@ CLASSPATH=".:htroot:$CLASSPATH"
 cmdline="$JAVA $JAVA_ARGS -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8 -classpath $CLASSPATH net.yacy.yacy";
 if [ $GUI -eq 1 ] #gui
 then
-	cmdline="$cmdline -gui"
+	cmdline="$cmdline -gui $parameter"
 fi
 if [ $DEBUG -eq 1 ] #debug
 then

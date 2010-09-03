@@ -71,6 +71,7 @@ public final class yacyRelease extends yacyVersion {
     // for details see defaults/yacy.network.freeworld.unit
     private static Map<yacyUpdateLocation, DevAndMainVersions> latestReleases = new ConcurrentHashMap<yacyUpdateLocation, DevAndMainVersions>();
     public final static List<yacyUpdateLocation> latestReleaseLocations = new ArrayList<yacyUpdateLocation>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
+    public static String startParameter = "";
     
     private MultiProtocolURI url;
     private File releaseFile;
@@ -394,7 +395,7 @@ public final class yacyRelease extends yacyVersion {
             final File startType = new File(sb.getDataPath(), "DATA/yacy.noconsole".replace("/", File.separator));
             String starterFile = "startYACY_debug.bat";
             if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
-
+            if (startParameter.startsWith("-gui")) starterFile += " " + startParameter;
             try{
                 Log.logInfo("RESTART", "INITIATED");
                 final String script =
@@ -449,7 +450,7 @@ public final class yacyRelease extends yacyVersion {
                     "done" + serverCore.LF_STRING +
                     //"cd ../../" + serverCore.LF_STRING +
                     "cd " + sb.getAppPath() + serverCore.LF_STRING +
-                    "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
+                    "nohup ./startYACY.sh " + (startParameter.startsWith("-gui") ? startParameter : "") + " > /dev/null" + serverCore.LF_STRING;
                 final File scriptFile = new File(sb.getDataPath(), "DATA/RELEASE/restart.sh");
                 OS.deployScript(scriptFile, script);
                 Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
@@ -484,6 +485,7 @@ public final class yacyRelease extends yacyVersion {
                 final File startType = new File(sb.getDataPath(), "DATA/yacy.noconsole".replace("/", File.separator));
                 String starterFile = "startYACY_debug.bat";
                 if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
+                if (startParameter.startsWith("-gui")) starterFile += " " + startParameter;
                 script = 
                     "@echo off" + serverCore.LF_STRING +
                     "title YaCy updater" + serverCore.LF_STRING +
@@ -531,7 +533,7 @@ public final class yacyRelease extends yacyVersion {
                     "cd " + sb.getAppPath().toString() + serverCore.LF_STRING +
                     "chmod 755 *.sh" + serverCore.LF_STRING + // tarTools does not keep access/execute right
                     "chmod 755 bin/*.sh" + serverCore.LF_STRING +
-                    "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
+                    "nohup ./startYACY.sh " + (startParameter.startsWith("-gui") ? startParameter : "") + " > /dev/null" + serverCore.LF_STRING;
                 scriptFileName = "update.sh";
             }
             final File scriptFile = new File(sb.getDataPath(), "DATA/RELEASE/".replace("/", File.separator) + scriptFileName); 

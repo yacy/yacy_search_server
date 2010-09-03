@@ -977,7 +977,8 @@ public final class yacy {
             System.setProperty("java.awt.headless", "true");
         }
         
-        System.out.print(">"); for (String a: args) System.out.print(a + " "); System.out.println();
+        String s = ""; for (String a: args) s += a + " ";
+        yacyRelease.startParameter = s.trim();
         
         File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
         File dataRoot = applicationRoot;
