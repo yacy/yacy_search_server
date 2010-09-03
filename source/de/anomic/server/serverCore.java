@@ -319,15 +319,15 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             
             announceThreadBlockRelease();
             
-            int pp, trycount = 0;
-            while ((pp = getJobCount()) >= this.maxBusySessions) {
+            int pp/*, trycount = 0*/;
+            if ((pp = getJobCount()) >= this.maxBusySessions) {
                 terminateOldSessions(3000);
                 this.log.logInfo("termination of old sessions: before = " + pp + ", after = " + getJobCount());
-                if (getJobCount() < this.maxBusySessions) break;
-                if (trycount++ > 5) break;
-                Thread.sleep(1000); // lets try again after a short break
+                //if (getJobCount() < this.maxBusySessions) break;
+                //if (trycount++ > 5) break;
+                //Thread.sleep(1000); // lets try again after a short break
             }
-            
+            /*
             if (getJobCount() >= this.maxBusySessions) {
                 // immediately close connection if too much sessions are still running
                 this.log.logWarning("* connections (" + getJobCount() + ") exceeding limit (" + this.maxBusySessions + ")" + ", closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
@@ -336,6 +336,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 return false;
                 
             }
+            */
             
             final String cIP = clientAddress(controlSocket);
             //System.out.println("server bfHosts=" + bfHost.toString());
