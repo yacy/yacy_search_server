@@ -23,8 +23,8 @@ package net.yacy.cora.protocol.http;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
+//import org.apache.commons.httpclient.HostConfiguration;
+//import org.apache.commons.httpclient.HttpClient;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -46,18 +46,18 @@ public final class ProxySettings {
     public static final Map<String, Object> allowProxy    = new ConcurrentHashMap<String, Object>();
     public static final Map<String, Object> disallowProxy = new ConcurrentHashMap<String, Object>();
     
-    /**
-     * produce a HostConfiguration (apache object) with the proxy access information included
-     * @param apacheHttpClient
-     * @return a host configuration with proxy config if the proxy shall be used; a cloned configuration otherwise
-     */
-    public static HostConfiguration getProxyHostConfig(HttpClient apacheHttpClient) {
-        final HostConfiguration hostConfig;
-        if (!use) return null;
-        hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
-        hostConfig.setProxy(host, port);
-        return hostConfig;
-    }
+//    /**
+//     * produce a HostConfiguration (apache object) with the proxy access information included
+//     * @param apacheHttpClient
+//     * @return a host configuration with proxy config if the proxy shall be used; a cloned configuration otherwise
+//     */
+//    public static HostConfiguration getProxyHostConfig(HttpClient apacheHttpClient) {
+//        final HostConfiguration hostConfig;
+//        if (!use) return null;
+//        hostConfig = new HostConfiguration(apacheHttpClient.getHostConfiguration());
+//        hostConfig.setProxy(host, port);
+//        return hostConfig;
+//    }
     
     /**
      * 

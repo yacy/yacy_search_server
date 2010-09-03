@@ -1,5 +1,5 @@
 /**
- *  Client
+ *  HTTPClient
  *  Copyright 2010 by Sebastian Gaebel
  *  First released 01.07.2010 at http://yacy.net
  *  
@@ -29,10 +29,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 
@@ -41,7 +49,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -104,6 +111,9 @@ public class HTTPClient {
     }
     
     public static void setDefaultUserAgent(final String defaultAgent) {
+    	if (httpClient == null) {
+    		initConnectionManager();
+    	}
     	HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
     }
     
@@ -152,7 +162,7 @@ public class HTTPClient {
 		// Create and initialize scheme registry
 		final SchemeRegistry schemeRegistry = new SchemeRegistry();
 		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-		schemeRegistry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+		schemeRegistry.register(new Scheme("https", getSSLSocketFactory(), 443));
 
 		ClientConnectionManager clientConnectionManager = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
 
@@ -465,7 +475,7 @@ public class HTTPClient {
     	try {
         	// execute the method
 			httpResponse = httpClient.execute(httpUriRequest, httpContext);
-		} catch (ClientProtocolException e) {
+		} catch (Exception e) {
 			ConnectionInfo.removeConnection(httpUriRequest.hashCode());
 			httpUriRequest.abort();
 			throw new IOException("Client can't execute: " + e.getMessage());
@@ -538,6 +548,40 @@ public class HTTPClient {
      */
     public static String getSystemOST() {
         return systemOST;
+    }
+    
+    private static SSLSocketFactory getSSLSocketFactory() {
+    	final TrustManager trustManager = new X509TrustManager() {
+			@Override
+			public void checkClientTrusted(X509Certificate[] chain, String authType)
+					throws CertificateException {
+			}
+
+			@Override
+			public void checkServerTrusted(X509Certificate[] chain, String authType)
+					throws CertificateException {
+			}
+
+			@Override
+			public X509Certificate[] getAcceptedIssuers() {
+				return null;
+			}
+    	};
+    	SSLContext sslContext = null;
+    	try {
+    		sslContext = SSLContext.getInstance("TLS");
+    		sslContext.init(null, new TrustManager[] { trustManager }, null);
+		} catch (NoSuchAlgorithmException e) {
+			// should not happen
+			// e.printStackTrace();
+		} catch (KeyManagementException e) {
+			// should not happen
+			// e.printStackTrace();
+		}
+
+		final SSLSocketFactory sslSF = new SSLSocketFactory(sslContext);
+		sslSF.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+    	return sslSF;
     }
 
 	/**
