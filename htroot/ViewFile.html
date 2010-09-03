@@ -38,7 +38,7 @@
           <dt>MimeType:</dt>   <dd>#[mimeType]#</dd>#(/mimeTypeAvailable)#
           <dt><label for="viewMode">View as</label>:</dt>
           <dd>
-            <select id="viewMode" name="viewMode">
+            <select id="viewMode" name="viewMode" onchange='this.form.submit()'>
               <option value="iframeWeb"#(vMode-iframeWeb)#:: selected="selected"#(/vMode-iframeWeb)#>Original from Web</option>
               <option value="iframeCache"#(vMode-iframeCache)#:: selected="selected"#(/vMode-iframeCache)#>Original from Cache</option>
               <option value="plain"#(vMode-plain)#:: selected="selected"#(/vMode-plain)#>Plain Text</option>
@@ -47,7 +47,7 @@
               <option value="words"#(vMode-words)#:: selected="selected"#(/vMode-words)#>Parsed Tokens/Words</option>
               <option value="links"#(vMode-links)#:: selected="selected"#(/vMode-links)#>Link List</option>
             </select>
-            <input type="submit" name="show" value="Show" />
+            <noscript><input type="submit" name="show" value="Show" /></noscript>
           </dd>
         </dl>
         <input type="hidden" name="words" value="#[words]#" />
