@@ -40,6 +40,9 @@ public class RSSReader extends DefaultHandler {
     private final StringBuilder buffer;
     private boolean parsingChannel, parsingImage, parsingItem;
     private final RSSFeed theChannel;
+    private Type type;
+    
+    public enum Type { rss, atom, none };
     
     private RSSReader(int maxsize) {
         theChannel = new RSSFeed(maxsize);
@@ -48,6 +51,7 @@ public class RSSReader extends DefaultHandler {
         parsingChannel = false;
         parsingImage = false;
         parsingItem = false;
+        type = Type.none;
     }
     
     public RSSReader(int maxsize, final String path) throws IOException {
@@ -63,8 +67,9 @@ public class RSSReader extends DefaultHandler {
         }
     }
     
-    public RSSReader(int maxsize, final InputStream stream) throws IOException {
+    public RSSReader(int maxsize, final InputStream stream, Type type) throws IOException {
         this(maxsize);
+        this.type = type;
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
             final SAXParser saxParser = factory.newSAXParser();
@@ -74,6 +79,10 @@ public class RSSReader extends DefaultHandler {
         } catch (ParserConfigurationException e) {
             throw new IOException (e.getMessage());
         }
+    }
+    
+    public Type getType() {
+        return this.type;
     }
     
     public static RSSReader parse(int maxsize, final byte[] a) throws IOException {
@@ -89,7 +98,10 @@ public class RSSReader extends DefaultHandler {
             throw new IOException("response does not contain valid xml");
         }
         final String end = new String(a, a.length - 10, 10);
-        if (end.indexOf("rss") < 0) {
+        Type type = Type.none;
+        if (end.indexOf("rss") > 0) type = Type.rss; 
+        if (end.indexOf("feed") > 0) type = Type.atom; 
+        if (type == Type.none) {
             throw new IOException("response incomplete");
         }
         
@@ -99,7 +111,7 @@ public class RSSReader extends DefaultHandler {
         // parse stream
         RSSReader reader = null;
         try {
-            reader = new RSSReader(maxsize, bais);
+            reader = new RSSReader(maxsize, bais, type);
         } catch (final Exception e) {
             throw new IOException("parse exception: " + e.getMessage(), e);
         }
@@ -117,9 +129,14 @@ public class RSSReader extends DefaultHandler {
     @Override
     public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
         if ("channel".equals(tag)) {
+            this.type = Type.rss;
             item = new RSSMessage();
             parsingChannel = true;
-        } else if ("item".equals(tag)) {
+        } else if ("feed".equals(tag)) {
+            this.type = Type.atom;
+            item = new RSSMessage();
+            parsingChannel = true;
+        } else if ("item".equals(tag) || "entry".equals(tag)) {
             if (parsingChannel) {
                 // the channel ends with the first item not with the channel close tag
                 theChannel.setChannel(item);
@@ -127,6 +144,9 @@ public class RSSReader extends DefaultHandler {
             }
             item = new RSSMessage();
             parsingItem = true;
+        } else if (parsingItem && this.type == Type.atom && "link".equals(tag)) {
+            String url = atts.getValue("href");
+            if (url != null && url.length() > 0) item.setValue("link", url);
         } else if ("image".equals(tag)) {
             parsingImage = true;
         }
@@ -135,10 +155,10 @@ public class RSSReader extends DefaultHandler {
     @Override
     public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
-        if ("channel".equals(tag)) {
+        if ("channel".equals(tag) || "feed".equals(tag)) {
             if (parsingChannel) theChannel.setChannel(item);
             parsingChannel = false;
-        } else if ("item".equals(tag)) {
+        } else if ("item".equals(tag) || "entry".equals(tag)) {
             theChannel.addMessage(item);
             parsingItem = false;
         } else if ("image".equals(tag)) {
@@ -150,7 +170,7 @@ public class RSSReader extends DefaultHandler {
         } else if (parsingItem)  {
             final String value = buffer.toString().trim();
             buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag)) item.setValue(tag, value);
+            if (RSSMessage.tags.contains(tag) && value.length() > 0) item.setValue(tag, value);
         } else if (parsingChannel) {
             final String value = buffer.toString().trim();
             buffer.setLength(0);

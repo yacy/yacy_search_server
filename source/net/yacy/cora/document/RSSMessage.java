@@ -35,10 +35,10 @@ public class RSSMessage implements Hit {
 
     public static enum Token {
 
-        title("title"),
-        link("link"),
-        description("description"),
-        pubDate("pubDate,lastBuildDate"),
+        title("title,atom:title,rss:title"),
+        link("link,rss:link,atom:link"),
+        description("description,rss:description,subtitle,atom:subtitle"),
+        pubDate("pubDate,lastBuildDate,rss:lastBuildDate,updated,rss:updated"),
         copyright("copyright,dc:publisher,publisher"),
         author("author,dc:creator,creator"),
         subject("subject,dc:subject"),
