@@ -284,7 +284,6 @@ public final class yacyRelease extends yacyVersion {
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
         
-//        ResponseContainer res = null;
         final String name = this.getUrl().getFileName();
         byte[] signatureBytes = null;
         
@@ -295,7 +294,6 @@ public final class yacyRelease extends yacyVersion {
         // download signature first, if public key is available
         try {
             if (this.publicKey != null) {
-//                final byte[] signatureData = Client.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
             	final byte[] signatureData = client.GETbytes(this.getUrl().toString() + ".sig");
                 if (signatureData == null) {
                     Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
@@ -306,13 +304,10 @@ public final class yacyRelease extends yacyVersion {
                 }
                 // in case that the download of a signature file failed (can be caused by bad working http servers), then it is assumed that no signature exists
             }
-//            final Client client = new Client(120000, reqHeader);
-//            res = client.GET(this.getUrl().toString());
             client.setTimout(120000);
             client.GET(this.getUrl().toString());
             final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
 
-//            final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
             final boolean unzipped = header.gzip() && (header.mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
             if ((unzipped) && (name.endsWith(".tar.gz"))) {
                 download = new File(storagePath, name.substring(0, name.length() - 3));
@@ -324,7 +319,6 @@ public final class yacyRelease extends yacyVersion {
                 SignatureOutputStream verifyOutput = null;
                 try {
                     verifyOutput = new SignatureOutputStream(new FileOutputStream(download), CryptoLib.signAlgorithm, publicKey);
-//                    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(verifyOutput));
                     client.writeTo(new BufferedOutputStream(verifyOutput));
 
                     if (!verifyOutput.verify(signatureBytes)) throw new IOException("Bad Signature!");
@@ -342,13 +336,11 @@ public final class yacyRelease extends yacyVersion {
                 if ((!signatureFile.exists()) || (signatureFile.length() == 0)) throw new IOException("create signature file failed");
             } else {
                 // just copy into file
-//                FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
                 client.writeTo(new BufferedOutputStream(new FileOutputStream(download)));
             }
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + this.getUrl() + " failed");
         } catch (final IOException e) {
             // Saving file failed, abort download
-//            if (res != null) res.abort();
             Log.logSevere("yacyVersion", "download of " + this.getName() + " failed: " + e.getMessage());
             if (download != null && download.exists()) {
                 FileUtils.deletedelete(download);
@@ -356,10 +348,6 @@ public final class yacyRelease extends yacyVersion {
             }
             download = null;
         } finally {
-//            if (res != null) {
-//                // release connection
-//                res.closeStream();
-//            }
         	try {
 				client.finish();
 			} catch (IOException e) {
@@ -432,18 +420,6 @@ public final class yacyRelease extends yacyVersion {
             } catch (final IOException e) {
                 Log.logSevere("RESTART", "restart failed", e);
             }
-
-            // create yacy.restart file which is used in Windows startscript
-/*            final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
-            if (!yacyRestart.exists()) {
-                try {
-                    yacyRestart.createNewFile();
-                    plasmaSwitchboard.getSwitchboard().terminate(5000);
-                } catch (IOException e) {
-                    serverLog.logSevere("SHUTDOWN", "restart failed", e);
-                }
-            }*/
-
         }
 
         if (yacyBuildProperties.isPkgManager()) {
@@ -494,7 +470,6 @@ public final class yacyRelease extends yacyVersion {
         if (yacyBuildProperties.isPkgManager()) {
             return;
         }
-        //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         try {
             final Switchboard sb = Switchboard.getSwitchboard();
             Log.logInfo("UPDATE", "INITIATED");
@@ -547,30 +522,12 @@ public final class yacyRelease extends yacyVersion {
                 script =
                     "#!/bin/sh" + serverCore.LF_STRING +
                     "cd " + sb.getDataPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
-    /*                ((releaseFile.getName().endsWith(".gz")) ?
-                            // test gz-file for integrity and tar xfz then
-                           ("if gunzip -t " + releaseFile.getAbsolutePath() + serverCore.LF_STRING +
-                            "then" + serverCore.LF_STRING + 
-                            "gunzip -c " + releaseFile.getAbsolutePath() + " | tar xf -" + serverCore.LF_STRING) :
-                            // just tar xf the file, no integrity test possible?
-                           ("tar xf " + releaseFile.getAbsolutePath() + serverCore.LF_STRING)
-                    ) +*/
                     "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
                     "sleep 1" + serverCore.LF_STRING +
                     "done" + serverCore.LF_STRING +
                     "rm " + sb.getAppPath().toString() + "/lib/*" + serverCore.LF_STRING +
                     "cp -Rf yacy/* " + sb.getAppPath().toString() + serverCore.LF_STRING +
                     "rm -Rf yacy" + serverCore.LF_STRING +
-    /*                ((releaseFile.getName().endsWith(".gz")) ?
-                            // else-case of gunzip -t test: if failed, just restart
-                           ("else" + serverCore.LF_STRING +
-                            "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
-                            "sleep 1" + serverCore.LF_STRING +
-                            "done" + serverCore.LF_STRING +
-                            "fi" + serverCore.LF_STRING) :
-                            // in case that we did not made the integrity test, there is no else case
-                            ""
-                    ) +*/
                     "cd " + sb.getAppPath().toString() + serverCore.LF_STRING +
                     "chmod 755 *.sh" + serverCore.LF_STRING + // tarTools does not keep access/execute right
                     "chmod 755 bin/*.sh" + serverCore.LF_STRING +
