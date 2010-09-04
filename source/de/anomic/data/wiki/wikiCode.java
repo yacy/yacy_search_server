@@ -21,7 +21,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
 package de.anomic.data.wiki;
 
 import java.io.BufferedReader;
@@ -42,109 +41,139 @@ import de.anomic.server.serverCore;
  * @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
  */
 public class wikiCode extends abstractWikiParser implements wikiParser {
+    private static final String ASTERISK = "*";
+    private static final String CLOSE_DEFINITION_DESCRIPTION = "</dd>";
+    private static final String CLOSE_DEFINITION_ITEM = "</dt>";
+    private static final String CLOSE_DEFINITION_LIST = "</dl>";
+    private static final String CLOSE_UNORDERED_LIST = "</ul>";
+    private static final String OPEN_DEFINITION_DESCRIPTION = "<dd>";
+    private static final String OPEN_DEFINITION_ITEM = "<dt>";
+    private static final String OPEN_UNORDERED_LIST = "<ul>";
+    private static final String EMPTY = "";
+    private static final String CLOSE_BLOCKQUOTE = "</blockquote>";
+    private static final String CLOSE_LIST_ELEMENT = "</li>";
+    private static final String CLOSE_ORDERED_LIST = "</ol>";
+    private static final String NOT_CHARACTER_NUMBER_OR_UNDERSCORE = "[^a-zA-Z0-9_]";
+    private static final String OPEN_BLOCKQUOTE = "<blockquote>";
+    private static final String OPEN_DEFINITION_LIST = "<dl>";
+    private static final String OPEN_LIST_ELEMENT = "<li>";
+    private static final String OPEN_ORDERED_LIST = "<ol>";
+    private static final String PIPE_ESCAPED = "&#124;";
 
-    /* Table properties */
-    private static final String[] tps = {"rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border"};
-    private static final Map<String, String[]> ps = new HashMap<String, String[]>();
+    /** List of properties which can be used in tables. */
+    private final static String[] TABLE_PROPERTIES = {"rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border"};
 
-    /* possible tags for headlines */
-    private static final String[] headlineTags = new String[]{"====", "===", "=="};
+    /** Map which contains possible values for deveral parameters. */
+    private final static Map<String, String[]> PROPERTY_VALUES = new HashMap<String, String[]>();
+
+    /** Tags for different types of headlines in wikiCode. */
+    private final static String[] HEADLINE_TAGS = new String[]{"====", "===", "=="};
 
     static {
-        /* Arrays must be sorted since Array.searchBinary() is used later. For more info see:
+        /* Arrays must be sorted since Array.searchBinary() is used later. For more info go to
          * http://java.sun.com/javase/6/docs/api/java/util/Arrays.html#binarySearch(T[], T, java.util.Comparator)
          */
-        Arrays.sort(headlineTags);
-        Arrays.sort(tps);
+        Arrays.sort(HEADLINE_TAGS);
+        Arrays.sort(TABLE_PROPERTIES);
         String[] array;
         Arrays.sort(array = new String[]{"void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border"});
-        ps.put("frame", array);
+        PROPERTY_VALUES.put("frame", array);
         Arrays.sort(array = new String[]{"none", "groups", "rows", "cols", "all"});
-        ps.put("rules", array);
+        PROPERTY_VALUES.put("rules", array);
         Arrays.sort(array = new String[]{"top", "middle", "bottom", "baseline"});
-        ps.put("valign", array);
+        PROPERTY_VALUES.put("valign", array);
         Arrays.sort(array = new String[]{"left", "right", "center"});
-        ps.put("align", array);
+        PROPERTY_VALUES.put("align", array);
     }
+    private static final String WIKI_CLOSE_LINK = "]]";
+    private static final String WIKI_OPEN_LINK = "[[";
+    private String numberedListLevel = EMPTY;
+    private String unorderedListLevel = EMPTY;
+    private String defListLevel = EMPTY;
+    private boolean processingCell = false;             //needed for prevention of double-execution of replaceHTML
+    private boolean processingDefList = false;          //needed for definition lists
+    private boolean escape = false;                     //needed for escape
+    private boolean escaped = false;                    //needed for <pre> not getting in the way
+    private boolean newRowStart = false;                //needed for the first row not to be empty
+    private boolean noList = false;                     //needed for handling of [= and <pre> in lists
+    private boolean processingPreformattedText = false; //needed for preformatted text
+    private boolean preformattedSpanning = false;       //needed for <pre> and </pre> spanning over several lines
+    private boolean replacedHtmlAlready = false;        //indicates if method replaceHTML has been used with line already
+    private boolean processingTable = false;            //needed for tables, because they reach over several lines
+    private int preindented = 0;                        //needed for indented <pre>s
+    private final List<String> tableOfContentElements = new ArrayList<String>();    //list of headlines used to create table of content of page
 
-    private String numListLevel = "";
-    private String ListLevel = "";
-    private String defListLevel = "";
-    private boolean cellprocessing = false;     //needed for prevention of double-execution of replaceHTML
-    private boolean defList = false;            //needed for definition lists
-    private boolean escape = false;             //needed for escape
-    private boolean escaped = false;            //needed for <pre> not getting in the way
-    private boolean newrowstart = false;        //needed for the first row not to be empty
-    private boolean nolist = false;             //needed for handling of [= and <pre> in lists
-    private boolean preformatted = false;       //needed for preformatted text
-    private boolean preformattedSpan = false;   //needed for <pre> and </pre> spanning over several lines
-    private boolean replacedHTML = false;       //indicates if method replaceHTML has been used with line already
-    private boolean table = false;              //needed for tables, because they reach over several lines
-    private int preindented = 0;                //needed for indented <pre>s
-    private final List<String> dirElements = new ArrayList<String>();    //list of headlines used to create diectory of page
-
-    /** Constructor of the class wikiCode */
-    public wikiCode(String address) {
+    /**
+     * Constructor
+     * @param address
+     */
+    public wikiCode(final String address) {
         super(address);
     }
 
-    protected String transform(
-            final BufferedReader reader,
-            final int length) throws IOException {
+    /**
+     * Transforms a text which contains wiki code to HTML fragment.
+     * @param reader contains the text to be transformed.
+     * @param length expected length of text, used to create buffer with right size.
+     * @return HTML fragment.
+     * @throws IOException in case input from reader can not be read.
+     */
+    protected String transform(final BufferedReader reader, final int length)
+            throws IOException {
         final StringBuilder out = new StringBuilder(length);
         String line;
         while ((line = reader.readLine()) != null) {
-            out.append(transformLine(line)).append(serverCore.CRLF_STRING);
+            out.append(processLineOfWikiCode(line)).append(serverCore.CRLF_STRING);
         }
-        return out.insert(0, directory()).toString();
+        return out.insert(0, createTableOfContents()).toString();
     }
 
+    // contributed by [FB], changes by [MN]
     /**
-     * Processes tables in the wiki code.
-     * @param input String which might or might not contain parts of a table.
-     * @return String with wiki code of parts of table replaced by HTML code for table.
+     * Processes tags which are connected to tables.
+     * @param line line of text to be transformed from wiki code to HTML
+     * @return HTML fragment
      */
-    //[FB], changes by [MN]
-    private String processTable(final String input) {
+    private String processTable(final String line) {
         //some variables that make it easier to change codes for the table
-        String line = "";
-        final String tableStart = "&#123;&#124;";                 // {|
-        final String newLine = "&#124;-";                         // |-
-        final String cellDivider = "&#124;&#124;";                // ||
-        final String tableEnd = "&#124;&#125;";                   // |}
-        final String attribDivider = "&#124;";                    // |
+        final StringBuilder out = new StringBuilder();
+        final String tableStart = "&#123;" + PIPE_ESCAPED;        // {|
+        final String newLine = PIPE_ESCAPED + "-";                // |-
+        final String cellDivider = PIPE_ESCAPED + PIPE_ESCAPED;   // ||
+        final String tableEnd = PIPE_ESCAPED + "&#125;";          // |}
+        final String attribDivider = PIPE_ESCAPED;                // |
         final int lenTableStart = tableStart.length();
         final int lenCellDivider = cellDivider.length();
         final int lenTableEnd = tableEnd.length();
         final int lenAttribDivider = attribDivider.length();
 
-        if ((input.startsWith(tableStart)) && (!table)) {
-            table = true;
-            newrowstart = true;
-            line = "<table";
-            if (input.trim().length() > lenTableStart) {
-                line += parseTableProperties(input.substring(lenTableStart).trim()).toString();
+        if ((line.startsWith(tableStart)) && (!processingTable)) {
+            processingTable = true;
+            newRowStart = true;
+            out.append("<table");
+            if (line.trim().length() > lenTableStart) {
+                out.append(filterTableProperties(line.substring(lenTableStart).trim()));
             }
-            line += ">";
-        } else if (input.startsWith(newLine) && (table)) {          // new row
-            if (!newrowstart) {
-                line += "\t</tr>\n";
+            out.append(">");
+        } else if (line.startsWith(newLine) && (processingTable)) {          // new row
+            if (!newRowStart) {
+                out.append("\t</tr>\n");
             } else {
-                newrowstart = false;
+                newRowStart = false;
             }
-            line = line + "\t<tr>";
-        } else if ((input.startsWith(cellDivider)) && (table)) {
-            line += "\t\t<td";
-            final int cellEnd = (input.indexOf(cellDivider, lenCellDivider) > 0) ? (input.indexOf(cellDivider, lenCellDivider)) : (input.length());
-            int propEnd = input.indexOf(attribDivider, lenCellDivider);
-            final int occImage = input.indexOf("[[Image:", lenCellDivider);
-            final int occEscape = input.indexOf("[=", lenCellDivider);
+            out.append("\t<tr>");
+        } else if ((line.startsWith(cellDivider)) && (processingTable)) {
+            out.append("\t\t<td");
+            final int cellEnd = (line.indexOf(cellDivider, lenCellDivider) > 0) ? (line.indexOf(cellDivider, lenCellDivider)) : (line.length());
+            int propEnd = line.indexOf(attribDivider, lenCellDivider);
+            final int occImage = line.indexOf("[[Image:", lenCellDivider);
+            final int occEscape = line.indexOf("[=", lenCellDivider);
             //If resultOf("[[Image:") is less than propEnd, that means that there is no
             //property for this cell, only an image. Without this, YaCy could get confused
             //by a | in [[Image:picture.png|alt-text]] or [[Image:picture.png|alt-text]]
             //Same for [= (part of [= =])
             if ((propEnd > lenCellDivider) && ((occImage > propEnd) || (occImage < 0)) && ((occEscape > propEnd) || (occEscape < 0))) {
-                propEnd = input.indexOf(attribDivider, lenCellDivider) + lenAttribDivider;
+                propEnd = line.indexOf(attribDivider, lenCellDivider) + lenAttribDivider;
             } else {
                 propEnd = cellEnd;
             }
@@ -152,27 +181,31 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             if (propEnd == cellEnd) {
                 propEnd = lenCellDivider;
             } else {
-                line += parseTableProperties(input.substring(lenCellDivider, propEnd - lenAttribDivider).trim()).toString();
+                out.append(filterTableProperties(line.substring(lenCellDivider, propEnd - lenAttribDivider).trim()));
             }
             // quick&dirty fix [MN]
             if (propEnd > cellEnd) {
                 propEnd = lenCellDivider;
             }
-            table = false;
-            cellprocessing = true;
-            line += ">" + processTable(input.substring(propEnd, cellEnd).trim()) + "</td>";
-            table = true;
-            cellprocessing = false;
-            if (cellEnd < input.length()) {
-                line += "\n" + processTable(input.substring(cellEnd));
+            processingTable = false;
+            processingCell = true;
+            out.append(">");
+            out.append(processTable(line.substring(propEnd, cellEnd).trim()));
+            out.append("</td>");
+            processingTable = true;
+            processingCell = false;
+            if (cellEnd < line.length()) {
+                out.append("\n");
+                out.append(processTable(line.substring(cellEnd)));
             }
-        } else if (input.startsWith(tableEnd) && (table)) {          // Table end
-            table = false;
-            line += "\t</tr>\n</table>" + input.substring(lenTableEnd);
+        } else if (line.startsWith(tableEnd) && (processingTable)) {          // Table end
+            processingTable = false;
+            out.append("\t</tr>\n</table>");
+            out.append(line.substring(lenTableEnd));
         } else {
-            line = input;
+            out.append(line);
         }
-        return line;
+        return out.toString();
     }
 
     // contributed by [MN], changes by [FB]
@@ -180,240 +213,256 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
      * Valid in this case means if they are a property for the table, tr or td
      * tag as stated in the HTML Pocket Reference by Jennifer Niederst (1st edition)
      * The method is important to avoid XSS attacks on the wiki via table properties.
-     * @param properties A string that may contain several table properties and/or junk.
-     * @return A string that only contains table properties.
+     * @param properties String which may contain several table properties and/or junk.
+     * @return String containing only table properties.
      */
-    private StringBuilder parseTableProperties(final String properties) {
-        final String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
-        final StringBuilder sb = new StringBuilder(properties.length());
+    private StringBuilder filterTableProperties(final String properties) {
+        final String[] values = properties.replaceAll("&quot;", EMPTY).split("[= ]");     //splitting the string at = and blanks
+        final StringBuilder stringBuilder = new StringBuilder(properties.length());
         String key, value;
         String[] posVals;
-        final int numberofvalues = values.length;
-        for (int i = 0; i < numberofvalues; i++) {
+        final int numberOfValues = values.length;
+        for (int i = 0; i < numberOfValues; i++) {
             key = values[i].trim();
             if (key.equals("nowrap")) {
-                addPair("nowrap", "nowrap", sb);
-            } else if (i + 1 < numberofvalues) {
+                appendKeyValuePair("nowrap", "nowrap", stringBuilder);
+            } else if (i + 1 < numberOfValues) {
                 value = values[++i].trim();
-                if ((key.equals("summary")) ||
-                        (key.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}")) ||
-                        ((key.equals("width") || key.equals("height")) && value.matches("\\d+%{0,1}")) ||
-                        ((posVals = ps.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0) ||
-                        (Arrays.binarySearch(tps, key) >= 0 && value.matches("\\d+"))) {
-                    addPair(key, value, sb);
+                if ((key.equals("summary"))
+                        || (key.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}"))
+                        || ((key.equals("width") || key.equals("height")) && value.matches("\\d+%{0,1}"))
+                        || ((posVals = PROPERTY_VALUES.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0)
+                        || (Arrays.binarySearch(TABLE_PROPERTIES, key) >= 0 && value.matches("\\d+"))) {
+                    appendKeyValuePair(key, value, stringBuilder);
                 }
             }
         }
-        return sb;
+        return stringBuilder;
     }
 
-    private StringBuilder addPair(final String key, final String value, final StringBuilder sb) {
-        return sb.append(" ").append(key).append("=\"").append(value).append("\"");
-    }
-
-    /** This method processes ordered lists.
+    /**
+     * Appends a key/value pair in HTML syntax to a given StringBuilder.
+     * @param key key to be appended.
+     * @param value value of key.
+     * @param stringBuilder this is what key/value are appended to.
+     * @return
      */
-    private String orderedList(String result) {
-        if (!nolist) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
-            int p0 = 0;
-            int p1 = 0;
+    private StringBuilder appendKeyValuePair(final String key, final String value, final StringBuilder stringBuilder) {
+        return stringBuilder.append(" ").append(key).append("=\"").append(value).append("\"");
+    }
+
+    /**
+     * Processes tags which are connected to ordered lists.
+     * @param line line of text to be transformed from wiki code to HTML
+     * @return HTML fragment
+     */
+    private String processOrderedList(String line) {
+        if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
+
             //# sorted Lists contributed by [AS]
             //## Sublist
-            if (result.startsWith(numListLevel + "#")) { //more #
-                p0 = result.indexOf(numListLevel);
-                p1 = result.length();
-                result = "<ol>" + serverCore.CRLF_STRING +
-                        "<li>" +
-                        result.substring(numListLevel.length() + 1, p1) +
-                        "</li>";
-                numListLevel += "#";
-            } else if (numListLevel.length() > 0 && result.startsWith(numListLevel)) { //equal number of #
-                p0 = result.indexOf(numListLevel);
-                p1 = result.length();
-                result = "<li>" +
-                        result.substring(numListLevel.length(), p1) +
-                        "</li>";
-            } else if (numListLevel.length() > 0) { //less #
-                int i = numListLevel.length();
-                String tmp = "";
+            if (line.startsWith(numberedListLevel + "#")) { //more #
+                line = OPEN_ORDERED_LIST + serverCore.CRLF_STRING
+                        + OPEN_LIST_ELEMENT
+                        + line.substring(numberedListLevel.length() + 1, line.length())
+                        + CLOSE_LIST_ELEMENT;
+                numberedListLevel += "#";
+            } else if (numberedListLevel.length() > 0 && line.startsWith(numberedListLevel)) { //equal number of #
+                line = OPEN_LIST_ELEMENT
+                        + line.substring(numberedListLevel.length(), line.length())
+                        + CLOSE_LIST_ELEMENT;
+            } else if (numberedListLevel.length() > 0) { //less #
+                int i = numberedListLevel.length();
+                String tmp = EMPTY;
 
-                while (!result.startsWith(numListLevel.substring(0, i))) {
-                    tmp += "</ol>";
+                while (!line.startsWith(numberedListLevel.substring(0, i))) {
+                    tmp += CLOSE_ORDERED_LIST;
                     i--;
                 }
-                numListLevel = numListLevel.substring(0, i);
-                p0 = numListLevel.length();
-                p1 = result.length();
+                numberedListLevel = numberedListLevel.substring(0, i);
+                final int positionOfOpeningTag = numberedListLevel.length();
+                final int positionOfClosingTag = line.length();
 
-                if (numListLevel.length() > 0) {
-                    result = tmp +
-                            "<li>" +
-                            result.substring(p0, p1) +
-                            "</li>";
+                if (numberedListLevel.length() > 0) {
+                    line = tmp
+                            + OPEN_LIST_ELEMENT
+                            + line.substring(positionOfOpeningTag, positionOfClosingTag)
+                            + CLOSE_LIST_ELEMENT;
                 } else {
-                    result = tmp + result.substring(p0, p1);
+                    line = tmp + line.substring(positionOfOpeningTag, positionOfClosingTag);
                 }
             }
-        // end contrib [AS]
+            // end contrib [AS]
         }
-        return result;
+        return line;
     }
 
-    /** This method processes unordered lists.
-     */
     //contributed by [AS] put into it's own method by [MN]
-    private String unorderedList(String result) {
-        if (!nolist) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
-            int p0 = 0;
-            int p1 = 0;
+    /**
+     * Processes tags which are connected to unordered lists.
+     * @param line line of text to be transformed from wiki code to HTML
+     * @return HTML fragment
+     */
+    private String processUnorderedList(String line) {
+        if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
             //contributed by [AS]
-            if (result.startsWith(ListLevel + "*")) { //more stars
-                p0 = result.indexOf(ListLevel);
-                p1 = result.length();
-                result = "<ul>" + serverCore.CRLF_STRING +
-                        "<li>" +
-                        result.substring(ListLevel.length() + 1, p1) +
-                        "</li>";
-                ListLevel += "*";
-            } else if (ListLevel.length() > 0 && result.startsWith(ListLevel)) { //equal number of stars
-                p0 = result.indexOf(ListLevel);
-                p1 = result.length();
-                result = "<li>" +
-                        result.substring(ListLevel.length(), p1) +
-                        "</li>";
-            } else if (ListLevel.length() > 0) { //less stars
-                int i = ListLevel.length();
-                String tmp = "";
+            if (line.startsWith(unorderedListLevel + ASTERISK)) { //more stars
+                line = OPEN_UNORDERED_LIST + serverCore.CRLF_STRING
+                        + OPEN_LIST_ELEMENT
+                        + line.substring(unorderedListLevel.length() + 1, line.length())
+                        + CLOSE_LIST_ELEMENT;
+                unorderedListLevel += ASTERISK;
+            } else if (unorderedListLevel.length() > 0 && line.startsWith(unorderedListLevel)) { //equal number of stars
+                line = OPEN_LIST_ELEMENT
+                        + line.substring(unorderedListLevel.length(), line.length())
+                        + CLOSE_LIST_ELEMENT;
+            } else if (unorderedListLevel.length() > 0) { //less stars
+                int i = unorderedListLevel.length();
+                String tmp = EMPTY;
 
-                while (ListLevel.length() >= i && !result.startsWith(ListLevel.substring(0, i))) {
-                    tmp += "</ul>";
+                while (unorderedListLevel.length() >= i && !line.startsWith(unorderedListLevel.substring(0, i))) {
+                    tmp += CLOSE_UNORDERED_LIST;
                     i--;
                 }
-                p0 = ListLevel.length();
-                if (i < p0) {
-                    ListLevel = ListLevel.substring(0, i);
-                    p0 = ListLevel.length();
+                int positionOfOpeningTag = unorderedListLevel.length();
+                if (i < positionOfOpeningTag) {
+                    unorderedListLevel = unorderedListLevel.substring(0, i);
+                    positionOfOpeningTag = unorderedListLevel.length();
                 }
-                p1 = result.length();
+                final int positionOfClosingTag = line.length();
 
-                if (ListLevel.length() > 0) {
-                    result = tmp +
-                            "<li>" +
-                            result.substring(p0, p1) +
-                            "</li>";
+                if (unorderedListLevel.length() > 0) {
+                    line = tmp
+                            + OPEN_LIST_ELEMENT
+                            + line.substring(positionOfOpeningTag, positionOfClosingTag)
+                            + CLOSE_LIST_ELEMENT;
                 } else {
-                    result = tmp + result.substring(p0, p1);
+                    line = tmp + line.substring(positionOfOpeningTag, positionOfClosingTag);
                 }
             }
-        //end contrib [AS]
+            //end contrib [AS]
         }
-        return result;
+        return line;
     }
 
-    /** This method processes definition lists.
-     */
     //contributed by [MN] based on unordered list code by [AS]
-    private String definitionList(String result) {
-        if (!nolist) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
-            int p0 = 0;
-            int p1 = 0;
-            if (result.startsWith(defListLevel + ";")) { //more semicolons
-                String dt = "";
-                String dd = "";
-                p0 = result.indexOf(defListLevel);
-                p1 = result.length();
-                final String resultCopy = result.substring(defListLevel.length() + 1, p1);
-                if ((p0 = resultCopy.indexOf(":")) > 0) {
-                    dt = resultCopy.substring(0, p0);
-                    dd = resultCopy.substring(p0 + 1);
-                    result = "<dl>" + "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                    defList = true;
+    /**
+     * Processes tags which are connected to definition lists.
+     * @param line line of text to be transformed from wiki code to HTML
+     * @return HTML fragment
+     */
+    private String processDefinitionList(String line) {
+        if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
+
+            if (line.startsWith(defListLevel + ";")) { //more semicolons
+                String definitionItem = EMPTY;
+                String definitionDescription = EMPTY;
+                final int positionOfOpeningTag;
+                final int positionOfClosingTag = line.length();
+                final String copyOfLine = line.substring(defListLevel.length() + 1, positionOfClosingTag);
+                if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
+                    definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
+                    definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
+                    line = OPEN_DEFINITION_LIST +
+                            OPEN_DEFINITION_ITEM +
+                            definitionItem +
+                            CLOSE_DEFINITION_ITEM +
+                            OPEN_DEFINITION_DESCRIPTION +
+                            definitionDescription;
+                    processingDefList = true;
                 }
                 defListLevel += ";";
-            } else if (defListLevel.length() > 0 && result.startsWith(defListLevel)) { //equal number of semicolons
-                String dt = "";
-                String dd = "";
-                p0 = result.indexOf(defListLevel);
-                p1 = result.length();
-                final String resultCopy = result.substring(defListLevel.length(), p1);
-                if ((p0 = resultCopy.indexOf(":")) > 0) {
-                    dt = resultCopy.substring(0, p0);
-                    dd = resultCopy.substring(p0 + 1);
-                    result = "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                    defList = true;
+            } else if (defListLevel.length() > 0 && line.startsWith(defListLevel)) { //equal number of semicolons
+                String definitionItem = EMPTY;
+                String definitionDescription = EMPTY;
+                final int positionOfOpeningTag;
+                final int positionOfClosingTag = line.length();
+                final String copyOfLine = line.substring(defListLevel.length(), positionOfClosingTag);
+                if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
+                    definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
+                    definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
+                    line = OPEN_DEFINITION_ITEM +
+                            definitionItem +
+                            CLOSE_DEFINITION_ITEM +
+                            OPEN_DEFINITION_DESCRIPTION +
+                            definitionDescription;
+                    processingDefList = true;
                 }
             } else if (defListLevel.length() > 0) { //less semicolons
-                String dt = "";
-                String dd = "";
+                String definitionItem = EMPTY;
+                String definitionDescription = EMPTY;
                 int i = defListLevel.length();
-                String tmp = "";
-                while (!result.startsWith(defListLevel.substring(0, i))) {
-                    tmp += "</dd></dl>";
+                String tmp = EMPTY;
+                while (!line.startsWith(defListLevel.substring(0, i))) {
+                    tmp = CLOSE_DEFINITION_DESCRIPTION + CLOSE_DEFINITION_LIST;
                     i--;
                 }
                 defListLevel = defListLevel.substring(0, i);
-                p0 = defListLevel.length();
-                p1 = result.length();
+                int positionOfOpeningTag = defListLevel.length();
+                final int positionOfClosingTag = line.length();
                 if (defListLevel.length() > 0) {
-                    final String resultCopy = result.substring(p0, p1);
-                    if ((p0 = resultCopy.indexOf(":")) > 0) {
-                        dt = resultCopy.substring(0, p0);
-                        dd = resultCopy.substring(p0 + 1);
-                        result = tmp + "<dt>" + dt + "</dt>" + "<dd>" + dd;
-                        defList = true;
+                    final String copyOfLine = line.substring(positionOfOpeningTag, positionOfClosingTag);
+                    if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
+                        definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
+                        definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
+                        line = tmp + OPEN_DEFINITION_ITEM + definitionItem + CLOSE_DEFINITION_ITEM + OPEN_DEFINITION_DESCRIPTION + definitionDescription;
+                        processingDefList = true;
                     }
                 } else {
-                    result = tmp + result.substring(p0, p1);
+                    line = tmp + line.substring(positionOfOpeningTag, positionOfClosingTag);
                 }
             }
         }
-        return result;
+        return line;
     }
 
-    /** This method processes links and images.
-     */
     //contributed by [AS] except where stated otherwise
-    private String linksAndImages(String result) {
+    /**
+     * Processes tags which are connected to links and images.
+     * @param line line of text to be transformed from wiki code to HTML
+     * @return HTML fragment
+     */
+    private String processLinksAndImages(String line) {
 
         // create links
         String kl, kv, alt, align;
         int p;
-        int p0 = 0;
-        int p1 = 0;
+        int positionOfOpeningTag;
+        int positionOfClosingTag;
         // internal links and images
-        while ((p0 = result.indexOf("[[")) >= 0) {
-            p1 = result.indexOf("]]", p0 + 2);
-            if (p1 <= p0) {
+        while ((positionOfOpeningTag = line.indexOf(WIKI_OPEN_LINK)) >= 0) {
+            positionOfClosingTag = line.indexOf(WIKI_CLOSE_LINK, positionOfOpeningTag + WIKI_OPEN_LINK.length());
+            if (positionOfClosingTag <= positionOfOpeningTag) {
                 break;
             }
-            kl = result.substring(p0 + 2, p1);
+            kl = line.substring(positionOfOpeningTag + WIKI_OPEN_LINK.length(), positionOfClosingTag);
 
             // this is the part of the code that's responsible for images
             // contributed by [MN]
             if (kl.startsWith("Image:")) {
-                alt = "";
-                align = "";
-                kv = "";
+                alt = EMPTY;
+                align = EMPTY;
+                kv = EMPTY;
                 kl = kl.substring(6);
 
                 // are there any arguments for the image?
-                if ((p = kl.indexOf("&#124;")) > 0) {
+                if ((p = kl.indexOf(PIPE_ESCAPED)) > 0) {
                     kv = kl.substring(p + 6);
                     kl = kl.substring(0, p);
                     // if there are 2 arguments, write them into ALIGN and ALT
-                    if ((p = kv.indexOf("&#124;")) > 0) {
+                    if ((p = kv.indexOf(PIPE_ESCAPED)) > 0) {
                         align = kv.substring(0, p);
                         //checking validity of value for align. Only non browser specific
                         //values get supported. Not supported: absmiddle, baseline, texttop
-                        if ((align.equals("bottom")) ||
-                                (align.equals("center")) ||
-                                (align.equals("left")) ||
-                                (align.equals("middle")) ||
-                                (align.equals("right")) ||
-                                (align.equals("top"))) {
+                        if ((align.equals("bottom"))
+                                || (align.equals("center"))
+                                || (align.equals("left"))
+                                || (align.equals("middle"))
+                                || (align.equals("right"))
+                                || (align.equals("top"))) {
                             align = " align=\"" + align + "\"";
                         } else {
-                            align = "";
+                            align = EMPTY;
                         }
                         alt = " alt=\"" + kv.substring(p + 6) + "\"";
                     } // if there is just one, put it into ALT
@@ -431,27 +480,27 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     kl = "http://" + super.address + "/" + kl;
                 }
 
-                result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt + ">" + result.substring(p1 + 2);
+                line = line.substring(0, positionOfOpeningTag) + "<img src=\"" + kl + "\"" + align + alt + ">" + line.substring(positionOfClosingTag + 2);
             } // end contrib [MN]
             // if it's no image, it might be an internal link
             else {
-                if ((p = kl.indexOf("&#124;")) > 0) {
+                if ((p = kl.indexOf(PIPE_ESCAPED)) > 0) {
                     kv = kl.substring(p + 6);
                     kl = kl.substring(0, p);
                 } else {
                     kv = kl;
                 }
-                result = result.substring(0, p0) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + result.substring(p1 + 2); // oob exception in append() !
+                line = line.substring(0, positionOfOpeningTag) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + 2); // oob exception in append() !
             }
         }
 
         // external links
-        while ((p0 = result.indexOf("[")) >= 0) {
-            p1 = result.indexOf("]", p0 + 1);
-            if (p1 <= p0) {
+        while ((positionOfOpeningTag = line.indexOf("[")) >= 0) {
+            positionOfClosingTag = line.indexOf("]", positionOfOpeningTag + 1);
+            if (positionOfClosingTag <= positionOfOpeningTag) {
                 break;
             }
-            kl = result.substring(p0 + 1, p1);
+            kl = line.substring(positionOfOpeningTag + 1, positionOfClosingTag);
             if ((p = kl.indexOf(" ")) > 0) {
                 kv = kl.substring(p + 1);
                 kl = kl.substring(0, p);
@@ -467,81 +516,85 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             if (kl.indexOf("://") < 1) {
                 kl = "http://" + super.address + "/" + kl;
             }
-            result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
+            line = line.substring(0, positionOfOpeningTag) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + 1);
         }
-        return result;
+        return line;
     }
 
-    /** This method handles the preformatted tags <pre> </pre> */
     //contributed by [MN]
-    private String preformattedTag(String result) {
-        int p0 = 0;
-        int p1 = 0;
+    /**
+     * Processes tags which are connected preformatted text (&lt;pre&gt; &lt;/pre&gt;).
+     * @param line line of text to be transformed from wiki code to HTML
+     * @return HTML fragment
+     */
+    private String processPreformattedText(String line) {
+        int positionOfOpeningTag;
+        int positionOfClosingTag;
         //both <pre> and </pre> in the same line
-        if (((p0 = result.indexOf("&lt;pre&gt;")) >= 0) && ((p1 = result.indexOf("&lt;/pre&gt;")) > 0) && (!(escaped))) {
-            if (p0 < p1) {
-                String preformattedText = "<pre style=\"border:dotted;border-width:thin\">" + result.substring(p0 + 11, p1) + "</pre>";
+        if (((positionOfOpeningTag = line.indexOf("&lt;pre&gt;")) >= 0) && ((positionOfClosingTag = line.indexOf("&lt;/pre&gt;")) > 0) && (!(escaped))) {
+            if (positionOfOpeningTag < positionOfClosingTag) {
+                String preformattedText = "<pre style=\"border:dotted;border-width:thin\">" + line.substring(positionOfOpeningTag + 11, positionOfClosingTag) + "</pre>";
                 preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
-                result = transformLine(result.substring(0, p0).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + result.substring(p1 + 12).replaceAll("!pre!", "!pre!!"));
-                result = result.replaceAll("!pre!txt!", preformattedText);
-                result = result.replaceAll("!pre!!", "!pre!");
+                line = processLineOfWikiCode(line.substring(0, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + line.substring(positionOfClosingTag + 12).replaceAll("!pre!", "!pre!!"));
+                line = line.replaceAll("!pre!txt!", preformattedText);
+                line = line.replaceAll("!pre!!", "!pre!");
             } //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
             else {
-                preformatted = true;
-                final String temp1 = transformLine(result.substring(0, p0 - 1).replaceAll("!tmp!", "!tmp!!") + "!tmp!txt!");
-                nolist = true;
-                final String temp2 = transformLine(result.substring(p0));
-                nolist = false;
-                result = temp1.replaceAll("!tmp!txt!", temp2);
-                result = result.replaceAll("!tmp!!", "!tmp!");
-                preformatted = false;
+                processingPreformattedText = true;
+                final String temp1 = processLineOfWikiCode(line.substring(0, positionOfOpeningTag - 1).replaceAll("!tmp!", "!tmp!!") + "!tmp!txt!");
+                noList = true;
+                final String temp2 = processLineOfWikiCode(line.substring(positionOfOpeningTag));
+                noList = false;
+                line = temp1.replaceAll("!tmp!txt!", temp2);
+                line = line.replaceAll("!tmp!!", "!tmp!");
+                processingPreformattedText = false;
             }
         } //start <pre>
-        else if (((p0 = result.indexOf("&lt;pre&gt;")) >= 0) && (!preformattedSpan) && (!escaped)) {
-            preformatted = true;    //prevent surplus line breaks
-            String bq = "";  //gets filled with <blockquote>s as needed
-            String preformattedText = "<pre style=\"border:dotted;border-width:thin\">" + result.substring(p0 + 11);
+        else if (((positionOfOpeningTag = line.indexOf("&lt;pre&gt;")) >= 0) && (!preformattedSpanning) && (!escaped)) {
+            processingPreformattedText = true;    //prevent surplus line breaks
+            final StringBuilder openBlockQuoteTags = new StringBuilder();  //gets filled with <blockquote>s as needed
+            String preformattedText = "<pre style=\"border:dotted;border-width:thin\">" + line.substring(positionOfOpeningTag + 11);
             preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
             //taking care of indented lines
-            while (result.substring(preindented, p0).startsWith(":")) {
+            while (line.substring(preindented, positionOfOpeningTag).startsWith(":")) {
                 preindented++;
-                bq = bq + "<blockquote>";
+                openBlockQuoteTags.append(OPEN_BLOCKQUOTE);
             }
-            result = transformLine(result.substring(preindented, p0).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
-            result = bq + result.replaceAll("!pre!txt!", preformattedText);
-            result = result.replaceAll("!pre!!", "!pre!");
-            preformattedSpan = true;
+            line = processLineOfWikiCode(line.substring(preindented, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
+            line = openBlockQuoteTags + line.replaceAll("!pre!txt!", preformattedText);
+            line = line.replaceAll("!pre!!", "!pre!");
+            preformattedSpanning = true;
         } //end </pre>
-        else if (((p0 = result.indexOf("&lt;/pre&gt;")) >= 0) && (preformattedSpan) && (!escaped)) {
-            preformattedSpan = false;
-            String bq = ""; //gets filled with </blockquote>s as needed
-            String preformattedText = result.substring(0, p0) + "</pre>";
+        else if (((positionOfOpeningTag = line.indexOf("&lt;/pre&gt;")) >= 0) && (preformattedSpanning) && (!escaped)) {
+            preformattedSpanning = false;
+            final StringBuilder endBlockQuoteTags = new StringBuilder(); //gets filled with </blockquote>s as needed
+            String preformattedText = line.substring(0, positionOfOpeningTag) + "</pre>";
             preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
             //taking care of indented lines
             while (preindented > 0) {
-                bq = bq + "</blockquote>";
+                endBlockQuoteTags.append(CLOSE_BLOCKQUOTE);
                 preindented--;
             }
-            result = transformLine("!pre!txt!" + result.substring(p0 + 12).replaceAll("!pre!", "!pre!!"));
-            result = result.replaceAll("!pre!txt!", preformattedText) + bq;
-            result = result.replaceAll("!pre!!", "!pre!");
-            preformatted = false;
+            line = processLineOfWikiCode("!pre!txt!" + line.substring(positionOfOpeningTag + 12).replaceAll("!pre!", "!pre!!"));
+            line = line.replaceAll("!pre!txt!", preformattedText) + endBlockQuoteTags;
+            line = line.replaceAll("!pre!!", "!pre!");
+            processingPreformattedText = false;
         } //Getting rid of surplus </pre>
-        else if (((p0 = result.indexOf("&lt;/pre&gt;")) >= 0) && (!preformattedSpan) && (!escaped)) {
-            while ((p0 = result.indexOf("&lt;/pre&gt;")) >= 0) {
-                result = result.substring(0, p0) + result.substring(p0 + 12);
+        else if (((positionOfOpeningTag = line.indexOf("&lt;/pre&gt;")) >= 0) && (!preformattedSpanning) && (!escaped)) {
+            while ((positionOfOpeningTag = line.indexOf("&lt;/pre&gt;")) >= 0) {
+                line = line.substring(0, positionOfOpeningTag) + line.substring(positionOfOpeningTag + 12);
             }
-            result = transformLine(result);
+            line = processLineOfWikiCode(line);
         }
-        return result;
+        return line;
     }
 
-    /** This method creates a directory for a wiki page.
-     * @return directory of the wiki
-     */
     //method contributed by [MN]
-    private StringBuilder directory() {
-        StringBuilder directory = new StringBuilder();
+    /** Creates table of contents for a wiki page.
+     * @return HTML fragment
+     */
+    private StringBuilder createTableOfContents() {
+        final StringBuilder directory = new StringBuilder();
         String element;
         int s = 0;
         int level = 1;
@@ -549,27 +602,29 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         int level2 = 0;
         int level3 = 0;
         int doubles = 0;
-        String anchorext = "";
-        if ((s = dirElements.size()) > 2) {
+        String anchorext = EMPTY;
+        if ((s = tableOfContentElements.size()) > 2) {
             directory.append("<table><tr><td><div class=\"WikiTOCBox\">\n");
             for (int i = 0; i < s; i++) {
-                if (i >= dirElements.size()) {
+                if (i >= tableOfContentElements.size()) {
                     break;
                 }
-                element = dirElements.get(i);
-                if (element == null) continue;
+                element = tableOfContentElements.get(i);
+                if (element == null) {
+                    continue;
+                }
                 //counting double headlines
                 doubles = 0;
                 for (int j = 0; j < i; j++) {
-                    if (j >= dirElements.size()) {
+                    if (j >= tableOfContentElements.size()) {
                         break;
                     }
-                    String d = dirElements.get(j);
+                    String d = tableOfContentElements.get(j);
                     if (d == null || d.length() < 1) {
                         continue;
                     }
-                    String a = d.substring(1).replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "");
-                    String b = element.substring(1).replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "");
+                    String a = d.substring(1).replaceAll(" ", "_").replaceAll(NOT_CHARACTER_NUMBER_OR_UNDERSCORE, EMPTY);
+                    String b = element.substring(1).replaceAll(" ", "_").replaceAll(NOT_CHARACTER_NUMBER_OR_UNDERSCORE, EMPTY);
                     if (a.equals(b)) {
                         doubles++;
                     }
@@ -588,7 +643,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     final String temp = element.substring(1);
                     element = level1 + "." + level2 + "." + level3 + " " + temp;
                     directory.append("&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#");
-                    directory.append(temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""));
+                    directory.append(temp.replaceAll(" ", "_").replaceAll(NOT_CHARACTER_NUMBER_OR_UNDERSCORE, EMPTY));
                     directory.append(anchorext);
                     directory.append("\" class=\"WikiTOC\">");
                     directory.append(element);
@@ -605,7 +660,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     final String temp = element.substring(1);
                     element = level1 + "." + level2 + " " + temp;
                     directory.append("&nbsp;&nbsp;<a href=\"#");
-                    directory.append(temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""));
+                    directory.append(temp.replaceAll(" ", "_").replaceAll(NOT_CHARACTER_NUMBER_OR_UNDERSCORE, EMPTY));
                     directory.append(anchorext);
                     directory.append("\" class=\"WikiTOC\">");
                     directory.append(element);
@@ -620,17 +675,18 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     final String temp = element.substring(1);
                     element = level1 + ". " + temp;
                     directory.append("<a href=\"#");
-                    directory.append(temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""));
-                    directory.append(anchorext + "\" class=\"WikiTOC\">");
+                    directory.append(temp.replaceAll(" ", "_").replaceAll(NOT_CHARACTER_NUMBER_OR_UNDERSCORE, EMPTY));
+                    directory.append(anchorext);
+                    directory.append("\" class=\"WikiTOC\">");
                     directory.append(element);
                     directory.append("</a><br />\n");
                 }
-                anchorext = "";
+                anchorext = EMPTY;
             }
             directory.append("</div></td></tr></table>\n");
         }
-        if (!dirElements.isEmpty()) {
-            dirElements.clear();
+        if (!tableOfContentElements.isEmpty()) {
+            tableOfContentElements.clear();
         }
         return directory;
     }
@@ -647,114 +703,114 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     //[MN]
     private String pairReplace(String input, final String pat, final String repl1, final String repl2) {
         String direlem = null;    //string to keep headlines until they get added to List dirElements
-        int p0 = 0;
-        int p1 = 0;
-        final int l = pat.length();
+        int firstPosition;
+        final int secondPosition;
+        final int strLen = pat.length();
         //replace pattern if a pair of the pattern can be found in the line
-        if (((p0 = input.indexOf(pat)) >= 0) && ((p1 = input.indexOf(pat, p0 + l)) >= 0)) {
+        if (((firstPosition = input.indexOf(pat)) >= 0) && ((secondPosition = input.indexOf(pat, firstPosition + strLen)) >= 0)) {
             //extra treatment for headlines
-            if (Arrays.binarySearch(headlineTags, pat) >= 0) {
+            if (Arrays.binarySearch(HEADLINE_TAGS, pat) >= 0) {
                 //add anchor and create headline
-                direlem = input.substring(p0 + l, p1);
+                direlem = input.substring(firstPosition + strLen, secondPosition);
                 if (direlem != null) {
                     //counting double headlines
                     int doubles = 0;
-                    for (int i = 0; i < dirElements.size(); i++) {
+                    for (int i = 0; i < tableOfContentElements.size(); i++) {
                         // no element with null value should ever be in directory
-                        assert (dirElements.get(i) != null);
+                        assert (tableOfContentElements.get(i) != null);
 
-                        if (dirElements.size() > i && dirElements.get(i).substring(1).equals(direlem)) {
+                        if (tableOfContentElements.size() > i && tableOfContentElements.get(i).substring(1).equals(direlem)) {
                             doubles++;
                         }
                     }
-                    String anchor = direlem.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""); //replace blanks with underscores and delete everything thats not a regular character, a number or _
+                    String anchor = direlem.replaceAll(" ", "_").replaceAll(NOT_CHARACTER_NUMBER_OR_UNDERSCORE, EMPTY); //replace blanks with underscores and delete everything thats not a regular character, a number or _
                     //if there are doubles, add underscore and number of doubles plus one
                     if (doubles > 0) {
                         anchor = anchor + "_" + (doubles + 1);
                     }
-                    input = input.substring(0, p0) + "<a name=\"" + anchor + "\"></a>" + repl1 +
-                            direlem + repl2 + input.substring(p1 + l);
+                    input = input.substring(0, firstPosition) + "<a name=\"" + anchor + "\"></a>" + repl1
+                            + direlem + repl2 + input.substring(secondPosition + strLen);
                     //add headlines to list of headlines (so TOC can be created)
-                    if (Arrays.binarySearch(headlineTags, pat) >= 0) {
-                        dirElements.add((pat.length() - 1) + direlem);
+                    if (Arrays.binarySearch(HEADLINE_TAGS, pat) >= 0) {
+                        tableOfContentElements.add((pat.length() - 1) + direlem);
                     }
                 }
             } else {
-                input = input.substring(0, p0) + repl1 +
-                        (input.substring(p0 + l, p1)) + repl2 +
-                        input.substring(p1 + l);
+                input = input.substring(0, firstPosition) + repl1
+                        + (input.substring(firstPosition + strLen, secondPosition)) + repl2
+                        + input.substring(secondPosition + strLen);
             }
         }
-        //recursion if a pair of the pattern can still be found in the line
-        if (((p0 = input.indexOf(pat)) >= 0) && (input.indexOf(pat, p0 + l) >= 0)) {
+        //recursion if another pair of the pattern can still be found in the line
+        if (((firstPosition = input.indexOf(pat)) >= 0) && (input.indexOf(pat, firstPosition + strLen) >= 0)) {
             input = pairReplace(input, pat, repl1, repl2);
         }
         return input;
     }
 
-    /** Replaces wiki tags with HTML tags.
-     * @param result a line of text
-     * @return the line of text with HTML tags instead of wiki tags
+    /** Replaces wiki tags with HTML tags in one line of text.
+     * @param line line of text to be transformed from wiki code to HTML
+     * @return HTML fragment
      */
-    public String transformLine(String result) {
+    public String processLineOfWikiCode(String line) {
         //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
-        if (!replacedHTML || preformattedSpan) {
-            result = CharacterCoding.unicode2html(result, true);
-            replacedHTML = true;
+        if (!replacedHtmlAlready || preformattedSpanning) {
+            line = CharacterCoding.unicode2html(line, true);
+            replacedHtmlAlready = true;
         }
 
         //check if line contains preformatted symbols or if we are in a preformatted sequence already.
-        if ((result.indexOf("&lt;pre&gt;") >= 0) || (result.indexOf("&lt;/pre&gt;") >= 0) || (preformattedSpan)) {
-            result = preformattedTag(result);
+        if ((line.indexOf("&lt;pre&gt;") >= 0) || (line.indexOf("&lt;/pre&gt;") >= 0) || (preformattedSpanning)) {
+            line = processPreformattedText(line);
         } else {
 
             //tables first -> wiki-tags in cells can be treated after that
-            result = processTable(result);
+            line = processTable(line);
 
             // format lines
-            if (result.length() > 0 && result.charAt(0) == ' ') {
-                result = "<tt>" + result.substring(1) + "</tt>";
+            if (line.length() > 0 && line.charAt(0) == ' ') {
+                line = "<tt>" + line.substring(1) + "</tt>";
             }
-            if (result.startsWith("----")) {
-                result = "<hr />";
+            if (line.startsWith("----")) {
+                line = "<hr />";
             }
 
             // citings contributed by [MN]
-            if (result.length() > 0 && result.charAt(0) == ':') {
-                String head = "";
-                String tail = "";
-                while (result.length() > 0 && result.charAt(0) == ':') {
-                    head = head + "<blockquote>";
-                    tail = tail + "</blockquote>";
-                    result = result.substring(1);
+            if (line.length() > 0 && line.charAt(0) == ':') {
+                final StringBuilder head = new StringBuilder();
+                final StringBuilder tail = new StringBuilder();
+                while (line.length() > 0 && line.charAt(0) == ':') {
+                    head.append(OPEN_BLOCKQUOTE);
+                    tail.append(CLOSE_BLOCKQUOTE);
+                    line = line.substring(1);
                 }
-                result = head + result + tail;
+                line = head + line + tail;
             }
             // end contrib [MN]	
 
             // format headers
-            result = pairReplace(result, "====", "<h4>", "</h4>");
-            result = pairReplace(result, "===", "<h3>", "</h3>");
-            result = pairReplace(result, "==", "<h2>", "</h2>");
+            line = pairReplace(line, "====", "<h4>", "</h4>");
+            line = pairReplace(line, "===", "<h3>", "</h3>");
+            line = pairReplace(line, "==", "<h2>", "</h2>");
 
-            result = pairReplace(result, "'''''", "<b><i>", "</i></b>");
-            result = pairReplace(result, "'''", "<b>", "</b>");
-            result = pairReplace(result, "''", "<i>", "</i>");
+            line = pairReplace(line, "'''''", "<b><i>", "</i></b>");
+            line = pairReplace(line, "'''", "<b>", "</b>");
+            line = pairReplace(line, "''", "<i>", "</i>");
 
-            result = unorderedList(result);
-            result = orderedList(result);
-            result = definitionList(result);
+            line = processUnorderedList(line);
+            line = processOrderedList(line);
+            line = processDefinitionList(line);
 
-            result = linksAndImages(result);
+            line = processLinksAndImages(line);
 
         }
 
-        if (!preformatted) {
-            replacedHTML = false;
+        if (!processingPreformattedText) {
+            replacedHtmlAlready = false;
         }
-        if ((result.endsWith("</li>")) || (defList) || (escape) || (preformatted) || (table) || (cellprocessing)) {
-            return result;
+        if (!(line.endsWith(CLOSE_LIST_ELEMENT) || processingDefList || escape || processingPreformattedText || processingTable || processingCell)) {
+            line += "<br />";
         }
-        return result + "<br />";
+        return line;
     }
 }
