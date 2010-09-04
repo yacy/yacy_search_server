@@ -205,14 +205,12 @@ public class yacysearchitem {
             final ArrayList<MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;
             if (media != null) {
-                MediaSnippet ms;
                 int c = 0;
-                for (int i = 0; i < media.size(); i++) {
-                    ms = media.get(i);
-                    prop.putHTML("content_items_" + i + "_href", ms.href.toNormalform(true, false));
-                    prop.putHTML("content_items_" + i + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), urllength));
-                    prop.putHTML("content_items_" + i + "_name", shorten(ms.name, namelength));
-                    prop.put("content_items_" + i + "_col", (col) ? "0" : "1");
+                for (MediaSnippet ms : media) {
+                    prop.putHTML("content_items_" + c + "_href", ms.href.toNormalform(true, false));
+                    prop.putHTML("content_items_" + c + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), urllength));
+                    prop.putHTML("content_items_" + c + "_name", shorten(ms.name, namelength));
+                    prop.put("content_items_" + c + "_col", (col) ? "0" : "1");
                     c++;
                     col = !col;
                 }

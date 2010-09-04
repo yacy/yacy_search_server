@@ -281,7 +281,7 @@ public class ResultFetcher {
         // check if we already retrieved this item
     	// (happens if a search pages is accessed a second time)
         EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "obtain one result entry - start", 0, 0), false, 30000, ProfilingGraph.maxTime);
-        if (this.result.sizeStore() > item) {
+        if (this.result.size() > item) {
             // we have the wanted result already in the result array .. return that
             return this.result.element(item).element;
         }
@@ -319,32 +319,38 @@ public class ResultFetcher {
     }
     
     public MediaSnippet oneImage(final int item) {
-        // check if we already retrieved this item (happens if a search pages is accessed a second time)
-        if (this.images.sizeStore() > item) {
-            // we have the wanted result already in the result array .. return that
-            return this.images.element(item).element;
-        }
+        // always look for a next object if there are way too less
+        if (this.images.size() <= item + 10) fillImagesCache();
+
+        // check if we already retrieved the item
+        if (this.images.size() > item) return this.images.element(item).element;
         
-        // generate result object
-        final ResultEntry result = nextResult();
-        MediaSnippet ms;
-        if (result != null) {
-            // iterate over all images in the result
-            final ArrayList<MediaSnippet> imagemedia = result.mediaSnippets();
-            if (imagemedia != null) {
-                for (int j = 0; j < imagemedia.size(); j++) {
-                    ms = imagemedia.get(j);
-                    images.push(ms, Long.valueOf(ms.ranking));
-                    //System.out.println("*** image " + ms.href.hash() + " images.size = " + images.size() + "/" + images.size());
-                }
-            }
-        }
+        // look again if there are not enough for presentation
+        while (this.images.size() <= item) {
+            if (fillImagesCache() == 0) break;
+        }        
+        if (this.images.size() <= item) return null;
         
         // now take the specific item from the image stack
-        if (this.images.size() <= item) return null;
         return this.images.element(item).element;
     }
     
+    private int fillImagesCache() {
+        ResultEntry result = nextResult();
+        int c = 0;
+        if (result == null) return c;
+        // iterate over all images in the result
+        final ArrayList<MediaSnippet> imagemedia = result.mediaSnippets();
+        if (imagemedia != null) {
+            for (MediaSnippet ms: imagemedia) {
+                images.push(ms, Long.valueOf(ms.ranking));
+                c++;
+                System.out.println("*** image " + new String(ms.href.hash()) + " images.size = " + images.size() + "/" + images.size());
+            }
+        }
+        return c;
+    }
+     
     public ArrayList<SortStack<ResultEntry>.stackElement> completeResults(final long waitingtime) {
         final long timeout = System.currentTimeMillis() + waitingtime;
         while ((result.size() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {

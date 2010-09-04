@@ -70,10 +70,6 @@ public class SortStore<E> extends SortStack<E> {
     public int size() {
         return super.size() + this.offstack.size();
     }
-    
-    public int sizeStore() {
-        return this.offstack.size();
-    }
 
     public void push(final E element, final Long weight) {
         if (this.offset.containsKey(element)) return;
