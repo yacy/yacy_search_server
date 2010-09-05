@@ -65,15 +65,15 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @param v
      */
     public final synchronized V put(final K s, final V v) {
-        V r = null;
         if (this.levelB.containsKey(s)) {
-            r = this.levelB.put(s, v);
+            V r = this.levelB.put(s, v);
             assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
+            return r;
         } else {
-            r = this.levelA.put(s, v);
+            V r = this.levelA.put(s, v);
             assert (this.levelA.size() <= cacheSize); // the cache should shrink automatically
+            return r;
         }
-        return r;
     }
     
     /**

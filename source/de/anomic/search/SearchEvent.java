@@ -388,7 +388,7 @@ public final class SearchEvent {
                 if (oldAbstract == null) {
                     // new abstracts in the cache
                     abstractsCache.put(wordhash, singleAbstract);
-                } else {
+                } else synchronized (oldAbstract) {
                     // extend the abstracts in the cache: join the single abstracts
                     for (Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
                         String urlhash = oneref.getKey();

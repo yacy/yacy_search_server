@@ -100,9 +100,14 @@ public final class DateFormatter {
      * @param date The Date instance to transform.
      * @return A fixed width (20 chars) ISO8601 date String.
      */
+    private static long FORMAT_ISO8601_last_time = 0;
+    private static String FORMAT_ISO8601_last_format = "";
     public static final String formatISO8601(final Date date) {
         if (date == null) return "";
-        return format(FORMAT_ISO8601, date);
+        if (Math.abs(date.getTime() - FORMAT_ISO8601_last_time) < 1000) return FORMAT_ISO8601_last_format;
+        FORMAT_ISO8601_last_format = format(FORMAT_ISO8601, date);
+        FORMAT_ISO8601_last_time = date.getTime();
+        return FORMAT_ISO8601_last_format;
     }
     public static final String formatANSIC(final Date date) {
         if (date == null) return "";
@@ -113,7 +118,49 @@ public final class DateFormatter {
         if (date == null) return "";
         return FORMAT_RFC1123_SHORT.format(date);
     }
+
+    /**
+     * Identical to {@link #formatShortDay(Date)}, but for short second format.
+     */
+    private static long FORMAT_SHORT_SECOND_last_time = 0;
+    private static String FORMAT_SHORT_SECOND_last_format = "";
+    public static String formatShortSecond(final Date date) {
+        if (date == null) return "";
+        if (Math.abs(date.getTime() - FORMAT_SHORT_SECOND_last_time) < 1000) return FORMAT_SHORT_SECOND_last_format;
+        FORMAT_SHORT_SECOND_last_format = format(FORMAT_SHORT_SECOND, date);
+        FORMAT_SHORT_SECOND_last_time = date.getTime();
+        return FORMAT_SHORT_SECOND_last_format;
+    }
     
+    public static String formatShortMilliSecond(final Date date) {
+        return format(FORMAT_SHORT_MILSEC, date);
+    }
+    
+    /**
+     * Note: The short day format doesn't include any timezone information. This method
+     * transforms the date into the GMT/UTC timezone. Example: If the local system time is,
+     * 2007-12-18 01:15:00 +0200, then the resulting String will be "2007-12-17".
+     * In case you need a format with a timezon offset, use {@link #formatShortDay(TimeZone)}
+     * @return a String representation of the current system date in GMT using the
+     *         short day format, e.g. "20071218".
+     */
+    public static String formatShortDay() {
+        return format(FORMAT_SHORT_DAY, new Date());
+    }
+
+    /**
+     * @see #formatShortDay()
+     * @param date the Date to transform
+     */
+    private static long FORMAT_SHORT_DAY_last_time = 0;
+    private static String FORMAT_SHORT_DAY_last_format = "";
+    public static String formatShortDay(final Date date) {
+        if (date == null) return "";
+        if (Math.abs(date.getTime() - FORMAT_SHORT_DAY_last_time) < 1000) return FORMAT_SHORT_DAY_last_format;
+        FORMAT_SHORT_DAY_last_format = format(FORMAT_SHORT_DAY, date);
+        FORMAT_SHORT_DAY_last_time = date.getTime();
+        return FORMAT_SHORT_DAY_last_format;
+    }
     
     /**
      * Parse dates as defined in {@linkplain http://www.w3.org/TR/NOTE-datetime}.
@@ -237,38 +284,6 @@ public final class DateFormatter {
     }
 
     /**
-     * Note: The short day format doesn't include any timezone information. This method
-     * transforms the date into the GMT/UTC timezone. Example: If the local system time is,
-     * 2007-12-18 01:15:00 +0200, then the resulting String will be "2007-12-17".
-     * In case you need a format with a timezon offset, use {@link #formatShortDay(TimeZone)}
-     * @return a String representation of the current system date in GMT using the
-     *         short day format, e.g. "20071218".
-     */
-    public static String formatShortDay() {
-        return format(FORMAT_SHORT_DAY, new Date());
-    }
-
-    /**
-     * @see #formatShortDay()
-     * @param date the Date to transform
-     */
-    public static String formatShortDay(final Date date) {
-        return format(FORMAT_SHORT_DAY, date);
-    }
-
-    /**
-     * This should only be used, if you need a short date String that needs to be aligned to
-     * a special timezone other than GMT/UTC. Be aware that a receiver won't be able to
-     * recreate the original Date without additional timezone information.
-     * @see #formatShortDay()
-     * @param date the Date to transform
-     * @param tz a TimeZone the resulting date String should be aligned to.
-     */
-    public static String formatShortDay(final Date date, final TimeZone tz) {
-        return format(FORMAT_SHORT_DAY, date, tz);
-    }
-
-    /**
      * Parse a String representation of a Date in short day format assuming the date
      * is aligned to the GMT/UTC timezone. An example for such a date string is "20071218".
      * @see #formatShortDay()
@@ -286,25 +301,6 @@ public final class DateFormatter {
      */
     public static String formatShortSecond() {
         return formatShortSecond(new Date());
-    }
-
-    /**
-     * Identical to {@link #formatShortDay(Date)}, but for short second format.
-     */
-    public static String formatShortSecond(final Date date) {
-        return format(FORMAT_SHORT_SECOND, date);
-    }
-    
-    public static String formatShortMilliSecond(final Date date) {
-        return format(FORMAT_SHORT_MILSEC, date);
-    }
-    
-    
-    /**
-     * Identical to {@link #formatShortDay(Date, TimeZone)}, but for short second format.
-     */
-    public static String formatShortSecond(final Date date, final TimeZone tz) {
-        return format(FORMAT_SHORT_SECOND, date, tz);
     }
     
     //TODO check the following 2 parse methods for correct use (GMT vs. different timezone)
@@ -368,20 +364,6 @@ public final class DateFormatter {
         } catch (final Exception e) {
             return "unknown";
         }
-    }
-    
-    /** called by all public format...(..., TimeZone) methods */
-    private static String format(final SimpleDateFormat format, final Date date, final TimeZone tz) {
-        String result;
-        
-        synchronized (format) {
-            final TimeZone bakTZ = format.getTimeZone();
-            format.setTimeZone(tz == null ? TZ_GMT : tz);
-            result = format.format(date);
-            format.setTimeZone(bakTZ);
-        }
-        
-        return result;
     }
 
     /** called by all public format...(...) methods */
