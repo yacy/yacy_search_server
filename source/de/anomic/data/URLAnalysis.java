@@ -67,6 +67,8 @@ import de.anomic.search.MetadataRepository.Export;
 
 public class URLAnalysis {
 
+    private static final Pattern patternMinus = Pattern.compile("-");
+
     /**
      * processes to analyse URL lists
      */
@@ -99,7 +101,7 @@ public class URLAnalysis {
                     try {
                         url = in.take();
                         if (url == poison) break;
-                        update(url.getHost().replaceAll("-", "\\.").split("\\."));
+                        update(patternMinus.matcher(url.getHost()).replaceAll("\\.").split("\\."));
                         update(p.matcher(url.getPath()).replaceAll("/").split("/"));
                     } catch (InterruptedException e) {
                         Log.logException(e);

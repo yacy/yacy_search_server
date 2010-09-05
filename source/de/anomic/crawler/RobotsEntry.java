@@ -40,7 +40,6 @@ import net.yacy.cora.document.MultiProtocolURI;
 
 public class RobotsEntry {
     
-    public static final String ROBOTS_DB_PATH_SEPARATOR = ";"; 
     public static final String HOST_NAME          = "hostname";
     public static final String ALLOW_PATH_LIST    = "allow";
     public static final String DISALLOW_PATH_LIST = "disallow";
@@ -64,7 +63,7 @@ public class RobotsEntry {
             this.denyPathList = new LinkedList<String>();
             final String csPl = new String(this.mem.get(DISALLOW_PATH_LIST));
             if (csPl.length() > 0){
-                final String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
+                final String[] pathArray = csPl.split(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
                 if ((pathArray != null)&&(pathArray.length > 0)) {
                     this.denyPathList.addAll(Arrays.asList(pathArray));
                 }
@@ -76,7 +75,7 @@ public class RobotsEntry {
             this.allowPathList = new LinkedList<String>();
             final String csPl = new String(this.mem.get(ALLOW_PATH_LIST));
             if (csPl.length() > 0){
-                final String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
+                final String[] pathArray = csPl.split(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
                 if ((pathArray != null)&&(pathArray.length > 0)) {
                     this.allowPathList.addAll(Arrays.asList(pathArray));
                 }
@@ -116,7 +115,7 @@ public class RobotsEntry {
             final StringBuilder pathListStr = new StringBuilder(allowPathList.size() * 30);
             for (String element : allowPathList) {
                 pathListStr.append(element)
-                           .append(ROBOTS_DB_PATH_SEPARATOR);
+                           .append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
             }
             this.mem.put(ALLOW_PATH_LIST, pathListStr.substring(0,pathListStr.length()-1).getBytes());
         }
@@ -127,7 +126,7 @@ public class RobotsEntry {
             final StringBuilder pathListStr = new StringBuilder(disallowPathList.size() * 30);
             for (String element : disallowPathList) {
                 pathListStr.append(element)
-                           .append(ROBOTS_DB_PATH_SEPARATOR);
+                           .append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
             }
             this.mem.put(DISALLOW_PATH_LIST,pathListStr.substring(0, pathListStr.length()-1).getBytes());
         }
@@ -197,7 +196,7 @@ public class RobotsEntry {
         // if the path is null or empty we set it to /
         if ((path == null) || (path.length() == 0)) path = "/";            
         // escaping all occurences of ; because this char is used as special char in the Robots DB
-        else  path = path.replaceAll(ROBOTS_DB_PATH_SEPARATOR,"%3B");
+        else  path = RobotsTxt.ROBOTS_DB_PATH_SEPARATOR_MATCHER.matcher(path).replaceAll("%3B");
         
         for (String element : this.denyPathList) {
                 

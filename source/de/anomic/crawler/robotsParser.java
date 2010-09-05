@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /*
  * A class for Parsing robots.txt files.
@@ -54,6 +55,8 @@ import java.util.ArrayList;
  */
 
 public final class robotsParser {
+    
+    private static final Pattern patternTab = Pattern.compile("\t");
     
 	public static final String ROBOTS_USER_AGENT = "User-agent:".toUpperCase();
     public static final String ROBOTS_DISALLOW = "Disallow:".toUpperCase();
@@ -109,7 +112,7 @@ public final class robotsParser {
         try {
             lineparser: while ((line = reader.readLine()) != null) {
                 // replacing all tabs with spaces
-                line = line.replaceAll("\t"," ").trim();
+                line = patternTab.matcher(line).replaceAll(" ").trim();
                 lineUpper = line.toUpperCase();
                 
                 // parse empty line
@@ -218,7 +221,7 @@ public final class robotsParser {
                             }
                             
                             // escaping all occurences of ; because this char is used as special char in the Robots DB
-                            path = path.replaceAll(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR,"%3B");                    
+                            path = RobotsTxt.ROBOTS_DB_PATH_SEPARATOR_MATCHER.matcher(path).replaceAll("%3B");
                             
                             // adding it to the pathlist
                             if (isDisallowRule) {

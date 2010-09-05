@@ -51,6 +51,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -62,6 +63,14 @@ import de.anomic.search.Switchboard;
 
 public class serverObjects extends HashMap<String, String> implements Cloneable {
 
+    private final static Pattern patternNewline = Pattern.compile("\n");
+    private final static Pattern patternDoublequote = Pattern.compile("\"");
+    private final static Pattern patternSlash = Pattern.compile("/");
+    private final static Pattern patternB = Pattern.compile("\b");
+    private final static Pattern patternF = Pattern.compile("\f");
+    private final static Pattern patternR = Pattern.compile("\r");
+    private final static Pattern patternT = Pattern.compile("\t");
+    
     private static final long serialVersionUID = 1L;
     private boolean localized = true; 
     
@@ -164,15 +173,15 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @param value a String that will be reencoded for JSON output.
      * @return      the modified String that was added to the map.
      */
-    public String putJSON(final String key, String value) {      
-    	value = value.replaceAll("\"", "'");
-    	value = value.replaceAll("/", "\\/");
-    	// value = value.replaceAll("\\", "\\\\");
-    	value = value.replaceAll("\b", "\\b");
-    	value = value.replaceAll("\f", "\\f");
-    	value = value.replaceAll("\n", "\\r");
-    	value = value.replaceAll("\r", "\\r");
-    	value = value.replaceAll("\t", "\\t");    	
+    public String putJSON(final String key, String value) {
+        // value = value.replaceAll("\\", "\\\\");
+        value = patternDoublequote.matcher(value).replaceAll("'");
+        value = patternSlash.matcher(value).replaceAll("\\/");
+        value = patternB.matcher(value).replaceAll("\\b");
+        value = patternF.matcher(value).replaceAll("\\f");
+        value = patternNewline.matcher(value).replaceAll("\\r");
+        value = patternR.matcher(value).replaceAll("\\r");
+        value = patternT.matcher(value).replaceAll("\\t");
     	return put(key, value);
     }
     public String putJSON(final String key, final byte[] value) {
@@ -333,7 +342,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
             String key, value;
             for (Map.Entry<String, String> entry: entrySet()) {
                 key = entry.getKey();
-                value = entry.getValue().replaceAll("\n", "\\\\n");  
+                value = patternNewline.matcher(entry.getValue()).replaceAll("\\\\n");
                 fos.write((key + "=" + value + "\r\n").getBytes());
             }
         } finally {

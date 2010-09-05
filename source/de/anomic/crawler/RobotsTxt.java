@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -50,6 +51,7 @@ public class RobotsTxt {
     private static Logger log = Logger.getLogger(RobotsTxt.class);
 
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";
+    public static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);
     
     BEncodedHeap robotsTable;
     private final ConcurrentHashMap<String, DomSync> syncObjects;

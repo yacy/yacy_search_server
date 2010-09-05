@@ -56,6 +56,7 @@ public class MultiProtocolURI implements Serializable {
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
     private static final Pattern patternDot = Pattern.compile("\\.");
     private static final Pattern patternSlash = Pattern.compile("/");
+    private static final Pattern patternBackSlash = Pattern.compile("\\\\");
     private static final Pattern patternAmp = Pattern.compile("&");
     private static final Pattern patternMail = Pattern.compile("^[a-z]+:.*?");
     
@@ -116,7 +117,7 @@ public class MultiProtocolURI implements Serializable {
         assert (url != null);
         url = url.trim();
         if (url.startsWith("\\\\")) {
-            url = "smb://" + url.substring(2).replaceAll("\\\\", "/");
+            url = "smb://" + patternBackSlash.matcher(url.substring(2)).replaceAll("/");
         }
         
         if (url.length() > 1 && url.charAt(1) == ':') {
@@ -684,10 +685,11 @@ public class MultiProtocolURI implements Serializable {
         return toNormalform(excludeReference, stripAmp, false);
     }
     
+    private static final Pattern ampPattern = Pattern.compile("&amp;");
     public String toNormalform(final boolean excludeReference, final boolean stripAmp, final boolean removeSessionID) {
         String result = toNormalform0(excludeReference, removeSessionID); 
         if (stripAmp) {
-            result = result.replaceAll("&amp;", "&");
+            result = ampPattern.matcher(result).replaceAll("&");
         }
         return result;
     }

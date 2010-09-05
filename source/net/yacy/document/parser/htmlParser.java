@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.regex.Pattern;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 
@@ -42,6 +43,8 @@ import net.yacy.kelondro.util.FileUtils;
 
 
 public class htmlParser extends AbstractParser implements Parser {
+
+    private static final Pattern patternUnderline = Pattern.compile("_");
 
     public htmlParser() {
         super("HTML Parser"); 
@@ -176,7 +179,7 @@ public class htmlParser extends AbstractParser implements Parser {
         if (encoding.startsWith("MACINTOSH")) encoding = "MacRoman";
         
         // fix wrong fill characters
-        encoding = encoding.replaceAll("_", "-");
+        encoding = patternUnderline.matcher(encoding).replaceAll("-");
 
         if (encoding.matches("GB[_-]?2312([-_]80)?")) return "GB2312";
         if (encoding.matches(".*UTF[-_]?8.*")) return "UTF-8";
