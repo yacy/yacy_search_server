@@ -512,6 +512,7 @@ public class HTTPClient {
     private void storeConnectionInfo(final HttpUriRequest httpUriRequest) {
     	final int port = httpUriRequest.getURI().getPort();
     	final String thost = httpUriRequest.getURI().getHost();
+    	assert thost != null : "uri = " + httpUriRequest.getURI().toString();
     	ConnectionInfo.addConnection(new ConnectionInfo(
     			httpUriRequest.getURI().getScheme(),
     			port == 80 ? thost : thost + ":" + port,

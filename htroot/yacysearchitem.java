@@ -173,6 +173,7 @@ public class yacysearchitem {
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
+                sb.loader.loadIfNotExistBackground(ms.href.toNormalform(true, false), 1024 * 1024 * 10);
                 prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
                 prop.putHTML("content_item_href", ms.href.toNormalform(true, false));
                 prop.put("content_item_code", sb.licensedURLs.aquireLicense(ms.href));
@@ -240,5 +241,4 @@ public class yacysearchitem {
         size = size / 1024;
         return size + " gbyte";
     }
-
 }

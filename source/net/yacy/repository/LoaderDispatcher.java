@@ -347,7 +347,11 @@ public final class LoaderDispatcher {
     }
     
     public void loadIfNotExistBackground(String url, File cache, long maxFileSize) {
-        new Loader(url, cache, maxFileSize).start();
+        new Loader(url, cache, maxFileSize, CrawlProfile.CacheStrategy.IFEXIST).start();
+    }
+    
+    public void loadIfNotExistBackground(String url, long maxFileSize) {
+        new Loader(url, null, maxFileSize, CrawlProfile.CacheStrategy.IFEXIST).start();
     }
     
     private class Loader extends Thread {
@@ -355,20 +359,22 @@ public final class LoaderDispatcher {
         private String url;
         private File cache;
         private long maxFileSize;
+        private CrawlProfile.CacheStrategy cacheStrategy;
         
-        public Loader(String url, File cache, long maxFileSize) {
+        public Loader(String url, File cache, long maxFileSize, CrawlProfile.CacheStrategy cacheStrategy) {
             this.url = url;
             this.cache = cache;
             this.maxFileSize = maxFileSize;
+            this.cacheStrategy = cacheStrategy;
         }
         
         public void run() {
-            if (this.cache.exists()) return;
+            if (this.cache != null && this.cache.exists()) return;
             try {
                 // load from the net
-                Response response = load(request(new DigestURI(this.url), false, true), CrawlProfile.CacheStrategy.NOCACHE, this.maxFileSize);
+                Response response = load(request(new DigestURI(this.url), false, true), this.cacheStrategy, this.maxFileSize);
                 byte[] b = response.getContent();
-                FileUtils.copy(b, this.cache);
+                if (this.cache != null) FileUtils.copy(b, this.cache);
             } catch (MalformedURLException e) {} catch (IOException e) {}
         }
     }
