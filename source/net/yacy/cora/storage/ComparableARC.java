@@ -22,6 +22,7 @@
 package net.yacy.cora.storage;
 
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -44,24 +45,56 @@ public final class ComparableARC<K, V> extends SimpleARC<K, V> implements Map<K,
             this.limit = cacheSize;
             this.keys = new LinkedList<K>();
         }
-        public V put(K k, V v) {
+        public synchronized V put(K k, V v) {
             V r = super.put(k, v);
-            keys.add(k);
+            if (r == null) keys.add(k);
             if (keys.size() > this.limit) {
                 K w = this.keys.removeFirst();
+                assert w != null;
                 V t = super.remove(w);
-                assert t != null;
+                assert t != null : "keys.size() = " + keys.size() + ", limit = " + this.limit;
             }
             return r;
         }
-        public V remove(Object k) {
+        public void putAll(Map<? extends K, ? extends V> map) {
+            for (Map.Entry<? extends K, ? extends V> entry: map.entrySet()) put(entry.getKey(), entry.getValue());
+        }
+        public synchronized V remove(Object k) {
             V r = super.remove(k);
-            this.keys.remove(k);
+            if (r == null) return null;
+            @SuppressWarnings("unchecked")
+            boolean removed = removeFromKeys((K) k);
+            assert removed;
             return r;
         }
-        public void clear() {
+        public synchronized Map.Entry<K,V> pollFirstEntry() {
+            Map.Entry<K,V> entry = super.pollFirstEntry();
+            boolean removed = removeFromKeys(entry.getKey());
+            assert removed;
+            return entry;
+        }
+        public synchronized Map.Entry<K,V> pollLastEntry() {
+            Map.Entry<K,V> entry = super.pollLastEntry();
+            boolean removed = removeFromKeys(entry.getKey());
+            assert removed;
+            return entry;
+        }
+        public synchronized void clear() {
             super.clear();
             this.keys.clear();
+        }
+        private boolean removeFromKeys(K k) {
+            assert k != null;
+            Iterator<K> i = keys.iterator();
+            K x;
+            while (i.hasNext()) {
+                x = i.next();
+                if (super.comparator().compare(k, x) == 0) {
+                    i.remove();
+                    return true;
+                }
+            }
+            return false;
         }
     }
     

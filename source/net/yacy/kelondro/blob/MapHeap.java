@@ -55,7 +55,7 @@ import net.yacy.kelondro.util.kelondroException;
 public class MapHeap implements Map<byte[], Map<String, String>> {
 
     private BLOB blob;
-    private ARC<String, Map<String, String>> cache;
+    private ARC<byte[], Map<String, String>> cache;
     private final char fillchar;
 
     
@@ -67,7 +67,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             final int cachesize,
             char fillchar) throws IOException {
         this.blob = new Heap(heapFile, keylength, ordering, buffermax);
-        this.cache = new ConcurrentARC<String, Map<String, String>>(cachesize, Runtime.getRuntime().availableProcessors());
+        this.cache = new ConcurrentARC<byte[], Map<String, String>>(cachesize, Runtime.getRuntime().availableProcessors(), ordering);
         this.fillchar = fillchar;
     }
    
@@ -147,7 +147,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         	if (blob != null) blob.insert(key, sb);
     
             // write map to cache
-            if (cache != null) cache.put(new String(key), newMap);
+            if (cache != null) cache.put(key, newMap);
         }
     }
     
@@ -176,7 +176,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         
         synchronized (this) {
             // remove from cache
-            cache.remove(new String(key));
+            cache.remove(key);
     
             // remove from file
             blob.delete(key);
@@ -208,7 +208,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         byte[] key = normalizeKey((byte[]) k);
         boolean h;
         synchronized (this) {
-            h = this.cache.containsKey(new String(key)) || this.blob.containsKey(key);
+            h = this.cache.containsKey(key) || this.blob.containsKey(key);
         }
         return h;
     }
@@ -262,8 +262,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         Map<String, String> map;
         if (storeCache) {
             synchronized (this) {
-                String keys = new String(key);
-                map = cache.get(keys);
+                map = cache.get(key);
                 if (map != null) return map;
     
                 // read object
@@ -276,7 +275,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 }
         
                 // write map to cache
-                cache.put(keys, map);
+                cache.put(key, map);
             }
             
             // return value
@@ -284,7 +283,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         } else {
             byte[] b;
             synchronized (this) {
-                map = cache.get(new String(key));
+                map = cache.get(key);
                 if (map != null) return map;
                 b = blob.get(key);
             }

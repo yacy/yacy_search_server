@@ -42,6 +42,11 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     private final int mask;
     private final ARC<K, V> arc[];
     
+    /**
+     * create a concurrent ARC based on a HashARC. The type of the key elements must implement a hashing function
+     * @param cacheSize the number of maximum entries
+     * @param partitions the number of partitions
+     */
     @SuppressWarnings("unchecked")
 	public ConcurrentARC(final int cacheSize, final int partitions) {
     	int m = 1;
@@ -52,6 +57,12 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     	this.mask = m;
     }
     
+    /**
+     * create a concurrent ARC based on a ComparableARC
+     * @param cacheSize the number of maximum entries
+     * @param partitions the number of partitions
+     * @param comparator a comparator for the key object which may be of type byte[]
+     */
     @SuppressWarnings("unchecked")
     public ConcurrentARC(final int cacheSize, final int partitions, Comparator<? super K> comparator) {
         int m = 1;
