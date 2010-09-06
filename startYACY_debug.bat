@@ -6,9 +6,8 @@ if exist DATA\yacy.noconsole del DATA\yacy.noconsole
 If %1.==CPGEN. GoTo :CPGEN
 
 Rem Generating the proper classpath unsing loops and labels
-Set CLASSPATH=classes;htroot
+Set CLASSPATH=htroot
 For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
-For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
@@ -21,7 +20,7 @@ if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
 if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 
 :STARTJAVA
-set javacmd=%javacmd% -Djava.net.preferIPv4Stack=true
+set javacmd=%javacmd% -XX:-UseGCOverheadLimit -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8
 Rem Starting YaCy
 Echo Generated classpath:%CLASSPATH%
 Echo JRE Parameters:%javacmd%
