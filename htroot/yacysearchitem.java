@@ -229,6 +229,8 @@ public class yacysearchitem {
         if (s.length() <= length) return s;
         final int p = s.lastIndexOf('.');
         if (p < 0) return s.substring(0, length - 3) + "...";
+        assert p >= 0;
+        assert length - (s.length() - p) - 3 >= 0;
         return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p); // TODO check oob
     }
     

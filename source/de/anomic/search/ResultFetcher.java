@@ -345,7 +345,7 @@ public class ResultFetcher {
             for (MediaSnippet ms: imagemedia) {
                 images.push(ms, Long.valueOf(ms.ranking));
                 c++;
-                System.out.println("*** image " + new String(ms.href.hash()) + " images.size = " + images.size() + "/" + images.size());
+                //System.out.println("*** image " + new String(ms.href.hash()) + " images.size = " + images.size() + "/" + images.size());
             }
         }
         return c;

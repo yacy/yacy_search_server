@@ -398,11 +398,26 @@ public final class QueryParams {
         return matcher;
     }
     
+    private String idCacheAnon = null, idCache = null;
+    final static private char asterisk = '*';
     public String id(final boolean anonymized) {
-        final String asterisk = "*";
-
+        if (anonymized) {
+            if (idCacheAnon != null) return idCacheAnon;
+        } else {
+            if (idCache != null) return idCache;
+        }
+        
         // generate a string that identifies a search so results can be re-used in a cache
-        final StringBuilder context = new StringBuilder();
+        final StringBuilder context = new StringBuilder(120);
+        if (anonymized) {
+            context.append(anonymizedQueryHashes(this.queryHashes));
+            context.append('-');
+            context.append(anonymizedQueryHashes(this.excludeHashes));
+        } else {
+            context.append(hashSet2hashString(this.queryHashes));
+            context.append('-');
+            context.append(hashSet2hashString(this.excludeHashes));
+        }
         context.append(asterisk);
         context.append(this.domType);
         context.append(asterisk);
@@ -425,14 +440,12 @@ public final class QueryParams {
         context.append(this.constraint);
         context.append(asterisk);
         context.append(this.maxDistance);
-
-        final String ret;
         if (anonymized) {
-            ret = anonymizedQueryHashes(this.queryHashes) + "-" + anonymizedQueryHashes(this.excludeHashes) + context;
+            idCacheAnon = context.toString();
         } else {
-            ret = hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + context;
+            idCache = context.toString();
         }
-        return ret;
+        return context.toString();
     }
     
     /**
