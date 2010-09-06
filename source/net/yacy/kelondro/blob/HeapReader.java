@@ -414,11 +414,12 @@ public class HeapReader {
             file.readFully(keyf, 0, keyf.length);
             if (!this.ordering.equal(key, keyf)) {
                 // verification of the indexed access failed. we must re-read the index
-                Log.logSevere("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
+                Log.logSevere("kelondroBLOBHeap", "indexed verification access failed for " + heapFile.toString());
                 // this is a severe operation, it should never happen.
+                return null;
                 // but if the process ends in this state, it would completely fail
                 // if the index is not rebuild now at once
-                initIndexReadFromHeap();
+                //initIndexReadFromHeap();
             }
             
             // read the blob
