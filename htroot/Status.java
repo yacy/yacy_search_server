@@ -277,7 +277,7 @@ public class Status {
         }
         
         if (!OS.isWindows) {
-        	prop.put("tray", "3");
+        	prop.put("tray", "2");
         } else if (sb.getConfig("trayIcon", "false").equals("false")) {
             prop.put("tray", "0");
         } else {
