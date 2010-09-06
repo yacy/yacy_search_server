@@ -879,7 +879,7 @@ thumbnailProgram =
 # - status    : peer's status page
 # - surftips  : the surftips-page
 # - wiki      : the wiki-page
-httpd.robots.txt = locked,dirs
+httpd.robots.txt = locked,dirs,bookmarks,network,news,status,profile
 
 # class to use for parsing wikicode
 wikiParser.class = de.anomic.data.wikiCode
