@@ -135,7 +135,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
     /**
      * iterator implements the Iterable interface
      */
-    public Iterator<Map.Entry<K, V>> iterator() {
+    public final Iterator<Map.Entry<K, V>> iterator() {
         return entrySet().iterator();
     }
 
@@ -147,7 +147,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @return a set view of the mappings contained in this map
      */
     @Override
-    public Set<Map.Entry<K, V>> entrySet() {
+    public final synchronized Set<Map.Entry<K, V>> entrySet() {
         Set<Map.Entry<K, V>> m = new HashSet<Map.Entry<K, V>>();
         for (Map.Entry<K, V> entry: this.levelA.entrySet()) m.add(entry);
         for (Map.Entry<K, V> entry: this.levelB.entrySet()) m.add(entry);
@@ -158,7 +158,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * a hash code for this ARC
      * @return the hash code of one of the ARC partial hash tables
      */
-    public int hashCode() {
+    public final int hashCode() {
         return this.levelA.hashCode();
     }
 }

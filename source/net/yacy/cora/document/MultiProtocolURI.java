@@ -587,13 +587,27 @@ public class MultiProtocolURI implements Serializable {
         // this is the path plus quest plus ref
         // if there is no quest and no ref the result is identical to getPath
         // this is defined according to http://java.sun.com/j2se/1.4.2/docs/api/java/net/URL.html#getFile()
-        if (quest == null) return (excludeReference || ref == null) ? path : path + "#" + ref;
+        if (quest == null) {
+            if (excludeReference || ref == null) return path;
+            StringBuilder sb = new StringBuilder(120);
+            sb.append(path);
+            sb.append('#');
+            sb.append(ref);
+            return sb.toString();
+        }
         String q = quest;
         if (removeSessionID) {
             for (String sid: sessionIDnames) {
                 if (q.toLowerCase().startsWith(sid.toLowerCase() + "=")) {
                     int p = q.indexOf('&');
-                    if (p < 0) return (excludeReference || ref == null) ? path : path + "#" + ref;
+                    if (p < 0) {
+                        if (excludeReference || ref == null) return path;
+                        StringBuilder sb = new StringBuilder(120);
+                        sb.append(path);
+                        sb.append('#');
+                        sb.append(ref);
+                        return sb.toString();
+                    }
                     q = q.substring(p + 1);
                     continue;
                 }
@@ -607,7 +621,14 @@ public class MultiProtocolURI implements Serializable {
                 }
             }
         }
-        return (excludeReference || ref == null) ? path + "?" + q : path + "?" + q + "#" + ref;
+        StringBuilder sb = new StringBuilder(120);
+        sb.append(path);
+        sb.append('?');
+        sb.append(q);
+        if (excludeReference || ref == null) return sb.toString();
+        sb.append('#');
+        sb.append(ref);
+        return sb.toString();
     }
     
     public String getFileName() {

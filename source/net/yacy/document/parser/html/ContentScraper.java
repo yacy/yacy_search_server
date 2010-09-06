@@ -284,7 +284,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return cleanLine(super.stripAll(new String(scraper.content.getChars())));
     }
     
-    private static String cleanLine(String s) {
+    private final static String cleanLine(String s) {
         StringBuilder sb = new StringBuilder(s.length());
         char c, l = ' ';
         for (int i = 0; i < s.length(); i++) {

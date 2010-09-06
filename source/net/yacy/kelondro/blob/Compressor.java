@@ -228,24 +228,28 @@ public class Compressor implements BLOB {
         }
     }
 
-    public synchronized byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
+    public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
         // depending on the source of the result, we additionally do entry compression
         // because if a document was read once, we think that it will not be retrieved another time again soon
-        byte[] b = buffer.remove(new String(key));
-        if (b != null) {
-            // compress the entry now and put it to the backend
-            try {
-                this.writeQueue.put(new Entity(new String(key), b));
-                this.bufferlength = this.bufferlength - b.length;
-                return b;
-            } catch (InterruptedException e) {
-                Log.logException(e);
-                buffer.put(new String(key), b);
+        String keys = new String(key);
+        byte[] b = null;
+        synchronized (this) {
+            b = buffer.remove(keys);
+            if (b != null) {
+                // compress the entry now and put it to the backend
+                try {
+                    this.writeQueue.put(new Entity(new String(key), b));
+                    this.bufferlength = this.bufferlength - b.length;
+                    return b;
+                } catch (InterruptedException e) {
+                    Log.logException(e);
+                    buffer.put(keys, b);
+                }
             }
+            
+            // return from the backend
+            b = this.backend.get(key);
         }
-        
-        // return from the backend
-        b = this.backend.get(key);
         if (b == null) return null;
         return decompress(b);
     }
@@ -263,8 +267,7 @@ public class Compressor implements BLOB {
     }
     
     public synchronized boolean containsKey(byte[] key) {
-        return 
-          this.buffer.containsKey(new String(key)) || this.backend.containsKey(key);
+        return this.buffer.containsKey(new String(key)) || this.backend.containsKey(key);
     }
 
     public int keylength() {
