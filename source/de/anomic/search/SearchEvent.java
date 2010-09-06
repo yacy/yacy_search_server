@@ -224,6 +224,25 @@ public final class SearchEvent {
    }
    
    public void cleanup() {
+       // stop all threads
+       if (primarySearchThreads != null) {
+           for (yacySearch search : this.primarySearchThreads) {
+               if (search.isAlive()) search.interrupt();
+           }
+       }
+       if (secondarySearchThreads != null) {
+           for (yacySearch search : this.secondarySearchThreads) {
+               if (search.isAlive()) search.interrupt();
+           }
+       }
+       
+       // clear all data structures
+       if (this.preselectedPeerHashes != null) this.preselectedPeerHashes.clear();
+       if (this.localSearchThread != null) if (this.localSearchThread.isAlive()) this.localSearchThread.interrupt();
+       if (this.IACount != null) this.IACount.clear();
+       if (this.IAResults != null) this.IAResults.clear();
+       if (this.heuristics != null) this.heuristics.clear();
+       
        // execute deletion of failed words
        int rw = this.results.failedURLs.size();
        if (rw > 0) {

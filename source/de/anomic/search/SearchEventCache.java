@@ -27,12 +27,12 @@
 package de.anomic.search;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.storage.ARC;
-import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
 
@@ -41,9 +41,12 @@ import de.anomic.yacy.yacySeedDB;
 
 public class SearchEventCache {
 
-    private static ARC<String, SearchEvent> lastEvents = new ConcurrentARC<String, SearchEvent>(1000, Runtime.getRuntime().availableProcessors() * 4); // a cache for objects from this class: re-use old search requests
-    public static final long eventLifetime = 600000; // the time an event will stay in the cache, 10 Minutes
-    public static final long memlimit = 100 * 1024 * 1024; // 100 MB
+    private static ConcurrentHashMap<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
+    public static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
+    public static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
+    public static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
+    public static final long memlimitHigh = 400 * 1024 * 1024; // 400 MB
+    public static final long memlimitMedium = 100 * 1024 * 1024; // 100 MB
     public static String lastEventID = "";
     public static long cacheInsert = 0, cacheHit = 0, cacheMiss = 0, cacheDelete = 0;
     
@@ -59,21 +62,34 @@ public class SearchEventCache {
     
     public static void cleanupEvents(final boolean all) {
         // remove old events in the event cache
-        List<String> delete = new ArrayList<String>();
+        final List<SearchEvent> delete = new ArrayList<SearchEvent>();
         // the less memory is there, the less time is acceptable for elements in the cache
         long memx = MemoryControl.available();
-        long acceptTime = memx > memlimit ? eventLifetime : memx  * eventLifetime / memlimit;
-        for (Map.Entry<String, SearchEvent> event: lastEvents) {
+        long acceptTime = memx > memlimitHigh ? eventLifetimeBigMem : memx > memlimitMedium ? eventLifetimeMediumMem : eventLifetimeShortMem;
+        Map.Entry<String, SearchEvent> event;
+        Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator();
+        while (i.hasNext()) {
+            event = i.next();
             if (all || event.getValue().getEventTime() + acceptTime < System.currentTimeMillis()) {
-                event.getValue().cleanup();
-                delete.add(event.getKey());
+                delete.add(event.getValue());
+                i.remove();
+                cacheDelete++;
             }
         }
-        // remove the events
-        cacheDelete += delete.size();
-        for (String k: delete) lastEvents.remove(k);
+        /*
+         * thread to remove the events;
+         * this process may take time because it applies index modifications
+         * in case of failed words 
+         */
+        new Thread(){
+            public void run() {
+                for (SearchEvent k: delete) {
+                    k.cleanup();
+                }
+            }
+        }.start();
     }
-
+    
     public static SearchEvent getEvent(final String eventID) {
         SearchEvent event = lastEvents.get(eventID);
         if (event == null) cacheMiss++; else cacheHit++;
