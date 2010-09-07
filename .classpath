@@ -35,12 +35,12 @@
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.12-bin.jar"/>
 	<classpathentry kind="lib" path="lib/jcifs-1.3.14.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.4.0-beta-1.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-1.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/fontbox-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.0.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-1.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.2.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

@@ -55,6 +55,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
@@ -238,9 +239,11 @@ public class yacySeed implements Cloneable {
      * @param name
      * @return a checked name without "<" and ">"
      */
+    final static Pattern ltp = Pattern.compile("<");
+    final static Pattern gtp = Pattern.compile(">");
     private static String checkPeerName(String name) {
-        name = name.replaceAll("<", "_");
-        name = name.replaceAll(">", "_");
+        name = ltp.matcher(name).replaceAll("_");
+        name = gtp.matcher(name).replaceAll("_");
         return name;
     }
     

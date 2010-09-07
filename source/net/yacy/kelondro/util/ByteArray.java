@@ -106,6 +106,46 @@ public class ByteArray {
         while (--l >= 0) if (this.buffer[l] != b.buffer[l]) return false;
         return true;
     }
+    
+    public static long parseDecimal(final byte[] s) throws NumberFormatException {
+        if (s == null) throw new NumberFormatException("null");
+
+        long result = 0;
+        boolean negative = false;
+        int i = 0, max = s.length;
+        long limit;
+        long multmin;
+        long digit;
+        
+        if (max <= 0) throw new NumberFormatException(new String(s));
+        if (s[0] == '-') {
+            negative = true;
+            limit = Long.MIN_VALUE;
+            i++;
+        } else {
+            limit = -Long.MAX_VALUE;
+        }
+        multmin = limit / 10;
+        if (i < max) {
+            digit = s[i++] - 48;
+            if (digit < 0) throw new NumberFormatException(new String(s));
+            result = -digit;
+        }
+        while (i < max) {
+            // Accumulating negatively avoids surprises near MAX_VALUE
+            digit = s[i++] - 48;
+            if (digit < 0) throw new NumberFormatException(new String(s));
+            if (result < multmin) throw new NumberFormatException(new String(s));
+            result *= 10;
+            if (result < limit + digit) throw new NumberFormatException(new String(s));
+            result -= digit;
+        }
+        if (negative) {
+            if (i > 1) return result; else throw new NumberFormatException(new String(s));
+        } else {
+            return -result;
+        }
+    }
 
     public static void main(String[] args) {
         ByteArray a0 = new ByteArray("abc".getBytes());
@@ -126,5 +166,6 @@ public class ByteArray {
         System.out.println("a0 " + ((map.containsKey(a0)) ? "in" : "not in") + " map");
         System.out.println("a1 " + ((map.containsKey(a1)) ? "in" : "not in") + " map");
         System.out.println("b " + ((map.containsKey(b)) ? "in" : "not in") + " map");
+        System.out.println("parseIntDecimal " + parseDecimal("6543".getBytes()));
     }
 }

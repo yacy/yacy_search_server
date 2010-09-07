@@ -43,6 +43,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
@@ -146,7 +147,7 @@ public class Tables {
         if (pk == null) {
             pki = size(tablename);
         } else {
-            pki = Integer.parseInt(new String(pk)) + 1;
+            pki = (int) (ByteArray.parseDecimal(pk) + 1);
         }
         while (true) {
             pk = int2key(pki).getBytes();
@@ -426,7 +427,7 @@ public class Tables {
             byte[] r = this.get(colname);
             if (r == null) return dflt;
             try {
-                return Integer.parseInt(new String(r));
+                return (int) ByteArray.parseDecimal(r);
             } catch (NumberFormatException e) {
                 return dflt;
             }
@@ -436,7 +437,7 @@ public class Tables {
             byte[] r = this.get(colname);
             if (r == null) return dflt;
             try {
-                return Long.parseLong(new String(r));
+                return ByteArray.parseDecimal(r);
             } catch (NumberFormatException e) {
                 return dflt;
             }

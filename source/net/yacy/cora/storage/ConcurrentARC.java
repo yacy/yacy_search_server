@@ -51,8 +51,10 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
 	public ConcurrentARC(final int cacheSize, final int partitions) {
     	int m = 1;
     	while (m < partitions) m = m * 2;
+        int partitionSize = cacheSize / m;
+        if (partitionSize < 4) partitionSize = 4;
     	this.arc = new HashARC[m];
-    	for (int i = 0; i < this.arc.length; i++) this.arc[i] = new HashARC<K, V>(cacheSize / m);
+    	for (int i = 0; i < this.arc.length; i++) this.arc[i] = new HashARC<K, V>(partitionSize);
     	m -= 1;
     	this.mask = m;
     }
@@ -67,8 +69,10 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     public ConcurrentARC(final int cacheSize, final int partitions, Comparator<? super K> comparator) {
         int m = 1;
         while (m < partitions) m = m * 2;
+        int partitionSize = cacheSize / m;
+        if (partitionSize < 4) partitionSize = 4;
         this.arc = new ComparableARC[m];
-        for (int i = 0; i < this.arc.length; i++) this.arc[i] = new ComparableARC<K, V>(cacheSize / m, comparator);
+        for (int i = 0; i < this.arc.length; i++) this.arc[i] = new ComparableARC<K, V>(partitionSize, comparator);
         m -= 1;
         this.mask = m;
     }

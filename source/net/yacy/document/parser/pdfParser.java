@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -41,6 +42,7 @@ import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
 import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -112,13 +114,13 @@ public class pdfParser extends AbstractParser implements Parser {
         }            
         
         CharBuffer writer = null;
-        PDFTextStripper stripper = null;
         try {
             // create a writer for output
+            PDFTextStripper stripper = null;
             writer = new CharBuffer();
             stripper = new PDFTextStripper();
             stripper.writeText(pdfDoc, writer); // may throw a NPE
-            pdfDoc.close();           
+            pdfDoc.close();
             writer.close();
         } catch (IOException e) {
             // close the writer
@@ -143,6 +145,19 @@ public class pdfParser extends AbstractParser implements Parser {
         } finally {
             try {pdfDoc.close();} catch (IOException e) {}
         }
+
+        // clear resources in pdfbox. they say that is resolved but it's not. see:
+        // https://issues.apache.org/jira/browse/PDFBOX-313
+        // https://issues.apache.org/jira/browse/PDFBOX-351
+        // https://issues.apache.org/jira/browse/PDFBOX-441
+        // the pdfbox still generates enormeous number of object allocations and don't delete these
+        // the following Object are statically stored and never flushed:
+        // COSFloat, COSArray, COSInteger, COSObjectKey, COSObject, COSDictionary,
+        // COSStream, COSString, COSName, COSDocument, COSInteger[], COSNull
+        // the great number of these objects can easily be seen in Java Visual VM
+        // we try to get this shit out of the memory here by forced clear calls, hope the best the rubbish gets out.
+        COSName.clearResources();
+        PDFont.clearResources();
         return new Document[]{new Document(
                 location,
                 mimeType,

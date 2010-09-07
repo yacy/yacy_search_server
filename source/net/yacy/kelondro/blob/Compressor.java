@@ -238,7 +238,7 @@ public class Compressor implements BLOB {
             if (b != null) {
                 // compress the entry now and put it to the backend
                 try {
-                    this.writeQueue.put(new Entity(new String(key), b));
+                    this.writeQueue.put(new Entity(keys, b));
                     this.bufferlength = this.bufferlength - b.length;
                     return b;
                 } catch (InterruptedException e) {

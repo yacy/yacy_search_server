@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.kelondro.util.ByteArray;
 
 
 public class RobotsEntry {
@@ -151,7 +152,7 @@ public class RobotsEntry {
     
     public Date getLoadedDate() {
         if (this.mem.containsKey(LOADED_DATE)) {
-            return new Date(Long.parseLong(new String(this.mem.get(LOADED_DATE))));
+            return new Date(ByteArray.parseDecimal(this.mem.get(LOADED_DATE)));
         }
         return null;
     }
@@ -164,7 +165,7 @@ public class RobotsEntry {
     
     public Date getModDate() {
         if (this.mem.containsKey(MOD_DATE)) {
-            return new Date(Long.parseLong(new String(this.mem.get(MOD_DATE))));
+            return new Date(ByteArray.parseDecimal(this.mem.get(MOD_DATE)));
         }
         return null;
     }        
@@ -178,12 +179,12 @@ public class RobotsEntry {
     
     public long getCrawlDelayMillis() {
         if (this.mem.containsKey(CRAWL_DELAY_MILLIS)) try {
-            return Long.parseLong(new String(this.mem.get(CRAWL_DELAY_MILLIS)));
+            return ByteArray.parseDecimal(this.mem.get(CRAWL_DELAY_MILLIS));
         } catch (final NumberFormatException e) {
             return 0;
         }
         if (this.mem.containsKey(CRAWL_DELAY)) try {
-            return 1000 * Integer.parseInt(new String(this.mem.get(CRAWL_DELAY)));
+            return 1000 * ByteArray.parseDecimal(this.mem.get(CRAWL_DELAY));
         } catch (final NumberFormatException e) {
             return 0;
         }

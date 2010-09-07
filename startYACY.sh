@@ -6,7 +6,7 @@ PIDFILE="yacy.pid"
 OS="`uname`"
 
 #get javastart args
-JAVA_ARGS="-server -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true";
+JAVA_ARGS="-server -XX:-UseGCOverheadLimit -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8";
 #JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
 
 #check if OS is Sun Solaris or one of the OpenSolaris distributions and use different version of id if necessary
@@ -177,7 +177,7 @@ CLASSPATH=""
 for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH=".:htroot:$CLASSPATH"
 
-cmdline="$JAVA $JAVA_ARGS -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -Dfile.encoding=UTF-8 -classpath $CLASSPATH net.yacy.yacy";
+cmdline="$JAVA $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy";
 if [ $GUI -eq 1 ] #gui
 then
 	cmdline="$cmdline -gui $parameter"
