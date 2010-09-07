@@ -91,6 +91,7 @@ public class UPnP {
 	}
 	
 	private static String getRemoteHost() {
+		if (sb == null) return null;
 		return sb.getConfig(SwitchboardConstants.UPNP_REMOTEHOST, "");
 	}
 	
