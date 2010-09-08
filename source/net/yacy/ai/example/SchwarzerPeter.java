@@ -68,7 +68,6 @@ public class SchwarzerPeter {
             this.spieleranzahl = spieleranzahl;
         }
         
-        @Override
         public Spieler nextRole() {
             int n = (this.spielernummer == this.spieleranzahl - 1) ? 0 : this.spielernummer + 1;
             return new Spieler(n, this.spieleranzahl);
@@ -159,30 +158,25 @@ return true;
             }
         }
 
-        @Override
         public List<Zug> explore() {
             return new ArrayList<Zug>(0);
         }
 
-        @Override
         public void applyFinding(Zug finding) {
             haende[this.currentRole().spielernummer].annehmen(random, this.haende[this.currentRole().linkerNachbar().spielernummer].abgeben(random));
 
         }
 
-        @Override
         public int getRanking(int findings, Spieler role) {
             // TODO Auto-generated method stub
             return 0;
         }
 
-        @Override
         public boolean isTermination(Spieler role) {
             // TODO Auto-generated method stub
             return false;
         }
 
-        @Override
         public Spieler isTermination() {
             // TODO Auto-generated method stub
             return null;
