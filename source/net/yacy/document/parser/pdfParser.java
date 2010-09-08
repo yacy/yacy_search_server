@@ -36,7 +36,6 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.exceptions.CryptographyException;
-import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
@@ -71,12 +70,13 @@ public class pdfParser extends AbstractParser implements Parser {
         
         // create a pdf parser
         PDDocument pdfDoc = null;
-        final PDFParser pdfParser;
+        //final PDFParser pdfParser;
         try {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-            pdfParser = new PDFParser(source);
-            pdfParser.parse();
-            pdfDoc = pdfParser.getPDDocument();
+            pdfDoc = PDDocument.load(source);
+            //pdfParser = new PDFParser(source);
+            //pdfParser.parse();
+            //pdfDoc = pdfParser.getPDDocument();
         } catch (IOException e) {
             if (pdfDoc != null) try {pdfDoc.close();} catch (IOException ee) {}
             throw new Parser.Failure(e.getMessage(), location);
@@ -103,15 +103,20 @@ public class pdfParser extends AbstractParser implements Parser {
         }
         
         // extracting some metadata
-        final PDDocumentInformation theDocInfo = pdfDoc.getDocumentInformation();            
+        final PDDocumentInformation info = pdfDoc.getDocumentInformation();            
         String docTitle = null, docSubject = null, docAuthor = null, docPublisher = null, docKeywordStr = null;
-        if (theDocInfo != null) {
-            docTitle = theDocInfo.getTitle();
-            docSubject = theDocInfo.getSubject();
-            docAuthor = theDocInfo.getAuthor();
-            docPublisher = theDocInfo.getProducer();
-            docKeywordStr = theDocInfo.getKeywords();
-        }            
+        if (info != null) {
+            docTitle = info.getTitle();
+            docSubject = info.getSubject();
+            docAuthor = info.getAuthor();
+            docPublisher = info.getProducer();
+            if (docPublisher == null || docPublisher.length() == 0) docPublisher = info.getCreator();
+            docKeywordStr = info.getKeywords();
+            // unused:
+            // info.getTrapped());
+            // info.getCreationDate());
+            // info.getModificationDate();
+        }
         
         CharBuffer writer = null;
         try {
@@ -175,7 +180,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 null,
                 false)};
     }
-    
+
     /**
      * test
      * @param args
