@@ -135,10 +135,10 @@ public class pdfParser extends AbstractParser implements Parser {
         } finally {
             try {pdfDoc.close();} catch (IOException e) {}
         }
+        pdfDoc = null;
 
         String[] docKeywords = null;
         if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
-        
         if (docTitle == null) docTitle = docSubject;
     
         byte[] contentBytes;
@@ -147,8 +147,6 @@ public class pdfParser extends AbstractParser implements Parser {
         } catch (UnsupportedEncodingException e) {
             Log.logException(e);
             throw new Parser.Failure(e.getMessage(), location);
-        } finally {
-            try {pdfDoc.close();} catch (IOException e) {}
         }
 
         // clear resources in pdfbox. they say that is resolved but it's not. see:

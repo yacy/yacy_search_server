@@ -116,7 +116,6 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.CrawlSwitchboard;
-import de.anomic.crawler.ImporterManager;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
@@ -216,7 +215,6 @@ public final class Switchboard extends serverSwitch {
     public  userDB                         userDB;
     public  bookmarksDB                    bookmarksDB;
     public  WebStructureGraph              webStructure;
-    public  ImporterManager                dbImportManager;
     public  ArrayList<QueryParams>         localSearches; // array of search result properties as HashMaps
     public  ArrayList<QueryParams>         remoteSearches; // array of search result properties as HashMaps
     public  ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
@@ -672,7 +670,6 @@ public final class Switchboard extends serverSwitch {
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
-        this.dbImportManager = new ImporterManager();
         this.trail = new ArrayList<String>();
         
         log.logConfig("Finished Switchboard Initialization");
@@ -1152,7 +1149,6 @@ public final class Switchboard extends serverSwitch {
         indexingAnalysisProcessor.awaitShutdown(12000);
         indexingStorageProcessor.awaitShutdown(12000);
         crawlStacker.close();
-        this.dbImportManager.close();
 //        de.anomic.http.client.Client.closeAllConnections();
         wikiDB.close();
         blogDB.close();
@@ -1526,6 +1522,7 @@ public final class Switchboard extends serverSwitch {
             ConnectionInfo.cleanUp();
             
             // do transmission of CR-files
+            /*
             checkInterruption();
             int count = rankingOwnDistribution.size() / 100;
             if (count == 0) count = 1;
@@ -1534,6 +1531,7 @@ public final class Switchboard extends serverSwitch {
                 rankingOwnDistribution.transferRanking(count);
                 rankingOtherDistribution.transferRanking(1);
             }
+            */
             
             // clean up delegated stack
             checkInterruption();
@@ -1753,7 +1751,7 @@ public final class Switchboard extends serverSwitch {
         try {
             // parse the document
             documents = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), b);
-            assert(documents != null) : "Unexpected error. Parser returned null.";
+            if (documents == null) throw new Parser.Failure("Parser returned null.", response.url());
         } catch (final Parser.Failure e) {
             this.log.logWarning("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
             addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), e.getMessage());

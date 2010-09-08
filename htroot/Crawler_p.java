@@ -451,11 +451,9 @@ public class Crawler_p {
                     		sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
                     		
                     		// create a new sitemap importer
-                    		final SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new DigestURI(sitemapURLStr, null), pe);
-                    		if (importerThread != null) {
-                    		    importerThread.setJobID(sb.dbImportManager.generateUniqueJobID());
-                    			importerThread.startIt();
-                    		}
+                    		final SitemapImporter importer = new SitemapImporter(sb, new DigestURI(sitemapURLStr, null), pe);
+                    		importer.start();
+                    		
                     	} catch (final Exception e) {
                     		// mist
                     		prop.put("info", "6");//Error with url
