@@ -154,7 +154,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.results = new ResultFetcher(loader, rankedCache, query, peers, 10000);
+            this.results = new ResultFetcher(loader, rankedCache, query, peers, 3000);
         } else {
             // do a local search
             this.rankedCache = new RankingProcess(this.query, this.order, max_results_preparation, 2);

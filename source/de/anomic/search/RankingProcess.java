@@ -69,7 +69,6 @@ public final class RankingProcess extends Thread {
     private static final int maxDoubleDomAll = 100, maxDoubleDomSpecial = 10000;
     
     private final QueryParams query;
-    private final int maxentries;
     private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
     private final HandleSet misses; // contains url-hashes that could not been found in the LURL-DB
@@ -99,7 +98,6 @@ public final class RankingProcess extends Thread {
         //this.handover = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.getOrdering(), 0);
         this.query = query;
         this.order = order;
-        this.maxentries = maxentries;
         this.remote_peerCount = 0;
         this.remote_resourceSize = 0;
         this.remote_indexCount = 0;
@@ -113,8 +111,6 @@ public final class RankingProcess extends Thread {
         this.authorNavigator = new Navigator();
         this.namespaceNavigator = new Navigator();
         this.ref = new Navigator();
-        //this.domZones = new int[8];
-        //for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
         this.feeders = concurrency;
         assert this.feeders >= 1;
     }
@@ -178,7 +174,6 @@ public final class RankingProcess extends Thread {
         timer = System.currentTimeMillis();
         String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
-        Long r;
         final ArrayList<WordReferenceVars> filteredEntries = new ArrayList<WordReferenceVars>();
 
         // apply all constraints
@@ -237,16 +232,12 @@ public final class RankingProcess extends Thread {
             
     		// do the ranking
     		for (WordReferenceVars fEntry: filteredEntries) {
-    			
-    		    // kick out entries that are too bad according to current findings
-    		    r = Long.valueOf(this.order.cardinal(fEntry));
-    		    assert maxentries != 0;
     
                 // double-check
     		    if (urlhashes.has(fEntry.metadataHash())) continue;
                 
     		    // insert
-    		    stack.put(new ReverseElement<WordReferenceVars>(fEntry, r)); // inserts the element and removed the worst (which is smallest)
+    		    stack.put(new ReverseElement<WordReferenceVars>(fEntry, this.order.cardinal(fEntry))); // inserts the element and removed the worst (which is smallest)
     		    try {
                     urlhashes.put(fEntry.metadataHash());
                 } catch (RowSpaceExceededException e) {
@@ -299,30 +290,31 @@ public final class RankingProcess extends Thread {
         return localSearchInclusion;
     }
     
-    // todo:
-    // - remove redundant urls (sub-path occurred before)
-    // - move up shorter urls
-    // - root-domain guessing to prefer the root domain over other urls if search word appears in domain name
-    
-    
-    private ReverseElement<WordReferenceVars> takeRWI(final boolean skipDoubleDom) {
+    private ReverseElement<WordReferenceVars> takeRWI(final boolean skipDoubleDom, long timeout) {
+        
         // returns from the current RWI list the best entry and removes this entry from the list
         WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>> m;
         ReverseElement<WordReferenceVars> rwi;
-        while ((rwi = stack.poll()) != null) {
-            if (!skipDoubleDom) return rwi;
-            // check doubledom
-            final String domhash = new String(rwi.getElement().metadataHash()).substring(6);
-            m = this.doubleDomCache.get(domhash);
-            if (m == null) {
-                // first appearance of dom
-                m = new WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
-                this.doubleDomCache.put(domhash, m);
-                return rwi;
+        try {
+            while ((rwi = stack.poll(timeout)) != null) {
+                if (!skipDoubleDom) return rwi;
+                
+                // check doubledom
+                final String domhash = new String(rwi.getElement().metadataHash()).substring(6);
+                m = this.doubleDomCache.get(domhash);
+                if (m == null) {
+                    // first appearance of dom
+                    m = new WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
+                    this.doubleDomCache.put(domhash, m);
+                    return rwi;
+                }
+                
+                // second appearances of dom
+                m.put(rwi);
             }
-            // second appearances of dom
-            m.put(rwi);
+        } catch (InterruptedException e1) {
         }
+        
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
         ReverseElement<WordReferenceVars> bestEntry = null;
@@ -343,12 +335,14 @@ public final class RankingProcess extends Thread {
                     continue;
                 }
                 o = m.peek();
+                if (o == null) continue;
                 if (o.getWeight() < bestEntry.getWeight()) {
                     bestEntry = o;
                 }
             }
         }
         if (bestEntry == null) return null;
+        
         // finally remove the best entry from the doubledom cache
         m = this.doubleDomCache.get(new String(bestEntry.getElement().metadataHash()).substring(6));
         o = m.poll();
@@ -370,8 +364,9 @@ public final class RankingProcess extends Thread {
     	long timeLimit = System.currentTimeMillis() + timeout;
     	int p = -1;
     	byte[] urlhash;
-    	while (System.currentTimeMillis() < timeLimit) {
-            final ReverseElement<WordReferenceVars> obrwi = takeRWI(skipDoubleDom);
+    	long timeleft;
+    	while ((timeleft = timeLimit - System.currentTimeMillis()) > 0) {
+            final ReverseElement<WordReferenceVars> obrwi = takeRWI(skipDoubleDom, timeleft);
             if (obrwi == null) {
             	if (this.feedingIsFinished()) return null;
             	try {Thread.sleep(50);} catch (final InterruptedException e1) {}

@@ -121,7 +121,7 @@ public class WeakPriorityBlockingQueue<E> {
             this.queue.add(element);
             this.enqueued.release();
         }
-        assert this.queue.size() == this.enqueued.availablePermits();
+        assert this.queue.size() >= this.enqueued.availablePermits() : "queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
     }
     
     /**
@@ -141,10 +141,12 @@ public class WeakPriorityBlockingQueue<E> {
      * @return the head element from the queue
      * @throws InterruptedException
      */
-    public synchronized E poll(long timeout) throws InterruptedException {
+    public E poll(long timeout) throws InterruptedException {
         boolean a = this.enqueued.tryAcquire(timeout, TimeUnit.MILLISECONDS);
         if (!a) return null;
-        return takeUnsafe();
+        synchronized (this) {
+            return takeUnsafe();
+        }
     }
     
     /**
@@ -152,9 +154,11 @@ public class WeakPriorityBlockingQueue<E> {
      * @return the head element from the queue
      * @throws InterruptedException
      */
-    public synchronized E take() throws InterruptedException {
+    public E take() throws InterruptedException {
         this.enqueued.acquire();
-        return takeUnsafe();
+        synchronized (this) {
+            return takeUnsafe();
+        }
     }
     
     private E takeUnsafe() {
@@ -162,7 +166,7 @@ public class WeakPriorityBlockingQueue<E> {
         assert element != null;
         this.queue.remove(element);
         this.drained.add(element);
-        assert this.queue.size() == this.enqueued.availablePermits();
+        assert this.queue.size() >= this.enqueued.availablePermits() : "queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
         return element;
     }
 

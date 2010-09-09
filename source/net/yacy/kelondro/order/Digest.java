@@ -50,9 +50,10 @@ import net.yacy.kelondro.logging.Log;
 
 public class Digest {
 	
-	public static BlockingQueue<MessageDigest> digestPool = new ArrayBlockingQueue<MessageDigest>(10);
+    private final static int digestThreads = Runtime.getRuntime().availableProcessors() + 1;
+	public static BlockingQueue<MessageDigest> digestPool = new ArrayBlockingQueue<MessageDigest>(digestThreads);
 	static {
-		for (int i = 0; i < 10; i++)
+		for (int i = 0; i < digestThreads; i++)
 			try {
 				MessageDigest digest = MessageDigest.getInstance("MD5");
 				digest.reset();

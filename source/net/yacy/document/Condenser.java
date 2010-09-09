@@ -473,10 +473,15 @@ public final class Condenser {
         int pos = 0;
         StringBuilder word;
         byte[] hash;
+        Integer oldpos;
         while (words.hasMoreElements()) {
             word = words.nextElement();
             hash = Word.word2hash(word.toString());
-            if (!map.containsKey(hash)) map.put(hash, Integer.valueOf(pos)); // don't overwrite old values, that leads to too far word distances
+            
+            // don't overwrite old values, that leads to too far word distances
+            oldpos = map.put(hash, Integer.valueOf(pos));
+            if (oldpos != null) map.put(hash, oldpos);
+            
             pos += word.length() + 1;
         }
         return map;
