@@ -663,9 +663,9 @@ msgForwardingCmd=/usr/sbin/sendmail
 msgForwardingTo=root@localhost
 
 #crawlPause: delay time after specific functions before crawling is resumed
-crawlPause.proxy=15000
-crawlPause.localsearch=9000
-crawlPause.remotesearch=3000
+crawlPause.proxy=100
+crawlPause.localsearch=1000
+crawlPause.remotesearch=500
 
 # Some configuration values for the crawler
 crawler.clientTimeout=9000

@@ -115,13 +115,12 @@ public class WeakPriorityBlockingQueue<E> {
         if (this.drained.contains(element)) return;
         if (this.queue.size() == this.maxsize) {
             // remove last elements if stack is too large
-            this.queue.remove(this.queue.last());
-            this.queue.add(element);
+            if (this.queue.add(element)) this.queue.remove(this.queue.last());
         } else {
-            this.queue.add(element);
-            this.enqueued.release();
+            // just add entry but only release semaphore if entry was not double
+            if (this.queue.add(element)) this.enqueued.release();
         }
-        assert this.queue.size() >= this.enqueued.availablePermits() : "queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
+        assert this.queue.size() >= this.enqueued.availablePermits() : "(put) queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
     }
     
     /**
@@ -166,7 +165,7 @@ public class WeakPriorityBlockingQueue<E> {
         assert element != null;
         this.queue.remove(element);
         this.drained.add(element);
-        assert this.queue.size() >= this.enqueued.availablePermits() : "queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
+        assert this.queue.size() >= this.enqueued.availablePermits() : "(take) queue.size() = " + this.queue.size() + ", enqueued.availablePermits() = " + this.enqueued.availablePermits();
         return element;
     }
 

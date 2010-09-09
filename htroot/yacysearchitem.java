@@ -74,6 +74,7 @@ public class yacysearchitem {
         prop.put("references", "0");
         prop.put("rssreferences", "0");
         prop.put("dynamic", "0");
+        boolean isHtml = header.get(HeaderFramework.CONNECTION_PROP_PATH).endsWith(".html");
         
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
@@ -123,6 +124,7 @@ public class yacysearchitem {
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_link", result.urlstring());
             prop.put("content_display", display);
+            if (isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(resulthashString));

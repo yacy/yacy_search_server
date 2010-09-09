@@ -1073,9 +1073,9 @@ public final class Switchboard extends serverSwitch {
      * @return
      */
     public String onlineCaution() {
-        if (System.currentTimeMillis() - this.proxyLastAccess < Integer.parseInt(getConfig(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, "30000"))) return "proxy";
-        if (System.currentTimeMillis() - this.localSearchLastAccess < Integer.parseInt(getConfig(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, "30000"))) return "localsearch";
-        if (System.currentTimeMillis() - this.remoteSearchLastAccess < Integer.parseInt(getConfig(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, "30000"))) return"remotesearch";
+        if (System.currentTimeMillis() - this.proxyLastAccess < Integer.parseInt(getConfig(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, "100"))) return "proxy";
+        if (System.currentTimeMillis() - this.localSearchLastAccess < Integer.parseInt(getConfig(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, "1000"))) return "localsearch";
+        if (System.currentTimeMillis() - this.remoteSearchLastAccess < Integer.parseInt(getConfig(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, "500"))) return"remotesearch";
         return null;
     }
 
