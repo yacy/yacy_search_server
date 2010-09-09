@@ -37,7 +37,6 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -531,11 +530,6 @@ public final class SearchEvent {
             
         }
     
-    }
-    
-    
-    public void remove(final WordReferenceVars reference) {
-        this.rankedCache.remove(reference);
     }
     
     public ResultFetcher result() {

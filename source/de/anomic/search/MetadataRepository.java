@@ -99,7 +99,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     }
     
     public int size() {
-        return urlIndexFile.size();
+        return urlIndexFile == null ? 0 : urlIndexFile.size();
     }
 
     public void close() {

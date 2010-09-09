@@ -130,7 +130,7 @@ public class SitemapImporter extends Thread {
                 url,
                 null, // this.siteMapURL.toString(),
                 entry.url(),
-                new Date(),
+                entry.lastmod(new Date()),
                 this.crawlingProfile.handle(),
                 0,
                 0,

@@ -40,6 +40,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.storage.WeakPriorityBlockingQueue;
+import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -56,7 +58,6 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.SortStack;
 
 import de.anomic.yacy.graphics.ProfilingGraph;
 
@@ -77,9 +78,9 @@ public final class RankingProcess extends Thread {
     
     private int remote_resourceSize, remote_indexCount, remote_peerCount;
     private int local_resourceSize, local_indexCount;
-    private final SortStack<WordReferenceVars> stack;
+    private final WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>> stack;
     private int feeders;
-    private final ConcurrentHashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
+    private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
     
     private final Navigator ref;  // reference score computation for the commonSense heuristic
@@ -93,8 +94,8 @@ public final class RankingProcess extends Thread {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchInclusion = null;
-        this.stack = new SortStack<WordReferenceVars>(maxentries, true);
-        this.doubleDomCache = new ConcurrentHashMap<String, SortStack<WordReferenceVars>>();
+        this.stack = new WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>(maxentries);
+        this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>>();
         //this.handover = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.getOrdering(), 0);
         this.query = query;
         this.order = order;
@@ -245,17 +246,7 @@ public final class RankingProcess extends Thread {
     		    if (urlhashes.has(fEntry.metadataHash())) continue;
                 
     		    // insert
-    		    if (maxentries < 0 || stack.size() < maxentries) {
-    		        // in case that we don't have enough yet, accept any new entry
-    		        stack.push(fEntry, r);
-    		    } else {
-    		        // if we already have enough entries, insert only such that are necessary to get a better result
-    		        if (stack.bottom(r.longValue())) continue;
-    		        
-    		        // take the entry. the stack is automatically reduced
-    		        // to the maximum size by deletion of elements at the bottom
-    		        stack.push(fEntry, r);
-    		    }
+    		    stack.put(new ReverseElement<WordReferenceVars>(fEntry, r)); // inserts the element and removed the worst (which is smallest)
     		    try {
                     urlhashes.put(fEntry.metadataHash());
                 } catch (RowSpaceExceededException e) {
@@ -314,32 +305,30 @@ public final class RankingProcess extends Thread {
     // - root-domain guessing to prefer the root domain over other urls if search word appears in domain name
     
     
-    private SortStack<WordReferenceVars>.stackElement takeRWI(final boolean skipDoubleDom) {
+    private ReverseElement<WordReferenceVars> takeRWI(final boolean skipDoubleDom) {
         // returns from the current RWI list the best entry and removes this entry from the list
-        SortStack<WordReferenceVars> m;
-        SortStack<WordReferenceVars>.stackElement rwi;
-        while (!stack.isEmpty()) {
-            rwi = stack.pop();
-            if (rwi == null) continue; // in case that a synchronization problem occurred just go lazy over it
+        WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>> m;
+        ReverseElement<WordReferenceVars> rwi;
+        while ((rwi = stack.poll()) != null) {
             if (!skipDoubleDom) return rwi;
             // check doubledom
-            final String domhash = new String(rwi.element.metadataHash()).substring(6);
+            final String domhash = new String(rwi.getElement().metadataHash()).substring(6);
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
-                m = new SortStack<WordReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll, true);
+                m = new WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
                 this.doubleDomCache.put(domhash, m);
                 return rwi;
             }
             // second appearances of dom
-            m.push(rwi.element, rwi.weight);
+            m.put(rwi);
         }
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
-        SortStack<WordReferenceVars>.stackElement bestEntry = null;
-        SortStack<WordReferenceVars>.stackElement o;
+        ReverseElement<WordReferenceVars> bestEntry = null;
+        ReverseElement<WordReferenceVars> o;
         synchronized (this.doubleDomCache) {
-            final Iterator<SortStack<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
+            final Iterator<WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>> i = this.doubleDomCache.values().iterator();
             while (i.hasNext()) {
                 try {
                     m = i.next();
@@ -350,19 +339,19 @@ public final class RankingProcess extends Thread {
                 if (m == null) continue;
                 if (m.isEmpty()) continue;
                 if (bestEntry == null) {
-                    bestEntry = m.top();
+                    bestEntry = m.peek();
                     continue;
                 }
-                o = m.top();
-                if (o.weight.longValue() < bestEntry.weight.longValue()) {
+                o = m.peek();
+                if (o.getWeight() < bestEntry.getWeight()) {
                     bestEntry = o;
                 }
             }
         }
         if (bestEntry == null) return null;
         // finally remove the best entry from the doubledom cache
-        m = this.doubleDomCache.get(new String(bestEntry.element.metadataHash()).substring(6));
-        o = m.pop();
+        m = this.doubleDomCache.get(new String(bestEntry.getElement().metadataHash()).substring(6));
+        o = m.poll();
         //assert o == null || o.element.metadataHash().equals(bestEntry.element.metadataHash()) : "bestEntry.element.metadataHash() = " + bestEntry.element.metadataHash() + ", o.element.metadataHash() = " + o.element.metadataHash();
         return bestEntry;
     }
@@ -382,17 +371,17 @@ public final class RankingProcess extends Thread {
     	int p = -1;
     	byte[] urlhash;
     	while (System.currentTimeMillis() < timeLimit) {
-            final SortStack<WordReferenceVars>.stackElement obrwi = takeRWI(skipDoubleDom);
+            final ReverseElement<WordReferenceVars> obrwi = takeRWI(skipDoubleDom);
             if (obrwi == null) {
             	if (this.feedingIsFinished()) return null;
             	try {Thread.sleep(50);} catch (final InterruptedException e1) {}
             	continue;
             }
-            urlhash = obrwi.element.metadataHash();
-            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash, obrwi.element, obrwi.weight.longValue());
+            urlhash = obrwi.getElement().metadataHash();
+            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash, obrwi.getElement(), obrwi.getWeight());
             if (page == null) {
             	try {
-                    misses.put(obrwi.element.metadataHash());
+                    misses.put(obrwi.getElement().metadataHash());
                 } catch (RowSpaceExceededException e) {
                     Log.logException(e);
                 }
@@ -494,17 +483,16 @@ public final class RankingProcess extends Thread {
     }
     
     protected int size() {
-        //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
-        int c = stack.size();
-        for (SortStack<WordReferenceVars> s: this.doubleDomCache.values()) {
-            c += s.size();
+        int c = stack.sizeAvailable();
+        for (WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>> s: this.doubleDomCache.values()) {
+            c += s.sizeAvailable();
         }
         return c;
     }
     
     public boolean isEmpty() {
         if (!stack.isEmpty()) return false;
-        for (SortStack<WordReferenceVars> s: this.doubleDomCache.values()) {
+        for (WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>> s: this.doubleDomCache.values()) {
             if (!s.isEmpty()) return false;
         }
         return true;
@@ -518,7 +506,7 @@ public final class RankingProcess extends Thread {
     
     public int filteredCount() {
         // the number of index entries that are considered as result set
-        return this.stack.size();
+        return this.stack.sizeAvailable();
     }
 
     public int getLocalIndexCount() {
@@ -544,11 +532,6 @@ public final class RankingProcess extends Thread {
     public int getRemotePeerCount() {
         // the number of remote peers that have contributed
         return this.remote_peerCount;
-    }
-    
-    protected void remove(final WordReferenceVars reference) {
-        stack.remove(reference);
-        urlhashes.remove(reference.urlHash);
     }
     
     public Iterator<byte[]> miss() {

@@ -49,11 +49,11 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     public ContentDomain type;
     public DigestURI href, source;
     public String name, attr, mime;
-    public int ranking;
+    public long ranking;
     public int width, height;
     public long fileSize;
 
-    public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final String attr, final int ranking, final DigestURI source) {
+    public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final String attr, final long ranking, final DigestURI source) {
         this.type = type;
         this.href = href;
         this.mime = mime;
@@ -73,7 +73,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
     }
     
-    public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final int ranking, final DigestURI source) {
+    public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final long ranking, final DigestURI source) {
         this.type = type;
         this.href = href;
         this.mime = mime;
@@ -188,7 +188,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             int appcount = queryhashes.size()  * 2 - 
                            TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
                            TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
-            final int ranking = Integer.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);  
+            final long ranking = Long.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);  
             result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, source));
         }
         return result;

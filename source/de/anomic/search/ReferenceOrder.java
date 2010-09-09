@@ -201,6 +201,11 @@ public class ReferenceOrder {
         return (doms.getScore(new String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
     }
 
+    /**
+     * return the ranking of a given word entry
+     * @param t
+     * @return a ranking: the higher the number, the better is the ranking
+     */
     public long cardinal(final WordReferenceVars t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
@@ -247,7 +252,7 @@ public class ReferenceOrder {
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
-        return Long.MAX_VALUE - r; // returns a reversed number: the lower the number the better the ranking. This is used for simple sorting with a TreeMap
+        return r; // the higher the number the better the ranking.
     }
 
     private static final String patchUK(String l) {

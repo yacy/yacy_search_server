@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.storage.WeakPriorityBlockingQueue;
+import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -38,8 +40,6 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
-import net.yacy.kelondro.util.SortStack;
-import net.yacy.kelondro.util.SortStore;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
@@ -57,8 +57,8 @@ public class ResultFetcher {
     // result values
     protected final LoaderDispatcher        loader;
     protected       Worker[]                workerThreads;
-    protected final SortStore<ResultEntry>  result;
-    protected final SortStore<MediaSnippet> images; // container to sort images by size
+    protected final WeakPriorityBlockingQueue<ReverseElement<ResultEntry>>  result;
+    protected final WeakPriorityBlockingQueue<ReverseElement<MediaSnippet>> images; // container to sort images by size
     protected final HandleSet               failedURLs; // a set of urlhashes that could not been verified during search
     protected final HandleSet               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
@@ -80,8 +80,8 @@ public class ResultFetcher {
         
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
-        this.result = new SortStore<ResultEntry>(-1, true); // this is the result, enriched with snippets, ranked and ordered by ranking
-        this.images = new SortStore<MediaSnippet>(-1, true);
+        this.result = new WeakPriorityBlockingQueue<ReverseElement<ResultEntry>>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.images = new WeakPriorityBlockingQueue<ReverseElement<MediaSnippet>>(-1);
         this.failedURLs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
@@ -155,12 +155,12 @@ public class ResultFetcher {
             boolean nav_topics = query.navigators.equals("all") || query.navigators.indexOf("topics") >= 0;
             try {
                 while (System.currentTimeMillis() < this.timeout) {
-                	if (result.size() > neededResults) break;
+                	if (result.sizeAvailable() > neededResults) break;
                     this.lastLifeSign = System.currentTimeMillis();
     
                     // check if we have enough
-                    if ((query.contentdom == ContentDomain.IMAGE) && (images.size() >= query.neededResults() + 50)) break;
-                    if ((query.contentdom != ContentDomain.IMAGE) && (result.size() >= query.neededResults() + 10)) break;
+                    if ((query.contentdom == ContentDomain.IMAGE) && (images.sizeAvailable() >= query.neededResults() + 50)) break;
+                    if ((query.contentdom != ContentDomain.IMAGE) && (result.sizeAvailable() >= query.neededResults() + 10)) break;
     
                     // get next entry
                     page = rankedCache.takeURL(true, taketimeout);
@@ -171,7 +171,7 @@ public class ResultFetcher {
                     final ResultEntry resultEntry = fetchSnippet(page, cacheStrategy); // does not fetch snippets if snippetMode == 0
 
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
-                    if (result.exists(resultEntry)) continue;
+                    //if (result.contains(resultEntry)) continue;
                     
                     urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                     snippetComputationAllTime += resultEntry.snippetComputationTime;
@@ -182,7 +182,7 @@ public class ResultFetcher {
                     long ranking = Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word()));
                     ranking += postRanking(resultEntry, rankedCache.getTopics());
                     //System.out.println("*** resultEntry.hash = " + resultEntry.hash());
-                    result.push(resultEntry, ranking);
+                    result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
                     if (nav_topics) rankedCache.addTopics(resultEntry);
                     //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
                 }
@@ -273,17 +273,13 @@ public class ResultFetcher {
         Log.logInfo("SEARCH", "sorted out urlhash " + new String(urlhash) + " during search: " + reason);
     }
     
-    public int resultCount() {
-    	return this.result.size();
-    }
-    
     public ResultEntry oneResult(final int item) {
         // check if we already retrieved this item
     	// (happens if a search pages is accessed a second time)
         EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "obtain one result entry - start", 0, 0), false, 30000, ProfilingGraph.maxTime);
-        if (this.result.size() > item) {
+        if (this.result.sizeAvailable() > item) {
             // we have the wanted result already in the result array .. return that
-            return this.result.element(item).element;
+            return this.result.element(item).getElement();
         }
         /*
         System.out.println("rankedCache.size() = " + this.rankedCache.size());
@@ -291,10 +287,10 @@ public class ResultFetcher {
         System.out.println("query.neededResults() = " + query.neededResults());
         */
         if ((!anyWorkerAlive()) &&
-            (((query.contentdom == ContentDomain.IMAGE) && (images.size() + 30 < query.neededResults())) ||
-             (this.result.size() < query.neededResults())) &&
+            (((query.contentdom == ContentDomain.IMAGE) && (images.sizeAvailable() + 30 < query.neededResults())) ||
+             (this.result.sizeAvailable() < query.neededResults())) &&
             //(event.query.onlineSnippetFetch) &&
-            (this.rankedCache.size() > this.result.size())
+            (this.rankedCache.size() > this.result.sizeAvailable())
            ) {
         	// start worker threads to fetch urls and snippets
             deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
@@ -302,13 +298,13 @@ public class ResultFetcher {
 
         // finally wait until enough results are there produced from the
         // snippet fetch process
-        while ((anyWorkerAlive()) && (result.size() <= item)) {
+        while ((anyWorkerAlive()) && (result.sizeAvailable() <= item)) {
             try {Thread.sleep((item % query.itemsPerPage) * 10L);} catch (final InterruptedException e) {}
         }
 
         // finally, if there is something, return the result
-        if (this.result.size() <= item) return null;
-        return this.result.element(item).element;
+        if (this.result.sizeAvailable() <= item) return null;
+        return this.result.element(item).getElement();
     }
     
     private int resultCounter = 0;
@@ -320,19 +316,19 @@ public class ResultFetcher {
     
     public MediaSnippet oneImage(final int item) {
         // always look for a next object if there are way too less
-        if (this.images.size() <= item + 10) fillImagesCache();
+        if (this.images.sizeAvailable() <= item + 10) fillImagesCache();
 
         // check if we already retrieved the item
-        if (this.images.size() > item) return this.images.element(item).element;
+        if (this.images.sizeDrained() > item) return this.images.element(item).getElement();
         
         // look again if there are not enough for presentation
-        while (this.images.size() <= item) {
+        while (this.images.sizeAvailable() <= item) {
             if (fillImagesCache() == 0) break;
         }        
-        if (this.images.size() <= item) return null;
+        if (this.images.sizeAvailable() <= item) return null;
         
         // now take the specific item from the image stack
-        return this.images.element(item).element;
+        return this.images.element(item).getElement();
     }
     
     private int fillImagesCache() {
@@ -343,7 +339,7 @@ public class ResultFetcher {
         final ArrayList<MediaSnippet> imagemedia = result.mediaSnippets();
         if (imagemedia != null) {
             for (MediaSnippet ms: imagemedia) {
-                images.push(ms, Long.valueOf(ms.ranking));
+                images.put(new ReverseElement<MediaSnippet>(ms, ms.ranking)); // remove smallest in case of overflow
                 c++;
                 //System.out.println("*** image " + new String(ms.href.hash()) + " images.size = " + images.size() + "/" + images.size());
             }
@@ -351,13 +347,13 @@ public class ResultFetcher {
         return c;
     }
      
-    public ArrayList<SortStack<ResultEntry>.stackElement> completeResults(final long waitingtime) {
+    public ArrayList<ReverseElement<ResultEntry>> completeResults(final long waitingtime) {
         final long timeout = System.currentTimeMillis() + waitingtime;
-        while ((result.size() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {
+        while ((result.sizeAvailable() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {
             try {Thread.sleep(100);} catch (final InterruptedException e) {}
             //System.out.println("+++DEBUG-completeResults+++ sleeping " + 200);
         }
-        return this.result.list(this.result.size());
+        return this.result.list(this.result.sizeAvailable());
     }
 
     public long postRanking(

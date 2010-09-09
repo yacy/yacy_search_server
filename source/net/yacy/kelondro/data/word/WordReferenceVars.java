@@ -27,6 +27,7 @@
 package net.yacy.kelondro.data.word;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
@@ -42,7 +43,7 @@ import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.index.Row;
 
 
-public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable, Comparable<WordReferenceVars> {
+public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable, Comparable<WordReferenceVars>, Comparator<WordReferenceVars> {
 
 	/**
 	 * object for termination of concurrent blocking queue processing
@@ -379,6 +380,10 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     
     public int compareTo(final WordReferenceVars o) {
         return Base64Order.enhancedCoder.compare(this.urlHash, o.metadataHash());
+    }
+
+    public int compare(WordReferenceVars o1, WordReferenceVars o2) {
+        return o1.compareTo(o2);
     }
     
     public void addPosition(final int position) {
