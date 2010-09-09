@@ -83,7 +83,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @param v
      */
     public final void insert(final K s, final V v) {
-        this.arc[s.hashCode() & mask].put(s, v);
+        this.arc[getPartition(s)].put(s, v);
     }
     
     /**
@@ -92,7 +92,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @param v
      */
     public final V put(final K s, final V v) {
-        return this.arc[s.hashCode() & mask].put(s, v);
+        return this.arc[getPartition(s)].put(s, v);
     }
     
     /**
@@ -102,7 +102,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      */
     @SuppressWarnings("unchecked")
     public final V get(final Object s) {
-    	return this.arc[s.hashCode() & mask].get((K) s);
+    	return this.arc[getPartition(s)].get((K) s);
     }
     
     /**
@@ -112,7 +112,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      */
     @SuppressWarnings("unchecked")
     public final boolean containsKey(final Object s) {
-    	return this.arc[s.hashCode() & mask].containsKey((K) s);
+    	return this.arc[getPartition(s)].containsKey((K) s);
     }
     
     /**
@@ -122,7 +122,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      */
     @SuppressWarnings("unchecked")
     public final V remove(final Object s) {
-    	return this.arc[s.hashCode() & mask].remove((K) s);
+    	return this.arc[getPartition(s)].remove((K) s);
     }
     
     /**
@@ -171,5 +171,19 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      */
     public int hashCode() {
         return this.arc.hashCode();
+    }
+    /**
+     * return in which partition the Object belongs
+     * This function uses the objects hashCode() function
+     * except for byte[] keys
+     * @return the partitrion number
+     */
+    private int getPartition(final Object x) {
+        if (x instanceof byte[]) {
+            int h = 0;
+            for (byte c: (byte[])x) h = 31 * h + (c & 0xFF);
+            return h & mask;
+        }
+        return x.hashCode() & mask;
     }
 }
