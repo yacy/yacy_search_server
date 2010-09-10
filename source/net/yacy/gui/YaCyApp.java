@@ -130,15 +130,15 @@ public class YaCyApp {
         
         // registering shutdown hook
         log.info("Registering Shutdown Hook");
-        Switchboard.addShutdownHook(Thread.currentThread());
-    
-        SwingUtilities.invokeLater(new Runnable() {
+        Thread t = new Thread() {
             public void run() {
                 app = new Application("YaCy GUI", operation, menues, new InfoPage("localhost", 8080));
                 app.setLocationRelativeTo(null);
                 app.setVisible(true);
             }
-        });
+        };
+        Switchboard.addShutdownHook(t, net.yacy.yacy.shutdownSemaphore);
+        SwingUtilities.invokeLater(t);
     }
     
     public static void main(String[] args) {

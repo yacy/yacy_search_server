@@ -29,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.concurrent.Semaphore;
 
 import javax.swing.text.JTextComponent;
 
@@ -64,10 +65,10 @@ public class Switchboard {
         new InfoUpdater(2000).start();
     }
     
-    public static void addShutdownHook(Thread mainThread) {
+    public static void addShutdownHook(Thread mainThread, Semaphore semaphore) {
         // registering shutdown hook
         final Runtime run = Runtime.getRuntime();
-        run.addShutdownHook(new shutdownHookThread(mainThread));
+        run.addShutdownHook(new shutdownHookThread(mainThread, semaphore));
     }
     
     public static JTextComponent InfoBox = null;
@@ -98,14 +99,16 @@ public class Switchboard {
     
     /**
     * This class is a helper class whose instance is started, when the java virtual
-    * machine shuts down. Signals the plasmaSwitchboard to shut down.
+    * machine shuts down. Signals the Switchboard to shut down.
     */
     public static class shutdownHookThread extends Thread {
         private final Thread mainThread;
+        private final Semaphore shutdownSemaphore;
 
-        public shutdownHookThread(final Thread mainThread) {
+        public shutdownHookThread(final Thread mainThread, Semaphore semaphore) {
             super();
             this.mainThread = mainThread;
+            this.shutdownSemaphore = semaphore;
         }
 
         public void run() {
@@ -118,10 +121,18 @@ public class Switchboard {
                     shutdown();
                     
                     // waiting for the main thread to finish execution
-                    log.info("Waiting for main thread to finish.");
+                    log.info("Waiting for GUI thread to finish.");
+                    this.mainThread.interrupt();
                     if (this.mainThread != null && this.mainThread.isAlive()) {
                         this.mainThread.join();
                     }
+                    // wait until everything is written
+                    log.info("Waiting for main thread to finish. shutdownSemaphore.permits = " + shutdownSemaphore.availablePermits());
+                    shutdownSemaphore.acquireUninterruptibly();
+                    //log.info("Aquired shutdown semaphore. remaining permits = " + shutdownSemaphore.availablePermits());
+                    
+                    // finished
+                    log.info("Shutdown Hook Terminated. Shutdown.");
                 }
             } catch (final Exception e) {
                 log.info("Unexpected error. " + e.getClass().getName(),e);

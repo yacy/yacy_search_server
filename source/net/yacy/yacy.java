@@ -131,24 +131,13 @@ public final class yacy {
     public static final String vDATE   = yacyBuildProperties.getBuildDate();
     public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     public static final String hline = "-------------------------------------------------------------------------------";
-   
+    public static final Semaphore shutdownSemaphore = new Semaphore(0);
+    
     /**
      * a reference to the {@link Switchboard} created by the
      * {@link yacy#startup(String, long, long)} method.
      */
     private static Switchboard sb = null;
-    
-    /**
-     * Semaphore needed by {@link yacy#setUpdaterCallback(serverUpdaterCallback)} to block 
-     * until the {@link plasmaSwitchboard }object was created.
-     */
-    //private static serverSemaphore sbSync = new serverSemaphore(0);
-    
-    /**
-     * Semaphore needed by {@link yacy#waitForFinishedStartup()} to block 
-     * until startup has finished
-     */
-    private static Semaphore startupFinishedSync = new Semaphore(0);
 
     /**
     * Starts up the whole application. Sets up all datastructures and starts
@@ -393,9 +382,6 @@ public final class yacy {
                     sb.setConfig("memoryFreeAfterInitAGC", MemoryControl.free());
                     sb.setConfig("memoryTotalAfterInitAGC", MemoryControl.total());
                 //} catch (ConcurrentModificationException e) {}
-                
-                // signal finished startup
-                startupFinishedSync.release();
                     
                 // wait for server shutdown
                 try {
@@ -438,10 +424,10 @@ public final class yacy {
         } catch (final Exception ee) {
             Log.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
-        	startupFinishedSync.release();
         }
         Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         Log.shutdown();
+        shutdownSemaphore.release(1000);
         try {
             System.exit(0);
         } catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
