@@ -39,17 +39,19 @@ import net.yacy.kelondro.logging.Log;
 public final class OS {
 
 	// constants for system identification
-	public static final int systemMacOSC  =  0; // 'classic' Mac OS 7.6.1/8.*/9.*
-	public static final int systemMacOSX  =  1; // all Mac OS X
-	public static final int systemUnix    =  2; // all Unix/Linux type systems
-	public static final int systemWindows =  3; // all Windows 95/98/NT/2K/XP
-	public static final int systemUnknown = -1; // any other system
-
+    public enum System {
+        MacOSC,  // 'classic' Mac OS 7.6.1/8.*/9.*
+        MacOSX,  // all Mac OS X
+        Unix,    // all Unix/Linux type systems
+        Windows, // all Windows 95/98/NT/2K/XP
+        Unknown; // any other system
+    }
+    
 	// constants for file type identification (Mac only)
 	public static final String blankTypeString = "____";
 
 	// system-identification statics
-	public static final int     systemOS;
+	public static final System  systemOS;
 	public static final boolean isMacArchitecture;
 	public static final boolean isUnixFS;
 	public static final boolean canExecUnix;
@@ -66,19 +68,19 @@ public final class OS {
 	// static initialization
 	static {
 		// check operation system type
-		final Properties sysprop = System.getProperties();
+		final Properties sysprop = java.lang.System.getProperties();
 		final String sysname = sysprop.getProperty("os.name","").toLowerCase();
-		if (sysname.startsWith("mac os x")) systemOS = systemMacOSX;
-		else if (sysname.startsWith("mac os")) systemOS = systemMacOSC;
-		else if (sysname.startsWith("windows")) systemOS = systemWindows;
-		else if ((sysname.startsWith("linux")) || (sysname.startsWith("unix"))) systemOS = systemUnix;
-		else systemOS = systemUnknown;
+		if (sysname.startsWith("mac os x")) systemOS = System.MacOSX;
+		else if (sysname.startsWith("mac os")) systemOS = System.MacOSC;
+		else if (sysname.startsWith("windows")) systemOS = System.Windows;
+		else if ((sysname.startsWith("linux")) || (sysname.startsWith("unix"))) systemOS = System.Unix;
+		else systemOS = System.Unknown;
 
-		isMacArchitecture = ((systemOS == systemMacOSC) || (systemOS == systemMacOSX));
-		isUnixFS = ((systemOS == systemMacOSX) || (systemOS == systemUnix));
-		canExecUnix = ((isUnixFS) || (!((systemOS == systemMacOSC) || (systemOS == systemWindows))));
-		isWindows = (systemOS == systemWindows);
-		isWin32 = (isWindows && System.getProperty("os.arch", "").contains("x86"));
+		isMacArchitecture = ((systemOS == System.MacOSC) || (systemOS == System.MacOSX));
+		isUnixFS = ((systemOS == System.MacOSX) || (systemOS == System.Unix));
+		canExecUnix = ((isUnixFS) || (!((systemOS == System.MacOSC) || (systemOS == System.Windows))));
+		isWindows = (systemOS == System.Windows);
+		isWin32 = (isWindows && java.lang.System.getProperty("os.arch", "").contains("x86"));
 
 		// set up maximum path length according to system
 		if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
@@ -119,11 +121,11 @@ public final class OS {
 
 	public static String infoString() {
 		String s = "System=";
-		if (systemOS == systemUnknown) s += "unknown";
-		else if (systemOS == systemMacOSC) s += "Mac OS Classic";
-		else if (systemOS == systemMacOSX) s += "Mac OS X";
-		else if (systemOS == systemUnix) s += "Unix/Linux";
-		else if (systemOS == systemWindows) s += "Windows";
+		if (systemOS == System.Unknown) s += "unknown";
+		else if (systemOS == System.MacOSC) s += "Mac OS Classic";
+		else if (systemOS == System.MacOSX) s += "Mac OS X";
+		else if (systemOS == System.Unix) s += "Unix/Linux";
+		else if (systemOS == System.Windows) s += "Windows";
 		else s += "unknown";
 		if (isMacArchitecture) s += ", Mac System Architecture";
 		if (isUnixFS) s += ", has Unix-like File System";
@@ -134,11 +136,11 @@ public final class OS {
 	/** generates a 2-character string containing information about the OS-type*/
 	public static String infoKey() {
 		String s = "";
-		if (systemOS == systemUnknown) s += "o";
-		else if (systemOS == systemMacOSC) s += "c";
-		else if (systemOS == systemMacOSX) s += "x";
-		else if (systemOS == systemUnix) s += "u";
-		else if (systemOS == systemWindows) s += "w";
+		if (systemOS == System.Unknown) s += "o";
+		else if (systemOS == System.MacOSC) s += "c";
+		else if (systemOS == System.MacOSX) s += "x";
+		else if (systemOS == System.Unix) s += "u";
+		else if (systemOS == System.Windows) s += "w";
 		else s += "o";
 		if (isMacArchitecture) s += "m";
 		if (isUnixFS) s += "f";
@@ -196,7 +198,7 @@ public final class OS {
 
 	public static void main(final String[] args) {
 		if (args[0].equals("-m")) {
-			System.out.println("Maximum possible memory: " + Integer.toString(getWin32MaxHeap()) + "m");
+			java.lang.System.out.println("Maximum possible memory: " + Integer.toString(getWin32MaxHeap()) + "m");
 		}
 	}
 

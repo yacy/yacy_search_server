@@ -481,6 +481,15 @@ public final class yacyRelease extends yacyVersion {
             }
             String script = null;
             String scriptFileName = null;
+            if (OS.isMacArchitecture) {
+                // overwrite Info.plist for Mac Applications (this holds the class paths and can be seen as the start script)
+                File InfoPlistSource = new File(sb.getDataPath(), "DATA/RELEASE/yacy/addon/YaCy.app/Contents/Info.plist");
+                File InfoPlistDestination = new File(sb.getAppPath(), "addon/YaCy.app/Contents/Info.plist");
+                if (InfoPlistSource.exists() && InfoPlistDestination.exists()) {
+                    FileUtils.copy(InfoPlistSource, InfoPlistDestination);
+                    Log.logInfo("UPDATE", "replaced Info.plist");
+                }
+            }
             if (OS.isWindows) {
                 final File startType = new File(sb.getDataPath(), "DATA/yacy.noconsole".replace("/", File.separator));
                 String starterFile = "startYACY_debug.bat";
