@@ -45,6 +45,7 @@ import javax.swing.text.JTextComponent;
 import net.yacy.gui.framework.Browser;
 import net.yacy.gui.framework.Layout;
 import net.yacy.gui.framework.Switchboard;
+import net.yacy.kelondro.util.OS;
 
 public class InfoPage implements Layout {
 
@@ -109,7 +110,14 @@ public class InfoPage implements Layout {
         // make the scroll pane that contains the search result
         JComponent mainText = new JEditorPane();
         mainText.setPreferredSize(new java.awt.Dimension(480, 590));
-        ((JEditorPane) mainText).setText("This is a very early test for a YaCy search gui.\nYou may enter a search term and press enter.");
+        String infotext =
+            "This is a very early test for a YaCy GUI.\n\n" +
+            "The YaCy administration interface is in your browser\n" +
+            "just open http://localhost:8080\n\n" +
+            "You may also enter a search term and press enter,\n" +
+            "then the query will be opened in your browser\n";
+        if (OS.isMacArchitecture) infotext += "\nThe application data on Mac is stored at ~Library/YaCy/\n";
+        ((JEditorPane) mainText).setText(infotext);
         //page.add(new splashCanvas());
 
         //SplashScreen splash = SplashScreen.getSplashScreen(); 

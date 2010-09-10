@@ -617,7 +617,7 @@ public class yacysearch {
             if (thispage == 0) {
             	resnav.append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
             } else {
-            	resnav.append("<a href=\"");
+            	resnav.append("<a id=\"prevpage\" href=\"");
                 resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, originalUrlMask, null, navigation));
             	resnav.append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
@@ -642,7 +642,7 @@ public class yacysearch {
             if (thispage >= numberofpages) {
             	resnav.append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
             } else {
-                resnav.append("<a href=\"");
+                resnav.append("<a id=\"nextpage\" href=\"");
                 resnav.append(QueryParams.navurl("html", thispage + 1, display, theQuery, originalUrlMask, null, navigation));
                 resnav.append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }
