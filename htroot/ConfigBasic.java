@@ -239,12 +239,19 @@ public class ConfigBasic {
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         if (lang.equals("default")) {
             prop.put("langDeutsch", "0");
+            prop.put("langFrancais", "0");
             prop.put("langEnglish", "1");
+        } else if (lang.equals("fr")) {
+            prop.put("langDeutsch", "0");
+            prop.put("langFrancais", "1");
+            prop.put("langEnglish", "0");
         } else if (lang.equals("de")) {
             prop.put("langDeutsch", "1");
+            prop.put("langFrancais", "0");
             prop.put("langEnglish", "0");
         } else {
             prop.put("langDeutsch", "0");
+            prop.put("langFrancais", "0");
             prop.put("langEnglish", "0");
         }
         return prop;
