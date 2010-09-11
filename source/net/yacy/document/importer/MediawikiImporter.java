@@ -118,7 +118,7 @@ public class MediawikiImporter extends Thread implements Importer {
      */
     public int speed() {
         if (count == 0) return 0;
-        return (int) ((long) count / runningTime());
+        return (int) ((long) count / Math.max(1L, runningTime() ));
     }
     
     /**
@@ -126,11 +126,11 @@ public class MediawikiImporter extends Thread implements Importer {
      * @return
      */
     public long remainingTime() {
-        return Math.max(0, this.approxdocs - count) / speed();
+        return Math.max(0, this.approxdocs - count) / Math.max(1, speed() );
     }
     
     public long runningTime() {
-        return (System.currentTimeMillis() - start) / 1024;
+        return (System.currentTimeMillis() - start) / 1000L;
     }
     
     public void run() {
