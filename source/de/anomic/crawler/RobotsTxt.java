@@ -43,6 +43,7 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.io.ByteCount;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 
@@ -347,6 +348,10 @@ public class RobotsTxt {
             
             // sending the get request
             robotsTxt = client.GETbytes(robotsURL.toString());
+            // statistics:
+            if (robotsTxt != null) {
+            	ByteCount.addAccountCount(ByteCount.CRAWLER, robotsTxt.length);
+            }
             final int code = client.getHttpResponse().getStatusLine().getStatusCode();
             final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
             

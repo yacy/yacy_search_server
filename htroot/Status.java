@@ -32,8 +32,9 @@ import java.util.Date;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.io.ByteCountInputStream;
-import net.yacy.kelondro.io.ByteCountOutputStream;
+import net.yacy.kelondro.io.ByteCount;
+//import net.yacy.kelondro.io.ByteCountInputStream;
+//import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -83,8 +84,9 @@ public class Status {
                     sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         		redirect = true;
         	} else if (post.containsKey("ResetTraffic")) {
-        		ByteCountInputStream.resetCount();
-        		ByteCountOutputStream.resetCount();
+//        		ByteCountInputStream.resetCount();
+//        		ByteCountOutputStream.resetCount();
+        		ByteCount.resetCount();
         		redirect = true;
         	} else if (post.containsKey("popup")) {
                 final String trigger_enabled = post.get("popup");
@@ -292,8 +294,8 @@ public class Status {
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
-        prop.put("trafficProxy", Formatter.bytesToString(ByteCountOutputStream.getAccountCount("PROXY")));
-        prop.put("trafficCrawler", Formatter.bytesToString(ByteCountInputStream.getAccountCount("CRAWLER")));
+        prop.put("trafficProxy", Formatter.bytesToString(ByteCount.getAccountCount(ByteCount.PROXY)));
+        prop.put("trafficCrawler", Formatter.bytesToString(ByteCount.getAccountCount(ByteCount.CRAWLER)));
 
         // connection information
         final serverCore httpd = (serverCore) sb.getThread("10_httpd");

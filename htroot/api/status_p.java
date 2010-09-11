@@ -1,8 +1,9 @@
 
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.io.ByteCountInputStream;
-import net.yacy.kelondro.io.ByteCountOutputStream;
+import net.yacy.kelondro.io.ByteCount;
+//import net.yacy.kelondro.io.ByteCountInputStream;
+//import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import de.anomic.search.Segment;
@@ -49,9 +50,9 @@ public class status_p {
         prop.putNum("processors", WorkflowProcessor.availableCPU);
 
 		// proxy traffic
-		prop.put("trafficIn", ByteCountInputStream.getGlobalCount());
-		prop.put("trafficProxy", ByteCountOutputStream.getAccountCount("PROXY"));
-		prop.put("trafficCrawler", ByteCountInputStream.getAccountCount("CRAWLER"));
+		prop.put("trafficIn", ByteCount.getGlobalCount());
+		prop.put("trafficProxy", ByteCount.getAccountCount(ByteCount.PROXY));
+		prop.put("trafficCrawler", ByteCount.getAccountCount(ByteCount.CRAWLER));
 
         // return rewrite properties
         return prop;

@@ -27,13 +27,13 @@ package net.yacy.kelondro.io;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
+//import java.util.HashMap;
 
 public final class ByteCountOutputStream extends BufferedOutputStream {
     
-    private final static Object syncObject = new Object();
-    private static long globalByteCount = 0;    
-    private final static HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
+//    private final static Object syncObject = new Object();
+//    private static long globalByteCount = 0;    
+//    private final static HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
     
     protected long byteCount;
     protected String byteCountAccountName = null; 
@@ -92,44 +92,45 @@ public final class ByteCountOutputStream extends BufferedOutputStream {
         return this.byteCountAccountName;
     }    
     
-    public final static long getGlobalCount() {
-        synchronized (syncObject) {
-            return globalByteCount;
-        }
-    }
+//    public final static long getGlobalCount() {
+//        synchronized (syncObject) {
+//            return globalByteCount;
+//        }
+//    }
     
-    public final static long getAccountCount(final String accountName) {
-        synchronized (syncObject) {
-            if (byteCountInfo.containsKey(accountName)) {
-                return (byteCountInfo.get(accountName)).longValue();
-            }
-            return 0;
-        }
-    }    
+//    public final static long getAccountCount(final String accountName) {
+//        synchronized (syncObject) {
+//            if (byteCountInfo.containsKey(accountName)) {
+//                return (byteCountInfo.get(accountName)).longValue();
+//            }
+//            return 0;
+//        }
+//    }    
     
-    public final static void resetCount() {
-        synchronized (syncObject) {
-            globalByteCount = 0;
-            byteCountInfo.clear();
-        }
-    }    
+//    public final static void resetCount() {
+//        synchronized (syncObject) {
+//            globalByteCount = 0;
+//            byteCountInfo.clear();
+//        }
+//    }    
     
     public final void finish() {
         if (this.finished) return;
         
         this.finished = true;
-        synchronized (syncObject) {
-            globalByteCount += this.byteCount;
-            if (this.byteCountAccountName != null) {
-                long lastByteCount = 0;
-                if (byteCountInfo.containsKey(this.byteCountAccountName)) {
-                    lastByteCount = (byteCountInfo.get(this.byteCountAccountName)).longValue();
-                }
-                lastByteCount += this.byteCount;
-                byteCountInfo.put(this.byteCountAccountName, Long.valueOf(lastByteCount));
-            }
-            
-        }            
+        ByteCount.addAccountCount(this.byteCountAccountName, this.byteCount);
+//        synchronized (syncObject) {
+//            globalByteCount += this.byteCount;
+//            if (this.byteCountAccountName != null) {
+//                long lastByteCount = 0;
+//                if (byteCountInfo.containsKey(this.byteCountAccountName)) {
+//                    lastByteCount = (byteCountInfo.get(this.byteCountAccountName)).longValue();
+//                }
+//                lastByteCount += this.byteCount;
+//                byteCountInfo.put(this.byteCountAccountName, Long.valueOf(lastByteCount));
+//            }
+//            
+//        }            
     }
     
 }

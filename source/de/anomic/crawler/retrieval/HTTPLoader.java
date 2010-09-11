@@ -34,6 +34,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.io.ByteCount;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 
@@ -137,9 +138,10 @@ public final class HTTPLoader {
                 // the transfer is ok
                 
                 // we write the new cache entry to file system directly
-// TODO:               res.setAccountingName("CRAWLER");
+//                res.setAccountingName("CRAWLER");
 //                final byte[] responseBody = res.getData();
                 long contentLength = responseBody.length;
+                ByteCount.addAccountCount(ByteCount.CRAWLER, contentLength);
 
                 // check length again in case it was not possible to get the length before loading
                 if (maxFileSize > 0 && contentLength > maxFileSize) {
@@ -267,9 +269,12 @@ public final class HTTPLoader {
 //            if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
         	if (responseBody != null && (code == 200 || code == 203)) {
                 // the transfer is ok
+        		
+        		//statistics:
+        		ByteCount.addAccountCount(ByteCount.CRAWLER, responseBody.length);
                 
                 // we write the new cache entry to file system directly
-// TODO:               res.setAccountingName("CRAWLER");
+//                res.setAccountingName("CRAWLER");
 //                final byte[] responseBody = res.getData();
 
                 // create a new cache entry

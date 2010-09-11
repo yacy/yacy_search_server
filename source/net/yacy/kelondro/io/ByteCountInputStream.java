@@ -29,13 +29,13 @@ package net.yacy.kelondro.io;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
+//import java.util.HashMap;
 
 public final class ByteCountInputStream extends FilterInputStream {
     
-    private final static Object syncObject = new Object();
-    private final static HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
-    private static long globalByteCount = 0;
+//    private final static Object syncObject = new Object();
+//    private final static HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
+//    private static long globalByteCount = 0;
     
     private boolean finished = false;
     protected long byteCount;
@@ -99,20 +99,20 @@ public final class ByteCountInputStream extends FilterInputStream {
         return this.byteCountAccountName;
     }
     
-    public final static long getGlobalCount() {
-        synchronized (syncObject) {
-            return globalByteCount;
-        }
-    }
+//    public final static long getGlobalCount() {
+//        synchronized (syncObject) {
+//            return globalByteCount;
+//        }
+//    }
     
-    public final static long getAccountCount(final String accountName) {
-        synchronized (syncObject) {
-            if (byteCountInfo.containsKey(accountName)) {
-                return (byteCountInfo.get(accountName)).longValue();
-            }
-            return 0;
-        }
-    }
+//    public final static long getAccountCount(final String accountName) {
+//        synchronized (syncObject) {
+//            if (byteCountInfo.containsKey(accountName)) {
+//                return (byteCountInfo.get(accountName)).longValue();
+//            }
+//            return 0;
+//        }
+//    }
     
     public final void close() throws IOException {
         super.close();
@@ -123,24 +123,25 @@ public final class ByteCountInputStream extends FilterInputStream {
         if (this.finished) return;
         
         this.finished = true;
-        synchronized (syncObject) {
-            globalByteCount += this.byteCount;
-            if (this.byteCountAccountName != null) {
-                long lastByteCount = 0;
-                if (byteCountInfo.containsKey(this.byteCountAccountName)) {
-                    lastByteCount = byteCountInfo.get(this.byteCountAccountName).longValue();
-                }
-                lastByteCount += this.byteCount;
-                byteCountInfo.put(this.byteCountAccountName, Long.valueOf(lastByteCount));
-            }
-            
-        }        
+        ByteCount.addAccountCount(this.byteCountAccountName, this.byteCount);
+//        synchronized (syncObject) {
+//            globalByteCount += this.byteCount;
+//            if (this.byteCountAccountName != null) {
+//                long lastByteCount = 0;
+//                if (byteCountInfo.containsKey(this.byteCountAccountName)) {
+//                    lastByteCount = byteCountInfo.get(this.byteCountAccountName).longValue();
+//                }
+//                lastByteCount += this.byteCount;
+//                byteCountInfo.put(this.byteCountAccountName, Long.valueOf(lastByteCount));
+//            }
+//            
+//        }        
     }
     
-    public final static void resetCount() {
-        synchronized (syncObject) {
-            globalByteCount = 0;
-            byteCountInfo.clear();
-        }
-    }
+//    public final static void resetCount() {
+//        synchronized (syncObject) {
+//            globalByteCount = 0;
+//            byteCountInfo.clear();
+//        }
+//    }
 }
