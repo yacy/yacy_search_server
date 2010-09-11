@@ -49,9 +49,9 @@ public class Banner {
         final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;
         int height = 60;
-        String bgcolor     = "ddeeee";
+        String bgcolor     = "e7effc";
         String textcolor   = "000000";
-        String bordercolor = "aaaaaa";
+        String bordercolor = "5090d0";
 
         if (post != null) {
             bgcolor = post.get("bgcolor", bgcolor);
