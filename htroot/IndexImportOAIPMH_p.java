@@ -36,6 +36,7 @@ import net.yacy.document.importer.ResumptionToken;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
+import de.anomic.data.WorkTables;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -89,6 +90,7 @@ public class IndexImportOAIPMH_p {
             
             if (post.get("urlstart", "").length() > 0) {
                 String oaipmhurl = post.get("urlstart", "");
+                sb.tables.recordAPICall(post, "IndexImportOAIPMH_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "OAI-PMH import for " + oaipmhurl);
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl, null);
