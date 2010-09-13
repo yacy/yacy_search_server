@@ -425,7 +425,7 @@ public final class QueryParams {
         context.append(asterisk);
         context.append(this.zonecode);
         context.append(asterisk);
-        context.append(Word.word2hash(this.ranking.toExternalString()));
+        context.append(new String(Word.word2hash(this.ranking.toExternalString())));
         context.append(asterisk);
         context.append(this.prefer);
         context.append(asterisk);

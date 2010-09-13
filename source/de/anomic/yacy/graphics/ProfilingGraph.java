@@ -29,6 +29,8 @@ package de.anomic.yacy.graphics;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
+import de.anomic.search.SearchEvent;
+
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.EventTracker.Event;
 import net.yacy.visualization.RasterPlotter;
@@ -39,7 +41,7 @@ public class ProfilingGraph {
     private static ChartPlotter bufferChart = null;
     public static long maxTime = 600000L;
     
-    public static long maxPayload(final String eventname, final long min) {
+    public static long maxPayload(final EventTracker.EClass eventname, final long min) {
     	final Iterator<Event> list = EventTracker.getHistory(eventname);
     	if (list == null) return min;
         long max = min, l;
@@ -56,9 +58,9 @@ public class ProfilingGraph {
     
     public static RasterPlotter performanceGraph(final int width, final int height, final String subline) {        
         // find maximum values for automatic graph dimension adoption
-        final int maxppm = (int) maxPayload("ppm", 25);
-        final int maxwords = (int) maxPayload("wordcache", 12000);
-        final long maxbytes = maxPayload("memory", 110 * 1024 * 1024);
+        final int maxppm = (int) maxPayload(EventTracker.EClass.PPM, 25);
+        final int maxwords = (int) maxPayload(EventTracker.EClass.WORDCACHE, 12000);
+        final long maxbytes = maxPayload(EventTracker.EClass.MEMORY, 110 * 1024 * 1024);
         final int maxmbytes = (int)(maxbytes / 1024 / 1024);
         
         // declare graph and set dimensions
@@ -103,7 +105,7 @@ public class ProfilingGraph {
             }
             */
             // draw memory
-            Iterator<Event> events = EventTracker.getHistory("memory");
+            Iterator<Event> events = EventTracker.getHistory(EventTracker.EClass.MEMORY);
             x0 = 1; y0 = 0;
             if (events != null) {
                 EventTracker.Event event;
@@ -122,7 +124,7 @@ public class ProfilingGraph {
             }
             
             // draw wordcache
-            events = EventTracker.getHistory("wordcache");
+            events = EventTracker.getHistory(EventTracker.EClass.WORDCACHE);
             x0 = 1; y0 = 0;
             if (events != null) {
                 EventTracker.Event event;
@@ -141,7 +143,7 @@ public class ProfilingGraph {
             }
             
             // draw ppm
-            events = EventTracker.getHistory("ppm");
+            events = EventTracker.getHistory(EventTracker.EClass.PPM);
             x0 = 1; y0 = 0;
             if (events != null) {
                 EventTracker.Event event;
@@ -168,13 +170,16 @@ public class ProfilingGraph {
     }
     
     public static class searchEvent {
-    	public String queryID, processName;
+        public SearchEvent.Type processName;
+        public String comment;
+    	public String queryID;
     	public long duration;
     	public int resultCount;
     	
-    	public searchEvent(final String queryID, final String processName, final int resultCount, final long duration) {
+    	public searchEvent(final String queryID, final SearchEvent.Type processName, String comment, final int resultCount, final long duration) {
     		this.queryID = queryID;
     		this.processName = processName;
+    		this.comment = comment;
     		this.resultCount = resultCount;
     		this.duration = duration;
     	}

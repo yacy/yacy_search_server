@@ -488,7 +488,7 @@ public class yacysearch {
                     authenticated,
                     indexSegment,
                     ranking);
-            EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false, 30000, ProfilingGraph.maxTime);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.INITIALIZATION, "", 0, 0), false);
             
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(3000);

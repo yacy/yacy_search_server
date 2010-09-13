@@ -95,7 +95,6 @@ public final class RankingProcess extends Thread {
         this.localSearchInclusion = null;
         this.stack = new WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>(maxentries);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>>>();
-        //this.handover = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.getOrdering(), 0);
         this.query = query;
         this.order = order;
         this.remote_peerCount = 0;
@@ -138,19 +137,19 @@ public final class RankingProcess extends Thread {
                     query.maxDistance);
             this.localSearchInclusion = search.inclusion();
             final ReferenceContainer<WordReference> index = search.joined();
-            EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.JOIN, query.queryString, index.size(), System.currentTimeMillis() - timer), false);
             if (index.isEmpty()) {
                 return;
             }
             
-            add(index, true, -1);
+            add(index, true, "local index: " + this.query.getSegment().getLocation(), -1);
         } catch (final Exception e) {
             Log.logException(e);
         }
         oneFeederTerminated();
     }
     
-    public void add(final ReferenceContainer<WordReference> index, final boolean local, final int fullResource) {
+    public void add(final ReferenceContainer<WordReference> index, final boolean local, String resourceName, final int fullResource) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
@@ -168,7 +167,7 @@ public final class RankingProcess extends Thread {
         
         // normalize entries
         final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.NORMALIZING, resourceName, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -248,7 +247,7 @@ public final class RankingProcess extends Thread {
         } catch (InterruptedException e) {}
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-		EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
+		EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
     }
     
     /**

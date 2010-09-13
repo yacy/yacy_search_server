@@ -551,7 +551,7 @@ public final class yacyClient {
         // store remote result to local result container
         // insert one container into the search result buffer
 		// one is enough, only the references are used, not the word
-        containerCache.add(container[0], false, joincount);
+        containerCache.add(container[0], false, target.getName() + "/" + target.hash, joincount);
 
         // insert the containers to the index
         for (ReferenceContainer<WordReference> c: container) try {

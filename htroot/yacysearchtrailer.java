@@ -182,7 +182,7 @@ public class yacysearchtrailer {
             prop.put("cat-location_display", display);
         }
         
-        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false, 30000, ProfilingGraph.maxTime);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);
         
         return prop;
     }

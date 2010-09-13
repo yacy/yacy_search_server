@@ -101,7 +101,7 @@ public class ResultFetcher {
         // start worker threads to fetch urls and snippets
         this.workerThreads = null;
         deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
-        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false, 30000, ProfilingGraph.maxTime);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
     }
 
     public void deployWorker(int deployCount, int neededResults) {
@@ -276,10 +276,12 @@ public class ResultFetcher {
     public ResultEntry oneResult(final int item) {
         // check if we already retrieved this item
     	// (happens if a search pages is accessed a second time)
-        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "obtain one result entry - start", 0, 0), false, 30000, ProfilingGraph.maxTime);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.ONERESULT, "started, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
         if (this.result.sizeAvailable() > item) {
             // we have the wanted result already in the result array .. return that
-            return this.result.element(item).getElement();
+            ResultEntry re = this.result.element(item).getElement();
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.ONERESULT, "prefetched, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
+            return re;
         }
         /*
         System.out.println("rankedCache.size() = " + this.rankedCache.size());
@@ -303,8 +305,13 @@ public class ResultFetcher {
         }
 
         // finally, if there is something, return the result
-        if (this.result.sizeAvailable() <= item) return null;
-        return this.result.element(item).getElement();
+        if (this.result.sizeAvailable() <= item) {
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.ONERESULT, "not found, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
+            return null;
+        }
+        ResultEntry re = this.result.element(item).getElement();
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.ONERESULT, "retrieved, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
+        return re;
     }
     
     private int resultCounter = 0;

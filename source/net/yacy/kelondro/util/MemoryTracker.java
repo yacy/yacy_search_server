@@ -26,8 +26,6 @@
 
 package net.yacy.kelondro.util;
 
-import de.anomic.yacy.graphics.ProfilingGraph;
-
 import net.yacy.kelondro.logging.Log;
 
 public class MemoryTracker extends Thread {
@@ -54,7 +52,7 @@ public class MemoryTracker extends Thread {
     public void run() {
         try {
         	while (running) {
-        		EventTracker.update("memory", Long.valueOf(MemoryControl.used()), true, 30000, ProfilingGraph.maxTime);
+        		EventTracker.update(EventTracker.EClass.MEMORY, Long.valueOf(MemoryControl.used()), true);
         		try {
     				Thread.sleep(this.delaytime);
     			} catch (final InterruptedException e) {

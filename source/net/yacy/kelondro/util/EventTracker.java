@@ -31,17 +31,25 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import de.anomic.yacy.graphics.ProfilingGraph;
+
 public class EventTracker {
     
-    private final static Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>();
-    private final static Map<String, Long> eventAccess = new ConcurrentHashMap<String, Long>(); // value: last time when this was accessed
+    private final static int  maxQueueSize = 30000;
+    private final static long maxQueueAge = ProfilingGraph.maxTime;
     
-    public final static void update(
-             final String eventName,
-             final Object eventPayload,
-             boolean useProtection,
-             int maxQueueSize,
-             long maxQueueAge) {
+    public enum EClass {
+        WORDCACHE,
+        MEMORY,
+        PPM,
+        INDEX,
+        SEARCH;
+    }
+    
+    private final static Map<EClass, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<EClass, ConcurrentLinkedQueue<Event>>();
+    private final static Map<EClass, Long> eventAccess = new ConcurrentHashMap<EClass, Long>(); // value: last time when this was accessed
+    
+    public final static void update(final EClass eventName, final Object eventPayload, boolean useProtection) {
         // check protection against too heavy access
         if (useProtection) {
             Long lastAcc = eventAccess.get(eventName);
@@ -92,13 +100,13 @@ public class EventTracker {
         }
     }
     
-    public final static Iterator<Event> getHistory(final String eventName) {
+    public final static Iterator<Event> getHistory(final EClass eventName) {
         ConcurrentLinkedQueue<Event> list = historyMaps.get(eventName);
         if (list == null) return null;
         return list.iterator();
     }
 
-    public final static int countEvents(final String eventName, long time) {
+    public final static int countEvents(final EClass eventName, long time) {
         Iterator<Event> event = getHistory(eventName);
         if (event == null) return 0;
         long now = System.currentTimeMillis();

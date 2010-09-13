@@ -40,7 +40,7 @@ public class PerformanceSearch_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         
-        final Iterator<EventTracker.Event> events = EventTracker.getHistory("SEARCH");
+        final Iterator<EventTracker.Event> events = EventTracker.getHistory(EventTracker.EClass.SEARCH);
         int c = 0;
         if (events != null) {
             EventTracker.Event event;
@@ -50,7 +50,8 @@ public class PerformanceSearch_p {
                 event = events.next();
                 search = (ProfilingGraph.searchEvent) event.payload;
                 prop.put("table_" + c + "_query", search.queryID);
-                prop.put("table_" + c + "_event", search.processName);
+                prop.put("table_" + c + "_event", search.processName.name());
+                prop.put("table_" + c + "_comment", search.comment);
                 prop.putNum("table_" + c + "_count", search.resultCount);
                 prop.putNum("table_" + c + "_delta", event.time - lastt);
                 prop.put("table_" + c + "_time", (new Date(event.time)).toString());

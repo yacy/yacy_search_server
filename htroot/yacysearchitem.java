@@ -162,7 +162,7 @@ public class yacysearchitem {
                 }
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
-            EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + item, 0, 0), false, 30000, ProfilingGraph.maxTime);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.FINALIZATION, "" + item, 0, 0), false);
             
             return prop;
         }

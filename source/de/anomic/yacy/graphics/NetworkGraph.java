@@ -129,12 +129,13 @@ public class NetworkGraph {
         // get dimensions
         final int cr = Math.min(eventPicture.getWidth(), eventPicture.getHeight()) / 5 - 20;
         final int cx = eventPicture.getWidth() / 2;
-        final int cy = eventPicture.getHeight() / 2;
+        final int cy = eventPicture.getHeight() / 2 + 20;
 
         int angle;
 
         // draw in the primary search peers
         for (int j = 0; j < primarySearches.length; j++) {
+            if (primarySearches[j] == null) continue;
             eventPicture.setColor((primarySearches[j].isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
             angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(primarySearches[j].target().hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
@@ -143,6 +144,7 @@ public class NetworkGraph {
         // draw in the secondary search peers
         if (secondarySearches != null) {
             for (int j = 0; j < secondarySearches.length; j++) {
+                if (secondarySearches[j] == null) continue;
                 eventPicture.setColor((secondarySearches[j].isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
                 angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(secondarySearches[j].target().hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1);

@@ -116,7 +116,7 @@ public class DocumentIndex extends Segment {
         this.queue.clear();
     }
     
-    public URIMetadataRow add(DigestURI url) throws IOException {
+    private URIMetadataRow add(DigestURI url) throws IOException {
         if (url == null) throw new IOException("file = null");
         if (url.isDirectory()) throw new IOException("file should be a document, not a path");
         if (!url.canRead()) throw new IOException("cannot read file");
@@ -136,7 +136,8 @@ public class DocumentIndex extends Segment {
                 url.length(),
                 document,
                 condenser,
-                null
+                null,
+                DocumentIndex.class.getName() + ".add"
                 );
     }
     

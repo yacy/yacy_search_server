@@ -28,15 +28,10 @@ package de.anomic.search;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.yacy.document.Condenser;
-import net.yacy.document.Document;
-import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
@@ -199,29 +194,6 @@ public class Segments implements Iterable<Segment> {
 
     public void finalize() {
         this.close();
-    }
-
-    public URIMetadataRow storeDocument(
-            final String segmentName,
-            final DigestURI url,
-            final DigestURI referrerURL,
-            final Date modDate,
-            final Date loadDate,
-            final long sourcesize,
-            final Document document,
-            final Condenser condenser,
-            final SearchEvent searchEvent
-            ) throws IOException {
-        return segment(segmentName).storeDocument(
-                url,
-                referrerURL,
-                modDate,
-                loadDate,
-                sourcesize,
-                document,
-                condenser,
-                searchEvent
-         );
     }
     
     public synchronized Segment.ReferenceCleaner getReferenceCleaner(final String segmentName, final byte[] startHash) {

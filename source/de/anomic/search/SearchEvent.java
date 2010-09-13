@@ -55,13 +55,10 @@ import de.anomic.yacy.graphics.ProfilingGraph;
 
 public final class SearchEvent {
     
-    public static final String INITIALIZATION = "initialization";
-    public static final String COLLECTION = "collection";
-    public static final String JOIN = "join";
-    public static final String PRESORT = "presort";
-    public static final String URLFETCH = "urlfetch";
-    public static final String NORMALIZING = "normalizing";
-    public static final String FINALIZATION = "finalization";
+    public enum Type {
+        INITIALIZATION, COLLECTION, JOIN, PRESORT, URLFETCH, NORMALIZING, FINALIZATION,
+        REMOTESEARCH_START, REMOTESEARCH_TERMINATE, ABSTRACTS, CLEANUP, SNIPPETFETCH_START, ONERESULT, REFERENCECOLLECTION, RESULTLIST;
+    }
     
     public static final int max_results_preparation = 3000;
     
@@ -145,7 +142,7 @@ public final class SearchEvent {
                     (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
             if (this.primarySearchThreads != null) {
                 if (this.primarySearchThreads.length > fetchpeers) this.rankedCache.moreFeeders(this.primarySearchThreads.length - fetchpeers);
-                EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
+                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
                 // finished searching
                 Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
             } else {
@@ -185,7 +182,7 @@ public final class SearchEvent {
                     IACount.put(wordhash, Integer.valueOf(container.size()));
                     IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
                 }
-                EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
+                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.ABSTRACTS, "", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             }
             
             // start worker threads to fetch urls and snippets
@@ -194,7 +191,7 @@ public final class SearchEvent {
          
         // clean up events
         SearchEventCache.cleanupEvents(false);
-        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "event-cleanup", 0, 0), false, 30000, ProfilingGraph.maxTime);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.CLEANUP, "", 0, 0), false);
         
         // store this search to a cache so it can be re-used
         if (MemoryControl.available() < 1024 * 1024 * 10) SearchEventCache.cleanupEvents(true);

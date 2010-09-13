@@ -30,8 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Semaphore;
 
-import de.anomic.yacy.graphics.ProfilingGraph;
-
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
@@ -113,11 +111,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             this.ram.add(newEntries);
             long t = System.currentTimeMillis();
             if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < t || this.lastDump + dumpCycle < t) {
-                EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
+                EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
                 cleanCache();
             }
         } catch (RowSpaceExceededException e) {
-            EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
+            EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             cleanCache();
             this.ram.add(newEntries);
         }
@@ -129,11 +127,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             this.ram.add(termHash, entry);
             long t = System.currentTimeMillis();
             if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < t || this.lastDump + dumpCycle < t) {
-                EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
+                EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
                 cleanCache();
             }
         } catch (RowSpaceExceededException e) {
-            EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
+            EventTracker.update(EventTracker.EClass.WORDCACHE, Long.valueOf(this.ram.size()), true);
             cleanCache();
             this.ram.add(termHash, entry);
         }

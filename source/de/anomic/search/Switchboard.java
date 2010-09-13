@@ -159,7 +159,6 @@ import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
-import de.anomic.yacy.graphics.ProfilingGraph;
 import de.anomic.yacy.graphics.WebStructureGraph;
 
 public final class Switchboard extends serverSwitch {
@@ -1866,12 +1865,12 @@ public final class Switchboard extends serverSwitch {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
         // the condenser may be null in case that an indexing is not wanted (there may be a no-indexing flag in the file)
         if (in.condenser != null) for (int i = 0; i < in.documents.length; i++) {
-            storeDocumentIndex(in.process, in.queueEntry, in.documents[i], in.condenser[i], null);
+            storeDocumentIndex(in.process, in.queueEntry, in.documents[i], in.condenser[i], null, "crawler/indexing queue");
         }
         in.queueEntry.updateStatus(Response.QUEUE_STATE_FINISHED);
     }
     
-    private void storeDocumentIndex(final Segments.Process process, final Response queueEntry, final Document document, final Condenser condenser, final SearchEvent searchEvent) {
+    private void storeDocumentIndex(final Segments.Process process, final Response queueEntry, final Document document, final Condenser condenser, final SearchEvent searchEvent, String sourceName) {
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
@@ -1905,7 +1904,8 @@ public final class Switchboard extends serverSwitch {
                     queueEntry.size(),
                     document,
                     condenser,
-                    searchEvent);
+                    searchEvent,
+                    sourceName);
             yacyChannel.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
@@ -1942,10 +1942,10 @@ public final class Switchboard extends serverSwitch {
         if (System.currentTimeMillis() - lastPPMUpdate > 20000) {
             // we don't want to do this too often
             updateMySeed();
-            EventTracker.update("ppm", Long.valueOf(currentPPM()), true, 30000, ProfilingGraph.maxTime);
+            EventTracker.update(EventTracker.EClass.PPM, Long.valueOf(currentPPM()), true);
             lastPPMUpdate = System.currentTimeMillis();
         }
-        EventTracker.update("indexed", queueEntry.url().toNormalform(true, false), false, 30000, ProfilingGraph.maxTime);
+        EventTracker.update(EventTracker.EClass.INDEX, queueEntry.url().toNormalform(true, false), false);
         
         // if this was performed for a remote crawl request, notify requester
         if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
@@ -2015,7 +2015,7 @@ public final class Switchboard extends serverSwitch {
                     Condenser condenser = new Condenser(document, true, true);
                     ResultImages.registerImages(url, document, true);
                     webStructure.generateCitationReference(url, document, condenser, response.lastModified());
-                    storeDocumentIndex(process, response, document, condenser, searchEvent);
+                    storeDocumentIndex(process, response, document, condenser, searchEvent, "heuristic:" + heuristicName);
                     log.logInfo("addToIndex fill of url " + url.toNormalform(true, true) + " finished");
                 }
             } catch (IOException e) {
@@ -2310,7 +2310,7 @@ public final class Switchboard extends serverSwitch {
     }
     
     public int currentPPM() {
-        return EventTracker.countEvents("indexed", 20000) * 3;
+        return EventTracker.countEvents(EventTracker.EClass.INDEX, 20000) * 3;
     }
     
     public double averageQPM() {

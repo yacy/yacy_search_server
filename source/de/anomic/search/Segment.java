@@ -205,7 +205,8 @@ public class Segment {
             final char doctype,
             final int outlinksSame,
             final int outlinksOther,
-            final SearchEvent searchEvent) {
+            final SearchEvent searchEvent,
+            final String sourceName) {
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
@@ -247,7 +248,7 @@ public class Segment {
                 } catch (RowSpaceExceededException e) {
                     continue;
                 }
-                searchEvent.getRankingResult().add(container, false, -1);
+                searchEvent.getRankingResult().add(container, false, sourceName, -1);
             }
         }
         
@@ -268,7 +269,8 @@ public class Segment {
             final long sourcesize,
             final Document document,
             final Condenser condenser,
-            final SearchEvent searchEvent
+            final SearchEvent searchEvent,
+            final String sourceName
             ) throws IOException {
         final long startTime = System.currentTimeMillis();
 
@@ -359,7 +361,8 @@ public class Segment {
                 Response.docType(document.dc_format()),       // document type
                 document.inboundLinks(),                      // inbound links
                 document.outboundLinks(),                     // outbound links
-                searchEvent                                   // a search event that can have results directly
+                searchEvent,                                  // a search event that can have results directly
+                sourceName                                    // the name of the source where the index was created
         );
         
         final long indexingEndTime = System.currentTimeMillis();
