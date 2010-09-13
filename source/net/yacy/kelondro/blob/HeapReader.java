@@ -405,6 +405,7 @@ public class HeapReader {
             // access the file and read the container
             file.seek(pos);
             final int len = file.readInt() - index.row().primaryKeyLength;
+            if (len < 0) throw new IOException("file " + file.file() + " corrupted at " + pos + ": negative len. len = " + len + ", pk.len = " + index.row().primaryKeyLength);
             if (MemoryControl.available() < len * 2 + keepFreeMem) {
                 if (!MemoryControl.request(len * 2 + keepFreeMem, true)) throw new RowSpaceExceededException(len * 2 + keepFreeMem, "HeapReader.get()"); // not enough memory available for this blob
             }
