@@ -672,6 +672,7 @@ public final class Switchboard extends serverSwitch {
         this.trail = new ArrayList<String>();
         
         log.logConfig("Finished Switchboard Initialization");
+        sb = this;
     }
 
     private void setDefaultSegments() {

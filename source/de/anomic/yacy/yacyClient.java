@@ -47,11 +47,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-//import java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-//import java.util.List;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -84,12 +84,13 @@ import org.apache.http.entity.mime.content.StringBody;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.crawler.retrieval.HTTPLoader;
+import de.anomic.search.ContentDomain;
+import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.search.TextSnippet;
 import de.anomic.server.serverCore;
 import de.anomic.tools.crypt;
@@ -357,7 +358,7 @@ public final class yacyClient {
         String urlBase = "http://" + address + "/yacysearch.rss";
         return Search.search(urlBase, query, verify, global, timeout, startRecord, maximumRecords);
     }
-    
+
     @SuppressWarnings("unchecked")
     public static int search(
             final yacySeed mySeed,
@@ -397,161 +398,100 @@ public final class yacyClient {
         // partitions : number of remote peers that are asked (for evaluation of QPM)
         // duetime    : maximum time that a peer should spent to create a result
 
-        // prepare request
-        final String salt = crypt.randomSalt();
         final long timestamp = System.currentTimeMillis();
-        boolean thisIsASecondarySearch = urlhashes.length() > 0;
-        assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
-
-        // send request
-        Map<String, String> result = null;
+        SearchResult result;
         try {
-//          	result = FileUtils.table(HttpConnector.wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000));
-          	final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
-          	parts.put("myseed", new StringBody(mySeed.genSeedStr(salt)));
-          	parts.put("count", new StringBody(Integer.toString(Math.max(10, count))));
-          	parts.put("resource", new StringBody(((global) ? "global" : "local")));
-          	parts.put("partitions", new StringBody(Integer.toString(partitions)));
-          	parts.put("query", new StringBody(wordhashes));
-          	parts.put("exclude", new StringBody(excludehashes));
-          	parts.put("duetime", new StringBody("1000"));
-          	parts.put("urls", new StringBody(urlhashes));
-          	parts.put("prefer", new StringBody(prefer.toString()));
-          	parts.put("filter", new StringBody(filter.toString()));
-          	parts.put("language", new StringBody(language));
-          	parts.put("sitehash", new StringBody(sitehash));
-          	parts.put("authorhash", new StringBody(authorhash));
-          	parts.put("ttl", new StringBody("0"));
-          	parts.put("maxdist", new StringBody(Integer.toString(maxDistance)));
-          	parts.put("profile", new StringBody(crypt.simpleEncode(rankingProfile.toExternalString())));
-          	parts.put("constraint", new StringBody((constraint == null) ? "" : constraint.exportB64()));
-          	if (secondarySearchSuperviser != null)
-          		parts.put("abstracts", new StringBody("auto"));
-          	result = FileUtils.table(HTTPConnector.getConnector(HTTPLoader.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
+            result = searchClient(
+                yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
+                mySeed, wordhashes, excludehashes, urlhashes, prefer, filter, language,
+                sitehash, authorhash, count, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
+                secondarySearchSuperviser, rankingProfile, constraint);
         } catch (final IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore);
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return -1;
         }
-
-        if (result == null || result.isEmpty()) {
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("SEARCH failed FROM "
-					+ target.hash
-					+ ":"
-					+ target.getName()
-					+ " (zero response), score="
-					+ target.selectscore);
-			return -1;
-		}
-
-		// compute all computation times
-		final long totalrequesttime = System.currentTimeMillis() - timestamp;
-		
-		// OUTPUT:
-		// version : application version of responder
-		// uptime : uptime in seconds of responder
-		// total : number of total available LURL's for this search
-		// count : number of returned LURL's for this search
-		// resource<n> : LURL of search
-		// fwhop : hops (depth) of forwards that had been performed to construct this result
-		// fwsrc : peers that helped to construct this result
-		// fwrec : peers that would have helped to construct this result (recommendations)
-		// searchtime : time that the peer actually spent to create the result
-		// references : references (search hints) that was calculated during search
-		
-		// now create a plasmaIndex out of this result
-		// System.out.println("yacyClient: " + ((urlhashes.length() == 0) ? "primary" : "secondary")+ " search result = " + result.toString()); // debug
-		
-		int urlcount = 0, joincount = 0;
-        try {
-            joincount = Integer.parseInt(result.get("joincount")); // the complete number of hits at remote site
-            urlcount = Integer.parseInt(result.get("count"));      // the number of hits that are returned in the result list
-        } catch (final NumberFormatException e) {
-            yacyCore.log.logInfo("SEARCH failed FROM " + target.hash + ":" + target.getName() + ", wrong output format: " + e.getMessage());
-            //yacyCore.peerActions.peerDeparture(target, "search request to peer created number format exception");
-            return -1;
-        }
-		// System.out.println("***result count " + results);
-
-		// create containers
-		final int words = wordhashes.length() / Word.commonHashLength;
-		assert words > 0 : "wordhashes = " + wordhashes;
-		final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
-		for (int i = 0; i < words; i++) {
-			try {
+        if (result == null) return -1;
+        // computation time
+        final long totalrequesttime = System.currentTimeMillis() - timestamp;
+        
+        // create containers
+        final int words = wordhashes.length() / Word.commonHashLength;
+        assert words > 0 : "wordhashes = " + wordhashes;
+        final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
+        for (int i = 0; i < words; i++) {
+            try {
                 container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes(), count);
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
                 return -1;
             }
-		}
+        }
 
-		// insert results to containers
-		URIMetadataRow urlEntry;
-		for (int n = 0; n < urlcount; n++) {
-			// get one single search result
-			urlEntry = URIMetadataRow.importEntry(result.get("resource" + n));
-			if (urlEntry == null) continue;
-			assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + new String(urlEntry.hash());
-			if (urlEntry.hash().length != 12) continue; // bad url hash
-			final URIMetadataRow.Components metadata = urlEntry.metadata();
-			if (metadata == null) continue;
-			if (blacklist.isListed(Blacklist.BLACKLIST_SEARCH, metadata.url())) {
-			    if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search: filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
-				continue; // block with backlist
-			}
+        // insert results to containers
+        for (URIMetadataRow urlEntry: result.links) {
+            // get one single search result
+            if (urlEntry == null) continue;
+            assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + new String(urlEntry.hash());
+            if (urlEntry.hash().length != 12) continue; // bad url hash
+            final URIMetadataRow.Components metadata = urlEntry.metadata();
+            if (metadata == null) continue;
+            if (blacklist.isListed(Blacklist.BLACKLIST_SEARCH, metadata.url())) {
+                if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search: filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
+                continue; // block with backlist
+            }
             
-			final String urlRejectReason = Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(metadata.url());
+            final String urlRejectReason = Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(metadata.url());
             if (urlRejectReason != null) {
                 if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search: rejected url '" + metadata.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
                 continue; // reject url outside of our domain
             }
 
-			// save the url entry
+            // save the url entry
             Reference entry = urlEntry.word();
-			if (entry == null) {
-			    if (yacyCore.log.isWarning()) yacyCore.log.logWarning("remote search: no word attached from peer " + target.getName() + ", version " + target.getVersion());
-				continue; // no word attached
-			}
+            if (entry == null) {
+                if (yacyCore.log.isWarning()) yacyCore.log.logWarning("remote search: no word attached from peer " + target.getName() + ", version " + target.getVersion());
+                continue; // no word attached
+            }
 
-			// the search-result-url transports all the attributes of word indexes
-			if (!Base64Order.enhancedCoder.equal(entry.metadataHash(), urlEntry.hash())) {
-				yacyCore.log.logInfo("remote search: url-hash " + new String(urlEntry.hash()) + " does not belong to word-attached-hash " + new String(entry.metadataHash()) + "; url = " + metadata.url() + " from peer " + target.getName());
-				continue; // spammed
-			}
+            // the search-result-url transports all the attributes of word indexes
+            if (!Base64Order.enhancedCoder.equal(entry.metadataHash(), urlEntry.hash())) {
+                yacyCore.log.logInfo("remote search: url-hash " + new String(urlEntry.hash()) + " does not belong to word-attached-hash " + new String(entry.metadataHash()) + "; url = " + metadata.url() + " from peer " + target.getName());
+                continue; // spammed
+            }
 
-			// passed all checks, store url
-			try {
-			    indexSegment.urlMetadata().store(urlEntry);
-				crawlResults.stack(urlEntry, mySeed.hash.getBytes(), target.hash.getBytes(), EventOrigin.QUERIES);
-			} catch (final IOException e) {
-				yacyCore.log.logSevere("could not store search result", e);
-				continue; // db-error
-			}
+            // passed all checks, store url
+            try {
+                indexSegment.urlMetadata().store(urlEntry);
+                crawlResults.stack(urlEntry, mySeed.hash.getBytes(), target.hash.getBytes(), EventOrigin.QUERIES);
+            } catch (final IOException e) {
+                yacyCore.log.logSevere("could not store search result", e);
+                continue; // db-error
+            }
 
-			if (urlEntry.snippet() != null) {
-				// we don't store the snippets along the url entry,
+            if (urlEntry.snippet() != null) {
+                // we don't store the snippets along the url entry,
                 // because they are search-specific.
-				// instead, they are placed in a snipped-search cache.
-				// System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
-			    TextSnippet.storeToCache(wordhashes, new String(urlEntry.hash()), urlEntry.snippet());
-			}
+                // instead, they are placed in a snipped-search cache.
+                // System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
+                TextSnippet.storeToCache(wordhashes, new String(urlEntry.hash()), urlEntry.snippet());
+            }
             
-			// add the url entry to the word indexes
-			for (int m = 0; m < words; m++) {
-				try {
+            // add the url entry to the word indexes
+            for (int m = 0; m < words; m++) {
+                try {
                     container[m].add(entry);
                 } catch (RowSpaceExceededException e) {
                     Log.logException(e);
                     break;
                 }
-			}
-		}
+            }
+        }
 
         // store remote result to local result container
         // insert one container into the search result buffer
-		// one is enough, only the references are used, not the word
-        containerCache.add(container[0], false, target.getName() + "/" + target.hash, joincount);
+        // one is enough, only the references are used, not the word
+        containerCache.add(container[0], false, target.getName() + "/" + target.hash, result.joincount);
 
         // insert the containers to the index
         for (ReferenceContainer<WordReference> c: container) try {
@@ -559,72 +499,181 @@ public final class yacyClient {
         } catch (Exception e) {
             Log.logException(e);
         }
-        yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + container[0].size() + "/" + joincount + " references for " + (thisIsASecondarySearch ? "a secondary search" : "joined word queries"));
+        boolean thisIsASecondarySearch = urlhashes.length() > 0;
+        assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
+
+        yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + container[0].size() + "/" + result.joincount + " references for " + (thisIsASecondarySearch ? "a secondary search" : "joined word queries"));
 
         // integrate remote top-words/topics
-        final String references = result.get("references");
-        if (references != null && references.length() > 0) {
-            yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent topics: " + references);
+        if (result.references != null && result.references.length > 0) {
+            yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + result.references.length + " topics");
             // add references twice, so they can be counted (must have at least 2 entries)
-            String[] rs = references.split(",");
             synchronized (containerCache) {
-                containerCache.addTopic(rs);
-                containerCache.addTopic(rs);
+                containerCache.addTopic(result.references);
+                containerCache.addTopic(result.references);
             }
         }
         
-		// read index abstract
-		if (secondarySearchSuperviser != null) {
-			final Iterator<Map.Entry<String, String>> i = result.entrySet().iterator();
-			Map.Entry<String, String> entry;
-			String wordhash;
-			String whacc = "";
-			ByteBuffer ci;
-			int ac = 0;
-			abstractparser: while (i.hasNext()) {
-				entry = i.next();
-				if (entry.getKey().startsWith("indexabstract.")) {
-					wordhash = entry.getKey().substring(14);
-					if (wordhash.charAt(0) == '[') break abstractparser;
-					whacc += wordhash;
-					try {
-						ci = new ByteBuffer(entry.getValue().getBytes("UTF-8"));
-					} catch (UnsupportedEncodingException e) {
-					    Log.logException(e);
-						return -1;
-					}
-					//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
-					secondarySearchSuperviser.addAbstract(wordhash, ReferenceContainer.decompressIndex(ci, target.hash));
-					ac++;
-				}
-			}
-			if (ac > 0) {
-			    secondarySearchSuperviser.commitAbstract();
-			    yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words "+ whacc);
-			}
-		}
+        // read index abstract
+        if (secondarySearchSuperviser != null) {
+            String wordhash;
+            String whacc = "";
+            ByteBuffer ci;
+            int ac = 0;
+            for (Map.Entry<byte[], String> abstractEntry: result.indexabstract.entrySet()) {
+                wordhash = new String(abstractEntry.getKey());
+                whacc += wordhash;
+                try {
+                    ci = new ByteBuffer(abstractEntry.getValue().getBytes("UTF-8"));
+                } catch (UnsupportedEncodingException e) {
+                    Log.logException(e);
+                    return -1;
+                }
+                secondarySearchSuperviser.addAbstract(wordhash, ReferenceContainer.decompressIndex(ci, target.hash));
+                ac++;
+            }
+            if (ac > 0) {
+                secondarySearchSuperviser.commitAbstract();
+                yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words "+ whacc);
+            }
+        }
         
         // generate statistics
-		long searchtime;
-		try {
-			searchtime = Integer.parseInt(result.get("searchtime"));
-		} catch (final NumberFormatException e) {
-			searchtime = totalrequesttime;
-		}
-		if (yacyCore.log.isFine()) yacyCore.log.logFine("SEARCH "
-				+ urlcount
-				+ " URLS FROM "
-				+ target.hash
-				+ ":"
-				+ target.getName()
-				+ ", score="
-				+ target.selectscore
-				+ ", searchtime=" + searchtime + ", netdelay="
-				+ (totalrequesttime - searchtime) + ", references="
-				+ result.get("references"));
-		return urlcount;
-	}
+        if (yacyCore.log.isFine()) yacyCore.log.logFine("SEARCH "
+                + result.urlcount
+                + " URLS FROM "
+                + target.hash
+                + ":"
+                + target.getName()
+                + ", score="
+                + target.selectscore
+                + ", searchtime=" + result.searchtime + ", netdelay="
+                + (totalrequesttime - result.searchtime) + ", references="
+                + result.references);
+        return result.urlcount;
+    }
+    
+    public static SearchResult searchClient(
+            LinkedHashMap<String,ContentBody> parts,
+            final yacySeed mySeed,
+            final String wordhashes,
+            final String excludehashes,
+            final String urlhashes,
+            final Pattern prefer,
+            final Pattern filter,
+            final String language,
+            final String sitehash,
+            final String authorhash,
+            final int count,
+            final int maxDistance,
+            final boolean global, 
+            final int partitions,
+            String hostname,
+            String hostaddress,
+            final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
+            final RankingProfile rankingProfile,
+            final Bitfield constraint
+    ) throws IOException {
+        // send a search request to peer with remote Hash
 
+        // INPUT:
+        // iam        : complete seed of the requesting peer
+        // youare     : seed hash of the target peer, used for testing network stability
+        // key        : transmission key for response
+        // search     : a list of search words
+        // hsearch    : a string of word hashes
+        // fwdep      : forward depth. if "0" then peer may NOT ask another peer for more results
+        // fwden      : forward deny, a list of seed hashes. They may NOT be target of forward hopping
+        // count      : maximum number of wanted results
+        // global     : if "true", then result may consist of answers from other peers
+        // partitions : number of remote peers that are asked (for evaluation of QPM)
+        // duetime    : maximum time that a peer should spent to create a result
+        
+        // send request
+        Map<String, String> resultMap = null;
+        parts.put("myseed", new StringBody((mySeed == null) ? "" : mySeed.genSeedStr(parts.get("key").toString())));
+        parts.put("count", new StringBody(Integer.toString(Math.max(10, count))));
+        parts.put("resource", new StringBody(((global) ? "global" : "local")));
+        parts.put("partitions", new StringBody(Integer.toString(partitions)));
+        parts.put("query", new StringBody(wordhashes));
+        parts.put("exclude", new StringBody(excludehashes));
+        parts.put("duetime", new StringBody("1000"));
+        parts.put("urls", new StringBody(urlhashes));
+        parts.put("prefer", new StringBody(prefer.toString()));
+        parts.put("filter", new StringBody(filter.toString()));
+        parts.put("language", new StringBody(language));
+        parts.put("sitehash", new StringBody(sitehash));
+        parts.put("authorhash", new StringBody(authorhash));
+        parts.put("ttl", new StringBody("0"));
+        parts.put("maxdist", new StringBody(Integer.toString(maxDistance)));
+        parts.put("profile", new StringBody(crypt.simpleEncode(rankingProfile.toExternalString())));
+        parts.put("constraint", new StringBody((constraint == null) ? "" : constraint.exportB64()));
+        if (secondarySearchSuperviser != null) parts.put("abstracts", new StringBody("auto"));
+        resultMap = FileUtils.table(HTTPConnector.getConnector(HTTPLoader.crawlerUserAgent).post(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), 60000, hostname, parts));
+        //resultMap = FileUtils.table(HTTPConnector.getConnector(HTTPLoader.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
+
+        if (resultMap == null || resultMap.isEmpty()) throw new IOException("resultMap is NULL");
+        return new SearchResult(resultMap);
+    }
+    
+    public static class SearchResult {
+        
+        public String version; // version : application version of responder
+        public String uptime; // uptime : uptime in seconds of responder
+        public String fwhop; // hops (depth) of forwards that had been performed to construct this result
+        public String fwsrc; // peers that helped to construct this result
+        public String fwrec; // peers that would have helped to construct this result (recommendations)
+        public int urlcount; // number of returned LURL's for this search
+        public int joincount; //
+        public Map<byte[], Integer> indexcount; //
+        public long searchtime; // time that the peer actually spent to create the result
+        public String[] references; // search hints, the top-words
+        public List<URIMetadataRow> links; // LURLs of search
+        public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
+        
+        public SearchResult(Map<String, String> resultMap) throws IOException {
+            try {
+                this.searchtime = Integer.parseInt(resultMap.get("searchtime"));
+            } catch (final NumberFormatException e) {
+                throw new IOException("wrong output format for searchtime: " + e.getMessage());
+            }
+            try {
+                this.joincount = Integer.parseInt(resultMap.get("joincount")); // the complete number of hits at remote site
+            } catch (final NumberFormatException e) {
+                throw new IOException("wrong output format for joincount: " + e.getMessage());
+            }
+            try {
+                this.urlcount = Integer.parseInt(resultMap.get("count"));      // the number of hits that are returned in the result list
+            } catch (final NumberFormatException e) {
+                throw new IOException("wrong output format for count: " + e.getMessage());
+            }
+            this.fwhop = resultMap.get("fwhop");
+            this.fwsrc = resultMap.get("fwsrc");
+            this.fwrec = resultMap.get("fwrec");
+            // scan the result map for entries with special prefix
+            indexcount = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
+            indexabstract = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
+            for (Map.Entry<String, String> entry: resultMap.entrySet()) {
+                if (entry.getKey().startsWith("indexcount.")) {
+                    indexcount.put(entry.getKey().substring(11).getBytes(), Integer.parseInt(entry.getValue()));
+                }
+                if (entry.getKey().startsWith("indexabstract.")) {
+                    indexabstract.put(entry.getKey().substring(14).getBytes(), entry.getValue());
+                }
+            }
+            references = resultMap.get("references").split(",");
+            this.links = new ArrayList<URIMetadataRow>(this.urlcount);
+            for (int n = 0; n < this.urlcount; n++) {
+                // get one single search result
+                String resultLine = resultMap.get("resource" + n);
+                if (resultLine == null) continue;
+                URIMetadataRow urlEntry = URIMetadataRow.importEntry(resultLine);
+                if (urlEntry == null) continue;
+                this.links.add(urlEntry);
+            }
+        }
+    }
+    
     public static Map<String, String> permissionMessage(final yacySeedDB seedDB, final String targetHash) {
         // ask for allowed message size and attachement size
         // if this replies null, the peer does not answer
@@ -1028,33 +1077,67 @@ public final class yacyClient {
             return null;
         }
     }
-    
 
     public static void main(final String[] args) {
-        if(args.length > 1) {
-        System.out.println("yacyClient Test");
-        try {
-            final Switchboard sb = new Switchboard(new File(args[0]), new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf");
-            /*final yacyCore core =*/ new yacyCore(sb);
-            sb.loadSeedLists();
-            final yacySeed target = sb.peers.getConnected(args[1]);
-            final byte[] wordhashe = Word.word2hash("test");
-            //System.out.println("permission=" + permissionMessage(args[1]));
-            
-            final byte[] content = new MultiProtocolURI("http://" + target.getPublicAddress() + "/yacy/search.html" +
-                                                      "?myseed=" + sb.peers.mySeed().genSeedStr(null) +
-                                                      "&youare=" + target.hash + "&key=" +
-                                                      "&myseed=" + sb.peers.mySeed() .genSeedStr(null) +
-                                                      "&count=10" +
-                                                      "&resource=global" +
-                                                      "&query=" + new String(wordhashe) +
-                                                      "&network.unit.name=" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT)).get(HTTPLoader.crawlerUserAgent, 10000);            
-            final Map<String, String> result = FileUtils.table(content);
-            System.out.println("Result=" + result.toString());
-        } catch (final Exception e) {
-            Log.logException(e);
-        }
-        System.exit(0);
+        if(args.length > 2) {
+            // search a remote peer. arguments:
+            // first  arg: path to application home
+            // second arg: address of target peer
+            // third  arg: search word or file name with list of search words
+            System.out.println("yacyClient Test");
+                File searchwordfile = new File(args[2]);
+                List<String> searchlines = new ArrayList<String>();
+                if (searchwordfile.exists()) {
+                    Iterator<String> i;
+                    try {
+                        i = FileUtils.strings(FileUtils.read(searchwordfile));
+                        while (i.hasNext()) searchlines.add(i.next());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        System.exit(-1);
+                    }
+                } else {
+                    searchlines.add(args[2]);
+                }
+                for (String line: searchlines) {
+                    final byte[] wordhashe = QueryParams.hashSet2hashString(Word.words2hashesHandles(QueryParams.cleanQuery(line)[0])).getBytes();
+                    long time = System.currentTimeMillis();
+                    SearchResult result;
+                    try {
+                        result = searchClient(
+                                yacyNetwork.basicRequestParts((String) null, (String) null, "freeworld"),
+                                null, // sb.peers.mySeed(),
+                                new String(wordhashe),
+                                "", // excludehashes,
+                                "", // urlhashes,
+                                Pattern.compile(""), // prefer,
+                                Pattern.compile(".*"), // filter,
+                                "", // language,
+                                "", // sitehash,
+                                "", // authorhash,
+                                10, // count,
+                                1000, // maxDistance,
+                                true, //global, 
+                                16, // partitions,
+                                "", args[1],
+                                null, //secondarySearchSuperviser,
+                                new RankingProfile(ContentDomain.TEXT), // rankingProfile,
+                                null // constraint);
+                        );
+                        if (result == null) {
+                            System.out.println("no response");
+                        } else {
+                            for (URIMetadataRow link: result.links) {
+                                System.out.println(link.metadata().url().toNormalform(true, false));
+                                System.out.println(link.snippet());
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println("Search Time: " + (System.currentTimeMillis() - time));
+                }
+            System.exit(0);
         } else if(args.length == 1) {
             System.out.println("wput Test");
             // connection params
@@ -1064,7 +1147,7 @@ public final class yacyClient {
             } catch (final MalformedURLException e) {
                 Log.logException(e);
             }
-            if(url == null) {
+            if (url == null) {
                 System.exit(1);
                 return;
             }

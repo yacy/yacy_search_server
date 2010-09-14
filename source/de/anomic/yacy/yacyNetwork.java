@@ -77,55 +77,14 @@ public class yacyNetwork {
 		return false;
 	}
 	
-//	public static final List<Part> basicRequestPost(final Switchboard sb, final String targetHash, final String salt) {
-//        // put in all the essentials for routing and network authentication
-//		// generate a session key
-//        final ArrayList<Part> post = new ArrayList<Part>();
-//        post.add(new DefaultCharsetStringPart("key", salt));
-//        
-//        // just standard identification essentials
-//		post.add(new DefaultCharsetStringPart("iam", sb.peers.mySeed().hash));
-//		if (targetHash != null) post.add(new DefaultCharsetStringPart("youare", targetHash));
-//        
-//        // time information for synchronization
-//		post.add(new DefaultCharsetStringPart("mytime", DateFormatter.formatShortSecond(new Date())));
-//		post.add(new DefaultCharsetStringPart("myUTC", Long.toString(System.currentTimeMillis())));
-//
-//        // network identification
-//        post.add(new DefaultCharsetStringPart(SwitchboardConstants.NETWORK_NAME, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT)));
-//
-//        // authentication essentials
-//        final String authenticationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");
-//        final String authenticationMethod = sb.getConfig("network.unit.protocol.request.authentication.method", "");
-//        if ((authenticationControl.equals("controlled")) && (authenticationMethod.length() > 0)) {
-//            if (authenticationMethod.equals("salted-magic-sim")) {
-//                // generate an authentication essential using the salt, the iam-hash and the network magic
-//                final String magic = sb.getConfig("network.unit.protocol.request.authentication.essentials", "");
-//                final String md5 = Digest.encodeMD5Hex(salt + sb.peers.mySeed().hash + magic);
-//                post.add(new DefaultCharsetStringPart("magicmd5", md5));
-//            }
-//        }        
-//        
-//		return post;
-//	}
-	
-	public static final LinkedHashMap<String,ContentBody> basicRequestParts(final Switchboard sb, final String targetHash, final String salt) throws UnsupportedEncodingException {
+	public static final LinkedHashMap<String,ContentBody> basicRequestParts(final Switchboard sb, final String targetHash, final String salt) {
         // put in all the essentials for routing and network authentication
 		// generate a session key
-        final LinkedHashMap<String,ContentBody> parts = new LinkedHashMap<String,ContentBody>();
-        parts.put("key", new StringBody(salt));
+        final LinkedHashMap<String,ContentBody> parts = basicRequestParts(sb.peers.mySeed().hash, targetHash, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT));
+        try {
+            parts.put("key", new StringBody(salt));
+        } catch (UnsupportedEncodingException e) {}
         
-        // just standard identification essentials
-		parts.put("iam", new StringBody(sb.peers.mySeed().hash));
-		if (targetHash != null) parts.put("youare", new StringBody(targetHash));
-        
-        // time information for synchronization
-		parts.put("mytime", new StringBody(DateFormatter.formatShortSecond(new Date())));
-		parts.put("myUTC", new StringBody(Long.toString(System.currentTimeMillis())));
-
-        // network identification
-		parts.put(SwitchboardConstants.NETWORK_NAME, new StringBody(Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT)));
-
         // authentication essentials
         final String authenticationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");
         final String authenticationMethod = sb.getConfig("network.unit.protocol.request.authentication.method", "");
@@ -134,11 +93,35 @@ public class yacyNetwork {
                 // generate an authentication essential using the salt, the iam-hash and the network magic
                 final String magic = sb.getConfig("network.unit.protocol.request.authentication.essentials", "");
                 final String md5 = Digest.encodeMD5Hex(salt + sb.peers.mySeed().hash + magic);
-                parts.put("magicmd5", new StringBody(md5));
+                try {
+                    parts.put("magicmd5", new StringBody(md5));
+                } catch (UnsupportedEncodingException e) {}
             }
         }        
         
 		return parts;
 	}
 	
+
+    public static final LinkedHashMap<String,ContentBody> basicRequestParts(String myHash, String targetHash, String networkName) {
+        // put in all the essentials for routing and network authentication
+        // generate a session key
+        final LinkedHashMap<String,ContentBody> parts = new LinkedHashMap<String,ContentBody>();
+        
+        // just standard identification essentials
+        if (myHash != null)
+            try {
+                parts.put("iam", new StringBody(myHash));
+                if (targetHash != null) parts.put("youare", new StringBody(targetHash));
+                
+                // time information for synchronization
+                parts.put("mytime", new StringBody(DateFormatter.formatShortSecond(new Date())));
+                parts.put("myUTC", new StringBody(Long.toString(System.currentTimeMillis())));
+
+                // network identification
+                parts.put(SwitchboardConstants.NETWORK_NAME, new StringBody(networkName));
+            } catch (UnsupportedEncodingException e) {}
+        
+        return parts;
+    }
 }

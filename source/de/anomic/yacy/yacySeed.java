@@ -752,9 +752,9 @@ public class yacySeed implements Cloneable {
         // yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
 
         // check protocol and syntax of seed
-        if (seedStr == null) { return null; }
+        if (seedStr == null || seedStr.length() == 0) return null;
         final String seed = crypt.simpleDecode(seedStr, key);
-        if (seed == null) { return null; }
+        if (seed == null || seed.length() == 0) return null;
         
         // extract hash
         final ConcurrentHashMap<String, String> dna = MapTools.string2map(seed, ",");
