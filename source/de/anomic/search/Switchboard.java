@@ -1623,7 +1623,7 @@ public final class Switchboard extends serverSwitch {
                     log.logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found, is too small or signature is bad)");
                 } else {
                     yacyRelease.deployRelease(downloaded);
-                    terminate(5000, "auto-update to install " + downloaded.getName());
+                    terminate(10, "auto-update to install " + downloaded.getName());
                     log.logInfo("AUTO-UPDATE: deploy and restart initiated");
                 }
             }
