@@ -290,7 +290,6 @@ public final class yacy {
             // set user-agent
             final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "
                     + HTTPClient.getSystemOST() + ")";
-//            Client.setUserAgent(userAgent);
             HTTPClient.setDefaultUserAgent(userAgent);
             
             // start main threads

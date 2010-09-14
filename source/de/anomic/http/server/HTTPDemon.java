@@ -821,14 +821,14 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // parse data in memory
         FileUpload upload = new FileUpload(diskFileItemFactory);
         List<FileItem> items;
-        long time = System.currentTimeMillis();
+        //long time = System.currentTimeMillis();
         try {
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
             //Log.logException(e);
             throw new IOException("FileUploadException " + e.getMessage());
         }
-        System.out.println("**** FileUploadBase.parseRequest time = " + (System.currentTimeMillis() - time));
+        //System.out.println("**** FileUploadBase.parseRequest time = " + (System.currentTimeMillis() - time));
         
         // format information for further usage
         final HashMap<String, byte[]> files = new HashMap<String, byte[]>();

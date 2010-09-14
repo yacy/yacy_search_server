@@ -46,6 +46,7 @@ import net.yacy.cora.protocol.ConnectionInfo;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
@@ -141,7 +142,7 @@ public class HTTPClient {
 		HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
 		// UserAgent
 		HttpProtocolParams.setUserAgent(httpParams, "yacy (" + systemOST +") yacy.net");
-		HttpProtocolParams.setUseExpectContinue(httpParams, true);
+		HttpProtocolParams.setUseExpectContinue(httpParams, false); // IMPORTANT - if not set to 'false' then servers do not process the request until a time-out of 2 seconds
 		/**
 		 * HTTP connection settings
 		 */
@@ -473,9 +474,18 @@ public class HTTPClient {
     	// statistics
     	storeConnectionInfo(httpUriRequest);
     	try {
-        	// execute the method
+        	// execute the method; some asserts confirm that that the request can be send with Content-Length and is therefore not terminated by EOF
+    	    if (httpUriRequest instanceof HttpEntityEnclosingRequest) {
+    	        HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) httpUriRequest;
+    	        HttpEntity entity = hrequest.getEntity();
+    	        assert entity != null;
+    	        assert !entity.isChunked();
+    	        assert entity.getContentLength() >= 0;
+    	        assert !hrequest.expectContinue();
+    	    }
 			httpResponse = httpClient.execute(httpUriRequest, httpContext);
 		} catch (Exception e) {
+		    //e.printStackTrace();
 			ConnectionInfo.removeConnection(httpUriRequest.hashCode());
 			httpUriRequest.abort();
 			throw new IOException("Client can't execute: " + e.getMessage());
