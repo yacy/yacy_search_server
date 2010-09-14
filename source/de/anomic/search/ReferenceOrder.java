@@ -48,11 +48,11 @@ public class ReferenceOrder {
 
     private static int cores = Runtime.getRuntime().availableProcessors();
     
-    protected int maxdomcount;
-    protected WordReferenceVars min, max;
-    protected final ScoreCluster<String> doms; // collected for "authority" heuristic 
-    private   final RankingProfile ranking;
-    private   final String language;
+    private       int maxdomcount;
+    private       WordReferenceVars min, max;
+    private final ScoreCluster<String> doms; // collected for "authority" heuristic 
+    private final RankingProfile ranking;
+    private final String language;
     
     public ReferenceOrder(final RankingProfile profile, String language) {
         this.min = null;
@@ -164,7 +164,7 @@ public class ReferenceOrder {
             if (min == null) min = iEntry.clone(); else min.min(iEntry);
             if (max == null) max = iEntry.clone(); else max.max(iEntry);
             // update domcount
-            dom = new String(iEntry.metadataHash()).substring(6);
+            dom = new String(iEntry.metadataHash(), 6, 6);
             count = doms0.get(dom);
             if (count == null) {
                 doms0.put(dom, int1);
@@ -191,8 +191,8 @@ public class ReferenceOrder {
         if (max == null) max = iEntry.clone(); else max.max(iEntry);
         
         // update domcount
-        String dom = new String(iEntry.metadataHash()).substring(6);
-        doms.addScore(dom, 1);
+        String dom = new String(iEntry.metadataHash(), 6, 6);
+        doms.incScore(dom);
         
         if (!doms.isEmpty()) this.maxdomcount = doms.getMaxScore();
     }

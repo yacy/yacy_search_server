@@ -524,8 +524,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             while (i.hasNext()) {
                 iEntry = i.next();
                 if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.metadataHash()) != null)) continue; // do not include urls that are in excludeContainer
-                dom = new String(iEntry.metadataHash()).substring(6);
-                mod = new String(iEntry.metadataHash()).substring(0, 6);
+                dom = new String(iEntry.metadataHash(), 6, 6);
+                mod = new String(iEntry.metadataHash(), 0, 6);
                 if ((paths = doms.get(dom)) == null) {
                     doms.put(dom, mod);
                 } else {

@@ -149,10 +149,10 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
-    public void put(Entry row) throws IOException, RowSpaceExceededException {
+    public boolean put(Entry row) throws IOException, RowSpaceExceededException {
         synchronized (this.backend) {
             checkBuffer();
-            this.buffer.put(row);
+            return this.buffer.put(row);
         }
     }
 

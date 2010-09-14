@@ -289,7 +289,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         return entry;
     }
 
-    public final synchronized void put(final Row.Entry row) throws IOException, RowSpaceExceededException {
+    public final synchronized boolean put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -305,12 +305,13 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         }
         
         // write to the back-end
+        boolean c;
         try {
-            index.put(row);
+            c = index.put(row);
         } catch (RowSpaceExceededException e1) {
             // flush all caches to get more memory
             clearCache();
-            index.put(row); // try again
+            c = index.put(row); // try again
         }
         if (checkHitSpace()) try {
             final Row.Entry dummy = readHitCache.replace(row); // overwrite old entry
@@ -318,6 +319,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         } catch (RowSpaceExceededException e) {
             clearCache();
         }
+        return c;
     }
     
     public final synchronized Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {

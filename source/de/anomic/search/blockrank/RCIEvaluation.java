@@ -161,8 +161,8 @@ public class RCIEvaluation {
             dom = i.next();
             if (dom.startsWith("www.")) dom = dom.substring(4);
             try {
-                dommap.put(new String((new DigestURI("http://" + dom, null)).hash()).substring(6), dom);
-                dommap.put(new String((new DigestURI("http://www." + dom, null)).hash()).substring(6), "www." + dom);
+                dommap.put(new String((new DigestURI("http://" + dom, null)).hash(), 6, 6), dom);
+                dommap.put(new String((new DigestURI("http://www." + dom, null)).hash(), 6, 6), "www." + dom);
             } catch (final MalformedURLException e) {}
         }
         return dommap;

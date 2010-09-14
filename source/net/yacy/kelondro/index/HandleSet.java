@@ -143,11 +143,11 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         for (byte[] b: aset) put(b);
     }
 
-    public final synchronized void put(final byte[] key) throws RowSpaceExceededException {
+    public final synchronized boolean put(final byte[] key) throws RowSpaceExceededException {
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
-        index.put(newentry);
+        return index.put(newentry);
     }
     
     public final synchronized void putUnique(final byte[] key) throws RowSpaceExceededException {

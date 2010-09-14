@@ -216,7 +216,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         }
     }
     
-    public void put(final Row.Entry row) throws IOException {
+    public boolean put(final Row.Entry row) throws IOException {
         try {
             final String sqlQuery = "INSERT INTO test (" +
                     "hash, " +
@@ -231,7 +231,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             
             sqlStatement.close();
             
-            return;
+            return false;
         } catch (final Exception e) {
             throw new IOException(e.getMessage());
         }

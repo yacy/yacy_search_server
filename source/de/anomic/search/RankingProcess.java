@@ -207,7 +207,7 @@ public final class RankingProcess extends Thread {
 			    }
 			    
 			    // check site constraints
-			    if (query.sitehash != null && !new String(iEntry.metadataHash()).substring(6).equals(query.sitehash)) {
+			    if (query.sitehash != null && !new String(iEntry.metadataHash(), 6, 6).equals(query.sitehash)) {
 			        // filter out all domains that do not match with the site constraint
 			    	continue;
 			    }
@@ -231,14 +231,11 @@ public final class RankingProcess extends Thread {
             
     		// do the ranking
     		for (WordReferenceVars fEntry: filteredEntries) {
-    
-                // double-check
-    		    if (urlhashes.has(fEntry.metadataHash())) continue;
-                
-    		    // insert
-    		    stack.put(new ReverseElement<WordReferenceVars>(fEntry, this.order.cardinal(fEntry))); // inserts the element and removed the worst (which is smallest)
-    		    try {
-                    urlhashes.put(fEntry.metadataHash());
+                // insert with double-check
+                try {
+                    if (!urlhashes.put(fEntry.metadataHash())) {
+                        stack.put(new ReverseElement<WordReferenceVars>(fEntry, this.order.cardinal(fEntry))); // inserts the element and removes the worst (which is smallest)
+                    }
                 } catch (RowSpaceExceededException e) {
                     Log.logException(e);
                 }
@@ -299,7 +296,7 @@ public final class RankingProcess extends Thread {
                 if (!skipDoubleDom) return rwi;
                 
                 // check doubledom
-                final String domhash = new String(rwi.getElement().metadataHash()).substring(6);
+                final String domhash = new String(rwi.getElement().metadataHash(), 6, 6);
                 m = this.doubleDomCache.get(domhash);
                 if (m == null) {
                     // first appearance of dom
@@ -398,7 +395,7 @@ public final class RankingProcess extends Thread {
                 
                 // in case that we do not have e catchall filter for urls
                 // we must also construct the domain navigator here
-                this.hostNavigator.inc(new String(urlhash).substring(6), new String(urlhash));
+                this.hostNavigator.inc(new String(urlhash, 6, 6), new String(urlhash));
             }
             
             // check for more errors

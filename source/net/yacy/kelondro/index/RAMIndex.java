@@ -158,9 +158,9 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         return index1.replace(entry);
     }
    
-	public final synchronized void put(final Row.Entry entry) throws RowSpaceExceededException {
+	public final synchronized boolean put(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
-        if (entry == null) return;
+        if (entry == null) return false;
         finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
         assert index0.isSorted();
@@ -168,9 +168,10 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         if (index0.has(key)) {
             // replace the entry
             index0.put(entry);
+            return true;
         }
         // else place it in the index1
-        index1.put(entry);
+        return index1.put(entry);
     }
    
     public final synchronized void addUnique(final Row.Entry entry) throws RowSpaceExceededException {

@@ -57,7 +57,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
             Log.logException(e);
             return null;
         }
-        return (url == null) ? null : new String(url.hash()).substring(6);
+        return (url == null) ? null : new String(url.hash(), 6, 6);
     }
     
     public DigestURI(final File file) throws MalformedURLException {

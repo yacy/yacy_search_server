@@ -543,12 +543,12 @@ public class Table implements Index, Iterable<Row.Entry> {
         return rowdef.newEntry(b);
     }
     
-    public synchronized void put(final Entry row) throws IOException, RowSpaceExceededException {
+    public synchronized boolean put(final Entry row) throws IOException, RowSpaceExceededException {
         assert file == null || file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
         assert row != null;
         assert row.bytes() != null;
-        if (file == null || row == null || row.bytes() == null) return;
+        if (file == null || row == null || row.bytes() == null) return false;
         final int i = (int) index.get(row.getPrimaryKeyBytes());
         if (i == -1) {
             try {
@@ -558,7 +558,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                 this.table = null;
                 addUnique(row);
             }
-            return;
+            return false;
         }
         
         if (table == null) {
@@ -576,6 +576,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        return true;
     }
 
     public Entry put(final Entry row, final Date entryDate) throws IOException, RowSpaceExceededException {

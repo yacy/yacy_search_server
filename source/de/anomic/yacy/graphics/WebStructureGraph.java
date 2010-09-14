@@ -104,7 +104,7 @@ public class WebStructureGraph {
         final StringBuilder cpg = new StringBuilder(12 * (hl.size() + 1) + 1);
         assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
         final StringBuilder cpl = new StringBuilder(12 * (hl.size() + 1) + 1);
-        final String lhp = new String(url.hash()).substring(6); // local hash part
+        final String lhp = new String(url.hash(), 6, 6); // local hash part
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
@@ -360,7 +360,7 @@ public class WebStructureGraph {
     }
     
     private void learn(final DigestURI url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
-        final String domhash = new String(url.hash()).substring(6);
+        final String domhash = new String(url.hash(), 6, 6);
 
         // parse the new reference string and join it with the stored references
         structureEntry structure = outgoingReferences(domhash);

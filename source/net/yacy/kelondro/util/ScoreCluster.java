@@ -231,38 +231,37 @@ public final class ScoreCluster<E> {
         gcount += newScore;
     }
     
-    public synchronized void addScore(final E obj, final int incrementScore) {
+    public void addScore(final E obj, final int incrementScore) {
         if (obj == null) return;
-        //System.out.println("setScore " + obj.getClass().getName());
-        Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
-        
-        if (usk == null) {
-            // set new value
-            if (incrementScore < 0) throw new kelondroOutOfLimitsException(incrementScore);
-            usk = Long.valueOf(scoreKey(encnt++, incrementScore));
+        synchronized (this) {
+            Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
             
-            // put new value into cluster
-            refkeyDB.put(obj, usk);
-            keyrefDB.put(usk, obj);
-            
-        } else {
-            // delete old entry
-            keyrefDB.remove(usk);
-            
-            // get previous handle and score
-            final long c = usk.longValue();
-            final int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
-            final int oldHandle = (int) (c & 0xFFFFFFFFL);
-            
-            // set new value
-            final int newValue = oldScore + incrementScore;
-            if (newValue < 0) throw new kelondroOutOfLimitsException(newValue);
-            usk = Long.valueOf(scoreKey(oldHandle, newValue)); // generates an unique key for a specific score
-            refkeyDB.put(obj, usk);
-            keyrefDB.put(usk, obj);
-            
-        }
-        
+            if (usk == null) {
+                // set new value
+                if (incrementScore < 0) throw new kelondroOutOfLimitsException(incrementScore);
+                usk = Long.valueOf(scoreKey(encnt++, incrementScore));
+                
+                // put new value into cluster
+                refkeyDB.put(obj, usk);
+                keyrefDB.put(usk, obj);
+                
+            } else {
+                // delete old entry
+                keyrefDB.remove(usk);
+                
+                // get previous handle and score
+                final long c = usk.longValue();
+                final int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
+                final int oldHandle = (int) (c & 0xFFFFFFFFL);
+                
+                // set new value
+                final int newValue = oldScore + incrementScore;
+                if (newValue < 0) throw new kelondroOutOfLimitsException(newValue);
+                usk = Long.valueOf(scoreKey(oldHandle, newValue)); // generates an unique key for a specific score
+                refkeyDB.put(obj, usk);
+                keyrefDB.put(usk, obj);
+            }
+        }        
         // increase overall counter
         gcount += incrementScore;
     }

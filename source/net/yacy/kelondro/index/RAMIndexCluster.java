@@ -172,10 +172,10 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         }            
     }
 
-    public final void put(final Entry row) throws RowSpaceExceededException {
+    public final boolean put(final Entry row) throws RowSpaceExceededException {
         final int i = indexFor(row);
-        if (i < 0) return;
-        accessArray(i).put(row);
+        if (i < 0) return false;
+        return accessArray(i).put(row);
     }
 
     public final boolean delete(final byte[] key) {
