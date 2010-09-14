@@ -449,13 +449,37 @@ public class Domains {
         }
         return false;
     }
+
+    private static final InetAddress parseInetAddress(final String ip) {
+        if (ip == null) return null;
+        if (ip.length() < 8) return null;
+        final String[] ips = ip.split("\\.");
+        if (ips.length != 4) return null;
+        final byte[] ipb = new byte[4];
+        try {
+            ipb[0] = (byte) Integer.parseInt(ips[0]);
+            ipb[1] = (byte) Integer.parseInt(ips[1]);
+            ipb[2] = (byte) Integer.parseInt(ips[2]);
+            ipb[3] = (byte) Integer.parseInt(ips[3]);
+        } catch (final NumberFormatException e) {
+            return null;
+        }
+        try {
+            return InetAddress.getByAddress(ipb);
+        } catch (final UnknownHostException e) {
+            return null;
+        }
+    }
     
     public static InetAddress dnsResolve(String host) {
         if ((host == null) || (host.length() == 0)) return null;
         host = host.toLowerCase().trim();        
+        // try to simply parse the address
+        InetAddress ip = parseInetAddress(host);
+        if (ip != null) return ip;
         
-        // trying to resolve host by doing a name cache lookup
-        InetAddress ip = nameCacheHit.get(host);
+        // try to resolve host by doing a name cache lookup
+        ip = nameCacheHit.get(host);
         if (ip != null) return ip;
         
         if (nameCacheMiss.containsKey(host)) return null;

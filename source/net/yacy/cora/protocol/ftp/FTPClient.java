@@ -2118,7 +2118,7 @@ public class FTPClient {
         final int b = Integer.parseInt(st.nextToken());
         final int c = Integer.parseInt(st.nextToken());
         final int d = Integer.parseInt(st.nextToken());
-        final InetAddress datahost = InetAddress.getByName(a + "." + b + "." + c + "." + d);
+        final InetAddress datahost = Domains.dnsResolve(a + "." + b + "." + c + "." + d);
         final int high = Integer.parseInt(st.nextToken());
         final int low = Integer.parseInt(st.nextToken());
         if (high < 0 || high > 255 || low < 0 || low > 255) {

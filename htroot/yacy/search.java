@@ -50,7 +50,6 @@ import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.net.natLib;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.Navigator;
 import de.anomic.search.QueryParams;
@@ -385,7 +384,7 @@ public final class search {
         prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
 
         // prepare search statistics
-        theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(natLib.getInetAddress(client), true, false, false);
+        theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(Domains.dnsResolve(client), true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalIndexCount() + theSearch.getRankingResult().getRemoteResourceSize();
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();

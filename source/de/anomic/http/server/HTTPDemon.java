@@ -1353,7 +1353,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         
         boolean isThisHostIP = false;
         try {
-//             final InetAddress clientAddress = InetAddress.getByName(hostName);
             final InetAddress clientAddress = Domains.dnsResolve(hostName);
             if (clientAddress == null) return false;
             

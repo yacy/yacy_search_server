@@ -36,10 +36,10 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.text.SimpleDateFormat;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
-import de.anomic.net.natLib;
 import de.anomic.search.QueryParams;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverAccessTracker;
@@ -238,7 +238,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
                 prop.putHTML("page_list_" + entCount + "_host", host);
                 if (page == 5) {
-                    final yacySeed remotepeer = sb.peers.lookupByIP(natLib.getInetAddress(host), true, true, true);
+                    final yacySeed remotepeer = sb.peers.lookupByIP(Domains.dnsResolve(host), true, true, true);
                     prop.putHTML("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
                 prop.putNum("page_list_" + entCount + "_count", handles.size());

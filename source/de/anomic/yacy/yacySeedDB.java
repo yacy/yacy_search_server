@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.SoftReference;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -39,6 +38,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -670,28 +670,27 @@ public final class yacySeedDB implements AlternativeDomainNames {
             // enumerate the cache and simultanous insert values
             final Iterator<yacySeed> e = seedsConnected(true, false, null, (float) 0.0);
             while (e.hasNext()) {
-                try {
-                    seed = e.next();
-                    if (seed != null) {
-                        addressStr = seed.getPublicAddress();
-                        if (addressStr == null) {
-                        	Log.logWarning("YACY","lookupByIP/Connected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
-                        	try {
-                                badPeerHashes.put(seed.hash.getBytes());
-                            } catch (RowSpaceExceededException e1) {
-                                Log.logException(e1);
-                                break;
-                            }
-                        	continue; 
+                seed = e.next();
+                if (seed != null) {
+                    addressStr = seed.getPublicAddress();
+                    if (addressStr == null) {
+                    	Log.logWarning("YACY","lookupByIP/Connected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
+                    	try {
+                            badPeerHashes.put(seed.hash.getBytes());
+                        } catch (RowSpaceExceededException e1) {
+                            Log.logException(e1);
+                            break;
                         }
-                        if ((pos = addressStr.indexOf(':'))!= -1) {
-                            addressStr = addressStr.substring(0,pos);
-                        }
-                        seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
-                        if (seedIPAddress.equals(peerIP)) return seed;
+                    	continue; 
                     }
-                } catch (final UnknownHostException ex) {}
+                    if ((pos = addressStr.indexOf(':'))!= -1) {
+                        addressStr = addressStr.substring(0,pos);
+                    }
+                    seedIPAddress = Domains.dnsResolve(addressStr);
+                    if (seedIPAddress == null) continue;
+                    if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                    if (seedIPAddress.equals(peerIP)) return seed;
+                }
             }
             // delete bad peers
             final Iterator<byte[]> i = badPeerHashes.iterator();
@@ -704,28 +703,27 @@ public final class yacySeedDB implements AlternativeDomainNames {
             final Iterator<yacySeed>e = seedsDisconnected(true, false, null, (float) 0.0);
 
             while (e.hasNext()) {
-                try {
-                    seed = e.next();
-                    if (seed != null) {
-                        addressStr = seed.getPublicAddress();
-                        if (addressStr == null) {
-                            Log.logWarning("YACY","lookupByIPDisconnected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
-                            try {
-                                badPeerHashes.put(seed.hash.getBytes());
-                            } catch (RowSpaceExceededException e1) {
-                                Log.logException(e1);
-                                break;
-                            }
-                            continue;
+                seed = e.next();
+                if (seed != null) {
+                    addressStr = seed.getPublicAddress();
+                    if (addressStr == null) {
+                        Log.logWarning("YACY","lookupByIPDisconnected: address of seed " + seed.getName() + "/" + seed.hash + " is null.");
+                        try {
+                            badPeerHashes.put(seed.hash.getBytes());
+                        } catch (RowSpaceExceededException e1) {
+                            Log.logException(e1);
+                            break;
                         }
-                        if ((pos = addressStr.indexOf(':'))!= -1) {
-                            addressStr = addressStr.substring(0,pos);
-                        }
-                        seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
-                        if (seedIPAddress.equals(peerIP)) return seed;
+                        continue;
                     }
-                } catch (final UnknownHostException ex) {}
+                    if ((pos = addressStr.indexOf(':'))!= -1) {
+                        addressStr = addressStr.substring(0,pos);
+                    }
+                    seedIPAddress = Domains.dnsResolve(addressStr);
+                    if (seedIPAddress == null) continue;
+                    if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                    if (seedIPAddress.equals(peerIP)) return seed;
+                }
             }
             // delete bad peers
             final Iterator<byte[]> i = badPeerHashes.iterator();
@@ -738,36 +736,31 @@ public final class yacySeedDB implements AlternativeDomainNames {
             final Iterator<yacySeed> e = seedsPotential(true, false, null, (float) 0.0);
 
             while (e.hasNext()) {
-                try {
-                    seed = e.next();
-                    if ((seed != null) && ((addressStr = seed.getPublicAddress()) != null)) {
-                        if ((pos = addressStr.indexOf(':'))!= -1) {
-                            addressStr = addressStr.substring(0,pos);
-                        }
-                        seedIPAddress = InetAddress.getByName(addressStr);
-                        if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
-                        if (seedIPAddress.equals(peerIP)) return seed;
+                seed = e.next();
+                if ((seed != null) && ((addressStr = seed.getPublicAddress()) != null)) {
+                    if ((pos = addressStr.indexOf(':'))!= -1) {
+                        addressStr = addressStr.substring(0,pos);
                     }
-                } catch (final UnknownHostException ex) {}
+                    seedIPAddress = Domains.dnsResolve(addressStr);
+                    if (seedIPAddress == null) continue;
+                    if (seed.isProper(false) == null) ipLookupCache.put(seedIPAddress, new SoftReference<yacySeed>(seed));
+                    if (seedIPAddress.equals(peerIP)) return seed;
+                }
             }
         }
         
-        try {
-            // check local seed
-            if (this.mySeed == null) return null;
-            addressStr = mySeed.getPublicAddress();
-            if (addressStr == null) return null;
-            if ((pos = addressStr.indexOf(':'))!= -1) {
-                addressStr = addressStr.substring(0,pos);
-            }
-            seedIPAddress = InetAddress.getByName(addressStr);
-            if (mySeed.isProper(false) == null) ipLookupCache.put(seedIPAddress,  new SoftReference<yacySeed>(mySeed));
-            if (seedIPAddress.equals(peerIP)) return mySeed;
-            // nothing found
-            return null;
-        } catch (final UnknownHostException e2) {
-            return null;
+        // check local seed
+        if (this.mySeed == null) return null;
+        addressStr = mySeed.getPublicAddress();
+        if (addressStr == null) return null;
+        if ((pos = addressStr.indexOf(':'))!= -1) {
+            addressStr = addressStr.substring(0,pos);
         }
+        seedIPAddress = Domains.dnsResolve(addressStr);
+        if (mySeed.isProper(false) == null) ipLookupCache.put(seedIPAddress,  new SoftReference<yacySeed>(mySeed));
+        if (seedIPAddress.equals(peerIP)) return mySeed;
+        // nothing found
+        return null;
     }
 
     private ArrayList<String> storeCache(final File seedFile, final boolean addMySeed) throws IOException {

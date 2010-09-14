@@ -57,6 +57,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
@@ -64,7 +65,6 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.MapTools;
 
-import de.anomic.net.natLib;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
@@ -468,7 +468,7 @@ public class yacySeed implements Cloneable {
      * @return the IP address of the peer represented by this yacySeed object as {@link InetAddress}
      */
     public final InetAddress getInetAddress() {
-        return natLib.getInetAddress(this.getIP());
+        return Domains.dnsResolve(this.getIP());
     }
     
     /** @return the portnumber of this seed or <code>-1</code> if not present */
@@ -818,7 +818,8 @@ public class yacySeed implements Cloneable {
         // returns null if ipString is proper, a string with the cause otherwise
         if (ipString == null) return "IP is null";
         if (ipString.length() > 0 && ipString.length() < 8) return "IP is too short: " + ipString;
-        if (!natLib.isProper(ipString)) return "IP is not proper: " + ipString; //this does not work with staticIP
+        InetAddress ip = Domains.dnsResolve(ipString);
+        if (ip == null) return "IP is not proper: " + ipString; //this does not work with staticIP
         if (ipString.equals("localhost") || ipString.startsWith("127.") || (ipString.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
         return null;
     }

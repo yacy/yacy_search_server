@@ -29,9 +29,7 @@ package www;
 // if the shell's current path is HTROOT
 
 import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
@@ -56,11 +54,7 @@ public class welcome {
         prop.putHTML("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
         prop.putHTML("peeraddress", sb.peers.mySeed().getPublicAddress());
         prop.put("hostname", env.myPublicIP());
-        try{
-            prop.put("hostip", InetAddress.getByName(env.myPublicIP()).getHostAddress());
-        }catch(final UnknownHostException e){
-            prop.put("hostip", "Unknown Host Exception");
-        }       
+        prop.put("hostip", Domains.dnsResolve(env.myPublicIP()).getHostAddress());       
         prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
         prop.put("clientip", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
 
