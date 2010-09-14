@@ -146,27 +146,26 @@ public final class search {
         
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
-        if (!Domains.isLocal(client)) {
-            if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
-            boolean block = false;
-            synchronized (trackerHandles) {
-                if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
-                    block = true;
-                }
-                if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) {
-                    block = true;
-                }
-                if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) {
-                    block = true;
-                }
+        if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
+        boolean block = false;
+        synchronized (trackerHandles) {
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
+                block = true;
             }
-            if (block) {
-                prop.put("links", "");
-                prop.put("linkcount", "0");
-                prop.put("references", "");
-                prop.put("searchtime", "0");
-                return prop;
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) {
+                block = true;
             }
+            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) {
+                block = true;
+            }
+        }
+        if (block && Domains.isLocal(client)) block = false;
+        if (block) {
+            prop.put("links", "");
+            prop.put("linkcount", "0");
+            prop.put("references", "");
+            prop.put("searchtime", "0");
+            return prop;
         }
         
         // tell all threads to do nothing for a specific time
@@ -386,7 +385,7 @@ public final class search {
         prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
 
         // prepare search statistics
-        theQuery.remotepeer = sb.peers.lookupByIP(natLib.getInetAddress(client), true, false, false);
+        theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(natLib.getInetAddress(client), true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalIndexCount() + theSearch.getRankingResult().getRemoteResourceSize();
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();
