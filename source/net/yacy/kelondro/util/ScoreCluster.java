@@ -66,14 +66,16 @@ public final class ScoreCluster<E> {
      * shrink the cluster to a demanded size
      * @param maxsize
      */
-    public synchronized void shrinkToMaxSize(int maxsize) {
+    public void shrinkToMaxSize(int maxsize) {
         if (maxsize < 0) return;
         Long key;
-        while (refkeyDB.size() > maxsize) {
-            // find and remove smallest objects until cluster has demanded size
-            key = keyrefDB.firstKey();
-            if (key == null) break;
-            refkeyDB.remove(keyrefDB.remove(key));
+        synchronized (this) {
+            while (refkeyDB.size() > maxsize) {
+                // find and remove smallest objects until cluster has demanded size
+                key = keyrefDB.firstKey();
+                if (key == null) break;
+                refkeyDB.remove(keyrefDB.remove(key));
+            }
         }
     }
     
@@ -81,16 +83,18 @@ public final class ScoreCluster<E> {
      * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
      * @param minScore
      */
-    public synchronized void shrinkToMinScore(int minScore) {
+    public void shrinkToMinScore(int minScore) {
         int score;
         Long key;
-        while (keyrefDB.size() > 0) {
-            // find and remove objects where their score is smaller than the demanded minimum score
-            key = keyrefDB.firstKey();
-            if (key == null) break;
-            score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
-            if (score >= minScore) break;
-            refkeyDB.remove(keyrefDB.remove(key));
+        synchronized (this) {
+            while (keyrefDB.size() > 0) {
+                // find and remove objects where their score is smaller than the demanded minimum score
+                key = keyrefDB.firstKey();
+                if (key == null) break;
+                score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
+                if (score >= minScore) break;
+                refkeyDB.remove(keyrefDB.remove(key));
+            }
         }
     }
     
@@ -197,36 +201,36 @@ public final class ScoreCluster<E> {
         addScore(obj, -1);
     }
     
-    public synchronized void setScore(final E obj, final int newScore) {
+    public void setScore(final E obj, final int newScore) {
         if (obj == null) return;
-        //System.out.println("setScore " + obj.getClass().getName());
-        Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
-        if (newScore < 0) throw new kelondroOutOfLimitsException(newScore);
-        
-        if (usk == null) {
-            // set new value
-            usk = Long.valueOf(scoreKey(encnt++, newScore));
+        synchronized (this) {
+            Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+            if (newScore < 0) throw new kelondroOutOfLimitsException(newScore);
             
-            // put new value into cluster
-            refkeyDB.put(obj, usk);
-            keyrefDB.put(usk, obj);
-            
-        } else {
-            // delete old entry
-            keyrefDB.remove(usk);
-            
-            // get previous handle and score
-            final long c = usk.longValue();
-            final int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
-            final int oldHandle = (int) (c & 0xFFFFFFFFL);
-            gcount -= oldScore;
-            
-            // set new value
-            usk = Long.valueOf(scoreKey(oldHandle, newScore)); // generates an unique key for a specific score
-            refkeyDB.put(obj, usk);
-            keyrefDB.put(usk, obj);
-        }
-        
+            if (usk == null) {
+                // set new value
+                usk = Long.valueOf(scoreKey(encnt++, newScore));
+                
+                // put new value into cluster
+                refkeyDB.put(obj, usk);
+                keyrefDB.put(usk, obj);
+                
+            } else {
+                // delete old entry
+                keyrefDB.remove(usk);
+                
+                // get previous handle and score
+                final long c = usk.longValue();
+                final int oldScore = (int) ((c & 0xFFFFFFFF00000000L) >> 32);
+                final int oldHandle = (int) (c & 0xFFFFFFFFL);
+                gcount -= oldScore;
+                
+                // set new value
+                usk = Long.valueOf(scoreKey(oldHandle, newScore)); // generates an unique key for a specific score
+                refkeyDB.put(obj, usk);
+                keyrefDB.put(usk, obj);
+            }
+        }        
         // increase overall counter
         gcount += newScore;
     }
@@ -266,15 +270,17 @@ public final class ScoreCluster<E> {
         gcount += incrementScore;
     }
     
-    public synchronized int deleteScore(final E obj) {
+    public int deleteScore(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
-        //System.out.println("setScore " + obj.getClass().getName());
-        final Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
-        if (usk == null) return 0;
-
-        // delete old entry
-        keyrefDB.remove(usk);
+        final Long usk;
+        synchronized (this) {
+            usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+            if (usk == null) return 0;
+    
+            // delete old entry
+            keyrefDB.remove(usk);
+        }
         
         // get previous handle and score
         final int oldScore = (int) ((usk.longValue() & 0xFFFFFFFF00000000L) >> 32);
@@ -289,9 +295,12 @@ public final class ScoreCluster<E> {
         return (refkeyDB.get(obj) != null);
     }
     
-    public synchronized int getScore(final E obj) {
+    public int getScore(final E obj) {
         if (obj == null) return 0;
-        final Long cs = refkeyDB.get(obj);
+        final Long cs;
+        synchronized (this) {
+            cs = refkeyDB.get(obj);
+        }
         if (cs == null) return 0;
         return (int) ((cs.longValue() & 0xFFFFFFFF00000000L) >> 32);
     }

@@ -173,7 +173,6 @@ public final class RankingProcess extends Thread {
         timer = System.currentTimeMillis();
         String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
-        final ArrayList<WordReferenceVars> filteredEntries = new ArrayList<WordReferenceVars>();
 
         // apply all constraints
         try {
@@ -222,24 +221,18 @@ public final class RankingProcess extends Thread {
 			        this.hostNavigator.inc(domhash, uhb);
 			    }
 			    
-			    // accept
-			    filteredEntries.add(iEntry);
-			    
-			    // increase counter for statistics
-			    if (local) this.local_indexCount++; else this.remote_indexCount++;
-			}
-            
-    		// do the ranking
-    		for (WordReferenceVars fEntry: filteredEntries) {
-                // insert with double-check
+			    // accept; insert to ranked stack with double-check
                 try {
-                    if (!urlhashes.put(fEntry.metadataHash())) {
-                        stack.put(new ReverseElement<WordReferenceVars>(fEntry, this.order.cardinal(fEntry))); // inserts the element and removes the worst (which is smallest)
+                    if (!urlhashes.put(iEntry.metadataHash())) {
+                        stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                     }
                 } catch (RowSpaceExceededException e) {
                     Log.logException(e);
                 }
-    		}
+			    
+			    // increase counter for statistics
+			    if (local) this.local_indexCount++; else this.remote_indexCount++;
+			}
 
         } catch (InterruptedException e) {}
         
