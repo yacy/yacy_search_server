@@ -49,6 +49,11 @@ public class EventTracker {
     private final static Map<EClass, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<EClass, ConcurrentLinkedQueue<Event>>();
     private final static Map<EClass, Long> eventAccess = new ConcurrentHashMap<EClass, Long>(); // value: last time when this was accessed
     
+    public final static void delete(final EClass eventName) {
+        historyMaps.remove(eventName);
+        eventAccess.remove(eventName);
+    }
+    
     public final static void update(final EClass eventName, final Object eventPayload, boolean useProtection) {
         // check protection against too heavy access
         if (useProtection) {

@@ -166,8 +166,9 @@ public final class search {
         }
         
         // tell all threads to do nothing for a specific time
-        sb.intermissionAllThreads(3000);
+        sb.intermissionAllThreads(500);
 
+        EventTracker.delete(EventTracker.EClass.SEARCH);
         final HandleSet abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : QueryParams.hashes2Set(abstracts);
         
         // store accessing peer

@@ -1,8 +1,0 @@
-<div class="SubMenu">
-  <h3>External Content Integration</h3>
-  <ul class="SubMenu">
-    <li><a href="/ContentIntegrationPHPBB3_p.html" class="MenuItemLink lock">Import phpBB3 forum</a></li>
-    <li><a href="/IndexImportWikimedia_p.html" class="MenuItemLink lock">Import Wikimedia dumps</a></li>
-    <li><a href="/IndexImportOAIPMH_p.html" class="MenuItemLink lock">Import OAI-PMH Sources</a></li>
-  </ul>
-</div>

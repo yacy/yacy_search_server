@@ -1,10 +1,36 @@
 <div class="SubMenu">
   <h3>Index Creation</h3>
-  <ul class="SubMenu">
-    <li><a href="/CrawlStart_p.html" class="MenuItemLink lock">Crawl Start (Advanced)</a></li>
-    <li><a href="/Load_MediawikiWiki.html" class="MenuItemLink">Indexing of Media Wikis</a></li>
-    <li><a href="/Load_PHPBB3.html" class="MenuItemLink">Indexing of phpBB3 Forums</a></li>
-    <li><a href="/Load_RSS_p.html" class="MenuItemLink lock">Indexing of RSS Feeds</a></li>
-    <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Scraping Proxy Configuration</a></li>
-  </ul>
+</div>
+<div class="SubMenu">
+  <div class="SubMenugroup">
+    <h3>Crawler/Spider</h3>
+    <ul class="SubMenu">
+      <li><a href="/CrawlStart_p.html" class="MenuItemLink lock">Web/FTP Crawl Start<br/>(Advanced)</a></li>
+      <li><a href="/Load_MediawikiWiki.html" class="MenuItemLink">Crawling of<br/>Media Wikis</a></li>
+      <li><a href="/Load_PHPBB3.html" class="MenuItemLink">Crawling of<br/>phpBB3 Forums</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Database Reader</h3>
+    <ul class="SubMenu">
+      <li><a href="/ContentIntegrationPHPBB3_p.html" class="MenuItemLink lock">Database Reader for<br/>phpBB3 Forums</a></li>
+      <li><a href="/IndexImportWikimedia_p.html" class="MenuItemLink lock">Dump Reader for <br/>Wikimedia dumps</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Content Import</h3>
+    <ul class="SubMenu">
+      <li><a href="/Load_RSS_p.html" class="MenuItemLink lock">RSS Feed<br/>Importer</a></li>
+      <li><a href="/IndexImportOAIPMH_p.html" class="MenuItemLink lock">OAI-PMH Server<br/>Importer</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Other Harvesting Methods</h3>
+    <ul class="SubMenu">
+      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Document Harvesting<br/>with Scraping Proxy</a></li>
+    </ul>
+  </div>
 </div>
