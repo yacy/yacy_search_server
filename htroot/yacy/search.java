@@ -36,6 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
@@ -145,28 +146,31 @@ public final class search {
         
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
-        if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
-        boolean block = false;
-        synchronized (trackerHandles) {
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
-                block = true;
+        if (!Domains.isLocal(client)) {
+            if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
+            boolean block = false;
+            synchronized (trackerHandles) {
+                if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -   3000)).size() >  1) {
+                    block = true;
+                }
+                if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) {
+                    block = true;
+                }
+                if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) {
+                    block = true;
+                }
             }
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() -  60000)).size() > 12) {
-                block = true;
+            if (block) {
+                prop.put("links", "");
+                prop.put("linkcount", "0");
+                prop.put("references", "");
+                prop.put("searchtime", "0");
+                return prop;
             }
-            if (trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size() > 36) {
-                block = true;
-            }
-        }
-        if (block) {
-            prop.put("links", "");
-            prop.put("linkcount", "0");
-            prop.put("references", "");
-            return prop;
         }
         
         // tell all threads to do nothing for a specific time
-        sb.intermissionAllThreads(500);
+        sb.intermissionAllThreads(100);
 
         EventTracker.delete(EventTracker.EClass.SEARCH);
         final HandleSet abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : QueryParams.hashes2Set(abstracts);
