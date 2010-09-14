@@ -1133,6 +1133,7 @@ public final class yacyClient {
                             }
                         }
                     } catch (IOException e) {
+                        // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
                     System.out.println("Search Time: " + (System.currentTimeMillis() - time));

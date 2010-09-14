@@ -422,8 +422,12 @@ public class Domains {
         if ((host == null) || (host.length() == 0)) return null;
         host = host.toLowerCase().trim();        
         
+        // try to simply parse the address
+        InetAddress ip = parseInetAddress(host);
+        if (ip != null) return ip;
+        
         // trying to resolve host by doing a name cache lookup
-        final InetAddress ip = nameCacheHit.get(host);
+        ip = nameCacheHit.get(host);
         if (ip != null) return ip;
         
         if (nameCacheMiss.containsKey(host)) return null;

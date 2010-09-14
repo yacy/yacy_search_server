@@ -802,8 +802,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    public static Map<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in)
-            throws IOException {
+    public static Map<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in) throws IOException {
+        //ByteArrayInputStream in = new ByteArrayInputStream(FileUtils.read(inx));
         final InputStream body = prepareBody(header, in);
         
         RequestContext request = new yacyContextRequest(header, body);
@@ -821,13 +821,15 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // parse data in memory
         FileUpload upload = new FileUpload(diskFileItemFactory);
         List<FileItem> items;
+        long time = System.currentTimeMillis();
         try {
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
             //Log.logException(e);
             throw new IOException("FileUploadException " + e.getMessage());
         }
-
+        System.out.println("**** FileUploadBase.parseRequest time = " + (System.currentTimeMillis() - time));
+        
         // format information for further usage
         final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
         for (FileItem item : items) {

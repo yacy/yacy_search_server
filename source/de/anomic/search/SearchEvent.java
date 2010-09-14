@@ -155,8 +155,7 @@ public final class SearchEvent {
         } else {
             // do a local search
             this.rankedCache = new RankingProcess(this.query, this.order, max_results_preparation, 2);
-            this.rankedCache.run();
-            //CrawlSwitchboard.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
+            this.rankedCache.run(); // this is not started concurrently here on purpose!
             
             if (generateAbstracts) {
                 // compute index abstracts

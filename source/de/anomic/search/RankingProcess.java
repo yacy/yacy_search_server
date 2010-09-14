@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -50,8 +51,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.BinSearch;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -69,9 +68,9 @@ public final class RankingProcess extends Thread {
     private static final int maxDoubleDomAll = 100, maxDoubleDomSpecial = 10000;
     
     private final QueryParams query;
-    private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private final TreeSet<byte[]> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
-    private final HandleSet misses; // contains url-hashes that could not been found in the LURL-DB
+    private final TreeSet<byte[]> misses; // contains url-hashes that could not been found in the LURL-DB
     //private final int[] domZones;
     private TreeMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     
@@ -102,8 +101,10 @@ public final class RankingProcess extends Thread {
         this.remote_indexCount = 0;
         this.local_resourceSize = 0;
         this.local_indexCount = 0;
-        this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-        this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+        this.urlhashes = new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder);
+        //this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+        this.misses = new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder);
+        //this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.hostNavigator = new Navigator();
@@ -221,13 +222,8 @@ public final class RankingProcess extends Thread {
 			        this.hostNavigator.inc(domhash, uhb);
 			    }
 			    
-			    // accept; insert to ranked stack with double-check
-                try {
-                    if (!urlhashes.put(iEntry.metadataHash())) {
-                        stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
-                    }
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
+			    if (urlhashes.add(iEntry.metadataHash())) {
+                    stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                 }
 			    
 			    // increase counter for statistics
@@ -364,11 +360,7 @@ public final class RankingProcess extends Thread {
             urlhash = obrwi.getElement().metadataHash();
             final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash, obrwi.getElement(), obrwi.getWeight());
             if (page == null) {
-            	try {
-                    misses.put(obrwi.getElement().metadataHash());
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-                }
+            	misses.add(obrwi.getElement().metadataHash());
             	continue;
             }
             

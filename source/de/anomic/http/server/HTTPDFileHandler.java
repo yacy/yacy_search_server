@@ -1032,22 +1032,7 @@ public final class HTTPDFileHandler {
 
                         // flush all
                         try {newOut.flush();}catch (final Exception e) {}
-                        
-                        /*
-                        // wait a little time until everything closes so that clients can read from the streams/sockets
-                        if ((contentLength >= 0) && (requestHeader.get(RequestHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
-                            // in case that the client knows the size in advance (contentLength present) the waiting will have no effect on the interface performance
-                            // but if the client waits on a connection interruption this will slow down.
-                            try {Thread.sleep(2000);} catch (final InterruptedException e) {} // FIXME: is this necessary?
-                        }
-                        */
                     }
-                    
-                    // check mime type again using the result array: these are 'magics'
-//                    if (serverByteBuffer.equals(result, 1, "PNG".getBytes())) mimeType = mimeTable.getProperty("png","text/html");
-//                    else if (serverByteBuffer.equals(result, 0, "GIF89".getBytes())) mimeType = mimeTable.getProperty("gif","text/html");
-//                    else if (serverByteBuffer.equals(result, 6, "JFIF".getBytes())) mimeType = mimeTable.getProperty("jpg","text/html");
-                    //System.out.print("MAGIC:"); for (int i = 0; i < 10; i++) System.out.print(Integer.toHexString((int) result[i]) + ","); System.out.println();
                 }
             } else {
                 HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
@@ -1055,8 +1040,7 @@ public final class HTTPDFileHandler {
             }
         } catch (final Exception e) {     
             try {
-                // doing some errorhandling ...
-                //Log.logException(e);
+                // error handling
                 int httpStatusCode = 400; 
                 final String httpStatusText = null; 
                 final StringBuilder errorMessage = new StringBuilder(2000); 
