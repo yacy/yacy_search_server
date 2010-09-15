@@ -74,7 +74,7 @@ public class ReferenceOrder {
         return out;
     }
     
-    public class NormalizeDistributor extends Thread {
+    private final class NormalizeDistributor extends Thread {
 
         ReferenceContainer<WordReference> container;
         LinkedBlockingQueue<WordReferenceVars> out;
@@ -118,7 +118,7 @@ public class ReferenceOrder {
     /**
      * normalize ranking: find minimum and maximum of separate ranking criteria
      */
-    public class NormalizeWorker extends Thread {
+    private class NormalizeWorker extends Thread {
         
         private final BlockingQueue<WordReferenceVars> out;
         private final Semaphore termination;
@@ -145,10 +145,10 @@ public class ReferenceOrder {
                 Integer count;
                 final Integer int1 = 1;
                 while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
-                    out.put(iEntry);
                     // find min/max
                     if (min == null) min = iEntry.clone(); else min.min(iEntry);
                     if (max == null) max = iEntry.clone(); else max.max(iEntry);
+                    out.put(iEntry); // must be after the min/max check to prevent that min/max is null in cardinal()
                     // update domcount
                     dom = new String(iEntry.metadataHash(), 6, 6);
                     count = doms0.get(dom);

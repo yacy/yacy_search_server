@@ -206,28 +206,30 @@ public final class RankingProcess extends Thread {
 			        continue;
 			    }
 			    
+                // count domZones
+                //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
+                
 			    // check site constraints
-			    if (query.sitehash != null && !new String(iEntry.metadataHash(), 6, 6).equals(query.sitehash)) {
-			        // filter out all domains that do not match with the site constraint
-			    	continue;
+			    domhash = new String(iEntry.metadataHash(), 6, 6);
+			    if (query.sitehash == null) {
+			        // no site constraint there; maybe collect host navigation information
+			        if (nav_hosts && query.urlMask_isCatchall) {
+	                    this.hostNavigator.inc(domhash, new String(iEntry.metadataHash()));
+	                }
+			    } else {
+			        if (!domhash.equals(query.sitehash)) {
+			            // filter out all domains that do not match with the site constraint
+			            continue;
+			        }
 			    }
 			    
-			    // count domZones
-			    //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
-			    
-			    // get statistics for host navigator
-			    if (nav_hosts && query.urlMask_isCatchall) {
-			        String uhb = new String(iEntry.urlHash);
-			        domhash = uhb.substring(6);
-			        this.hostNavigator.inc(domhash, uhb);
-			    }
-			    
-			    if (urlhashes.add(iEntry.metadataHash())) {
+			    // finally make a double-check and insert result to stack
+                if (urlhashes.add(iEntry.metadataHash())) {
                     stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+
+                    // increase counter for statistics
+                    if (local) this.local_indexCount++; else this.remote_indexCount++;
                 }
-			    
-			    // increase counter for statistics
-			    if (local) this.local_indexCount++; else this.remote_indexCount++;
 			}
 
         } catch (InterruptedException e) {}

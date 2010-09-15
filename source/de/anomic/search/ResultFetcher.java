@@ -106,7 +106,7 @@ public class ResultFetcher {
 
     public void deployWorker(int deployCount, int neededResults) {
     	if (anyWorkerAlive()) return;
-    	this.workerThreads = new Worker[(query.snippetCacheStrategy.isAllowedToFetchOnline()) ? deployCount : 1];
+    	this.workerThreads = new Worker[/*(query.snippetCacheStrategy.mustBeOffline()) ? 1 : */deployCount];
     	for (int i = 0; i < workerThreads.length; i++) {
     		this.workerThreads[i] = new Worker(i, 10000, query.snippetCacheStrategy, neededResults);
     		this.workerThreads[i].start();
