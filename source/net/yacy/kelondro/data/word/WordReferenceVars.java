@@ -397,30 +397,30 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
      */
     
     public static BlockingQueue<WordReferenceVars> transform(ReferenceContainer<WordReference> container) {
-    	LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
+    	LinkedBlockingQueue<WordReferenceVars> vars = new LinkedBlockingQueue<WordReferenceVars>();
     	if (container.size() <= 100) {
     	    // transform without concurrency to omit thread creation overhead
     	    for (Row.Entry entry: container) try {
-                out.put(new WordReferenceVars(new WordReferenceRow(entry)));
+                vars.put(new WordReferenceVars(new WordReferenceRow(entry)));
             } catch (InterruptedException e) {}
             try {
-                out.put(WordReferenceVars.poison);
+                vars.put(WordReferenceVars.poison);
             } catch (InterruptedException e) {}
-            return out;
+            return vars;
     	}
-    	Thread distributor = new TransformDistributor(container, out);
+    	Thread distributor = new TransformDistributor(container, vars);
     	distributor.start();
     	
     	// return the resulting queue while the processing queues are still working
-    	return out;
+    	return vars;
     }
     
     public static class TransformDistributor extends Thread {
 
     	ReferenceContainer<WordReference> container;
-    	LinkedBlockingQueue<WordReferenceVars> out;
+    	BlockingQueue<WordReferenceVars> out;
     	
-    	public TransformDistributor(ReferenceContainer<WordReference> container, LinkedBlockingQueue<WordReferenceVars> out) {
+    	public TransformDistributor(ReferenceContainer<WordReference> container, BlockingQueue<WordReferenceVars> out) {
     		this.container = container;
     		this.out = out;
     	}

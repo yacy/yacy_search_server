@@ -401,7 +401,7 @@ public final class yacyClient {
         final long timestamp = System.currentTimeMillis();
         SearchResult result;
         try {
-            result = searchClient(
+            result = new SearchResult(
                 yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
                 mySeed, wordhashes, excludehashes, urlhashes, prefer, filter, language,
                 sitehash, authorhash, count, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
@@ -411,7 +411,6 @@ public final class yacyClient {
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return -1;
         }
-        if (result == null) return -1;
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
         
@@ -553,69 +552,6 @@ public final class yacyClient {
         return result.urlcount;
     }
     
-    public static SearchResult searchClient(
-            LinkedHashMap<String,ContentBody> parts,
-            final yacySeed mySeed,
-            final String wordhashes,
-            final String excludehashes,
-            final String urlhashes,
-            final Pattern prefer,
-            final Pattern filter,
-            final String language,
-            final String sitehash,
-            final String authorhash,
-            final int count,
-            final int maxDistance,
-            final boolean global, 
-            final int partitions,
-            String hostname,
-            String hostaddress,
-            final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
-            final RankingProfile rankingProfile,
-            final Bitfield constraint
-    ) throws IOException {
-        // send a search request to peer with remote Hash
-
-        // INPUT:
-        // iam        : complete seed of the requesting peer
-        // youare     : seed hash of the target peer, used for testing network stability
-        // key        : transmission key for response
-        // search     : a list of search words
-        // hsearch    : a string of word hashes
-        // fwdep      : forward depth. if "0" then peer may NOT ask another peer for more results
-        // fwden      : forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        // count      : maximum number of wanted results
-        // global     : if "true", then result may consist of answers from other peers
-        // partitions : number of remote peers that are asked (for evaluation of QPM)
-        // duetime    : maximum time that a peer should spent to create a result
-        
-        // send request
-        Map<String, String> resultMap = null;
-        parts.put("myseed", new StringBody((mySeed == null) ? "" : mySeed.genSeedStr(parts.get("key").toString())));
-        parts.put("count", new StringBody(Integer.toString(Math.max(10, count))));
-        parts.put("resource", new StringBody(((global) ? "global" : "local")));
-        parts.put("partitions", new StringBody(Integer.toString(partitions)));
-        parts.put("query", new StringBody(wordhashes));
-        parts.put("exclude", new StringBody(excludehashes));
-        parts.put("duetime", new StringBody("1000"));
-        parts.put("urls", new StringBody(urlhashes));
-        parts.put("prefer", new StringBody(prefer.toString()));
-        parts.put("filter", new StringBody(filter.toString()));
-        parts.put("language", new StringBody(language));
-        parts.put("sitehash", new StringBody(sitehash));
-        parts.put("authorhash", new StringBody(authorhash));
-        parts.put("ttl", new StringBody("0"));
-        parts.put("maxdist", new StringBody(Integer.toString(maxDistance)));
-        parts.put("profile", new StringBody(crypt.simpleEncode(rankingProfile.toExternalString())));
-        parts.put("constraint", new StringBody((constraint == null) ? "" : constraint.exportB64()));
-        if (secondarySearchSuperviser != null) parts.put("abstracts", new StringBody("auto"));
-        resultMap = FileUtils.table(HTTPConnector.getConnector(HTTPLoader.crawlerUserAgent).post(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), 60000, hostname, parts));
-        //resultMap = FileUtils.table(HTTPConnector.getConnector(HTTPLoader.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
-
-        if (resultMap == null || resultMap.isEmpty()) throw new IOException("resultMap is NULL");
-        return new SearchResult(resultMap);
-    }
-    
     public static class SearchResult {
         
         public String version; // version : application version of responder
@@ -631,11 +567,70 @@ public final class yacyClient {
         public List<URIMetadataRow> links; // LURLs of search
         public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
         
-        public SearchResult(Map<String, String> resultMap) throws IOException {
+        public SearchResult(
+                LinkedHashMap<String,ContentBody> parts,
+                final yacySeed mySeed,
+                final String wordhashes,
+                final String excludehashes,
+                final String urlhashes,
+                final Pattern prefer,
+                final Pattern filter,
+                final String language,
+                final String sitehash,
+                final String authorhash,
+                final int count,
+                final int maxDistance,
+                final boolean global, 
+                final int partitions,
+                String hostname,
+                String hostaddress,
+                final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
+                final RankingProfile rankingProfile,
+                final Bitfield constraint) throws IOException {
+            // send a search request to peer with remote Hash
+
+            // INPUT:
+            // iam        : complete seed of the requesting peer
+            // youare     : seed hash of the target peer, used for testing network stability
+            // key        : transmission key for response
+            // search     : a list of search words
+            // hsearch    : a string of word hashes
+            // fwdep      : forward depth. if "0" then peer may NOT ask another peer for more results
+            // fwden      : forward deny, a list of seed hashes. They may NOT be target of forward hopping
+            // count      : maximum number of wanted results
+            // global     : if "true", then result may consist of answers from other peers
+            // partitions : number of remote peers that are asked (for evaluation of QPM)
+            // duetime    : maximum time that a peer should spent to create a result
+            
+            // send request
+            Map<String, String> resultMap = null;
+            parts.put("myseed", new StringBody((mySeed == null) ? "" : mySeed.genSeedStr(parts.get("key").toString())));
+            parts.put("count", new StringBody(Integer.toString(Math.max(10, count))));
+            parts.put("resource", new StringBody(((global) ? "global" : "local")));
+            parts.put("partitions", new StringBody(Integer.toString(partitions)));
+            parts.put("query", new StringBody(wordhashes));
+            parts.put("exclude", new StringBody(excludehashes));
+            parts.put("duetime", new StringBody("1000"));
+            parts.put("urls", new StringBody(urlhashes));
+            parts.put("prefer", new StringBody(prefer.toString()));
+            parts.put("filter", new StringBody(filter.toString()));
+            parts.put("language", new StringBody(language));
+            parts.put("sitehash", new StringBody(sitehash));
+            parts.put("authorhash", new StringBody(authorhash));
+            parts.put("ttl", new StringBody("0"));
+            parts.put("maxdist", new StringBody(Integer.toString(maxDistance)));
+            parts.put("profile", new StringBody(crypt.simpleEncode(rankingProfile.toExternalString())));
+            parts.put("constraint", new StringBody((constraint == null) ? "" : constraint.exportB64()));
+            if (secondarySearchSuperviser != null) parts.put("abstracts", new StringBody("auto"));
+            resultMap = FileUtils.table(HTTPConnector.getConnector(HTTPLoader.crawlerUserAgent).post(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), 60000, hostname, parts));
+            //resultMap = FileUtils.table(HTTPConnector.getConnector(HTTPLoader.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
+
+            // evaluate request result
+            if (resultMap == null || resultMap.isEmpty()) throw new IOException("resultMap is NULL");
             try {
                 this.searchtime = Integer.parseInt(resultMap.get("searchtime"));
             } catch (final NumberFormatException e) {
-                throw new IOException("wrong output format for searchtime: " + e.getMessage());
+                throw new IOException("wrong output format for searchtime: " + e.getMessage() + ", map = " + resultMap.toString());
             }
             try {
                 this.joincount = Integer.parseInt(resultMap.get("joincount")); // the complete number of hits at remote site
@@ -1104,7 +1099,7 @@ public final class yacyClient {
                     long time = System.currentTimeMillis();
                     SearchResult result;
                     try {
-                        result = searchClient(
+                        result = new SearchResult(
                                 yacyNetwork.basicRequestParts((String) null, (String) null, "freeworld"),
                                 null, // sb.peers.mySeed(),
                                 new String(wordhashe),
@@ -1124,13 +1119,9 @@ public final class yacyClient {
                                 new RankingProfile(ContentDomain.TEXT), // rankingProfile,
                                 null // constraint);
                         );
-                        if (result == null) {
-                            System.out.println("no response");
-                        } else {
-                            for (URIMetadataRow link: result.links) {
+                        for (URIMetadataRow link: result.links) {
                                 System.out.println(link.metadata().url().toNormalform(true, false));
                                 System.out.println(link.snippet());
-                            }
                         }
                     } catch (IOException e) {
                         // TODO Auto-generated catch block

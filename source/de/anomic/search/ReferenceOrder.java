@@ -64,9 +64,10 @@ public class ReferenceOrder {
     }
     
     public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container) {
-        BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(container);
         LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
-        Thread distributor = new NormalizeDistributor(vars, out);
+        int threads = cores + 1;
+        if (container.size() < 20) threads = 2;
+        Thread distributor = new NormalizeDistributor(container, out, threads);
         distributor.start();
         
         // return the resulting queue while the processing queues are still working
@@ -75,21 +76,25 @@ public class ReferenceOrder {
     
     public class NormalizeDistributor extends Thread {
 
-        BlockingQueue<WordReferenceVars> vars;
+        ReferenceContainer<WordReference> container;
         LinkedBlockingQueue<WordReferenceVars> out;
+        private int threads;
         
-        public NormalizeDistributor(BlockingQueue<WordReferenceVars> vars, LinkedBlockingQueue<WordReferenceVars> out) {
-            this.vars = vars;
+        public NormalizeDistributor(ReferenceContainer<WordReference> container, LinkedBlockingQueue<WordReferenceVars> out, int threads) {
+            this.container = container;
             this.out = out;
+            this.threads = threads;
         }
         
         @Override
         public void run() {
+            // transform the reference container into a stream of parsed entries
+            BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(container);
+            
             // start the transformation threads
-            int cores0 = cores + 1;
-            Semaphore termination = new Semaphore(cores0);
-            NormalizeWorker[] worker = new NormalizeWorker[cores0];
-            for (int i = 0; i < cores0; i++) {
+            Semaphore termination = new Semaphore(this.threads);
+            NormalizeWorker[] worker = new NormalizeWorker[this.threads];
+            for (int i = 0; i < this.threads; i++) {
                 worker[i] = new NormalizeWorker(out, termination);
                 worker[i].start();
             }
@@ -99,17 +104,20 @@ public class ReferenceOrder {
             int p = 0;
             try {
                 while ((iEntry = vars.take()) != WordReferenceVars.poison) {
-                    worker[p % cores0].add(iEntry);
+                    worker[p % this.threads].add(iEntry);
                     p++;
                 }
             } catch (InterruptedException e) {
             }
             
             // insert poison to stop the queues
-            for (int i = 0; i < cores0; i++) worker[i].add(WordReferenceVars.poison);
+            for (int i = 0; i < this.threads; i++) worker[i].add(WordReferenceVars.poison);
         }
     }
 
+    /**
+     * normalize ranking: find minimum and maximum of separate ranking criteria
+     */
     public class NormalizeWorker extends Thread {
         
         private final BlockingQueue<WordReferenceVars> out;
@@ -131,7 +139,34 @@ public class ReferenceOrder {
         
         public void run() {
             try {
-                addNormalizer(decodedEntries, out);
+                WordReferenceVars iEntry;
+                Map<String, Integer> doms0 = new HashMap<String, Integer>();
+                String dom;
+                Integer count;
+                final Integer int1 = 1;
+                while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
+                    out.put(iEntry);
+                    // find min/max
+                    if (min == null) min = iEntry.clone(); else min.min(iEntry);
+                    if (max == null) max = iEntry.clone(); else max.max(iEntry);
+                    // update domcount
+                    dom = new String(iEntry.metadataHash(), 6, 6);
+                    count = doms0.get(dom);
+                    if (count == null) {
+                        doms0.put(dom, int1);
+                    } else {
+                        doms0.put(dom, Integer.valueOf(count.intValue() + 1));
+                    }
+                }
+
+                // update domain score
+                Map.Entry<String, Integer> entry;
+                final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
+                while (di.hasNext()) {
+                    entry = di.next();
+                    doms.addScore(entry.getKey(), (entry.getValue()).intValue());
+                }
+                if (!doms.isEmpty()) maxdomcount = doms.getMaxScore();
             } catch (InterruptedException e) {
                 Log.logException(e);
             } catch (Exception e) {
@@ -144,57 +179,6 @@ public class ReferenceOrder {
                 } catch (InterruptedException e) {}
             }
         }
-    }
-    
-    /**
-     * normalize ranking: find minimum and maximum of separate ranking criteria
-     * @param decodedEntries
-     * @param out
-     * @throws InterruptedException
-     */
-    public void addNormalizer(BlockingQueue<WordReferenceVars> decodedEntries, final BlockingQueue<WordReferenceVars> out) throws InterruptedException {
-        WordReferenceVars iEntry;
-        Map<String, Integer> doms0 = new HashMap<String, Integer>();
-        String dom;
-        Integer count;
-        final Integer int1 = 1;
-        while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
-            out.put(iEntry);
-            // find min/max
-            if (min == null) min = iEntry.clone(); else min.min(iEntry);
-            if (max == null) max = iEntry.clone(); else max.max(iEntry);
-            // update domcount
-            dom = new String(iEntry.metadataHash(), 6, 6);
-            count = doms0.get(dom);
-            if (count == null) {
-                doms0.put(dom, int1);
-            } else {
-                doms0.put(dom, Integer.valueOf(count.intValue() + 1));
-            }
-        }
-
-        // update domain score
-        Map.Entry<String, Integer> entry;
-        final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
-        while (di.hasNext()) {
-            entry = di.next();
-            doms.addScore(entry.getKey(), (entry.getValue()).intValue());
-        }
-        if (!doms.isEmpty()) this.maxdomcount = doms.getMaxScore();
-    }
-    
-    public void addNormalizer(WordReferenceVars iEntry, final BlockingQueue<WordReferenceVars> out) throws InterruptedException {
-        out.put(iEntry);
-        
-        // find min/max
-        if (min == null) min = iEntry.clone(); else min.min(iEntry);
-        if (max == null) max = iEntry.clone(); else max.max(iEntry);
-        
-        // update domcount
-        String dom = new String(iEntry.metadataHash(), 6, 6);
-        doms.incScore(dom);
-        
-        if (!doms.isEmpty()) this.maxdomcount = doms.getMaxScore();
     }
     
     public int authority(final byte[] urlHash) {

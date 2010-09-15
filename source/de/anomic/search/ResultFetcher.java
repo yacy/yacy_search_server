@@ -357,10 +357,10 @@ public class ResultFetcher {
     public ArrayList<ReverseElement<ResultEntry>> completeResults(final long waitingtime) {
         final long timeout = System.currentTimeMillis() + waitingtime;
         while ((result.sizeAvailable() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {
-            try {Thread.sleep(100);} catch (final InterruptedException e) {}
+            try {Thread.sleep(20);} catch (final InterruptedException e) {}
             //System.out.println("+++DEBUG-completeResults+++ sleeping " + 200);
         }
-        return this.result.list(this.result.sizeAvailable());
+        return this.result.list(Math.min(query.neededResults(), this.result.sizeAvailable()));
     }
 
     public long postRanking(
