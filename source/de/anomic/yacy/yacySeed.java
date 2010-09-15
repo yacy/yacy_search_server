@@ -659,29 +659,44 @@ public class yacySeed implements Cloneable {
     }
 
     private static byte[] bestGap(final yacySeedDB seedDB) {
+        byte[] randomHash = randomHash();
         if ((seedDB == null) || (seedDB.sizeConnected() <= 2)) {
             // use random hash
-            return randomHash();
+            return randomHash;
         }
         // find gaps
         final TreeMap<Long, String> gaps = hashGaps(seedDB);
         
         // take one gap; prefer biggest but take also another smaller by chance
         String interval = null;
-        final Random r = new Random();
         while (!gaps.isEmpty()) {
             interval = gaps.remove(gaps.lastKey());
-            if (r.nextBoolean()) break;
+            if (random.nextBoolean()) break;
         }
         if (interval == null) return randomHash();
         
         // find dht position and size of gap
-        final long gaphalf = FlatWordPartitionScheme.dhtDistance(
-                FlatWordPartitionScheme.std.dhtPosition(interval.substring(0, 12).getBytes(), null),
-                FlatWordPartitionScheme.std.dhtPosition(interval.substring(12).getBytes(), null)) >> 1;
-        long p = FlatWordPartitionScheme.std.dhtPosition(interval.substring(0, 12).getBytes(), null);
-        long gappos = (Long.MAX_VALUE - p >= gaphalf) ? p + gaphalf : (p - Long.MAX_VALUE) + gaphalf;
-        return FlatWordPartitionScheme.positionToHash(gappos);
+        long left = FlatWordPartitionScheme.std.dhtPosition(interval.substring(0, 12).getBytes(), null);
+        long right = FlatWordPartitionScheme.std.dhtPosition(interval.substring(12).getBytes(), null);
+        final long gap4 = FlatWordPartitionScheme.dhtDistance(left, right) >> 2; // a quarter of a gap
+        long gapx = gap4;
+        if (random.nextBoolean()) gapx += gap4;
+        if (random.nextBoolean()) gapx += gap4;
+        long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
+        byte[] computedHash = FlatWordPartitionScheme.positionToHash(gappos);
+        // the computed hash is the perfect position (modulo gap4 population and gap alternatives)
+        // this is too tight. The hash must be more randomized. We take only (!) the first two bytes
+        // of the computed hash and add random bytes at the remaining positions. The first two bytes
+        // of the hash may have 64*64 = 2^^10 positions, good for over 1 million peers.
+        byte[] combined = new byte[12];
+        System.arraycopy(computedHash, 0, combined, 0, 2);
+        System.arraycopy(randomHash, 2, combined, 2, 10);
+        // finally check if the hash is already known
+        while (seedDB.hasConnected(combined) || seedDB.hasDisconnected(combined) || seedDB.hasPotential(combined)) {
+            // if we are lucky then this loop will never run
+            combined = randomHash();
+        }
+        return combined;
     }
     
     private static TreeMap<Long, String> hashGaps(final yacySeedDB seedDB) {
