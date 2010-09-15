@@ -45,6 +45,7 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.kelondro.util.MemoryControl;
 
 
@@ -571,7 +572,7 @@ public class HeapReader {
      * static iterator of entries in BLOBHeap files:
      * this is used to import heap dumps into a write-enabled index heap
      */
-    public static class entries implements
+    public static class entries extends LookAheadIterator<Map.Entry<byte[], byte[]>> implements
         CloneableIterator<Map.Entry<byte[], byte[]>>,
         Iterator<Map.Entry<byte[], byte[]>>,
         Iterable<Map.Entry<byte[], byte[]>> {
@@ -579,14 +580,12 @@ public class HeapReader {
         DataInputStream is;
         int keylen;
         private final File blobFile;
-        Map.Entry<byte[], byte[]> nextEntry;
         
         public entries(final File blobFile, final int keylen) throws IOException {
             if (!(blobFile.exists())) throw new IOException("file " + blobFile + " does not exist");
             this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 8*1024*1024));
             this.keylen = keylen;
             this.blobFile = blobFile;
-            this.nextEntry = next0();
         }
 
         public CloneableIterator<Entry<byte[], byte[]>> clone(Object modifier) {
@@ -601,14 +600,7 @@ public class HeapReader {
             }
         }
         
-        public boolean hasNext() {
-            if (is == null) return false;
-            if  (this.nextEntry != null) return true;
-            close();
-            return false;
-        }
-
-        private Map.Entry<byte[], byte[]> next0() {
+        public Map.Entry<byte[], byte[]> next0() {
             try {
                 byte b;
                 int len;
@@ -637,10 +629,6 @@ public class HeapReader {
                     // so far we have read this.keylen - 1 + 1 = this.keylen bytes.
                     // there must be a remaining number of len - this.keylen bytes left for the BLOB
                     if (len < this.keylen) return null;    // a strange case that can only happen in case of corrupted data
-//                    if (is.available() < (len - this.keylen)) { // this really indicates corrupted data but doesn't work for >2GB Blobs
-//                        Log.logWarning("HeapReader", "corrupted data by entry of " + len + " bytes at available of: " + is.available() + " in " + this.blobFile.getName());
-//                        return null;
-//                    }
                     payload = new byte[len - this.keylen]; // the remaining record entries
                     if (is.read(payload) < payload.length) return null;
                     return new entry(key, payload);
@@ -648,20 +636,6 @@ public class HeapReader {
             } catch (final IOException e) {
                 return null;
             }
-        }
-        
-        public Map.Entry<byte[], byte[]> next() {
-            final Map.Entry<byte[], byte[]> n = this.nextEntry;
-            this.nextEntry = next0();
-            return n;
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException("blobs cannot be altered during read-only iteration");
-        }
-
-        public Iterator<Map.Entry<byte[], byte[]>> iterator() {
-            return this;
         }
         
         public void close() {

@@ -157,33 +157,44 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         // else place it in the index1
         return index1.replace(entry);
     }
-   
-	public final synchronized boolean put(final Row.Entry entry) throws RowSpaceExceededException {
+	
+	/**
+     * Adds the row to the index. The row is identified by the primary key of the row.
+     * @param row a index row
+     * @return true if this set did _not_ already contain the given row. 
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
+	public final boolean put(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
-        if (entry == null) return false;
-        finishInitialization();
-        // if the new entry is within the initialization part, just overwrite it
-        assert index0.isSorted();
-        final byte[] key = entry.getPrimaryKeyBytes();
-        if (index0.has(key)) {
-            // replace the entry
-            index0.put(entry);
-            return true;
+        if (entry == null) return true;
+        synchronized (this) {
+            finishInitialization();
+            // if the new entry is within the initialization part, just overwrite it
+            assert index0.isSorted();
+            final byte[] key = entry.getPrimaryKeyBytes();
+            if (index0.has(key)) {
+                // replace the entry
+                index0.put(entry);
+                return false;
+            }
+            // else place it in the index1
+            return index1.put(entry);
         }
-        // else place it in the index1
-        return index1.put(entry);
     }
    
-    public final synchronized void addUnique(final Row.Entry entry) throws RowSpaceExceededException {
+    public final void addUnique(final Row.Entry entry) throws RowSpaceExceededException {
     	assert (entry != null);
     	if (entry == null) return;
-        if (index1 == null) {
-            // we are in the initialization phase
-        	index0.addUnique(entry);
-        	return;
-        }
-        // initialization is over, add to secondary index
-        index1.addUnique(entry);
+    	synchronized (this) {
+            if (index1 == null) {
+                // we are in the initialization phase
+            	index0.addUnique(entry);
+            	return;
+            }
+            // initialization is over, add to secondary index
+            index1.addUnique(entry);
+    	}
     }
 
 	public final void addUnique(final List<Entry> rows) throws RowSpaceExceededException {

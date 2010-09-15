@@ -24,6 +24,7 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -113,6 +114,13 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         return get(index, true);
     }
     
+    /**
+     * Adds the row to the index. The row is identified by the primary key of the row.
+     * @param row a index row
+     * @return true if this set did _not_ already contain the given row. 
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
     public final synchronized boolean put(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
@@ -124,12 +132,12 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         final int index = find(entry.bytes(), 0);
         if (index < 0) {
             super.addUnique(entry);
-            return false;
+            return true;
         } else {
             final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
             set(index, entry);       // this may alter the sortBound, which we will revert in the next step
             this.sortBound = sb;     // revert a sortBound altering
-            return true;
+            return false;
         }
     }
 

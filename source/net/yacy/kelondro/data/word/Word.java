@@ -55,7 +55,7 @@ public class Word {
     public static final int commonHashLength = 12;
     
     private static final int hashCacheSize = Math.max(10000, Math.min(100000, (int) (MemoryControl.available() / 20000L)));
-    private static final ARC<String, byte[]> hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Runtime.getRuntime().availableProcessors());
+    private static final ARC<String, byte[]> hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Runtime.getRuntime().availableProcessors() + 1);
     
     // object carries statistics for words and sentences
     public  int      count;       // number of occurrences

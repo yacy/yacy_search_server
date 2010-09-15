@@ -143,6 +143,13 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         for (byte[] b: aset) put(b);
     }
 
+    /**
+     * Adds the key to the set
+     * @param key
+     * @return true if this set did _not_ already contain the given key. 
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
     public final synchronized boolean put(final byte[] key) throws RowSpaceExceededException {
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();

@@ -194,6 +194,14 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return indexentry.getColLong(1);
     }
     
+    /**
+     * Adds the key-value pair to the index.
+     * @param key the index key
+     * @param l the value
+     * @return the previous entry of the index
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
     public final synchronized long put(final byte[] key, final long l) throws RowSpaceExceededException {
         assert l >= 0 : "l = " + l;
         assert (key != null);

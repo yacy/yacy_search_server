@@ -1018,7 +1018,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
         
         private yacySeed internalNext() {
-            if ((it == null) || (!(it.hasNext()))) return null;
+            if (it == null || !(it.hasNext())) return null;
             try {
                 ConcurrentHashMap<String, String> dna;
                 while (it.hasNext()) {

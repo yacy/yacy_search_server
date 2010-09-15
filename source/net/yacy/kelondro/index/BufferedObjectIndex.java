@@ -149,6 +149,13 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
+    /**
+     * Adds the row to the index. The row is identified by the primary key of the row.
+     * @param row a index row
+     * @return true if this set did _not_ already contain the given row. 
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
     public boolean put(Entry row) throws IOException, RowSpaceExceededException {
         synchronized (this.backend) {
             checkBuffer();

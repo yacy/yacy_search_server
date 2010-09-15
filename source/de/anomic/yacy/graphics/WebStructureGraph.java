@@ -46,6 +46,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.LookAheadIterator;
 
 
 public class WebStructureGraph {
@@ -463,21 +464,15 @@ public class WebStructureGraph {
         return new structureIterator(latest);
     }
     
-    public class structureIterator implements Iterator<structureEntry> {
+    public class structureIterator extends LookAheadIterator<structureEntry> implements Iterator<structureEntry> {
 
         private final Iterator<Map.Entry<String, String>> i;
-        private structureEntry nextentry;
         
         public structureIterator(final boolean latest) {
             i = ((latest) ? structure_new : structure_old).entrySet().iterator();
-            next0();
         }
         
-        public boolean hasNext() {
-            return nextentry != null;
-        }
-
-        private void next0() {
+        public structureEntry next0() {
             Map.Entry<String, String> entry = null;
             String dom = null, ref = "";
             while (i.hasNext()) {
@@ -488,24 +483,10 @@ public class WebStructureGraph {
                 if (dom.length() >= 8) break;
                 dom = null;
             }
-            if ((entry == null) || (dom == null)) {
-                nextentry = null;
-                return;
-            }
+            if (entry == null || dom == null) return null;
             assert (ref.length() - 8) % 10 == 0 : "refs = " + ref + ", length = " + ref.length();
-            nextentry = new structureEntry(dom.substring(0, 6), dom.substring(7), ref.substring(0, 8), refstr2map(ref));
+            return new structureEntry(dom.substring(0, 6), dom.substring(7), ref.substring(0, 8), refstr2map(ref));
         }
-        
-        public structureEntry next() {
-            final structureEntry r = nextentry;
-            next0();
-            return r;
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException("not implemented");
-        }
-        
     }
     
     public static class structureEntry {

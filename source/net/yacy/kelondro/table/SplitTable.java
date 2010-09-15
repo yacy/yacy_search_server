@@ -354,6 +354,13 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         return null;
     }
     
+    /**
+     * Adds the row to the index. The row is identified by the primary key of the row.
+     * @param row a index row
+     * @return true if this set did _not_ already contain the given row. 
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
     public boolean put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         Index keeper = keeperOf(row.getColBytes(0, true));
@@ -362,7 +369,9 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
         }
-        return keeper.put(row);
+        boolean b = keeper.put(row);
+        assert b;
+        return b;
     }
     
 

@@ -44,6 +44,14 @@ public interface Index extends Iterable<Row.Entry> {
     public boolean has(byte[] key); // use this only if there is no get in case that has returns true
     public Row.Entry get(byte[] key) throws IOException;
     public Row.Entry replace(Row.Entry row) throws RowSpaceExceededException, IOException;
+    
+    /**
+     * Adds the row to the index. The row is identified by the primary key of the row.
+     * @param row a index row
+     * @return true if this set did _not_ already contain the given row. 
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
     public boolean put(Row.Entry row) throws IOException, RowSpaceExceededException;
     public void addUnique(Row.Entry row) throws RowSpaceExceededException, IOException; // no double-check
     public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException; // removes all elements that are double (to be used after all addUnique)

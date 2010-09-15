@@ -38,6 +38,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.kelondro.util.ScoreCluster;
 
 
@@ -363,29 +364,17 @@ public class MapDataMining extends MapHeap {
         super.close();
     }
     
-    public class mapIterator implements Iterator<Map<String, String>> {
+    public class mapIterator extends LookAheadIterator<Map<String, String>> implements Iterator<Map<String, String>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
         Iterator<byte[]> keyIterator;
-        Map<String, String> n;
 
         public mapIterator(final Iterator<byte[]> keyIterator) {
             this.keyIterator = keyIterator;
-            this.n = next0();
-        }
-
-        public boolean hasNext() {
-            return this.n != null;
-        }
-
-        public Map<String, String> next() {
-            final Map<String, String> n1 = n;
-            n = next0();
-            return n1;
         }
         
-        private Map<String, String> next0() {
+        public Map<String, String> next0() {
             if (keyIterator == null) return null;
             byte[] nextKey;
             Map<String, String> map;
@@ -394,7 +383,8 @@ public class MapDataMining extends MapHeap {
                 try {
                     map = get(nextKey);
                 } catch (final IOException e) {
-                    break;
+                    Log.logWarning("MapDataMining", e.getMessage());
+                    continue;
                 } catch (RowSpaceExceededException e) {
                     Log.logException(e);
                     continue;
@@ -404,10 +394,6 @@ public class MapDataMining extends MapHeap {
                 return map;
             }
             return null;
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
         }
     } // class mapIterator
 }

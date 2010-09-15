@@ -34,8 +34,9 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.LookAheadIterator;
 
-public class ChunkIterator implements Iterator<byte[]> {
+public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator<byte[]> {
 
     private final int chunksize;
     
@@ -52,7 +53,6 @@ public class ChunkIterator implements Iterator<byte[]> {
     
     
     private final DataInputStream stream;
-    private byte[] nextBytes;
     private final int recordsize;
     
     public ChunkIterator(final File file, final int recordsize, final int chunksize) throws FileNotFoundException {
@@ -61,13 +61,8 @@ public class ChunkIterator implements Iterator<byte[]> {
         this.recordsize = recordsize;
         this.chunksize = chunksize;
         this.stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 64 * 1024));
-        this.nextBytes = next0();
     }
     
-    public boolean hasNext() {
-        return nextBytes != null;
-    }
-
     public byte[] next0() {
         final byte[] chunk = new byte[chunksize];
         int r, s;
@@ -90,15 +85,5 @@ public class ChunkIterator implements Iterator<byte[]> {
             Log.logException(e);
             return null;
         }
-    }
-
-    public byte[] next() {
-        final byte[] n = this.nextBytes;
-        this.nextBytes = next0();
-        return n;
-    }
-    
-    public void remove() {
-        throw new UnsupportedOperationException("no remove in ChunkIterator possible");
     }
 }

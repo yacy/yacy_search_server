@@ -114,6 +114,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
     
     public final void addUnique(final Entry row) throws RowSpaceExceededException {
         final int i = indexFor(row);
+        assert i >= 0 : "i = " + i;
         if (i < 0) return;
         accessArray(i).addUnique(row);
     }
@@ -171,10 +172,18 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
             return MergeIterator.cascade(col, this.rowdef.objectOrder, MergeIterator.simpleMerge, up);
         }            
     }
-
+    
+    /**
+     * Adds the row to the index. The row is identified by the primary key of the row.
+     * @param row a index row
+     * @return true if this set did _not_ already contain the given row. 
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
     public final boolean put(final Entry row) throws RowSpaceExceededException {
         final int i = indexFor(row);
-        if (i < 0) return false;
+        assert i >= 0 : "i = " + i;
+        if (i < 0) return true;
         return accessArray(i).put(row);
     }
 
@@ -236,6 +245,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
     
     public final Entry replace(final Entry row) throws RowSpaceExceededException {
         final int i = indexFor(row);
+        assert i >= 0 : "i = " + i;
         if (i < 0) return null;
         return accessArray(i).replace(row);
     }

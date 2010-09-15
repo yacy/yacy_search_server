@@ -36,6 +36,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.document.Hit;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
 
@@ -196,10 +197,13 @@ public class NetworkGraph {
         Iterator<yacySeed> e = seedDB.seedsConnected(true, false, null, (float) 0.0);
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
-            if (seed != null) {
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, coronaangle);
-                count++;
+            if (seed == null) {
+                Log.logWarning("NetworkGraph", "connected seed == null");
+                continue;
             }
+            //Log.logInfo("NetworkGraph", "drawing peer " + seed.getName());
+            drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, coronaangle);
+            count++;
         }
         totalCount += count;
 
@@ -208,12 +212,16 @@ public class NetworkGraph {
         e = seedDB.seedsSortedDisconnected(false, yacySeed.LASTSEEN);
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
-            if (seed != null) {
-                lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
-                if (lastseen > passiveLimit) break; // we have enough, this list is sorted so we don't miss anything
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, coronaangle);
-                count++;
+            if (seed == null) {
+                Log.logWarning("NetworkGraph", "disconnected seed == null");
+                continue;
             }
+            lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
+            if (lastseen > passiveLimit) {
+                break; // we have enough, this list is sorted so we don't miss anything
+            }
+            drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, coronaangle);
+            count++;
         }
         totalCount += count;
 
@@ -222,12 +230,16 @@ public class NetworkGraph {
         e = seedDB.seedsSortedPotential(false, yacySeed.LASTSEEN);
         while (e.hasNext() && count < maxCount) {
             seed = e.next();
-            if (seed != null) {
-                lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
-                if (lastseen > potentialLimit) break; // we have enough, this list is sorted so we don't miss anything
-                drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, coronaangle);
-                count++;
+            if (seed == null) {
+                Log.logWarning("NetworkGraph", "potential seed == null");
+                continue;
             }
+            lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
+            if (lastseen > potentialLimit) {
+                break; // we have enough, this list is sorted so we don't miss anything
+            }
+            drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, coronaangle);
+            count++;
         }
         totalCount += count;
 
