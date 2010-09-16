@@ -347,12 +347,12 @@ public class CrawlQueues {
             return false;
         }
         
-        if (this.workers.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+        if (this.workers.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 20)) {
             // try a cleanup
             cleanup();
         }
         // check again
-        if (this.workers.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+        if (this.workers.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 20)) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.workers.size() + "), httpClients = " + ConnectionInfo.getCount());
             return false;
         }
@@ -363,12 +363,12 @@ public class CrawlQueues {
             return false;
         }
         
-        if (remoteTriggeredCrawlJobSize() > 100) {
+        if (remoteTriggeredCrawlJobSize() > 200) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: the remote-triggered crawl job queue is filled, omitting processing");
             return false;
         }
         
-        if (coreCrawlJobSize() > 0 && sb.indexingStorageProcessor.queueSize() > 0) {
+        if (coreCrawlJobSize() > 0 /*&& sb.indexingStorageProcessor.queueSize() > 0*/) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
             return false;
         }
@@ -380,9 +380,7 @@ public class CrawlQueues {
                 final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.peers);
                 while (e.hasNext()) {
                     seed = e.next();
-                    if (seed != null) {
-                        remoteCrawlProviderHashes.add(seed.hash);
-                    }
+                    if (seed != null) remoteCrawlProviderHashes.add(seed.hash);
                 }
             }
         }
@@ -391,7 +389,7 @@ public class CrawlQueues {
         // take one entry from the provider list and load the entries from the remote peer
         seed = null;
         String hash = null;
-        while ((seed == null) && (!remoteCrawlProviderHashes.isEmpty())) {
+        while (seed == null && !remoteCrawlProviderHashes.isEmpty()) {
             hash = remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
             if (hash == null) continue;
             seed = sb.peers.get(hash);
@@ -405,12 +403,12 @@ public class CrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.peers, seed, 30, 60000);
+        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.peers, seed, 60, 8000);
         if (feed == null || feed.isEmpty()) {
             // something is wrong with this provider. To prevent that we get not stuck with this peer
             // we remove it from the peer list
             sb.peers.peerActions.peerDeparture(seed, "no results from provided remote crawls");
-            // ask another peer
+            // try again and ask another peer
             return remoteCrawlLoaderJob();
         }
         
@@ -424,7 +422,7 @@ public class CrawlQueues {
             try {
                 url = new DigestURI(item.getLink(), null);
             } catch (final MalformedURLException e) {
-                url = null;
+                continue;
             }
             try {
                 referrer = new DigestURI(item.getReferrer(), null);

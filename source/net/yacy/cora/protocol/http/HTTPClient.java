@@ -135,7 +135,7 @@ public class HTTPClient {
 		connPerRoute.setMaxForRoute(new HttpRoute(localhost), maxcon);
 		ConnManagerParams.setMaxConnectionsPerRoute(httpParams, connPerRoute);
 		// how long to wait for getting a connection from manager in milliseconds
-		ConnManagerParams.setTimeout(httpParams, 3000L);
+		ConnManagerParams.setTimeout(httpParams, 9000L);
 		/**
 		 * HTTP protocol settings
 		 */
@@ -147,13 +147,13 @@ public class HTTPClient {
 		 * HTTP connection settings
 		 */
 		// timeout in milliseconds until a connection is established in milliseconds
-		HttpConnectionParams.setConnectionTimeout(httpParams, 10000);
+		HttpConnectionParams.setConnectionTimeout(httpParams, 9500);
 		// SO_LINGER affects the socket close operation in seconds
 		// HttpConnectionParams.setLinger(httpParams, 6);
 		// TODO: is default ok?
 		// HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
 		// SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
-		HttpConnectionParams.setSoTimeout(httpParams, 5000);
+		HttpConnectionParams.setSoTimeout(httpParams, 9900);
 		// getting an I/O error when executing a request over a connection that has been closed at the server side
 		HttpConnectionParams.setStaleCheckingEnabled(httpParams, true);
 		// conserve bandwidth by minimizing the number of segments that are sent

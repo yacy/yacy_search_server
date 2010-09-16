@@ -483,14 +483,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public boolean has(final byte[] key) {
-        /*
-        try {
-            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        } catch (final IOException e) {
-            Log.logSevere("Table", "", e);
-        }
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
-        */
+        if (index == null) return false;
         return index.has(key);
     }
 

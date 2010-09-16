@@ -211,11 +211,7 @@ public class PerformanceQueues_p {
                     threadName.equals(SwitchboardConstants.SEED_UPLOAD) ||
                     threadName.equals(SwitchboardConstants.CLEANUP)) {
                     /* do not change any values */
-                } else if (threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER) ||
-                		   threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
-                	sb.setRemotecrawlPPM(Math.max(1, (int) (sb.getConfigLong("network.unit.remotecrawl.speed", 60) / multiplier)));
-                }
-                else {
+                } else {
                     // load with new values
                     idlesleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), String.valueOf(idlesleep))) * multiplier);
                     busysleep = (long) (Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"), String.valueOf(busysleep))) * multiplier);

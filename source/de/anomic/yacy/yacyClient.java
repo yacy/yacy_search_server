@@ -316,7 +316,11 @@ public final class yacyClient {
     public static RSSFeed queryRemoteCrawlURLs(final yacySeedDB seedDB, final yacySeed target, final int maxCount, final long maxTime) {
         // returns a list of 
         if (target == null) { return null; }
-        
+        int targetCount = Integer.parseInt(target.get(yacySeed.RCOUNT, "0"));
+        if (targetCount <= 0) {
+            yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs wrong peer '" + target.getName() + "' selected: not enough links available");
+            return null;
+        }
         // prepare request
         final String salt = crypt.randomSalt();
         
@@ -346,6 +350,9 @@ public final class yacyClient {
                 //Log.logException(e);
                 return null;
             }
+            // update number of remotely available links in seed
+            target.put(yacySeed.RCOUNT, Integer.toString(Math.max(0, targetCount - feed.size())));
+            seedDB.update(target.hash, target);
             return feed;
         } catch (final IOException e) {
             yacyCore.log.logSevere("yacyClient.queryRemoteCrawlURLs error asking peer '" + target.getName() + "':" + e.toString());

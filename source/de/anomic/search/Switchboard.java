@@ -302,11 +302,6 @@ public final class Switchboard extends serverSwitch {
         // set a high maximum cache size to current size; this is adopted later automatically
         final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
         setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-        
-        // set network-specific performance attributes
-        if (this.firstInit) {
-            setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
-        }
 
         // load the network definition
         overwriteNetworkDefinition();
@@ -616,7 +611,7 @@ public final class Switchboard extends serverSwitch {
                          SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT,
                          SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM,
                          0, Long.MAX_VALUE, 0, Long.MAX_VALUE),
-                     30000);
+                     10000);
         deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", null,
                      new InstantBusyThread(
                          crawlQueues,
@@ -624,7 +619,7 @@ public final class Switchboard extends serverSwitch {
                          SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT,
                          SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM,
                          10000, Long.MAX_VALUE, 10000, Long.MAX_VALUE),
-                     30000); // error here?
+                     10000); // error here?
         deployThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
                      new InstantBusyThread(
                          crawlQueues,
@@ -661,6 +656,11 @@ public final class Switchboard extends serverSwitch {
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP , "0")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_MEMPREREQ , "1000000")));
 
+        // set network-specific performance attributes
+        if (this.firstInit) {
+            setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
+        }
+        
         // test routine for snippet fetch
         //Set query = new HashSet();
         //query.add(CrawlSwitchboardEntry.word2hash("Weitergabe"));
@@ -928,10 +928,21 @@ public final class Switchboard extends serverSwitch {
     }
     
     public void setRemotecrawlPPM(final int ppm) {
-        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 60000 / ppm);
-        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, Math.max(10000, 180000 / ppm));
-        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, Math.max(15000, 1800000 / ppm));
-        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, Math.max(30000, 3600000 / ppm));
+        final long newBusySleep = Math.max(100, 60000 / ppm);
+        
+        // propagate to crawler
+        final BusyThread rct = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, newBusySleep);
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, Math.min(10000, newBusySleep * 10));
+        rct.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 1000));
+        rct.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, 10000));
+        
+        // propagate to loader
+        final BusyThread rcl = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, newBusySleep * 4);
+        setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, Math.min(10000, newBusySleep * 20));
+        rcl.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, 1000));
+        rcl.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, 10000));
     }
     
     public void initMessages() throws IOException {
@@ -1952,7 +1963,6 @@ public final class Switchboard extends serverSwitch {
         if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
             final yacySeed initiatorPeer = peers.get(new String(queueEntry.initiator()));
             if (initiatorPeer != null) {
-                log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
                 if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(queueEntry.initiator()));
                 // start a thread for receipt sending to avoid a blocking here
                 new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + new String(queueEntry.initiator())).start();
@@ -2036,7 +2046,14 @@ public final class Switchboard extends serverSwitch {
             this.reference = reference;
         }
         public void run() {
-            yacyClient.crawlReceipt(peers.mySeed(), initiatorPeer, "crawl", "fill", "indexed", reference, "");
+            long t = System.currentTimeMillis();
+            Map<String, String> response = yacyClient.crawlReceipt(peers.mySeed(), initiatorPeer, "crawl", "fill", "indexed", reference, "");
+            if (response == null) {
+                log.logInfo("Sending crawl receipt for '" + reference.metadata().url().toNormalform(false, true) + "' to " + initiatorPeer.getName() + " FAILED, send time = " + (System.currentTimeMillis() - t));
+                return;
+            }
+            String delay = response.get("delay");
+            log.logInfo("Sending crawl receipt for '" + reference.metadata().url().toNormalform(false, true) + "' to " + initiatorPeer.getName() + " success, delay = " + delay + ", send time = " + (System.currentTimeMillis() - t));
         }
     }
     

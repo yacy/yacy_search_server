@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.workflow.BusyThread;
 
 import de.anomic.data.WorkTables;
 import de.anomic.search.Switchboard;
@@ -67,32 +66,13 @@ public class RemoteCrawl_p {
                 try {
                     newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
                 } catch (final NumberFormatException e) {}
-                final long newBusySleep = Math.max(100, 60000 / newppm);
-                
-                // propagate to crawler
-                final BusyThread rct = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, newBusySleep);
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, newBusySleep * 3);
-                rct.setBusySleep(newBusySleep);
-                rct.setIdleSleep(newBusySleep * 3);
-                
-                // propagate to loader
-                final BusyThread rcl = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, newBusySleep * 5);
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, newBusySleep * 10);
-                rcl.setBusySleep(newBusySleep * 5);
-                rcl.setIdleSleep(newBusySleep * 10);
-                
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
+                sb.setRemotecrawlPPM(newppm);
             }
         }
         
         // write remote crawl request settings
         prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? "1" : "0");
-        long RTCbusySleep = 100;
-        try {
-            RTCbusySleep = Math.max(1, Integer.parseInt(env.getConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100")));
-        } catch (final NumberFormatException e) {}
+        long RTCbusySleep = Math.max(1, env.getConfigLong(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 100));
         final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
         
