@@ -19,92 +19,40 @@
   <body id="IndexCreate">
     #%env/templates/header.template%#
     #%env/templates/submenuIndexCreate.template%#
-    <h2>Crawl Start</h2>
+    <h2>Site Crawling</h2>
     
     <p id="startCrawling">
-    <strong>Start Crawling Job:</strong>&nbsp;
-    You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
+    <strong>Site Crawler:</strong>&nbsp;
+    Download all web pages from a given domain or base URL.
     </p>
     
-    <form name="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data">
-      <table border="0" cellpadding="5" cellspacing="1">
-        <tr class="TableHeader">
-          <td><strong>Attribut</strong></td>
-          <td><strong>Value</strong></td>
-          <td><strong>Description</strong></td>
-        </tr>
-        <tr valign="top" class="TableCellSummary">
-          <td>Starting Point:</td>
-          <td>
-            <table cellpadding="0" cellspacing="0">            
-              <tr>
-                <td><label for="url"><span class="nobr">From URL</span></label>:</td>
-                <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
-                <td>
-                  <input name="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" />                                    
-                </td>
-              </tr>
-              <tr>
-                <td><label for="url"><span class="nobr">From Sitemap</span></label>:</td>
-                <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"/></td>
-                <td>
-                  <input name="sitemapURL" type="text" size="41" maxlength="256" value="" readonly="readonly"/>
-                </td>              
-              </tr>
-              <tr>
-                <td><label for="file"><span class="nobr">From File</span></label>:</td>
-                <td><input type="radio" name="crawlingMode" id="file" value="file" /></td>
-                <td><input type="file" name="crawlingFile" size="18" onfocus="check('file')" /></td>
-              </tr>
-              <tr>
-              	<td colspan="3" class="commit">
-	              	<span id="robotsOK"></span>
-	              	<span id="title"><br/></span>
-	              	<img src="/env/grafics/empty.gif" name="ajax" alt="empty" />
-              	</td>
-              </tr>
-            </table>
-          </td>
-          <td colspan="3">
-            Existing start URLs are always re-crawled.
-            Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td><label for="crawlingDepth">Crawling Depth</label>:</td>
-          <td><input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" /></td>
-          <td>
-            This defines how often the Crawler will follow links (of links..) embedded in websites.
-            0 means that only the page you enter under "Starting Point" will be added
-            to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will
-            index approximately 25.600.000.000 pages, maybe this is the whole WWW.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Scheduled re-crawl</td>
-          <td>
-            <dl>
-            <dt>no&nbsp;doubles<input type="radio" name="recrawl" value="nodoubles" #(crawlingIfOlderCheck)#checked="checked"::#(/crawlingIfOlderCheck)#/></dt>
-            <dd>run this crawl once and never load any page that is already known, only the start-url may be loaded again.</dd>
-			<dt>re-load<input type="radio" name="recrawl" value="reload"/ #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)#></dt>
-			<dd>run this crawl once, but treat urls that are known since<br/>
-			<select name="crawlingIfOlderNumber" id="crawlingIfOlderNumber">
-              <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-              <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-              <option value="7" selected="selected">7</option>
-              <option value="8">8</option><option value="9">9</option><option value="10">10</option>
-              <option value="12">12</option><option value="14">14</option><option value="21">21</option>
-              <option value="28">28</option><option value="30">30</option>
-			</select>
-			<select name="crawlingIfOlderUnit">
-              <option value="year"   #(crawlingIfOlderUnitYearCheck)#::selected="selected"#(/crawlingIfOlderUnitYearCheck)#>years</option>
-              <option value="month"  #(crawlingIfOlderUnitMonthCheck)#::selected="selected"#(/crawlingIfOlderUnitMonthCheck)#>months</option>
-              <option value="day"    #(crawlingIfOlderUnitDayCheck)#::selected="selected"#(/crawlingIfOlderUnitDayCheck)#>days</option>
-              <option value="hour"   #(crawlingIfOlderUnitHourCheck)#::selected="selected"#(/crawlingIfOlderUnitHourCheck)#>hours</option>
-			</select> not as double and load them again. No scheduled re-crawl.
-			</dd>
-			<dt>scheduled<input type="radio" name="recrawl" value="scheduler"/></dt>
-			<dd>after starting this crawl, repeat the crawl every<br/>
+    <fieldset>
+      <legend>
+        <label>Site Crawl Start</label>
+      </legend>
+      <form name="Crawler" id="Crawler" method="post" action="Crawler_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <dl>
+        <dt><label>Site</label></dt>
+        <dd>
+          <table border="0" cellpadding="0" cellspacing="0"><tr valign="top">
+            <td valign="top"><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" />Start URL</td>
+            <td valign="top">
+            <input name="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
+            <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
+            </td>
+	        <td>
+          <span id="robotsOK"></span>
+          <img align="top" src="/env/grafics/empty.gif" name="ajax" alt="empty" />
+          </td></tr><tr>
+            <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"/>Sitemap URL</td>
+            <td><input name="sitemapURL" type="text" size="41" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/></td>
+          </tr></table><br/>
+        </dd>
+      <input type="hidden" name="crawlingDepth" id="crawlingDepth" value="99">
+        <dt><label>Scheduler</label></dt>
+        <dd>
+            <input type="radio" name="recrawl" value="nodoubles" #(crawlingIfOlderCheck)#checked="checked"::#(/crawlingIfOlderCheck)#/>run this crawl once<br/>
+			<input type="radio" name="recrawl" value="scheduler"/>scheduled, repeat the crawl every
 			<select name="repeat_time">
               <option value="1">1</option><option value="2">2</option><option value="3">3</option>
               <option value="4">4</option><option value="5">5</option><option value="6">6</option>
@@ -118,188 +66,42 @@
               <option value="selhours">hours</option>
               <option value="seldays" selected="selected">days</option>
             </select> automatically.
-			</dd>
-            </dl>
-          </td>
-          <td>
-            A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,
-            then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,
-            to use that check the 'once' option. When you want that this web crawl is repeated automatically, then check the 'scheduled' option.
-            In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td><label for="mustmatch">Must-Match Filter</label>:</td>
-          <td>
-			<input type="radio" name="range" value="wide" checked="checked" />Use filter&nbsp;&nbsp;
-			<input name="mustmatch" id="mustmatch" type="text" size="60" maxlength="100" value="#[mustmatch]#" /><br />
-			<input type="radio" name="range" value="domain" />Restrict to start domain<br />
-			<input type="radio" name="range" value="subpath" />Restrict to sub-path
-		  </td>
-          <td>
-            The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>
-            that must match with the URLs which are used to be crawled; default is 'catch all'.
-            Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'. 
-            You can also use an automatic domain-restriction to fully crawl a single domain.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="mustnotmatch">Must-Not-Match Filter</label>:</td>
-          <td>
-			<input name="mustnotmatch" id="mustnotmatch" type="text" size="60" maxlength="100" value="#[mustnotmatch]#" />
-		  </td>
-          <td>
-            This filter must not match to allow that the page is accepted for crawling.
-            The empty string is a never-match filter which should do well for most cases.
-            If you don't know what this means, please leave this field empty.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td>Auto-Dom-Filter:</td>
-          <td>
-            <label for="crawlingDomFilterCheck">Use</label>:
-            <input type="checkbox" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" #(crawlingDomFilterCheck)#::checked="checked"#(/crawlingDomFilterCheck)# />&nbsp;&nbsp;
-            <label for="crawlingDomFilterDepth">Depth</label>:
-            <input name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#" />
-          </td>
-          <td>
-            This option will automatically create a domain-filter which limits the crawl on domains the crawler
-            will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while
-            restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth
-            for this example would be 1.<br />
-            The default value 0 gives no restrictions.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Maximum Pages per Domain:</td>
-          <td>
-            <label for="crawlingDomMaxCheck">Use</label>:
-            <input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# />&nbsp;&nbsp;
-            <label for="crawlingDomMaxPages">Page-Count</label>:
-            <input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" />
-          </td>
-          <td>
-            You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.
-            You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within
-            the given depth. Domains outside the given depth are then sorted-out anyway.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td><label for="crawlingQ">Accept URLs with '?' / dynamic URLs</label>:</td>
-          <td><input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /></td>
-          <td>
-            A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that
-            is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="storeHTCache">Store to Web Cache</label>:</td>
-          <td><input type="checkbox" name="storeHTCache" id="storeHTCache" #(storeHTCacheChecked)#::checked="checked"#(/storeHTCacheChecked)# /></td>
-          <td>
-            This option is used by default for proxy prefetch, but is not needed for explicit crawling.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td><label for="mustmatch">Policy for usage of Web Cache</label>:</td>
-          <td>
-			<input type="radio" name="cachePolicy" value="nocache" />no&nbsp;cache&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="iffresh" checked="checked" />if&nbsp;fresh&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="ifexist" />if&nbsp;exist&nbsp;&nbsp;&nbsp;
-			<input type="radio" name="cachePolicy" value="cacheonly" />cache&nbsp;only
-		  </td>
-          <td>
-            The caching policy states when to use the cache during crawling:
-              <b>no&nbsp;cache</b>: never use the cache, all content from fresh internet source;
-              <b>if&nbsp;fresh</b>: use the cache if the cache exists and is fresh using the proxy-fresh rules;
-              <b>if&nbsp;exist</b>: use the cache if the cache exist. Do no check freshness. Otherwise use online source;
-              <b>cache&nbsp;only</b>: never go online, use all content from cache. If no cache exist, treat content as unavailable
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Do Local Indexing:</td>
-          <td>
-            <label for="indexText">index text</label>:
-            <input type="checkbox" name="indexText" id="indexText" #(indexingTextChecked)#::checked="checked"#(/indexingTextChecked)# />&nbsp;&nbsp;&nbsp;
-            <label for="indexMedia">index media</label>:
-            <input type="checkbox" name="indexMedia" id="indexMedia" #(indexingMediaChecked)#::checked="checked"#(/indexingMediaChecked)# />
-          </td>
-          <td>
-            This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the
-            Document Cache without indexing.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td><label for="crawlOrder">Do Remote Indexing</label>:</td>
-          <td>
-            <table border="0" cellpadding="2" cellspacing="0">
-              <tr>
-                <td>
-                  <input type="checkbox" name="crawlOrder" id="crawlOrder" #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)# />
-                </td>
-                <td>
-                  <label for="intention">Describe your intention to start this global crawl (optional)</label>:<br />
-                  <input name="intention" id="intention" type="text" size="40" maxlength="100" value="" /><br />
-                  This message will appear in the 'Other Peer Crawl Start' table of other peers.
-                </td>
-              </tr>
-            </table>
-          </td>
-          <td>
-            If checked, the crawler will contact other peers and use them as remote indexers for your crawl.
-            If you need your crawling results locally, you should switch this off.
-            Only senior and principal peers can initiate or receive remote crawls.
-            <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>,
-            so they can omit starting a crawl with the same start point.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td><label for="xsstopw">Exclude <em>static</em> Stop-Words</label>:</td>
-          <td><input type="checkbox" name="xsstopw" id="xsstopw" #(xsstopwChecked)#::checked="checked"#(/xsstopwChecked)# /></td>
-          <td>
-            This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,
-            check this box.
-          </td>
-        </tr>
-        <!--
-        <tr valign="top" class="TableCellDark">
-          <td>Exclude <em>dynamic</em> Stop-Words</td>
-          <td><input type="checkbox" name="xdstopw" #(xdstopwChecked)#::checked="checked"#(/xdstopwChecked)# /></td>
-          <td colspan="3">
-            Excludes all words from indexing which are listed by statistic rules.
-            <em>THIS IS NOT YET FUNCTIONAL</em>
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellDark">
-          <td>Exclude <em>parent-indexed</em> words</td>
-          <td><input type="checkbox" name="xpstopw" #(xpstopwChecked)#::checked="checked"#(/xpstopwChecked)# /></td>
-          <td colspan="3">
-            Excludes all words from indexing which had been indexed in the parent web page.
-            <em>THIS IS NOT YET FUNCTIONAL</em>
-          </td>
-        </tr>
-        -->
-        <tr valign="top" class="TableCellLight">
-          <td>Create Bookmark</td>
-          <td>
-	          <label for="createBookmark">Use</label>:
-	          <input type="checkbox" name="createBookmark" id="createBookmark" />
-	          &nbsp;&nbsp;&nbsp;(works with "Starting Point: From URL" only)
-	          <br /><br />
-			  <label for="bookmarkTitle"> Title</label>:&nbsp;&nbsp;&nbsp; 
-			  <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="100" /><br /><br />
-			  <label for="bookmarkFolder"> Folder</label>:
-			  <input name="bookmarkFolder" id="bookmarkFolder" type="text" size="50" maxlength="100" value="/crawlStart" />
-			  <br />&nbsp;          	  
-          </td>
-          <td>
-            This option lets you create a bookmark from your crawl start URL.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td colspan="5"><input type="submit" name="crawlingstart" value="Start New Crawl" /></td>
-        </tr>
-      </table>
+        </dd>
+        <dt><label>Path in Domain</label></dt>
+        <dd>
+            <input type="radio" name="range" value="domain" checked="checked"/>full domain<br />
+			<input type="radio" name="range" value="subpath" />only sub-path of given url
+        </dd>
+        <input type="hidden" name="mustnotmatch" id="mustnotmatch" value="">
+        <input type="hidden" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" value="off">
+        <input type="hidden" name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" value="#[crawlingDomFilterDepth]#">
+        <dt><label>Limitation</label></dt>
+        <dd><table border="0" cellpadding="0" cellspacing="0"><tr valign="top"><tr>
+          <td valign="top"><input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# /> not more than </td>
+          <td valign="top"><input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" /></td>
+          <td valign="top">documents</td>
+          </tr></table>
+        </dd>
+        <dt><label>Dynamic URLs</label></dt>
+        <dd><input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /> allow '?' in path
+        </dd>
+        <input type="hidden" name="storeHTCache" id="storeHTCache" value="on">
+        <input type="hidden" name="cachePolicy" id="cachePolicy" value="iffresh">
+        <input type="hidden" name="indexText" id="indexText" value="on">
+        <input type="hidden" name="indexMedia" id="indexMedia" value="on">
+        <input type="hidden" name="intention" id="intention" value="">
+        <input type="hidden" name="xsstopw" id="xsstopw" value="off">
+        <input type="hidden" name="xdstopw" id="xdstopw" value="off">
+        <input type="hidden" name="xpstopw" id="xpstopw" value="off">
+        <input type="hidden" name="createBookmark" id="createBookmark" value="off">
+        <dt></dt><dd></dd><dt></dt><dd></dd>
+        <dt><label>Start</label></dt>
+        <dd><input type="submit" name="crawlingstart" value="Start New Crawl" />
+        </dd>
+      </dl>
+      
     </form>
+    </fieldset>
     
     #%env/templates/footer.template%#
   </body>
