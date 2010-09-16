@@ -31,7 +31,6 @@ import java.util.HashSet;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
-import net.yacy.kelondro.workflow.BusyThread;
 
 import de.anomic.data.WorkTables;
 import de.anomic.http.server.HTTPDemon;
@@ -56,7 +55,7 @@ public class ConfigNetwork_p {
         if (post != null) {
             
             // store this call as api call
-            sb.tables.recordAPICall(post, "ConfigNetwork.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "network settings");
+            sb.tables.recordAPICall(post, "ConfigNetwork_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "network settings");
             
             if (post.containsKey("changeNetwork")) {
                 final String networkDefinition = post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
@@ -75,24 +74,14 @@ public class ConfigNetwork_p {
             }
             
             if (post.containsKey("save")) {
-                boolean crawlResponse = post.get("crawlResponse", "off").equals("on");
                 
                 // DHT control
                 boolean indexDistribute = post.get("indexDistribute", "").equals("on");
                 boolean indexReceive = post.get("indexReceive", "").equals("on");
                 final boolean robinsonmode = post.get("network", "").equals("robinson");
-                final String clustermode = post.get("cluster.mode", "publicpeer");
                 if (robinsonmode) {
                     indexDistribute = false;
                     indexReceive = false;
-                    if ((clustermode.equals("privatepeer")) || (clustermode.equals("publicpeer"))) {
-                        prop.put("commitRobinsonWithoutRemoteIndexing", "1");
-                        crawlResponse = false;
-                    }
-                    if ((clustermode.equals("privatecluster")) || (clustermode.equals("publiccluster"))) {
-                        prop.put("commitRobinsonWithRemoteIndexing", "1");
-                        crawlResponse = true;
-                    }
                     commit = 1;
                 } else {
                     if (!indexDistribute && !indexReceive) {
@@ -103,9 +92,6 @@ public class ConfigNetwork_p {
                     } else {
                         if (!indexReceive) prop.put("commitDHTNoGlobalSearch", "1");
                         commit = 1;
-                    }
-                    if (!crawlResponse) {
-                        prop.put("commitCrawlPlea", "1");
                     }
                 }
                 
@@ -147,31 +133,6 @@ public class ConfigNetwork_p {
                 }
                 
                 sb.setConfig("cluster.mode", post.get("cluster.mode", "publicpeer"));
-                
-                // read remote crawl request settings
-                sb.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
-                int newppm = 1;
-                try {
-                    newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
-                } catch (final NumberFormatException e) {}
-                final long newBusySleep = Math.max(100, 60000 / newppm);
-                
-                // propagate to crawler
-                final BusyThread rct = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, newBusySleep);
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, newBusySleep * 3);
-                rct.setBusySleep(newBusySleep);
-                rct.setIdleSleep(newBusySleep * 3);
-                
-                // propagate to loader
-                final BusyThread rcl = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, newBusySleep * 5);
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, newBusySleep * 10);
-                rcl.setBusySleep(newBusySleep * 5);
-                rcl.setIdleSleep(newBusySleep * 10);
-                
-                sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, Long.toString(newBusySleep));
-                
                 sb.setConfig("cluster.peers.ipport", checkIPPortList(post.get("cluster.peers.ipport", "")));
                 sb.setConfig("cluster.peers.yacydomain", checkYaCyDomainList(post.get("cluster.peers.yacydomain", "")));
                 
@@ -238,7 +199,7 @@ public class ConfigNetwork_p {
         return prop;
     }
     
-    public static String normalizedList(String input) {
+    private static String normalizedList(String input) {
         input = input.replace(' ', ',');
         input = input.replace(' ', ';');
         input = input.replaceAll(",,", ",");
@@ -247,7 +208,7 @@ public class ConfigNetwork_p {
         return input;
     }
     
-    public static String checkYaCyDomainList(String input) {
+    private static String checkYaCyDomainList(String input) {
         input = normalizedList(input);
         final String[] s = input.split(",");
         input = "";
@@ -259,7 +220,7 @@ public class ConfigNetwork_p {
         return input.substring(1);
     }
     
-    public static String checkIPPortList(String input) {
+    private static String checkIPPortList(String input) {
         input = normalizedList(input);
         final String[] s = input.split(",");
         input = "";

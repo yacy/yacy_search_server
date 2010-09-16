@@ -44,12 +44,9 @@
         ::<div class="error">Inapplicable Setting Combination:</div>
         ::<div class="error">No changes were made!</div>
     #(/commit)#
-    #(commitCrawlPlea)#::<div class="error">P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on.</div>#(/commitCrawlPlea)#
     #(commitDHTIsRobinson)#::<div class="error">For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration.</div>#(/commitDHTIsRobinson)#
     #(commitDHTNoGlobalSearch)#::<div class="error">Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.</div>#(/commitDHTNoGlobalSearch)#
     #(commitRobinson)#::<div class="commit">For Robinson Mode, index distribution and receive is switched off.</div>#(/commitRobinson)#
-    #(commitRobinsonWithRemoteIndexing)#::<div class="commit">This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted.</div>#(/commitRobinsonWithRemoteIndexing)#
-    #(commitRobinsonWithoutRemoteIndexing)#::<div class="commit">This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it).</div>#(/commitRobinsonWithoutRemoteIndexing)#
     #(commitPasswordWarning)#::<div class="error">With this configuration it is not allowed to authentify automatically from localhost! Please open the <a href="ConfigAccounts_p.html">Account Configuration</a> and set a new password.</div>#(/commitPasswordWarning)#
     <form id="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
@@ -142,17 +139,8 @@
                  #(indexReceiveBlockBlacklistChecked.off)#::checked="checked" #(/indexReceiveBlockBlacklistChecked.off)#/>
           <label for="indexReceiveBlockBlacklistOff">accept transmitted URLs that match your blacklist</label>.
         </dd>
-        <dt>
-          <label for="crawlResponse">Accept Remote Crawl Requests</label>
-          <input type="checkbox" id="crawlResponse" name="crawlResponse" #(crawlResponse)#::checked="checked" #(/crawlResponse)#/>
-        </dt>
-        <dd>
-          Perform web indexing upon request of another peer.<br />
-          This works only if you are a senior peer.<br />
-          <label for="acceptCrawlLimit">Load with a maximum of</label>
-          <input id="acceptCrawlLimit" name="acceptCrawlLimit" type="text" size="4" maxlength="4" value="#[acceptCrawlLimit]#" /> pages per minute
-        </dd>
       </dl>
+    <input type="submit" name="save" value="Save" />
     </fieldset>
         
     <fieldset>
@@ -216,7 +204,7 @@
           If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.
           <input type="text" id="peertags" name="peertags" value="#[peertags]#" size="40" maxlength="80" />
         </dd>
-      </dl>    
+      </dl>
     <input type="submit" name="save" value="Save" />
 	</fieldset>
     </form>

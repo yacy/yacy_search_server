@@ -522,10 +522,12 @@ storeTXCache=true
 # order=parameters for requester; response=parameters for responder
 # these values apply only for senior-senior - communication
 # The delay value is number of seconds bewteen two separate orders
+# crawlOrder: default value for remote crawl starts
+# crawlResponse: set to true if a peer should retrieve remote crawl urls from other peers
 crawlOrder=true
 crawlOrderDepth=0
 crawlOrderDelay=8
-crawlResponse=true
+crawlResponse=false
 crawlResponseDepth=0
 
 # indexing-exclusion - rules

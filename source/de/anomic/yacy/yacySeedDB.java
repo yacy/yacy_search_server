@@ -75,7 +75,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
      */
     public static final String DBFILE_OWN_SEED = "mySeed.txt";
     
-    public static final String[]      sortFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.UPTIME, yacySeed.VERSION, yacySeed.LASTSEEN};
+    public static final String[]      sortFields = new String[] {yacySeed.LCOUNT, yacySeed.RCOUNT, yacySeed.ICOUNT, yacySeed.UPTIME, yacySeed.VERSION, yacySeed.LASTSEEN};
     public static final String[]   longaccFields = new String[] {yacySeed.LCOUNT, yacySeed.ICOUNT, yacySeed.ISPEED};
     public static final String[] doubleaccFields = new String[] {yacySeed.RSPEED};
     
