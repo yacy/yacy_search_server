@@ -25,6 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
@@ -53,7 +54,7 @@ public class AccessTracker_p {
 	
 	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     
-	private static final List<Track> listclone(final List<Track> m) {
+	private static final Collection<Track> listclone(final Collection<Track> m) {
         final List<Track> accessClone = new LinkedList<Track>();
         try {
             accessClone.addAll(m);
@@ -76,7 +77,7 @@ public class AccessTracker_p {
         if (page == 0) {
             final Iterator<String> i = sb.accessHosts();
             String host;
-            List<Track> access;
+            Collection<Track> access;
             int entCount = 0;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
@@ -106,7 +107,7 @@ public class AccessTracker_p {
         if (page == 1) {
             String host = (post == null) ? "" : post.get("host", "");
             int entCount = 0;
-            List<Track> access;
+            Collection<Track> access;
             Track entry;
             if (host.length() > 0) {
 				access = sb.accessTrack(host);

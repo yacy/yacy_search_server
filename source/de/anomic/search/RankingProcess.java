@@ -382,7 +382,9 @@ public final class RankingProcess extends Thread {
                 
                 // in case that we do not have e catchall filter for urls
                 // we must also construct the domain navigator here
-                this.hostNavigator.inc(new String(urlhash, 6, 6), new String(urlhash));
+                if (query.sitehash == null) {
+                    this.hostNavigator.inc(new String(urlhash, 6, 6), new String(urlhash));
+                }
             }
             
             // check for more errors

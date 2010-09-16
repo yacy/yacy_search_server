@@ -69,10 +69,10 @@
               <option value="seldays" selected="selected">days</option>
             </select> for new documents automatically.
         </dd>
-        <dt><label>Path in Domain</label></dt>
+        <dt><label>Path</label></dt>
         <dd>
-            <input type="radio" name="range" id="rangeDomain" value="domain" checked="checked"/>full domain<br />
-			<input type="radio" name="range" id="rangeSubpath" value="subpath" />only sub-path of given url
+            <input type="radio" name="range" id="rangeDomain" value="domain" checked="checked"/>load all files in domain<br />
+			<input type="radio" name="range" id="rangeSubpath" value="subpath" />load only files in a sub-path of given url
         </dd>
         <input type="hidden" name="mustnotmatch" id="mustnotmatch" value="">
         <input type="hidden" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" value="off">
@@ -85,7 +85,7 @@
           </tr></table>
         </dd>
         <dt><label>Dynamic URLs</label></dt>
-        <dd><input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /> allow '?' in path
+        <dd><input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /> allow <a href="http://en.wikipedia.org/wiki/Query_string">query-strings</a> (urls with a '?' in the path)
         </dd>
         <input type="hidden" name="storeHTCache" id="storeHTCache" value="on">
         <input type="hidden" name="cachePolicy" id="cachePolicy" value="iffresh">

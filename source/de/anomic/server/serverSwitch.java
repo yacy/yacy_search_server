@@ -25,8 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -541,7 +541,7 @@ public class serverSwitch {
         this.accessTracker.track(host, accessPath);
     }
     
-    public List<Track> accessTrack(String host) {
+    public Collection<Track> accessTrack(String host) {
         return this.accessTracker.accessTrack(host);
     } 
     
