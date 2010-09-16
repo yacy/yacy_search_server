@@ -43,7 +43,7 @@ public class CrawlStartExpert_p {
         //String repository = "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/";
         prop.put("starturl", /*(intranet) ? repository :*/ "http://");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
-        prop.put("crawlingDepth", env.getConfig("crawlingDepth", "0"));
+        prop.put("crawlingDepth", Math.min(3, env.getConfigLong("crawlingDepth", 0)));
         prop.put("mustmatch", /*(intranet) ? repository + ".*" :*/ CrawlProfile.MATCH_ALL);
         prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER);
         
