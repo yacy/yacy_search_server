@@ -29,12 +29,11 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.text.SimpleDateFormat;
 
 import net.yacy.cora.protocol.Domains;
@@ -55,7 +54,7 @@ public class AccessTracker_p {
 	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     
 	private static final Collection<Track> listclone(final Collection<Track> m) {
-        final List<Track> accessClone = new LinkedList<Track>();
+        final Collection<Track> accessClone = new ConcurrentLinkedQueue<Track>();
         try {
             accessClone.addAll(m);
         } catch (final ConcurrentModificationException e) {}

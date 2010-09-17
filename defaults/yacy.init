@@ -174,7 +174,6 @@ httpdMaxBusySessions = 200
 # users shall be encouraged to use the htdocs path for individual content,
 # not this path defined here
 htRootPath = htroot
-htTemplatePath = htroot/env/templates
 
 # the htroot path
 # root path for the httpd file server

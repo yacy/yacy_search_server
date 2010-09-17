@@ -406,7 +406,12 @@ public class HeapReader {
             // access the file and read the container
             file.seek(pos);
             final int len = file.readInt() - index.row().primaryKeyLength;
-            if (len < 0) throw new IOException("file " + file.file() + " corrupted at " + pos + ": negative len. len = " + len + ", pk.len = " + index.row().primaryKeyLength);
+            if (len < 0) {
+                // database file may be corrupted and should be deleted :-((
+                Log.logSevere("HeapReader", "file " + file.file() + " corrupted at " + pos + ": negative len. len = " + len + ", pk.len = " + index.row().primaryKeyLength);
+                // to get lazy over that problem (who wants to tell the user to stop operation and delete the file???) we work on like the entry does not exist
+                return null;
+            }
             if (MemoryControl.available() < len * 2 + keepFreeMem) {
                 if (!MemoryControl.request(len * 2 + keepFreeMem, true)) throw new RowSpaceExceededException(len * 2 + keepFreeMem, "HeapReader.get()"); // not enough memory available for this blob
             }

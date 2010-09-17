@@ -104,6 +104,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyBuildProperties;
+import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.graphics.EncodedImage;
 
 public final class HTTPDFileHandler {
@@ -117,7 +118,6 @@ public final class HTTPDFileHandler {
     
     private static File     htRootPath     = null;
     private static File     htDocsPath     = null;
-    private static File     htTemplatePath = null;
     private static String[] defaultFiles   = null;
     private static File     htDefaultPath  = null;
     private static File     htLocalePath   = null;
@@ -169,14 +169,6 @@ public final class HTTPDFileHandler {
             // create a repository path
             final File repository = new File(htDocsPath, "repository");
             if (!repository.exists()) repository.mkdirs();
-            
-            // create a htTemplatePath
-            if (htTemplatePath == null) {
-                htTemplatePath = theSwitchboard.getAppPath("htTemplatePath","htroot/env/templates");
-                if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
-            }
-            //This is now handles by #%env/templates/foo%#
-            //if (templates.isEmpty()) templates.putAll(httpTemplate.loadTemplates(htTemplatePath));
             
             // create htLocaleDefault, htLocalePath
             if (htDefaultPath == null) htDefaultPath = theSwitchboard.getAppPath("htDefaultPath", "htroot");
@@ -818,6 +810,9 @@ public final class HTTPDFileHandler {
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((Switchboard) switchboard).peers.myID());
                             templatePatterns.put(servletProperties.PEER_STAT_MYTIME, DateFormatter.formatShortSecond());
+                            yacySeed myPeer = sb.peers.mySeed();
+                            templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1); 
+                            templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                             //System.out.println("respond props: " + ((tp == null) ? "null" : tp.toString())); // debug
                         } catch (final InvocationTargetException e) {
                             if (e.getCause() instanceof InterruptedException) {

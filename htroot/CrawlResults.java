@@ -197,8 +197,8 @@ public class CrawlResults {
                         urlstr = metadata.url().toNormalform(false, true);
                         urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                     }
-                    initiatorSeed = entry.getValue() == null ? null : sb.peers.getConnected(new String(entry.getValue().initiatorHash));
-                    executorSeed = entry.getValue() == null ? null : sb.peers.getConnected(new String(entry.getValue().executorHash));
+                    initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(new String(entry.getValue().initiatorHash));
+                    executorSeed = entry.getValue() == null || entry.getValue().executorHash == null ? null : sb.peers.getConnected(new String(entry.getValue().executorHash));
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");
