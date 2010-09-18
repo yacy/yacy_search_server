@@ -43,14 +43,14 @@ public class ConfigProperties_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        int count=0;
-        String key="";
+        int count = 0;
+        String key;
 
-        //change a Key
+        //change a key
         if(post != null && post.containsKey("key") && post.containsKey("value")){
-            key=post.get("key");
-            final String value=post.get("value");
-            if(!key.equals("")){
+            key = post.get("key");
+            final String value = post.get("value");
+            if (!key.equals("")) {
                 env.setConfig(key, value);
             }
         }
@@ -60,13 +60,18 @@ public class ConfigProperties_p {
         while(keys.hasNext()){
             list.add(keys.next());
         }
+        
         Collections.sort(list);
         keys = list.iterator();
         while(keys.hasNext()){
             key = keys.next();
-            prop.putHTML("options_"+count+"_key", key);
-            prop.putHTML("options_"+count+"_value", env.getConfig(key, "ERROR"));
-            count++;        
+
+            // only display lines if they are no commment
+            if (!key.startsWith("#")) {
+                prop.putHTML("options_" + count + "_key", key);
+                prop.putHTML("options_" + count + "_value", env.getConfig(key, "ERROR"));
+                count++;
+            }
         }
 
         prop.put("options", count);

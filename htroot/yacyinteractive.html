@@ -11,7 +11,7 @@ function xmlhttpPost() {
 }
 
 function search(query) {
-    var xmlHttpReq = false;
+//    var xmlHttpReq = false;
     var self = this;
     if (window.XMLHttpRequest) { // Mozilla/Safari
         self.xmlHttpReq = new XMLHttpRequest(); 
@@ -31,7 +31,7 @@ function search(query) {
 
 function navget(list, name) {
   for (var i = 0; i < list.length; i++) {
-    if (list[i].facetname = name) return list[i];
+    if (list[i].facetname == name) return list[i];
   }
 }
 
@@ -41,8 +41,8 @@ function updatepage(str) {
   var rsp = eval("("+str+")");
   var firstChannel = rsp.channels[0];
   var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
-  var startIndex = firstChannel.startIndex;
-  var itemsPerPage = firstChannel.itemsPerPage;
+//  var startIndex = firstChannel.startIndex;
+//  var itemsPerPage = firstChannel.itemsPerPage;
   var navigation = firstChannel.navigation;
   var topics = navget(navigation, "topics");
   

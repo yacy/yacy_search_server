@@ -550,18 +550,18 @@ public class yacysearch {
                 	prop.put("didYouMean_suggestions_"+meanCount+"_word", suggestion);
                 	prop.put("didYouMean_suggestions_"+meanCount+"_url",
                 		"/yacysearch.html" + "?display=" + display +
-    	                "&query=" + suggestion +
-    	                "&maximumRecords="+ theQuery.displayResults() +
-    	                "&startRecord=" + (0 * theQuery.displayResults()) +
-    	                "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +
-    	                "&verify=" + (theQuery.snippetCacheStrategy.mustBeOffline() ? "false" : "true") +
-    	                "&nav=" + theQuery.navigators +
-    	                "&urlmaskfilter=" + originalUrlMask.toString() +
-    	                "&prefermaskfilter=" + theQuery.prefer.toString() +
-    	                "&cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
-    	                "&contentdom=" + theQuery.contentdom() +
-    	                "&former=" + theQuery.queryString(true) +
-    	                "&meanCount=" + meanMax
+    	                "&amp;query=" + suggestion +
+    	                "&amp;maximumRecords="+ theQuery.displayResults() +
+    	                "&amp;startRecord=" + (0 * theQuery.displayResults()) +
+    	                "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
+    	                "&amp;verify=" + (theQuery.snippetCacheStrategy.mustBeOffline() ? "false" : "true") +
+    	                "&amp;nav=" + theQuery.navigators +
+    	                "&amp;urlmaskfilter=" + originalUrlMask.toString() +
+    	                "&amp;prefermaskfilter=" + theQuery.prefer.toString() +
+    	                "&amp;cat=href&amp;amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
+    	                "&amp;contentdom=" + theQuery.contentdom() +
+    	                "&amp;former=" + theQuery.queryString(true) +
+    	                "&amp;meanCount=" + meanMax
     	             );
                 	prop.put("didYouMean_suggestions_"+meanCount+"_sep","|");
                 	meanCount++;
