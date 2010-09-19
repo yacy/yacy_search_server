@@ -65,7 +65,7 @@ public class serverAccessTracker {
      */
     private synchronized void cleanupAccessTracker() {
 
-        if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return;
+//        if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return;
         this.lastCleanup = System.currentTimeMillis();
         
         // clear entries which had no entry for the maxTrackingTime time
@@ -114,9 +114,9 @@ public class serverAccessTracker {
     
     public void track(final String host, String accessPath) {
         // check storage size
-//        if (System.currentTimeMillis() - this.lastCleanup > cleanupCycle) {
+        if (System.currentTimeMillis() - this.lastCleanup > cleanupCycle) {
             cleanupAccessTracker();
-//        }
+        }
         
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
