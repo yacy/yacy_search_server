@@ -42,7 +42,6 @@ import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.search.QueryParams;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverAccessTracker;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -76,17 +75,15 @@ public class AccessTracker_p {
         if (page == 0) {
             final Iterator<String> i = sb.accessHosts();
             String host;
-            Collection<Track> access;
             int entCount = 0;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
                 host = i.next();
-                access = sb.accessTrack(host);
                 prop.putHTML("page_list_" + entCount + "_host", host);
-                prop.putNum("page_list_" + entCount + "_countSecond", serverAccessTracker.tailList(access, Long.valueOf(System.currentTimeMillis() - 1000)).size());
-                prop.putNum("page_list_" + entCount + "_countMinute", serverAccessTracker.tailList(access, Long.valueOf(System.currentTimeMillis() - 1000 * 60)).size());
-                prop.putNum("page_list_" + entCount + "_count10Minutes", serverAccessTracker.tailList(access, Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 10)).size());
-                prop.putNum("page_list_" + entCount + "_countHour", serverAccessTracker.tailList(access, Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size());
+                prop.putNum("page_list_" + entCount + "_countSecond", sb.latestAccessCount(host, 1000));
+                prop.putNum("page_list_" + entCount + "_countMinute", sb.latestAccessCount(host, 1000 * 60));
+                prop.putNum("page_list_" + entCount + "_count10Minutes", sb.latestAccessCount(host, 1000 * 60 * 10));
+                prop.putNum("page_list_" + entCount + "_countHour", sb.latestAccessCount(host, 1000 * 60 * 60));
                 entCount++;
             }
             } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this

@@ -23,10 +23,9 @@ package de.anomic.server;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import net.yacy.kelondro.logging.Log;
 
 public class serverAccessTracker {
 
@@ -35,7 +34,7 @@ public class serverAccessTracker {
     private final long  maxTrackingTime;
     private final int   maxTrackingCount;
     private final int   maxHostCount;
-    private final ConcurrentHashMap<String, Collection<Track>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
+    private final ConcurrentHashMap<String, ConcurrentLinkedQueue<Track>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     private long lastCleanup;
     
     public static class Track {
@@ -57,7 +56,7 @@ public class serverAccessTracker {
         this.maxTrackingTime = maxTrackingTime;
         this.maxTrackingCount = maxTrackingCount;
         this.maxHostCount = maxTrackingHostCount;
-        this.accessTracker = new ConcurrentHashMap<String, Collection<Track>>();
+        this.accessTracker = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Track>>();
     }
     
     /*
@@ -65,50 +64,57 @@ public class serverAccessTracker {
      */
     private synchronized void cleanupAccessTracker() {
 
-//        if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return;
+        if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return; // avoid too many scans of the queues
         this.lastCleanup = System.currentTimeMillis();
         
         // clear entries which had no entry for the maxTrackingTime time
-        final Iterator<Map.Entry<String, Collection<Track>>> i = accessTracker.entrySet().iterator();
-        Iterator<Track> it;
-        Collection<Track> track;
+        final Iterator<Map.Entry<String, ConcurrentLinkedQueue<Track>>> i = accessTracker.entrySet().iterator();
+        ConcurrentLinkedQueue<Track> track;
         while (i.hasNext()) {
             track = i.next().getValue();
-            if (tailList(track, Long.valueOf(System.currentTimeMillis() - maxTrackingTime)).isEmpty()) {
+            clearTooOldAccess(track);
+            if (track.isEmpty()) {
                 // all entries are too old. delete the whole track
                 i.remove();
             } else {
                 // check if the maxTrackingCount is exceeded
-            	it = track.iterator();
-                while (track.size() > this.maxTrackingCount && it.hasNext()) {
+                while (track.size() > this.maxTrackingCount) try {
                     // delete the oldest entries
-//                    track.remove(0);
-                	track.remove(it.next());
-                }
+                    track.remove();
+                } catch (NoSuchElementException e) { break; } // concurrency may cause that the track is already empty
             }
         }
         
         // if there are more entries left than maxTrackingCount, delete some.
         while (accessTracker.size() > this.maxHostCount) {
             // delete just any
-            accessTracker.remove(accessTracker.keys().nextElement());
+            String key = accessTracker.keys().nextElement();
+            if (key == null) break; // may occur because of concurrency effects
+            accessTracker.remove(key);
         }
+    }
 
-//        this.lastCleanup = System.currentTimeMillis();
+    /**
+     * compute the number of accesses to a given host in the latest time
+     * @param host the host that was accessed
+     * @param delta the time delta from now to the past where the access times shall be computed
+     * @return the number of accesses to the host in the given time span
+     */
+    public int latestAccessCount(final String host, long delta) {
+        Collection<Track> timeList = accessTrack(host);
+        long time = System.currentTimeMillis() - delta;
+        int c = 0;
+        for (Track l: timeList) if (l.getTime() > time) c++;
+        return c;
     }
     
-    public static Collection<Track> tailList(Collection<Track> timeList, long time) {
-        Collection<Track> t = new ConcurrentLinkedQueue<Track>();
-        for (Track l: timeList) if (l.getTime() > time) t.add(l);
-        return t;
-    }
-
-    private Collection<Track> clearTooOldAccess(final Collection<Track> access) {
-        try {
-            return tailList(access, Long.valueOf(System.currentTimeMillis() - maxTrackingTime));
-        } catch (IllegalArgumentException e) {
-            Log.logException(e);
-            return new ConcurrentLinkedQueue<Track>();
+    private void clearTooOldAccess(final ConcurrentLinkedQueue<Track> access) {
+        Long time = Long.valueOf(System.currentTimeMillis() - maxTrackingTime);
+        Iterator<Track> e = access.iterator();
+        Track l;
+        while (e.hasNext()) {
+            l = e.next();
+            if (l.getTime() <= time) e.remove();
         }
     }
     
@@ -120,35 +126,34 @@ public class serverAccessTracker {
         
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
-        Collection<Track> track = accessTracker.get(host);
-        if (track == null) track = new ConcurrentLinkedQueue<Track>();
-        track.add(new Track(System.currentTimeMillis(), accessPath));
-        // write back to tracker
-        accessTracker.put(host, clearTooOldAccess(track));
+        ConcurrentLinkedQueue<Track> track = accessTracker.get(host);
+        if (track == null) {
+            track = new ConcurrentLinkedQueue<Track>();
+            track.add(new Track(System.currentTimeMillis(), accessPath));
+            // add to tracker
+            accessTracker.put(host, track);
+        } else {
+            track.add(new Track(System.currentTimeMillis(), accessPath));
+            clearTooOldAccess(track);
+        }
     }
     
     public Collection<Track> accessTrack(final String host) {
         // returns mapping from Long(accesstime) to path
         
-        Collection<Track> access = accessTracker.get(host);
+        ConcurrentLinkedQueue<Track> access = accessTracker.get(host);
         if (access == null) return null;
         // clear too old entries
-        synchronized (access) {
-            if (access.size() != (access = clearTooOldAccess(access)).size()) {
-                // write back to tracker
-                if (access.isEmpty()) {
-                    accessTracker.remove(host);
-                } else {
-                    accessTracker.put(host, access);
-                }
-            }
+        clearTooOldAccess(access);
+        if (access.isEmpty()) {
+            accessTracker.remove(host);
         }
         return access;
     }
     
     public Iterator<String> accessHosts() {
         // returns an iterator of hosts in tracker (String)
-        final Map<String, Collection<Track>> accessTrackerClone = new ConcurrentHashMap<String, Collection<Track>>();
+        final Map<String, ConcurrentLinkedQueue<Track>> accessTrackerClone = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Track>>();
         accessTrackerClone.putAll(accessTracker);
         return accessTrackerClone.keySet().iterator();
     }

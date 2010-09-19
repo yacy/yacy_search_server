@@ -544,6 +544,10 @@ public class serverSwitch {
     public Collection<Track> accessTrack(String host) {
         return this.accessTracker.accessTrack(host);
     } 
+
+    public int latestAccessCount(final String host, long timedelta) {
+        return this.accessTracker.latestAccessCount(host, timedelta);
+    } 
     
     public Iterator<String> accessHosts() {
         return this.accessTracker.accessHosts();
