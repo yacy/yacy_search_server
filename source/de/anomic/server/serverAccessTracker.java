@@ -66,9 +66,11 @@ public class serverAccessTracker {
     private synchronized void cleanupAccessTracker() {
 
         if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return;
+        this.lastCleanup = System.currentTimeMillis();
         
         // clear entries which had no entry for the maxTrackingTime time
         final Iterator<Map.Entry<String, Collection<Track>>> i = accessTracker.entrySet().iterator();
+        Iterator<Track> it;
         Collection<Track> track;
         while (i.hasNext()) {
             track = i.next().getValue();
@@ -77,9 +79,11 @@ public class serverAccessTracker {
                 i.remove();
             } else {
                 // check if the maxTrackingCount is exceeded
-                while (track.size() > this.maxTrackingCount) {
+            	it = track.iterator();
+                while (track.size() > this.maxTrackingCount && it.hasNext()) {
                     // delete the oldest entries
-                    track.remove(0);
+//                    track.remove(0);
+                	track.remove(it.next());
                 }
             }
         }
@@ -90,7 +94,7 @@ public class serverAccessTracker {
             accessTracker.remove(accessTracker.keys().nextElement());
         }
 
-        this.lastCleanup = System.currentTimeMillis();
+//        this.lastCleanup = System.currentTimeMillis();
     }
     
     public static Collection<Track> tailList(Collection<Track> timeList, long time) {
@@ -110,9 +114,9 @@ public class serverAccessTracker {
     
     public void track(final String host, String accessPath) {
         // check storage size
-        if (System.currentTimeMillis() - this.lastCleanup > cleanupCycle) {
+//        if (System.currentTimeMillis() - this.lastCleanup > cleanupCycle) {
             cleanupAccessTracker();
-        }
+//        }
         
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
@@ -130,7 +134,7 @@ public class serverAccessTracker {
         if (access == null) return null;
         // clear too old entries
         synchronized (access) {
-            if ((access = clearTooOldAccess(access)).size() != access.size()) {
+            if (access.size() != (access = clearTooOldAccess(access)).size()) {
                 // write back to tracker
                 if (access.isEmpty()) {
                     accessTracker.remove(host);
