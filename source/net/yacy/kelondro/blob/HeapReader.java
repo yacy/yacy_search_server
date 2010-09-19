@@ -423,6 +423,9 @@ public class HeapReader {
                 // verification of the indexed access failed. we must re-read the index
                 Log.logSevere("kelondroBLOBHeap", "indexed verification access failed for " + heapFile.toString());
                 // this is a severe operation, it should never happen.
+                // remove entry from index because keeping that element in the index would not make sense
+                index.remove(key);
+                // nothing to return
                 return null;
                 // but if the process ends in this state, it would completely fail
                 // if the index is not rebuild now at once
