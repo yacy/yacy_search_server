@@ -154,7 +154,7 @@ public final class SearchEvent {
             this.results = new ResultFetcher(loader, rankedCache, query, peers, 3000);
         } else {
             // do a local search
-            this.rankedCache = new RankingProcess(this.query, this.order, max_results_preparation, 2);
+            this.rankedCache = new RankingProcess(this.query, this.order, max_results_preparation, 1);
             this.rankedCache.run(); // this is not started concurrently here on purpose!
             
             if (generateAbstracts) {

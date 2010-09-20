@@ -127,10 +127,12 @@ public class WeakPriorityBlockingQueue<E> {
      * return the element with the smallest weight and remove it from the stack
      * @return null if no element is on the queue or the head of the queue
      */
-    public synchronized E poll() {
-        if (this.queue.isEmpty()) return null;
-        this.enqueued.tryAcquire();
-        return takeUnsafe();
+    public E poll() {
+        boolean a = this.enqueued.tryAcquire();
+        if (!a) return null;
+        synchronized (this) {
+            return takeUnsafe();
+        }
     }
     
     /**
@@ -141,7 +143,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @throws InterruptedException
      */
     public E poll(long timeout) throws InterruptedException {
-        boolean a = this.enqueued.tryAcquire(timeout, TimeUnit.MILLISECONDS);
+        boolean a = (timeout <= 0) ? this.enqueued.tryAcquire() : this.enqueued.tryAcquire(timeout, TimeUnit.MILLISECONDS);
         if (!a) return null;
         synchronized (this) {
             return takeUnsafe();

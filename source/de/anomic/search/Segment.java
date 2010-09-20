@@ -207,6 +207,8 @@ public class Segment {
             final int outlinksOther,
             final SearchEvent searchEvent,
             final String sourceName) {
+        RankingProcess rankingProcess = (searchEvent == null) ? null : searchEvent.getRankingResult();
+        if (rankingProcess != null) rankingProcess.moreFeeders(1);
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = MultiProtocolURI.urlComps(url.toString()).length;
@@ -248,10 +250,10 @@ public class Segment {
                 } catch (RowSpaceExceededException e) {
                     continue;
                 }
-                searchEvent.getRankingResult().add(container, false, sourceName, -1);
+                rankingProcess.add(container, false, sourceName, -1);
             }
         }
-        
+        if (rankingProcess != null) rankingProcess.oneFeederTerminated();
         return wordCount;
     }
 

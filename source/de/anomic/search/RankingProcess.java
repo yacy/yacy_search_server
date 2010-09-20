@@ -283,7 +283,8 @@ public final class RankingProcess extends Thread {
         WeakPriorityBlockingQueue<ReverseElement<WordReferenceVars>> m;
         ReverseElement<WordReferenceVars> rwi;
         try {
-            while ((rwi = stack.poll(timeout)) != null) {
+            //System.out.println("feeders = " + this.feeders);
+            while ((rwi = stack.poll((this.feedingIsFinished()) ? 0 : timeout)) != null) {
                 if (!skipDoubleDom) return rwi;
                 
                 // check doubledom

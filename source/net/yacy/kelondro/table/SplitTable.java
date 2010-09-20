@@ -363,15 +363,15 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
      */
     public boolean put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        Index keeper = keeperOf(row.getColBytes(0, true));
-        if (keeper != null) return keeper.put(row);
         synchronized (this.tables) {
+            Index keeper = keeperOf(row.getColBytes(0, true));
+            if (keeper != null) return keeper.put(row);
             assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
             keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
+            boolean b = keeper.put(row);
+            assert b;
+            return b;
         }
-        boolean b = keeper.put(row);
-        assert b;
-        return b;
     }
     
 

@@ -402,7 +402,7 @@ public class IndexControlRWIs_p {
             URIMetadataRow entry;
             String us;
             long rn = -1;
-            while (!ranked.isEmpty() && (entry = ranked.takeURL(false, 60000)) != null) {
+            while (!ranked.isEmpty() && (entry = ranked.takeURL(false, 1000)) != null) {
                 if ((entry == null) || (entry.metadata() == null)) continue;
                 url = entry.metadata().url();
                 if (url == null) continue;

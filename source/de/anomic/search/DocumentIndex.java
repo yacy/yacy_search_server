@@ -178,15 +178,21 @@ public class DocumentIndex extends Segment {
     /**
      * do a full-text search of a given string and return a specific number of results
      * @param querystring
-     * @param pos
      * @param count
      * @return a list of files that contain the given string
      */    
-    public ArrayList<DigestURI> find(String querystring, int pos, int count) {
-        ArrayList<URIMetadataRow> result = findMetadata(querystring, this);
+    public ArrayList<DigestURI> find(String querystring, int count) {
+        // make a query and start a search
+        QueryParams query = new QueryParams(querystring, count, null, this, textRankingDefault);
+        ReferenceOrder order = new ReferenceOrder(query.ranking, query.targetlang);
+        RankingProcess rankedCache = new RankingProcess(query, order, SearchEvent.max_results_preparation, 1);
+        rankedCache.start();
+        
+        // search is running; retrieve results
+        URIMetadataRow row;
         ArrayList<DigestURI> files = new ArrayList<DigestURI>();
         Components metadata;
-        for (URIMetadataRow row : result) {
+        while ((row = rankedCache.takeURL(false, 1000)) != null) {
             metadata = row.metadata();
             if (metadata == null) continue;
             files.add(metadata.url());
@@ -194,35 +200,6 @@ public class DocumentIndex extends Segment {
             if (count == 0) break;
         }
         return files;
-    }
-
-    public static final ArrayList<URIMetadataRow> findMetadata(
-            final String querystring,
-            final Segment indexSegment) {
-        QueryParams query = new QueryParams(querystring, 100, null, indexSegment, textRankingDefault);
-        ReferenceOrder order = new ReferenceOrder(query.ranking, query.targetlang);
-        return findMetadata(query, order);
-    }
-    
-    public static final ArrayList<URIMetadataRow> findMetadata(final QueryParams query, final ReferenceOrder order) {
-        
-        RankingProcess rankedCache = new RankingProcess(query, order, SearchEvent.max_results_preparation, 2);
-        rankedCache.run();
-        
-        ArrayList<URIMetadataRow> result = new ArrayList<URIMetadataRow>();
-        URIMetadataRow r;
-        while ((r = rankedCache.takeURL(false, 100)) != null) result.add(r);
-        
-        return result;
-    }
-    
-    /**
-     * find the given string and return 20 hits
-     * @param querystring
-     * @return a list of files that contain the word
-     */
-    public ArrayList<DigestURI> find(String querystring) {
-        return find(querystring, 0, 100);
     }
     
     /**
@@ -282,7 +259,7 @@ public class DocumentIndex extends Segment {
                 for (int i = 2; i < args.length; i++) query += args[i];
                 query.trim();
                 DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
-                ArrayList<DigestURI> results = di.find(query);
+                ArrayList<DigestURI> results = di.find(query, 100);
                 for (DigestURI f: results) {
                     if (f != null) System.out.println(f.toString());
                 }
