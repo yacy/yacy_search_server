@@ -985,6 +985,9 @@ public final class yacy {
             // aut-update yacy
             if (args.length == 2) applicationRoot= new File(args[1]);
             update(applicationRoot);
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-version"))) {
+            // show yacy version
+            System.out.println(copyright);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
             // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
             // attention: this may run long and should not be interrupted!
