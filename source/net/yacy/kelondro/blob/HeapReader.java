@@ -410,6 +410,7 @@ public class HeapReader {
                 // database file may be corrupted and should be deleted :-((
                 Log.logSevere("HeapReader", "file " + file.file() + " corrupted at " + pos + ": negative len. len = " + len + ", pk.len = " + index.row().primaryKeyLength);
                 // to get lazy over that problem (who wants to tell the user to stop operation and delete the file???) we work on like the entry does not exist
+                index.remove(key);
                 return null;
             }
             if (MemoryControl.available() < len * 2 + keepFreeMem) {
