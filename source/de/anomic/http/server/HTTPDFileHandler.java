@@ -1134,7 +1134,7 @@ public final class HTTPDFileHandler {
         }
     }
     
-    private static final Method rewriteMethod(final File classFile) {                
+    private static final Method rewriteMethod(final File classFile) throws InvocationTargetException {                
         Method m = null;
         // now make a class out of the stream
         try {
@@ -1164,11 +1164,12 @@ public final class HTTPDFileHandler {
             }
             
         } catch (final ClassNotFoundException e) {
-            System.out.println("INTERNAL ERROR: class " + classFile + " is missing:" + e.getMessage()); 
+            Log.logSevere("HTTPDFileHandler", "class " + classFile + " is missing:" + e.getMessage());
+            throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
         } catch (final NoSuchMethodException e) {
-            System.out.println("INTERNAL ERROR: method respond not found in class " + classFile + ": " + e.getMessage());
+            Log.logSevere("HTTPDFileHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
+            throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
         }
-        //System.out.println("found method: " + m.toString());
         return m;
     }
     
