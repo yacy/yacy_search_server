@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -127,17 +128,20 @@ public class CrawlProfileEditor_p {
             }
         }
         
-        // generate handle list
-        int count = 0;
+        // generate handle list: first sort by handle name
         CrawlProfile selentry;
+        TreeMap<String, String> orderdHandles = new TreeMap<String, String>();
         for (byte[] h: sb.crawler.profilesActiveCrawls.keySet()) {
             selentry = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(h));
-            if (ignoreNames.contains(selentry.name())) {
-                continue;
-            }
-            prop.put("profiles_" + count + "_name", selentry.name());
-            prop.put("profiles_" + count + "_handle", selentry.handle());
-            if (handle.equals(selentry.handle())) {
+            if (ignoreNames.contains(selentry.name())) continue;
+            orderdHandles.put(selentry.name(), selentry.handle());
+        }
+        // then write into pop-up menu list
+        int count = 0;
+        for (Map.Entry<String, String> NameHandle: orderdHandles.entrySet()) {
+            prop.put("profiles_" + count + "_name", NameHandle.getKey());
+            prop.put("profiles_" + count + "_handle", NameHandle.getValue());
+            if (handle.equals(NameHandle.getValue())) {
                 prop.put("profiles_" + count + "_selected", "1");
             }
             count++;

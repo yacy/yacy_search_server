@@ -259,8 +259,6 @@ public class NetworkGraph {
                 }
             }
             for (Hit event: yacyChannel.channels(yacyChannel.DHTSEND)) {
-                assert event != null;
-                assert event.getPubDate() != null;
                 if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTSEND: " + event.getLink());
