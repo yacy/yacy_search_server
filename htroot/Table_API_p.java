@@ -19,10 +19,13 @@
 
 import java.io.IOException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
@@ -44,16 +47,24 @@ public class Table_API_p {
         prop.put("showexec", 0);
         prop.put("showtable", 0);
         
-        prop.put("inline", 0);
+        int startRecord = 0;
+        int maximumRecords = 25;
         boolean inline = false;
-        if (post != null && post.get("inline","false").equals("true")) {
-            prop.put("inline", 1);
-            inline = true;
+        Pattern query = Pattern.compile(".*");
+        if (post != null && post.containsKey("startRecord")) startRecord = post.getInt("startRecord", 0);
+        if (post != null && post.containsKey("maximumRecords")) maximumRecords = post.getInt("maximumRecords", 0);
+        if (post != null && post.containsKey("query") && post.get("query", "").length() > 0) {
+            query = Pattern.compile(".*" + post.get("query", "") + ".*");
+            startRecord = 0;
+            maximumRecords = 1000;
         }
+        if (post != null && post.get("inline","false").equals("true")) inline = true;
+
+        prop.put("inline", (inline) ? 1 : 0);
         
-        String typefilter = ".*";
-        if (post != null && post.containsKey("filter")) {
-            typefilter = post.get("filter", ".*");
+        Pattern typefilter = Pattern.compile(".*");
+        if (post != null && post.containsKey("filter") && post.get("filter", "").length() > 0) {
+            typefilter = Pattern.compile(post.get("filter", ".*"));
         }
         
         String pk;
@@ -136,7 +147,7 @@ public class Table_API_p {
             Map<String, Integer> l = sb.tables.execAPICall(pks, "localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""));
             
             // construct result table
-            prop.put("showexec", 1);
+            prop.put("showexec", l.size() > 0 ? 1 : 0);
             
             final Iterator<Map.Entry<String, Integer>> resultIterator = l.entrySet().iterator();
             Map.Entry<String, Integer> record;
@@ -158,18 +169,32 @@ public class Table_API_p {
         prop.put("showtable_inline", inline ? 1 : 0);
         
         // insert rows
+        List<Tables.Row> table = new ArrayList<Tables.Row>(maximumRecords);
         int count = 0;
+        int tablesize = 0;
         try {
+            tablesize = sb.tables.size(WorkTables.TABLE_API_NAME);
             final Iterator<Tables.Row> plainIterator = sb.tables.iterator(WorkTables.TABLE_API_NAME);
             final Iterator<Tables.Row> mapIterator = sb.tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
-            Tables.Row row;
+            Tables.Row r;
             boolean dark = true;
             boolean scheduledactions = false;
+            int c = 0;
+            String type, comment;
+            // first prepare a list
             while (mapIterator.hasNext()) {
-                row = mapIterator.next();
-                if (row == null) continue;
-                String type = new String(row.get(WorkTables.TABLE_API_COL_TYPE));
-                if (!type.matches(typefilter)) continue;
+                r = mapIterator.next();
+                if (r == null) continue;
+                type = new String(r.get(WorkTables.TABLE_API_COL_TYPE));
+                if (!typefilter.matcher(type).matches()) continue;
+                comment = new String(r.get(WorkTables.TABLE_API_COL_COMMENT));
+                if (!query.matcher(comment).matches()) continue;
+                if (c >= startRecord) table.add(r);
+                c++;
+                if (table.size() >= maximumRecords) break;
+            }
+            // then work on the list
+            for (Tables.Row row: table) {
                 Date now = new Date();
                 Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, now) : null;
                 Date date_recording = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, date);
@@ -190,7 +215,7 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_selectedHours", unit.equals("hours") ? 1 : 0);
                 prop.put("showtable_list_" + count + "_selectedDays", (unit.length() == 0 || unit.equals("days")) ? 1 : 0);
                 prop.put("showtable_list_" + count + "_repeatTime", time);
-                prop.put("showtable_list_" + count + "_type", type);
+                prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
                 prop.put("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8080") + new String(row.get(WorkTables.TABLE_API_COL_URL)));
 
@@ -232,7 +257,8 @@ public class Table_API_p {
                     }
                 }
                 prop.put("showtable_list_" + count + "_scheduler_inline", inline ? "true" : "false");
-                prop.put("showtable_list_" + count + "_scheduler_filter", typefilter);
+                prop.put("showtable_list_" + count + "_scheduler_filter", typefilter.pattern());
+                prop.put("showtable_list_" + count + "_scheduler_query", query.pattern());
                 count++;
             }
             if (scheduledactions) {
@@ -246,6 +272,33 @@ public class Table_API_p {
         }
         prop.put("showtable_list", count);
         prop.put("showtable_num", count);
+        
+        // write navigation details
+        prop.put("showtable_startRecord", startRecord);
+        prop.put("showtable_maximumRecords", maximumRecords);
+        prop.put("showtable_inline", (inline) ? 1 : 0);
+        prop.put("showtable_filter", typefilter.pattern());
+        prop.put("showtable_query", query.pattern().replaceAll("\\.\\*", ""));
+        if (tablesize >= 50) {
+            prop.put("showtable_navigation", 1);
+            prop.put("showtable_navigation_startRecord", startRecord);
+            prop.put("showtable_navigation_to", Math.min(tablesize, startRecord + maximumRecords));
+            prop.put("showtable_navigation_of", tablesize);
+            prop.put("showtable_navigation_left", startRecord == 0 ? 0 : 1);
+            prop.put("showtable_navigation_left_startRecord", Math.max(0, startRecord - maximumRecords));
+            prop.put("showtable_navigation_left_maximumRecords", maximumRecords);
+            prop.put("showtable_navigation_left_inline", (inline) ? 1 : 0);
+            prop.put("showtable_navigation_left_filter", typefilter.pattern());
+            prop.put("showtable_navigation_left", startRecord == 0 ? 0 : 1);
+            prop.put("showtable_navigation_filter", typefilter.pattern());
+            prop.put("showtable_navigation_right", startRecord + maximumRecords >= tablesize ? 0 : 1);
+            prop.put("showtable_navigation_right_startRecord", Math.min(tablesize - maximumRecords, startRecord + maximumRecords));
+            prop.put("showtable_navigation_right_maximumRecords", maximumRecords);
+            prop.put("showtable_navigation_right_inline", (inline) ? 1 : 0);
+            prop.put("showtable_navigation_right_filter", typefilter.pattern());
+        } else {
+            prop.put("showtable_navigation", 0);
+        }
         
         // return rewrite properties
         return prop;

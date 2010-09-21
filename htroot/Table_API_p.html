@@ -36,9 +36,22 @@
     to a scheduler for a periodic execution.
     </p>::#(/inline)#
     #(showtable)#::
-    <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist">
+    <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist" target="_self">
       <fieldset>
       <legend><label for="table">Recorded Actions</label></legend>
+      <p><span id="resCounter" style="display: inline;">
+      #(navigation)#
+      ::
+      #(left)#<img src="env/grafics/navdl.gif">::<a href="Table_API_p.html?startRecord=#[startRecord]#&maximumRecords=#[maximumRecords]#&inline=#(inline)#false::true#(/inline)#&filter=#[filter]#" target="_self"><img src="env/grafics/navsl.gif"></a>#(/left)#
+      #[startRecord]#-#[to]# of #[of]#
+      #(right)#<img src="env/grafics/navdr.gif">::<a href="Table_API_p.html?startRecord=#[startRecord]#&maximumRecords=#[maximumRecords]#&inline=#(inline)#false::true#(/inline)#&filter=#[filter]#" target="_self"><img src="env/grafics/navsr.gif"></a>#(/right)#
+      <img src="env/grafics/nave.gif">#(/navigation)#
+      <input type="hidden" name="startRecord" value="#[startRecord]#">
+      <input type="hidden" name="maximumRecords" value="#[maximumRecords]#">
+      <input type="hidden" name="inline" value="#(inline)#false::true#(/inline)#">
+      <input type="hidden" name="filter" value="#[filter]#">
+      <input type="text" name="query" value="#[query]#" style="border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;">
+      </span><br/></p>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
           <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
