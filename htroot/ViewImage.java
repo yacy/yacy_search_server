@@ -92,7 +92,7 @@ public class ViewImage {
             if (url != null) try {
                 resourceb = sb.loader.loadContent(sb.loader.request(url, false, true), CrawlProfile.CacheStrategy.IFEXIST);
             } catch (IOException e) {
-                Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
+                Log.logFine("ViewImage", "cannot load: " + e.getMessage());
             }
             byte[] imgb = null;
             if (resourceb == null) {

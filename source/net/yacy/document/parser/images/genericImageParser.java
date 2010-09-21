@@ -147,7 +147,7 @@ public class genericImageParser extends AbstractParser implements Parser {
                             props.put(tag.getTagName(), tag.getDescription());
                             ii.info.append(tag.getTagName() + ": " + tag.getDescription() + " .\n");
                         } catch (MetadataException e) {
-                            Log.logException(e);
+                            //Log.logException(e);
                         }
                     }
                     title = props.get("Image Description");

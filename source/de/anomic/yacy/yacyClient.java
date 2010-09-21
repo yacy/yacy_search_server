@@ -475,11 +475,11 @@ public final class yacyClient {
                 continue; // db-error
             }
 
-            if (urlEntry.snippet() != null) {
+            if (urlEntry.snippet() != null && urlEntry.snippet().length() > 0 && !urlEntry.snippet().equals("null")) {
                 // we don't store the snippets along the url entry,
                 // because they are search-specific.
                 // instead, they are placed in a snipped-search cache.
-                // System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
+                // System.out.println("--- RECEIVED SNIPPET '" + urlEntry.snippet() + "'");
                 TextSnippet.storeToCache(wordhashes, new String(urlEntry.hash()), urlEntry.snippet());
             }
             

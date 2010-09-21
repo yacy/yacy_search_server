@@ -347,9 +347,9 @@ public final class RankingProcess extends Thread {
      * @param timeout the time this method may take for a result computation
      * @return a metadata entry for a url
      */
-    public URIMetadataRow takeURL(final boolean skipDoubleDom, final int timeout) {
+    public URIMetadataRow takeURL(final boolean skipDoubleDom, final long timeout) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
-    	long timeLimit = System.currentTimeMillis() + timeout;
+    	long timeLimit = System.currentTimeMillis() + Math.max(10, timeout);
     	int p = -1;
     	byte[] urlhash;
     	long timeleft;

@@ -155,9 +155,9 @@ public final class SearchEvent {
         } else {
             // do a local search
             this.rankedCache = new RankingProcess(this.query, this.order, max_results_preparation, 1);
-            this.rankedCache.run(); // this is not started concurrently here on purpose!
             
             if (generateAbstracts) {
+                this.rankedCache.run(); // this is not started concurrently here on purpose!
                 // compute index abstracts
                 final long timer = System.currentTimeMillis();
                 int maxcount = -1;
@@ -182,6 +182,8 @@ public final class SearchEvent {
                     IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
                 }
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.ABSTRACTS, "", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
+            } else {
+                this.rankedCache.start(); // start concurrently
             }
             
             // start worker threads to fetch urls and snippets

@@ -164,12 +164,12 @@ public class ResultFetcher {
                     if ((query.contentdom != ContentDomain.IMAGE) && (result.sizeAvailable() >= query.neededResults() + 10)) break;
     
                     // get next entry
-                    page = rankedCache.takeURL(true, taketimeout);
+                    page = rankedCache.takeURL(true, this.timeout - System.currentTimeMillis());
                     //if (page == null) page = rankedCache.takeURL(false, taketimeout);
                     if (page == null) break;
                     if (failedURLs.has(page.hash())) continue;
                     
-                    final ResultEntry resultEntry = fetchSnippet(page, query.host == null ? cacheStrategy : CacheStrategy.CACHEONLY); // does not fetch snippets if snippetMode == 0
+                    final ResultEntry resultEntry = fetchSnippet(page, query.sitehash == null ? cacheStrategy : CacheStrategy.CACHEONLY); // does not fetch snippets if snippetMode == 0
 
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     //if (result.contains(resultEntry)) continue;
@@ -228,7 +228,7 @@ public class ResultFetcher {
                     ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))),
                     180,
                     Integer.MAX_VALUE,
-                    query.isGlobal());
+                    !query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
@@ -247,7 +247,7 @@ public class ResultFetcher {
         } else {
             // attach media information
             startTime = System.currentTimeMillis();
-            final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, cacheStrategy, 6000, query.isGlobal());
+            final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, cacheStrategy, 6000, !query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
             

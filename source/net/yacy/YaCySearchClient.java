@@ -76,10 +76,11 @@ public class YaCySearchClient {
     }
 
     public static class RSSEntry {
-        String title, link;
+        String title, link, snippet;
         public RSSEntry(Element element) {
             title = val(element, "title", "");
             link  = val(element, "link", "");
+            snippet = val(element, "description", "");
         }
         private String val(Element parent, String label, String dflt) {
             Element e = (Element) parent.getElementsByTagName(label).item(0);
@@ -88,7 +89,7 @@ public class YaCySearchClient {
                     ((CharacterData) child).getData() : dflt;
         }
         public String toString() {
-            return "Title : " + title + "\nLink  : " + link + "\n";
+            return "Title      : " + title + "\nLink       : " + link + "\nDescription: " + snippet + "\n";
         }
     }
     

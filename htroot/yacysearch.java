@@ -97,7 +97,7 @@ public class yacysearch {
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring =  originalquerystring.replace('+', ' ');
-        CrawlProfile.CacheStrategy snippetFetchStrategy = (post != null && post.get("verify", "false").equals("true")) ? CrawlProfile.CacheStrategy.IFEXIST : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
+        CrawlProfile.CacheStrategy snippetFetchStrategy = (post != null && post.get("verify", "false").equals("true")) ? CrawlProfile.CacheStrategy.IFFRESH : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
         if (snippetFetchStrategy == null) snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
         final serverObjects prop = new serverObjects();
 
@@ -237,7 +237,7 @@ public class yacysearch {
             Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
         } else if (Domains.matchesList(client, sb.networkWhitelist)) {
             Log.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
-        } else if (global || snippetFetchStrategy.isAllowedToFetchOnline()) {
+        } else if (!authenticated && (global || snippetFetchStrategy.isAllowedToFetchOnline())) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized (trackerHandles) {
                 int accInOneSecond = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size();

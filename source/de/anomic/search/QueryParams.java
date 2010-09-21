@@ -222,10 +222,6 @@ public final class QueryParams {
         return this.contentdom.toString();
     }
     
-    public boolean isGlobal() {
-        return this.domType != SEARCHDOM_LOCAL;
-    }
-    
     public boolean isLocal() {
         return this.domType == SEARCHDOM_LOCAL;
     }
@@ -418,8 +414,8 @@ public final class QueryParams {
             context.append('-');
             context.append(hashSet2hashString(this.excludeHashes));
         }
-        context.append(asterisk);
-        context.append(this.domType);
+        //context.append(asterisk);
+        //context.append(this.domType);
         context.append(asterisk);
         context.append(this.contentdom);
         context.append(asterisk);
