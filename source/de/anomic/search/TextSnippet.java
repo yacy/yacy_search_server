@@ -25,6 +25,7 @@
 package de.anomic.search;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -36,20 +37,18 @@ import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.SnippetExtractor;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.Cache;
 import de.anomic.yacy.yacySearch;
 
 public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
@@ -67,66 +66,6 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public static final int ERROR_PARSER_FAILED = 14;
     public static final int ERROR_PARSER_NO_LINES = 15;
     public static final int ERROR_NO_MATCH = 16;
-    
-    private static final ARC<String, String> snippetsCache = new ConcurrentARC<String, String>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
-    private static final ARC<String, DigestURI> faviconCache = new ConcurrentARC<String, DigestURI>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
-    
-    private final DigestURI url;
-    private String line;
-    private final String error;
-    private final int errorCode;
-    private HandleSet remaingHashes;
-    private final DigestURI favicon;
-    
-    public static boolean existsInCache(final DigestURI url, final HandleSet queryhashes) {
-        final String hashes = yacySearch.set2string(queryhashes);
-        return retrieveFromCache(hashes, new String(url.hash())) != null;
-    }
-
-    public static void storeToCache(final String wordhashes, final String urlhash, final String snippet) {
-        // generate key
-        String key = urlhash + wordhashes;
-
-        // do nothing if snippet is known
-        if (snippetsCache.containsKey(key)) return;
-
-        // learn new snippet
-        snippetsCache.put(key, snippet);
-    }
-    
-    public static String retrieveFromCache(final String wordhashes, final String urlhash) {
-        // generate key
-        final String key = urlhash + wordhashes;
-        return snippetsCache.get(key);
-    }
-    
-    /**
-     * removed all word hashes that can be computed as tokens from a given sentence from a given hash set
-     * @param sentence
-     * @param queryhashes
-     * @return the given hash set minus the hashes from the tokenization of the given sentence
-     */
-    public static HandleSet removeAppearanceHashes(final String sentence, final HandleSet queryhashes) {
-        // remove all hashes that appear in the sentence
-        if (sentence == null) return queryhashes;
-        final TreeMap<byte[], Integer> hs = Condenser.hashSentence(sentence);
-        final Iterator<byte[]> j = queryhashes.iterator();
-        byte[] hash;
-        Integer pos;
-        final HandleSet remaininghashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), queryhashes.size());
-        while (j.hasNext()) {
-            hash = j.next();
-            pos = hs.get(hash);
-            if (pos == null) {
-                try {
-                    remaininghashes.put(hash);
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-                }
-            }
-        }
-        return remaininghashes;
-    }
 
     /**
      * <code>\\A[^\\p{L}\\p{N}].+</code>
@@ -148,54 +87,206 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * <code>(.*?)(\\&lt;b\\&gt;.+?\\&lt;/b\\&gt;)(.*)</code>
      */
     private final static Pattern p01 = Pattern.compile("(.*?)(\\<b\\>.+?\\</b\\>)(.*)"); // marked words are in <b>-tags
-    
-    public TextSnippet(final DigestURI url, final String line, final int errorCode, final HandleSet remaingHashes, final String errortext) {
-        this(url, line, errorCode, remaingHashes, errortext, null);
+
+    public static class Cache {
+        private final ARC<String, String> cache;
+        public Cache() {
+            cache = new ConcurrentARC<String, String>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
+        }
+        public void put(final String wordhashes, final String urlhash, final String snippet) {
+            // generate key
+            String key = urlhash + wordhashes;
+
+            // do nothing if snippet is known
+            if (cache.containsKey(key)) return;
+
+            // learn new snippet
+            cache.put(key, snippet);
+        }
+        
+        public String get(final String wordhashes, final String urlhash) {
+            // generate key
+            final String key = urlhash + wordhashes;
+            return cache.get(key);
+        }
+        
+        public boolean contains(final String wordhashes, final String urlhash) {
+            return cache.containsKey(urlhash + wordhashes);
+        }
     }
     
-    public TextSnippet(final DigestURI url, final String line, final int errorCode, final HandleSet remaingHashes, final String errortext, final DigestURI favicon) {
-        this.url = url;
+    public static final Cache snippetsCache = new Cache();
+    
+    private byte[] urlhash;
+    private String line;
+    private String error;
+    private int errorCode;
+
+    public TextSnippet(final byte[] urlhash, final String line, final int errorCode, final String errortext) {
+        init(urlhash, line, errorCode, errortext);
+    }
+
+    public TextSnippet(final LoaderDispatcher loader, final URIMetadataRow.Components comp, final HandleSet queryhashes, final CrawlProfile.CacheStrategy cacheStrategy, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
+        // heise = "0OQUNU3JSs05"
+        final DigestURI url = comp.url();
+        if (queryhashes.isEmpty()) {
+            //System.out.println("found no queryhashes for URL retrieve " + url);
+            init(url.hash(), null, ERROR_NO_HASH_GIVEN, "no query hashes given");
+            return;
+        }
+        
+        // try to get snippet from snippetCache
+        int source = SOURCE_CACHE;
+        final String wordhashes = yacySearch.set2string(queryhashes);
+        final String urls = new String(url.hash());
+        String line = snippetsCache.get(wordhashes, urls);
+        if (line != null) {
+            // found the snippet
+            init(url.hash(), line, source, null);
+            return;
+        }
+        
+        
+        /* ===========================================================================
+         * LOAD RESOURCE DATA
+         * =========================================================================== */
+        // if the snippet is not in the cache, we can try to get it from the htcache
+        Response response;
+        try {
+            // first try to get the snippet from metadata
+            String loc;
+            boolean objectWasInCache = de.anomic.http.client.Cache.has(url);
+            boolean useMetadata = !objectWasInCache && !cacheStrategy.mustBeOffline();
+            if (useMetadata && containsAllHashes(loc = comp.dc_title(), queryhashes)) {
+                // try to create the snippet from information given in the url itself
+                init(url.hash(), loc, SOURCE_METADATA, null);
+                return;
+            } else if (useMetadata && containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
+                // try to create the snippet from information given in the creator metadata
+                init(url.hash(), loc, SOURCE_METADATA, null);
+                return;
+            } else if (useMetadata && containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
+                // try to create the snippet from information given in the subject metadata
+                init(url.hash(), loc, SOURCE_METADATA, null);
+                return;
+            } else if (useMetadata && containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
+                // try to create the snippet from information given in the url
+                init(url.hash(), loc, SOURCE_METADATA, null);
+                return;
+            } else {
+                // try to load the resource from the cache
+                response = loader.load(loader.request(url, true, reindexing), cacheStrategy, Long.MAX_VALUE);
+                if (response == null) {
+                    // in case that we did not get any result we can still return a success when we are not allowed to go online
+                    if (cacheStrategy.mustBeOffline()) {
+                        init(url.hash(), null, ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
+                        return;
+                    }
+                    
+                    // if it is still not available, report an error
+                    init(url.hash(), null, ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
+                    return;
+                }
+                if (!objectWasInCache) {
+                    // place entry on indexing queue
+                    Switchboard.getSwitchboard().toIndexer(response);
+                    source = SOURCE_WEB;
+                }
+            }
+        } catch (final Exception e) {
+            //Log.logException(e);
+            init(url.hash(), null, ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
+            return;
+        } 
+        
+        /* ===========================================================================
+         * PARSE RESOURCE
+         * =========================================================================== */
+        Document document = null;
+        try {
+            document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+        } catch (final Parser.Failure e) {
+            init(url.hash(), null, ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
+            return;
+        }
+        if (document == null) {
+            init(url.hash(), null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+            return;
+        }
+        
+        /* ===========================================================================
+         * COMPUTE SNIPPET
+         * =========================================================================== */    
+        // we have found a parseable non-empty file: use the lines
+
+        // compute snippet from text
+        final Collection<StringBuilder> sentences = document.getSentences(pre);
+        if (sentences == null) {
+            init(url.hash(), null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
+            return;
+        }
+        final SnippetExtractor tsr;
+        String textline = null;
+        HandleSet remainingHashes = queryhashes;
+        try {
+            tsr = new SnippetExtractor(sentences, queryhashes, snippetMaxLength);
+            textline = tsr.getSnippet();
+            remainingHashes =  tsr.getRemainingWords();
+        } catch (UnsupportedOperationException e) {
+            init(url.hash(), null, ERROR_NO_MATCH, "no matching snippet found");
+            return;
+        }
+        
+        // compute snippet from media
+        //String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
+        //String videoline = computeMediaSnippet(document.getVideolinks(), queryhashes);
+        //String appline = computeMediaSnippet(document.getApplinks(), queryhashes);
+        //String hrefline = computeMediaSnippet(document.getAnchors(), queryhashes);
+        //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
+        
+        line = "";
+        //if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
+        //if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
+        //if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
+        //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
+        if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
+        
+        if (line == null || !remainingHashes.isEmpty()) {
+            init(url.hash(), null, ERROR_NO_MATCH, "no matching snippet found");
+            return;
+        }
+        if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
+
+        // finally store this snippet in our own cache
+        snippetsCache.put(wordhashes, urls, line);
+        
+        document.close();
+        init(url.hash(), line, source, null);
+    }
+    
+    private void init(final byte[] urlhash, final String line, final int errorCode, final String errortext) {
+        this.urlhash = urlhash;
         this.line = line;
         this.errorCode = errorCode;
         this.error = errortext;
-        this.remaingHashes = remaingHashes;
-        this.favicon = favicon;
     }
-    public DigestURI getUrl() {
-        return this.url;
-    }
-    public DigestURI getFavicon() {
-        return this.favicon;
-    }
+    
     public boolean exists() {
         return line != null;
     }
-    public int compareTo(TextSnippet o) {
-        return Base64Order.enhancedCoder.compare(this.url.hash(), o.url.hash());
-    }
-    public int compare(TextSnippet o1, TextSnippet o2) {
-        return o1.compareTo(o2);
-    }
-    public int hashCode() {
-        return ByteArray.hashCode(this.url.hash());
-    }
     
-    @Override
-    public String toString() {
-        return (line == null) ? "" : line;
-    }
     public String getLineRaw() {
         return (line == null) ? "" : line;
     }
+    
     public String getError() {
         return (error == null) ? "" : error.trim();
     }
+    
     public int getErrorCode() {
         return errorCode;
     }
-    public HandleSet getRemainingHashes() {
-        return this.remaingHashes;
-    }
+    
     public String getLineMarked(final HandleSet queryHashes) {
         if (line == null) return "";
         if (queryHashes == null || queryHashes.isEmpty()) return line.trim();
@@ -225,6 +316,23 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return l.toString().trim();
     }
 
+    public int compareTo(TextSnippet o) {
+        return Base64Order.enhancedCoder.compare(this.urlhash, o.urlhash);
+    }
+    
+    public int compare(TextSnippet o1, TextSnippet o2) {
+        return o1.compareTo(o2);
+    }
+    
+    public int hashCode() {
+        return ByteArray.hashCode(this.urlhash);
+    }
+    
+    @Override
+    public String toString() {
+        return (line == null) ? "" : line;
+    }
+    
     /**
      * mark words with &lt;b&gt;-tags
      * @param word the word to mark
@@ -307,119 +415,6 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return al;
     }
     
-    public static TextSnippet retrieveTextSnippet(final LoaderDispatcher loader, final URIMetadataRow.Components comp, final HandleSet queryhashes, final CrawlProfile.CacheStrategy cacheStrategy, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
-        // heise = "0OQUNU3JSs05"
-        final DigestURI url = comp.url();
-        if (queryhashes.isEmpty()) {
-            //System.out.println("found no queryhashes for URL retrieve " + url);
-            return new TextSnippet(url, null, ERROR_NO_HASH_GIVEN, queryhashes, "no query hashes given");
-        }
-        
-        // try to get snippet from snippetCache
-        int source = SOURCE_CACHE;
-        final String wordhashes = yacySearch.set2string(queryhashes);
-        final String urls = new String(url.hash());
-        String line = retrieveFromCache(wordhashes, urls);
-        if (line != null) {
-            // found the snippet
-            return new TextSnippet(url, line, source, null, null, faviconCache.get(urls));
-        }
-        
-        
-        /* ===========================================================================
-         * LOADING RESOURCE DATA
-         * =========================================================================== */
-        // if the snippet is not in the cache, we can try to get it from the htcache
-        Response response;
-        try {
-            // first try to get the snippet from metadata
-            String loc;
-            if (containsAllHashes(loc = comp.dc_title(), queryhashes)) {
-                // try to create the snippet from information given in the url itself
-                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(urls));
-            } else if (containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
-                // try to create the snippet from information given in the creator metadata
-                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(urls));
-            } else if (containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
-                // try to create the snippet from information given in the subject metadata
-                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(urls));
-            } else if (containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
-                // try to create the snippet from information given in the subject metadata
-                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(urls));
-            } else {
-                // trying to load the resource from the cache
-                boolean objectWasInCache = Cache.has(url);
-                response = loader.load(loader.request(url, true, reindexing), cacheStrategy, Long.MAX_VALUE);
-                if (response == null) {
-                    // in case that we did not get any result we can still return a success when we are not allowed to go online
-                    if (cacheStrategy.mustBeOffline()) {
-                        return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "omitted network load (not allowed), no cache entry");
-                    }
-                    
-                    // if it is still not available, report an error
-                    return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource from net, no cache entry");
-                }
-                if (!objectWasInCache) {
-                    // place entry on indexing queue
-                    Switchboard.getSwitchboard().toIndexer(response);
-                    source = SOURCE_WEB;
-                }
-            }
-        } catch (final Exception e) {
-            //Log.logException(e);
-            return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "error loading resource: " + e.getMessage());
-        } 
-        
-        /* ===========================================================================
-         * PARSING RESOURCE
-         * =========================================================================== */
-        Document document = null;
-        try {
-             document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-        } catch (final Parser.Failure e) {
-            return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, e.getMessage()); // cannot be parsed
-        }
-        if (document == null) return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, "parser error/failed"); // cannot be parsed
-        
-        
-        /* ===========================================================================
-         * COMPUTE SNIPPET
-         * =========================================================================== */    
-        final DigestURI resFavicon = (document.getFavicon() == null) ? null : new DigestURI(document.getFavicon());
-        if (resFavicon != null) faviconCache.put(urls, resFavicon);
-        // we have found a parseable non-empty file: use the lines
-
-        // compute snippet from text
-        final Iterator<StringBuilder> sentences = document.getSentences(pre);
-        if (sentences == null) return new TextSnippet(url, null, ERROR_PARSER_NO_LINES, queryhashes, "parser returned no sentences",resFavicon);
-        final Object[] tsr = computeTextSnippet(sentences, queryhashes, snippetMaxLength);
-        final String textline = (tsr == null) ? null : (String) tsr[0];
-        final HandleSet remainingHashes = (tsr == null) ? queryhashes : (HandleSet) tsr[1];
-        
-        // compute snippet from media
-        //String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
-        //String videoline = computeMediaSnippet(document.getVideolinks(), queryhashes);
-        //String appline = computeMediaSnippet(document.getApplinks(), queryhashes);
-        //String hrefline = computeMediaSnippet(document.getAnchors(), queryhashes);
-        //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
-        
-        line = "";
-        //if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
-        //if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
-        //if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
-        //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
-        if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
-        
-        if (line == null || !remainingHashes.isEmpty()) return new TextSnippet(url, null, ERROR_NO_MATCH, remainingHashes, "no matching snippet found",resFavicon);
-        if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
-
-        // finally store this snippet in our own cache
-        storeToCache(wordhashes, urls, line);
-        
-        document.close();
-        return new TextSnippet(url, line, source, null, null, resFavicon);
-    }
-    
     private static boolean containsAllHashes(final String sentence, final HandleSet queryhashes) {
         final TreeMap<byte[], Integer> m = Condenser.hashSentence(sentence);
         for (byte[] b: queryhashes) {
@@ -427,137 +422,5 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
         return true;
     }
-    
-    private static Object[] /*{String - the snippet, HandleSet - remaining hashes}*/
-            computeTextSnippet(final Iterator<StringBuilder> sentences, final HandleSet queryhashes, int maxLength) {
-        try {
-            if (sentences == null) return null;
-            if ((queryhashes == null) || (queryhashes.isEmpty())) return null;
-            Iterator<byte[]> j;
-            TreeMap<byte[], Integer> hs;
-            StringBuilder sentence;
-            final TreeMap<Integer, StringBuilder> os = new TreeMap<Integer, StringBuilder>();
-            int uniqCounter = 9999;
-            int score;
-            while (sentences.hasNext()) {
-                sentence = sentences.next();
-                hs = Condenser.hashSentence(sentence.toString());
-                j = queryhashes.iterator();
-                score = 0;
-                while (j.hasNext()) {if (hs.containsKey(j.next())) score++;}
-                if (score > 0) {
-                    os.put(Integer.valueOf(1000000 * score - sentence.length() * 10000 + uniqCounter--), sentence);
-                }
-            }
-            
-            String result;
-            HandleSet remaininghashes;
-            while (!os.isEmpty()) {
-                sentence = os.remove(os.lastKey()); // sentence with the biggest score
-                Object[] tsr = computeTextSnippet(sentence.toString(), queryhashes, maxLength);
-                if (tsr == null) continue;
-                result = (String) tsr[0];
-                if ((result != null) && (result.length() > 0)) {
-                    remaininghashes = (HandleSet) tsr[1];
-                    if (remaininghashes.isEmpty()) {
-                        // we have found the snippet
-                        return new Object[]{result, remaininghashes};
-                    } else if (remaininghashes.size() < queryhashes.size()) {
-                        // the result has not all words in it.
-                        // find another sentence that represents the missing other words
-                        // and find recursively more sentences
-                        maxLength = maxLength - result.length();
-                        if (maxLength < 20) maxLength = 20;
-                        tsr = computeTextSnippet(os.values().iterator(), remaininghashes, maxLength);
-                        if (tsr == null) return null;
-                        final String nextSnippet = (String) tsr[0];
-                        if (nextSnippet == null) return tsr;
-                        return new Object[]{result + (" / " + nextSnippet), tsr[1]};
-                    } else {
-                        // error
-                        //assert remaininghashes.size() < queryhashes.size() : "remaininghashes.size() = " + remaininghashes.size() + ", queryhashes.size() = " + queryhashes.size() + ", sentence = '" + sentence + "', result = '" + result + "'";
-                        continue;
-                    }
-                }
-            }
-            return null;
-        } catch (final IndexOutOfBoundsException e) {
-            Log.logSevere("computeSnippet", "error with string generation", e);
-            return new Object[]{null, queryhashes};
-        }
-    }
-    
-    private static Object[] /*{String - the snippet, HandleSet - remaining hashes}*/
-            computeTextSnippet(String sentence, final HandleSet queryhashes, final int maxLength) {
-        try {
-            if (sentence == null) return null;
-            if ((queryhashes == null) || (queryhashes.isEmpty())) return null;
-            byte[] hash;
-            
-            // find all hashes that appear in the sentence
-            final TreeMap<byte[], Integer> hs = Condenser.hashSentence(sentence);
-            final Iterator<byte[]> j = queryhashes.iterator();
-            Integer pos;
-            int p, minpos = sentence.length(), maxpos = -1;
-            final HandleSet remainingHashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), 0);
-            while (j.hasNext()) {
-                hash = j.next();
-                pos = hs.get(hash);
-                if (pos == null) {
-                    try {
-                        remainingHashes.put(hash);
-                    } catch (RowSpaceExceededException e) {
-                        Log.logException(e);
-                    }
-                } else {
-                    p = pos.intValue();
-                    if (p > maxpos) maxpos = p;
-                    if (p < minpos) minpos = p;
-                }
-            }
-            // check result size
-            maxpos = maxpos + 10;
-            if (maxpos > sentence.length()) maxpos = sentence.length();
-            if (minpos < 0) minpos = 0;
-            // we have a result, but is it short enough?
-            if (maxpos - minpos + 10 > maxLength) {
-                // the string is too long, even if we cut at both ends
-                // so cut here in the middle of the string
-                final int lenb = sentence.length();
-                sentence = sentence.substring(0, (minpos + 20 > sentence.length()) ? sentence.length() : minpos + 20).trim() +
-                " [..] " +
-                sentence.substring((maxpos + 26 > sentence.length()) ? sentence.length() : maxpos + 26).trim();
-                maxpos = maxpos + lenb - sentence.length() + 6;
-            }
-            if (maxpos > maxLength) {
-                // the string is too long, even if we cut it at the end
-                // so cut it here at both ends at once
-                assert maxpos >= minpos;
-                final int newlen = Math.max(10, maxpos - minpos + 10);
-                final int around = (maxLength - newlen) / 2;
-                assert minpos - around < sentence.length() : "maxpos = " + maxpos + ", minpos = " + minpos + ", around = " + around + ", sentence.length() = " + sentence.length();
-                //assert ((maxpos + around) <= sentence.length()) && ((maxpos + around) <= sentence.length()) : "maxpos = " + maxpos + ", minpos = " + minpos + ", around = " + around + ", sentence.length() = " + sentence.length();
-                sentence = "[..] " + sentence.substring(minpos - around, ((maxpos + around) > sentence.length()) ? sentence.length() : (maxpos + around)).trim() + " [..]";
-                minpos = around;
-                maxpos = sentence.length() - around - 5;
-            }
-            if (sentence.length() > maxLength) {
-                // trim sentence, 1st step (cut at right side)
-                sentence = sentence.substring(0, maxpos).trim() + " [..]";
-            }
-            if (sentence.length() > maxLength) {
-                // trim sentence, 2nd step (cut at left side)
-                sentence = "[..] " + sentence.substring(minpos).trim();
-            }
-            if (sentence.length() > maxLength) {
-                // trim sentence, 3rd step (cut in the middle)
-                sentence = sentence.substring(6, 20).trim() + " [..] " + sentence.substring(sentence.length() - 26, sentence.length() - 6).trim();
-            }
-            return new Object[] {sentence, remainingHashes};
-        } catch (final IndexOutOfBoundsException e) {
-            Log.logSevere("computeSnippet", "error with string generation", e);
-            return null;
-        }
-    }
-    
+
 }

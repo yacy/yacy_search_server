@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -275,11 +276,15 @@ dc_rights
         return -1; 
     }
     
-    public Iterator<StringBuilder> getSentences(final boolean pre) {
+    public List<StringBuilder> getSentences(final boolean pre) {
         if (this.text == null) return null;
         final Condenser.sentencesFromInputStreamEnum e = Condenser.sentencesFromInputStream(getText());
         e.pre(pre);
-        return e;
+        ArrayList<StringBuilder> sentences = new ArrayList<StringBuilder>();
+        while (e.hasNext()) {
+            sentences.add(e.next());
+        }
+        return sentences;
     }
     
     public List<String> getKeywords() {

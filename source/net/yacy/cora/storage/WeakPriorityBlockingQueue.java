@@ -226,7 +226,7 @@ public class WeakPriorityBlockingQueue<E> {
     }
     
     /**
-     * return the specific amount of entrie as they would be retrievable with element()
+     * return the specific amount of entries as they would be retrievable with element()
      * if count is < 0 then all elements are taken
      * the returned list is not cloned from the internal list and shall not be modified in any way (read-only)
      * @param count
@@ -234,12 +234,20 @@ public class WeakPriorityBlockingQueue<E> {
      */
     public synchronized ArrayList<E> list(final int count) {
         if (count < 0) {
-            // shift all elements
-            while (!this.queue.isEmpty()) this.poll();
-            return this.drained;
+            return list();
         }
         if (count > sizeAvailable()) throw new RuntimeException("list(" + count + ") exceeded avaiable number of elements (" + sizeAvailable() + ")"); 
         while (count > this.drained.size()) this.poll();
+        return this.drained;
+    }
+    
+    /**
+     * return all entries as they would be retrievable with element()
+     * @return a list of all elements in the stack
+     */
+    public synchronized ArrayList<E> list() {
+        // shift all elements
+        while (!this.queue.isEmpty()) this.poll();
         return this.drained;
     }
     

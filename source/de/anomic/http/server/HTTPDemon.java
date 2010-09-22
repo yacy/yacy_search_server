@@ -256,10 +256,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     
     public static int staticAdminAuthenticated(final String authorization, final serverSwitch sw) {
         // the authorization string must be given with the truncated 6 bytes at the beginning
-        if (authorization == null) return 1;
-        //if (authorization.length() < 6) return 1; // no authentication information given
         final String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
         if (adminAccountBase64MD5.length() == 0) return 2; // no password stored
+        if (authorization == null || authorization.length() == 0) return 1;
         if (adminAccountBase64MD5.equals(Digest.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 1;
     }

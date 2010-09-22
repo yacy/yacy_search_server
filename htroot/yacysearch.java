@@ -80,6 +80,8 @@ public class yacysearch {
         final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
         
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        final boolean localhostAccess = sb.accessFromLocalhost(header);
+        
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if (!authenticated) display = 2;
         // display == 0: shop top menu
@@ -234,34 +236,34 @@ public class yacysearch {
             global = false;
             snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
             block = true;
-            Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
+            Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
         } else if (Domains.matchesList(client, sb.networkWhitelist)) {
-            Log.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
-        } else if (!authenticated && (global || snippetFetchStrategy.isAllowedToFetchOnline())) {
+            Log.logInfo("LOCAL_SEARCH", "ACCESS CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
+        } else if (!authenticated && !localhostAccess) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized (trackerHandles) {
                 int accInOneSecond = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size();
                 int accInThreeSeconds = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size();
                 int accInOneMinute = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size();
                 int accInTenMinutes = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
-                if (accInTenMinutes > 600) {
-                    global = false;
-                    snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
+                // protections against too strong YaCy network load, reduces remote search
+                if (global) {
+                    if (accInTenMinutes >= 30 || accInOneMinute >= 6 || accInThreeSeconds >= 1) {
+                        global = false;
+                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + "/1s, " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed global search");
+                    }
+                }
+                // protection against too many remote server snippet loads (protects traffic on server)
+                if (snippetFetchStrategy.isAllowedToFetchOnline()) {
+                    if (accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1) {
+                        snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
+                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + "/1s, " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed remote snippet loading");
+                    }
+                }
+                // general load protection
+                if (accInTenMinutes >= 2000 || accInOneMinute >= 600 || accInOneSecond >= 20) {
                     block = true;
-                    Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInTenMinutes + " searches in ten minutes, fully blocked (no results generated)");
-                } else if (accInOneMinute > 200) {
-                    global = false;
-                    snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
-                    block = true;
-                    Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneMinute + " searches in one minute, fully blocked (no results generated)");
-                } else if (accInThreeSeconds > 1) {
-                    global = false;
-                    snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
-                    Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + " searches in three seconds, blocked global search and snippets");
-                } else if (accInOneSecond > 2) {
-                    global = false;
-                    snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
-                    Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + " searches in one second, blocked global search and snippets");
+                    Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + "/1s, " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed search");
                 }
             }
         }

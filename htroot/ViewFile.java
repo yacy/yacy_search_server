@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -243,7 +244,7 @@ public class ViewFile {
                 
             } else if (viewMode.equals("sentences")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_SENTENCES);
-                final Iterator<StringBuilder> sentences = document.getSentences(pre);
+                final Collection<StringBuilder> sentences = document.getSentences(pre);
 
                 boolean dark = true;
                 int i = 0;
@@ -251,8 +252,8 @@ public class ViewFile {
                 if (sentences != null) {
                     
                     // Search word highlighting
-                    while (sentences.hasNext()) {
-                        sentence = sentences.next().toString();
+                    for (StringBuilder s: sentences) {
+                        sentence = s.toString();
                         if (sentence.trim().length() > 0) {
                             prop.put("viewMode_sentences_" + i + "_nr", i + 1);
                             prop.put("viewMode_sentences_" + i + "_text", markup(wordArray, sentence));
@@ -266,7 +267,7 @@ public class ViewFile {
 
             } else if (viewMode.equals("words")) {
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_WORDS);
-                final Iterator<StringBuilder> sentences = document.getSentences(pre);
+                final Collection<StringBuilder> sentences = document.getSentences(pre);
 
                 boolean dark = true;
                 int i = 0;
@@ -274,8 +275,8 @@ public class ViewFile {
                 if (sentences != null) {
                     
                     // Search word highlighting
-                    while (sentences.hasNext()) {
-                        sentence = sentences.next().toString();
+                    for (StringBuilder s: sentences) {
+                        sentence = s.toString();
                         Enumeration<StringBuilder> tokens = Condenser.wordTokenizer(sentence, "UTF-8");
                         while (tokens.hasMoreElements()) {
                             token = tokens.nextElement().toString();

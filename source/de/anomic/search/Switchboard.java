@@ -2057,12 +2057,19 @@ public final class Switchboard extends serverSwitch {
         }
     }
     
-    public int adminAuthenticated(final RequestHeader requestHeader) {
+    public boolean accessFromLocalhost(final RequestHeader requestHeader) {
         
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final String clientIP = requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "");
+        if (!Domains.isLocal(clientIP)) return false;
         final String refererHost = requestHeader.refererHost();
-        boolean accessFromLocalhost = Domains.isLocal(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocal(refererHost));
+        return refererHost == null || refererHost.length() == 0 || Domains.isLocal(refererHost);
+    }
+    
+    public int adminAuthenticated(final RequestHeader requestHeader) {
+        
+        // authorization for localhost, only if flag is set to grant localhost access as admin
+        boolean accessFromLocalhost = accessFromLocalhost(requestHeader);
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
         
         // get the authorization string from the header

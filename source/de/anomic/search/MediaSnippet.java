@@ -29,17 +29,20 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.MimeTable;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
@@ -157,8 +160,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             entry = i.next();
             url = new DigestURI(entry.getKey());
             desc = entry.getValue();
-            int ranking = TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
-                           TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
+            int ranking = removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
+                           removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
                 result.add(new MediaSnippet(mediatype, url, MimeTable.url2mime(url), desc, document.getTextLength(), null, ranking, source));
             }
@@ -186,41 +189,40 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             if (ientry.width() > 0 && ientry.width() < 64) continue;
             desc = ientry.alt();
             int appcount = queryhashes.size()  * 2 - 
-                           TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
-                           TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
+                           removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
+                           removeAppearanceHashes(desc, queryhashes).size();
             final long ranking = Long.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);  
             result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, source));
         }
         return result;
     }
     
-
-    /*
-    private static String computeMediaSnippet(Map<yacyURL, String> media, Set<String> queryhashes) {
-        Iterator<Map.Entry<yacyURL, String>> i = media.entrySet().iterator();
-        Map.Entry<yacyURL, String> entry;
-        yacyURL url;
-        String desc;
-        Set<String> s;
-        String result = "";
-        while (i.hasNext()) {
-            entry = i.next();
-            url = entry.getKey();
-            desc = entry.getValue();
-            s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
-            if (isEmpty()) {
-                result += "<br /><a href=\"" + url + "\">" + ((desc.length() == 0) ? url : desc) + "</a>";
-                continue;
-            }
-            s = removeAppearanceHashes(desc, s);
-            if (isEmpty()) {
-                result += "<br /><a href=\"" + url + "\">" + ((desc.length() == 0) ? url : desc) + "</a>";
-                continue;
+    /**
+     * removed all word hashes that can be computed as tokens from a given sentence from a given hash set
+     * @param sentence
+     * @param queryhashes
+     * @return the given hash set minus the hashes from the tokenization of the given sentence
+     */
+    private static HandleSet removeAppearanceHashes(final String sentence, final HandleSet queryhashes) {
+        // remove all hashes that appear in the sentence
+        if (sentence == null) return queryhashes;
+        final TreeMap<byte[], Integer> hs = Condenser.hashSentence(sentence);
+        final Iterator<byte[]> j = queryhashes.iterator();
+        byte[] hash;
+        Integer pos;
+        final HandleSet remaininghashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), queryhashes.size());
+        while (j.hasNext()) {
+            hash = j.next();
+            pos = hs.get(hash);
+            if (pos == null) {
+                try {
+                    remaininghashes.put(hash);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
             }
         }
-        if (result.length() == 0) return null;
-        return result.substring(6);
+        return remaininghashes;
     }
-    */
     
 }

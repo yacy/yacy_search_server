@@ -480,7 +480,7 @@ public final class yacyClient {
                 // because they are search-specific.
                 // instead, they are placed in a snipped-search cache.
                 // System.out.println("--- RECEIVED SNIPPET '" + urlEntry.snippet() + "'");
-                TextSnippet.storeToCache(wordhashes, new String(urlEntry.hash()), urlEntry.snippet());
+                TextSnippet.snippetsCache.put(wordhashes, new String(urlEntry.hash()), urlEntry.snippet());
             }
             
             // add the url entry to the word indexes

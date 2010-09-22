@@ -220,7 +220,7 @@ public class ResultFetcher {
         if (query.contentdom == ContentDomain.TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            final TextSnippet snippet = TextSnippet.retrieveTextSnippet(
+            final TextSnippet snippet = new TextSnippet(
                     this.loader,
                     metadata,
                     snippetFetchWordHashes,
