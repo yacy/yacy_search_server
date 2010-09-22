@@ -104,7 +104,7 @@ public class serverAccessTracker {
         Collection<Track> timeList = accessTrack(host);
         long time = System.currentTimeMillis() - delta;
         int c = 0;
-        for (Track l: timeList) if (l.getTime() > time) c++;
+        for (Track l: timeList) if ( l != null && l.getTime() > time) c++;
         return c;
     }
     
