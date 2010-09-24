@@ -75,13 +75,12 @@ public class htmlParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("text/csv");
     }
     
-    public Document[] parse(
+    public static ContentScraper parseToScraper(
             final MultiProtocolURI location, 
-            final String mimeType, 
             final String documentCharset, 
-            final InputStream sourceStream) throws Parser.Failure, InterruptedException {
+            final InputStream sourceStream) throws Parser.Failure {
         
-        // make a scraper and transformer
+        // make a scraper
         final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
         String charset = null;
         try {
@@ -93,10 +92,6 @@ public class htmlParser extends AbstractParser implements Parser {
             charset = documentCharset;
         } else {
             charset = patchCharsetEncoding(charset);
-        }
-        
-        if (documentCharset == null || !documentCharset.equalsIgnoreCase(charset)) {
-            log.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
         }
         
         Charset c;
@@ -122,10 +117,18 @@ public class htmlParser extends AbstractParser implements Parser {
         //hfos.close();
         if (writer.binarySuspect()) {
             final String errorMsg = "Binary data found in resource";
-            log.logSevere("Unable to parse '" + location + "'. " + errorMsg);
-            throw new Parser.Failure(errorMsg,location);    
+            throw new Parser.Failure(errorMsg, location);    
         }
-        return transformScraper(location, mimeType, documentCharset, scraper);
+        return scraper;
+    }
+
+    public Document[] parse(
+            final MultiProtocolURI location, 
+            final String mimeType, 
+            final String documentCharset, 
+            final InputStream sourceStream) throws Parser.Failure, InterruptedException {
+        
+        return transformScraper(location, mimeType, documentCharset, parseToScraper(location, documentCharset, sourceStream));
     }
 
     private static Document[] transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {

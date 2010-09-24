@@ -29,7 +29,6 @@ package net.yacy.repository;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
@@ -48,8 +47,8 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.html.ContentScraper;
-import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -327,12 +326,11 @@ public final class LoaderDispatcher {
         byte[] page = (r == null) ? null : r.getContent();
         if (page == null) throw new IOException("no response from url " + location.toString());
         
-        // scrape content
-        final ContentScraper scraper = new ContentScraper(location);
-        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
-        writer.write(new String(page, "UTF-8"));
-        
-        return scraper;
+        try {
+        	return htmlParser.parseToScraper(location, r.getCharacterEncoding(), new ByteArrayInputStream(page));
+        } catch(Parser.Failure e) {
+        	throw new IOException(e.getMessage());
+        }
     }
 
     /**
