@@ -833,7 +833,13 @@ Sending Client==Client (Sender)
 #File: CrawlProfileEditor_p.html
 #---------------------------
 Crawl Profile Editor==Crawl Profil Editor
-Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
+>Crawler Steering<==>Crawler Steuerung<
+>Crawl Scheduler<==>Crawl Planer<
+>Scheduled Crawls can be modified in this table<==>Geplante Crawls können in dieser Tabelle geändert werden<
+>Crawl Profile Editor<==>Crawl Profil Editor<
+Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl Profile beinhalten Informationen über einen Crawl Prozess der gerade ausgeführt wird.
+
+#Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
 #The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="/ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
 #cannot be altered here as they are hard-coded.==können nicht verändert werden, weil sie "hard-coded" sind.
 Crawl Profile List==Crawl Profil Liste
@@ -1040,6 +1046,44 @@ This can be useful to circumvent that extremely common words are added to the da
 check this box.==aktivieren Sie diese Box.
 "Start New Crawl"=="Neuen Crawl starten"
 Depth</label>:==Tiefe</label>:
+#-----------------------------
+
+#File: CrawlStartSite_p.html
+#---------------------------
+>Site Crawling<==>Seiten Crawlen<
+Site Crawler:==Seiten Crawler:
+Download all web pages from a given domain or base URL.==Downloaden aller Webseiten von einer gegebenen Domain oder Basis URL.
+>Site Crawl Start<==>Seiten Crawl Start<
+>Site<==>Seite<
+>Scheduler<==>Zeitplanung<
+run this crawl once==führe diesen Crawl nur einmalig aus
+scheduled, look every==geplant, überprüfe alle
+>minutes<==>Minuten<
+>hours<==>Stunden<
+>days<==>Tage<
+for new documents automatically.==automatisch auf neue Dokument.
+>Path<==>Pfad<
+load all files in domain==Lade alle Dateien in der Domäne
+load only files in a sub-path of given url==Lade nur Dateien in einem Unterpfad der angegebenen URL
+>Limitation<==>Einschränkungen<
+not more than <==nicht mehr als <
+>documents<==>Dokumente<
+>Dynamic URLs<==>Dynamische URLs<
+allow <==erlaube <
+urls with a \'\?\' in the path==URLs mit einem '?' im Pfad
+#>Start<==>Start<
+"Start New Crawl"=="Starte neuen Crawl"
+Hints<==Hinweise<
+>Crawl Speed Limitation<==>Einschränkung der Crawl Geschwindigkeit<
+No more that two pages are loaded from the same host in one second \(not more that 120 document per minute\) to limit the load on the target server.==Es werden nicht mehr als 2 Seiten pro Sekunde vom selben Host geladen (nicht mehr als 120 Dokumente per Minute), um die Last auf den Zielserver zu minimieren.
+>Target Balancer<==>Ziel Balancer<
+A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.==Ein zweiter Crawl für einen anderen Host erhöht den Durchsatz auf ein Maximum von 240 Dokumenten pro Minute weil der der Crawler Balancer die Last über alle Hosts verteilt.
+>High Speed Crawling<==>Hochgeschwindigkeits Crawlen<
+A \'shallow crawl\' which is not limited to a single host \(or site\)==Ein 'oberflächlicher Crawl' der nicht auf einen einzelnen Host (oder eine Seite) limitiert ist
+can extend the pages per minute \(ppm\) rate to unlimited documents per minute when the number of target hosts is high.==kann die Anzahl der Seiten pro Minute (ppm) auf unendlich viele Dokumente pro Minute erweitern wenn die Anzahl der Ziel Hosts hoch ist.
+This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==Das kann erreicht werden durch Verwendung des <a href="CrawlStartExpert_p.html">Crawl Start (Expert)</a> Servlets.
+>Scheduler Steering<==>Geplante Steuerung<
+The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==Die geplante Ausführung von Crawls kann geändert oder entfernt werden mit der <a href="Table_API_p.html">API Aktionen Steuerung</a>.
 #-----------------------------
 
 #File: ConfigWikiSearch.html
@@ -1389,7 +1433,7 @@ use either 'mysql' or 'pgsql'==Verwende entweder 'mysql' oder 'pgsql'
 Host=Hostname
 > of the database<==> der Datenbank<
 of database service==des Datenbank Dienstes
-(usually 3306 for mySQL)==(normalerweise 3306 für MySQL)
+usually 3306 for mySQL==normalerweise 3306 für MySQL
 Name of the database==Name der Datenbank
 on the host==auf dem Host
 Table prefix string==Tabellen Präfix
@@ -1947,10 +1991,14 @@ Chunk Size<==Chunk Größe<
 #Count</td>==Anzahl</td>
 Used Memory<==Benutzter Speicher<
 #Node Caches:==Knoten Cache:
+Object Index Caches:==Objekt Index Caches:
+Needed Memory==Benötigter Speicher
 
 Object Read Caches==Objekt Lese Caches
-Read Hit<==Lese Treffer<
-Read Miss<==Lese Verfehler<
+>Read Hit Cache<==>Lese Treffer Cache<
+>Read Miss Cache<==>Lese Miss Cache<
+>Hit Cache<==>Treffer Cache<
+#>Miss Cache<==>Miss Cache<
 Write Unique<==Schreiben einzigartig<
 Write Double<==Schreiben mehrfach<
 Deletes<==Löschungen<
@@ -1964,9 +2012,14 @@ Start Shrink when less than \#\[objectCacheStartShrink\]\# MB availabe left==Sta
 Other Caching Structures:==Andere Zwischenspeicher Strukturen:
 Type</td>==Typ</td>
 Amount</td>==Umfang</td>
+>Hit<==>Treffer<
+>Miss<==>Verfehler<
+Insert<==Einfügen<
+Delete<==Löschen<
 #DNSCache</td>==DNSCache</td>
 #DNSNoCache</td>==DNSNoCache</td>
 #HashBlacklistedCache==HashBlacklistedCache
+Search Event Cache<==Such Ereignis Cache<
 #-----------------------------
 
 #File: PerformanceQueues_p.html
@@ -1989,7 +2042,7 @@ Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
 >idle loops==>untät. Durchl.
 >busy loops==>beschäft. Durchl.
 Minimum of<br />Required Memory==Mindestens<br />benötigter Speicher
-Full Description==vollständige Beschreibung
+Full Description==Vollständige Beschreibung
 Submit New Delay Values==Neue Verzögerungswerte speichern
 Changes take effect immediately==Änderungen werden sofort wirksam
 Cache Settings:==Cache Einstellungen:
@@ -2016,6 +2069,16 @@ flushed to disc; this may last some minutes.==auf die Festplatte gesichert werde
 #Initial space of words in cache:==Anfangs Freiraum im Word Cache:
 #This is is the init size of space for words in cache.==Dies ist die Anfangsgröße von Wörtern im Cache.
 Enter New Cache Size==Neue Cachegröße eintragen
+Balancer Settings==Balancer Einstellungen
+This is the time delta between accessing of the same domain during a crawl.==Das ist die Zeitdifferenz zwischen zwei Zugriffen auf dieselbe Domäne während eines Crawls.
+The crawl balancer tries to avoid that domains are==Der Crawl Balancer versucht zu vermeiden, dass Domains
+accessed too often, but if the balancer fails \(i.e. if there are only links left from the same domain\), then these minimum==zu oft abgefragt werden. Aber wenn der Balancer nicht mehr greift \(z.B. wenn nur noch Links von derselben Domain übrig sind), werden diese Minimum
+delta times are ensured.==Zeitdifferenzen eingehalten.
+#>Crawler Domain<==>Crawler Domain<
+>Minimum Access Time Delta<==>Minimum Zeitdifferenz zwischen Zugriffen<
+>local \(intranet\) crawls<==>Lokale (Intranet) Crawls<
+>global \(internet\) crawls<==>Globale (Internet) Crawls<
+"Enter New Parameters"=="Neue Parameter Setzen"
 Thread Pool Settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
 current Active==derzeit aktiv
@@ -2044,11 +2107,15 @@ Performance Settings of Search Sequence==Performanceeinstellungen des Suchablauf
 Search Sequence Timing==Timing des Suchablaufs
 Timing results of latest search request:==Timing-Ergebnisse der letzten Suchanfrage:
 Query==Abfrage
-Event</td>==Ereignis</td>
-Time==Zeit
+Event<==Ereignis<
+Comment<==Kommentar<
+Time<==Zeit<
 Duration \(ms\)==Dauer (Millisekunden)
 Result-Count==Anzahl Ergebnisse
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Das Netzwerkbild zeigt wie die letzte Suche durch Anfragen bei zuständigen Peers im DHT gelöst wurde.
+red -> request list alive==rot -> Request Liste aktiv
+green -> request has terminated==grün -> Request wurde beendet
+grey -> the search target hash order position\(s\) \(more targets if a dht partition is used\)<==grau -> Das Suchergebnis hash order position(s) (Mehrere Ziele wenn eine DHT Partition verwendet wird)<
 "Search event picture"=="Such Ereignis Bild"
 #-----------------------------
 
@@ -2187,6 +2254,7 @@ Connection timeout in ms==Verbindungs-Timeout in ms
 means unlimited==schaltet die Begrenzung ab
 Crawler Settings==Crawler Einstellungen
 Maximum Filesize==Maximale Dateigröße
+Local File==Lokale Datei
 Maximum allowed file size in bytes that should be downloaded==Maximale Größe der herunterzuladenden Datei in Byte
 Larger files will be skipped==Größere Dateien werden übersprungen
 Please note that if the crawler uses content compression, this limit is used to check the compressed content size==Beachten Sie, dass beim Herunterladen der Dateien mittels "Content-Compression" die komprimierte Dateigröße maßgeblich ist
@@ -2611,12 +2679,22 @@ to a scheduler for a periodic execution.==einem Scheduler für periodische Ausf�
 >Date==>Datum
 >Type==>Typ
 >Comment==>Kommentar
-#>URL==>URL
+Call<br/>Count<==Aufruf<br/>Zähler<
+Recording<==Aufzeichnungs<
+Last&nbsp;Exec==Letzte&nbsp;Ausführung
+Next&nbsp;Exec==Nächste&nbsp;Ausführung
+>Scheduler<==>Geplante Ausführung<
+#>URL<==>URL
+>no repetition<==>keine Wiederholung<
+>activate scheduler<==>Ausführung planen<
 "Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
 "Delete Selected Actions"=="Lösche ausgewählte Aktionen"
 >Result of API execution==>Ergebnis der API Ausführung
 #>Status<==>Status>
 #>URL<==>URL<
+>minutes<==>Minuten<
+>hours<==>Stunden<
+>days<==>Tage<
 #-----------------------------
 
 #File: Table_RobotsTxt_p.html
@@ -3040,7 +3118,7 @@ Access Tracker==Zugriffe
 ### PEER CONTROL
 Peer Control==Peer Kontrolle
 Admin Console==Admin Konsole
->Steering==>API Steuerung
+>API Action Steering<==>API Aktionen Steuerung<
 Confirm Restart==Bestätige Neustart
 Re-Start</a>==Neustarten</a>
 Confirm Shutdown==Bestätige Herunterfahren
@@ -3172,10 +3250,21 @@ URL Viewer==URL Betrachter
 #>Music==>Musik
 #--- New menu items ---
 Index Creation==Indexerzeugung
-Crawl Start \(Advanced\)==Crawl starten (Erweitert)
-Indexing of Media Wikis==Indexierung von Media Wikis
-Indexing of phpBB3 Forums==Indexierung von phpBB3 Foren
-Scraping Proxy Configuration==Indexierung per Proxy
+#Crawler/Spider<==Crawler/Spider<
+Full Site Crawl==Vollständiger Seiten Crawl
+Sitemap Loader==Sitemap Lader
+Crawl Start<br/>\(Expert\)==Crawl Start<br/>(Experte)
+Crawling of==Crawlen von
+#Media Wikis==Media Wikis
+>phpBB3 Forums<==>phpBB3 Foren<
+Content Import<==Content Importer<
+Network Harvesting<==Netzwerk Harvesting<
+#Remote<br/>Crawling==Remote<br/>Crawling
+#Scraping<br/>Proxy==Scraping<br/>Proxy
+Database Reader<==Datenbank Leser<
+for phpBB3 Forums==für phpBB3 Foren
+Dump Reader for==Dump Leser für
+#Wikimedia dumps==Wikimedia dumps
 #-----------------------------
 
 #File: env/templates/submenuPortalIntegration.template
