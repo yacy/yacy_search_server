@@ -83,14 +83,20 @@ public class htmlParser extends AbstractParser implements Parser {
         // make a scraper
         final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
         String charset = null;
-        try {
-            charset = htmlFilter.detectCharset();
-        } catch (IOException e1) {
-            throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
+
+        if (documentCharset != null) {
+            charset = patchCharsetEncoding(documentCharset);
         }
+        
         if (charset == null) {
-            charset = documentCharset;
-        } else {
+            try {
+                charset = htmlFilter.detectCharset();
+            } catch (IOException e1) {
+                throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
+            }
+        }
+        
+        if (charset == null) {
             charset = patchCharsetEncoding(charset);
         }
         
