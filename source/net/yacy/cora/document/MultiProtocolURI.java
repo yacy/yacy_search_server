@@ -59,6 +59,7 @@ public class MultiProtocolURI implements Serializable {
     private static final Pattern patternBackSlash = Pattern.compile("\\\\");
     private static final Pattern patternAmp = Pattern.compile("&");
     private static final Pattern patternMail = Pattern.compile("^[a-z]+:.*?");
+    //private static final Pattern patternSpace = Pattern.compile("%20");
     
     // session id handling
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
@@ -116,6 +117,7 @@ public class MultiProtocolURI implements Serializable {
         // identify protocol
         assert (url != null);
         url = url.trim();
+        //url = patternSpace.matcher(url).replaceAll(" ");
         if (url.startsWith("\\\\")) {
             url = "smb://" + patternBackSlash.matcher(url.substring(2)).replaceAll("/");
         }
@@ -857,9 +859,9 @@ public class MultiProtocolURI implements Serializable {
         if (isSMB()) try {
             return getSmbFile().exists();
         } catch (SmbException e) {
-            throw new IOException("SMB.exists SmbException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.exists SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
-            throw new IOException("SMB.exists MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.exists MalformedURLException (" + e.getMessage() + ") for " + this.toString());
         }
         return false;
     }
@@ -869,9 +871,9 @@ public class MultiProtocolURI implements Serializable {
         if (isSMB()) try {
             return getSmbFile().canRead();
         } catch (SmbException e) {
-            throw new IOException("SMB.canRead SmbException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.canRead SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
-            throw new IOException("SMB.canRead MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.canRead MalformedURLException (" + e.getMessage() + ") for " + this.toString());
         }
         return false;
     }
@@ -881,9 +883,9 @@ public class MultiProtocolURI implements Serializable {
         if (isSMB()) try {
             return getSmbFile().canWrite();
         } catch (SmbException e) {
-            throw new IOException("SMB.canWrite SmbException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.canWrite SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
-            throw new IOException("SMB.canWrite MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.canWrite MalformedURLException (" + e.getMessage() + ") for " + this.toString());
         }
         return false;
     }
@@ -893,9 +895,9 @@ public class MultiProtocolURI implements Serializable {
         if (isSMB()) try {
             return getSmbFile().isHidden();
         } catch (SmbException e) {
-            throw new IOException("SMB.isHidden SmbException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.isHidden SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
-            throw new IOException("SMB.isHidden MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.isHidden MalformedURLException (" + e.getMessage() + ") for " + this.toString());
         }
         return false;
     }
@@ -905,9 +907,9 @@ public class MultiProtocolURI implements Serializable {
         if (isSMB()) try {
             return getSmbFile().isDirectory();
         } catch (SmbException e) {
-            throw new IOException("SMB.isDirectory SmbException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.isDirectory SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
-            throw new IOException("SMB.isDirectory MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.isDirectory MalformedURLException (" + e.getMessage() + ") for " + this.toString());
         }
         return false;
     }
@@ -917,9 +919,9 @@ public class MultiProtocolURI implements Serializable {
         if (isSMB()) try {
             return getSmbFile().length();
         } catch (SmbException e) {
-            throw new IOException("SMB.length SmbException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.length SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
-            throw new IOException("SMB.length MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.length MalformedURLException (" + e.getMessage() + ") for " + this.toString());
         }
         return 0;
     }
@@ -929,9 +931,9 @@ public class MultiProtocolURI implements Serializable {
         if (isSMB()) try {
             return getSmbFile().lastModified();
         } catch (SmbException e) {
-            throw new IOException("SMB.lastModified SmbException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.lastModified SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
-            throw new IOException("SMB.lastModified MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.lastModified MalformedURLException (" + e.getMessage() + ") for " + this.toString());
         }
         return 0;
     }
@@ -941,7 +943,7 @@ public class MultiProtocolURI implements Serializable {
         if (isSMB()) try {
             return getSmbFile().getName();
         } catch (MalformedURLException e) {
-            throw new IOException("SMB.getName MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            throw new IOException("SMB.getName MalformedURLException (" + e.getMessage() + ") for " + this.toString() );
         }
         return null;
     }

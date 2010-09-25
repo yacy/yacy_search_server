@@ -121,8 +121,14 @@ public class DocumentIndex extends Segment {
         if (url.isDirectory()) throw new IOException("file should be a document, not a path");
         if (!url.canRead()) throw new IOException("cannot read file");
         Document[] documents;
+        long length;
         try {
-            documents = TextParser.parseSource(url, null, null, url.length(), url.getInputStream(null, -1));
+            length = url.length();
+        } catch (Exception e) {
+            length = -1;
+        }
+        try {
+            documents = TextParser.parseSource(url, null, null, length, url.getInputStream(null, -1));
         } catch (Exception e) {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }

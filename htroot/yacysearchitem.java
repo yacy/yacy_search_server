@@ -31,6 +31,7 @@ import java.util.TreeSet;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
@@ -108,6 +109,7 @@ public class yacysearchitem {
             if (!result.url().isLocal()) try {
                 faviconURL = new DigestURI(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico", null);
             } catch (final MalformedURLException e1) {
+                Log.logException(e1);
                 faviconURL = null;
             }
             
@@ -124,8 +126,8 @@ public class yacysearchitem {
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_link", result.urlstring());
             prop.put("content_display", display);
-            if (isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
-            prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
+            if (faviconURL != null && isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
+            prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(resulthashString));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));

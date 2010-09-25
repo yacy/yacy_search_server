@@ -85,8 +85,8 @@ public final class FileUtils {
      * @see #copy(File source, File dest)
      */
     public static long copy(final InputStream source, final OutputStream dest, final long count) throws IOException {
-        assert count == -1 || count > 0 : "precondition violated: count == " + count + " (nothing to copy)";
-        if(count == 0) {
+        assert count < 0 || count > 0 : "precondition violated: count == " + count + " (nothing to copy)";
+        if (count == 0) {
             // no bytes to copy
             return 0;
         }
@@ -101,7 +101,7 @@ public final class FileUtils {
             total += c;
             
             if (count > 0) {
-                chunkSize = (int) Math.min(count-total, DEFAULT_BUFFER_SIZE);
+                chunkSize = (int) Math.min(count - total, DEFAULT_BUFFER_SIZE);
                 if (chunkSize == 0) break;
             }
             
@@ -275,7 +275,7 @@ public final class FileUtils {
             return b;
         }
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-        copy(source, baos, count);
+        copy(source, baos);
         baos.close();
         return baos.toByteArray();
     }

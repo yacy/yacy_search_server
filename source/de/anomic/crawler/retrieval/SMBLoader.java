@@ -122,7 +122,12 @@ public class SMBLoader {
         
         // check mime type and availability of parsers
         // and also check resource size and limitation of the size
-        long size = url.length();
+        long size;
+        try {
+            size = url.length();
+        } catch (Exception e) {
+            size = -1;
+        }
         String parserError = null;
         if ((acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) ||
             (size > maxFileSize && maxFileSize >= 0)) {

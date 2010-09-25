@@ -657,6 +657,10 @@ public class yacySeed implements Cloneable {
     public final boolean isOnline(final String type) {
         return type.equals(yacySeed.PEERTYPE_SENIOR) || type.equals(yacySeed.PEERTYPE_PRINCIPAL);
     }
+    
+    public long nextLong(Random random, long n) {
+        return Math.abs(random.nextLong()) % n;
+    }
 
     private static byte[] bestGap(final yacySeedDB seedDB) {
         byte[] randomHash = randomHash();
@@ -678,10 +682,8 @@ public class yacySeed implements Cloneable {
         // find dht position and size of gap
         long left = FlatWordPartitionScheme.std.dhtPosition(interval.substring(0, 12).getBytes(), null);
         long right = FlatWordPartitionScheme.std.dhtPosition(interval.substring(12).getBytes(), null);
-        final long gap4 = FlatWordPartitionScheme.dhtDistance(left, right) >> 2; // a quarter of a gap
-        long gapx = gap4;
-        if (random.nextBoolean()) gapx += gap4;
-        if (random.nextBoolean()) gapx += gap4;
+        final long gap8 = FlatWordPartitionScheme.dhtDistance(left, right) >> 3; //  1/8 of a gap
+        long gapx = gap8 + (Math.abs(random.nextLong()) % (6 * gap8));
         long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
         byte[] computedHash = FlatWordPartitionScheme.positionToHash(gappos);
         // the computed hash is the perfect position (modulo gap4 population and gap alternatives)
