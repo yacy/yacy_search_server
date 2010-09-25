@@ -20,6 +20,7 @@
 
 package net.yacy.document.parser;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.regex.Pattern;
+
+import com.ibm.icu.text.CharsetDetector;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 
@@ -78,42 +81,56 @@ public class htmlParser extends AbstractParser implements Parser {
     public static ContentScraper parseToScraper(
             final MultiProtocolURI location, 
             final String documentCharset, 
-            final InputStream sourceStream) throws Parser.Failure {
+            InputStream sourceStream) throws Parser.Failure, IOException {
         
         // make a scraper
-        final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
         String charset = null;
 
+        // ah, we are lucky, we got a character-encoding via HTTP-header
         if (documentCharset != null) {
             charset = patchCharsetEncoding(documentCharset);
         }
         
+        // nothing found: try to find a meta-tag
         if (charset == null) {
             try {
+                final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
+                sourceStream = htmlFilter;
                 charset = htmlFilter.detectCharset();
             } catch (IOException e1) {
                 throw new Parser.Failure("Charset error:" + e1.getMessage(), location);
             }
         }
-        
+
+        // the author didn't tell us the encoding, try the mozilla-heuristic
         if (charset == null) {
-            charset = patchCharsetEncoding(charset);
+        	CharsetDetector det = new CharsetDetector();
+        	det.enableInputFilter(true);
+        	InputStream detStream = new BufferedInputStream(sourceStream);
+        	det.setText(detStream);
+        	charset = det.detect().getName();
+        	sourceStream = detStream;
+        }
+        
+        // wtf? still nothing, just take system-standard
+        if (charset == null) {
+            charset = Charset.defaultCharset().name();
         }
         
         Charset c;
         try {
-            c = Charset.forName(charset);
+        	c = Charset.forName(charset);
         } catch (IllegalCharsetNameException e) {
-            c = Charset.defaultCharset();
+        	c = Charset.defaultCharset();
         } catch (UnsupportedCharsetException e) {
-            c = Charset.defaultCharset();
+        	c = Charset.defaultCharset();
         }
         
         // parsing the content
         final ContentScraper scraper = new ContentScraper(location);        
         final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false);
         try {
-            FileUtils.copy(htmlFilter, writer, c);
+            FileUtils.copy(sourceStream, writer, c);
             writer.close();
         } catch (IOException e) {
             throw new Parser.Failure("IO error:" + e.getMessage(), location);
@@ -134,7 +151,11 @@ public class htmlParser extends AbstractParser implements Parser {
             final String documentCharset, 
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
         
-        return transformScraper(location, mimeType, documentCharset, parseToScraper(location, documentCharset, sourceStream));
+        try {
+			return transformScraper(location, mimeType, documentCharset, parseToScraper(location, documentCharset, sourceStream));
+		} catch (IOException e) {
+			throw new Parser.Failure("IOException in htmlParser: " + e.getMessage(), location);
+		}
     }
 
     private static Document[] transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
@@ -173,8 +194,8 @@ public class htmlParser extends AbstractParser implements Parser {
      */
     public static String patchCharsetEncoding(String encoding) {
         
-        // return the system default encoding
-        if ((encoding == null) || (encoding.length() < 3)) return Charset.defaultCharset().name();
+        // do nothing with null
+        if ((encoding == null) || (encoding.length() < 3)) return null;
         
         // trim encoding string
         encoding = encoding.trim();
