@@ -898,7 +898,7 @@ These records had been imported from surrogate files in DATA/SURROGATES/in==Dies
 \(i.e. <a href="/IndexImportWikimedia_p.html">wikimedia import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportWikimedia_p.html">WikiMedia Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
 #Domain==Domain
 #URLs=URLs
-"delete all"=="alle löschen"
+"delete all"=="Alle Löschen"
 Showing all \#\[all\]\# entries in this stack.==Zeigt alle #[all]# Einträge in diesem Bereich.
 Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt die letzten #[count]# Einträge aus diesem Bereich von insgesamt #[all]# Einträgen.
 "clear list"=="Liste leeren"
@@ -950,8 +950,8 @@ not as double and load them again. No scheduled re-crawl.==bekannt sind nicht al
 after starting this crawl, repeat the crawl every==Nach dem Start dieses Crawls, führe ihn jede
 > automatically.==> automatisch aus.
 A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==Ein Web Crawl führt eine Dubletten Prüfung anhand einer internen Datenbank gegen alle im Internet gefunden Links durch. Wenn dieselbe URL wieder gefunden wird,
-then the url is treated as double when you check the \'no doubles\' option. A url may be loaded again when it has reached a specific age,==wird die URL als Dublette behandelt wenn die 'Keine Doubletten' option ausgewählt wurde. Eine URL kann noch einmal geladen werden wenn sie ein bestimmtes Alter erreicht hat.
-to use that check the \'once\' option. When you want that this web crawl is repeated automatically, then check the \'scheduled\' option.==Dafür kann die 'Nachladen' Option verwendet werden. Wenn der Web Crawl automatisch wiederholt werden soll, kann die 'Geplant' Option ausgewählt werden.
+then the url is treated as double when you check the \'no doubles\' option. A url may be loaded again when it has reached a specific age,==wird die URL als Dublette behandelt wenn die 'Keine Doubletten' Option ausgewählt wurde. Eine URL kann noch einmal geladen werden wenn sie ein bestimmtes Alter erreicht hat.
+to use that check the \'re-load\' option. When you want that this web crawl is repeated automatically, then check the \'scheduled\' option.==Dafür kann die 'Nachladen' Option verwendet werden. Wenn der Web Crawl automatisch wiederholt werden soll, kann die 'Geplant' Option ausgewählt werden.
 In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==In diesem Fall wird der Crawl erneut nach der eingestellten Zeit ausgeführt und keine URL aus einem vorhergegangenem Crawl wird als Dublette ausgelassen.
 Must-Match Filter==Muss-entsprechen Filter
 Use filter==Filter nutzen
@@ -3001,6 +3001,12 @@ depth<==Tiefe<
 nodes<==Knoten<
 time<==Zeit<
 size<==Größe<
+>Background<==>Hintergrund<
+#>Text<==>Text<
+>Line<==>Linie<
+>Dot<==>Punkt<
+>Dot-end<==>Punktende<
+>Color <==>Farbe <
 "change"=="Ändern"
 #-----------------------------
 
