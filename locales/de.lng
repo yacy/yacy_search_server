@@ -513,12 +513,12 @@ your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/t
 Network Configuration==Netzwerk Einstellungen
 Accepted Changes==Änderungen wurden gespeichert
 Inapplicable Setting Combination==unpassende Einstellungskombination
-P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
+#P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
 For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Für P2P-Tätigkeit muss mindestens DHT-Verteilung oder DHT-Empfang (oder beides) aktiviert sein. Ansonsten haben Sie einen Robinson-Peer definiert
 Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==Die globale Suche im P2P-Modus ist nur erlaubt, wenn der Index-Empfang aktiviert ist. Sie sind im P2P-Modus, aber Sie dürfen keine anderen Peers durchsuchen.
 For Robinson Mode, index distribution and receive is switched off==Im Robinson-Modus werden Indexverteilung und -empfang deaktiviert
-This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
-This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
+#This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
+#This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
 Network and Domain Specification==Netzwerk und Domain Spezifikation
 With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
 Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
@@ -547,11 +547,11 @@ Accept remote Index Transmissions==Remote Index-Übertragungen akzeptieren
 This works only if you have a senior peer. The DHT-rules do not work without this function==Dies funktioniert nur, wenn Sie einen Senior-Peer haben. Die DHT-Regeln arbeiten nicht ohne diese Funktion
 >reject==>verwerfe
 accept transmitted URLs that match your blacklist==akzeptiere übertragene URLs, die zu Ihrer Blacklist passen
->Accept Remote Crawl Requests==>Remotecrawl-Anfragen akzeptieren
-Perform web indexing upon request of another peer==Führe Indexierung bei Anfrage eines anderen Peers aus
-This works only if you are a senior peer==Dies funktioniert nur, wenn Sie ein Senior-Peer sind
-Load with a maximum of==Lade mit maximal
-pages per minute==Seiten pro Minute (PPM)
+#>Accept Remote Crawl Requests==>Remotecrawl-Anfragen akzeptieren
+#Perform web indexing upon request of another peer==Führe Indexierung bei Anfrage eines anderen Peers aus
+#This works only if you are a senior peer==Dies funktioniert nur, wenn Sie ein Senior-Peer sind
+#Load with a maximum of==Lade mit maximal
+#pages per minute==Seiten pro Minute (PPM)
 >Robinson Mode==>Robinson Modus
 If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==Falls Ihr Peer im 'Robinson Modus' läuft, so verwenden Sie YaCy als Suchmaschine für Ihr eigenes Suchportal, ohne Datenaustausch mit anderen Peers
 There is no index receive and no index distribution between your peer and any other peer==Es gibt keinen Index-Empfang von und keine Index-Verteilung zu anderen Peers
@@ -612,40 +612,6 @@ enable/disable Parser==Parser aktiv / inaktiv
 #BMP Image Parser==BMP Bild Parser
 # --- Parser Names are hard-coded END ---
 "Submit"=="Speichern"
-#-----------------------------
-
-#File: ConfigPHPBB3Search.html
-#---------------------------
-Configuration of a phpBB3 Search==Konfiguration einer phpBB3 Suche
-#Integration in phpBB3==Integration in phpBB3
-It is possible to insert forum pages into the YaCy index using a database import of forum postings.==Es ist möglich die Forumsseiten mit YaCy zu indexieren, indem die Datenbank mit den Forumseinträgen importiert wird.
-This guide helps you to insert a search window in your phpBB3 pages.==Diese Anleitung hilft Ihnen ein YaCy Suchfeld in Ihre phpBB3 Forenseiten einzubinden.
-Retrieval of phpBB3 Forum Pages using a database export==Extraktion der phpBB3 Forenseiten durch Datenbank Export
-Forum posting contain rich information about the topic, the time, the subject and the author.==Forenbeiträge enthalten reichaltige Informationen über das Thema, die Zeit, den Betreff und den Autor.
-This information is in an bad annotated form in web pages delivered by the forum software.==Diese Information wird in einem schlecht kommentierten Format in Form von Webseiten ausgeliefert, die von der Forumssoftware erzeugt werden.
-It is much better to retrieve the forum postings directly from the database.==Es ist viel besser die Forenbeiträge direkt aus der Datenbank zu extrahieren.
-This will cause that YaCy is able to offer nice navigation features after searches.==Durch den Direktimport kann YaCy nach einer Suche auch hilfreiche Features zur Navigation anbieten.
-YaCy has a phpBB3 extraction feature, please go to the <a href="ContentIntegrationPHPBB3_p.html">phpBB3 content integration</a> servlet for direct database imports.==YaCy kann bereits Daten aus einer phpBB3 Installation extrahieren. Auf der Seite <a href="ContentIntegrationPHPBB3_p.html">Import aus phpBB3 Datenbanken</a> finden Sie ein Servlet für den direkten Datenbank Import.
-Retrieval of phpBB3 Forum Pages using a web crawl==Extraktion der phpBB3 Forenseiten durch Web Crawling
-The following form is a simplified crawl start that uses the proper values for a phpbb3 forum crawl.==Das folgende Eingabeformular ist eine vereinfachte Crawl Startseite, die passende Werte für eine phpBB3 Forensuche voreingestellt hat.
-Just insert the front page URL of your forum. After you started the crawl you may want to get back==Fügen Sie einfach die Startseite Ihres Forums ein. Nachdem Sie den Crawl gestartet haben sollten Sie zurück
-to this page to read the integration hints below.==auf die Seite kommen, um die Integrationshinweise unten zu lesen.
-URL of the phpBB3 forum main page==URL der Hauptseite des phpBB3 Forums
-This is a crawl start point==Das ist der Ausgangspunkt für den Crawl
-"Get content of phpBB3: crawl forum pages"=="Hole den phpBB3 Foreninhalt: Crawlen der Forenseiten"
-Inserting a Search Window to phpBB3==Einfügen eines Suchfeldes in das phpBB3 Forum
-To integrate a search window into phpBB3, you must insert some code into a forum template.==Um ein Suchfeld in Ihr phpBB3 Forum einzubauen, müssen Sie folgende Zeilen Code in das Forums Template einbauen.
-There are several templates that can be used for phpBB3, but in this guide we consider that==Da es viele verschiedene Templates für phpBB3 Foren gibt, gehen wir in dieser Anleitung davon aus, dass
-you are using the default template, \'prosilver\'==Sie das Standard Template 'prosilver' verwenden.
-open styles/prosilver/template/overall_header.html==Öffnen Sie die Datei styles/prosilver/template/overall_header.html
-find the line where the default search window is displayed, thats right behind the <pre>\&lt;div id=\"search-box\"\&gt;</pre> statement==Finden Sie die Zeile in der das Standard Suchfeld angezeigt wird, das sich gleich hinter der Anweisung <pre>&lt;div id="search-box"&gt;</pre> befindet
-Insert the following code right behind the div tag==Fügen Sie folgenden Code gleich nach dem div Tag ein
-YaCy Forum Search==YaCy Foren Suche
-;YaCy Search==;YaCy Suche
-Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name==Überprüfen Sie alle in diesem Codeschnipsel vorkommenden statischen IP Adressen und ersetzen Sie diese mit Ihrer eigenen IP oder dem eigenen Hostnamen.
-You may want to change the default text elements in the code snippet==Sie können auch die Standard Textelemente in dem Code Ausschnitt gegen eigene Texte austauschen.
-To see all options for the search widget, look at the more generic description of search widgets at==Um alle Optionen für das Suchfeld zu sehen, schauen Sie sich die generische Beschreibung des Such Widgets auf
-the <a href=\"ConfigLiveSearch.html\">configuration for live search</a>.==der Seite <a href=\"ConfigLiveSearch.html\">Integration eines Suchfelds für Live Suche</a> an.
 #-----------------------------
 
 #File: ConfigPortal.html
@@ -832,11 +798,10 @@ Sending Client==Client (Sender)
 
 #File: CrawlProfileEditor_p.html
 #---------------------------
-Crawl Profile Editor==Crawl Profil Editor
+>Crawl Profile Editor<==>Crawl Profil Editor<
 >Crawler Steering<==>Crawler Steuerung<
 >Crawl Scheduler<==>Crawl Planer<
 >Scheduled Crawls can be modified in this table<==>Geplante Crawls können in dieser Tabelle geändert werden<
->Crawl Profile Editor<==>Crawl Profil Editor<
 Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl Profile beinhalten Informationen über einen Crawl Prozess der gerade ausgeführt wird.
 
 #Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
@@ -858,8 +823,8 @@ Fill Proxy Cache==Fülle Proxy Cache
 Local Text Indexing==Lokal Text Indexieren
 Local Media Indexing==Lokal Media Indexieren
 Remote Indexing==Remote Indexieren
-Status / Action==Status / Aktion
-terminated::active==beendet::aktiv
+#Status / Action==Status / Aktion
+#terminated::active==beendet::aktiv
 no::yes==nein::ja
 Running==Läuft
 "Terminate"=="Beenden"
@@ -948,12 +913,12 @@ Showing latest \#\[count\]\# lines from a stack of \#\[all\]\# entries.==Zeigt d
 
 #File: CrawlStartExpert_p.html
 #---------------------------
-Crawl Start==Crawl Start
+Expert Crawl Start==Experten Crawl Start
 Start Crawling Job:==Starte Crawling Aufgabe:
 You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Sie können hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten. "Crawling" bedeutet, dass YaCy die angegebene Webseite runterlädt, alle Links extrahiert und dann den Inhalt hinter diesen Links runterlädt. Dies wird solange wiederholt wie unter "Crawling Tiefe" angegeben.
-#Attribut==Attribut
-Value==Wert
-Description</strong>==Beschreibung</strong>
+Attribute<==Attribut<
+Value<==Wert<
+Description<==Beschreibung<
 >Starting Point:==>Startpunkt:
 >From URL==>Von URL
 From Sitemap==Von Sitemap
@@ -964,14 +929,30 @@ Create Bookmark==Lesezeichen erstellen
 \(works with "Starting Point: From URL" only\)==(funktioniert nur mit "Startpunkt von URL")
 Title<==Titel<
 Folder<==Ordner<
-This option lets you create a bookmark from your crawl start URL. For automatic re-crawling you can use the following default folders:==Diese Option gibt Ihnen die Möglichkeit ein Lesezeichen aus Ihrer Crawl Start URL zu erstellen. Um diese automatisch wieder zu crawlen, können Sie diese folgenden Standard Ordner benutzen:
-Attention: recrawl settings depend on the folder. They can be adjusted in==Achtung: Recrawl-Einstellungen sind vom Ordner abhängig. Diese können angepasst werden in
+This option lets you create a bookmark from your crawl start URL.==Diese Option gibt Ihnen die Möglichkeit ein Lesezeichen aus Ihrer Crawl Start URL zu erstellen.
 Crawling Depth</label>==Crawling-Tiefe</label>
-This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
-A minimum of 0 is recommended and means that the page you enter under \"Starting Point\" will be added==Ein Minimum von 0 wird empfohlen und bedeutet, dass die Seite, die Sie unter "Startpunkt" angegeben haben, 
-to the index, but no linked content is indexed. 2-4 is good for normal indexing.==dem Index zugefügt wird, verlinkter Inhalt allerdings nicht. 2-4 ist gut für normales Indexieren.
-Be careful with the depth. Consider a branching factor of average 20;==Seien Sie vorsichtig mit der Crawl-Tiefe. Erwägen Sie einen durchschnittlichen Verzweigungsfaktor von 20;
-A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==eine Crawl-Tiefe 8 wird 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
+This defines how often the Crawler will follow links \(of links..\) embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links (von Links ...) in Webseiten folgen wird.
+0 means that only the page you enter under \"Starting Point\" will be added==0 bedeutet, dass nur die Seite unter "Startpunkt"
+to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==
+dem Index zugefügt wird. 2-4 ist gut für normales Indexieren. Werte über 8 sind nicht nützlich, denn eine Suche mit Suchtiefe 8 würde
+index approximately 25.600.000.000 pages, maybe this is the whole WWW.==ungefähr 25.600.000.000 Seiten indexieren, vielleicht sogar das ganze WWW.
+Scheduled re-crawl<==Geplanter Re-Crawl<
+>no&nbsp;doubles<==>Keine&nbsp;Dubletten<
+run this crawl once and never load any page that is already known, only the start-url may be loaded again.==Führe diesen Crawl einmalig aus und lade niemals eine schon bekannte Seite nach. Nur die URL unter Startpunkt darf noch einmal geladen werden.
+>re-load<==>Nachladen<
+run this crawl once, but treat urls that are known since==führe diesen Crawl einmalig aus aber behandle URLs die bereits seit
+>years<==>Jahre<
+>months<==>Monate<
+>days<==>Tage<
+>hours<==>Stunden<
+not as double and load them again. No scheduled re-crawl.==bekannt sind nicht als Dubletten und lade sie erneut.
+>scheduled<==>Geplant<
+after starting this crawl, repeat the crawl every==Nach dem Start dieses Crawls, führe ihn jede
+> automatically.==> automatisch aus.
+A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==Ein Web Crawl führt eine Dubletten Prüfung anhand einer internen Datenbank gegen alle im Internet gefunden Links durch. Wenn dieselbe URL wieder gefunden wird,
+then the url is treated as double when you check the \'no doubles\' option. A url may be loaded again when it has reached a specific age,==wird die URL als Dublette behandelt wenn die 'Keine Doubletten' option ausgewählt wurde. Eine URL kann noch einmal geladen werden wenn sie ein bestimmtes Alter erreicht hat.
+to use that check the \'once\' option. When you want that this web crawl is repeated automatically, then check the \'scheduled\' option.==Dafür kann die 'Nachladen' Option verwendet werden. Wenn der Web Crawl automatisch wiederholt werden soll, kann die 'Geplant' Option ausgewählt werden.
+In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==In diesem Fall wird der Crawl erneut nach der eingestellten Zeit ausgeführt und keine URL aus einem vorhergegangenem Crawl wird als Dublette ausgelassen.
 Must-Match Filter==Muss-entsprechen Filter
 Use filter==Filter nutzen
 Restrict to start domain==Auf Startdomain beschränken
@@ -985,16 +966,9 @@ Must-Not-Match Filter==Muss-nicht-entsprechen Filter
 This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
 The empty string is a never-match filter which should do well for most cases.==Ein leeres Feld ist ein niemals-passend Filter, der in den meisten Fällen gute Dienste leisten sollte.
 If you don't know what this means, please leave this field empty.==Wenn Sie nicht wissen, was dies bedeutet, lassen Sie das Feld einfach leer.
-Re-crawl known URLs:==Re-crawl bekannter URLs:
+#Re-crawl known URLs:==Re-crawl bekannter URLs:
 Use</label>:==Benutzen</label>:
-If older than==Wenn älter als
-Year\(s\)==Jahr(e)
-Month\(s\)==Monat(e)
-Day\(s\)==Tag(e)
-Hour\(s\)==Stunde(n)
-If you use this option, web pages that are already existent in your database are crawled and indexed again.==Ist diese Option aktiviert, werden bereits in Ihrer Datenbank existierende Internetseite erneut gecrawlt und indexiert.
-It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es hängt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl älter als das angegebene
-date, the page is crawled again, otherwise it is treated as 'double' and not loaded or indexed again.==Datum ist, wird die Seite erneut gecrawlet, sonst wird sie als 'double' markiert und weder geladen noch indexiert.
+#It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es hängt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl älter als das angegebene
 Auto-Dom-Filter:==Auto-Dom-Filter:
 This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschränkt ,
 will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen
@@ -1011,7 +985,7 @@ dynamic URLs==dynamische URLs
 A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Ein Fragezeichen ist normalerweise ein Hinweis auf eine dynamische Seite. URLs mit dynamischem Inhalt sollten normalerweise nicht gecrawlt werden. Wie auch immer, manchmal gibt es Seiten mit festem Inhalt, die
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
 Store to Web Cache==Speichern im Web-Cache
-This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardmässig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
+This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardmäßig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
 
 Policy for usage of Web Cache==Regeln für die Nutzung des Web Caches
 The caching policy states when to use the cache during crawling:==Die Caching Regeln legen fest wann der Cache während des Crawlen verwendet wird:
@@ -1084,36 +1058,6 @@ can extend the pages per minute \(ppm\) rate to unlimited documents per minute w
 This can be done using the <a href=\"CrawlStartExpert_p.html\">Expert Crawl Start</a> servlet.==Das kann erreicht werden durch Verwendung des <a href="CrawlStartExpert_p.html">Crawl Start (Expert)</a> Servlets.
 >Scheduler Steering<==>Geplante Steuerung<
 The scheduler on crawls can be changed or removed using the <a href=\"Table_API_p.html\">API Steering</a>.==Die geplante Ausführung von Crawls kann geändert oder entfernt werden mit der <a href="Table_API_p.html">API Aktionen Steuerung</a>.
-#-----------------------------
-
-#File: ConfigWikiSearch.html
-#---------------------------
-YaCy \'\#\[clientname\]\#\': Configuration of a Wiki Search==YaCy '#[clientname]#': Konfiguration einer Wiki Suche
-#Integration in MediaWiki==Integration in MediaWiki
-It is possible to insert wiki pages into the YaCy index using a web crawl on that pages.==Es ist möglich Wiki Seiten in den YaCy Index aufzunehmen, indem man diese Seiten crawlen läßt.
-This guide helps you to crawl your wiki and to insert a search window in your wiki pages.==Diese Anleitung hilft Ihnen, Ihr Wiki zu crawlen und ein Suchfeld in die Wiki Seiten einzubauen.
-Retrieval of Wiki Pages==Abrufen der Wiki Seiten
-The following form is a simplified crawl start that uses the proper values for a wiki crawl.==Das folgende Eingabeformular ist eine vereinfachte Crawl Startseite die passende Werte für eine Wiki Suche voreingestellt hat.
-Just insert the front page URL of your wiki.==Fügen Sie einfach die Start URL Ihres Wikis ein.
-After you started the crawl you may want to get back==Nachdem Sie den Crawl gestartet haben sollten Sie nochmals zurück
-to this page to read the integration hints below.==auf diese Seite gehen, um die Integrationshinweise weiter unten zu lesen.
-URL of the wiki main page==URL der Wiki Hauptseite
-This is a crawl start point==Das ist der Ausgangspunkt des Crawls
-"Get content of Wiki: crawl wiki pages"=="Hole den Inhalt des Wiki: Crawle die Wiki Seiten"
-Inserting a Search Window to MediaWiki==Einfügen eines Suchfeldes in ein MediaWiki
-To integrate a search window into a MediaWiki, you must insert some code into the wiki template.==Um ein Suchfeld in das MediWiki einzufügen, müssen Sie einigen Code in Ihr Wiki Template einfügen.
-There are several templates that can be used for MediaWiki, but in this guide we consider that==Es gibt einige Templates die für ein MediaWiki verwendet werden können. Aber in dieser Anleitung setzen wir voraus, dass
-you are using the default template, \'MonoBook.php\':==Sie das Standard Template einsetzen, 'MonoBook.php':
-open skins/MonoBook.php==Öffnen Sie skins/MonoBook.php
-find the line where the default search window is displayed, there are the following statements:==Finden Sie die Zeile in der die Standard Suchmaschine angezeigt wird, erkennbar an folgenden Anweisungen:
-Remove that code or set it in comments using \'&lt;!--\' and \'--&gt;\'==Entfernen Sie diesen Code oder setzen sie ihn zwischen Kommentar Klammern mit '&lt;!--' und '--&gt;'
-Insert the following code:==Fügen Sie folgenden Code ein:
-Search with YaCy in this Wiki:==Mit YaCy in diesem Wiki suchen:
-value=\"Search\"==value="Suche"
-Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name==Überprüfen Sie alle in diesem Codeschnipsel vorkommenden statischen IP Adressen und ersetzen Sie diese mit Ihrer eigenen IP oder dem eigenen Hostnamen.
-You may want to change the default text elements in the code snippet==Sie können auch die Standard Textelemente in dem Code Ausschnitt gegen eigene Texte austauschen.
-To see all options for the search widget, look at the more generic description of search widgets at==Um alle Optionen für das Suchfeld zu sehen, schauen Sie sich die generische Beschreibung des Such Widgets auf
-the <a href=\"ConfigLiveSearch.html\">configuration for live search</a>.==der Seite <a href=\"ConfigLiveSearch.html\">Integration eines Suchfelds für Live Suche</a> an.
 #-----------------------------
 
 #File: Help.html
@@ -1654,6 +1598,7 @@ Import failed:==Import fehlgeschlagen:
 Import all Records from a server==Importiere alle Datensätze von einem Server
 Import all records that follow according to resumption elements into index==Importiere alle folgenden Datensätze die Wiederaufnahme Elementen entsprechen in den Index
 "import this source"=="Importiere diese Quelle"
+::or&nbsp;==::oder&nbsp;
 "import from a list"=="Importiere von einer Liste"
 Import started!==Import gestartet!
 Bad input data:==Ungültige Eingabedaten:
@@ -1661,6 +1606,8 @@ Bad input data:==Ungültige Eingabedaten:
 
 #File: IndexImportOAIPMHList_p.html
 #---------------------------
+List of \#\[num\]\# OAI-PMH Servers==Liste von #[num]# OAI-PMH Servern
+"Load Selected Sources"=="Lade ausgewählte Quellen"
 OAI-PMH source import list==OAI-PMH Quellen Import Liste
 #OAI Source List==OAI Quellen Liste
 >Source<==>Quelle<
@@ -1670,6 +1617,116 @@ Import List==Importierte Liste
 >Processed<br />Chunks<==>Bearbeitete<br />Datenblöcke<
 >Imported<br />Records<==>Importierte<br />Datensätze<
 >Speed<br />\(records/second\)==>Geschwindigkeit<br />==(Datensätze/Sekunde)
+#-----------------------------
+
+#File: Load_MediawikiWiki.html
+#---------------------------
+YaCy \'\#\[clientname\]\#\': Configuration of a Wiki Search==YaCy '#[clientname]#': Konfiguration einer Wiki Suche
+#Integration in MediaWiki==Integration in MediaWiki
+It is possible to insert wiki pages into the YaCy index using a web crawl on that pages.==Es ist möglich Wiki Seiten in den YaCy Index aufzunehmen, indem man diese Seiten crawlen läßt.
+This guide helps you to crawl your wiki and to insert a search window in your wiki pages.==Diese Anleitung hilft Ihnen, Ihr Wiki zu crawlen und ein Suchfeld in die Wiki Seiten einzubauen.
+Retrieval of Wiki Pages==Abrufen der Wiki Seiten
+The following form is a simplified crawl start that uses the proper values for a wiki crawl.==Das folgende Eingabeformular ist eine vereinfachte Crawl Startseite die passende Werte für eine Wiki Suche voreingestellt hat.
+Just insert the front page URL of your wiki.==Fügen Sie einfach die Start URL Ihres Wikis ein.
+After you started the crawl you may want to get back==Nachdem Sie den Crawl gestartet haben sollten Sie nochmals zurück
+to this page to read the integration hints below.==auf diese Seite gehen, um die Integrationshinweise weiter unten zu lesen.
+URL of the wiki main page==URL der Wiki Hauptseite
+This is a crawl start point==Das ist der Ausgangspunkt des Crawls
+"Get content of Wiki: crawl wiki pages"=="Hole den Inhalt des Wiki: Crawle die Wiki Seiten"
+Inserting a Search Window to MediaWiki==Einfügen eines Suchfeldes in ein MediaWiki
+To integrate a search window into a MediaWiki, you must insert some code into the wiki template.==Um ein Suchfeld in das MediWiki einzufügen, müssen Sie einigen Code in Ihr Wiki Template einfügen.
+There are several templates that can be used for MediaWiki, but in this guide we consider that==Es gibt einige Templates die für ein MediaWiki verwendet werden können. Aber in dieser Anleitung setzen wir voraus, dass
+you are using the default template, \'MonoBook.php\':==Sie das Standard Template einsetzen, 'MonoBook.php':
+open skins/MonoBook.php==Öffnen Sie skins/MonoBook.php
+find the line where the default search window is displayed, there are the following statements:==Finden Sie die Zeile in der die Standard Suchmaschine angezeigt wird, erkennbar an folgenden Anweisungen:
+Remove that code or set it in comments using \'&lt;!--\' and \'--&gt;\'==Entfernen Sie diesen Code oder setzen sie ihn zwischen Kommentar Klammern mit '&lt;!--' und '--&gt;'
+Insert the following code:==Fügen Sie folgenden Code ein:
+Search with YaCy in this Wiki:==Mit YaCy in diesem Wiki suchen:
+value=\"Search\"==value="Suche"
+Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name==Überprüfen Sie alle in diesem Codeschnipsel vorkommenden statischen IP Adressen und ersetzen Sie diese mit Ihrer eigenen IP oder dem eigenen Hostnamen.
+You may want to change the default text elements in the code snippet==Sie können auch die Standard Textelemente in dem Code Ausschnitt gegen eigene Texte austauschen.
+To see all options for the search widget, look at the more generic description of search widgets at==Um alle Optionen für das Suchfeld zu sehen, schauen Sie sich die generische Beschreibung des Such Widgets auf
+the <a href=\"ConfigLiveSearch.html\">configuration for live search</a>.==der Seite <a href=\"ConfigLiveSearch.html\">Integration eines Suchfelds für Live Suche</a> an.
+#-----------------------------
+
+#File: Load_PHPBB3.html
+#---------------------------
+Configuration of a phpBB3 Search==Konfiguration einer phpBB3 Suche
+#Integration in phpBB3==Integration in phpBB3
+It is possible to insert forum pages into the YaCy index using a database import of forum postings.==Es ist möglich die Forumsseiten mit YaCy zu indexieren, indem die Datenbank mit den Forumseinträgen importiert wird.
+This guide helps you to insert a search window in your phpBB3 pages.==Diese Anleitung hilft Ihnen ein YaCy Suchfeld in Ihre phpBB3 Forenseiten einzubinden.
+Retrieval of phpBB3 Forum Pages using a database export==Extraktion der phpBB3 Forenseiten durch Datenbank Export
+Forum posting contain rich information about the topic, the time, the subject and the author.==Forenbeiträge enthalten reichaltige Informationen über das Thema, die Zeit, den Betreff und den Autor.
+This information is in an bad annotated form in web pages delivered by the forum software.==Diese Information wird in einem schlecht kommentierten Format in Form von Webseiten ausgeliefert, die von der Forumssoftware erzeugt werden.
+It is much better to retrieve the forum postings directly from the database.==Es ist viel besser die Forenbeiträge direkt aus der Datenbank zu extrahieren.
+This will cause that YaCy is able to offer nice navigation features after searches.==Durch den Direktimport kann YaCy nach einer Suche auch hilfreiche Features zur Navigation anbieten.
+YaCy has a phpBB3 extraction feature, please go to the <a href="ContentIntegrationPHPBB3_p.html">phpBB3 content integration</a> servlet for direct database imports.==YaCy kann bereits Daten aus einer phpBB3 Installation extrahieren. Auf der Seite <a href="ContentIntegrationPHPBB3_p.html">Import aus phpBB3 Datenbanken</a> finden Sie ein Servlet für den direkten Datenbank Import.
+Retrieval of phpBB3 Forum Pages using a web crawl==Extraktion der phpBB3 Forenseiten durch Web Crawling
+The following form is a simplified crawl start that uses the proper values for a phpbb3 forum crawl.==Das folgende Eingabeformular ist eine vereinfachte Crawl Startseite, die passende Werte für eine phpBB3 Forensuche voreingestellt hat.
+Just insert the front page URL of your forum. After you started the crawl you may want to get back==Fügen Sie einfach die Startseite Ihres Forums ein. Nachdem Sie den Crawl gestartet haben sollten Sie zurück
+to this page to read the integration hints below.==auf die Seite kommen, um die Integrationshinweise unten zu lesen.
+URL of the phpBB3 forum main page==URL der Hauptseite des phpBB3 Forums
+This is a crawl start point==Das ist der Ausgangspunkt für den Crawl
+"Get content of phpBB3: crawl forum pages"=="Hole den phpBB3 Foreninhalt: Crawlen der Forenseiten"
+Inserting a Search Window to phpBB3==Einfügen eines Suchfeldes in das phpBB3 Forum
+To integrate a search window into phpBB3, you must insert some code into a forum template.==Um ein Suchfeld in Ihr phpBB3 Forum einzubauen, müssen Sie folgende Zeilen Code in das Forums Template einbauen.
+There are several templates that can be used for phpBB3, but in this guide we consider that==Da es viele verschiedene Templates für phpBB3 Foren gibt, gehen wir in dieser Anleitung davon aus, dass
+you are using the default template, \'prosilver\'==Sie das Standard Template 'prosilver' verwenden.
+open styles/prosilver/template/overall_header.html==Öffnen Sie die Datei styles/prosilver/template/overall_header.html
+find the line where the default search window is displayed, thats right behind the <pre>\&lt;div id=\"search-box\"\&gt;</pre> statement==Finden Sie die Zeile in der das Standard Suchfeld angezeigt wird, das sich gleich hinter der Anweisung <pre>&lt;div id="search-box"&gt;</pre> befindet
+Insert the following code right behind the div tag==Fügen Sie folgenden Code gleich nach dem div Tag ein
+YaCy Forum Search==YaCy Foren Suche
+;YaCy Search==;YaCy Suche
+Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name==Überprüfen Sie alle in diesem Codeschnipsel vorkommenden statischen IP Adressen und ersetzen Sie diese mit Ihrer eigenen IP oder dem eigenen Hostnamen.
+You may want to change the default text elements in the code snippet==Sie können auch die Standard Textelemente in dem Code Ausschnitt gegen eigene Texte austauschen.
+To see all options for the search widget, look at the more generic description of search widgets at==Um alle Optionen für das Suchfeld zu sehen, schauen Sie sich die generische Beschreibung des Such Widgets auf
+the <a href=\"ConfigLiveSearch.html\">configuration for live search</a>.==der Seite <a href=\"ConfigLiveSearch.html\">Integration eines Suchfelds für Live Suche</a> an.
+#-----------------------------
+
+#File: Load_RSS_p.html
+#---------------------------
+Configuration of a RSS Search==Konfiguration einer RSS Suche
+Loading of RSS Feeds<==Laden eines RSS Feeds<
+RSS feeds can be loaded into the YaCy search index.==RSS Feeds können in den YaCy Suchindex geladen werden.
+This does not load the rss file as such into the index but all the messages inside the RSS feeds as individual documents.==Dabei wird nicht die RSS Datei als solche in den Index geladen aber dafür alle Nachrichten innerhalb des RSS Feeds als einzelne Dokumente.
+URL of the RSS feed==URL des RSS Feeds
+>Preview<==>Vorschau<
+"Show RSS Items"=="Zeige RSS Objekte"
+Available after successful loading of rss feed in preview==Verfügbar nach dem erfolgreichen Laden des RSS Feeds in der Vorschau
+"Add All Items to Index \(full content of url\)"=="Füge alle Objekte zum Index hinzu (Voller Inhalt der URL)"
+>once<==>einmalig<
+>load this feed once now<==>Lade diesen Feed nun einmalig<
+>scheduled<==>geplant<
+>repeat the feed loading every<==>Wiederhole das Laden dieses Feeds alle<
+>minutes<==>Minuten<
+>hours<==>Stunden<
+>days<==>Tage<
+> automatically.==> automatisch.
+>List of Scheduled RSS Feed Load Targets<==>Liste aller geplanten RSS Feed Ziele<
+>Title<==>Titel<
+#>URL/Referrer<==>URL/Referrer<
+#>Recording<==>Recording<
+>Last Load<==>Zuletzt Geladen<
+>Next Load<==>Nächster Ladevorgang<
+>Last Count<==>Letzter Zähler<
+>All Count<==>Gesamter Zähler<
+>Avg. Update/Day<==>Durchschnittliche Updates pro Tag<
+"Remove Selected Feeds from Scheduler"=="Entferne ausgewählte Feeds aus der geplanten Liste"
+"Remove All Feeds from Scheduler"=="Entferne alle Feeds aus der geplanten Liste"
+>Available RSS Feed List<==>Liste mit verfügbaren RSS Feeds<
+"Remove Selected Feeds from Feed List"=="Entferne ausgewählte Feeds aus der Feed Liste"
+"Remove All Feeds from Feed List"=="Entferne alle Feeds aus der Feed Liste"
+"Add Selected Feeds to Scheduler"=="Füge ausgewählte Feeds zur geplanten Liste hinzu"
+>RSS Feed of==>RSS Feed von
+>Author<==>Autor<
+>Description<==>Beschreibung<
+>Language<==>Sprache<
+>Date<==>Datum<
+>Time-to-live<==>TTL (Zeit zu Leben)<
+>Docs<==>Dokumente<
+>State<==><
+#>URL<==>URL<
+"Add Selected Items to Index \(full content of url\)"=="Füge ausgewählte Objekte zum Index hinzu (Voller Inhalt der URL)"
 #-----------------------------
 
 #File: LogStatistics_p.html
@@ -1997,8 +2054,8 @@ Needed Memory==Benötigter Speicher
 Object Read Caches==Objekt Lese Caches
 >Read Hit Cache<==>Lese Treffer Cache<
 >Read Miss Cache<==>Lese Miss Cache<
->Hit Cache<==>Treffer Cache<
-#>Miss Cache<==>Miss Cache<
+>Read Hit<==>Lese Hit<
+>Read Miss<==>Lese Verfehler<
 Write Unique<==Schreiben einzigartig<
 Write Double<==Schreiben mehrfach<
 Deletes<==Löschungen<
@@ -2011,7 +2068,6 @@ Start Shrink when less than \#\[objectCacheStartShrink\]\# MB availabe left==Sta
 
 Other Caching Structures:==Andere Zwischenspeicher Strukturen:
 Type</td>==Typ</td>
-Amount</td>==Umfang</td>
 >Hit<==>Treffer<
 >Miss<==>Verfehler<
 Insert<==Einfügen<
@@ -2019,7 +2075,7 @@ Delete<==Löschen<
 #DNSCache</td>==DNSCache</td>
 #DNSNoCache</td>==DNSNoCache</td>
 #HashBlacklistedCache==HashBlacklistedCache
-Search Event Cache<==Such Ereignis Cache<
+Search Event Cache<==Suchereignis Cache<
 #-----------------------------
 
 #File: PerformanceQueues_p.html
@@ -2219,6 +2275,37 @@ Post-Ranking==Nach-Ranking
 
 "Set as Default Ranking"=="Als Standard Ranking speichern"
 "Re-Set to Built-In Ranking"=="Auf ursprüngliche Werte zurücksetzen"
+#-----------------------------
+
+
+#File: RemoteCrawl_p.html
+#---------------------------
+Remote Crawl Configuration==Remote Crawl Konfiguration
+#>Remote Crawler<==>Remote Crawler<
+The remote crawler is a process that requests urls from other peers.==Der Remote Crawler ist ein Prozess der URLs bei anderen Peer anfragt.
+Peers offer remote-crawl urls if the flag \'Do Remote Indexing\'==Peers bieten Remote Crawls an wenn das Flag 'Nutze Remote Indexierung'
+is switched on when a crawl is started.==gesetzt ist wenn ein Crawl gestartet wird.
+Remote Crawler Configuration==Remote Crawler Konfiguration
+>Accept Remote Crawl Requests<==>Akzeptiere Remote Crawl Anfragen<
+Perform web indexing upon request of another peer.==Führe auf Anfragen eines anderen Peers Web Indexing durch.
+Load with a maximum of==Lade mit einem Maximum an
+pages per minute==Seiten pro Minute
+"Save"=="Speichern"
+Crawl results will appear in the==Die Anzeige der Crawl Ergebnisse erfolgt im
+>Crawl Result Monitor<==>Crawl Ergebnis Monitor<
+Peers offering remote crawl URLs==Peers die Remote Crawl URLs anbieten
+If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==Wenn die Remote Crawl Option aktiviert ist, dann wird dieser Peer URLs von den folgenden Remote Peers laden:
+#>Name<==>Name<
+#>Remote<br/>Crawl<==>Remote<br/>Crawl<
+#>Release/<br/>SVN<==>Version/<br/>SVN<
+>PPM<==>==>Seiten pro Minute (PPM)<
+>QPH<==>Anfragen pro Stunde (QPH)<
+>Last<br/>Seen<==>Zuletzt<br/>Gesehen<
+>UTC</strong><br/>Offset<==>UTC</strong><br/>Abweichung<
+#>Uptime<==>Uptime<
+#>Links<==>Links<
+#>RWIs<==>RWIs<
+>Age<==>Alter<
 #-----------------------------
 
 #File: Settings_p.html
@@ -2712,11 +2799,12 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 Table Administration==Administration der Datenbank Tabellen
 Table Selection==Tabellenauswahl
 Select Table:==Auswahl Tabelle:
-"Show Table"=="Zeige Tabelle"
+#"Show Table"=="Zeige Tabelle"
 show max.==Zeige max.
 >all<==>alle<
 entries,==Einträge,
 search rows for==filtere Zeilen nach
+"Search"=="Suche"
 Table Editor: showing table==Tabellen Editor: zeige Tabelle
 #PK==Primärschlüssel
 "Edit Selected Row"=="Bearbeite ausgwählte Zeile"
@@ -3099,7 +3187,6 @@ Index&nbsp;Control==Index&nbsp;Kontrolle
 Index Creation==Indexerzeugung
 Crawler Monitor==Crawler Überwachung
 Crawl Results==Crawl Ergebnisse
-Content Import==Inhalte Importieren
 Index Administration==Indexverwaltung
 Filter &amp; Blacklists==Filter &amp; Sperrlisten
 ### SEARCH INTEGRATION ###
@@ -3209,7 +3296,7 @@ Local<==Lokal<
 #Global==Global
 #Remote==Remote
 Crawler Steering==Crawl Steuerung
-Crawl Profile Editor==Crawl Profil Editor
+Scheduler and Profile Editor<==Scheduler und Profil Editor<
 #robots.txt Monitor==robots.txt Monitor
 #-----------------------------
 
@@ -3307,14 +3394,13 @@ Password</label>==Passwort</label>
 
 #File: proxymsg/error.html
 #---------------------------
-YaCy: Error Message==YaCy: Fehler Nachricht
-YaCy - Distributed Web Indexing - Administration==YaCy - Verteiltes Internet-Indexieren - Administration 
-Problems with request:==Probleme mit Anfrage:
+YaCy: Error Message==YaCy: Fehlermeldung
+request:==Anfrage:
 unspecified error==unspezifizierter Fehler
 not-yet-assigned error==noch nicht vergebener Fehler
 You don't have an active internet connection. Please go online.==Sie haben keine aktive Internetverbindung. Bitte gehen Sie online.
 Could not load resource. The file is not available.==Datei konnte nicht geladen werden. Die Datei ist nicht vorhanden.
-Exception occured==Dieser Fehler trat auf 
+Exception occurred==Dieser Fehler trat auf 
 Generated \#\[date\]\# by==Erstellt am #[date]# von
 #-----------------------------
 
