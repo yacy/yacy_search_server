@@ -79,6 +79,8 @@ public class IndexControlRWIs_p {
         prop.putHTML("keystring", "");
         prop.put("keyhash", "");
         prop.put("result", "");
+        prop.put("cleanup", post == null ? 1 : 0);
+        
         String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
         int i = 0;
         for (String s: sb.indexSegments.segmentNames()) {
