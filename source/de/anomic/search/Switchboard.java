@@ -63,6 +63,7 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -225,7 +226,7 @@ public final class Switchboard extends serverSwitch {
     public  URLLicense                     licensedURLs;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
     public  Dispatcher                     dhtDispatcher;
-    public  List<String>                   trail;
+    public  LinkedBlockingQueue<String>    trail;
     public  yacySeedDB                     peers;
     public  WorkTables                     tables;
     
@@ -669,7 +670,7 @@ public final class Switchboard extends serverSwitch {
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
-        this.trail = new ArrayList<String>();
+        this.trail = new LinkedBlockingQueue<String>();
         
         log.logConfig("Finished Switchboard Initialization");
         sb = this;

@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.ImageParser;
@@ -46,12 +47,13 @@ public class cytag {
     public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final Switchboard sb = (Switchboard)env;
-
+        MultiProtocolURI referer = header.referer();
+        
         // harvest request information
         StringBuilder connect = new StringBuilder();
         connect.append('{');
         addJSON(connect, "time", DateFormatter.formatShortMilliSecond(new Date()));
-        addJSON(connect, "trail", header.referer().toNormalform(false, false));
+        addJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false, false));
         addJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
         addJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));
         addJSON(connect, "icon",  (post == null) ? "" : post.get("icon", ""));
@@ -59,6 +61,7 @@ public class cytag {
         addJSON(connect, "agent", header.get("User-Agent", ""));
         connect.append('}');
         
+        if (sb.trail.size() >= 100) sb.trail.remove();
         sb.trail.add(connect.toString());
         //Log.logInfo("CYTAG", "catched trail - " + connect.toString());
         
