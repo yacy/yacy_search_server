@@ -45,9 +45,10 @@ import net.yacy.kelondro.order.NaturalOrder;
 public class wikiBoard {
 
     public  static final int keyLength = 64;
-    private static final String dateFormat = "yyyyMMddHHmmss";
+    private static final String DATE_FORMAT = "yyyyMMddHHmmss";
+    private static final String ANONYMOUS = "anonymous";
 
-    protected static final SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat, Locale.US);
+    protected static final SimpleDateFormat SimpleFormatter = new SimpleDateFormat(DATE_FORMAT, Locale.US);
 
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -66,7 +67,7 @@ public class wikiBoard {
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
             //bkpbase = new MapView(BLOBTree.toHeap(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, bkppathNew), 500, '_');
-            bkpbase = new MapHeap(bkppath, keyLength + dateFormat.length(), NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+            bkpbase = new MapHeap(bkppath, keyLength + DATE_FORMAT.length(), NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         }
     }
 
@@ -94,17 +95,11 @@ public class wikiBoard {
     }
 
     private static String normalize(final String key) {
-        if (key == null) return "null";
-        return key.trim().toLowerCase();
+        return (key != null) ? key.trim().toLowerCase() : "null";
     }
 
-    public static String webalize(String key) {
-        if (key == null) return "null";
-        key = key.trim().toLowerCase();
-        int p;
-        while ((p = key.indexOf(" ")) >= 0)
-            key = key.substring(0, p) + "%20" + key.substring(p +1);
-        return key;
+    public static String webalize(final String key) {
+        return (key != null) ? normalize(key).replaceAll(" ", "%20") : "null";
     }
 
     public static String guessAuthor(final String ip) {
@@ -122,6 +117,7 @@ public class wikiBoard {
     }
 
     public class entry {
+        private static final String ANONYMOUS = "anonymous";
 
         String key;
         Map<String, String> record;
@@ -129,18 +125,27 @@ public class wikiBoard {
         public entry(final String subject, String author, String ip, String reason, final byte[] page) throws IOException {
             record = new HashMap<String, String>();
             key = subject;
-            if (key.length() > keyLength) key = key.substring(0, keyLength);
+            if (key.length() > keyLength) {
+                key = key.substring(0, keyLength);
+            }
             record.put("date", dateString());
-            if ((author == null) || (author.length() == 0)) author = "anonymous";
+            if ((author == null) || (author.length() == 0)) {
+                author = ANONYMOUS;
+            }
             record.put("author", Base64Order.enhancedCoder.encode(author.getBytes("UTF-8")));
-            if ((ip == null) || (ip.length() == 0)) ip = "";
+            if ((ip == null) || (ip.length() == 0)) {
+                ip = "";
+            }
             record.put("ip", ip);
-            if ((reason == null) || (reason.length() == 0)) reason = "";
+            if ((reason == null) || (reason.length() == 0)) {
+                reason = "";
+            }
             record.put("reason", Base64Order.enhancedCoder.encode(reason.getBytes("UTF-8")));
-            if (page == null)
+            if (page == null) {
                 record.put("page", "");
-            else
+            } else {
                 record.put("page", Base64Order.enhancedCoder.encode(page));
+            }
             authors.put(ip, author);
             //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
         }
@@ -171,26 +176,26 @@ public class wikiBoard {
 
         public String author() {
             final String a = record.get("author");
-            if (a == null) return "anonymous";
-            final byte[] b = Base64Order.enhancedCoder.decode(a);
-            if (b == null) return "anonymous";
-            return new String(b);
+            final byte[] b;
+            return (a != null && (b = Base64Order.enhancedCoder.decode(a)) != null) ? new String(b) : ANONYMOUS;
         }
 
         public String reason() {
             final String r = record.get("reason");
-            if (r == null) return "";
+            if (r == null) {
+                return "";
+            }
             final byte[] b = Base64Order.enhancedCoder.decode(r);
-            if (b == null) return "unknown";
+            if (b == null) {
+                return "unknown";
+            }
             return new String(b);
         }
 
         public byte[] page() {
             final String m = record.get("page");
-            if (m == null) return new byte[0];
-            final byte[] b = Base64Order.enhancedCoder.decode(m);
-            if (b == null) return "".getBytes();
-            return b;
+            final byte[] b;
+            return (m != null && (b = Base64Order.enhancedCoder.decode(m)) != null) ? b : new byte[0];
         }
 
         void setAncestorDate(final Date date) {
@@ -223,8 +228,7 @@ public class wikiBoard {
 
         public entry getAncestor() {
             final Date ancDate = getAncestorDate();
-            if (ancDate == null) return null;
-            return read(key + dateString(ancDate), bkpbase);
+            return (ancDate == null) ? null : read(key + dateString(ancDate), bkpbase);
         }
 
         void setChild(final String subject) {
@@ -233,28 +237,24 @@ public class wikiBoard {
 
         private String getChildName() {
             final String c = record.get("child");
-            if (c == null) return null;
-            final byte[] subject = Base64Order.enhancedCoder.decode(c);
-            if (subject == null) return null;
-            return new String(subject);
+            final byte[] subject;
+            return (c != null && (subject = Base64Order.enhancedCoder.decode(c)) != null) ? new String(subject) : null;
         }
 
         public boolean hasChild() {
             final String c = record.get("child");
-            if (c == null) return false;
-            final byte[] subject = Base64Order.enhancedCoder.decode(c);
-            return (subject != null);
+            return (c != null && Base64Order.enhancedCoder.decode(c) != null) ? true : false;
         }
 
         public entry getChild() {
             final String childName = getChildName();
-            if (childName == null) return null;
-            return read(childName, datbase);
+            return (childName == null) ? null : read(childName, datbase);
         }
     }
 
     public String write(final entry page) {
         // writes a new page and returns key
+        String ret = null;
         try {
             // first load the old page
             final entry oldEntry = read(page.key);
@@ -269,11 +269,11 @@ public class wikiBoard {
             bkpbase.insert((page.key + dateString(oldDate)).getBytes(), oldEntry.record);
             // write the new page
             datbase.insert(page.key.getBytes(), page.record);
-            return page.key;
+            ret = page.key;
         } catch (final Exception e) {
             Log.logException(e);
-            return null;
         }
+        return ret;
     }
 
     public entry read(final String key) {
@@ -281,19 +281,20 @@ public class wikiBoard {
     }
 
     entry read(String key, final MapHeap base) {
+        entry ret = null;
         try {
             key = normalize(key);
-            if (key.length() > keyLength) key = key.substring(0, keyLength);
+            if (key.length() > keyLength) {
+                key = key.substring(0, keyLength);
+            }
             final Map<String, String> record = base.get(key.getBytes());
-            if (record == null) return newEntry(key, "anonymous", "127.0.0.1", "New Page", "".getBytes());
-            return new entry(key, record);
+            ret = (record == null) ? newEntry(key, ANONYMOUS, "127.0.0.1", "New Page", "".getBytes()) : new entry(key, record);
         } catch (final IOException e) {
             Log.logException(e);
-            return null;
         } catch (RowSpaceExceededException e) {
             Log.logException(e);
-            return null;
         }
+        return ret;
     }
     
     public entry readBkp(final String key) {
