@@ -39,7 +39,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.data.list.ListAccumulator;
 import de.anomic.data.list.XMLBlacklistImporter;
@@ -48,6 +47,7 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -143,7 +143,7 @@ public class sharedBlacklist_p {
                         // get List
                         DigestURI u = new DigestURI(downloadURLOld, null);
 
-                        otherBlacklist = FileUtils.strings(u.get(HTTPLoader.yacyUserAgent, 10000));
+                        otherBlacklist = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", Hash);
@@ -160,7 +160,7 @@ public class sharedBlacklist_p {
 
                 try {
                     final DigestURI u = new DigestURI(downloadURL, null);
-                    otherBlacklist = FileUtils.strings(u.get(HTTPLoader.yacyUserAgent, 10000));
+                    otherBlacklist = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);

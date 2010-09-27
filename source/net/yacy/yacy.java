@@ -46,6 +46,7 @@ import java.util.concurrent.Semaphore;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.gui.YaCyApp;
@@ -289,7 +290,7 @@ public final class yacy {
             
             // set user-agent
             final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "
-                    + HTTPClient.getSystemOST() + ")";
+                    + MultiProtocolURI.systemOST + ")";
             HTTPClient.setDefaultUserAgent(userAgent);
             
             // start main threads

@@ -36,13 +36,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.MapTools;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
 //import de.anomic.http.client.Client;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -149,7 +148,7 @@ public class Network {
                 prop.put("table_my-url", seed.get(yacySeed.SEEDLIST, ""));
                 
                 // generating the location string
-                prop.putHTML("table_my-location", HTTPClient.generateLocation());
+                prop.putHTML("table_my-location", MultiProtocolURI.generateLocation());
             }
 
             // overall results: Network statistics
@@ -363,8 +362,8 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
-                                userAgent = HTTPLoader.yacyUserAgent;
-                                location = HTTPClient.generateLocation();
+                                userAgent = MultiProtocolURI.yacybotUserAgent;
+                                location = MultiProtocolURI.generateLocation();
                             } else {
                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
                                location = parseLocationInUserAgent(userAgent);

@@ -44,6 +44,7 @@ import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -85,7 +86,7 @@ public class FTPClient {
     private Socket ControlSocket = null;
 
     // socket timeout
-    private static final int ControlSocketTimeout = 10000;
+    private static final int ControlSocketTimeout = 1000;
 
     // data socket timeout
     private int DataSocketTimeout = 0; // in seconds (default infinite)
@@ -1515,13 +1516,14 @@ public class FTPClient {
         }
 
         try {
-            ControlSocket = new Socket(host, port);
+            ControlSocket = new Socket();
             ControlSocket.setSoTimeout(getTimeout());
             ControlSocket.setKeepAlive(true);
             ControlSocket.setTcpNoDelay(true); // no accumulation until buffer is full
             ControlSocket.setSoLinger(false, getTimeout()); // !wait for all data being written on close()
             ControlSocket.setSendBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
             ControlSocket.setReceiveBufferSize(1440); // read http://www.cisco.com/warp/public/105/38.shtml
+            ControlSocket.connect(new InetSocketAddress(host, port), 1000);
             clientInput = new BufferedReader(new InputStreamReader(ControlSocket.getInputStream()));
             clientOutput = new DataOutputStream(new BufferedOutputStream(ControlSocket.getOutputStream()));
 

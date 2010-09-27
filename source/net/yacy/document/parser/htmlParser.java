@@ -32,8 +32,6 @@ import java.util.regex.Pattern;
 
 import com.ibm.icu.text.CharsetDetector;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
-
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
@@ -268,7 +266,7 @@ public class htmlParser extends AbstractParser implements Parser {
         MultiProtocolURI url;
         try {
             url = new MultiProtocolURI(args[0]);
-            byte[] content = url.get(HTTPLoader.crawlerUserAgent, 3000);
+            byte[] content = url.get(MultiProtocolURI.yacybotUserAgent, 3000);
             Document[] document = new htmlParser().parse(url, "text/html", null, new ByteArrayInputStream(content));
             String title = document[0].dc_title();
             System.out.println(title);

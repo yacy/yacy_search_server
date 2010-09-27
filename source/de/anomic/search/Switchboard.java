@@ -124,7 +124,6 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.CrawlProfile.CacheStrategy;
 import de.anomic.crawler.retrieval.EventOrigin;
-import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.LibraryProvider;
@@ -2406,7 +2405,7 @@ public final class Switchboard extends serverSwitch {
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
         reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
-        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+        reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
         client.setTimout((int) getConfigLong("bootstrapLoadTimeout", 20000));
@@ -2557,7 +2556,7 @@ public final class Switchboard extends serverSwitch {
      */
     public static Map<String, String> loadFileAsMap(final DigestURI url) {
     	final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+        reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
     	try {

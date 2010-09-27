@@ -45,8 +45,6 @@ import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.ByteCount;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
-
 public class RobotsTxt {
     
     private static Logger log = Logger.getLogger(RobotsTxt.class);
@@ -325,7 +323,7 @@ public class RobotsTxt {
         RequestHeader reqHeaders = new RequestHeader();
         
         // add yacybot user agent
-        reqHeaders.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        reqHeaders.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         
         // adding referer
         reqHeaders.put(RequestHeader.REFERER, (MultiProtocolURI.newURL(robotsURL,"/")).toNormalform(true, true));

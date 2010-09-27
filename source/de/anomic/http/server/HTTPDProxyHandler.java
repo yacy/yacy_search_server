@@ -71,6 +71,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -86,7 +87,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 //import de.anomic.http.client.Client;
@@ -97,6 +97,9 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 
 public final class HTTPDProxyHandler {
+    
+
+    public  static final String yacyUserAgent = "yacy (" + MultiProtocolURI.systemOST +") yacy.net";
     
     // static variables
     // can only be instantiated upon first instantiation of this class object
@@ -1539,7 +1542,7 @@ public final class HTTPDProxyHandler {
     private static synchronized String generateUserAgent(final HeaderFramework requestHeaders) {
         userAgentStr.setLength(0);
         
-        final String browserUserAgent = requestHeaders.get(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+        final String browserUserAgent = requestHeaders.get(HeaderFramework.USER_AGENT, yacyUserAgent);
         final int pos = browserUserAgent.lastIndexOf(')');
         if (pos >= 0) {
             userAgentStr

@@ -49,7 +49,8 @@ import net.yacy.cora.protocol.http.HTTPClient;
  * MultiProtocolURI provides a URL object for multiple protocols like http, https, ftp, smb and file
  *
  */
-public class MultiProtocolURI implements Serializable {
+public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolURI> {
+
     
     private static final long serialVersionUID = -1173233022912141884L;
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
@@ -78,10 +79,47 @@ public class MultiProtocolURI implements Serializable {
         }
     }
     
+    /**
+     * provide system information for client identification
+     */
+    public static final String systemOST = System.getProperty("os.arch", "no-os-arch") + " " +
+            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
+            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
+    
+    public  static final String yacybotUserAgent = "yacybot (" + systemOST +") http://yacy.net/bot.html";
+    
+    /**
+     * generating the location string
+     * 
+     * @return
+     */
+    public static String generateLocation() {
+        String loc = System.getProperty("user.timezone", "nowhere");
+        final int p = loc.indexOf('/');
+        if (p > 0) {
+            loc = loc.substring(0, p);
+        }
+        loc = loc + "/" + System.getProperty("user.language", "dumb");
+        return loc;
+    }
+    
     // class variables
     protected String protocol, host, userInfo, path, quest, ref;
     protected int port;
     
+    /**
+     * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
+     */
+    public MultiProtocolURI()  {
+        this.protocol = null;
+        this.host = null;
+        this.userInfo = null;
+        this.path = null;
+        this.quest = null;
+        this.ref = null;
+        this.port = -1;
+    }
+
     public MultiProtocolURI(final File file) throws MalformedURLException {
         this("file", "", -1, file.getAbsolutePath());
     }
@@ -762,9 +800,8 @@ public class MultiProtocolURI implements Serializable {
         return this.toString().equals(other.toString());
     }
 
-    public int compareTo(final Object h) {
-        assert (h instanceof MultiProtocolURI);
-        return this.toString().compareTo(((MultiProtocolURI) h).toString());
+    public int compareTo(MultiProtocolURI h) {
+        return this.toString().compareTo(h.toString());
     }
     
     public boolean isPOST() {
@@ -1112,4 +1149,5 @@ public class MultiProtocolURI implements Serializable {
             }
         }
     }
+
 }

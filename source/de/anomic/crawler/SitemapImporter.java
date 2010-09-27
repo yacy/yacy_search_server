@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -39,7 +40,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.io.ByteCountInputStream;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -62,7 +62,7 @@ public class SitemapImporter extends Thread {
     public void run() {
         // download document
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         final HTTPClient client = new HTTPClient();
         client.setTimout(5000);
         client.setHeader(requestHeader.entrySet());

@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -52,7 +53,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
 //import de.anomic.http.client.Client;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.AlternativeDomainNames;
@@ -846,7 +846,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
         reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
-        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+        reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         
         // init http-client
 //        final Client client = new Client(10000, reqHeader);

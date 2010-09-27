@@ -201,7 +201,7 @@ public final class LoaderDispatcher {
                 // create request header values and a response object because we need that
                 // in case that we want to return the cached content in the next step
                 final RequestHeader requestHeader = new RequestHeader();
-                requestHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
+                requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
                 DigestURI refererURL = null;
                 if (request.referrerhash() != null) refererURL = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
                 if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));

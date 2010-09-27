@@ -50,8 +50,6 @@ public final class HTTPLoader {
     private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
     public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
     public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
-    public  static final String crawlerUserAgent = "yacybot (" + HTTPClient.getSystemOST() +") http://yacy.net/bot.html";
-    public  static final String yacyUserAgent = "yacy (" + HTTPClient.getSystemOST() +") yacy.net";
     
     /**
      * The socket timeout that should be used
@@ -101,7 +99,7 @@ public final class HTTPLoader {
         
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, crawlerUserAgent);
+        requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         DigestURI refererURL = null;
         if (request.referrerhash() != null) refererURL = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
         if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
@@ -216,7 +214,7 @@ public final class HTTPLoader {
         
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, crawlerUserAgent);
+        requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, DEFAULT_LANGUAGE);
         requestHeader.put(HeaderFramework.ACCEPT_CHARSET, DEFAULT_CHARSET);
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);

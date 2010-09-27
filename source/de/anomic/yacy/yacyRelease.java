@@ -57,7 +57,6 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.tools.CryptoLib;
@@ -283,7 +282,7 @@ public final class yacyRelease extends yacyVersion {
         File download = null;
         // setup httpClient
         final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+        reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         
         final String name = this.getUrl().getFileName();
         byte[] signatureBytes = null;

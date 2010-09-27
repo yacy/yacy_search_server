@@ -609,6 +609,28 @@ public class Domains {
         return localHostAddresses[0];
     }
     
+    /**
+     * generate a list of intranet InetAddresses without the loopback address 127.0.0.1
+     * @return list of all intranet addresses
+     */
+    public static List<InetAddress> myIntranetIPs() {
+        // list all local addresses
+        if (localHostAddresses.length < 2) try {Thread.sleep(1000);} catch (InterruptedException e) {}
+        ArrayList<InetAddress> list = new ArrayList<InetAddress>(localHostAddresses.length);
+        if (localHostAddresses.length == 0) {
+            if (localHostAddress != null && isLocal(localHostAddress.getHostAddress())) {
+                list.add(localHostAddress);
+            }
+            return list;
+        }
+        for (int i = 0; i < localHostAddresses.length; i++) {
+            if ((0Xff & localHostAddresses[i].getAddress()[0]) == 127) continue;
+            if (!matchesList(localHostAddresses[i].getHostAddress(), localhostPatterns)) continue;
+            list.add(localHostAddresses[i]);
+        }
+        return list;
+    }
+    
     public static int getDomainID(final String host) {
         if (host == null || host.length() == 0) return TLD_Local_ID;
         if (isLocal(host)) return TLD_Local_ID;

@@ -42,6 +42,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ConnectionInfo;
 
 import org.apache.http.Header;
@@ -93,7 +94,7 @@ public class HTTPClient {
 
 	private final static int maxcon = 20;
 	private static IdledConnectionEvictor idledConnectionEvictor = null;
-	private static HttpClient httpClient = null;
+	private static HttpClient httpClient = initConnectionManager();
 	private Header[] headers = null;
 	private HttpResponse httpResponse = null;
 	private HttpUriRequest currentRequest = null;
@@ -106,19 +107,13 @@ public class HTTPClient {
     
     public HTTPClient() {
     	super();
-    	if (httpClient == null) {
-    		initConnectionManager();
-    	}
     }
     
     public static void setDefaultUserAgent(final String defaultAgent) {
-    	if (httpClient == null) {
-    		initConnectionManager();
-    	}
     	HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
     }
     
-    private static void initConnectionManager() {
+    private static HttpClient initConnectionManager() {
 		// Create and initialize HTTP parameters
 		final HttpParams httpParams = new BasicHttpParams();
 		/**
@@ -141,7 +136,7 @@ public class HTTPClient {
 		 */
 		HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
 		// UserAgent
-		HttpProtocolParams.setUserAgent(httpParams, "yacy (" + systemOST +") yacy.net");
+		HttpProtocolParams.setUserAgent(httpParams, MultiProtocolURI.yacybotUserAgent);
 		HttpProtocolParams.setUseExpectContinue(httpParams, false); // IMPORTANT - if not set to 'false' then servers do not process the request until a time-out of 2 seconds
 		/**
 		 * HTTP connection settings
@@ -175,7 +170,7 @@ public class HTTPClient {
 
 		idledConnectionEvictor = new IdledConnectionEvictor(clientConnectionManager);
 		idledConnectionEvictor.start();
-        
+        return httpClient;
     }
     
     /**
@@ -530,35 +525,6 @@ public class HTTPClient {
     			httpUriRequest.hashCode(),
     			System.currentTimeMillis(),
     			upbytes));
-    }
-    
-    /**
-     * provide system information for client identification
-     */
-    private static final String systemOST = System.getProperty("os.arch", "no-os-arch") + " " +
-            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
-            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
-    
-    /**
-     * generating the location string
-     * 
-     * @return
-     */
-    public static String generateLocation() {
-        String loc = System.getProperty("user.timezone", "nowhere");
-        final int p = loc.indexOf('/');
-        if (p > 0) {
-            loc = loc.substring(0, p);
-        }
-        loc = loc + "/" + System.getProperty("user.language", "dumb");
-        return loc;
-    }
-
-    /**
-     * @return the systemOST
-     */
-    public static String getSystemOST() {
-        return systemOST;
     }
     
     private static SSLSocketFactory getSSLSocketFactory() {

@@ -37,11 +37,11 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.WorkTables;
 import de.anomic.data.translator;
 import de.anomic.search.Switchboard;
@@ -103,7 +103,7 @@ public class ConfigLanguage_p {
                 Iterator<String> it;
                 try{
                     final DigestURI u = new DigestURI(url, null);
-                    it = FileUtils.strings(u.get(HTTPLoader.yacyUserAgent, 10000));
+                    it = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
                 }catch(final IOException e){
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);

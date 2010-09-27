@@ -41,8 +41,6 @@ import net.yacy.cora.protocol.http.HTTPConnector;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
-
 public class Search {
     
     public static BlockingQueue<RSSMessage> search(String rssSearchServiceURL, String query, boolean verify, boolean global, long timeout, int maximumRecords) {
@@ -128,7 +126,7 @@ public class Search {
             parts.put("maximumRecords", new StringBody(Long.toString(maximumRecords)));
             parts.put("verify", new StringBody(verify ? "true" : "false"));
             parts.put("resource", new StringBody(global ? "global" : "local"));
-            final byte[] result = HTTPConnector.getConnector(HTTPLoader.yacyUserAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
+            final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
             //String debug = new String(result); System.out.println("*** DEBUG: " + debug);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {
