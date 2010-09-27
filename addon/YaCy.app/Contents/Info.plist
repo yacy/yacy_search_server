@@ -48,9 +48,9 @@
 			<string>$JAVAROOT/lib/activation.jar</string>
 			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
 			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
-			<string>$JAVAROOT/lib/httpclient-4.0.1.jar</string>
+			<string>$JAVAROOT/lib/httpclient-4.0.3.jar</string>
 			<string>$JAVAROOT/lib/httpcore-4.0.1.jar</string>
-			<string>$JAVAROOT/lib/httpmime-4.0.1.jar</string>
+			<string>$JAVAROOT/lib/httpmime-4.0.3.jar</string>
 			<string>$JAVAROOT/lib/icu4j-core.jar</string>
 			<string>$JAVAROOT/lib/jakarta-oro-2.0.8.jar</string>
 			<string>$JAVAROOT/lib/jcifs-1.3.14.jar</string>

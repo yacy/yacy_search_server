@@ -175,6 +175,7 @@
   </target>
 	
     <!-- define the classpath that should be used for compiling -->
+    <!-- when changing paths here, please also update the paths in /addon/YaCy.app/Contents/Info.plist -->
     <path id="project.class.path">
         <pathelement location="${build}" />
         <pathelement location="${htroot}" />
