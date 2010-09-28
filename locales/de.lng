@@ -1022,6 +1022,23 @@ check this box.==aktivieren Sie diese Box.
 Depth</label>:==Tiefe</label>:
 #-----------------------------
 
+#File: CrawlStartIntranet_p.html
+#---------------------------
+#Intranet Crawl Start==Intranet Crawl Start
+When an index domain is configured to contain intranet links,==Wenn eine Index Domain konfiguriert wurde die Intranet Links enthält,
+the intranet may be scanned for available servers.==kann dieses Intranet auf verfügbare Server gescannt werden.
+Please select below the servers in your intranet that you want to fetch into the search index.==Bitte in der folgenden Server Liste aus Ihrem Intranet auswählen, welche Sie in den Suchindex aufnehmen wollen.
+This network definition does not allow intranet links.==Diese Netzwerk Konfiguration erlaubt keine Intranet Links.
+A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==Eine Liste mit Servern aus dem Intranet ist nur verfügbar, wenn Sie YaCy auch konfiguriert haben Intranetseiten zu indexieren.
+To do so, open the <a href=\"ConfigBasic.html\">Basic Configuration</a> servlet and select the \'Intranet Indexing\' use case.==Um diese Einstellung vorzunehmen, bitte im Servlet <a href="ConfigBasic.html">Basis Konfiguration</a> den Anwendungsfall 'Intranet Indexierung' auswählen.
+Available Intranet Server==Verfügbare Intranet Server
+#>URL<==>URL<
+>Process<==>Status<
+>not in index<==>Nicht im Index<
+>indexed<==>Indexiert<
+"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawler hinzu"
+#-----------------------------
+
 #File: CrawlStartSite_p.html
 #---------------------------
 >Site Crawling<==>Seiten Crawlen<
@@ -3347,6 +3364,7 @@ Index Creation==Indexerzeugung
 Full Site Crawl==Vollständiger Seiten Crawl
 Sitemap Loader==Sitemap Lader
 Crawl Start<br/>\(Expert\)==Crawl Start<br/>(Experte)
+#>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
 Crawling of==Crawlen von
 #Media Wikis==Media Wikis
 >phpBB3 Forums<==>phpBB3 Foren<
