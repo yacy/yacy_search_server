@@ -31,12 +31,13 @@ import java.util.ArrayList;
 
 public abstract class AbstractReference implements Reference {
 
-    protected static ArrayList<Integer> a(int i) {
-        ArrayList<Integer> l = new ArrayList<Integer>(1);
-        l.add(i);
-        return l;
+    protected static void a(ArrayList<Integer> a, int i) {
+        assert a != null;
+        a.clear();
+        a.add(i);
     }
     protected static int max(ArrayList<Integer> a) {
+        assert a != null;
         assert !a.isEmpty();
         if (a.size() == 1) return a.get(0);
         if (a.size() == 2) return Math.max(a.get(0), a.get(1));
@@ -45,6 +46,7 @@ public abstract class AbstractReference implements Reference {
         return r;
     }
     protected static int min(ArrayList<Integer> a) {
+        assert a != null;
         assert !a.isEmpty();
         if (a.size() == 1) return a.get(0);
         if (a.size() == 2) return Math.min(a.get(0), a.get(1));

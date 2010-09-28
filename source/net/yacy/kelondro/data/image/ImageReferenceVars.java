@@ -53,7 +53,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
                posinphrase, posofphrase,
                urlcomps, urllength, virtualAge,
                wordsintext, wordsintitle;
-    ArrayList<Integer> positions;
+    private final ArrayList<Integer> positions;
     public double termFrequency;
     
     public ImageReferenceVars(
@@ -309,7 +309,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         if (this.virtualAge > (v = other.virtualAge)) this.virtualAge = v;
         if (this.wordsintext > (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext > (v = other.phrasesintext)) this.phrasesintext = v;
-        this.positions = a(Math.min(min(this.positions), min(other.positions)));
+        if (other.positions != null) a(this.positions, Math.min(min(this.positions), min(other.positions)));
         if (this.posinphrase > (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase > (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified > (w = other.lastModified)) this.lastModified = w;
@@ -331,7 +331,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         if (this.virtualAge < (v = other.virtualAge)) this.virtualAge = v;
         if (this.wordsintext < (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext < (v = other.phrasesintext)) this.phrasesintext = v;
-        this.positions = a(Math.max(max(this.positions), max(other.positions)));
+        if (other.positions != null) a(this.positions, Math.max(max(this.positions), max(other.positions)));
         if (this.posinphrase < (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase < (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified < (w = other.lastModified)) this.lastModified = w;

@@ -168,8 +168,10 @@ public class HTTPClient {
 		// uncompress gzip
 		((AbstractHttpClient) httpClient).addResponseInterceptor(new GzipResponseInterceptor());
 
-		idledConnectionEvictor = new IdledConnectionEvictor(clientConnectionManager);
-		idledConnectionEvictor.start();
+		if (idledConnectionEvictor == null) {
+		    idledConnectionEvictor = new IdledConnectionEvictor(clientConnectionManager);
+		    idledConnectionEvictor.start();
+		}
         return httpClient;
     }
     
