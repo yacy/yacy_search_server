@@ -517,6 +517,7 @@ public final class SearchEvent {
                 if (checkedPeers.contains(peer)) continue; // do not ask a peer again
                 urls = entry.getValue();
                 words = wordsFromPeer(peer, urls);
+                if (words.length() == 0) continue; // ???
                 assert words.length() >= 12 : "words = " + words;
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls + " from words: " + words);
                 rankedCache.moreFeeders(1);

@@ -26,28 +26,48 @@
 
 package net.yacy.kelondro.rwi;
 
-import java.util.ArrayList;
+import java.util.List;
 
 
 public abstract class AbstractReference implements Reference {
 
-    protected static void a(ArrayList<Integer> a, int i) {
+    protected static void a(List<Integer> a, int i) {
         assert a != null;
-        a.clear();
-        a.add(i);
+        if (i < 0) return; // signal for 'do nothing'
+        synchronized (a) {
+            a.clear();
+            a.add(i);
+        }
     }
-    protected static int max(ArrayList<Integer> a) {
+    protected static int max(List<Integer> a, List<Integer> b) {
         assert a != null;
-        assert !a.isEmpty();
+        if (a.size() == 0) return max(b);
+        if (b.size() == 0) return max(a);
+        return Math.max(max(a), max(b));
+    }
+    protected static int min(List<Integer> a, List<Integer> b) {
+        assert a != null;
+        if (a.size() == 0) return min(b);
+        if (b.size() == 0) return min(a);
+        int ma = min(a);
+        int mb = min(b);
+        if (ma == -1) return mb;
+        if (mb == -1) return ma;
+        return Math.min(ma, mb);
+    }
+
+    private static int max(List<Integer> a) {
+        assert a != null;
+        if (a.size() == 0) return -1;
         if (a.size() == 1) return a.get(0);
         if (a.size() == 2) return Math.max(a.get(0), a.get(1));
         int r = a.get(0);
         for (int i = 1; i < a.size(); i++) if (a.get(i) > r) r = a.get(i);
         return r;
     }
-    protected static int min(ArrayList<Integer> a) {
+    private static int min(List<Integer> a) {
         assert a != null;
-        assert !a.isEmpty();
+        if (a.size() == 0) return -1;
         if (a.size() == 1) return a.get(0);
         if (a.size() == 2) return Math.min(a.get(0), a.get(1));
         int r = a.get(0);

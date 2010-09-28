@@ -27,7 +27,9 @@
 package net.yacy.kelondro.data.word;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
@@ -60,7 +62,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                posinphrase, posofphrase,
                urlcomps, urllength, virtualAge,
                wordsintext, wordsintitle;
-    private final ArrayList<Integer> positions;
+    private final List<Integer> positions;
     public double termFrequency;
     
     public WordReferenceVars(
@@ -71,7 +73,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      hitcount,      // how often appears this word in the text
             final int      wordcount,     // total number of words
             final int      phrasecount,   // total number of phrases
-            final ArrayList<Integer> ps,  // positions of words that are joined into the reference
+            final List<Integer> ps,       // positions of words that are joined into the reference
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
@@ -96,7 +98,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.llocal = outlinksSame;
         this.lother = outlinksOther;
         this.phrasesintext = phrasecount;
-        this.positions = new ArrayList<Integer>(ps.size());
+        this.positions = Collections.synchronizedList(new ArrayList<Integer>(ps.size()));
         for (int i = 0; i < ps.size(); i++) this.positions.add(ps.get(i));
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
@@ -317,7 +319,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.virtualAge > (v = other.virtualAge)) this.virtualAge = v;
         if (this.wordsintext > (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext > (v = other.phrasesintext)) this.phrasesintext = v;
-        if (other.positions != null) a(this.positions, Math.min(min(this.positions), min(other.positions)));
+        if (other.positions != null) a(this.positions, min(this.positions, other.positions));
         if (this.posinphrase > (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase > (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified > (w = other.lastModified)) this.lastModified = w;
@@ -339,7 +341,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.virtualAge < (v = other.virtualAge)) this.virtualAge = v;
         if (this.wordsintext < (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext < (v = other.phrasesintext)) this.phrasesintext = v;
-        if (other.positions != null) a(this.positions, Math.max(max(this.positions), max(other.positions)));
+        if (other.positions != null) a(this.positions, max(this.positions, other.positions));
         if (this.posinphrase < (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase < (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified < (w = other.lastModified)) this.lastModified = w;
