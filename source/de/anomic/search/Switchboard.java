@@ -228,6 +228,7 @@ public final class Switchboard extends serverSwitch {
     public  LinkedBlockingQueue<String>    trail;
     public  yacySeedDB                     peers;
     public  WorkTables                     tables;
+    public  TreeMap<byte[], DigestURI>     intranetURLs = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
     
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -551,9 +552,9 @@ public final class Switchboard extends serverSwitch {
                 this.crawler,
                 this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
                 this.peers,
-                "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
-                "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
-        
+                isIntranetMode(),
+                isGlobalMode()); // Intranet and Global mode may be both true!
+
         // initializing dht chunk generation
         this.dhtMaxReferenceCount = (int) getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
         
@@ -993,6 +994,14 @@ public final class Switchboard extends serverSwitch {
         return sb;
     }
 
+    public boolean isIntranetMode() {
+        return "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
+    }
+    
+    public boolean isGlobalMode() {
+        return "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
+    }    
+    
     public boolean isRobinsonMode() {
     	// we are in robinson mode, if we do not exchange index by dht distribution
     	// we need to take care that search requests and remote indexing requests go only
@@ -1523,7 +1532,7 @@ public final class Switchboard extends serverSwitch {
                 Log.logException(e);
                 continue;
             }
-            Map<String, Integer> callResult = this.tables.execAPICall(pks, "localhost", (int) this.getConfigLong("port", 8080), this.getConfig("adminAccountBase64MD5", ""));
+            Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) this.getConfigLong("port", 8080), this.getConfig("adminAccountBase64MD5", ""), pks);
             for (Map.Entry<String, Integer> call: callResult.entrySet()) {
                 log.logInfo("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
             }

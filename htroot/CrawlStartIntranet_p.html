@@ -1,0 +1,65 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Intranet Crawl Start</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+    <!--
+    function setall(name) {
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        for (i = 0; i < count; i++) {
+            if (selectForm.elements["item_" + i] == null) continue;
+            selectForm.elements["item_" + i].checked = !selectForm.elements["item_" + i].checked;
+        }
+    }
+    -->
+    </script>
+    <script type="text/javascript" src="/js/sorttable.js"></script>
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Intranet Crawl Start</h2>
+    <p>
+      When an index domain is configured to contain intranet links,
+      the intranet may be scanned for available servers.
+      Please select below the servers in your intranet that you want to fetch into the search index.
+    </p>
+    
+	#(notintranet)#::
+	<p class="error">
+      This network definition does not allow intranet links.
+      A list of intranet servers is only available if you confiugure YaCy to index intranet targets.
+      To do so, open the <a href="ConfigBasic.html">Basic Configuration</a> servlet and select the 'Intranet Indexing' use case.
+    </p>
+	#(/notintranet)#
+	
+	#(servertable)#::
+	<form name="servertable" action="CrawlStartIntranet_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist" target="_self"><fieldset>
+	  <legend><label for="table">Available Intranet Server</label></legend>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name)" /></td>
+          <td>URL</td>
+          <td>Process</td>
+        </tr>
+        #{list}#
+        <tr class="TableCellLight">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td><a href="#[url]#">#[url]#</a></td>
+          #(process)#<td class="error">not in index</td>::<td class="commit">indexed</td>#(/process)#
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="crawl" value="Add Selected Servers to Crawler" /></dt>
+      </p>
+    </fieldset></form>
+	#(/servertable)#
+	
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

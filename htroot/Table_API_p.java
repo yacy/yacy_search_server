@@ -144,7 +144,7 @@ public class Table_API_p {
             }
             
             // now call the api URLs and store the result status
-            Map<String, Integer> l = sb.tables.execAPICall(pks, "localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""));
+            Map<String, Integer> l = sb.tables.execAPICalls("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), pks);
             
             // construct result table
             prop.put("showexec", l.size() > 0 ? 1 : 0);
