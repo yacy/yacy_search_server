@@ -423,7 +423,7 @@ monitor at the network page</a> what the other peers are doing==auf der Netzwerk
 Your Peer name is a default name; please set an individual peer name.==Ihr Peer-Name ist ein Standardname; bitte stellen Sie einen individuellen Namen ein.
 You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
 Some pages are protected by passwords.==Einige Seiten sind passwortgeschützt.
-You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Sie sollten ein Password in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> setzen, um Ihren YaCy peer abzusichern.</p>::
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Sie sollten ein Password in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> setzen, um Ihren YaCy Peer abzusichern.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall geöffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
 This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich, wenn Sie vollständig am YaCy-Netzwerk teilhaben möchten.
 You can also use your peer without opening it, but this is not recomended.==Sie können Ihren Peer auch nutzen ohne ihn zu öffnen, dies wird jedoch nicht empfohlen.
@@ -2729,7 +2729,7 @@ Please log in.==Bitte melden Sie sich an.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Sie können nun zurück auf die <a href="Settings_p.html">Einstellungen</a> Seite gehen, wenn Sie weitere Änderungen vornehmen wollen.
 See you soon!==Bis bald!
 Just a moment, please!==Einen Moment bitte!
-Application will terminate after working off all scheduled tasks.==Der YaCy Proxy fährt sich runter, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
+Application will terminate after working off all scheduled tasks.==YaCy Proxy wird beendet, nachdem alle ausstehenden Aufgaben abgearbeitet wurden.
 Then YaCy will restart.==Dann wird YaCy neu gestartet.
 If you can't reach YaCy's interface after 5 minutes restart failed.==Wenn Sie nach 5 Minuten nicht auf das YaCy Interface zugreifen können, dann ist der Neustart fehlgeschlagen.
 Installing release==Installiere Release
@@ -2738,9 +2738,8 @@ YaCy will be restarted after installation==YaCy wird nach der Installation neuge
 
 #File: Supporter.html
 #---------------------------
-Supporter</title>==Unterstützer</title>
+Supporter<==Unterstützer<
 "Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"
-Supporter</h2>==Unterstützer</h2>
 Supporter are switched off for users without authorization==Die Unterstützer-Seiten sind ausgeschaltet für Benutzer ohne Erlaubnis
 "bookmark"=="Lesezeichen"
 "Add to bookmarks"=="Zu den Lesezeichen hinzufügen"
@@ -2749,8 +2748,6 @@ Supporter are switched off for users without authorization==Die Unterstützer-Se
 "negative vote"=="Negative Bewertung"
 "Give negative vote"=="Link negativ bewerten"
 provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==bereitgestellt durch YaCy Peers mit einer URL in ihrem Profil. Es werden nur URLs von Peers angezeigt, die online sind.
-
-provided by YaCy peers using public bookmarks, link votes and crawl start points
 #-----------------------------
 
 #File: Surftips.html
@@ -2764,6 +2761,8 @@ title="positive vote"==title="Positive Bewertung"
 alt="Give positive vote"==alt="Link positiv bewerten"
 title="negative vote"==title="Negative Bewertung"
 alt="Give negative vote"==alt="Link negativ bewerten"
+YaCy Supporters<==YaCy Unterstützer<
+>a list of home pages of yacy users<==>Eine Liste von Homepages von YaCy Nutzern<
 provided by YaCy peers using public bookmarks, link votes and crawl start points==automatisch erzeugt durch öffentliche Lesezeichen, Link-Bewertungen und Crawl-Startpunkte anderer YaCy-Peers
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="Bitte geben Sie zu Ihrer Linkempfehlung einen Kommentar ein. (Ihre Stimme wird auch ohne Kommentar angenommen.)"
 "authentication required"=="Autorisierung erforderlich"
@@ -3239,7 +3238,7 @@ Project Home==Projektseite
 #Deutsches Forum==Deutsches Forum
 English Forum==Englisches Forum
 YaCy Project Wiki==YaCy Projekt Wiki
-YaCy Statistics==YaCy Statistiken
+Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
 #-----------------------------
 
 #File: env/templates/simpleheader.template
