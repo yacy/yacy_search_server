@@ -7,9 +7,9 @@
     <script type="text/javascript">
     function switchTargetBlacklist(value){
         if (value == "moveBlacklistEntry") {
-            document.editBlacklistPatterns.targetBlacklist.disabled=false;
+            document.getElementById("editBlacklistPatterns").targetBlacklist.disabled=false;
         } else {
-            document.editBlacklistPatterns.targetBlacklist.disabled=true;
+            document.getElementById("editBlacklistPatterns").targetBlacklist.disabled=true;
         }
     }
     </script>
@@ -32,15 +32,15 @@
     <fieldset class="selectList">
       <legend>Select list:</legend>
       #(disabled)#
-      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" name="selectListName">
-        <select name="selectedListName" size="1" onChange="document.selectListName.submit();">
+      <form id="selectListName" action="Blacklist_p.html" method="post" enctype="multipart/form-data"><fieldset>
+        <select name="selectedListName" size="1" onchange="document.getElementById('selectListName').submit();">
           #{blackLists}#
           <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]# [#(shared)#not shared::shared#(/shared)#]</option>
           #{/blackLists}#
         </select>
         <input type="hidden" name="selectList" value="select" />
         <input type="submit" />
-      </form>
+      </fieldset></form>
         ::
       #(/disabled)#
     </fieldset>
@@ -55,10 +55,10 @@
           ::
           <p>Unable to create list <strong>#[name]#</strong> since a list of this name exists already.</p>
       #(/error)#
-        <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+        <form action="Blacklist_p.html" method="post" enctype="multipart/form-data"><fieldset>
           <input type="text" id="newListName" size ="50" name="newListName" />
           <input type="submit" name="createNewList" value="create" />
-        </form>
+        </fieldset></form>
     </fieldset>  
     <br /><br />
 #(disabled)#
@@ -87,7 +87,7 @@
 
       </form>
 
-      <form name="editBlacklistPatterns" action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+      <form id="editBlacklistPatterns" action="Blacklist_p.html" method="post" enctype="multipart/form-data">
         <p>These are the domain name/path patterns in <strong><em>#[currentBlacklist]#</em></strong>:</p>
         <div>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
@@ -120,18 +120,18 @@
           </div>
       </form>
 
-      <form name ="selectRange" action="Blacklist_p.html" method="post">
+      <form id="selectRange" action="Blacklist_p.html" method="post"><fieldset>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
           <input type="hidden" name="action" value="selectRange" />
           <p>Show entries:
-          <select name="offset" size="1" onChange="document.selectRange.submit();">
+          <select name="offset" size="1" onchange="document.selectRange.submit();">
                 #{subListOffset}#
                 <option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[fvalue]# - #[tvalue]#</option>
                 #{/subListOffset}#
           </select>
           &nbsp;
           Entries per page:
-          <select name="size" size="1" onChange="document.selectRange.submit();">
+          <select name="size" size="1" onchange="document.selectRange.submit();">
                 #{subListSize}#
                 <option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[text]#</option>
                 #{/subListSize}#
@@ -139,7 +139,7 @@
           &nbsp;
           <input type="submit" value="Go" />
           </p>
-      </form>
+      </fieldset></form>
 
       ::
       <p>Edit existing pattern(s):</p>
