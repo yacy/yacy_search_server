@@ -121,7 +121,7 @@ public class Scanner extends Thread {
     private void addProtocol(String protocol, boolean bigrange) {
         for (InetAddress i: genlist(bigrange)) {
             try {
-                this.scanqueue.put(new MultiProtocolURI(protocol + "://" + i.getHostAddress() + "/"));
+                this.scanqueue.put(new MultiProtocolURI(protocol + "://" + i.getHostName() + "/"));
             } catch (MalformedURLException e) {
                 Log.logException(e);
             } catch (InterruptedException e) {

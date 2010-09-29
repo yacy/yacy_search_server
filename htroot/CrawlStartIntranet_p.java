@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.kelondro.blob.Tables;
@@ -90,6 +91,7 @@ public class CrawlStartIntranet_p {
             urlString = url.toNormalform(true, false);
             prop.put("servertable_list_" + i + "_pk", new String(url.hash()));
             prop.put("servertable_list_" + i + "_count", i);
+            prop.putHTML("servertable_list_" + i + "_ip", Domains.dnsResolve(url.getHost()).getHostAddress());
             prop.putHTML("servertable_list_" + i + "_url", urlString);
             prop.put("servertable_list_" + i + "_process", inIndex(sb, urlString) == null ? 0 : 1);
             i++;
