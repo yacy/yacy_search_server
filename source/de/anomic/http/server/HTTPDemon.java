@@ -1188,8 +1188,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         headers.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(moddate));
         
         if (nocache) {
-            if (httpVersion.toUpperCase().equals(HeaderFramework.HTTP_VERSION_1_1)) headers.put(HeaderFramework.CACHE_CONTROL, "no-cache");
-            else headers.put(HeaderFramework.PRAGMA, "no-cache");
+            headers.put(HeaderFramework.CACHE_CONTROL, "no-cache");
+            headers.put(HeaderFramework.CACHE_CONTROL, "no-store");
+            headers.put(HeaderFramework.PRAGMA, "no-cache");
         }
         
         if (contentType == null) contentType = "text/html; charset=UTF-8";

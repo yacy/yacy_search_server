@@ -274,6 +274,9 @@ public final class HTTPDFileHandler {
             if (authorization != null && authorization.length() == 0) authorization = null;
             final String adminAccountBase64MD5 = switchboard.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
             
+            // cache settings
+            boolean nocache = path.contains("?") || body != null;
+            
             // a bad patch to map the /xml/ path to /api/
             if (path.startsWith("/xml/")) {
                 path = "/api/" + path.substring(5);
@@ -388,6 +391,8 @@ public final class HTTPDFileHandler {
                     }
                 }
             }
+            
+            if (args != null) nocache = true;
         
             // we are finished with parsing
             // the result of value hand-over is in args and argc
@@ -504,7 +509,6 @@ public final class HTTPDFileHandler {
             //We need tp here
             servletProperties templatePatterns = null;
             Date targetDate;
-            boolean nocache = false;
             
             if ((targetClass != null) && (path.endsWith("png"))) {
                 // call an image-servlet to produce an on-the-fly - generated image
