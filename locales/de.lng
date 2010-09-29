@@ -629,7 +629,7 @@ URL of a Small Corporate Image<==URL des kleinen Corporate Identity Bildes<
 URL of a Large Corporate Image<==URL des großen Corporate Identity Bildes<
 Default Pop-Up Page<==Standard Pop-up<
 >Status Page==>Status Seite
->Search Front Page==Frontseite Suche
+>Search Front Page==>Frontseite Suche
 >Search Page \(small header\)==>Suchseite (kleine Kopfzeile)
 >Interactive Search Page==>Interaktive Suchseite
 "Change Search Page"=="Ändere die Suchseite"
@@ -3454,6 +3454,11 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 #---------------------------
 "Continue this queue"=="Diese Queue weiter abarbeiten"
 "Pause this queue"=="Diese Queue anhalten"
+#-----------------------------
+
+#File: js/yacyinteractive.js
+#---------------------------
+>total results==>Gesamte Ergebnisse
 #-----------------------------
 
 #File: yacy/ui/js/jquery-flexigrid.js

@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional and not Strict because the target attribute for a links are being used -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>YaCy '#[clientname]#': Integration of a Search Field for Live Search</title>
@@ -50,7 +51,7 @@
 </pre>
 <h4>Configuration options and defaults for 'yconf':</h4>
 <h5>Defaults</h5>
-<form><dl>
+<form action=""><dl>
 <dt>url</dt><dd>is a mandatory property - no default</dd>
 <dt>global</dt><dd>false</dd>
 <dt>theme</dt><dd>'start'</dd>
@@ -73,11 +74,13 @@ Specifies where the dialog should be displayed. Possible values for position: 'c
 The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
 <h5>Interaction (modal | resizable)</h5>
 If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with). Modal dialogs create an overlay below the dialog but above other page elements.
-<p/>
+<p>
 If resizable is set to true, the dialog will be resizeable.
+</p>
 <h5>Load JavaScript load_js (true | false)</h5>
 <p>
 If load_js is set to false, you have to manually load the needed JavaScript on your portal page. This can help to avoid timing problems or double loading.
+</p>
 <pre>
 &lt;script src="/yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;    
 &lt;script src="/yacy/ui/js/jquery-ui-1.7.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
@@ -86,16 +89,15 @@ If load_js is set to false, you have to manually load the needed JavaScript on y
 &lt;script src="/yacy/ui/js/jquery.form.js"&gt;&lt;/script&gt;
 &lt;script src="/yacy/ui/js/jquery.field.min.js"&gt;&lt;/script&gt;
 </pre>
-</p>
 <h5>Load Stylesheets load_css (true | false)</h5>
 <p>
 If load_css is set to false, you have to manually load the needed CSS on your portal page. This can help to avoid timing problems or double loading.
+</p>
 <pre>
 &lt;link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" /&gt;	
 &lt;link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" /&gt;
 &lt;link media="screen" type="text/css" href="/yacy/ui/css/yacyui-portalsearch.css" rel="stylesheet" /&gt;
-<pre>
-</p>
+</pre>
 <h5>Themes</h5>
 <p>You can <a href="http://jquery-ui.googlecode.com/files/jquery-ui-themes-1.7.zip" target="_blank">
 download</a> ready made themes or <a href="http://jqueryui.com/themeroller/" target="_blank">create</a> 
