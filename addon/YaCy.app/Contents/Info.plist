@@ -36,6 +36,7 @@
 		<string>-gui Library/YaCy</string>
 		<key>ClassPath</key>
 			<array>
+			<string>$JAVAROOT/htroot</string>
 			<string>$JAVAROOT/lib/bcmail-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/bcprov-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/bzip2.jar</string>
