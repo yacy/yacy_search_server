@@ -1032,6 +1032,7 @@ This network definition does not allow intranet links.==Diese Netzwerk Konfigura
 A list of intranet servers is only available if you confiugure YaCy to index intranet targets.==Eine Liste mit Servern aus dem Intranet ist nur verfügbar, wenn Sie YaCy auch konfiguriert haben Intranetseiten zu indexieren.
 To do so, open the <a href=\"ConfigBasic.html\">Basic Configuration</a> servlet and select the \'Intranet Indexing\' use case.==Um diese Einstellung vorzunehmen, bitte im Servlet <a href="ConfigBasic.html">Basis Konfiguration</a> den Anwendungsfall 'Intranet Indexierung' auswählen.
 Available Intranet Server==Verfügbare Intranet Server
+#>IP<==>IP<
 #>URL<==>URL<
 >Process<==>Status<
 >not in index<==>Nicht im Index<
@@ -2835,7 +2836,6 @@ Primary Key==Primärschlüssel
 #File: terminal_p.html
 #---------------------------
 #YaCy System Monitor==YaCy System Monitor
-div id="location">
 Search Form==Suchformular
 Crawl Start==Crawl starten
 Status Page==Status Seite
@@ -2844,7 +2844,7 @@ Confirm Shutdown==Bestätige Herunterfahren
 Event Terminal==Ereignis Terminal
 Image Terminal==Bilder Terminal
 #Domain Monitor==Domain Monitor
-"Loading Processing software..."=="Processing Software wird geladen..."
+"Loading Processing software..."=="Verarbeitungs Software wird geladen..."
 This browser does not have a Java Plug-in.==Dieser Browser besitzt kein Java Plug-In.
 Get the latest Java Plug-in here.==Holen Sie sich das neueste Java Plug-In hier.
 Resource Monitor==Ressourcen Monitor
@@ -3110,11 +3110,6 @@ YaCy Interactive Search==YaCy interaktive Suche
 This page uses the JSON search API to display search results as you type.==Diese Seite verwendet die JSON Such API, um die Suchergebnisse beim Tippen anzuzeigen.
 Click the API icon to see an example call to the native API.==Klicken Sie auf die API Sprechblase, um einen Beispielaufruf der nativen API zu sehen.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
->total results==>Ergebnisse insgesamt
-&nbsp;topwords:==&nbsp;Topwörter:
->Name==>Name
->Size==>Größe
->Date==>Datum
 kiosk mode==Kiosk Modus
 #>Link==>Link
 #-----------------------------
@@ -3458,7 +3453,11 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 
 #File: js/yacyinteractive.js
 #---------------------------
->total results==>Gesamte Ergebnisse
+>total results==>Ergebnisse insgesamt
+&nbsp;topwords:==&nbsp;Topwörter:
+>Name==>Name
+>Size==>Größe
+>Date==>Datum
 #-----------------------------
 
 #File: yacy/ui/js/jquery-flexigrid.js

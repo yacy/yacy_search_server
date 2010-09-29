@@ -108,9 +108,10 @@ public class Collage {
                        + "px;left:" + imgPosX[i]
                        + "px;z-index:" + z + "\" "
                        + "id=\"col" + z + "\" "
+					   + "alt=\"" + baseURL.toNormalform(true, false) + "\" "
                        + "onmouseover=\"raise(" + z + ")\" onmouseout=\"lower(" + z + ")\" "
-                       + "title=\"" + baseURL.toNormalform(true, false) + "\">"
-                       + "</a><br>");
+                       + "title=\"" + baseURL.toNormalform(true, false) + "\" />"
+                       + "</a><br />");
                 c++;
             }
             prop.put("imgurl_list", c);

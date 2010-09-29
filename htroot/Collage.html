@@ -35,12 +35,16 @@ function lower (element)
   img.style.zIndex = CollageLastImageZIndex;
 }
 </script>
-</head>
-<body>
 #(emb)#
 <script type="text/javascript">
 document.body.style.background = "#000";
 </script>
+::
+#(/emb)#
+</head>
+<body>
+<p>
+#(emb)#
 ::
 #%env/templates/header.template%#
 #%env/templates/submenuWebStructure.template%#
@@ -66,5 +70,6 @@ document.body.style.background = "#000";
 #(emb)#::
 #%env/templates/footer.template%#
 #(/emb)#
+</p>
 </body>
 </html>

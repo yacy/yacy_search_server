@@ -1,11 +1,11 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
-"http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional and not Strict because iframes are in use -->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
 <head>
-<title>YaCy System Monitor</title>
+<title>YaCy System Terminal Monitor</title>
 <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
-<meta name="description" content="YaCy Peer Live Monitoring" />
-<meta name="keywords" content="open,source,search,engine,monitor" />
+<meta name="description" content="YaCy Peer Live Monitoring Terminal" />
+<meta name="keywords" content="open,source,search,engine,monitor,terminal" />
 <link rel="stylesheet" type="text/css" href="/env/terminal.css" />
 <script type="text/javascript" src="/js/highslide/highslide.js"></script>
 <script type="text/javascript">
@@ -42,7 +42,7 @@ function init() {
 <div id="location">
 <a href="http://yacy.net"><img src="/Banner.png?textcolor=ffffff&amp;bgcolor=000000&amp;bordercolor=aaaaaa" alt="YaCy" style="width:468px;height:60px;border-width:0px;vertical-align:bottom;" /></a>&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="/index.html">&lt;Search Form&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="/CrawlStart_p.html">&lt;Crawl Start&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="/CrawlStartSite_p.html">&lt;Crawl Start&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="/Status.html">&lt;Status Page&gt;</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="/Steering.html?shutdown=" onclick="return confirm('Confirm Shutdown')">&lt;Shutdown&gt;</a>
 </div>
@@ -60,7 +60,7 @@ function init() {
 </div>
 <h1>Image Terminal</h1>
 <iframe src="/Collage.html?emb=&amp;width=468&amp;height=460&amp;max=3"
-              style="width:468px;height:460px;margin:0;border-width:0;" scrolling="no" name="newsframe"></iframe>
+              style="width:468px;height:460px;margin:0;border-width:0;" scrolling="no" name="collageframe"></iframe>
 
 </div> <!-- end left side -->
 
@@ -133,7 +133,10 @@ function init() {
 <h1>Network Monitor</h1>
 <div style="text-align:left;margin:0;padding:0;">
 <a href="/NetworkPicture.png?width=660&amp;height=360&amp;bgcolor=000000" onclick="return hs.expand(this)"><img src="/NetworkPicture.png?width=660&amp;height=360&amp;bgcolor=000000" style="width:330px;height:180px;border-width:0;" alt="The yacy Network" /></a>
-<embed src="http://widgets.amung.us/flash/v2map.swf" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" wmode="transparent" allowScriptAccess="always" allowNetworking="all" type="application/x-shockwave-flash" flashvars="wausitehash=qp3j5gox&amp;map=night&amp;pin=star-orange&amp;link=no" width="330" height="180" />
+<!--<embed src="http://widgets.amung.us/flash/v2map.swf" quality="high" pluginspage="http://www.macromedia.com/go/getflashplayer" wmode="transparent" allowScriptAccess="always" allowNetworking="all" type="application/x-shockwave-flash" flashvars="wausitehash=qp3j5gox&amp;map=night&amp;pin=star-orange&amp;link=no" width="330" height="180" />-->
+<!-- Because embed is not XHTML 1.0 Transitional replaced by object -->
+<script type="text/javascript" src="http://widgets.amung.us/map.js"></script><script type="text/javascript">WAU_map('o7q65cl05v75', 330, 180, 'night', 'star-orange')</script>
+
 </div>
 
 </div> <!-- end right side -->
