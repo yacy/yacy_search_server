@@ -92,7 +92,6 @@ public class CrawlProfileEditor_p {
         labels.add(new eentry(CrawlProfile.INDEX_TEXT,          "Index Text",            false, eentry.BOOLEAN));
         labels.add(new eentry(CrawlProfile.INDEX_MEDIA,         "Index Media",           false, eentry.BOOLEAN));
         labels.add(new eentry(CrawlProfile.STORE_HTCACHE,       "Store in HTCache",      false, eentry.BOOLEAN));
-        labels.add(new eentry(CrawlProfile.STORE_TXCACHE,       "Store in TXCache",      false, eentry.BOOLEAN));
         labels.add(new eentry(CrawlProfile.REMOTE_INDEXING,     "Remote Indexing",       false, eentry.BOOLEAN));
         labels.add(new eentry(CrawlProfile.XSSTOPW,             "Static stop-words",     false, eentry.BOOLEAN));
         labels.add(new eentry(CrawlProfile.XDSTOPW,             "Dynamic stop-words",    false, eentry.BOOLEAN));

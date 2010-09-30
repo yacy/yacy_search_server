@@ -188,15 +188,16 @@ public class CrawlResults {
                 try {
                     urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(entry.getKey().getBytes(), null, 0);
                     if (urle == null) {
-                        Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash "+ entry.getKey());
+                        Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;
                         urltxt = null;
                         metadata = null;
-                    } else {
-                        metadata = urle.metadata();
-                        urlstr = metadata.url().toNormalform(false, true);
-                        urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
+                        continue;
                     }
+                    metadata = urle.metadata();
+                    urlstr = metadata.url().toNormalform(false, true);
+                    urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
+                    
                     initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(new String(entry.getValue().initiatorHash));
                     executorSeed = entry.getValue() == null || entry.getValue().executorHash == null ? null : sb.peers.getConnected(new String(entry.getValue().executorHash));
 

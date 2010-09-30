@@ -138,14 +138,13 @@ public class Crawler_p {
                 final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
                 final boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
                 
-                
                 // set the crawl filter
                 String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL);
                 String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
                 if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL; // avoid that all urls are filtered out if bad value was submitted
                 // special cases:
                 if (crawlingStartURL!= null && fullDomain) {
-                    newcrawlingMustMatch = ".*" + crawlingStartURL.getHost() + ".*";
+                    newcrawlingMustMatch = crawlingStartURL.isFile() ? "file:///.*" : crawlingStartURL.isSMB() ? "smb://.*" : ".*" + crawlingStartURL.getHost() + ".*";
                 }
                 if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
                     newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
@@ -203,7 +202,8 @@ public class Crawler_p {
                 final boolean indexMedia = post.get("indexMedia", "off").equals("on");
                 env.setConfig("indexMedia", (indexMedia) ? "true" : "false");
                 
-                final boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
+                boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
+                if (crawlingStartURL.isFile() || crawlingStartURL.isSMB()) storeHTCache = false;
                 env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
                 
                 final String cachePolicyString = post.get("cachePolicy", "iffresh");
@@ -247,15 +247,21 @@ public class Crawler_p {
                         // stack url
                         sb.crawler.profilesPassiveCrawls.remove(crawlingStartURL.hash()); // if there is an old entry, delete it
                         final CrawlProfile pe = new CrawlProfile(
-                                (crawlingStartURL.getHost() == null) ? Long.toHexString(System.currentTimeMillis()) : crawlingStartURL.getHost(),
+                                (crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true, false) : crawlingStartURL.getHost(),
                                 crawlingStartURL,
                                 newcrawlingMustMatch,
                                 newcrawlingMustNotMatch,
                                 newcrawlingdepth,
-                                crawlingIfOlder, crawlingDomMaxPages,
+                                crawlingIfOlder,
+                                crawlingDomMaxPages,
                                 crawlingQ,
                                 indexText, indexMedia,
-                                storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, cachePolicy);
+                                storeHTCache,
+                                crawlOrder,
+                                xsstopw,
+                                xdstopw,
+                                xpstopw,
+                                cachePolicy);
                         sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
                         final String reasonString = sb.crawlStacker.stackCrawl(new Request(
                                 sb.peers.mySeed().hash.getBytes(),
@@ -352,7 +358,8 @@ public class Crawler_p {
                             final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
                             final DigestURI crawlURL = new DigestURI("file://" + file.toString(), null);
                             final CrawlProfile profile = new CrawlProfile(
-                                    fileName, crawlURL,
+                                    fileName,
+                                    crawlURL,
                                     newcrawlingMustMatch,
                                     CrawlProfile.MATCH_NEVER,
                                     newcrawlingdepth,
@@ -362,9 +369,10 @@ public class Crawler_p {
                                     indexText,
                                     indexMedia,
                                     storeHTCache,
-                                    true,
                                     crawlOrder,
-                                    xsstopw, xdstopw, xpstopw,
+                                    xsstopw,
+                                    xdstopw,
+                                    xpstopw,
                                     cachePolicy);
                             sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
                             sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
@@ -405,15 +413,21 @@ public class Crawler_p {
                 	try {
                 		final DigestURI sitemapURL = new DigestURI(sitemapURLStr, null);
                 		final CrawlProfile pe = new CrawlProfile(
-                				sitemapURLStr, sitemapURL,
-                				newcrawlingMustMatch,
+                				sitemapURLStr,
+                				sitemapURL,
+                				CrawlProfile.MATCH_ALL,
                 				CrawlProfile.MATCH_NEVER,
-                				newcrawlingdepth,
-                				crawlingIfOlder, crawlingDomMaxPages,
-                				crawlingQ,
-                				indexText, indexMedia,
-                				storeHTCache, true, crawlOrder,
-                				xsstopw, xdstopw, xpstopw,
+                				0,
+                				crawlingIfOlder,
+                				crawlingDomMaxPages,
+                				true,
+                				indexText,
+                				indexMedia,
+                				storeHTCache,
+                				crawlOrder,
+                				xsstopw,
+                				xdstopw,
+                				xpstopw,
                 				cachePolicy);
                 		sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
                 		final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, pe);
@@ -431,7 +445,7 @@ public class Crawler_p {
                         // download document
                         ContentScraper scraper = null;
                         scraper = sb.loader.parseResource(sitelistURL, CrawlProfile.CacheStrategy.IFFRESH);
-                        String title = scraper.getTitle();
+                        // String title = scraper.getTitle();
                         // String description = scraper.getDescription();
                         
                         // get links and generate filter
@@ -444,7 +458,7 @@ public class Crawler_p {
 
                         // put links onto crawl queue
                         final CrawlProfile profile = new CrawlProfile(
-                                title == null || title.length() == 0 ? sitelistURL.getHost() : title,
+                                sitelistURL.getHost(),
                                 sitelistURL,
                                 newcrawlingMustMatch,
                                 CrawlProfile.MATCH_NEVER,
@@ -455,9 +469,10 @@ public class Crawler_p {
                                 indexText,
                                 indexMedia,
                                 storeHTCache,
-                                true,
                                 crawlOrder,
-                                xsstopw, xdstopw, xpstopw,
+                                xsstopw,
+                                xdstopw,
+                                xpstopw,
                                 cachePolicy);
                         sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);

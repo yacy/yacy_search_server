@@ -53,7 +53,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String INDEX_TEXT       = "indexText";
     public static final String INDEX_MEDIA      = "indexMedia";
     public static final String STORE_HTCACHE    = "storeHTCache";
-    public static final String STORE_TXCACHE    = "storeTXCache";
     public static final String REMOTE_INDEXING  = "remoteIndexing";
     public static final String XSSTOPW          = "xsstopw";
     public static final String XDSTOPW          = "xdstopw";
@@ -64,17 +63,22 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     private Pattern mustmatch = null, mustnotmatch = null;
     
     
-    public CrawlProfile(final String name, final DigestURI startURL,
+    public CrawlProfile(
+                 final String name,
+                 final DigestURI startURL,
                  final String mustmatch,
                  final String mustnotmatch,
                  final int depth,
                  final long recrawlIfOlder /*date*/,
                  final int domMaxPages,
                  final boolean crawlingQ,
-                 final boolean indexText, final boolean indexMedia,
-                 final boolean storeHTCache, final boolean storeTXCache,
+                 final boolean indexText,
+                 final boolean indexMedia,
+                 final boolean storeHTCache,
                  final boolean remoteIndexing,
-                 final boolean xsstopw, final boolean xdstopw, final boolean xpstopw,
+                 final boolean xsstopw,
+                 final boolean xdstopw,
+                 final boolean xpstopw,
                  final CacheStrategy cacheStrategy) {
         super(40);
         if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
@@ -91,7 +95,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(INDEX_TEXT,       indexText);
         put(INDEX_MEDIA,      indexMedia);
         put(STORE_HTCACHE,    storeHTCache);
-        put(STORE_TXCACHE,    storeTXCache);
         put(REMOTE_INDEXING,  remoteIndexing);
         put(XSSTOPW,          xsstopw); // exclude static stop-words
         put(XDSTOPW,          xdstopw); // exclude dynamic stop-word
@@ -215,11 +218,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
     public boolean storeHTCache() {
         final String r = get(STORE_HTCACHE);
-        if (r == null) return false;
-        return (r.equals(Boolean.TRUE.toString()));
-    }
-    public boolean storeTXCache() {
-        final String r = get(STORE_TXCACHE);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }

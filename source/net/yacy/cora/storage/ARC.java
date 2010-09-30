@@ -21,6 +21,7 @@
 
 package net.yacy.cora.storage;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -62,14 +63,21 @@ public interface ARC<K, V> extends Iterable<Map.Entry<K, V>> {
      * @return the value
      */
     public V get(K s);
+
+    /**
+     * check if the map contains the value
+     * @param value
+     * @return the keys that have the given value
+     */
+    public Collection<K> getKeys(V value);
     
     /**
      * check if the map contains the key
-     * @param s
-     * @return
+     * @param key
+     * @return true if the map contains the key
      */
-    public boolean containsKey(K s);
-    
+    public boolean containsKey(K key);
+
     /**
      * remove an entry from the cache
      * @param s

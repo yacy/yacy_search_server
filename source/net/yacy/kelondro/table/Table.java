@@ -305,6 +305,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         }
         final HashMap<String, String> map = new HashMap<String, String>(8);
+        if (index == null) return map; // possibly closed or beeing closed
         map.put("tableSize", Integer.toString(index.size()));
         map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
         map.put("tableKeyMem", Integer.toString(index.row().objectsize * index.size()));

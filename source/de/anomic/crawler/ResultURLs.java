@@ -159,6 +159,10 @@ public final class ResultURLs {
         return resultDomains.get(stack);
     }
 
+    public void clearStacks() {
+        for (EventOrigin origin: EventOrigin.values()) clearStack(origin);
+    }
+    
     public synchronized void clearStack(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();

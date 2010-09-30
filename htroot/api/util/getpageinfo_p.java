@@ -26,11 +26,13 @@ public class getpageinfo_p {
         prop.put("robots-allowed", "3"); //unknown
         prop.put("sitemap", "");
         prop.put("favicon","");        
+        prop.put("sitelist", "");
+        prop.put("filter", ".*");
         
         // default actions
         String actions="title,robots";
         
-        if(post!=null && post.containsKey("url")){
+        if (post != null && post.containsKey("url")) {
             if(post.containsKey("actions"))
                 actions=post.get("actions");
             String url=post.get("url");
@@ -97,7 +99,7 @@ public class getpageinfo_p {
                     prop.putXML("filter", filter.length() > 0 ? filter.substring(1) : ".*");
                 }
             }
-            if(actions.indexOf("robots")>=0){
+            if (actions.indexOf("robots")>=0) {
                 try {
                     final DigestURI theURL = new DigestURI(url, null);
                     

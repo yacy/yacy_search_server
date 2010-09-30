@@ -225,22 +225,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 // parse file url
                 String h = url.substring(p + 1);
                 if (h.startsWith("//")) {
-                    // host may be given, but may be also empty
-                    final int q = h.indexOf('/', 2);
-                    if (q <= 0) {
-                        // no host given
-                        host = null;
-                        path = h.substring(2);
-                    } else {
-                        host = h.substring(2, q);
-                        if (host.length() == 0 || host.equals("localhost")) host = null;
-                        h = h.substring(q);
-                        char c = h.charAt(2);
-                        if (c == ':' || c == '|')
-                            path = h.substring(1);
-                        else
-                            path = h;
-                    }
+                    // no host given
+                    host = null;
+                    path = h.substring(2);
                 } else {
                     host = null;
                     if (h.length() > 0 && h.charAt(0) == '/') {

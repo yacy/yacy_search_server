@@ -858,6 +858,9 @@ public final class Switchboard extends serverSwitch {
             this.queuesRoot = new File(new File(indexPrimaryPath, networkName), "QUEUES");
             this.networkRoot.mkdirs();
             this.queuesRoot.mkdirs();
+
+            // clear statistic data
+            this.crawlResults.clearStacks();
             
             // relocate
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object

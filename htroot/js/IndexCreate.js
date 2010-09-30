@@ -48,14 +48,14 @@ function handleResponse(){
 		        sitemap=response.getElementsByTagName("sitemap")[0].firstChild.nodeValue;
 		    }		
 			document.getElementsByName("sitemapURL")[0].value=sitemap;
-			document.getElementById("sitemap").disabled=false;
+			if (sitemap) document.getElementById("sitemap").disabled=false;
 		}
 			sitelist="";		
 	        if (response.getElementsByTagName("sitelist")[0].firstChild!=null){
 		        sitelist=response.getElementsByTagName("sitelist")[0].firstChild.nodeValue;
 		    }
 			document.getElementById("sitelistURLs").innerHTML = sitelist;
-			document.getElementById("sitelist").disabled=false;
+			if (sitelist) document.getElementById("sitelist").disabled=false;
         
 		// clear the ajax image
 		document.getElementsByName("ajax")[0].setAttribute("src", AJAX_OFF);

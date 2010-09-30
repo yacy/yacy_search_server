@@ -157,7 +157,6 @@ public class QuickCrawlLink_p {
                         indexText,
                         indexMedia,
                         storeHTCache,
-                        true,
                         remoteIndexing,
                         xsstopw,
                         xdstopw,

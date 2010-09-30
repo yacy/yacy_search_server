@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -111,7 +112,7 @@ public class SettingsAck_p {
                 final serverCore theServerCore = (serverCore) env.getThread("10_httpd");
                 try {
                     final InetSocketAddress theNewAddress = theServerCore.generateSocketAddress(port);
-                    final String hostName = theNewAddress.getHostName();
+                    final String hostName = Domains.getHostName(theNewAddress.getAddress());
                     prop.put("info_restart", "1");
                     prop.put("info_restart_ip",(hostName.equals("0.0.0.0"))? "localhost" : hostName);
                     prop.put("info_restart_port", theNewAddress.getPort());

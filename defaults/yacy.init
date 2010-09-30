@@ -674,10 +674,10 @@ crawler.clientTimeout=9000
 crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
-crawler.http.maxFileSize=1048576
+crawler.http.maxFileSize=10485760
 
 # ftp crawler specific settings; size in bytes
-crawler.ftp.maxFileSize=1048576
+crawler.ftp.maxFileSize=10485760
 
 # smb crawler specific settings: maximum size
 crawler.smb.maxFileSize=100000000

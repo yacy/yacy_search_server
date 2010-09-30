@@ -118,7 +118,11 @@ public final class HTTPLoader {
             // FIXME: 30*-handling (bottom) is never reached
             // we always get the final content because httpClient.followRedirects = true
 
-        	if (responseBody != null && (code == 200 || code == 203)) {
+        	if (responseBody == null) {
+        	    // no response, reject file
+                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no response body (you may increase the maxmimum file size)");
+                throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
+        	} else if (code == 200 || code == 203) {
                 // the transfer is ok
                 
                 // we write the new cache entry to file system directly
@@ -180,7 +184,7 @@ public final class HTTPLoader {
                 }
             } else {
                 // if the response has not the right response type then reject file
-            	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code " + code +  ")");
+            	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code " + code);
                 throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
             }
         return response;

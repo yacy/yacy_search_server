@@ -21,6 +21,8 @@
 package net.yacy.cora.storage;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -103,6 +105,17 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     @SuppressWarnings("unchecked")
     public final V get(final Object s) {
     	return this.arc[getPartition(s)].get((K) s);
+    }
+    
+    /**
+     * check if the map contains the value
+     * @param value
+     * @return the keys that have the given value
+     */
+    public Collection<K> getKeys(V value) {
+        ArrayList<K> keys = new ArrayList<K>();
+        for (int i = 0; i < this.arc.length; i++) keys.addAll(this.arc[i].getKeys(value));
+        return keys;
     }
     
     /**

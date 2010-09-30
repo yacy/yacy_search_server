@@ -23,11 +23,20 @@ package net.yacy.cora.protocol;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.ARC;
@@ -454,6 +463,80 @@ public class Domains {
         return false;
     }
 
+    public static String getHostName(final InetAddress i) {
+        Collection<String> hosts = nameCacheHit.getKeys(i);
+        if (hosts.size() > 0) return hosts.iterator().next();
+        
+        // call i.getHostName() using concurrency to interrupt execution in case of a time-out
+        final Callable<String> callable = new Callable<String>() {
+            public String call() { return i.getHostName(); }
+        };
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        final Future<String> taskFuture = service.submit(callable);
+        Runnable t = new Runnable() {         
+            public void run() { taskFuture.cancel(true); }
+        };
+        service.execute(t);
+        service.shutdown();
+        try {
+            return taskFuture.get(500, TimeUnit.MILLISECONDS);
+        } catch (CancellationException e) {
+            // callable was interrupted
+            return i.getHostAddress();
+        } catch (InterruptedException e) {
+            // service was shutdown
+            return i.getHostAddress();
+        } catch(ExecutionException e) {
+            // callable failed unexpectedly
+            return i.getHostAddress();
+        } catch (TimeoutException e) {
+            // time-out
+            return i.getHostAddress();
+        }
+    }
+    
+    public static InetAddress dnsResolve(final String hostx) {
+        if ((hostx == null) || (hostx.length() == 0)) return null;
+        final String host = hostx.toLowerCase().trim();        
+        // try to simply parse the address
+        InetAddress ip = parseInetAddress(host);
+        if (ip != null) return ip;
+        
+        // try to resolve host by doing a name cache lookup
+        ip = nameCacheHit.get(host);
+        if (ip != null) return ip;
+        
+        if (nameCacheMiss.containsKey(host)) return null;
+        
+        // call dnsResolveNetBased(host) using concurrency to interrupt execution in case of a time-out
+        final Callable<InetAddress> callable = new Callable<InetAddress>() {
+            public InetAddress call() { return dnsResolveNetBased(host); }
+        };
+        ExecutorService service = Executors.newSingleThreadExecutor();
+        final Future<InetAddress> taskFuture = service.submit(callable);
+        Runnable t = new Runnable() {         
+            public void run() { taskFuture.cancel(true); }
+        };
+        service.execute(t);
+        service.shutdown();
+        try {
+            return taskFuture.get(500, TimeUnit.MILLISECONDS);
+        } catch (CancellationException e) {
+            // callable was interrupted
+            return null;
+        } catch (InterruptedException e) {
+            // service was shutdown
+            return null;
+        } catch(ExecutionException e) {
+            // callable failed unexpectedly
+            return null;
+        } catch (TimeoutException e) {
+            // time-out
+            return null;
+        }
+    }
+    
+
     private static final InetAddress parseInetAddress(final String ip) {
         if (ip == null) return null;
         if (ip.length() < 8) return null;
@@ -474,33 +557,21 @@ public class Domains {
             return null;
         }
     }
-    
-    public static InetAddress dnsResolve(String host) {
-        if ((host == null) || (host.length() == 0)) return null;
-        host = host.toLowerCase().trim();        
-        // try to simply parse the address
-        InetAddress ip = parseInetAddress(host);
-        if (ip != null) return ip;
-        
-        // try to resolve host by doing a name cache lookup
-        ip = nameCacheHit.get(host);
-        if (ip != null) return ip;
-        
-        if (nameCacheMiss.containsKey(host)) return null;
-        //System.out.println("***DEBUG dnsResolve(" + host + ")");
+
+    private static InetAddress dnsResolveNetBased(String host) {
         try {
             boolean doCaching = true;
-            ip = InetAddress.getByName(host); // this makes the DNS request to backbone
+            InetAddress ip = InetAddress.getByName(host); // this makes the DNS request to backbone
             if ((ip == null) ||
                 (ip.isLoopbackAddress()) ||
                 (nameCacheNoCachingList.containsKey(host))
             ) {
                 doCaching = false;
             } else {
-            	if (matchesList(host, nameCacheNoCachingPatterns)) {
-            		nameCacheNoCachingList.put(host, PRESENT);
+                if (matchesList(host, nameCacheNoCachingPatterns)) {
+                    nameCacheNoCachingList.put(host, PRESENT);
                     doCaching = false;
-            	}
+                }
             }
             
             if (doCaching && ip != null) {
@@ -519,6 +590,7 @@ public class Domains {
         return null;
     }
 
+    
     /**
     * Returns the number of entries in the nameCacheHit map
     *
@@ -565,7 +637,7 @@ public class Domains {
         public void run() {
             String lhn = localHostName;
             try {
-                lhn = InetAddress.getLocalHost().getHostName();
+                lhn = getHostName(InetAddress.getLocalHost());
             } catch (UnknownHostException e) {}
             try {
                 localHostAddresses = InetAddress.getAllByName(lhn);
@@ -656,7 +728,8 @@ public class Domains {
         // finally check if there are other local IP addresses that are not in
         // the standard IP range
         for (int i = 0; i < localHostAddresses.length; i++) {
-            if (localHostAddresses[i].getHostName().equals(host)) return true;
+            String hostname = getHostName(localHostAddresses[i]);
+            if (hostname != null && hostname.equals(host)) return true;
             if (localHostAddresses[i].getHostAddress().equals(host)) return true;
         }
 

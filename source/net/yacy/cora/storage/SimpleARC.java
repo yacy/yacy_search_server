@@ -22,6 +22,8 @@
 package net.yacy.cora.storage;
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -97,6 +99,26 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
         }
         assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
         return v;
+    }
+
+    /**
+     * check if the map contains the value
+     * @param value
+     * @return the keys that have the given value
+     */
+    public Collection<K> getKeys(V value) {
+        ArrayList<K> keys = new ArrayList<K>();
+        synchronized (this.levelB) {
+            for (Map.Entry<K, V> entry: this.levelB.entrySet()) {
+                if (value.equals(entry.getValue())) keys.add(entry.getKey());
+            }
+        }
+        synchronized (this) {
+            for (Map.Entry<K, V> entry: this.levelA.entrySet()) {
+                if (value.equals(entry.getValue())) keys.add(entry.getKey());
+            }
+        }
+        return keys;
     }
     
     /**
