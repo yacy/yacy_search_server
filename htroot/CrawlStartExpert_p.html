@@ -45,6 +45,13 @@
                 </td>
               </tr>
               <tr>
+                <td><label for="url"><span class="nobr">From Link-List of URL</span></label>:</td>
+                <td><input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled"/></td>
+                <td>
+                  <div id="sitelistURLs"></div>
+                </td>              
+              </tr>
+              <tr>
                 <td><label for="url"><span class="nobr">From Sitemap</span></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"/></td>
                 <td>
@@ -152,22 +159,6 @@
             This filter must not match to allow that the page is accepted for crawling.
             The empty string is a never-match filter which should do well for most cases.
             If you don't know what this means, please leave this field empty.
-          </td>
-        </tr>
-        <tr valign="top" class="TableCellLight">
-          <td>Auto-Dom-Filter:</td>
-          <td>
-            <label for="crawlingDomFilterCheck">Use</label>:
-            <input type="checkbox" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" #(crawlingDomFilterCheck)#::checked="checked"#(/crawlingDomFilterCheck)# />&nbsp;&nbsp;
-            <label for="crawlingDomFilterDepth">Depth</label>:
-            <input name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" type="text" size="2" maxlength="2" value="#[crawlingDomFilterDepth]#" />
-          </td>
-          <td>
-            This option will automatically create a domain-filter which limits the crawl on domains the crawler
-            will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while
-            restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth
-            for this example would be 1.<br />
-            The default value 0 gives no restrictions.
           </td>
         </tr>
         <tr valign="top" class="TableCellDark">

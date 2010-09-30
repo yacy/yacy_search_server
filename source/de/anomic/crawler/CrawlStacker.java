@@ -196,7 +196,7 @@ public final class CrawlStacker {
         final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : nextQueue.getURL(entry.referrerhash());
 
         // add domain to profile domain list
-        if ((profile.domFilterDepth() != Integer.MAX_VALUE) || (profile.domMaxPages() != Integer.MAX_VALUE)) {
+        if (profile.domMaxPages() != Integer.MAX_VALUE) {
             profile.domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
         }
 
@@ -294,12 +294,6 @@ public final class CrawlStacker {
         if (url.isPOST() && !(profile.crawlingQ()))  {
             if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is post URL.");
             return "post url not allowed";
-        }
-
-        // deny urls that do not match with the profile domain list
-        if (!(profile.grantedDomAppearance(url.getHost()))) {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is not listed in granted domains.");
-            return "url does not match domain filter";
         }
 
         // deny urls that exceed allowed number of occurrences

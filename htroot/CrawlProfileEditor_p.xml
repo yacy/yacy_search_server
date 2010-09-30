@@ -9,7 +9,6 @@
 		<mustmatch>#[mustmatch]#</mustmatch>
 		<mustnotmatch>#[mustnotmatch]#</mustnotmatch>
 		<crawlingIfOlder>#[crawlingIfOlder]#</crawlingIfOlder>
-		<crawlingDomFilterDepth>#[crawlingDomFilterDepth]#</crawlingDomFilterDepth>
 		<crawlingDomFilterContent>
 		#{crawlingDomFilterContent}#
 			<item>#[item]#</item>

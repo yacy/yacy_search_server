@@ -87,7 +87,6 @@ public class CrawlProfileEditor_p {
         labels.add(new eentry(CrawlProfile.FILTER_MUSTNOTMATCH, "Must-Not-Match Filter", false, eentry.STRING));
         labels.add(new eentry(CrawlProfile.DEPTH,               "Crawl Depth",           false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.RECRAWL_IF_OLDER,    "Recrawl If Older",      false, eentry.INTEGER));
-        labels.add(new eentry(CrawlProfile.DOM_FILTER_DEPTH,    "Domain Filter Depth",   false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.DOM_MAX_PAGES,       "Domain Max. Pages",     false, eentry.INTEGER));
         labels.add(new eentry(CrawlProfile.CRAWLING_Q,          "CrawlingQ / '?'-URLs",  false, eentry.BOOLEAN));
         labels.add(new eentry(CrawlProfile.INDEX_TEXT,          "Index Text",            false, eentry.BOOLEAN));
@@ -245,7 +244,7 @@ public class CrawlProfileEditor_p {
         prop.put(CRAWL_PROFILE_PREFIX + count + "_mustmatch", profile.mustMatchPattern().toString());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", profile.mustNotMatchPattern().toString());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", "inactive");
 
         // start contrib [MN]
         int i = 0;

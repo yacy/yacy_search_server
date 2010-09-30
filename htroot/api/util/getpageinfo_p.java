@@ -81,6 +81,20 @@ public class getpageinfo_p {
                     // put language
                     Set<String> languages = scraper.getContentLanguages();
                     prop.putXML("lang", (languages == null) ? "unknown" : languages.iterator().next());
+                    
+                    // get links and put them into a semicolon-separated list
+                    StringBuilder links = new StringBuilder();
+                    StringBuilder filter = new StringBuilder();
+                    count = 0;
+                    for (MultiProtocolURI uri: scraper.getAnchors().keySet()) {
+                        links.append(';').append(uri.toNormalform(true, false));
+                        filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
+                        prop.putXML("links_" + count + "_link", uri.toNormalform(true, false));
+                        count++;
+                    }
+                    prop.put("links", count);
+                    prop.putXML("sitelist", links.length() > 0 ? links.substring(1) : "");
+                    prop.putXML("filter", filter.length() > 0 ? filter.substring(1) : ".*");
                 }
             }
             if(actions.indexOf("robots")>=0){

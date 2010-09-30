@@ -48,7 +48,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String FILTER_MUSTNOTMATCH = "nevermatch";
     public static final String DEPTH            = "generalDepth";
     public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
-    public static final String DOM_FILTER_DEPTH = "domFilterDepth";
     public static final String DOM_MAX_PAGES    = "domMaxPages";
     public static final String CRAWLING_Q       = "crawlingQ";
     public static final String INDEX_TEXT       = "indexText";
@@ -70,7 +69,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final String mustnotmatch,
                  final int depth,
                  final long recrawlIfOlder /*date*/,
-                 final int domFilterDepth, final int domMaxPages,
+                 final int domMaxPages,
                  final boolean crawlingQ,
                  final boolean indexText, final boolean indexMedia,
                  final boolean storeHTCache, final boolean storeTXCache,
@@ -87,7 +86,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(FILTER_MUSTNOTMATCH,   (mustnotmatch == null) ? CrawlProfile.MATCH_NEVER : mustnotmatch);
         put(DEPTH,            depth);
         put(RECRAWL_IF_OLDER, recrawlIfOlder);
-        put(DOM_FILTER_DEPTH, domFilterDepth);
         put(DOM_MAX_PAGES,    domMaxPages);
         put(CRAWLING_Q,       crawlingQ); // crawling of urls with '?'
         put(INDEX_TEXT,       indexText);
@@ -186,21 +184,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return 0L;
         }
     }
-    public int domFilterDepth() {
-        // if the depth is equal or less to this depth,
-        // then the current url feeds with its domain the crawl filter
-        // if this is -1, all domains are feeded
-        final String r = get(DOM_FILTER_DEPTH);
-        if (r == null) return Integer.MAX_VALUE;
-        try {
-            final int i = Integer.parseInt(r);
-            if (i < 0) return Integer.MAX_VALUE;
-            return i;
-        } catch (final NumberFormatException e) {
-            Log.logException(e);
-            return Integer.MAX_VALUE;
-        }
-    }
     public int domMaxPages() {
         // this is the maximum number of pages that are crawled for a single domain
         // if -1, this means no limit
@@ -270,16 +253,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             dp.inc();
         }
     }
-    public boolean grantedDomAppearance(final String domain) {
-        final int max = domFilterDepth();
-        if (max == Integer.MAX_VALUE) return true;
-        final DomProfile dp = doms.get(domain);
-        if (dp == null) {
-            return 0 < max;
-        }
-        return dp.depth <= max;
-    }
-
     public boolean grantedDomCount(final String domain) {
         final int max = domMaxPages();
         if (max == Integer.MAX_VALUE) return true;
@@ -291,10 +264,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
     public int domSize() {
         return doms.size();
-    }
-    public boolean domExists(final String domain) {
-        if (domFilterDepth() == Integer.MAX_VALUE) return true;
-        return doms.containsKey(domain);
     }
 
     public String domName(final boolean attr, final int index){

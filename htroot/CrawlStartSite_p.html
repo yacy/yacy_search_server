@@ -42,13 +42,18 @@
             <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
             </td>
 	        <td>
-          <span id="robotsOK"></span>
-          <img align="top" src="/env/grafics/empty.gif" name="ajax" alt="empty" />
-          </td></tr><tr>
+            <span id="robotsOK"></span><img align="top" src="/env/grafics/empty.gif" name="ajax" alt="empty" />
+            </td>
+          </tr><tr>
+            <td><input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled"
+            onmousedown="document.getElementById('rangeDomain').disabled=true;document.getElementById('rangeSubpath').disabled=true;document.getElementById('crawlingDomMaxCheck').disabled=true;document.getElementById('crawlingDomMaxPages').disabled=true;document.getElementById('crawlingQ').disabled=true;"/>Link-List of URL</td>
+            <td><div id="sitelistURLs"></div></td>
+          </tr><tr>
             <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"
             onmousedown="document.getElementById('rangeDomain').disabled=true;document.getElementById('rangeSubpath').disabled=true;document.getElementById('crawlingDomMaxCheck').disabled=true;document.getElementById('crawlingDomMaxPages').disabled=true;document.getElementById('crawlingQ').disabled=true;"/>Sitemap URL</td>
             <td><input name="sitemapURL" type="text" size="41" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/></td>
-          </tr></table><br/>
+          </tr>
+          </table><br/>
         </dd>
       <input type="hidden" name="crawlingDepth" id="crawlingDepth" value="99">
         <dt><label>Scheduler</label></dt>
