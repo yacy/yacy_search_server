@@ -73,7 +73,7 @@ public class ConfigLanguage_p {
             String selectedLanguage = post.get("language");
 
             // store this call as api call
-            ((Switchboard) env).tables.recordAPICall(post, "ConfigLanguage.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "language settings: " + selectedLanguage);
+            ((Switchboard) env).tables.recordAPICall(post, "ConfigLanguage_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "language settings: " + selectedLanguage);
             
             //change language
             if(post.containsKey("use_button") && selectedLanguage != null){
