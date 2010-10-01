@@ -203,7 +203,7 @@ public class Crawler_p {
                 env.setConfig("indexMedia", (indexMedia) ? "true" : "false");
                 
                 boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
-                if (crawlingStartURL.isFile() || crawlingStartURL.isSMB()) storeHTCache = false;
+                if (crawlingStartURL!= null &&(crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                 env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
                 
                 final String cachePolicyString = post.get("cachePolicy", "iffresh");
