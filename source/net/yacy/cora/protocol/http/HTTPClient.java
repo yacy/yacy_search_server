@@ -337,7 +337,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException 
      */
-	public byte[] POSTbytes(final String uri, final LinkedHashMap<String, ContentBody> parts) throws IOException {
+	public byte[] POSTbytes(final String uri, final LinkedHashMap<String, ContentBody> parts, final boolean usegzip) throws IOException {
     	final HttpPost httpPost = new HttpPost(uri);
 
     	final MultipartEntity multipartEntity = new MultipartEntity();
@@ -346,7 +346,11 @@ public class HTTPClient {
     	// statistics
     	upbytes = multipartEntity.getContentLength();
 
-    	httpPost.setEntity(multipartEntity);
+    	if (usegzip) {
+    		httpPost.setEntity(new GzipCompressingEntity(multipartEntity));
+    	} else {
+    		httpPost.setEntity(multipartEntity);
+    	}
     	
     	return getContentBytes(httpPost, Long.MAX_VALUE);
     }

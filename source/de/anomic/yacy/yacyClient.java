@@ -1005,7 +1005,7 @@ public final class yacyClient {
             parts.put("wordc", new StringBody(Integer.toString(indexes.size())));
             parts.put("entryc", new StringBody(Integer.toString(indexcount)));
             parts.put("indexes", new StringBody(entrypost.toString()));
-            final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts);
+            final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
             final Iterator<String> v = FileUtils.strings(content);
             // this should return a list of urlhashes that are unknown
             
@@ -1049,7 +1049,7 @@ public final class yacyClient {
         }
         try {
             parts.put("urlc", new StringBody(Integer.toString(urlc)));
-            final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts);
+            final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
             final Iterator<String> v = FileUtils.strings(content);
             
             final Map<String, String> result = FileUtils.table(v);
@@ -1161,7 +1161,7 @@ public final class yacyClient {
 			}
 			byte[] res;
 			try {
-				res = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(url, timeout, vhost, newpost);
+				res = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(url, timeout, vhost, newpost, true);
 				System.out.println(new String(res));
 			} catch (IOException e1) {
 				Log.logException(e1);

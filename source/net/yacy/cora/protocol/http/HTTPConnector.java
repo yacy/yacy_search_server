@@ -53,19 +53,34 @@ public class HTTPConnector {
      * send data to the server named by vhost
      * 
      * @param url address of the server
+     * @param timeout in milliseconds
      * @param vhost name of the server at address which should respond
      * @param post data to send (name-value-pairs)
-     * @param timeout in milliseconds
      * @return response body
      * @throws IOException
      */
     public byte[] post(final MultiProtocolURI url, final int timeout, final String vhost, LinkedHashMap<String, ContentBody> post) throws IOException {
+		return post(url, timeout, vhost, post, false);
+	}
+    
+    /**
+     * send data to the server named by vhost
+     * 
+     * @param url address of the server
+     * @param timeout in milliseconds
+     * @param vhost name of the server at address which should respond
+     * @param post data to send (name-value-pairs)
+     * @param usegzip if the body should be gzipped
+     * @return response body
+     * @throws IOException
+     */
+    public byte[] post(final MultiProtocolURI url, final int timeout, final String vhost, LinkedHashMap<String, ContentBody> post, final boolean usegzip) throws IOException {
 		final HTTPClient client = new HTTPClient();
 		client.setTimout(timeout);
 		client.setUserAgent(this.userAgent);
 		client.setHost(vhost);
 		
-		return client.POSTbytes(url.toNormalform(false, false), post);
+		return client.POSTbytes(url.toNormalform(false, false), post, usegzip);
 	}
 
 }
