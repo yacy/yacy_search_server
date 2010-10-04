@@ -303,7 +303,8 @@ function yacysearch(global, clear) {
 							$.each (
 								facet.elements,
 								function(j,element) {
-									$("<li><a href='javascript:openNavigator(\""+element.modifier+"\")'>"+element.name+" ("+element.count+")</a></li>").appendTo(id+" .nav");
+									var mod = element.modifier.replace(/'/g,"%27");
+									$("<li><a href='javascript:openNavigator(\""+mod+"\")'>"+element.name+" ("+element.count+")</a></li>").appendTo(id+" .nav");
 								}	
 							)
 							$(acc).accordion({});
