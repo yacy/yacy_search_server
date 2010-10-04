@@ -12,7 +12,7 @@ function search(query) {
     else if (window.ActiveXObject) { // IE
         self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=100&nav=topics&query=" + query, true);
+    self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=30&nav=none&query=" + query, true);
     self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     self.xmlHttpReq.onreadystatechange = function() {
         if (self.xmlHttpReq.readyState == 4) {
@@ -40,7 +40,7 @@ function updatepage(str) {
   var topics = navget(navigation, "topics");
   
   var html = "<span id=\"resCounter\" style=\"display: inline;\">total results = " + totalResults;
-  if (topics.length > 0) {
+  if (topics && topics.length > 0) {
     var topwords = "";
     for (var i = 0; i < topics.elements.length; i++) {
         topwords += "<a href=\"yacyinteractive.html?query=" + firstChannel.searchTerms + "+" + topics.elements[i].name + "\">" + topics.elements[i].name + "</a> ";

@@ -13,7 +13,8 @@
 		yconf = {
 			url      : ' ',
 			global   : true,
-			width    : 500,			
+			width    : 500,	
+			height   : 600,			
 			theme    : 'start',
 			title    : 'YaCy Widget',
 			load_js  : false,
@@ -29,7 +30,7 @@
 		<form id="ysearch" method="get" accept-charset="UTF-8" action="yacysearch.html"><p>
 			<input name="query" id="yquery" class="fancy" type="text" size="20" maxlength="80" value=""/>
 			<input type="hidden" name="verify" value="ifexist" />
-			<input type="hidden" name="maximumRecords" value="20" />
+			<input type="hidden" name="maximumRecords" value="10" />
 			<input type="hidden" name="resource" value="local" />
 			<input type="hidden" name="urlmaskfilter" value=".*" />
 			<input type="hidden" name="prefermaskfilter" value="" />
