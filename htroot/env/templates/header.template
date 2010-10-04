@@ -15,7 +15,7 @@
 			global   : true,
 			width    : 500,			
 			theme    : 'start',
-			title    : 'YaCy P2P Search',
+			title    : 'YaCy Widget',
 			load_js  : false,
 			load_css : false
 		};
