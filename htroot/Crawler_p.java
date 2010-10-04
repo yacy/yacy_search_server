@@ -144,7 +144,7 @@ public class Crawler_p {
                 if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL; // avoid that all urls are filtered out if bad value was submitted
                 // special cases:
                 if (crawlingStartURL!= null && fullDomain) {
-                    newcrawlingMustMatch = crawlingStartURL.isFile() ? "file:///.*" : crawlingStartURL.isSMB() ? "smb://.*" : ".*" + crawlingStartURL.getHost() + ".*";
+                    newcrawlingMustMatch = crawlingStartURL.isFile() ? "file://" + crawlingStartURL.getPath() + ".*" : crawlingStartURL.isSMB() ? "smb://" + crawlingStartURL.getPath() + ".*" : ".*" + crawlingStartURL.getHost() + ".*";
                 }
                 if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
                     newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
