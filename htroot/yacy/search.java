@@ -39,7 +39,7 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
+import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -195,7 +195,7 @@ public final class search {
         int joincount = 0;
         QueryParams theQuery = null;
         SearchEvent theSearch = null;
-        ArrayList<ReverseElement<ResultEntry>> accu = null;
+        ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> accu = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
             Segment indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
@@ -365,7 +365,7 @@ public final class search {
             final long timer = System.currentTimeMillis();
             final StringBuilder links = new StringBuilder(6000);
             String resource = null;
-            ReverseElement<ResultEntry> entry;
+            WeakPriorityBlockingQueue.Element<ResultEntry> entry;
             for (int i = 0; i < accu.size(); i++) {
                 entry = accu.get(i);
                 resource = entry.getElement().resource();

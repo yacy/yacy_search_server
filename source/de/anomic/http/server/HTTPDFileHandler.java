@@ -109,8 +109,6 @@ import de.anomic.yacy.graphics.EncodedImage;
 
 public final class HTTPDFileHandler {
     
-    private static final boolean safeServletsMode = false; // if true then all servlets are called synchronized
-    
     // create a class loader
     private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
     private static serverSwitch switchboard = null;
@@ -1177,15 +1175,8 @@ public final class HTTPDFileHandler {
         return m;
     }
     
-    public static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        // debug functions: for special servlets call them without reflection to get better stack trace results
-        Object result;
-        if (safeServletsMode) synchronized (switchboard) {
-            result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
-        } else {
-            result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
-        }
-        return result;
+    private static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
     }
 
     /**

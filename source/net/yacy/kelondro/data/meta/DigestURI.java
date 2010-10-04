@@ -273,6 +273,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
 
     // checks for local/global IP range and local IP
     public final boolean isLocal() {
+        if (this.isSMB() || this.isFile()) return true;
         if (this.hash == null) {
             if (super.isLocal()) return true;
             synchronized (this) {

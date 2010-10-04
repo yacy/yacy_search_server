@@ -179,6 +179,7 @@ public final class LoaderDispatcher {
     private Response loadInternal(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
         // get the protocol of the next URL
         final DigestURI url = request.url();
+        if (url.isFile() || url.isSMB()) cacheStrategy = CrawlProfile.CacheStrategy.NOCACHE; // load just from the file system
         final String protocol = url.getProtocol();
         final String host = url.getHost();
         

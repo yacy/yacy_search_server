@@ -96,8 +96,8 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
             // move value from A to B; since it was already removed from A, just put it to B
             //System.out.println("ARC: moving A->B, size(A) = " + this.levelA.size() + ", size(B) = " + this.levelB.size());
             this.levelB.put((K) s, v);
+            assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
         }
-        assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
         return v;
     }
 

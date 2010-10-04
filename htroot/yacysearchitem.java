@@ -100,7 +100,7 @@ public class yacysearchitem {
             // text search
 
             // generate result object
-            final ResultEntry result = theSearch.oneResult(item);
+            final ResultEntry result = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
             if (result == null) return prop; // no content
 
             
@@ -136,7 +136,7 @@ public class yacysearchitem {
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
-            prop.putHTML("content_host", result.url().getHost());
+            prop.putHTML("content_host", result.url().getHost() == null ? "" : result.url().getHost());
             prop.putHTML("content_file", result.url().getFile());
             prop.putHTML("content_path", result.url().getPath());
             prop.put("content_nl", (item == 0) ? 0 : 1);
@@ -203,7 +203,7 @@ public class yacysearchitem {
             // any other media content
 
             // generate result object
-            final ResultEntry result = theSearch.oneResult(item);
+            final ResultEntry result = theSearch.oneResult(item, 500);
             if (result == null) return prop; // no content
             
             prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
@@ -234,7 +234,7 @@ public class yacysearchitem {
         final int p = s.lastIndexOf('.');
         if (p < 0) return s.substring(0, length - 3) + "...";
         assert p >= 0;
-        assert length - (s.length() - p) - 3 >= 0;
+        assert length - (s.length() - p) - 3 >= 0: "length = " + length + ", s.length() = " + s.length() + ", p = " + p;
         return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p); // TODO check oob
     }
     

@@ -38,9 +38,9 @@ import java.util.concurrent.TimeUnit;
 public class WeakPriorityBlockingQueue<E> {
 
     
-    private final TreeSet<E>   queue;    // object within the stack, ordered using a TreeSet
+    private final TreeSet<Element<E>>   queue;    // object within the stack, ordered using a TreeSet
     private final Semaphore    enqueued; // semaphore for elements in the stack
-    private final ArrayList<E> drained;  // objects that had been on the stack but had been removed
+    private final ArrayList<Element<E>> drained;  // objects that had been on the stack but had been removed
     protected int maxsize;
 
     /**
@@ -52,8 +52,8 @@ public class WeakPriorityBlockingQueue<E> {
     public WeakPriorityBlockingQueue(final int maxsize) {
         // the maxsize is the maximum number of entries in the stack
         // if this is set to -1, the size is unlimited
-        this.queue = new TreeSet<E>();
-        this.drained = new ArrayList<E>();
+        this.queue = new TreeSet<Element<E>>();
+        this.drained = new ArrayList<Element<E>>();
         this.enqueued = new Semaphore(0);
         this.maxsize = maxsize;
     }
@@ -110,7 +110,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @param weight the weight of the element
      * @param remove - the rating of the element that shall be removed in case that the stack has an size overflow
      */
-    public synchronized void put(final E element) {
+    public synchronized void put(final Element<E> element) {
         // put the element on the stack
         if (this.drained.contains(element)) return;
         if (this.queue.size() == this.maxsize) {
@@ -127,7 +127,7 @@ public class WeakPriorityBlockingQueue<E> {
      * return the element with the smallest weight and remove it from the stack
      * @return null if no element is on the queue or the head of the queue
      */
-    public E poll() {
+    public Element<E> poll() {
         boolean a = this.enqueued.tryAcquire();
         if (!a) return null;
         synchronized (this) {
@@ -142,7 +142,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @return the head element from the queue
      * @throws InterruptedException
      */
-    public E poll(long timeout) throws InterruptedException {
+    public Element<E> poll(long timeout) throws InterruptedException {
         boolean a = (timeout <= 0) ? this.enqueued.tryAcquire() : this.enqueued.tryAcquire(timeout, TimeUnit.MILLISECONDS);
         if (!a) return null;
         synchronized (this) {
@@ -155,15 +155,15 @@ public class WeakPriorityBlockingQueue<E> {
      * @return the head element from the queue
      * @throws InterruptedException
      */
-    public E take() throws InterruptedException {
+    public Element<E> take() throws InterruptedException {
         this.enqueued.acquire();
         synchronized (this) {
             return takeUnsafe();
         }
     }
     
-    private E takeUnsafe() {
-        final E element = this.queue.first();
+    private Element<E> takeUnsafe() {
+        final Element<E> element = this.queue.first();
         assert element != null;
         this.queue.remove(element);
         this.drained.add(element);
@@ -176,7 +176,7 @@ public class WeakPriorityBlockingQueue<E> {
      * return the element with the smallest weight, but do not remove it
      * @return null if no element is on the queue or the head of the queue
      */
-    public synchronized E peek() {
+    public synchronized Element<E> peek() {
         if (this.queue.isEmpty()) return null;
         return this.queue.first();
     }
@@ -192,13 +192,15 @@ public class WeakPriorityBlockingQueue<E> {
      * @param position inside the drained queue
      * @return the element from the recorded position or null if that position is not available
      */
-    public synchronized E element(final int position) {
+    public Element<E> element(final int position) {
         if (position < this.drained.size()) {
             return this.drained.get(position);
         }
-        if (position >= this.queue.size() + this.drained.size()) return null; // we don't have that element
-        while (position >= this.drained.size()) this.poll();
-        return this.drained.get(position);
+        synchronized (this) {
+            if (position >= this.queue.size() + this.drained.size()) return null; // we don't have that element
+            while (position >= this.drained.size()) this.poll();
+            return this.drained.get(position);
+        }
     }
     
     /**
@@ -210,12 +212,11 @@ public class WeakPriorityBlockingQueue<E> {
      * @return the element from the recorded position or null if that position is not available within the timeout
      * @throws InterruptedException
      */
-    public synchronized E element(final int position, long time) throws InterruptedException {
+    public Element<E> element(final int position, long time) throws InterruptedException {
         long timeout = System.currentTimeMillis() + time;
         if (position < this.drained.size()) {
             return this.drained.get(position);
         }
-        if (position >= this.queue.size() + this.drained.size()) return null; // we don't have that element
         while (position >= this.drained.size()) {
             long t = timeout - System.currentTimeMillis();
             if (t <= 0) break;
@@ -232,7 +233,7 @@ public class WeakPriorityBlockingQueue<E> {
      * @param count
      * @return a list of elements in the stack
      */
-    public synchronized ArrayList<E> list(final int count) {
+    public synchronized ArrayList<Element<E>> list(final int count) {
         if (count < 0) {
             return list();
         }
@@ -245,7 +246,7 @@ public class WeakPriorityBlockingQueue<E> {
      * return all entries as they would be retrievable with element()
      * @return a list of all elements in the stack
      */
-    public synchronized ArrayList<E> list() {
+    public synchronized ArrayList<Element<E>> list() {
         // shift all elements
         while (!this.queue.isEmpty()) this.poll();
         return this.drained;
@@ -255,13 +256,13 @@ public class WeakPriorityBlockingQueue<E> {
      * iterate over all elements available. All elements that are still in the queue are drained to recorded positions
      * @return an iterator over all drained positions.
      */
-    public synchronized Iterator<E> iterator() {
+    public synchronized Iterator<Element<E>> iterator() {
         // shift all elements to the offstack
         while (!this.queue.isEmpty()) this.poll();
         return this.drained.iterator();
     }
 
-    protected interface Element<E> {
+    public interface Element<E> {
         public long getWeight();
         public E getElement();
         public boolean equals(Element<E> o);
@@ -269,7 +270,7 @@ public class WeakPriorityBlockingQueue<E> {
         public String toString();
     }
     
-    protected abstract static class AbstractElement<E> {
+    protected abstract static class AbstractElement<E> implements Element<E> {
 
         public long weight;
         public E element;
@@ -299,7 +300,7 @@ public class WeakPriorityBlockingQueue<E> {
      * natural ordering elements, can be used as container of objects <E> in the priority queue
      * the elements with smallest ordering weights are first in the queue when elements are taken
      */
-    public static class NaturalElement<E> extends AbstractElement<E> implements Comparable<NaturalElement<E>>, Comparator<NaturalElement<E>> {
+    public static class NaturalElement<E> extends AbstractElement<E> implements Element<E>, Comparable<NaturalElement<E>>, Comparator<NaturalElement<E>> {
 
         public NaturalElement(final E element, final long weight) {
             this.element = element;
@@ -321,13 +322,14 @@ public class WeakPriorityBlockingQueue<E> {
             if (o1h < o2h) return -1;
             return 0;
         }
+        
     }
     
     /**
      * reverse ordering elements, can be used as container of objects <E> in the priority queue
      * the elements with highest ordering weights are first in the queue when elements are taken
      */
-    public static class ReverseElement<E> extends AbstractElement<E> implements Comparable<ReverseElement<E>>, Comparator<ReverseElement<E>> {
+    public static class ReverseElement<E> extends AbstractElement<E> implements Element<E>, Comparable<ReverseElement<E>>, Comparator<ReverseElement<E>> {
 
         public ReverseElement(final E element, final long weight) {
             this.element = element;
@@ -352,14 +354,26 @@ public class WeakPriorityBlockingQueue<E> {
     }
     
     public static void main(String[] args) {
-        WeakPriorityBlockingQueue<ReverseElement<String>> a = new WeakPriorityBlockingQueue<ReverseElement<String>>(3);
+        final WeakPriorityBlockingQueue<String> a = new WeakPriorityBlockingQueue<String>(3);
+        //final Element<String> REVERSE_POISON = new ReverseElement<String>("", Long.MIN_VALUE);
+        new Thread(){
+            public void run() {
+                Element<String> e;
+                try {
+                    while ((e = a.poll(1000)) != null) System.out.println("> " + e.toString());
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }.start();
         a.put(new ReverseElement<String>("abc", 1));
         //a.poll();
         a.put(new ReverseElement<String>("abcx", 2));
         a.put(new ReverseElement<String>("6s_7dfZk4xvc", 3));
         a.put(new ReverseElement<String>("6s_7dfZk4xvcx", 4));
+        //a.put((Element<String>) REVERSE_POISON);
         //a.poll();
         System.out.println("size = " + a.sizeAvailable());
-        while (a.sizeQueue() > 0) System.out.println("> " + a.poll().toString());
+        //while (a.sizeQueue() > 0) System.out.println("> " + a.poll().toString());
     }
 }

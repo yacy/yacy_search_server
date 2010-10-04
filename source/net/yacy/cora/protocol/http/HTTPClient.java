@@ -480,8 +480,8 @@ public class HTTPClient {
     	        HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) httpUriRequest;
     	        HttpEntity entity = hrequest.getEntity();
     	        assert entity != null;
-    	        assert !entity.isChunked();
-    	        assert entity.getContentLength() >= 0;
+    	        //assert !entity.isChunked();
+    	        //assert entity.getContentLength() >= 0;
     	        assert !hrequest.expectContinue();
     	    }
 			httpResponse = httpClient.execute(httpUriRequest, httpContext);

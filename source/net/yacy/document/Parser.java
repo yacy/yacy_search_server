@@ -98,6 +98,11 @@ public interface Parser {
             this.url = url;
         }
         
+        public Failure(final String message, final MultiProtocolURI url, Throwable e) {
+            super(message + "; url = " + url.toNormalform(true, false), e);
+            this.url = url;
+        }
+        
         public MultiProtocolURI getURL() {
             return this.url;
         }

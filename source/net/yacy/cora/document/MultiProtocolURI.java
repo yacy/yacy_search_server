@@ -830,7 +830,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     // checks for local/global IP range and local IP
     public boolean isLocal() {
-        return this.protocol.equals("file") || this.protocol.equals("smb") || Domains.isLocal(this.host);
+        return this.isFile() || this.isSMB() || Domains.isLocal(this.host);
     }
 
     // language calculation
