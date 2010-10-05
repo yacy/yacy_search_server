@@ -286,17 +286,39 @@ public final class RankingProcess extends Thread {
         // returns from the current RWI list the best entry and removes this entry from the list
         WeakPriorityBlockingQueue<WordReferenceVars> m;
         WeakPriorityBlockingQueue.Element<WordReferenceVars> rwi = null;
-        try {
+
+        // check if the doubleDomCache is filled
+        /*
+        boolean doubleDomCacheFilled = false;
+        synchronized (this.doubleDomCache) {
+            final Iterator<WeakPriorityBlockingQueue<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
+            while (i.hasNext()) {
+                try {
+                    m = i.next();
+                } catch (ConcurrentModificationException e) {
+                    Log.logException(e);
+                    break; // not the best solution...
+                }
+                if (m == null) continue;
+                if (m.isEmpty()) continue;
+                doubleDomCacheFilled = true;
+                break;
+            }
+        }
+        */
+        
+        // take one entry from the stack if there are entries on that stack or the feeding is not yet finished
+        if (!feedingIsFinished() || stack.sizeQueue() > 0) try {
             //System.out.println("stack.poll: feeders = " + this.feeders + ", stack.sizeQueue = " + stack.sizeQueue());
             int loops = 0; // a loop counter to terminate the reading if all the results are from the same domain
             long timeout = System.currentTimeMillis() + waitingtime;
             while (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage) {
                 if (waitingtime <= 0) {
                     rwi = stack.poll();
-                } else while (System.currentTimeMillis() < timeout) {
+                } else timeoutloop:while (System.currentTimeMillis() < timeout) {
+                    if (feedingIsFinished() && stack.sizeQueue() == 0) break timeoutloop;
                     rwi = stack.poll(50);
-                    if (rwi != null) break;
-                    if (feedingIsFinished() && stack.sizeQueue() == 0) break;
+                    if (rwi != null) break timeoutloop;
                 }
                 if (rwi == null) break;
                 if (!skipDoubleDom) {
@@ -306,24 +328,20 @@ public final class RankingProcess extends Thread {
                 
                 // check doubledom
                 final String domhash = new String(rwi.getElement().metadataHash(), 6, 6);
-                m = this.doubleDomCache.get(domhash);
-                if (m == null) {
-                    // first appearance of dom
-                    m = new WeakPriorityBlockingQueue<WordReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
-                    this.doubleDomCache.put(domhash, m);
-                    //System.out.println("m == null");
-                    return rwi;
+                synchronized (this.doubleDomCache) {
+                    m = this.doubleDomCache.get(domhash);
+                    if (m == null) {
+                        // first appearance of dom. we create an entry to signal that one of that domain was already returned
+                        m = new WeakPriorityBlockingQueue<WordReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
+                        this.doubleDomCache.put(domhash, m);
+                        return rwi;
+                    }
+                    // second appearances of dom
+                    m.put(rwi);
                 }
-                
-                // second appearances of dom
-                m.put(rwi);
             }
-        } catch (InterruptedException e1) {
-        }
-        if (this.doubleDomCache.size() == 0) {
-            //System.out.println("this.doubleDomCache.size() == 0");
-            return null;
-         }
+        } catch (InterruptedException e1) {}
+        if (this.doubleDomCache.size() == 0) return null;
         
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
@@ -336,41 +354,26 @@ public final class RankingProcess extends Thread {
                     m = i.next();
                 } catch (ConcurrentModificationException e) {
                     Log.logException(e);
-                    break; // not the best solution...
+                    continue; // not the best solution...
                 }
-                if (m == null) {
-                    //System.out.println("m == null");
-                    continue;
-                }
-                if (m.isEmpty()) {
-                    //System.out.println("m.isEmpty()"); 
-                    continue;
-                }
+                if (m == null) continue;
+                if (m.isEmpty()) continue;
                 if (bestEntry == null) {
                     bestEntry = m.peek();
-                    //System.out.println("bestEntry = m.peek() = " + bestEntry);
                     continue;
                 }
                 o = m.peek();
-                if (o == null) {
-                    //System.out.println("o == null");
-                    continue;
-                }
+                if (o == null) continue;
                 if (o.getWeight() < bestEntry.getWeight()) {
                     bestEntry = o;
                 }
             }
+            if (bestEntry == null) return null;
+            
+            // finally remove the best entry from the doubledom cache
+            m = this.doubleDomCache.get(new String(bestEntry.getElement().metadataHash()).substring(6));
+            bestEntry = m.poll();
         }
-        if (bestEntry == null) {
-            //System.out.println("bestEntry == null");
-            return null;
-        }
-        
-        // finally remove the best entry from the doubledom cache
-        m = this.doubleDomCache.get(new String(bestEntry.getElement().metadataHash()).substring(6));
-        o = m.poll();
-        //assert o == null || o.element.metadataHash().equals(bestEntry.element.metadataHash()) : "bestEntry.element.metadataHash() = " + bestEntry.element.metadataHash() + ", o.element.metadataHash() = " + o.element.metadataHash();
-        //System.out.println("return bestEntry");
         return bestEntry;
     }
     

@@ -72,7 +72,7 @@ public class ResultFetcher {
             final QueryParams query,
             final yacySeedDB peers,
             final int taketimeout) {
-    	
+    	assert query != null;
         this.loader = loader;
     	this.rankingProcess = rankedCache;
     	this.query = query;
@@ -102,7 +102,7 @@ public class ResultFetcher {
         // start worker threads to fetch urls and snippets
         this.workerThreads = null;
         deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
     }
 
     public void deployWorker(int deployCount, int neededResults) {
@@ -111,7 +111,7 @@ public class ResultFetcher {
     	this.workerThreads = new Worker[/*(query.snippetCacheStrategy.mustBeOffline()) ? 1 : */deployCount];
     	synchronized(this.workerThreads) {
         	for (int i = 0; i < workerThreads.length; i++) {
-        	    Worker worker = new Worker(i, 1000, query.snippetCacheStrategy, neededResults);
+        	    Worker worker = new Worker(i, 10000, query.snippetCacheStrategy, neededResults);
         	    worker.start();
         		this.workerThreads[i] = worker;
             }
