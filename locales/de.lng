@@ -815,8 +815,8 @@ Crawl Thread==Crawl Art
 Must Match==Muss zutreffen
 Must Not Match==Muss nicht zutreffen
 MaxAge</strong>==Max. Alter</strong>
-Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
-Auto Filter Content</strong>==Auto Inhalts Filter</strong>
+#Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
+#Auto Filter Content</strong>==Auto Inhalts Filter</strong>
 Max Page Per Domain</strong>==Max. Seiten pro Domain</strong>
 Accept==Akzeptiere
 Fill Proxy Cache==Fülle Proxy Cache
@@ -969,12 +969,12 @@ If you don't know what this means, please leave this field empty.==Wenn Sie nich
 #Re-crawl known URLs:==Re-crawl bekannter URLs:
 Use</label>:==Benutzen</label>:
 #It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es hängt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl älter als das angegebene
-Auto-Dom-Filter:==Auto-Dom-Filter:
-This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschränkt ,
-will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen
-restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==und dann den folgenden Crawl automatisch auf die Domains zu beschränken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe für
-for this example would be 1.==dieses Beispiel wäre 1.
-The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschränkt wird.
+#Auto-Dom-Filter:==Auto-Dom-Filter:
+#This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschränkt ,
+#will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen
+#restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==und dann den folgenden Crawl automatisch auf die Domains zu beschränken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe für
+#for this example would be 1.==dieses Beispiel wäre 1.
+#The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschränkt wird.
 Maximum Pages per Domain:==Maximale Seiten pro Domain:
 Page-Count==Seitenanzahl
 You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.==Sie können die maximale Anzahl an Seiten, die von einer einzelnen Domain gefunden und indexiert werden, mit dieser Option begrenzen.
@@ -1019,7 +1019,6 @@ Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschließen
 This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem häufig vorkommende Wörter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle Wörter von der Indexierung auszuschließen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
 "Start New Crawl"=="Neuen Crawl starten"
-Depth</label>:==Tiefe</label>:
 #-----------------------------
 
 #File: CrawlStartIntranet_p.html
@@ -1723,7 +1722,7 @@ Available after successful loading of rss feed in preview==Verfügbar nach dem e
 >List of Scheduled RSS Feed Load Targets<==>Liste aller geplanten RSS Feed Ziele<
 >Title<==>Titel<
 #>URL/Referrer<==>URL/Referrer<
-#>Recording<==>Recording<
+>Recording<==>Eintrag<
 >Last Load<==>Zuletzt Geladen<
 >Next Load<==>Nächster Ladevorgang<
 >Last Count<==>Letzter Zähler<
@@ -1735,6 +1734,9 @@ Available after successful loading of rss feed in preview==Verfügbar nach dem e
 "Remove Selected Feeds from Feed List"=="Entferne ausgewählte Feeds aus der Feed Liste"
 "Remove All Feeds from Feed List"=="Entferne alle Feeds aus der Feed Liste"
 "Add Selected Feeds to Scheduler"=="Füge ausgewählte Feeds zur geplanten Liste hinzu"
+>new<==>Neu<
+>enqueued<==>Geplant<
+>indexed<==>Indexiert<
 >RSS Feed of==>RSS Feed von
 >Author<==>Autor<
 >Description<==>Beschreibung<
@@ -2780,6 +2782,11 @@ to change the configuration or to request crawl actions.==um Konfigurationen zu 
 These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
 to a scheduler for a periodic execution.==einem Scheduler für periodische Ausführung zu übergeben.
 >Recorded Actions<==>Aufgezeichnete Aktionen<
+"next page"=="Nächste Seite"
+"previous page"=="Vorherige Seite"
+"next page"=="Keine nächste Seite"
+"previous page"=="Keine vorherige Seite"
+ of \#\[of\]\#== von #[of]#
 >Date==>Datum
 >Type==>Typ
 >Comment==>Kommentar
@@ -2799,6 +2806,7 @@ Next&nbsp;Exec==Nächste&nbsp;Ausführung
 >minutes<==>Minuten<
 >hours<==>Stunden<
 >days<==>Tage<
+Scheduled actions are executed after the next execution date has arrived within a time frame of \#\[tfminutes\]\# minutes.==Geplante Aktionen werden innerhalb eines #[tfminutes]# Minuten Zeitfensters ausgeführt wenn der nächste Ausführungszeitpunkt erreicht wurde.
 #-----------------------------
 
 #File: Table_RobotsTxt_p.html

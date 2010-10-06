@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
   <head>
     <title>YaCy '#[clientname]#': Crawl Start</title>
     #%env/templates/metas.template%#
@@ -30,7 +30,7 @@
       <legend>
         <label>Site Crawl Start</label>
       </legend>
-      <form name="Crawler" id="Crawler" method="post" action="Crawler_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <form id="Crawler" method="post" action="Crawler_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
       <dl>
         <dt><label>Site</label></dt>
         <dd>
@@ -38,11 +38,12 @@
             <td valign="top"><input type="radio" name="crawlingMode" id="url" value="url" checked="checked"
             onmousedown="document.getElementById('rangeDomain').disabled=false;document.getElementById('rangeSubpath').disabled=false;document.getElementById('crawlingDomMaxCheck').disabled=false;document.getElementById('crawlingDomMaxPages').disabled=false;document.getElementById('crawlingQ').disabled=false;"/>Start URL</td>
             <td valign="top">
-            <input name="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
+            <input id="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
             <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
             </td>
 	        <td>
-            <span id="robotsOK"></span><img align="top" src="/env/grafics/empty.gif" name="ajax" alt="empty" />
+            <span id="robotsOK"></span>
+			<img id="ajax" src="/env/grafics/empty.gif" alt="empty" style="vertical-align: top;" />
             </td>
           </tr><tr>
             <td><input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled" />Link-List of URL</td>
@@ -53,8 +54,8 @@
             <td><input name="sitemapURL" type="text" size="41" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/></td>
           </tr>
           </table><br/>
-        </dd>
-      <input type="hidden" name="crawlingDepth" id="crawlingDepth" value="99">
+		  <input type="hidden" name="crawlingDepth" id="crawlingDepth" value="99" />
+        </dd>      
         <dt><label>Scheduler</label></dt>
         <dd>
             <input type="radio" name="recrawl" value="nodoubles" #(crawlingIfOlderCheck)#checked="checked"::#(/crawlingIfOlderCheck)#/>run this crawl once<br/>
@@ -77,30 +78,32 @@
         <dd>
             <input type="radio" name="range" id="rangeDomain" value="domain" checked="checked"/>load all files in domain<br />
 			<input type="radio" name="range" id="rangeSubpath" value="subpath" />load only files in a sub-path of given url
-        </dd>
-        <input type="hidden" name="mustnotmatch" id="mustnotmatch" value="">
-        <input type="hidden" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" value="off">
-        <input type="hidden" name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" value="#[crawlingDomFilterDepth]#">
+			<input type="hidden" name="mustnotmatch" id="mustnotmatch" value="" />
+			<input type="hidden" name="crawlingDomFilterCheck" id="crawlingDomFilterCheck" value="off" />
+			<input type="hidden" name="crawlingDomFilterDepth" id="crawlingDomFilterDepth" value="#[crawlingDomFilterDepth]#" />
+		</dd>
         <dt><label>Limitation</label></dt>
-        <dd><table border="0" cellpadding="0" cellspacing="0"><tr valign="top"><tr>
+        <dd><table border="0" cellpadding="0" cellspacing="0"><tr valign="top">
           <td valign="top"><input type="checkbox" name="crawlingDomMaxCheck" id="crawlingDomMaxCheck" #(crawlingDomMaxCheck)#::checked="checked"#(/crawlingDomMaxCheck)# /> not more than </td>
           <td valign="top"><input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" /></td>
           <td valign="top">documents</td>
           </tr></table>
         </dd>
         <dt><label>Dynamic URLs</label></dt>
-        <dd><input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /> allow <a href="http://en.wikipedia.org/wiki/Query_string">query-strings</a> (urls with a '?' in the path)
+        <dd>
+		<input type="checkbox" name="crawlingQ" id="crawlingQ" #(crawlingQChecked)#::checked="checked"#(/crawlingQChecked)# /> allow <a href="http://en.wikipedia.org/wiki/Query_string">query-strings</a> (urls with a '?' in the path)
+
+		<input type="hidden" name="storeHTCache" id="storeHTCache" value="on" />
+        <input type="hidden" name="cachePolicy" id="cachePolicy" value="iffresh" />
+        <input type="hidden" name="indexText" id="indexText" value="on" />
+        <input type="hidden" name="indexMedia" id="indexMedia" value="on" />
+        <input type="hidden" name="intention" id="intention" value="" />
+        <input type="hidden" name="xsstopw" id="xsstopw" value="off" />
+        <input type="hidden" name="xdstopw" id="xdstopw" value="off" />
+        <input type="hidden" name="xpstopw" id="xpstopw" value="off" />
+        <input type="hidden" name="createBookmark" id="createBookmark" value="off" />
         </dd>
-        <input type="hidden" name="storeHTCache" id="storeHTCache" value="on">
-        <input type="hidden" name="cachePolicy" id="cachePolicy" value="iffresh">
-        <input type="hidden" name="indexText" id="indexText" value="on">
-        <input type="hidden" name="indexMedia" id="indexMedia" value="on">
-        <input type="hidden" name="intention" id="intention" value="">
-        <input type="hidden" name="xsstopw" id="xsstopw" value="off">
-        <input type="hidden" name="xdstopw" id="xdstopw" value="off">
-        <input type="hidden" name="xpstopw" id="xpstopw" value="off">
-        <input type="hidden" name="createBookmark" id="createBookmark" value="off">
-        <dt></dt><dd></dd><dt></dt><dd></dd>
+        <!-- <dt>&nbsp;</dt><dd>&nbsp;</dd><dt>&nbsp;</dt><dd>&nbsp;</dd> -->
         <dt><label>Start</label></dt>
         <dd><input type="submit" name="crawlingstart" value="Start New Crawl" />
         </dd>
@@ -115,7 +118,7 @@
     <li><h4>High Speed Crawling</h4> A 'shallow crawl' which is not limited to a single host (or site)
     can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.
     This can be done using the <a href="CrawlStartExpert_p.html">Expert Crawl Start</a> servlet.</li>
-    <li><h4>Scheduler Steering</h4> The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.
+    <li><h4>Scheduler Steering</h4> The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.</li>
     </ul>
     #%env/templates/footer.template%#
   </body>

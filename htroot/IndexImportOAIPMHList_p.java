@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.importer.OAIListFriendsLoader;
 import net.yacy.document.importer.OAIPMHImporter;
 
@@ -51,8 +52,8 @@ public class IndexImportOAIPMHList_p {
             for (String root: oaiRoots) {
                 prop.put("source_table_" + count + "_dark", (dark) ? "1" : "0");
                 prop.put("source_table_" + count + "_count", count);
-                prop.put("source_table_" + count + "_source", root);
-                prop.put("source_table_" + count + "_loadurl", "<a href=\"/IndexImportOAIPMH_p.html?urlstart=" + root + "\" target=\"_top\">" + root + "</a>");
+                prop.put("source_table_" + count + "_source", CharacterCoding.unicode2html(root, true));
+                prop.put("source_table_" + count + "_loadurl", "<a href=\"/IndexImportOAIPMH_p.html?urlstart=" + CharacterCoding.unicode2html(root, true) + "\" target=\"_top\">" + CharacterCoding.unicode2html(root, true) + "</a>");
                 dark = !dark;
                 count++;
             }
@@ -72,7 +73,7 @@ public class IndexImportOAIPMHList_p {
             for (OAIPMHImporter job: jobs) {
                 prop.put("import_table_" + count + "_dark", (dark) ? "1" : "0");
                 prop.put("import_table_" + count + "_thread", (job.isAlive()) ? "<img src=\"/env/grafics/loading.gif\" alt=\"running\" />" : "finished");
-                prop.put("import_table_" + count + "_source", job.source());
+                prop.putXML("import_table_" + count + "_source", job.source());
                 prop.put("import_table_" + count + "_chunkCount", job.chunkCount());
                 prop.put("import_table_" + count + "_recordsCount", job.count());
                 prop.put("import_table_" + count + "_completeListSize", job.getCompleteListSize());

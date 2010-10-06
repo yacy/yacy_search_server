@@ -217,7 +217,7 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_repeatTime", time);
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
-                prop.put("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8080") + new String(row.get(WorkTables.TABLE_API_COL_URL)));
+                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8080") + new String(row.get(WorkTables.TABLE_API_COL_URL)));
 
                 if (time == 0) {
                     prop.put("showtable_list_" + count + "_scheduler", 0);

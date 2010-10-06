@@ -1,17 +1,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
   <head>
     <title>YaCy '#[clientname]#': Configuration of a RSS Search</title>
     #%env/templates/metas.template%#
     <script type="text/javascript">
     <!--
-    function setall(name) {
-        var selectForm = document.forms.namedItem(name);
-        var count = selectForm.elements["num"].value;
-        for (i = 0; i < count; i++) {
-            if (selectForm.elements["item_" + i] == null) continue;
-            selectForm.elements["item_" + i].checked = !selectForm.elements["item_" + i].checked;
-        }
+	// The chrome browser is getting the wrong value if we try to get the value inside the script "var checkStatus=inputs.elements[0].checked;" - so now the value is a parameter
+	function checkAll (formToCheckAll, checkStatus) {
+	var inputs=document.getElementById(formToCheckAll);	
+	//var checkStatus=inputs.elements[0].checked;
+	for (var i =0; i < inputs.elements.length; i++) {
+			inputs.elements[i].checked = checkStatus;
+		}
     }
     -->
     </script>
@@ -63,11 +63,11 @@
     </form>
 
 	#(showscheduledfeeds)#::
-	<form name="scheduledfeeds"><fieldset>
-	  <legend><label for="table">List of Scheduled RSS Feed Load Targets</label></legend>
+	<form id="scheduledfeeds" action="Load_RSS_p.html"><fieldset>
+	  <legend><label for="scheduledfeeds">List of Scheduled RSS Feed Load Targets</label></legend>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
-          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name)" /></td>
+          <td class="sorttable_nosort"><input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" /></td>
           <td>Title</td>
           <td>URL/Referrer</td>
           <td>Recording</td>
@@ -80,8 +80,8 @@
         #{list}#
         <tr class="TableCellLight">
           <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
-          <td><a href="/Load_RSS_p.html?showrss=&url=#[rss]#">#[title]#</a></td>
-          <td><a href="/Load_RSS_p.html?showrss=&url=#[rss]#">#[rss]#</a><br/><a href="#[referrer]#">#[referrer]#</a></td>
+          <td><a href="/Load_RSS_p.html?showrss=&amp;url=#[rss]#">#[title]#</a></td>
+          <td><a href="/Load_RSS_p.html?showrss=&amp;url=#[rss]#">#[rss]#</a><br/><a href="#[referrer]#">#[referrer]#</a></td>
           <td>#[recording]#</td>
           <td>#[lastload]#</td>
           <td>#[nextload]#</td>
@@ -93,18 +93,18 @@
       </table>
       <p>
       <input type="hidden" name="num" value="#[num]#" />
-      <input type="submit" name="removeSelectedFeedsScheduler" value="Remove Selected Feeds from Scheduler" /></dt>
-      <input type="submit" name="removeAllFeedsScheduler" value="Remove All Feeds from Scheduler" /></dt>
+      <input type="submit" name="removeSelectedFeedsScheduler" value="Remove Selected Feeds from Scheduler" />
+      <input type="submit" name="removeAllFeedsScheduler" value="Remove All Feeds from Scheduler" />
       </p>
     </fieldset></form>
 	#(/showscheduledfeeds)#
 	
 	#(shownewfeeds)#::
-	<form name="newfeeds"><fieldset>
-	  <legend><label for="table">Available RSS Feed List</label></legend>
+	<form id="newfeeds" action="Load_RSS_p.html"><fieldset>
+	  <legend><label for="newfeeds">Available RSS Feed List</label></legend>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
-          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name)" /></td>
+          <td class="sorttable_nosort"><input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" /></td>
           <td>Title</td>
           <td>URL/Referrer</td>
           <td>Recording</td>
@@ -112,24 +112,24 @@
         #{list}#
         <tr class="TableCellLight">
           <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
-          <td><a href="/Load_RSS_p.html?showrss=&url=#[rss]#">#[title]#</a></td>
-          <td><a href="/Load_RSS_p.html?showrss=&url=#[rss]#">#[rss]#</a><br/><a href="#[referrer]#">#[referrer]#</a></td>
+          <td><a href="/Load_RSS_p.html?showrss=&amp;url=#[rss]#">#[title]#</a></td>
+          <td><a href="/Load_RSS_p.html?showrss=&amp;url=#[rss]#">#[rss]#</a><br/><a href="#[referrer]#">#[referrer]#</a></td>
           <td>#[recording]#</td>
         </tr>
         #{/list}#
       </table>
       <p>
       <input type="hidden" name="num" value="#[num]#" />
-      <input type="submit" name="removeSelectedFeedsNewList" value="Remove Selected Feeds from Feed List" /></dt>
-      <input type="submit" name="removeAllFeedsNewList" value="Remove All Feeds from Feed List" /></dt>
-      <input type="submit" name="addSelectedFeedScheduler" value="Add Selected Feeds to Scheduler" /></dt>
+      <input type="submit" name="removeSelectedFeedsNewList" value="Remove Selected Feeds from Feed List" />
+      <input type="submit" name="removeAllFeedsNewList" value="Remove All Feeds from Feed List" />
+      <input type="submit" name="addSelectedFeedScheduler" value="Add Selected Feeds to Scheduler" />
       </p>
     </fieldset></form>
 	#(/shownewfeeds)#
 	
 	#(showitems)#::
-	<form name="rssfeed"><fieldset>
-	  <legend><label for="table">RSS Feed of #[rss]#</label></legend>
+	<form id="rssfeed" action="Load_RSS_p.html"><fieldset>
+	  <legend><label for="rssfeed">RSS Feed of #[rss]#</label></legend>
       <dl>
 		<dt>Title</dt><dd>#[title]#</dd>
 		<dt>Author</dt><dd>#[author]#</dd>
@@ -141,7 +141,7 @@
 	  </dl>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
-          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name)" /></td>
+          <td class="sorttable_nosort"><input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" /></td>
           <td>State</td>
           <td>Title</td>
           <td>URL</td>
@@ -166,7 +166,7 @@
       <p>
       <input type="hidden" name="num" value="#[num]#" />
       <input type="hidden" name="url" value="#[rss]#" />
-      <input type="submit" name="indexSelectedItemContent" value="Add Selected Items to Index (full content of url)" /></dt>
+      <input type="submit" name="indexSelectedItemContent" value="Add Selected Items to Index (full content of url)" />
       </p>
     </fieldset></form>
 	#(/showitems)#

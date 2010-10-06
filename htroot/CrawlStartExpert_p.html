@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
   <head>
     <title>YaCy '#[clientname]#': Crawl Start</title>
     #%env/templates/metas.template%#
@@ -26,7 +26,7 @@
     You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
     </p>
     
-    <form name="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data">
+    <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data">
       <table border="0" cellpadding="5" cellspacing="1">
         <tr class="TableHeader">
           <td><strong>Attribute</strong></td>
@@ -41,7 +41,7 @@
                 <td><label for="url"><span class="nobr">From URL</span></label>:</td>
                 <td><input type="radio" name="crawlingMode" id="url" value="url" checked="checked" /></td>
                 <td>
-                  <input name="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" />                                    
+                  <input id="crawlingURL" type="text" size="41" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" />                                    
                 </td>
               </tr>
               <tr>
@@ -67,7 +67,7 @@
               	<td colspan="3" class="commit">
 	              	<span id="robotsOK"></span>
 	              	<span id="title"><br/></span>
-	              	<img src="/env/grafics/empty.gif" name="ajax" alt="empty" />
+	              	<img id="ajax" src="/env/grafics/empty.gif" alt="empty" />
               	</td>
               </tr>
             </table>
@@ -93,7 +93,7 @@
             <dl>
             <dt>no&nbsp;doubles<input type="radio" name="recrawl" value="nodoubles" #(crawlingIfOlderCheck)#checked="checked"::#(/crawlingIfOlderCheck)#/></dt>
             <dd>run this crawl once and never load any page that is already known, only the start-url may be loaded again.</dd>
-			<dt>re-load<input type="radio" name="recrawl" value="reload"/ #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)#></dt>
+			<dt>re-load<input type="radio" name="recrawl" value="reload" #(crawlingIfOlderCheck)#::checked="checked"#(/crawlingIfOlderCheck)# /></dt>
 			<dd>run this crawl once, but treat urls that are known since<br/>
 			<select name="crawlingIfOlderNumber" id="crawlingIfOlderNumber">
               <option value="1">1</option><option value="2">2</option><option value="3">3</option>

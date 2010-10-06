@@ -199,9 +199,9 @@ public class Load_RSS_p {
                         Date date_next_exec = r.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                         prop.put("showscheduledfeeds_list_" + apic + "_pk", new String(row.getPK()));
                         prop.put("showscheduledfeeds_list_" + apic + "_count", apic);
-                        prop.put("showscheduledfeeds_list_" + apic + "_rss", messageurl);
-                        prop.put("showscheduledfeeds_list_" + apic + "_title", row.get("title", ""));
-                        prop.put("showscheduledfeeds_list_" + apic + "_referrer", referrer == null ? "" : referrer.toNormalform(true, false));
+                        prop.putXML("showscheduledfeeds_list_" + apic + "_rss", messageurl);
+                        prop.putXML("showscheduledfeeds_list_" + apic + "_title", row.get("title", ""));
+                        prop.putXML("showscheduledfeeds_list_" + apic + "_referrer", referrer == null ? "#" : referrer.toNormalform(true, false));
                         prop.put("showscheduledfeeds_list_" + apic + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
                         prop.put("showscheduledfeeds_list_" + apic + "_lastload", DateFormat.getDateTimeInstance().format(row.get("last_load_date", new Date())));
                         prop.put("showscheduledfeeds_list_" + apic + "_nextload", date_next_exec == null ? "" : DateFormat.getDateTimeInstance().format(date_next_exec));
@@ -213,9 +213,9 @@ public class Load_RSS_p {
                         // this is a new entry
                         prop.put("shownewfeeds_list_" + newc + "_pk", new String(row.getPK()));
                         prop.put("shownewfeeds_list_" + newc + "_count", newc);
-                        prop.put("shownewfeeds_list_" + newc + "_rss", messageurl);
-                        prop.put("shownewfeeds_list_" + newc + "_title", row.get("title", ""));
-                        prop.put("shownewfeeds_list_" + newc + "_referrer", referrer == null ? "" : referrer.toNormalform(true, false));
+                        prop.putXML("shownewfeeds_list_" + newc + "_rss", messageurl);
+                        prop.putXML("shownewfeeds_list_" + newc + "_title", row.get("title", ""));
+                        prop.putXML("shownewfeeds_list_" + newc + "_referrer", referrer == null ? "" : referrer.toNormalform(true, false));
                         prop.put("shownewfeeds_list_" + newc + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
                         newc++;
                     }

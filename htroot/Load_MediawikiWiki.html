@@ -20,11 +20,12 @@
       to this page to read the integration hints below.
     </p>
     
-   <form name="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data">
+   <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data">
        <fieldset>
         <dl>
           <dt><b>URL of the wiki main page</b><br />This is a crawl start point</dt>
-          <dd><input type="text" name="crawlingURL" value="#[starturl]#" size="60" maxlength="256" onkeypress="changed()" onfocus="check('url')" /></dd>
+          <dd>
+		  <input type="text" name="crawlingURL" value="#[starturl]#" size="60" maxlength="256" onkeypress="changed()" onfocus="check('url')" />
           
           <input type="hidden" name="crawlingMode" id="url" value="url" checked="checked" />
           <input type="hidden" name="createBookmark" value="off" />		  
@@ -38,7 +39,7 @@
           <input type="hidden" name="crawlingDomFilterCheck" value="off" />
           <input type="hidden" name="crawlingDomFilterDepth" value="0" />
           <input type="hidden" name="crawlingDomMaxCheck" value="off" />
-          <input type="hidden" name="crawlingDomMaxPages" "" />
+          <input type="hidden" name="crawlingDomMaxPages" value="" />
           <input type="hidden" name="crawlingQ" value="off" />
           <input type="hidden" name="storeHTCache" value="off" />
           <input type="hidden" name="indexText" value="on" />
@@ -48,8 +49,8 @@
           <input type="hidden" name="xsstopw" value="off" />
           <input type="hidden" name="xdstopw" value="off" />
           <input type="hidden" name="xpstopw" value="off" />
-          
-          <dt></dt>
+          </dd>
+          <dt>&nbsp;</dt>
           <dd><input type="submit" name="crawlingstart" value="Get content of Wiki: crawl wiki pages" /></dd>
           
         </dl>
@@ -62,7 +63,8 @@
       To integrate a search window into a MediaWiki, you must insert some code into the wiki template.
       There are several templates that can be used for MediaWiki, but in this guide we consider that
       you are using the default template, 'MonoBook.php':
-      <ul>
+	</p>
+    <ul>
         <li>open skins/MonoBook.php</li>
         <li>find the line where the default search window is displayed, there are the following statements:
          <pre>&lt;form name="searchform" action="&lt;?php $this-&gt;text('searchaction') ?&gt;" id="searchform"&gt;
@@ -114,9 +116,8 @@
         <li>Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name</li>
         <li>You may want to change the default text elements in the code snippet</li>
         <li>To see all options for the search widget, look at the more generic description of search widgets at
-            the <a href="ConfigLiveSearch.html">configuration for live search</a>.
-       </ul>
-       </p>
+            the <a href="ConfigLiveSearch.html">configuration for live search</a>.</li>
+    </ul>
     #%env/templates/footer.template%#
   </body>
 </html>

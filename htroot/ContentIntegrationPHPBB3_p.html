@@ -15,12 +15,12 @@
     </p>
     <p>
       If you read from an imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:
-      <ul>
-      <li>before importing large database dumps, set the following Line in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB):</li>
-      <pre>$cfg['UploadDir'] = '/tmp';</pre>
-      <li>deselect the partial import flag</li>
-      </ul>
-    </p>
+	</p>
+    <ul>
+		<li>before importing large database dumps, set the following Line in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB):<br />
+		<pre>$cfg['UploadDir'] = '/tmp';</pre></li>
+		<li>deselect the partial import flag</li>
+    </ul>
     <p>
       When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.
       All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.
@@ -56,7 +56,7 @@
           <dt><b>Posts per file</b><br />in exported surrogates</dt>
           <dd><input type="text" name="content.phpbb3.ppf" value="#[content.phpbb3.ppf]#" size="20" /></dd>
           
-          <dt></dt>
+          <dt>&nbsp;</dt>
           <dd>
             <input type="submit" name="check" value="Check database connection" />&nbsp;&nbsp;
             <input type="submit" name="export" value="Export Content to Surrogates" />
@@ -67,11 +67,11 @@
         <dl>
           <dt><b>Import a database dump</b>,<br /></dt>
           <dd><input type="text" name="content.phpbb3.dumpfile" value="#[content.phpbb3.dumpfile]#" size="60" /></dd>
-        </dl>
-        <dt></dt>
+          <dt>&nbsp;</dt>
           <dd>
             <input type="submit" name="import" value="Import Dump" />
           </dd>
+		</dl>
       </fieldset>
     </form>
     

@@ -11,8 +11,8 @@ function handleResponse(){
         if (response.getElementsByTagName("title")[0].firstChild!=null){
 	        doctitle=response.getElementsByTagName("title")[0].firstChild.nodeValue;
 	    }
-		// document.getElementById("title").innerHTML=doctitle;
-		document.Crawler.bookmarkTitle.value=doctitle
+		//document.getElementById("title").innerHTML=doctitle;
+		document.getElementById("bookmarkTitle").value=doctitle;
 		
 		// determine if crawling is allowed by the robots.txt
         docrobotsOK="";		
@@ -28,14 +28,16 @@ function handleResponse(){
         	img.setAttribute("src", "/env/grafics/ok.png");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
+			img.setAttribute("alt", "robots.txt - OK");
         	robotsOKspan.appendChild(img);
         } else if(docrobotsOK==0){
 			img=document.createElement("img");
         	img.setAttribute("src", "/env/grafics/bad.png");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
+			img.setAttribute("alt", "robots.txt - Bad");
         	robotsOKspan.appendChild(img);
-        	robotsOKspan.appendChild(img);
+        	// robotsOKspan.appendChild(img);
         } else {
 	        robotsOKspan.appendChild(document.createTextNode(""));
 	        document.getElementById("robotsOK").innerHTML="";
@@ -58,7 +60,7 @@ function handleResponse(){
 			if (sitelist) document.getElementById("sitelist").disabled=false;
         
 		// clear the ajax image
-		document.getElementsByName("ajax")[0].setAttribute("src", AJAX_OFF);
+		document.getElementById("ajax").setAttribute("src", AJAX_OFF);
     }
 }
 
@@ -69,8 +71,8 @@ function changed() {
 
 function loadInfos() {
 	// displaying ajax image
-	document.getElementsByName("ajax")[0].setAttribute("src",AJAX_ON);	
+	document.getElementById("ajax").setAttribute("src",AJAX_ON);	
 	
-	url=document.getElementsByName("crawlingURL")[0].value;
+	url=document.getElementById("crawlingURL").value;
 	sndReq('/api/util/getpageinfo_p.xml?actions=title,robots&url='+url);
 }
