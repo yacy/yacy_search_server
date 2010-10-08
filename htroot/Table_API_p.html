@@ -70,7 +70,7 @@
           <td>#[dateNextExec]#</td>
           <td>
           #(scheduler)#
-          <!-- <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat"><fieldset> -->
+           <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat">
             <select name="repeat_select" onchange='this.form.submit()'>
               <option value="off" selected="selected">no repetition</option>
               <option value="on">activate scheduler</option>
@@ -78,9 +78,9 @@
             <input type="hidden" name="pk" value="#[pk]#" />
             <input type="hidden" name="inline" value="#[inline]#" />
             <input type="hidden" name="filter" value="#[filter]#" />
-          <!-- </fieldset></form> -->
+          </form>
           ::
-         <!-- <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat"> -->
+         <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat">
             <table><tr><td>
             <select name="repeat_time" onchange='this.form.submit()'>
             #{scale}#
@@ -98,7 +98,7 @@
             <input type="hidden" name="inline" value="#[inline]#" />
             <input type="hidden" name="filter" value="#[filter]#" />
             <noscript><input type="submit" value="Submit" /></noscript>
-        <!--  </form> -->
+        </form>
           #(/scheduler)#
           </td>
           #(inline)#<td>#[url]#</td>::#(/inline)#
