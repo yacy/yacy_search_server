@@ -787,7 +787,14 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         if (obj == null) return false;
         if (!(obj instanceof MultiProtocolURI)) return false;
         MultiProtocolURI other = (MultiProtocolURI) obj;
-        return this.toString().equals(other.toString());
+        
+        return
+          this.protocol.equals(other.protocol) && 
+          this.host.equals(other.host) && 
+          this.userInfo.equals(other.userInfo) && 
+          this.path.equals(other.path) && 
+          this.quest.equals(other.quest) && 
+          this.port == other.port; 
     }
 
     public int compareTo(MultiProtocolURI h) {

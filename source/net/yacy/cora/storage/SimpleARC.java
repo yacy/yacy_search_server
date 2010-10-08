@@ -85,10 +85,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      */
     @SuppressWarnings("unchecked")
     public final V get(final Object s) {
-        V v;
-        synchronized (this.levelB) {
-            v = this.levelB.get(s);
-        }
+        V v = this.levelB.get(s);
         if (v != null) return v;
         synchronized (this) {
             v = this.levelA.remove(s);
@@ -127,12 +124,8 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @return
      */
     public final boolean containsKey(final Object s) {
-        synchronized (this.levelB) {
-            if (this.levelB.containsKey(s)) return true;
-        }
-        synchronized (this.levelA) {
-            return this.levelA.containsKey(s);
-        }
+        if (this.levelB.containsKey(s)) return true;
+        return this.levelA.containsKey(s);
     }
    
     

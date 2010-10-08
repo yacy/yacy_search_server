@@ -122,7 +122,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + new String(newtext));
-        String b = cleanLine(super.stripAll(new String(newtext)));
+        String b = cleanLine(super.stripAll(newtext));
         if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
             // this is bad for the text sematics, because it is not possible for the
@@ -265,7 +265,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     private String recursiveParse(char[] inlineHtml) {
-        if (inlineHtml.length < 14) return cleanLine(super.stripAll(new String(inlineHtml)));
+        if (inlineHtml.length < 14) return cleanLine(super.stripAll(inlineHtml));
         
         // start a new scraper to parse links inside this text
         // parsing the content
@@ -276,12 +276,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             writer.close();
         } catch (IOException e) {
             Log.logException(e);
-            return cleanLine(super.stripAll(new String(inlineHtml)));
+            return cleanLine(super.stripAll(inlineHtml));
         }
         this.anchors.putAll(scraper.getAnchors());
         this.images.putAll(scraper.images);
         
-        return cleanLine(super.stripAll(new String(scraper.content.getChars())));
+        return cleanLine(super.stripAll(scraper.content.getChars()));
     }
     
     private final static String cleanLine(String s) {

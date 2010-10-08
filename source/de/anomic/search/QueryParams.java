@@ -313,7 +313,7 @@ public final class QueryParams {
         if ((querystring != null) && (querystring.length() > 0)) {
         
             // convert Umlaute
-            querystring = AbstractScraper.stripAll(querystring).toLowerCase().trim();
+            querystring = AbstractScraper.stripAll(querystring.toCharArray()).toLowerCase().trim();
             int c;
             for (int i = 0; i < seps.length(); i++) {
                 while ((c = querystring.indexOf(seps.charAt(i))) >= 0) {

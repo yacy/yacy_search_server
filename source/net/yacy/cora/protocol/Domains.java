@@ -679,6 +679,13 @@ public class Domains {
         // check dns lookup: may be a local address even if the domain name looks global
         if (!recursive) return false;
         InetAddress a = dnsResolve(host);
+        /*
+        if (a == null) {
+            // unknown if this is a local address. Could also be a timeout.
+            // It would be harmful to declare any public address as local, therefore return false
+            return false;
+        }
+        */
         return a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress() || isLocal(a.getHostAddress(), false);
     }
 }

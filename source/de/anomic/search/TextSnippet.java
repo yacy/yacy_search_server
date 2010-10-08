@@ -155,7 +155,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         try {
             // first try to get the snippet from metadata
             String loc;
-            boolean objectWasInCache = de.anomic.http.client.Cache.has(url);
+            boolean noCacheUsage = url.isFile() || url.isSMB();
+            boolean objectWasInCache = (noCacheUsage) ? false : de.anomic.http.client.Cache.has(url);
             boolean useMetadata = !objectWasInCache && !cacheStrategy.mustBeOffline();
             if (useMetadata && containsAllHashes(loc = comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
@@ -175,7 +176,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 return;
             } else {
                 // try to load the resource from the cache
-                response = loader.load(loader.request(url, true, reindexing), cacheStrategy, Long.MAX_VALUE);
+                response = loader.load(loader.request(url, true, reindexing), noCacheUsage ? CrawlProfile.CacheStrategy.NOCACHE : cacheStrategy, Long.MAX_VALUE);
                 if (response == null) {
                     // in case that we did not get any result we can still return a success when we are not allowed to go online
                     if (cacheStrategy.mustBeOffline()) {

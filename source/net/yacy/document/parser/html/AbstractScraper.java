@@ -67,12 +67,12 @@ public abstract class AbstractScraper implements Scraper {
 
     public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
 
-    protected static String stripAllTags(String s) {
-        StringBuilder r = new StringBuilder(s.length());
+    protected static String stripAllTags(final char[] s) {
+        StringBuilder r = new StringBuilder(s.length);
         int bc = 0;
         char c;
-        for (int p = 0; p < s.length(); p++) {
-            c = s.charAt(p);
+        for (int p = 0; p < s.length; p++) {
+            c = s[p];
             if (c == lb) {
                 bc++;
                 r.append(' ');
@@ -85,7 +85,7 @@ public abstract class AbstractScraper implements Scraper {
         return r.toString().trim();
     }
 
-    public static String stripAll(String s) {
+    public static String stripAll(final char[] s) {
         return CharacterCoding.html2unicode(stripAllTags(s));
     }
 

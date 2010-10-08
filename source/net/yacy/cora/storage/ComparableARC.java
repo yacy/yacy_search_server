@@ -45,6 +45,9 @@ public final class ComparableARC<K, V> extends SimpleARC<K, V> implements Map<K,
             this.limit = cacheSize;
             this.keys = new LinkedList<K>();
         }
+        public synchronized V get(Object k) {
+            return super.get(k);
+        }
         public synchronized V put(K k, V v) {
             V r = super.put(k, v);
             if (r == null) keys.add(k);

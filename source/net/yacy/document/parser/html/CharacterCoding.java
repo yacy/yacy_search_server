@@ -240,14 +240,19 @@ public class CharacterCoding {
         Character r;
         while (p < text.length()) {
             p1 = text.indexOf('&', p);
-            if (p1 < 0) p1 = text.length();
-            sb.append(text.subSequence(p, p1));
+            if (p1 < 0) {
+                sb.append(text, p, text.length());
+                break;
+            }
+            sb.append(text, p, p1);
             p = p1;
             if (p >= text.length()) break;
             q = text.indexOf(';', p);
             if (q < 0) {
-                p++;
-                continue;
+                // if there is now no semicolon, then this will also fail when another ampersand is found afterwards
+                // we are finished here
+                sb.append(text, p, text.length());
+                break;
             }
             s = text.substring(p, q + 1);
             p = q + 1;
