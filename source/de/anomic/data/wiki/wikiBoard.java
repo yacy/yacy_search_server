@@ -41,7 +41,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
 
-
+/**
+ * 
+ */
 public class wikiBoard {
 
     public  static final int keyLength = 64;
@@ -54,11 +56,17 @@ public class wikiBoard {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    MapHeap datbase = null;
-    MapHeap bkpbase = null;
-    static HashMap<String, String> authors = new HashMap<String, String>();
+    private MapHeap datbase = null;
+    private MapHeap bkpbase = null;
+    private static final Map<String, String> AUTHORS = new HashMap<String, String>();
 
-    public wikiBoard( final File actpath, final File bkppath) throws IOException {
+    /**
+     * Constructor.
+     * @param actpath path of database which contains current wiki data.
+     * @param bkppath path of backup database.
+     * @throws IOException if error occurs during HDD access.
+     */
+    public wikiBoard(final File actpath, final File bkppath) throws IOException {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
             //datbase = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, actpathNew), 500, '_');
@@ -71,224 +79,329 @@ public class wikiBoard {
         }
     }
 
+    /**
+     * Gets total number of entries of wiki DB and DB which contains backup entries.
+     * @return number of entries in wiki plus number of old entries.
+     */
     public int sizeOfTwo() {
         return datbase.size() + bkpbase.size();
     }
 
+    /**
+     * Gets number of entries of wiki DB.
+     * @return number of entries in wiki.
+     */
     public int size() {
         return datbase.size();
     }
 
+    /**
+     * Closes database files.
+     */
     public void close() {
         datbase.close();
         bkpbase.close();
     }
 
+    /**
+     * Gets current date.
+     * @return current date.
+     */
     static String dateString() {
         return dateString(new Date());
     }
 
+    /**
+     * Gets String representation of a Date.
+     * @param date the Date.
+     * @return String representation of Date.
+     */
     public static String dateString(final Date date) {
         synchronized (SimpleFormatter) {
             return SimpleFormatter.format(date);
         }
     }
 
+    /**
+     * Gets normalized version of a key.
+     * @param key the key.
+     * @return normalized version of key.
+     */
     private static String normalize(final String key) {
         return (key != null) ? key.trim().toLowerCase() : "null";
     }
 
+    /**
+     * Normalizes key and replaces spaces by escape code.
+     * @param key the key.
+     * @return normalized and webalized version.
+     */
     public static String webalize(final String key) {
         return (key != null) ? normalize(key).replaceAll(" ", "%20") : "null";
     }
 
+    /**
+     * Tries to guess the name of the author by a given IP address.
+     * @param ip the IP address.
+     * @return
+     */
     public static String guessAuthor(final String ip) {
-        final String author = authors.get(ip);
+        final String author = AUTHORS.get(ip);
         //yacyCore.log.logDebug("DEBUG: guessing author for ip = " + ip + " is '" + author + "', authors = " + authors.toString());
         return author;
     }
 
+    /**
+     * Adds an author name and a corresponding IP to internal Map.
+     * @param ip IP address of the author.
+     * @param author name of author.
+     */
     public static void setAuthor(final String ip, final String author) {
-        authors.put(ip,author);
+        AUTHORS.put(ip,author);
     }
 
-    public entry newEntry(final String subject, final String author, final String ip, final String reason, final byte[] page) throws IOException {
-        return new entry(normalize(subject), author, ip, reason, page);
+    /**
+     * Creates new Entry.
+     * @param subject subject of entry.
+     * @param author author of entry.
+     * @param ip IP address of author.
+     * @param reason reason for new Entry (for example "edit").
+     * @param page content of Entry.
+     * @return new Entry.
+     * @throws IOException
+     */
+    public Entry newEntry(final String subject, final String author, final String ip, final String reason, final byte[] page) throws IOException {
+        return new Entry(normalize(subject), author, ip, reason, page);
     }
 
-    public class entry {
+    /**
+     * Contains information of wiki page.
+     */
+    public class Entry {
         private static final String ANONYMOUS = "anonymous";
 
-        String key;
-        Map<String, String> record;
+        private String key;
+        private final Map<String, String> record;
 
-        public entry(final String subject, String author, String ip, String reason, final byte[] page) throws IOException {
-            record = new HashMap<String, String>();
-            key = subject;
-            if (key.length() > keyLength) {
-                key = key.substring(0, keyLength);
-            }
-            record.put("date", dateString());
-            if ((author == null) || (author.length() == 0)) {
-                author = ANONYMOUS;
-            }
-            record.put("author", Base64Order.enhancedCoder.encode(author.getBytes("UTF-8")));
-            if ((ip == null) || (ip.length() == 0)) {
-                ip = "";
-            }
-            record.put("ip", ip);
-            if ((reason == null) || (reason.length() == 0)) {
-                reason = "";
-            }
-            record.put("reason", Base64Order.enhancedCoder.encode(reason.getBytes("UTF-8")));
-            if (page == null) {
-                record.put("page", "");
-            } else {
-                record.put("page", Base64Order.enhancedCoder.encode(page));
-            }
-            authors.put(ip, author);
-            //System.out.println("DEBUG: setting author " + author + " for ip = " + ip + ", authors = " + authors.toString());
+        /**
+         * Constructor which creates new Entry using given information.
+         * @param subject subject of Entry.
+         * @param author author of Entry.
+         * @param ip IP address of author.
+         * @param reason reason for new Entry (for example "edit").
+         * @param page content of Entry.
+         * @throws IOException
+         */
+        public Entry(final String subject, final String author, final String ip, final String reason, final byte[] page) throws IOException {
+            this.record = new HashMap<String, String>();
+            this.key = subject.substring(0, Math.min((key != null) ? key.length() : 0, keyLength));
+            this.record.put("date", dateString());
+            this.record.put("author", Base64Order.enhancedCoder.encodeString((author != null && author.length() > 0) ? author : ANONYMOUS));
+            this.record.put("ip", (ip != null && ip.length() > 0) ? ip : "");
+            this.record.put("reason", Base64Order.enhancedCoder.encodeString((reason != null && reason.length() > 0) ? reason : ""));
+            this.record.put("page", (page != null) ? Base64Order.enhancedCoder.encode(page) : "");
+            AUTHORS.put(ip, author);
         }
 
-        entry(final String key, final Map<String, String> record) {
+        /**
+         * Constructor which creates Entry using key and record.
+         * @param key key of Entry.
+         * @param record record which contains data.
+         */
+        Entry(final String key, final Map<String, String> record) {
             this.key = key;
             this.record = record;
         }
 
+        /**
+         * Gets subject of Entry.
+         * @return subject of entry.
+         */
         public String subject() {
             return key;
         }
 
+        /**
+         * Gets date of Entry.
+         * @return date of Entry.
+         */
         public Date date() {
+            Date ret;
             try {
                 final String c = record.get("date");
                 if (c == null) {
                     System.out.println("DEBUG - ERROR: date field missing in wikiBoard");
-                    return new Date();
-                }
-                synchronized (SimpleFormatter) {
-                    return SimpleFormatter.parse(c);
+                    ret = new Date();
+                } else {
+                    synchronized (SimpleFormatter) {
+                        ret = SimpleFormatter.parse(c);
+                    }
                 }
             } catch (final ParseException e) {
-                return new Date();
+                ret = new Date();
             }
+            return ret;
         }
 
+        /**
+         * Gets author of Entry.
+         * @return author of Entry.
+         */
         public String author() {
             final String a = record.get("author");
             final byte[] b;
             return (a != null && (b = Base64Order.enhancedCoder.decode(a)) != null) ? new String(b) : ANONYMOUS;
         }
 
+        /**
+         * Gets reason for Entry.
+         * @return reason for Entry.
+         */
         public String reason() {
+            final String ret;
             final String r = record.get("reason");
-            if (r == null) {
-                return "";
+            if (r != null) {
+                final byte[] b;
+                ret = ((b = Base64Order.enhancedCoder.decode(r)) != null) ? new String(b) : "unknown";
+            } else {
+                ret = "";
             }
-            final byte[] b = Base64Order.enhancedCoder.decode(r);
-            if (b == null) {
-                return "unknown";
-            }
-            return new String(b);
+            return ret;
         }
 
+        /**
+         * Gets actual content of Entry.
+         * @return content of Entry.
+         */
         public byte[] page() {
             final String m = record.get("page");
             final byte[] b;
             return (m != null && (b = Base64Order.enhancedCoder.decode(m)) != null) ? b : new byte[0];
         }
 
+        /**
+         * Sets date of previous version of Entry.
+         * @param date date of previous version of Entry.
+         */
         void setAncestorDate(final Date date) {
             record.put("bkp", dateString(date));
         }
 
+        /**
+         * Gets date of previous version of Entry.
+         * @return date of previous version of Entry.
+         */
         private Date getAncestorDate() {
+            Date ret = null;
             try {
                 final String c = record.get("date");
-                if (c == null) return null;
-                synchronized (SimpleFormatter) {
-                    return SimpleFormatter.parse(c);
+                if (c != null) {
+                    synchronized (SimpleFormatter) {
+                        ret = SimpleFormatter.parse(c);
+                    }
                 }
             } catch (final ParseException e) {
-                return null;
+                ret = null;
             }
+            return ret;
         }
 
-        /*
-	public boolean hasAncestor() {
-	    Date ancDate = getAncestorDate();
-	    if (ancDate == null) return false;
-	    try {
-		return bkpbase.has(key + dateString(ancDate));
-	    } catch (IOException e) {
-		return false;
-	    }
-	}
+        /**
+         * Gets previous version of Entry.
+         * @return previous version of Entry.
          */
-
-        public entry getAncestor() {
+        public Entry getAncestor() {
             final Date ancDate = getAncestorDate();
             return (ancDate == null) ? null : read(key + dateString(ancDate), bkpbase);
         }
 
+        /**
+         * Adds child of current Entry.
+         * @param subject subject of child of current Entry.
+         */
         void setChild(final String subject) {
             record.put("child", Base64Order.enhancedCoder.encode(subject.getBytes()));
         }
 
+        /**
+         * Gets name (= subject) of child of this Entry.
+         * @return name of child of this Entry.
+         */
         private String getChildName() {
             final String c = record.get("child");
             final byte[] subject;
             return (c != null && (subject = Base64Order.enhancedCoder.decode(c)) != null) ? new String(subject) : null;
         }
 
+        /**
+         * Tells if Entry has child.
+         * @return true if has child, else false.
+         */
         public boolean hasChild() {
             final String c = record.get("child");
             return (c != null && Base64Order.enhancedCoder.decode(c) != null) ? true : false;
         }
 
-        public entry getChild() {
+        /**
+         * Gets child of this Entry.
+         * @return child of this Entry.
+         */
+        public Entry getChild() {
             final String childName = getChildName();
             return (childName == null) ? null : read(childName, datbase);
         }
     }
 
-    public String write(final entry page) {
+    /**
+     * Writes content of Entry to database and returns key.
+     * @param entry Entry to be written.
+     * @return key of Entry.
+     */
+    public String write(final Entry entry) {
         // writes a new page and returns key
-        String ret = null;
+        String key = null;
         try {
             // first load the old page
-            final entry oldEntry = read(page.key);
+            final Entry oldEntry = read(entry.key);
             // set the bkp date of the new page to the date of the old page
             final Date oldDate = oldEntry.date();
-            page.setAncestorDate(oldDate);
-            oldEntry.setChild(page.subject());
+            entry.setAncestorDate(oldDate);
+            oldEntry.setChild(entry.subject());
             // write the backup
-            //System.out.println("key = " + page.key);
-            //System.out.println("oldDate = " + oldDate);
-            //System.out.println("record = " + oldEntry.record.toString());
-            bkpbase.insert((page.key + dateString(oldDate)).getBytes(), oldEntry.record);
+            bkpbase.insert((entry.key + dateString(oldDate)).getBytes(), oldEntry.record);
             // write the new page
-            datbase.insert(page.key.getBytes(), page.record);
-            ret = page.key;
+            datbase.insert(entry.key.getBytes(), entry.record);
+            key = entry.key;
         } catch (final Exception e) {
             Log.logException(e);
         }
-        return ret;
+        return key;
     }
 
-    public entry read(final String key) {
+    /**
+     * Reads content of Entry from database.
+     * @param key key of Entry.
+     * @return Entry which contains data.
+     */
+    public Entry read(final String key) {
         return read(key, datbase);
     }
 
-    entry read(String key, final MapHeap base) {
-        entry ret = null;
+    /**
+     * Reads content of Entry from database.
+     * @param key key of Entry.
+     * @param base database containing data.
+     * @return Entry which contains data.
+     */
+    Entry read(final String key, final MapHeap base) {
+        Entry ret = null;
         try {
-            key = normalize(key);
-            if (key.length() > keyLength) {
-                key = key.substring(0, keyLength);
+            String copyOfKey = normalize(key);
+            if (copyOfKey.length() > keyLength) {
+                copyOfKey = copyOfKey.substring(0, keyLength);
             }
-            final Map<String, String> record = base.get(key.getBytes());
-            ret = (record == null) ? newEntry(key, ANONYMOUS, "127.0.0.1", "New Page", "".getBytes()) : new entry(key, record);
+            final Map<String, String> record = base.get(copyOfKey.getBytes());
+            ret = (record == null) ? newEntry(copyOfKey, ANONYMOUS, "127.0.0.1", "New Page", "".getBytes()) : new Entry(copyOfKey, record);
         } catch (final IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {
@@ -296,25 +409,32 @@ public class wikiBoard {
         }
         return ret;
     }
-    
-    public entry readBkp(final String key) {
+
+    /**
+     * Reads old Entry from backup database.
+     * @param key key of Entry.
+     * @return the Entry.
+     */
+    public Entry readBkp(final String key) {
         return read(key, bkpbase);
     }
 
-    /*
-    public boolean has(String key) {
-	try {
-	    return datbase.has(normalize(key));
-	} catch (IOException e) {
-	    return false;
-	}
-    }
+    /**
+     * Gets Iterator of keys in database.
+     * @param up
+     * @return keys of Entries in database.
+     * @throws IOException
      */
-
     public Iterator<byte[]> keys(final boolean up) throws IOException {
         return datbase.keys(up, false);
     }
 
+    /**
+     * Gets Iterator of keys in backup database.
+     * @param up
+     * @return keys of Entries in backup database.
+     * @throws IOException
+     */
     public Iterator<byte[]> keysBkp(final boolean up) throws IOException {
         return bkpbase.keys(up, false);
     }

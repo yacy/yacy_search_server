@@ -11,26 +11,25 @@
     ::
     #%env/templates/header.template%#
     #%env/templates/submenuPublication.template%#
-	::
-	#%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/embeddedheader.template%#
     #(/display)#
 
     #(mode)#
     <!-- 0: viewing -->
-
     <div class="Post">
       <h2 class="PostSubject">YaCyWiki page: #[pagename]#</h2>
       <div class="PostBody">
         #[page]#
       </div>
       <p class="PostInfo">
-         last edited by #[author]# | change date #[date]# | <a href="Wiki.html?page=#[pagename]#&amp;edit=Edit">Edit</a> #(access)#(only granted to admin)::#(/access)#
+         last edited by #[author]# | change date #[date]# | <a href="Wiki.html?page=#[pagename]#&amp;display=#[display]#&amp;edit=Edit">Edit</a> #(access)#(only granted to admin)::#(/access)#
       </p>
     </div>
     <p class="Navigation">
-      <a href="Wiki.html">Start Page</a> -
-      <a href="Wiki.html?index=Index">Index</a> -
-      <a href="Wiki.html?page=#[pagename]#&amp;diff=">Versions</a> -
+      <a href="Wiki.html?display=#[display]#">Start Page</a> -
+      <a href="Wiki.html?index=Index&amp;display=#[display]#">Index</a> -
+      <a href="Wiki.html?page=#[pagename]#&amp;diff=&amp;display=#[display]#">Versions</a> -
     </p>
     <form method="post" action="Wiki.html"><div>
       <label for="access">Grant Write Access to</label>
@@ -38,6 +37,7 @@
     </div></form>
     ::
     <!-- 1: edit -->
+    <h2>Edit</h2>
     <form action="Wiki.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
         <dl>
@@ -54,6 +54,7 @@
           You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.
         </p>
         <input type="hidden" name="page" value="#[pagename]#" />
+        <input type="hidden" name="display" value="#[display]#" />
         <input type="hidden" name="reason" value="edit" />
         <input type="submit" name="submit" value="Submit" />
         <input type="submit" name="preview" value="Preview" />
@@ -96,6 +97,7 @@
           You can use <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.
         </p>
         <input type="hidden" name="page" value="#[pagename]#" />
+        <input type="hidden" name="display" value="#[display]#" />
         <input type="hidden" name="reason" value="edit" />
         <input type="submit" name="submit" value="Submit" />
         <input type="submit" name="preview" value="Preview" />
@@ -104,6 +106,7 @@
     </form>
     ::
     <!-- 3: Index -->
+    <h2>Index</h2>
     <table border="0" cellpadding="5" cellspacing="0">
       <tr class="TableHeader">
         <td>Subject</td>
@@ -112,7 +115,7 @@
       </tr>
       #{pages}#
       <tr class="TableCellLight">
-        <td><a href="Wiki.html?page=#[name]#">#[subject]#</a></td>
+        <td><a href="Wiki.html?page=#[name]#&amp;display=#[display]#">#[subject]#</a></td>
         <td>#[date]#</td>
         <td>#[author]#</td>
       </tr>
@@ -120,14 +123,16 @@
     </table>
     #(error)#::<p class="error">IO Error reading wiki database: #[message]#</p>#(/error)#
     <p class="Navigation">
-      <a href="Wiki.html">Start Page</a>
+      <a href="Wiki.html?display=#[display]#">Start Page</a>
     </p>
     ::
     <!-- 4: Diff -->
+    <h2>Versions</h2>
     #(error)#<!-- no error -->
     <form method="get" action="Wiki.html">
-      <fieldset><legend>Select versions of page '#[page]#</legend>
+      <fieldset><legend>Select versions of page '#[page]#'</legend>
         <input type="hidden" name="page" value="#[page]#" />
+        <input type="hidden" name="display" value="#[display]#" />
         <input type="hidden" name="diff" value="" />
         <dl>
           <dt><label for="old">Compare version from</label>:</dt>
@@ -149,6 +154,7 @@
       </fieldset>
     </form>
     ::<!-- IO error -->
+    <h2>Error</h2>
     <p class="error">IO Error reading wiki database: #[message]#</p>
     ::<!-- no entries available for #[name]# -->
     #(/error)#
@@ -189,6 +195,7 @@
           <a href="WikiHelp.html" onclick="window.open('WikiHelp.html','WikiHelp','toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,width=640,height=480');return false;">Wiki Code</a> here.
         </p>
         <input type="hidden" name="page" value="#[pagename]#" />
+        <input type="hidden" name="display" value="#[display]#" />
         <input type="hidden" name="reason" value="edit" />
         <input type="submit" name="submit" value="Submit" />
         <input type="submit" name="preview" value="Preview" />
@@ -197,8 +204,8 @@
     </form>
     #(/versioning)#
     <p class="Navigation">
-      <a href="Wiki.html">Start Page</a> -
-      <a href="Wiki.html?page=#[page]#">Return to #[page]#</a>
+      <a href="Wiki.html?display=#[display]#">Start Page</a> -
+      <a href="Wiki.html?page=#[page]#&amp;display=#[display]#">Return to #[page]#</a>
     </p>
     #(/mode)#
 

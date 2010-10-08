@@ -47,8 +47,10 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
+import java.util.Map;
 
 public class Wiki {
+    private static final String ANONYMOUS = "anonymous";
 
     //private static String ListLevel = "";
     //private static String numListLevel = "";
@@ -74,12 +76,11 @@ public class Wiki {
         String access = sb.getConfig("WikiAccess", "admin");
         final String pagename = get(post, "page", "start");
         final String ip = get(post, HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
-        String author = get(post, "author", "anonymous");
-        if (author.equals("anonymous")) {
+        String author = get(post, "author", ANONYMOUS);
+        if (author.equals(ANONYMOUS)) {
             author = wikiBoard.guessAuthor(ip);
             if (author == null) {
-                if (sb.peers.mySeed() == null) author = "anonymous";
-                else author = sb.peers.mySeed().get("Name", "anonymous");
+                author = (sb.peers.mySeed() == null) ? ANONYMOUS : sb.peers.mySeed().get("Name", ANONYMOUS);
             }
         }
         
@@ -94,10 +95,13 @@ public class Wiki {
             access = post.get("access", "admin");
             sb.setConfig("WikiAccess", access);
         }
-        if (access.equals("admin")) prop.put("mode_access", "0");
-        if (access.equals("all"))   prop.put("mode_access", "1");
+        if (access.equals("admin")) {
+            prop.put("mode_access", "0");
+        } else if (access.equals("all")) {
+            prop.put("mode_access", "1");
+        }
 
-        wikiBoard.entry page = sb.wikiDB.read(pagename);
+        wikiBoard.Entry page = sb.wikiDB.read(pagename);
         
         if (post != null && post.containsKey("submit")) {
             
@@ -114,17 +118,21 @@ public class Wiki {
             } catch (final UnsupportedEncodingException e) {
                 content = post.get("content", "").getBytes();
             }
-            final wikiBoard.entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
+            final wikiBoard.Entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
             sb.wikiDB.write(newEntry);
             // create a news message
-            final HashMap<String, String> map = new HashMap<String, String>();
+            final Map<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
-            if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
+            if (post.get("content", "").trim().length() > 0 && !new String(page.page()).equals(new String(content))) {
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map);
+            }
             page = newEntry;
             prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);
+            prop.put("LOCATION", prop.get("LOCATION") + "&display=" + display);
         }
+
+        prop.put("mode_display", display);
 
         if (post != null && post.containsKey("edit")) {
             if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
@@ -139,6 +147,7 @@ public class Wiki {
                 prop.putHTML("mode_author", author);
                 prop.putHTML("mode_page-code", new String(page.page(), "UTF-8"));
                 prop.putHTML("mode_pagename", pagename);
+                prop.put("mode_display", display);
             } catch (final UnsupportedEncodingException e) {}
         }
 
@@ -147,6 +156,7 @@ public class Wiki {
             // preview the page
             prop.put("mode", "2");//preview
             prop.putHTML("mode_pagename", pagename);
+            prop.put("mode_display", display);
             prop.putHTML("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
             prop.putWiki("mode_page", post.get("content", ""));
@@ -157,18 +167,16 @@ public class Wiki {
         else if (post != null && post.containsKey("index")) {
             // view an index
             prop.put("mode", "3"); //Index
-            String subject;
             try {
                 final Iterator<byte[]> i = sb.wikiDB.keys(true);
-                wikiBoard.entry entry;
                 int count=0;
                 while (i.hasNext()) {
-                    subject = new String(i.next());
-                    entry = sb.wikiDB.read(subject);
-                    prop.putHTML("mode_pages_"+count+"_name",wikiBoard.webalize(subject));
-                    prop.putHTML("mode_pages_"+count+"_subject", subject);
-                    prop.put("mode_pages_"+count+"_date", dateString(entry.date()));
-                    prop.putHTML("mode_pages_"+count+"_author", entry.author());
+                    final String subject = new String(i.next());
+                    final wikiBoard.Entry entry = sb.wikiDB.read(subject);
+                    prop.putHTML("mode_pages_" + count + "_name",wikiBoard.webalize(subject));
+                    prop.putHTML("mode_pages_" + count + "_subject", subject);
+                    prop.put("mode_pages_" + count + "_date", dateString(entry.date()));
+                    prop.putHTML("mode_pages_" + count + "_author", entry.author());
                     count++;
                 }
                 prop.put("mode_pages", count);
@@ -177,6 +185,7 @@ public class Wiki {
                 prop.putHTML("mode_error_message", e.getMessage());
             }
             prop.putHTML("mode_pagename", pagename);
+            prop.put("mode_display", display);
         }
         
         else if (post != null && post.containsKey("diff")) {
@@ -184,12 +193,13 @@ public class Wiki {
             prop.put("mode", "4");
             prop.putHTML("mode_page", pagename);
             prop.putHTML("mode_error_page", pagename);
+            prop.put("mode_error_display", display);
             
             try {
                 final Iterator<byte[]> it = sb.wikiDB.keysBkp(true);
-                wikiBoard.entry entry;
-                wikiBoard.entry oentry = null;
-                wikiBoard.entry nentry = null;
+                wikiBoard.Entry entry;
+                wikiBoard.Entry oentry = null;
+                wikiBoard.Entry nentry = null;
                 int count = 0;
                 boolean oldselected = false, newselected = false;
                 while (it.hasNext()) {
@@ -209,10 +219,12 @@ public class Wiki {
                 }
                 count--;    // don't show current version
                 
-                if (!oldselected)   // select latest old entry
+                if (!oldselected) { // select latest old entry
                     prop.put("mode_error_versions_" + (count - 1) + "_oldselected", "1");
-                if (!newselected)   // select latest new entry (== current)
+                }
+                if (!newselected) { // select latest new entry (== current)
                     prop.put("mode_error_curselected", "1");
+                }
                 
                 if (count == 0) {
                     prop.put("mode_error", "2"); // no entries found
@@ -226,7 +238,9 @@ public class Wiki {
                     prop.put("mode_error_curfdate", dateString(entry.date()));
                 }
                 
-                if (nentry == null) nentry = entry;
+                if (nentry == null) {
+                    nentry = entry;
+                }
                 if (post.containsKey("compare") && oentry != null && nentry != null) {
                     // TODO: split into paragraphs and compare them with the same diff-algo
                     final diff diff = new diff(
@@ -237,6 +251,7 @@ public class Wiki {
                 } else if (post.containsKey("viewold") && oentry != null) {
                     prop.put("mode_versioning", "2");
                     prop.putHTML("mode_versioning_pagename", pagename);
+                    prop.put("mode_versioning_display", display);
                     prop.putHTML("mode_versioning_author", oentry.author());
                     prop.put("mode_versioning_date", dateString(oentry.date()));
                     prop.putWiki("mode_versioning_page", oentry.page());
@@ -252,6 +267,7 @@ public class Wiki {
             // show page
             prop.put("mode", "0"); //viewing
             prop.putHTML("mode_pagename", pagename);
+            prop.put("mode_display", display);
             prop.putHTML("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
             prop.putWiki("mode_page", page.page());
