@@ -265,22 +265,15 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     public static boolean isDomDomain(final byte[] urlHash, final int id) {
         return domDomain(urlHash) == id;
     }
-    
-    public static boolean matchesAnyDomDomain(final byte[] urlHash, final int idset) {
-        // this is a boolean matching on a set of domDomains
-        return (domDomain(urlHash) | idset) != 0;
-    }
 
     // checks for local/global IP range and local IP
     public final boolean isLocal() {
         if (this.isSMB() || this.isFile()) return true;
-        if (this.hash == null) {
-            if (super.isLocal()) return true;
-            synchronized (this) {
-                if (this.hash == null) this.hash = urlHashComputation();
-            }
+        if (this.hash == null) synchronized (this) {
+            // this is synchronized because another thread may also call the same method in between
+            // that is the reason that this.hash is checked again
+            if (this.hash == null) this.hash = urlHashComputation();
         }
-        //if (domDomain(this.hash) != 7) System.out.println("*** DEBUG - not local: " + this.toNormalform(true, false));
         return domDomain(this.hash) == 7;
     }
 

@@ -28,15 +28,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.ARC;
@@ -468,36 +461,16 @@ public class Domains {
         if (hosts.size() > 0) return hosts.iterator().next();
         
         // call i.getHostName() using concurrency to interrupt execution in case of a time-out
-        final Callable<String> callable = new Callable<String>() {
-            public String call() { return i.getHostName(); }
-        };
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        final Future<String> taskFuture = service.submit(callable);
-        Runnable t = new Runnable() {         
-            public void run() { taskFuture.cancel(true); }
-        };
-        service.execute(t);
-        service.shutdown();
         try {
-            return taskFuture.get(500, TimeUnit.MILLISECONDS);
-        } catch (CancellationException e) {
-            // callable was interrupted
-            return i.getHostAddress();
-        } catch (InterruptedException e) {
-            // service was shutdown
-            return i.getHostAddress();
-        } catch(ExecutionException e) {
-            // callable failed unexpectedly
-            return i.getHostAddress();
-        } catch (TimeoutException e) {
-            // time-out
+            return TimeoutRequest.getHostName(i, 500);
+        } catch (ExecutionException e) {
             return i.getHostAddress();
         }
     }
     
-    public static InetAddress dnsResolve(final String hostx) {
-        if ((hostx == null) || (hostx.length() == 0)) return null;
-        final String host = hostx.toLowerCase().trim();        
+    public static InetAddress dnsResolve(String host) {
+        if ((host == null) || (host.length() == 0)) return null;
+        host = host.toLowerCase().trim();        
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
         if (ip != null) return ip;
@@ -509,34 +482,37 @@ public class Domains {
         if (nameCacheMiss.containsKey(host)) return null;
         
         // call dnsResolveNetBased(host) using concurrency to interrupt execution in case of a time-out
-        final Callable<InetAddress> callable = new Callable<InetAddress>() {
-            public InetAddress call() { return dnsResolveNetBased(host); }
-        };
-        ExecutorService service = Executors.newSingleThreadExecutor();
-        final Future<InetAddress> taskFuture = service.submit(callable);
-        Runnable t = new Runnable() {         
-            public void run() { taskFuture.cancel(true); }
-        };
-        service.execute(t);
-        service.shutdown();
         try {
-            return taskFuture.get(500, TimeUnit.MILLISECONDS);
-        } catch (CancellationException e) {
-            // callable was interrupted
-            return null;
-        } catch (InterruptedException e) {
-            // service was shutdown
-            return null;
-        } catch(ExecutionException e) {
-            // callable failed unexpectedly
-            return null;
-        } catch (TimeoutException e) {
-            // time-out
-            return null;
+            boolean doCaching = true;
+            ip = TimeoutRequest.getByName(host, 500); // this makes the DNS request to backbone
+            if ((ip == null) ||
+                (ip.isLoopbackAddress()) ||
+                (nameCacheNoCachingList.containsKey(host))
+            ) {
+                doCaching = false;
+            } else {
+                if (matchesList(host, nameCacheNoCachingPatterns)) {
+                    nameCacheNoCachingList.put(host, PRESENT);
+                    doCaching = false;
+                }
+            }
+            
+            if (doCaching && ip != null) {
+                
+                // add new entries
+                nameCacheHit.put(host, ip);
+            }
+            return ip;
+        } catch (final ExecutionException e) {
+            // remove old entries
+            flushMissNameCache();
+            
+            // add new entries
+            nameCacheMiss.put(host, PRESENT);
         }
+        return null;
     }
     
-
     private static final InetAddress parseInetAddress(final String ip) {
         if (ip == null) return null;
         if (ip.length() < 8) return null;
@@ -557,39 +533,6 @@ public class Domains {
             return null;
         }
     }
-
-    private static InetAddress dnsResolveNetBased(String host) {
-        try {
-            boolean doCaching = true;
-            InetAddress ip = InetAddress.getByName(host); // this makes the DNS request to backbone
-            if ((ip == null) ||
-                (ip.isLoopbackAddress()) ||
-                (nameCacheNoCachingList.containsKey(host))
-            ) {
-                doCaching = false;
-            } else {
-                if (matchesList(host, nameCacheNoCachingPatterns)) {
-                    nameCacheNoCachingList.put(host, PRESENT);
-                    doCaching = false;
-                }
-            }
-            
-            if (doCaching && ip != null) {
-                
-                // add new entries
-                nameCacheHit.put(host, ip);
-            }
-            return ip;
-        } catch (final UnknownHostException e) {
-            // remove old entries
-            flushMissNameCache();
-            
-            // add new entries
-            nameCacheMiss.put(host, PRESENT);
-        }
-        return null;
-    }
-
     
     /**
     * Returns the number of entries in the nameCacheHit map

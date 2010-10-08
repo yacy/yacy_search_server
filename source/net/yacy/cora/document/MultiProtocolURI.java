@@ -42,6 +42,7 @@ import jcifs.smb.SmbFileInputStream;
 
 import net.yacy.cora.document.Punycode.PunycodeException;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 
@@ -53,6 +54,8 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     
     private static final long serialVersionUID = -1173233022912141884L;
+    private static final long SMB_TIMEOUT = 500;
+    
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
     private static final Pattern patternDot = Pattern.compile("\\.");
@@ -881,7 +884,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public boolean exists() throws IOException {
         if (isFile()) return getFSFile().exists();
         if (isSMB()) try {
-            return getSmbFile().exists();
+            return TimeoutRequest.exists(getSmbFile(), SMB_TIMEOUT);
         } catch (SmbException e) {
             throw new IOException("SMB.exists SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
@@ -893,7 +896,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public boolean canRead() throws IOException {
         if (isFile()) return getFSFile().canRead();
         if (isSMB()) try {
-            return getSmbFile().canRead();
+            return TimeoutRequest.canRead(getSmbFile(), SMB_TIMEOUT);
         } catch (SmbException e) {
             throw new IOException("SMB.canRead SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
@@ -905,7 +908,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public boolean canWrite() throws IOException {
         if (isFile()) return getFSFile().canWrite();
         if (isSMB()) try {
-            return getSmbFile().canWrite();
+            return TimeoutRequest.canWrite(getSmbFile(), SMB_TIMEOUT);
         } catch (SmbException e) {
             throw new IOException("SMB.canWrite SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
@@ -917,7 +920,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public boolean isHidden() throws IOException {
         if (isFile()) return getFSFile().isHidden();
         if (isSMB()) try {
-            return getSmbFile().isHidden();
+            return TimeoutRequest.isHidden(getSmbFile(), SMB_TIMEOUT);
         } catch (SmbException e) {
             throw new IOException("SMB.isHidden SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
@@ -929,7 +932,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public boolean isDirectory() throws IOException {
         if (isFile()) return getFSFile().isDirectory();
         if (isSMB()) try {
-            return getSmbFile().isDirectory();
+            return TimeoutRequest.isDirectory(getSmbFile(), SMB_TIMEOUT);
         } catch (SmbException e) {
             throw new IOException("SMB.isDirectory SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
@@ -941,7 +944,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public long length() throws IOException {
         if (isFile()) return getFSFile().length();
         if (isSMB()) try {
-            return getSmbFile().length();
+            return TimeoutRequest.length(getSmbFile(), SMB_TIMEOUT);
         } catch (SmbException e) {
             throw new IOException("SMB.length SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
@@ -953,7 +956,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public long lastModified() throws IOException {
         if (isFile()) return getFSFile().lastModified();
         if (isSMB()) try {
-            return getSmbFile().lastModified();
+            return TimeoutRequest.lastModified(getSmbFile(), SMB_TIMEOUT);
         } catch (SmbException e) {
             throw new IOException("SMB.lastModified SmbException (" + e.getMessage() + ") for " + this.toString());
         } catch (MalformedURLException e) {
@@ -977,7 +980,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         if (isSMB()) try {
             SmbFile sf = getSmbFile();
             try {
-                return sf.list();
+                return TimeoutRequest.list(sf, SMB_TIMEOUT);
             } catch (SmbException e) {
                 throw new IOException("SMB.list SmbException for " + sf.toString() + ": " + e.getMessage());
             }

@@ -20,11 +20,8 @@
 
 package net.yacy.cora.protocol;
 
-import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,6 +31,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -122,7 +120,7 @@ public class Scanner extends Thread {
         for (InetAddress i: genlist(bigrange)) {
             try {
                 
-                this.scanqueue.put(new MultiProtocolURI(protocol + "://" + Domains.getHostName(i) + "/"));
+                this.scanqueue.put(new MultiProtocolURI(protocol + "://" + i.getHostAddress() + "/"));
             } catch (MalformedURLException e) {
                 Log.logException(e);
             } catch (InterruptedException e) {
@@ -154,22 +152,17 @@ public class Scanner extends Thread {
             this.starttime = System.currentTimeMillis();
         }
         public void run() {
-            if (ping(this.uri, timeout)) {
-                services.put(this.uri, "");
-                /*
-                try {
-                    byte[] b = this.uri.get(MultiProtocolURI.yacybotUserAgent, timeout);
-                    if (b != null) services.put(this.uri, "");
-                } catch (Exception e) {
-                    // try a list
+            try {
+                if (TimeoutRequest.ping(this.uri, timeout)) {
                     try {
-                        String[] l = this.uri.list();
-                        if (l != null) services.put(this.uri, "");
-                    } catch (Exception e1) {
-                        // this just failed. do nothing
+                        services.put(new MultiProtocolURI(this.uri.getProtocol() + "://" + Domains.getHostName(InetAddress.getByName(this.uri.getHost())) + "/"), "");
+                    } catch (MalformedURLException e) {
+                        e.printStackTrace();
+                    } catch (UnknownHostException e) {
+                        e.printStackTrace();
                     }
                 }
-                */
+            } catch (ExecutionException e) {
             }
             Object r = runner.remove(this);
             assert r != null;
@@ -185,21 +178,6 @@ public class Scanner extends Thread {
         }
     }
     
-    private static boolean ping(MultiProtocolURI uri, int timeout) {
-        try {
-            Socket socket = new Socket();
-            socket.connect(new InetSocketAddress(Domains.dnsResolve(uri.getHost()), uri.getPort()), timeout);
-            if (socket.isConnected()) {
-                socket.close();
-                return true;
-            }
-            return false;
-        } catch (UnknownHostException e) {
-            return false;
-        } catch (IOException e) {
-            return false;
-        }
-    }
     
     public Collection<MultiProtocolURI> services() {
         return this.services.keySet();

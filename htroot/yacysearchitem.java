@@ -106,7 +106,7 @@ public class yacysearchitem {
             
             final int port=result.url().getPort();
             DigestURI faviconURL = null;
-            if (!result.url().isLocal()) try {
+            if (isHtml && !sb.isIntranetMode() && !result.url().isLocal()) try {
                 faviconURL = new DigestURI(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico", null);
             } catch (final MalformedURLException e1) {
                 Log.logException(e1);

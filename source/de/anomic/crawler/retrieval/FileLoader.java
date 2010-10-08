@@ -64,14 +64,17 @@ public class FileLoader {
         }
         
         // process directories: transform them to html with meta robots=noindex (using the ftpc lib)
-        if (url.isDirectory()) {
-            String[] l = url.list();
+        String[] l = null;
+        try {l = url.list();} catch (IOException e) {}
+        if (l != null) {
+            /*
             if (l == null) {
                 // this can only happen if there is no connection or the directory does not exist
                 //log.logInfo("directory listing not available. URL = " + request.url().toString());
                 sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, "directory listing not available. URL = " + request.url().toString());
                 throw new IOException("directory listing not available. URL = " + request.url().toString());
             }
+            */
             String u = url.toNormalform(true, true);
             List<String> list = new ArrayList<String>();
             for (String s: l) {

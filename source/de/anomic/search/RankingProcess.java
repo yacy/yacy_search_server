@@ -203,7 +203,7 @@ public final class RankingProcess extends Thread {
 			    }
 
 			    // check tld domain
-			    if (!DigestURI.matchesAnyDomDomain(iEntry.metadataHash(), this.query.zonecode)) {
+			    if ((DigestURI.domDomain(iEntry.metadataHash()) & this.query.zonecode) == 0) {
 			        // filter out all tld that do not match with wanted tld domain
 			        continue;
 			    }
