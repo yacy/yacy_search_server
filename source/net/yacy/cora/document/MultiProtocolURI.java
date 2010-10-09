@@ -795,11 +795,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         MultiProtocolURI other = (MultiProtocolURI) obj;
         
         return
-          this.protocol.equals(other.protocol) && 
-          this.host.equals(other.host) && 
-          this.userInfo.equals(other.userInfo) && 
-          this.path.equals(other.path) && 
-          this.quest.equals(other.quest) && 
+          ((this.protocol == null && other.protocol == null) || (this.protocol != null && other.protocol != null && this.protocol.equals(other.protocol))) && 
+          ((this.host == null && other.host == null) || (this.host != null && other.host != null && this.host.equals(other.host))) && 
+          ((this.userInfo == null && other.userInfo == null) || (this.userInfo != null && other.userInfo != null && this.userInfo.equals(other.userInfo))) && 
+          ((this.path == null && other.path == null) || (this.path != null && other.path != null && this.path.equals(other.path))) && 
+          ((this.quest == null && other.quest == null) || (this.quest != null && other.quest != null && this.quest.equals(other.quest))) && 
           this.port == other.port; 
     }
 
