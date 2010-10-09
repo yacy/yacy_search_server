@@ -212,12 +212,8 @@ public class Crawler_p {
                 if (crawlingStartURL!= null &&(crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                 env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
                 
-                final String cachePolicyString = post.get("cachePolicy", "iffresh");
-                CrawlProfile.CacheStrategy cachePolicy = CrawlProfile.CacheStrategy.IFFRESH;
-                if (cachePolicyString.equals("nocache")) cachePolicy = CrawlProfile.CacheStrategy.NOCACHE;
-                if (cachePolicyString.equals("iffresh")) cachePolicy = CrawlProfile.CacheStrategy.IFFRESH;
-                if (cachePolicyString.equals("ifexist")) cachePolicy = CrawlProfile.CacheStrategy.IFEXIST;
-                if (cachePolicyString.equals("cacheonly")) cachePolicy = CrawlProfile.CacheStrategy.CACHEONLY;
+                CrawlProfile.CacheStrategy cachePolicy = CrawlProfile.CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
+                if (cachePolicy == null) cachePolicy = CrawlProfile.CacheStrategy.IFFRESH;
                 
                 final boolean xsstopw = post.get("xsstopw", "off").equals("on");
                 env.setConfig("xsstopw", (xsstopw) ? "true" : "false");

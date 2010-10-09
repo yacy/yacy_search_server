@@ -462,7 +462,7 @@ public class Domains {
         
         // call i.getHostName() using concurrency to interrupt execution in case of a time-out
         try {
-            return TimeoutRequest.getHostName(i, 500);
+            return TimeoutRequest.getHostName(i, 1000);
         } catch (ExecutionException e) {
             return i.getHostAddress();
         }
@@ -484,7 +484,7 @@ public class Domains {
         // call dnsResolveNetBased(host) using concurrency to interrupt execution in case of a time-out
         try {
             boolean doCaching = true;
-            ip = TimeoutRequest.getByName(host, 500); // this makes the DNS request to backbone
+            ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
             if ((ip == null) ||
                 (ip.isLoopbackAddress()) ||
                 (nameCacheNoCachingList.containsKey(host))

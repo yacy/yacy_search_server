@@ -192,7 +192,9 @@ public final class RankingProcess extends Thread {
 			    }
 			    
 			    // check constraints
-			    if (!testFlags(iEntry)) continue;
+			    if (!testFlags(iEntry)) {
+			        continue;
+			    }
 			    
 			    // check document domain
 			    if (query.contentdom != ContentDomain.TEXT) {
@@ -203,10 +205,12 @@ public final class RankingProcess extends Thread {
 			    }
 
 			    // check tld domain
+			    /*
 			    if ((DigestURI.domDomain(iEntry.metadataHash()) & this.query.zonecode) == 0) {
 			        // filter out all tld that do not match with wanted tld domain
 			        continue;
 			    }
+			    */
 			    
                 // count domZones
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
