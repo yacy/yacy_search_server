@@ -59,6 +59,8 @@ public final class QueryParams {
     public static final int SEARCHDOM_CLUSTERALL = 2;
     public static final int SEARCHDOM_GLOBALDHT = 3;
     public static final int SEARCHDOM_GLOBALALL = 4;
+
+    private static final String ampersand = "&amp;";
     
     public static enum FetchMode {
     	NO_FETCH_NO_VERIFY,
@@ -137,7 +139,7 @@ public final class QueryParams {
         this.domMaxTargets = 0;
         this.constraint = constraint;
         this.allofconstraint = false;
-        this.snippetCacheStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
+        this.snippetCacheStrategy = null;
         this.host = null;
         this.sitehash = null;
         this.authorhash = null;
@@ -453,9 +455,9 @@ public final class QueryParams {
      * @param addToQuery
      * @return
      */
-    public static String navurl(final String ext, final int page, final int display, final QueryParams theQuery, final String originalUrlMask, final String addToQuery, final String nav) {
-
-        final String ampersand = "&amp;";
+    public static String navurl(
+            final String ext, final int page, final int display, final QueryParams theQuery,
+            String newQueryString, final String originalUrlMask, final String nav) {
 
         final StringBuilder sb = new StringBuilder();
         sb.append("/yacysearch.");
@@ -465,8 +467,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("query=");
-        sb.append(theQuery.queryStringForUrl());
-        sb.append((addToQuery == null) ? "" : "+" + addToQuery);
+        sb.append(newQueryString == null ? theQuery.queryStringForUrl() : newQueryString);
 
         sb.append(ampersand);
         sb.append("maximumRecords=");
@@ -482,7 +483,7 @@ public final class QueryParams {
 
         sb.append(ampersand);
         sb.append("verify=");
-        sb.append(theQuery.snippetCacheStrategy.mustBeOffline() ? "false" : "true");
+        sb.append(theQuery.snippetCacheStrategy == null ? "false" : theQuery.snippetCacheStrategy.toName());
 
         sb.append(ampersand);
         sb.append("nav=");

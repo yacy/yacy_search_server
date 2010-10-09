@@ -33,6 +33,7 @@ import java.util.Set;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -54,7 +55,7 @@ public class Word {
      */
     public static final int commonHashLength = 12;
     
-    private static final int hashCacheSize = Math.max(10000, Math.min(100000, (int) (MemoryControl.available() / 20000L)));
+    private static final int hashCacheSize = Math.max(100000, Math.min(10000000, (int) (MemoryControl.available() / 20000L)));
     private static final ARC<String, byte[]> hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Runtime.getRuntime().availableProcessors() + 1);
     
     // object carries statistics for words and sentences
@@ -83,7 +84,7 @@ public class Word {
     }
 
     public void check(final int i) {
-        phrases.add(Integer.valueOf(i));
+        phrases.add(LargeNumberCache.valueOf(i));
     }
 
     public Iterator<Integer> phrases() {

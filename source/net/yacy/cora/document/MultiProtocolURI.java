@@ -762,16 +762,22 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             defaultPort = true;
         }
         final String urlPath = this.getFile(excludeReference, removeSessionID);
-        
-        if (defaultPort) {
-            return
-              this.protocol + "://" +
-              ((this.getHost() == null) ? "" : ((this.userInfo != null) ? (this.userInfo + "@") : ("")) + this.getHost().toLowerCase()) +
-              urlPath;
+        StringBuilder u = new StringBuilder(80);
+        u.append(this.protocol);
+        u.append("://");
+        if (this.getHost() != null) {
+            if (this.userInfo != null) {
+                u.append(this.userInfo);
+                u.append("@");
+            }
+            u.append(this.getHost().toLowerCase());
         }
-        return this.protocol + "://" +
-               ((this.userInfo != null) ? (this.userInfo + "@") : ("")) +
-               this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + urlPath;
+        if (!defaultPort) {
+            u.append(":");
+            u.append(this.port);
+        }
+        u.append(urlPath);
+        return u.toString();
     }
     
     public int hashCode() {

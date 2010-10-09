@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -178,7 +179,7 @@ public final class SearchEvent {
                         mindhtdistance = l;
                         IAneardhthash = wordhash;
                     }
-                    IACount.put(wordhash, Integer.valueOf(container.size()));
+                    IACount.put(wordhash, LargeNumberCache.valueOf(container.size()));
                     IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
                 }
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);

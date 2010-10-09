@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -87,7 +88,12 @@ public final class Condenser {
     public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
     
     private final static int numlength = 5;
-
+    private final static NumberFormat intStringFormatter = NumberFormat.getIntegerInstance();
+    static {
+        intStringFormatter.setMinimumIntegerDigits(numlength);
+        intStringFormatter.setMaximumIntegerDigits(numlength);
+    }
+    
     //private Properties analysis;
     private Map<String, Word> words; // a string (the words) to (indexWord) - relation
     
@@ -97,7 +103,7 @@ public final class Condenser {
     public int RESULT_NUMB_SENTENCES = -1;
     public int RESULT_DIFF_SENTENCES = -1;
     public Bitfield RESULT_FLAGS = new Bitfield(4);
-    Identificator languageIdentificator;
+    private Identificator languageIdentificator;
     
     public Condenser(
             final Document document,
@@ -268,12 +274,6 @@ public final class Condenser {
         return this.languageIdentificator.getLanguage();
     }
 
-    public String intString(final int number, final int length) {
-        String s = Integer.toString(number);
-        while (s.length() < length) s = "0" + s;
-        return s;
-    }
-
     private void createCondensement(final InputStream is) throws UnsupportedEncodingException {
         final HashSet<String> currsentwords = new HashSet<String>();
         StringBuilder sentence = new StringBuilder(100);
@@ -357,7 +357,7 @@ public final class Condenser {
                 }
                 words.put(word, wsp);
                 // we now have the unique handle of the word, put it into the sentence:
-                sentence.append(intString(wordHandle, numlength));
+                sentence.append(intStringFormatter.format(wordHandle));
                 wordInSentenceCounter++;
             }
         }
@@ -389,7 +389,7 @@ public final class Condenser {
                 wc = (sentence.length() - 1) / numlength;
                 s = new String[wc + 2];
                 psp = sentences.get(sentence);
-                s[0] = intString(psp.occurrences(), numlength); // number of occurrences of this sentence
+                s[0] = intStringFormatter.format(psp.occurrences()); // number of occurrences of this sentence
                 s[1] = sentence.substring(0, 1); // the termination symbol of this sentence
                 for (int i = 0; i < wc; i++) {
                     k = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
@@ -422,8 +422,8 @@ public final class Condenser {
                                 idx = it1.next().intValue(); // number of a sentence
                                 s = (String[]) orderedSentences[idx];
                                 for (int j = 2; j < s.length; j++) {
-                                    if (s[j].equals(intString(wsp.posInText, numlength)))
-                                        s[j] = intString(wsp1.posInText, numlength);
+                                    if (s[j].equals(intStringFormatter.format(wsp.posInText)))
+                                        s[j] = intStringFormatter.format(wsp1.posInText);
                                 }
                                 orderedSentences[idx] = s;
                             }
@@ -479,7 +479,7 @@ public final class Condenser {
             hash = Word.word2hash(word.toString());
             
             // don't overwrite old values, that leads to too far word distances
-            oldpos = map.put(hash, Integer.valueOf(pos));
+            oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
             if (oldpos != null) map.put(hash, oldpos);
             
             pos += word.length() + 1;

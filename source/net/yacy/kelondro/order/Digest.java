@@ -50,7 +50,7 @@ import net.yacy.kelondro.logging.Log;
 
 public class Digest {
 	
-    private final static int digestThreads = Runtime.getRuntime().availableProcessors() + 1;
+    private final static int digestThreads = Runtime.getRuntime().availableProcessors() * 2 + 1;
 	public static BlockingQueue<MessageDigest> digestPool = new ArrayBlockingQueue<MessageDigest>(digestThreads);
 	static {
 		for (int i = 0; i < digestThreads; i++)

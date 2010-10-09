@@ -303,7 +303,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         NOCACHE(0),    // never use the cache, all content from fresh internet source
         IFFRESH(1),    // use the cache if the cache exists and is fresh using the proxy-fresh rules
         IFEXIST(2),    // use the cache if the cache exist. Do no check freshness. Otherwise use online source.
-        CACHEONLY(3);  // never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available
+        CACHEONLY(3);  // never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available 
         public int code;
         private CacheStrategy(int code) {
             this.code = code;
@@ -316,12 +316,13 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return NOCACHE;
         }
         public static CacheStrategy parse(String name) {
+            if (name == null) return null;
             if (name.equals("nocache")) return NOCACHE;
             if (name.equals("iffresh")) return IFFRESH;
             if (name.equals("ifexist")) return IFEXIST;
             if (name.equals("cacheonly")) return CACHEONLY;
             if (name.equals("true")) return IFFRESH;
-            if (name.equals("false")) return CACHEONLY;
+            if (name.equals("false")) return null;
             return null;
         }
         public String toName() {

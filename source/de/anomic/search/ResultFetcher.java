@@ -43,7 +43,6 @@ import net.yacy.kelondro.util.EventTracker;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.CrawlProfile.CacheStrategy;
 import de.anomic.search.MediaSnippet;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.graphics.ProfilingGraph;
@@ -187,7 +186,7 @@ public class ResultFetcher {
                     if (failedURLs.has(page.hash())) continue;
 
                     loops++;
-                    final ResultEntry resultEntry = fetchSnippet(page, query.sitehash == null ? cacheStrategy : CacheStrategy.CACHEONLY); // does not fetch snippets if snippetMode == 0
+                    final ResultEntry resultEntry = fetchSnippet(page, cacheStrategy); // does not fetch snippets if snippetMode == 0
 
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     //if (result.contains(resultEntry)) continue;

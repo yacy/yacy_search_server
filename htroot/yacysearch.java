@@ -100,7 +100,6 @@ public class yacysearch {
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring =  originalquerystring.replace('+', ' ');
         CrawlProfile.CacheStrategy snippetFetchStrategy = (post != null && post.get("verify", "false").equals("true")) ? CrawlProfile.CacheStrategy.IFFRESH : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
-        if (snippetFetchStrategy == null) snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
         final serverObjects prop = new serverObjects();
 
         // get segment
@@ -167,7 +166,7 @@ public class yacysearch {
         // collect search attributes
         boolean newsearch = post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
         
-        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000) : (snippetFetchStrategy.isAllowedToFetchOnline() ? 10 : 100), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
+        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 10 : 100), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
         int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
         
         int newcount;
@@ -234,7 +233,7 @@ public class yacysearch {
         boolean block = false;
         if (Domains.matchesList(client, sb.networkBlacklist)) {
             global = false;
-            snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
+            if (snippetFetchStrategy != null) snippetFetchStrategy = null;
             block = true;
             Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
         } else if (Domains.matchesList(client, sb.networkWhitelist)) {
@@ -254,9 +253,9 @@ public class yacysearch {
                     }
                 }
                 // protection against too many remote server snippet loads (protects traffic on server)
-                if (snippetFetchStrategy.isAllowedToFetchOnline()) {
+                if (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline()) {
                     if (accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1) {
-                        snippetFetchStrategy = CrawlProfile.CacheStrategy.CACHEONLY;
+                        snippetFetchStrategy = null;
                         Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + "/1s, " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed remote snippet loading");
                     }
                 }
@@ -554,19 +553,7 @@ public class yacysearch {
                 	suggestion = meanIt.next();
                 	prop.put("didYouMean_suggestions_"+meanCount+"_word", suggestion);
                 	prop.put("didYouMean_suggestions_"+meanCount+"_url",
-                		"/yacysearch.html" + "?display=" + display +
-    	                "&amp;query=" + suggestion +
-    	                "&amp;maximumRecords="+ theQuery.displayResults() +
-    	                "&amp;startRecord=" + (0 * theQuery.displayResults()) +
-    	                "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
-    	                "&amp;verify=" + (theQuery.snippetCacheStrategy.mustBeOffline() ? "false" : "true") +
-    	                "&amp;nav=" + theQuery.navigators +
-    	                "&amp;urlmaskfilter=" + originalUrlMask.toString() +
-    	                "&amp;prefermaskfilter=" + theQuery.prefer.toString() +
-    	                "&amp;cat=href&amp;amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
-    	                "&amp;contentdom=" + theQuery.contentdom() +
-    	                "&amp;former=" + theQuery.queryString(true) +
-    	                "&amp;meanCount=" + meanMax
+                	    QueryParams.navurl("html", 0, display, theQuery, suggestion, originalUrlMask.toString(), theQuery.navigators)
     	             );
                 	prop.put("didYouMean_suggestions_"+meanCount+"_sep","|");
                 	meanCount++;
@@ -624,7 +611,7 @@ public class yacysearch {
             	resnav.append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
             } else {
             	resnav.append("<a id=\"prevpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, originalUrlMask, null, navigation));
+                resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, null, originalUrlMask, navigation));
             	resnav.append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
             final int numberofpages = Math.min(10, Math.max(1 + thispage, 1 + ((theSearch.getRankingResult().getLocalIndexCount() < 11) ? Math.max(30, theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize()) : theSearch.getRankingResult().getLocalIndexCount()) / theQuery.displayResults()));
@@ -637,7 +624,7 @@ public class yacysearch {
 					resnav.append("\" width=\"16\" height=\"16\" />&nbsp;");
                 } else {
                     resnav.append("<a href=\"");
-                    resnav.append(QueryParams.navurl("html", i, display, theQuery, originalUrlMask, null, navigation));
+                    resnav.append(QueryParams.navurl("html", i, display, theQuery, null, originalUrlMask, navigation));
                     resnav.append("\"><img src=\"env/grafics/navd");
                 	resnav.append(i + 1);
                 	resnav.append(".gif\" alt=\"page");
@@ -649,7 +636,7 @@ public class yacysearch {
             	resnav.append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
             } else {
                 resnav.append("<a id=\"nextpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage + 1, display, theQuery, originalUrlMask, null, navigation));
+                resnav.append(QueryParams.navurl("html", thispage + 1, display, theQuery, null, originalUrlMask, navigation));
                 resnav.append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }
             String resnavs = resnav.toString();
@@ -705,7 +692,7 @@ public class yacysearch {
         prop.putHTML("prefermaskfilter", prefermask);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());
-        prop.put("verify", snippetFetchStrategy.toName());
+        prop.put("verify", snippetFetchStrategy == null ? "false" : snippetFetchStrategy.toName());
         prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);

@@ -48,7 +48,7 @@ public class Phrase {
     }
 
     public void check(final int i) {
-        hash.add(Integer.valueOf(i));
+        hash.add(LargeNumberCache.valueOf(i));
     }
 
     

@@ -43,7 +43,8 @@ public class SnippetExtractor {
         Integer pos;
         TreeSet<Integer> positions;
         int linenumber = 0;
-        for (StringBuilder sentence: sentences) {
+        int fullmatchcounter = 0;
+        lookup: for (StringBuilder sentence: sentences) {
             hs = Condenser.hashSentence(sentence.toString());
             positions = new TreeSet<Integer>();
             for (byte[] word: queryhashes) {
@@ -61,6 +62,8 @@ public class SnippetExtractor {
             if (positions.size() > 0) {
                 order.put(Long.valueOf(-100000000L * (linenumber == 0 ? 1 : 0) + 10000000L * positions.size() + 1000000L * worddistance + 100000L * linelengthKey(sentence.length(), maxLength) - 10000L * linenumber + uniqCounter--), sentence);
                 if (order.size() > 5) order.remove(order.firstEntry().getKey());
+                if (positions.size() == queryhashes.size()) fullmatchcounter++;
+                if (fullmatchcounter >= 3) break lookup;
             }
             linenumber++;
         }
