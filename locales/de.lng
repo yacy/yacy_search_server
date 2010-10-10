@@ -1046,6 +1046,7 @@ Site Crawler:==Seiten Crawler:
 Download all web pages from a given domain or base URL.==Downloaden aller Webseiten von einer gegebenen Domain oder Basis URL.
 >Site Crawl Start<==>Seiten Crawl Start<
 >Site<==>Seite<
+Link-List of URL==Link Liste der URL
 >Scheduler<==>Zeitplanung<
 run this crawl once==führe diesen Crawl nur einmalig aus
 scheduled, look every==geplant, überprüfe alle
