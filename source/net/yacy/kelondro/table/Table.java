@@ -449,14 +449,12 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public Entry get(final byte[] key) throws IOException {
-        if ((file == null) || (index == null)) return null;
-        synchronized (this) {
-            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
-            assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
-        }
+        if (file == null || index == null) return null;
         Entry e = get0(key);
         if (e != null && this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes())) return e;
         synchronized (this) {
+            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
+            assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
             e = get0(key);
             assert e == null || this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes());
             return e;
@@ -464,7 +462,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
     
     private Entry get0(final byte[] key) throws IOException {
-    	if ((file == null) || (index == null)) return null;
+    	if (file == null || index == null) return null;
         final int i = (int) index.get(key);
         if (i == -1) return null;
         final byte[] b = new byte[rowdef.objectsize];
@@ -756,7 +754,11 @@ public class Table implements Index, Iterable<Row.Entry> {
         final int i = (int) index.remove(lr.getPrimaryKeyBytes());
         assert i < 0 || index.size() < is : "index.size() = " + index.size() + ", is = " + is;
         assert i >= 0;
-        if (table != null) table.removeOne();
+        if (table != null) {
+            int tsb = table.size();
+            table.removeOne();
+            assert table.size() < tsb : "table.size() = " + table.size() + ", tsb = " + tsb;
+        }
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         return lr;
@@ -791,14 +793,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
         if (fos != null) try { fos.close(); } catch (final IOException e) {}
         
-        
-        // open an existing table file
-        try {
-            this.file = new BufferedRecords(new Records(f, rowdef.objectsize), this.buffersize);
-        } catch (final FileNotFoundException e) {
-            // should never happen
-            Log.logSevere("Table", "", e);
-        }
+        this.file = new BufferedRecords(new Records(f, rowdef.objectsize), this.buffersize);
         
         // initialize index and copy table
         table = (table == null) ? null : new RowSet(taildef);

@@ -52,7 +52,7 @@ import net.yacy.kelondro.util.MemoryControl;
  * All access to the file is made with byte[] that are generated outside of this class
  * This class only references byte[] that are handed over to methods of this class.
  */
-public final class Records {
+public final class CachedRecords {
     
     private RandomAccessFile raf;
     private final File tablefile;
@@ -60,20 +60,24 @@ public final class Records {
      * number of bytes in one record
      */
     protected final int recordsize;
+    private long cacheindex;
     /**
      * number of entries in buffer
      */
+    private int cachecount;
     private int buffercount;
+    private byte[] cache;
     private byte[] buffer;
     private final byte[] zero;
     
     /**
      * stay below hard disc cache (is that necessary?)
      */
+    private static final int maxReadCache = 16 * 1024;
     private static final int maxWriteBuffer = 16 * 1024;
     
     
-    public Records(final File tablefile, final int recordsize) {
+    public CachedRecords(final File tablefile, final int recordsize) throws IOException {
         this.tablefile = tablefile;
         this.recordsize = recordsize;
 
@@ -102,18 +106,24 @@ public final class Records {
             Log.logException(e);
         }
         
-        // initialize write buffer
+        // initialize cache and buffer
+        int cachesize = Math.max(1, (maxReadCache / recordsize)) * recordsize;
         int buffersize = Math.max(1, (maxWriteBuffer / recordsize)) * recordsize;
-        if (!MemoryControl.request(buffersize + 1024 * 1024 * 20, true)) {
-        	// not enough memory there, take less
-        	long lessmem = Math.min(maxWriteBuffer / 8, MemoryControl.available() - (1024 * 1024 * 6) / 6);
-        	//System.out.println("newmem vorher: cachesize = " + cachesize + ", buffersize = " + buffersize + ", available = " + serverMemory.available() + ", lessmem = " + lessmem);
-        	buffersize = Math.max(1, (int) (lessmem / recordsize)) * recordsize;
+        if (!MemoryControl.request(cachesize + buffersize + 1024 * 1024 * 20, true)) {
+            // not enough memory there, take less
+            long lessmem = Math.min(Math.min(maxReadCache, maxWriteBuffer) / 8, MemoryControl.available() - (1024 * 1024 * 6) / 6);
+            //System.out.println("newmem vorher: cachesize = " + cachesize + ", buffersize = " + buffersize + ", available = " + serverMemory.available() + ", lessmem = " + lessmem);
+            cachesize = Math.max(1, (int) (lessmem / recordsize)) * recordsize;
+            buffersize = Math.max(1, (int) (lessmem / recordsize)) * recordsize;
             //System.out.println("newmem nachher: cachesize = " + cachesize + ", buffersize = " + buffersize);
         }
         
+        this.cache = new byte[cachesize];
         this.buffer = new byte[buffersize];
         this.buffercount = 0;
+        
+        // first-time read of cache
+        fillCache(0);
     }
     
     /**
@@ -158,6 +168,19 @@ public final class Records {
     private final long filesize() throws IOException {
         return raf.length() / recordsize;
     }
+
+    /**
+     * checks if the index is inside the cache
+     * 
+     * @param index
+     * @return the index offset inside the cache or -1 if the index is not in the cache 
+     */
+    private final int inCache(final long index) {
+        if (index >= this.cacheindex && index < this.cacheindex + this.cachecount) {
+            return (int) (index - this.cacheindex);
+        }
+        return -1;
+    }
     
     /**
      * checks if the index is inside the buffer
@@ -168,16 +191,51 @@ public final class Records {
      */
     private final int inBuffer(final long index) throws IOException {
         final long fs = filesize();
-        if (index >= fs && index < fs + this.buffercount) {
+        if ((index >= fs) && (index < fs + this.buffercount)) {
             return (int) (index - fs);
         }
         return -1;
+    }
+    
+    /**
+     * load cache with copy of disc content; start with record at index
+     * 
+     * if the record would overlap with the write buffer,
+     * its start is shifted forward until it fits
+     * 
+     * @param index
+     * @throws IOException
+     */
+    private final void fillCache(long index) throws IOException {
+        //System.out.println("*** DEBUG FillCache " + this.tablefile.getName() + " at index " + index);
+        // first check if the index is inside the current cache
+        assert inCache(index) < 0;
+        if (inCache(index) >= 0) return;
+        
+        // calculate new start position
+        final long fs = this.filesize();
+        if (index + this.cache.length / this.recordsize > fs) {
+            index = fs - this.cache.length / this.recordsize;
+        }
+        if (index < 0) index = 0;
+        
+        // calculate number of records that shall be stored in the cache
+        this.cachecount = (int) Math.min(this.cache.length / this.recordsize, this.filesize() - index);
+        assert this.cachecount >= 0;
+        
+        // check if we need to read 0 bytes from the file
+        this.cacheindex = index;
+        if (this.cachecount == 0) return;
+        
+        // copy records from file to cache
+        raf.seek(this.recordsize * index);
+        raf.readFully(this.cache, 0, this.recordsize * this.cachecount);
     }
 
     /**
      * write buffer to end of file 
      */
-    protected final synchronized void flushBuffer() {
+    public final void flushBuffer() {
         try {
             raf.seek(raf.length());
             raf.write(this.buffer, 0, this.recordsize * this.buffercount);
@@ -198,6 +256,7 @@ public final class Records {
         }
         this.raf = null;
         this.buffer = null;
+        this.cache = null;
     }
 
     /**
@@ -210,15 +269,25 @@ public final class Records {
         assert b.length - start >= this.recordsize;
         if (index >= size()) throw new IndexOutOfBoundsException("kelondroEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
         // check if index is inside of cache
-        final int q = inBuffer(index);
-        if (q < 0) {
-            // copy records from file to given buffer
-            raf.seek(this.recordsize * index);
-            raf.readFully(b, start, this.recordsize);
+        int p = inCache(index);
+        final int q = (p >= 0) ? -1 : inBuffer(index);
+        if (p < 0 && q < 0) {
+            // the index is outside of cache and buffer index. shift cache window
+            fillCache(index);
+            p = inCache(index);
+            assert p >= 0;
+        }
+        if (p >= 0) {
+            // read entry from the cache
+            System.arraycopy(this.cache, p * this.recordsize, b, start, this.recordsize); 
             return;
         }
-        // read entry from the buffer
-        System.arraycopy(this.buffer, q * this.recordsize, b, start, this.recordsize); 
+        if (q >= 0) {
+            // read entry from the buffer
+            System.arraycopy(this.buffer, q * this.recordsize, b, start, this.recordsize); 
+            return;
+        }
+        assert false;
     }
 
     public final synchronized void put(final long index, final byte[] b, final int start) throws IOException {
@@ -233,7 +302,15 @@ public final class Records {
         }
         
         // check if index is inside of cache
-        final int q = inBuffer(index);
+        final int p = inCache(index);
+        final int q = (p >= 0) ? -1 : inBuffer(index);
+        if (p >= 0) {
+            // write entry to the cache and to the file
+            System.arraycopy(b, start, this.cache, p * this.recordsize, this.recordsize);
+            raf.seek(index * this.recordsize);
+            raf.write(b, start, this.recordsize);
+            return;
+        }
         if (q >= 0) {
             // write entry to the buffer
             System.arraycopy(b, start, this.buffer, q * this.recordsize, this.recordsize);
@@ -302,16 +379,25 @@ public final class Records {
     
     private final boolean isClean(final long index) throws IOException {
          assert index < size();
-         // check if index is inside of buffer
-         final int q = inBuffer(index);
+         // check if index is inside of cache
+         int p = inCache(index);
+         final int q = (p >= 0) ? -1 : inBuffer(index);
+         if (p < 0 && q < 0) {
+             // the index is outside of cache and buffer index. shift cache window
+             fillCache(index);
+             p = inCache(index);
+             assert p >= 0;
+         }
+         if (p >= 0) {
+             // check entry from the cache
+             return isClean(this.cache, p * this.recordsize, this.recordsize);
+         }
          if (q >= 0) {
              // check entry from the buffer
              return isClean(this.buffer, q * this.recordsize, this.recordsize);
          }
-         byte[] b = new byte[this.recordsize];
-         raf.seek(index * this.recordsize);
-         raf.readFully(b, 0, this.recordsize);
-         return isClean(b, 0, this.recordsize);
+         assert false;
+         return false;
     }
 
     /**
@@ -319,7 +405,7 @@ public final class Records {
      * @param index
      * @throws IOException
      */
-    private final void clean(final long index) throws IOException {
+    public final synchronized void clean(final long index) throws IOException {
         final long s = size();
         if (index >= s) throw new IndexOutOfBoundsException("kelondroEcoFS.clean(" + index + ") outside bounds (" + s + ")");
         if (index == s - 1) {
@@ -328,7 +414,15 @@ public final class Records {
         }
         
         // check if index is inside of cache
-        final int q = inBuffer(index);
+        final int p = inCache(index);
+        final int q = (p >= 0) ? -1 : inBuffer(index);
+        if (p >= 0) {
+            // write zero bytes to the cache and to the file
+            System.arraycopy(zero, 0, this.cache, p * this.recordsize, this.recordsize);
+            raf.seek(index * this.recordsize);
+            raf.write(zero, 0, this.recordsize);
+            return;
+        }
         if (q >= 0) {
             // write zero to the buffer
             System.arraycopy(zero, 0, this.buffer, q * this.recordsize, this.recordsize);
@@ -348,7 +442,7 @@ public final class Records {
     public final synchronized void cleanLast(final byte[] b, final int start) throws IOException {
         cleanLast0(b, start);
         long i;
-        while ((i = size()) > 0 && isClean(i - 1)) {
+        while (((i = size()) > 0) && (isClean(i - 1))) {
             //System.out.println("Extra clean/1: before size = " + size());
             cleanLast0();
             //System.out.println("               after  size = " + size());
@@ -364,27 +458,36 @@ public final class Records {
      * @param start
      * @throws IOException
      */
-    private final void cleanLast0(final byte[] b, final int start) throws IOException {
+    private final synchronized void cleanLast0(final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
-        // check if index is inside of buffer
-        if (this.buffercount > 0) {
+        // check if index is inside of cache
+        final long s = this.size();
+        int p = inCache(s - 1);
+        final int q = (p >= 0) ? -1 : inBuffer(s - 1);
+        if ((p < 0) && (q < 0)) {
+            // the index is outside of cache and buffer index. shift cache window
+            fillCache(this.size() - 1);
+            p = inCache(this.size() - 1);
+            assert p >= 0;
+        }
+        if (p >= 0) {
+            // read entry from the cache
+            System.arraycopy(this.cache, p * this.recordsize, b, start, this.recordsize); 
+            // shrink cache and file
+            assert this.buffercount == 0;
+            this.raf.setLength((s - 1) * this.recordsize);
+            this.cachecount--;
+            return;
+        }
+        if (q >= 0) {
             // read entry from the buffer
-            System.arraycopy(this.buffer, (this.buffercount - 1) * this.recordsize, b, start, this.recordsize);
+            System.arraycopy(this.buffer, q * this.recordsize, b, start, this.recordsize);
             // shrink buffer
+            assert this.buffercount > 0;
             this.buffercount--;
             return;
         }
-        // read entry from the file
-        final long endpos = this.raf.length() - this.recordsize;
-        raf.seek(endpos);
-        raf.readFully(b, start, this.recordsize);
-        
-        // write zero bytes to the cache and to the file
-        this.raf.seek(endpos);
-        this.raf.write(zero, 0, this.recordsize);
-
-        // shrink file
-        this.raf.setLength(endpos);
+        assert false;
     }
     
     /**
@@ -401,16 +504,28 @@ public final class Records {
         }
     }
     
-    private final void cleanLast0() throws IOException {
+    private final synchronized void cleanLast0() throws IOException {
 
         // check if index is inside of cache
-        if (this.buffercount > 0) {
+        final long s = this.size();
+        final long p = inCache(s - 1);
+        final long q = (p >= 0) ? -1 : inBuffer(s - 1);
+        if (p >= 0) {
+            // shrink cache and file
+            assert this.buffercount == 0;
+            this.raf.setLength((s - 1) * this.recordsize);
+            this.cachecount--;
+            return;
+        }
+        if (q >= 0) {
             // shrink buffer
+            assert this.buffercount > 0;
             this.buffercount--;
             return;
         }
-        // shrink file
-        this.raf.setLength(raf.length() - this.recordsize);
+        // check if file should shrink
+        assert this.buffercount == 0;
+        this.raf.setLength((s - 1) * this.recordsize);
     }
     
     public final void deleteOnExit() {
@@ -426,7 +541,7 @@ public final class Records {
         final File f = new File(args[0]);
         if (f.exists()) FileUtils.deletedelete(f);
         try {
-            final Records t = new Records(f, 8);
+            final CachedRecords t = new CachedRecords(f, 8);
             final byte[] b = new byte[8];
             t.add("01234567".getBytes(), 0);
             t.add("ABCDEFGH".getBytes(), 0);

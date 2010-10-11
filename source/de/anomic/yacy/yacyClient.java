@@ -1085,6 +1085,7 @@ public final class yacyClient {
             // first  arg: path to application home
             // second arg: address of target peer
             // third  arg: search word or file name with list of search words
+            // i.e. /Data/workspace1/yacy/ localhost:8080 /Data/workspace1/yacy/test/words/searchtest.words
             System.out.println("yacyClient Test");
                 File searchwordfile = new File(args[2]);
                 List<String> searchlines = new ArrayList<String>();
