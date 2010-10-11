@@ -99,7 +99,7 @@ public class yacysearch {
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring =  originalquerystring.replace('+', ' ');
-        CrawlProfile.CacheStrategy snippetFetchStrategy = (post != null && post.get("verify", "false").equals("true")) ? CrawlProfile.CacheStrategy.IFFRESH : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
+        CrawlProfile.CacheStrategy snippetFetchStrategy = (post == null) ? null : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
         final serverObjects prop = new serverObjects();
 
         // get segment

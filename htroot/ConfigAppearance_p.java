@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
@@ -89,8 +90,8 @@ public class ConfigAppearance_p {
                     final File skinfile = new File(skinPath, selectedSkin);
                     FileUtils.deletedelete(skinfile);
                 }
-
             }
+            
             if (post.containsKey("install_button")) {
                 // load skin from URL
                 final String url = post.get("url");
@@ -120,7 +121,15 @@ public class ConfigAppearance_p {
                     changeSkin(sb, skinPath, url.substring(url.lastIndexOf('/'), url.length()));
                 }
             }
-            
+
+            if (post.containsKey("set_colors")) {
+                if (skinFiles.contains(selectedSkin)) {
+                    changeSkin(sb, skinPath, selectedSkin);
+                }
+                for (Map.Entry<String, String> entry: post.entrySet()) {
+                    if (entry.getKey().startsWith("color_")) env.setConfig(entry.getKey(), "#" + entry.getValue());
+                }
+            }
         }
 
         // reread skins
@@ -136,6 +145,14 @@ public class ConfigAppearance_p {
         }
         prop.put("skinlist", count);
         prop.putHTML("currentskin", env.getConfig("currentSkin", "default"));
+        
+        // write colors from generic skin
+        Iterator<String> i = env.configKeys();
+        String key;
+        while (i.hasNext()) {
+            key = i.next();
+            if (key.startsWith("color_")) prop.put(key, env.getConfig(key, "#000000").substring(1));
+        }
         return prop;
     }
 

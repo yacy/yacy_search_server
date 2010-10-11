@@ -941,3 +941,18 @@ about.body =
 heuristic.site = false
 heuristic.scroogle = false
 
+# colours for generic design
+color_background = #FFFFFF
+color_text = #18294A
+color_legend = #65AC2A
+color_tableheader = #5090D0
+color_tableitem = #DEE6F3
+color_tableitem2 = #ECF1F8
+color_tablebottom = #FFCCCC
+color_borderline = #888888
+color_signbad = #990000
+color_signgood = #009900
+color_signother = #000099
+color_searchheadline = #2200CC
+color_searchurl = #008000
+color_searchurlhover = #008000

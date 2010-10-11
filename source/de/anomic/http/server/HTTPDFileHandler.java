@@ -750,6 +750,7 @@ public final class HTTPDFileHandler {
                         path.endsWith("vcf") ||
                         path.endsWith("kml") ||
                         path.endsWith("gpx") ||
+                        path.endsWith("css") ||
                         path.endsWith("/") ||
                         path.equals("/robots.txt")) {
                             

@@ -322,7 +322,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             if (name.equals("ifexist")) return IFEXIST;
             if (name.equals("cacheonly")) return CACHEONLY;
             if (name.equals("true")) return IFFRESH;
-            if (name.equals("false")) return null;
+            if (name.equals("false")) return null; // if this cache strategy is assigned as query attribute, null means "do not create a snippet"
             return null;
         }
         public String toName() {
