@@ -538,10 +538,12 @@ public class Response {
         // we checked that in shallStoreCache
 
         // a picture cannot be indexed
+        /*
         if (Classification.isMediaExtension(url().getFileExtension())) {
             return "Media_Content_(forbidden)";
         }
-
+         */
+        
         // -cookies in request
         // unfortunately, we cannot index pages which have been requested with a cookie
         // because the returned content may be special for the client
@@ -557,9 +559,11 @@ public class Response {
             
             // a picture cannot be indexed
             final String mimeType = responseHeader.mime();
+            /*
             if (Classification.isPictureMime(mimeType)) {
                 return "Media_Content_(Picture)";
             }
+            */
             String parserError = TextParser.supportsMime(mimeType);
             if (parserError != null) {
                 return "Media_Content, no parser: " + parserError;
