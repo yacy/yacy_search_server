@@ -92,14 +92,18 @@ public final class BufferedRecords {
     }
     
     public final synchronized void get(final long index, final byte[] b, final int start) throws IOException {
-        assert b.length - start >= efs.recordsize;
-        if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
-        final byte[] bb = buffer.get(Long.valueOf(index));
-        if (bb == null) {
-            efs.get(index, b, start);
-        } else {
-            System.arraycopy(bb, 0, b, start, efs.recordsize);
+        Long idx = Long.valueOf(index);
+        final byte[] bb;
+        synchronized (this) {
+            assert b.length - start >= efs.recordsize;
+            if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
+            bb = buffer.get(idx);
+            if (bb == null) {
+                efs.get(index, b, start);
+                return;
+            }
         }
+        System.arraycopy(bb, 0, b, start, efs.recordsize);
     }
 
     public final synchronized void put(final long index, final byte[] b, final int start) throws IOException {

@@ -516,20 +516,21 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     public static final <ReferenceType extends Reference> ByteBuffer compressIndex(final ReferenceContainer<ReferenceType> inputContainer, final ReferenceContainer<ReferenceType> excludeContainer, final long maxtime) {
         // collect references according to domains
         final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
-        final TreeMap<String, String> doms = new TreeMap<String, String>();
+        final TreeMap<String, StringBuilder> doms = new TreeMap<String, StringBuilder>();
         synchronized (inputContainer) {
             final Iterator<ReferenceType> i = inputContainer.entries();
             Reference iEntry;
-            String dom, mod, paths;
+            String dom, mod;
+            StringBuilder paths;
             while (i.hasNext()) {
                 iEntry = i.next();
                 if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.metadataHash()) != null)) continue; // do not include urls that are in excludeContainer
                 dom = new String(iEntry.metadataHash(), 6, 6);
                 mod = new String(iEntry.metadataHash(), 0, 6);
                 if ((paths = doms.get(dom)) == null) {
-                    doms.put(dom, mod);
+                    doms.put(dom, new StringBuilder(30).append(mod));
                 } else {
-                    doms.put(dom, paths + mod);
+                    doms.put(dom, paths.append(mod));
                 }
                 if (System.currentTimeMillis() > timeout)
                     break;
@@ -538,13 +539,13 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         // construct a result string
         final ByteBuffer bb = new ByteBuffer(inputContainer.size() * 6);
         bb.append('{');
-        final Iterator<Map.Entry<String, String>> i = doms.entrySet().iterator();
-        Map.Entry<String, String> entry;
+        final Iterator<Map.Entry<String, StringBuilder>> i = doms.entrySet().iterator();
+        Map.Entry<String, StringBuilder> entry;
         while (i.hasNext()) {
             entry = i.next();
             bb.append(entry.getKey());
             bb.append(':');
-            bb.append(entry.getValue());
+            bb.append(entry.getValue().toString());
             if (System.currentTimeMillis() > timeout)
                 break;
             if (i.hasNext())

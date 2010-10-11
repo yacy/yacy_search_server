@@ -171,7 +171,7 @@ public final class search {
         sb.intermissionAllThreads(100);
 
         EventTracker.delete(EventTracker.EClass.SEARCH);
-        final HandleSet abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : QueryParams.hashes2Set(abstracts);
+        final HandleSet abstractSet = (abstracts.length() == 0 || abstracts.equals("auto")) ? null : QueryParams.hashes2Set(abstracts);
         
         // store accessing peer
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
@@ -283,10 +283,15 @@ public final class search {
             yacyChannel.channels(yacyChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, true, sb.loader);
+            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, abstracts.length() > 0, sb.loader);
             
             // set statistic details of search result and find best result index set
-            if (theSearch.getRankingResult().getLocalIndexCount() == 0) {
+            joincount = theSearch.getRankingResult().getLocalIndexCount();
+            prop.put("joincount", Integer.toString(joincount));
+            if (joincount != 0) {
+                accu = theSearch.result().completeResults(1000);
+            }
+            if (theSearch.getRankingResult().getLocalIndexCount() == 0 || abstracts.length() == 0) {
                 prop.put("indexcount", "");
                 prop.put("joincount", "0");
             } else {
@@ -309,15 +314,6 @@ public final class search {
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
-                
-                if (theSearch.getRankingResult().getLocalIndexCount() == 0) {
-                    joincount = 0;
-                    prop.put("joincount", "0");
-                } else {
-                    joincount = theSearch.getRankingResult().getLocalIndexCount();
-                    prop.put("joincount", Integer.toString(joincount));
-                    accu = theSearch.result().completeResults(3000);
-                }
                 
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
@@ -353,7 +349,7 @@ public final class search {
         prop.put("indexabstract", indexabstract.toString());
         
         // prepare result
-        if ((joincount == 0) || (accu == null)) {
+        if (joincount == 0 || accu == null || accu.size() == 0) {
             
             // no results
             prop.put("links", "");
