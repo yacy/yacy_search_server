@@ -2,6 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>YaCy '#[clientname]#': Web Structure</title>
+<link rel="stylesheet" media="screen" type="text/css" href="/yacy/ui/css/colorpicker.css" />
 #%env/templates/metas.template%# 
 <script type="text/javascript" src="/js/WatchWebStructure.js"></script>
 <style type="text/css">
@@ -21,6 +22,24 @@
 <body id="WebStructure" style="margin:0px;">
 #%env/templates/header.template%# 
 #%env/templates/submenuWebStructure.template%#
+
+    <script type="text/javascript" src="/yacy/ui/js/jquery.colorpicker.js"></script>
+	<script type="text/javascript">
+      $(document).ready(function(){
+        $('#colorback, #colortext, #colorline, #colordot, #colorlineend').ColorPicker({
+			onSubmit: function(hsb, hex, rgb, el) {
+				$(el).val(hex);
+				$(el).ColorPickerHide();
+			},
+			onBeforeShow: function () {
+				$(this).ColorPickerSetColor(this.value);
+			}
+		})
+		.bind('keyup', function(){
+			$(this).ColorPickerSetColor(this.value);
+		});
+      });
+    </script>
 
 <div id="api"><a href="/api/webstructure.xml?about=#[besthost]#"><img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
 <span>
@@ -62,11 +81,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 	</dd>
     <dt>size</dt>
 	<dd><input type="text" name="width" value="#[width]#" size="5" maxlength="5" />&nbsp;x&nbsp;<input type="text" name="height" value="#[height]#" size="5" maxlength="5" /></dd>
-    <dt>Background</dt><dd>Color <input type="text" name="colorback" value="#[colorback]#" size="6" maxlength="6" /></dd>
-    <dt>Text</dt><dd>Color <input type="text" name="colortext" value="#[colortext]#" size="6" maxlength="6" /></dd>
-    <dt>Line</dt><dd>Color <input type="text" name="colorline" value="#[colorline]#" size="6" maxlength="6" /></dd>
-    <dt>Dot</dt><dd>Color <input type="text" name="colordot" value="#[colordot]#" size="6" maxlength="6" /></dd>
-    <dt>Dot-end</dt><dd>Color <input type="text" name="colorlineend" value="#[colorlineend]#" size="6" maxlength="6" /></dd>
+    <dt>Background</dt><dd>Color <input type="text" name="colorback" id="colorback" value="#[colorback]#" size="6" maxlength="6" /></dd>
+    <dt>Text</dt><dd>Color <input type="text" name="colortext" id="colortext" value="#[colortext]#" size="6" maxlength="6" /></dd>
+    <dt>Line</dt><dd>Color <input type="text" name="colorline" id="colorline" value="#[colorline]#" size="6" maxlength="6" /></dd>
+    <dt>Dot</dt><dd>Color <input type="text" name="colordot" id="colordot" value="#[colordot]#" size="6" maxlength="6" /></dd>
+    <dt>Dot-end</dt><dd>Color <input type="text" name="colorlineend" id="colorlineend" value="#[colorlineend]#" size="6" maxlength="6" /></dd>
     <dt>&nbsp;</dt>
     <dd><input type="submit" value="change" /></dd>
   </dl>
