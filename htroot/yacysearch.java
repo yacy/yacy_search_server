@@ -546,7 +546,7 @@ public class yacysearch {
             prop.put("meanCount", meanMax);
             if (meanMax > 0) {
                 DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
-            	Iterator<String> meanIt = didYouMean.getSuggestions(100, 10).iterator();
+            	Iterator<String> meanIt = didYouMean.getSuggestions(100, 5).iterator();
                 int meanCount = 0;
                 String suggestion;
                 while(meanCount<meanMax && meanIt.hasNext()) {

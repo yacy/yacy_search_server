@@ -115,12 +115,12 @@ public class DidYouMeanLibrary {
         String string = s.trim().toLowerCase();
         SortedSet<String> t = this.dict.tailSet(string);
         for (final String r: t) {
-            if (r.startsWith(string)) ret.add(r); else break;
+            if (r.startsWith(string) && r.length() > string.length()) ret.add(r); else break;
         }
         string = reverse(string);
         t = this.tcid.tailSet(string);
         for (final String r: t) {
-            if (r.startsWith(string)) ret.add(reverse(r)); else break;
+            if (r.startsWith(string) && r.length() > string.length()) ret.add(reverse(r)); else break;
         }
         return ret;
     }

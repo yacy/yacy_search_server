@@ -80,6 +80,7 @@ public class OverarchingLocalization implements Localization {
      */
     public Set<String> recommend(String s) {
         Set<String> recommendations = new HashSet<String>();
+        if (s.length() == 0) return recommendations;
         for (Localization service: this.services.values()) {
             recommendations.addAll(service.recommend(s));
         }

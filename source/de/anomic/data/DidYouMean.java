@@ -11,6 +11,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
+import net.yacy.kelondro.util.ScoreCluster;
 
 
 /**
@@ -121,15 +122,28 @@ public class DidYouMean {
         long timelimit = System.currentTimeMillis() + timeout;
         SortedSet<String> preSorted = getSuggestions(timeout);
         if (System.currentTimeMillis() > timelimit) return preSorted;
-        SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
-        int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
-        int c0;
+        ScoreCluster<String> scored = new ScoreCluster<String>();
         for (final String s: preSorted) {
             if (System.currentTimeMillis() > timelimit) break;
-            if (preSortSelection <= 0) break;
-            c0 = index.count(Word.word2hash(s));
-            if (c0 > wc) countSorted.add(s);
-            preSortSelection--;
+            if (scored.size() >= 2 * preSortSelection) break;
+            scored.addScore(s, index.count(Word.word2hash(s)));
+        }
+        SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
+        if (System.currentTimeMillis() > timelimit) {
+            while (scored.size() > 0) {
+                if (countSorted.size() >= preSortSelection) break;
+                String s = scored.getMaxObject();
+                scored.deleteScore(s);
+                countSorted.add(s);
+            }
+        } else {
+            int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
+            while (scored.size() > 0) {
+                if (countSorted.size() >= preSortSelection) break;
+                String s = scored.getMaxObject();
+                int score = scored.deleteScore(s);
+                if (score > wc) countSorted.add(s);
+            }
         }
         return countSorted;
     }
@@ -258,9 +272,11 @@ public class DidYouMean {
 		
         @Override
         public void run() {
+            char m;
             for (int i = 0; i < wordLen; i++) try {
+                m = word.charAt(i);
                 for (char c: alphabet) {
-                    test(word.substring(0, i) + c + word.substring(i + 1));
+                    if (m != c) test(word.substring(0, i) + c + word.substring(i + 1));
                     if (System.currentTimeMillis() > timeLimit) return;
                 }
             } catch (InterruptedException e) {}

@@ -214,8 +214,10 @@ public class OpenGeoDBLocalization implements Localization {
     public Set<String> recommend(String s) {
         Set<String> a = new HashSet<String>();
         s = s.trim().toLowerCase();
+        if (s.length() == 0) return a;
         SortedMap<String, List<Integer>> t = this.name2ids.tailMap(s);
         for (String r: t.keySet()) {
+            r = r.toLowerCase();
             if (r.startsWith(s)) a.add(r); else break;
         }
         return a;

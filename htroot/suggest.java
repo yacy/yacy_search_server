@@ -46,6 +46,8 @@ public class suggest {
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
         String querystring =  originalquerystring.replace('+', ' ');
+        int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
+        int count = (post == null) ? 20 : post.getInt("count", 20);
         
         // get segment
         Segment indexSegment = null;
@@ -60,7 +62,7 @@ public class suggest {
         }
         
         DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
-        Iterator<String> meanIt = didYouMean.getSuggestions(300, 10).iterator();
+        Iterator<String> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
         int meanCount = 0;
         String suggestion;
         StringBuilder suggestions = new StringBuilder(120);
