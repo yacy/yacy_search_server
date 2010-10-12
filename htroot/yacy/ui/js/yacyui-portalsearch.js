@@ -171,6 +171,7 @@ function yrun() {
 
 		if(e.which == 27) {						// ESC
 			$("#ypopup").dialog('close');
+			$("#yquery").setValue("");
 		} else if(e.which == 39) {				// Right
 			startRecord = startRecord + maximumRecords;
 			yacysearch(submit, false);					
@@ -309,8 +310,15 @@ function yacysearch(global, clear) {
 						}								
 					}
 				);
-				if(count>0)
+				if(count>0) {
 					autoOpenSidebar();
+					if ($("#ypopup").dialog('isOpen')) {					
+						if($("#ypopup h3 :last").position().top < yconf.height) {
+							startRecord = startRecord + maximumRecords;
+							yacysearch(submit, false);						
+						}
+					}
+				}
 			 }
         }
     );
