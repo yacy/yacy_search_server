@@ -357,31 +357,31 @@ Current skin==Aktueller Skin
 Available Skins==Verfügbare Skins
 "Use"=="Benutzen"
 "Delete"=="Löschen"
+>Skin Color Definition<==>Definition der Skin Farben<
+The generic skin \'generic_pd\' can be configured here with custom colors:==Der allgemeine Skin 'generic_pd' kann hier mit eigenen Farben angepasst werden:
+>Background<==>Hintergrund<
+#>Text<==>Text<
+>Legend<==>Legende<
+>Table&nbsp;Header<==>Tabellen&nbsp;Kopf<
+>Table&nbsp;Item<==>Tabellen&nbsp;Zelle&nbsp;1<
+>Table&nbsp;Item&nbsp;2<==>Tabellen&nbsp;Zelle&nbsp;2<
+>Table&nbsp;Bottom<==>Tabellen&nbsp;Unterseite<
+>Border&nbsp;Line<==>Rand&nbsp;Linie<
+>Sign&nbsp;\'bad\'<==>Zeichen&nbsp;'gut'<
+>Sign&nbsp;\'good\'<==>Zeichen&nbsp;'schlecht'<
+>Sign&nbsp;\'other\'<==>Zeichen&nbsp;'andere'<
+>Search&nbsp;Headline<==>Suche&nbsp;Kopfzeile<
+>Search&nbsp;URL==>Suche&nbsp;URL
+"Set Colors"=="Farben Anwenden"
+#>Skin Download<==>Skin Download<
+Skins can be installed from download locations==Skins können direkt von einer Download Quelle installiert werden
 Install new skin from URL==Installiere einen neuen Skin von folgender URL
 Use this skin==Benutze diesen Skin
 "Install"=="Installieren"
-Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
-Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
-#Search Page Integration==Suchseite Integration
-#The search page may be customized. You can change the 'corporate identity'-images, the greeting line==Die Suchseite darf angepasst werden. Sie können die "corporate identity"-Grafiken, die Begrüssungszeile
-#and a link to a home page that is reached when the 'corporate identity'-images are clicked.==und den Link zu der Homepage, die erreicht wird, wenn auf die "corporate identity"-Grafik geklickt wird, ändern.
-#Greeting Line==Begrüssungszeile
-#URL of Home Page==Homepage URL
-#URL of a Small Corporate Image==URL der kleinen Grafik
-#URL of a Large Corporate Image==URL der grossen Grafik
-#Default Pop-Up Page==Standard Pop-Up Seite
-#Status Page==Status Seite
-#Search Front Page==Suchseite
-#Search Page \(small header\)==Suchseite (kleiner Kopf)
-#Interactive Search Page==Interaktive Suchseite
-#"Change Search Page"=="Suchseite ändern"
-#"Set to Default Values"=="Standardwerte wiederherstellen"
-#The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigene Website integriert werden. Benutzen Sie einfach folgenden Code:
-#This would look like:==Das wird dann so aussehen:
-#For a search page with a small header, use this code:==Für eine Seite mit einem kleinen Kopf benutzen Sie diesen Code:
-#A third option is the interactive search. Use this code:==Eine dritte Option ist die interaktive Suche. Benutzen Sie dazu diesen Code:
 Make sure that you only download data from trustworthy sources. The new Skin file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
 might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+>Unable to get URL:==>Die URL konnte nicht geladen werden:
+Error saving the skin.==Fehler beim Speichern des Skins.
 #-----------------------------
 
 #File: ConfigBasic.html
@@ -644,7 +644,7 @@ A third option is the interactive search. Use this code:==Als dritte Option gibt
 #---------------------------
 Your Personal Profile==Ihr persönliches Profil
 You can create a personal profile here, which can be seen by other YaCy-members==Hier können Sie Ihr persönliches Profil verwalten, welches andere YaCy-Benutzer ansehen können
-or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a #href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
+or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
 #Name==Name
 #Nick Name==Nick Name
 Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
@@ -655,7 +655,7 @@ Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long
 #MSN==MSN
 #Skype==Skype
 Comment==Kommentar
-"Save"==Speichern
+"Save"=="Speichern"
 You can use==Sie können
 here.==im Profil benutzen.
 #-----------------------------
