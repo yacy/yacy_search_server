@@ -42,7 +42,7 @@
     <script type="text/javascript" src="/yacy/ui/js/jquery.autocomplete.js"></script>
 	<script type="text/javascript">
       $(document).ready(function() {
-		$('#search').autocomplete('/suggest.json', {parse: opensearch});  
+		$('#search').autocomplete('/suggest.json', {parse: opensearch, delay: 0, selectFirst: false});  
         function opensearch(data) {
             var parsed = [];
             data = eval('({"suggest":' + data + '})');

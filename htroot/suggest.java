@@ -37,7 +37,7 @@ import de.anomic.server.serverSwitch;
  */
 public class suggest {
     
-    private static final int meanMax = 10;
+    private static final int meanMax = 30;
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
@@ -59,8 +59,8 @@ public class suggest {
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
         
-        DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex());
-        Iterator<String> meanIt = didYouMean.getSuggestions(querystring, 300, 10).iterator();
+        DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
+        Iterator<String> meanIt = didYouMean.getSuggestions(300, 10).iterator();
         int meanCount = 0;
         String suggestion;
         StringBuilder suggestions = new StringBuilder(120);
