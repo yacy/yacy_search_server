@@ -93,7 +93,7 @@ public final class search {
         final String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        final int     count  = Math.min(100, post.getInt("count", 10)); // maximum number of wanted results
+        final int     count  = Math.min(100, post.getInt("count", 0)); // maximum number of wanted results
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
@@ -196,7 +196,7 @@ public final class search {
         QueryParams theQuery = null;
         SearchEvent theSearch = null;
         ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> accu = null;
-        if ((query.length() == 0) && (abstractSet != null)) {
+        if (query.length() == 0 && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
             Segment indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
             theQuery = new QueryParams(
@@ -289,7 +289,7 @@ public final class search {
             joincount = theSearch.getRankingResult().getLocalIndexCount();
             prop.put("joincount", Integer.toString(joincount));
             if (joincount != 0) {
-                accu = theSearch.result().completeResults(1000);
+                accu = theSearch.result().completeResults(3000);
             }
             if (theSearch.getRankingResult().getLocalIndexCount() == 0 || abstracts.length() == 0) {
                 prop.put("indexcount", "");

@@ -15,6 +15,7 @@
   <script src="/yacy/ui/js/jquery-ui-1.7.2.min.js" type="text/javascript"></script>
   <link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.base.css" rel="stylesheet" />
   <link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" />
+  <link media="screen" type="text/css" href="/yacy/ui/css/autocomplete.css" rel="stylesheet" />  
 
   <script type="text/javascript">
   //<![CDATA[
@@ -38,6 +39,28 @@
 </head>
 <body id="yacysearch">
 
+    <script type="text/javascript" src="/yacy/ui/js/jquery.autocomplete.js"></script>
+	<script type="text/javascript">
+      $(document).ready(function() {
+		$('#search').autocomplete('/suggest.json', {parse: opensearch});  
+        function opensearch(data) {
+            var parsed = [];
+            data = eval('({"suggest":' + data + '})');
+            for (var i = 0; i < data.suggest[1].length; i++) {  
+                var row = data.suggest[1][i];
+                if (row) {  
+                    parsed[parsed.length] = {  
+                        data: [row],  
+                        value: row,  
+                        result: row  
+                    };  
+                };
+            };
+            return parsed;  
+        };
+      });
+    </script>
+    
 #(display)#
 	#%env/templates/simpleheader.template%#
 	::

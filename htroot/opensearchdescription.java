@@ -42,8 +42,8 @@ public class opensearchdescription {
         String thisaddress = header.get("Host", "localhost");
         if (thisaddress.indexOf(':') == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
 
-	int compareyacy = 0;
-	if(post != null && post.get("compare_yacy", "false").equals("true"))
+        int compareyacy = 0;
+        if (post != null && post.get("compare_yacy", "false").equals("true"))
 		compareyacy = 1;
         
         final serverObjects prop = new serverObjects();

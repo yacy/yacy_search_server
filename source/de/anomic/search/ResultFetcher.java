@@ -382,7 +382,9 @@ public class ResultFetcher {
      
     public ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> completeResults(final long waitingtime) {
         final long timeout = System.currentTimeMillis() + waitingtime;
-        while ((result.sizeAvailable() < query.neededResults()) && (anyWorkerAlive()) && (System.currentTimeMillis() < timeout)) {
+        while ( result.sizeAvailable() < query.neededResults() &&
+                anyWorkerAlive() &&
+                System.currentTimeMillis() < timeout) {
             try {Thread.sleep(20);} catch (final InterruptedException e) {}
             //System.out.println("+++DEBUG-completeResults+++ sleeping " + 200);
         }

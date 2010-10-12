@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+<OpenSearchDescription
+    xmlns="http://a9.com/-/spec/opensearch/1.1/"
+    xmlns:suggestions="http://www.opensearch.org/specifications/opensearch/extensions/suggestions/1.1">
   <ShortName>#(compareyacy)#::Compare #(/compareyacy)#YaCy/#[clientname]#</ShortName>
   <LongName>YaCy.net - #[SearchPageGreeting]#</LongName>
   <Image type="image/gif">http://#[thisaddress]#/env/grafics/yacy.gif</Image>
@@ -16,6 +18,7 @@
   ::
   <Url type="text/html" method="GET" template="http://#[thisaddress]#/compare_yacy.html?verify=true&amp;resource=global&amp;nav=all&amp;query={searchTerms}" />
   #(/compareyacy)#
+  <Url type="application/x-suggestions+json" template="http://#[thisaddress]#/suggest?query={searchTerms}"/>
   <!-- syntax according to http://www.loc.gov/standards/sru/. Set verify=true to get snippets in the search results -->
   <Developer>See http://developer.berlios.de/projects/yacy/</Developer>
   <Query role="example" searchTerms="yacy+open+source" />
