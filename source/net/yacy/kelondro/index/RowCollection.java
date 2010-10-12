@@ -121,7 +121,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     }
     
     protected RowCollection(final Row rowdef, final Row.Entry exportedCollectionRowEnvironment) {
-        final int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(1) - exportOverheadSize;
+        final int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(1) - (int) exportOverheadSize;
         final Row.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowEnvironment, 1);
         
         this.rowdef = rowdef;
@@ -192,7 +192,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     
     private static Column exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4;
 
-    protected static final int exportOverheadSize = 14;
+    protected static final long exportOverheadSize = 14;
 
     private static Row exportRow(final int chunkcachelength) {
         /*

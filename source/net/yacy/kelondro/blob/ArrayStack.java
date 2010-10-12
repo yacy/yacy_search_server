@@ -663,6 +663,43 @@ public class ArrayStack implements BLOB {
     }
     
     /**
+     * get all BLOBs in the array.
+     * this is useful when it is not clear if an entry is unique in all BLOBs in this array.
+     * @param key
+     * @return
+     * @throws IOException
+     */
+    public Iterable<Long> lengthAll(byte[] key) throws IOException {
+        return new BlobLengths(key);
+    }
+    
+    public class BlobLengths extends LookAheadIterator<Long> {
+
+        private final Iterator<blobItem> bii;
+        private final byte[] key;
+        
+        public BlobLengths(byte[] key) {
+            this.bii = blobs.iterator();
+            this.key = key;
+        }
+        
+        protected Long next0() {
+            while (this.bii.hasNext()) {
+                BLOB b = this.bii.next().blob;
+                if (b == null) continue;
+                try {
+                    long l = b.length(key);
+                    if (l >= 0) return Long.valueOf(l);
+                } catch (IOException e) {
+                    Log.logSevere("ArrayStack", "", e);
+                    return null;
+                }
+            }
+            return null;
+        }        
+    }
+    
+    /**
      * retrieve the sizes of all BLOB
      * @param key
      * @return the size of the BLOB or -1 if the BLOB does not exist

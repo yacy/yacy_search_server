@@ -217,7 +217,6 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	if (System.currentTimeMillis() > timeout) {
     	    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
     	    return c;
-    	    // timeout = Long.MAX_VALUE; // to prevent that the warning is shown again
     	}
     	while (entries.hasNext()) {
     		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), payloadrow)));
@@ -225,10 +224,34 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     		if (System.currentTimeMillis() > timeout) {
     		    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
     		    return c;
-    		    // timeout = Long.MAX_VALUE; // to prevent that the warning is shown again
             }
     	}
     	return c;
+    }
+    
+    public int count(final byte[] termHash) throws IOException {
+        long timeout = System.currentTimeMillis() + 3000;
+        Iterator<Long> entries = this.array.lengthAll(termHash).iterator();
+        if (entries == null || !entries.hasNext()) return 0;
+        Long a = entries.next();
+        int k = 1;
+        int c = RowSet.importRowCount(a, payloadrow);
+        assert c >= 0;
+        if (System.currentTimeMillis() > timeout) {
+            Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
+            return c;
+        }
+        while (entries.hasNext()) {
+            c += RowSet.importRowCount(entries.next(), payloadrow);
+            assert c >= 0;
+            k++;
+            if (System.currentTimeMillis() > timeout) {
+                Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
+                return c;
+            }
+        }
+        assert c >= 0;
+        return c;
     }
     
     /**

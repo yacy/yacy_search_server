@@ -31,6 +31,9 @@ import net.yacy.kelondro.util.ScoreCluster;
  */
 public class DidYouMean {
 
+    private static final int MinimumInputWordLength = 2;
+    private static final int MinimumOutputWordLength = 4;
+    
     private static final char[] ALPHABET_LATIN = {
         'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
 		'q','r','s','t','u','v','w','x','y','z',
@@ -118,8 +121,10 @@ public class DidYouMean {
      * @return
      */
     public SortedSet<String> getSuggestions(long timeout, int preSortSelection) {
+        if (this.word.length() < MinimumInputWordLength) return this.resultSet; // return nothing if input is too short
+        long startTime = System.currentTimeMillis();
+        long timelimit = startTime + timeout;
         if (this.word.indexOf(' ') > 0) return getSuggestions(this.word.split(" "), timeout, preSortSelection, this.index);
-        long timelimit = System.currentTimeMillis() + timeout;
         SortedSet<String> preSorted = getSuggestions(timeout);
         if (System.currentTimeMillis() > timelimit) return preSorted;
         ScoreCluster<String> scored = new ScoreCluster<String>();
@@ -129,22 +134,18 @@ public class DidYouMean {
             scored.addScore(s, index.count(Word.word2hash(s)));
         }
         SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
-        if (System.currentTimeMillis() > timelimit) {
-            while (scored.size() > 0) {
-                if (countSorted.size() >= preSortSelection) break;
-                String s = scored.getMaxObject();
-                scored.deleteScore(s);
-                countSorted.add(s);
-            }
-        } else {
-            int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
-            while (scored.size() > 0) {
-                if (countSorted.size() >= preSortSelection) break;
-                String s = scored.getMaxObject();
-                int score = scored.deleteScore(s);
-                if (score > wc) countSorted.add(s);
-            }
+        int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
+        while (scored.size() > 0 && countSorted.size() < preSortSelection) {
+            String s = scored.getMaxObject();
+            int score = scored.deleteScore(s);
+            if (s.length() >= MinimumOutputWordLength && score > wc) countSorted.add(s);
+            if (System.currentTimeMillis() > timelimit) break;
         }
+
+        // finished
+        Log.logInfo("DidYouMean", "found " + preSorted.size() + " terms, returned " + countSorted.size() + " suggestions; execution time: "
+                        + (System.currentTimeMillis() - startTime) + "ms" + " - remaining queue size: " + guessLib.size());
+
         return countSorted;
     }
 	
@@ -242,10 +243,6 @@ public class DidYouMean {
 	    
         // we don't want the given word in the result
         this.resultSet.remove(this.word);
-
-        // finished
-        Log.logInfo("DidYouMean", "found "+this.resultSet.size()+" terms; execution time: "
-                        +(System.currentTimeMillis()-startTime)+"ms"+ " - remaining queue size: "+guessLib.size());
 
         return this.resultSet;
 			
@@ -347,7 +344,7 @@ public class DidYouMean {
                 String s;
                 try {
                     while (!(s = guessLib.take()).equals(POISON_STRING)) {
-                        if (index.has(Word.word2hash(s))) resultSet.add(s);
+                        if (s.length() >= MinimumOutputWordLength && index.has(Word.word2hash(s))) resultSet.add(s);
                         if (System.currentTimeMillis() > timeLimit) return;
                     }
                 } catch (InterruptedException e) {}

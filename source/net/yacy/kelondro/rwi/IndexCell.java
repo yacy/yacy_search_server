@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.cora.storage.ComparableARC;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
@@ -62,6 +63,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     // class variables
     private final ReferenceContainerArray<ReferenceType> array;
     private       ReferenceContainerCache<ReferenceType> ram;
+    private final ComparableARC<byte[], Integer>         countCache;
     private       int                                    maxRamEntries;
     private final IODispatcher                           merger;
     private       long                                   lastCleanup, lastDump;
@@ -86,6 +88,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         
         this.array = new ReferenceContainerArray<ReferenceType>(cellPath, prefix, factory, termOrder, payloadrow, merger);
         this.ram = new ReferenceContainerCache<ReferenceType>(factory, payloadrow, termOrder);
+        this.countCache = new ComparableARC<byte[], Integer>(100, termOrder);
         this.maxRamEntries = maxRamEntries;
         this.merger = merger;
         this.lastCleanup = System.currentTimeMillis();
@@ -147,29 +150,27 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     /**
      * count number of references for a given term
-     * this method may cause strong IO load if called too frequently, because it is
-     * necessary to read the corresponding reference containers from the files and
-     * count the resulting index object.
-     * To reduce the load for processes that frequently need access to the same
-     * term objects, a ARC cache is here to reduce IO load.
+     * this method may cause strong IO load if called too frequently.
      */
     public int count(byte[] termHash) {
+        Integer cachedCount = this.countCache.get(termHash);
+        if (cachedCount != null) return cachedCount.intValue();
         
-        int countFile;
+        int countFile = 0;
         // read fresh values from file
-        ReferenceContainer<ReferenceType> c1;
         try {
-            c1 = this.array.get(termHash);
+            countFile = this.array.count(termHash);
         } catch (Exception e) {
             Log.logException(e);
-            c1 = null;
         }
-        countFile = (c1 == null) ? 0 : c1.size();
+        assert countFile >= 0;
         
         // count from container in ram
         ReferenceContainer<ReferenceType> countRam = this.ram.get(termHash, null);
-
-        return (countRam == null) ? countFile : countFile + countRam.size();
+        assert countRam == null || countRam.size() >= 0;
+        int c = countRam == null ? countFile : countFile + countRam.size();
+        this.countCache.put(termHash, c);
+        return c;
     }
     
     /**

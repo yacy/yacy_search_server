@@ -79,14 +79,23 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         if (orderbound < 0) return new RowSet(rowdef); // error
         long alloc = ((long) size) * ((long) rowdef.objectsize);
         assert alloc <= Integer.MAX_VALUE : "alloc = " + alloc;
+        assert alloc == b.length - exportOverheadSize;
         final byte[] chunkcache = new byte[(int) alloc];
         //assert b.length - exportOverheadSize == size * rowdef.objectsize : "b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize;
         if (b.length - exportOverheadSize != alloc) {
             Log.logSevere("RowSet", "exportOverheadSize wrong: b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize);
             return new RowSet(rowdef);
         }
-        System.arraycopy(b, exportOverheadSize, chunkcache, 0, chunkcache.length);
+        System.arraycopy(b, (int) exportOverheadSize, chunkcache, 0, chunkcache.length);
         return new RowSet(rowdef, size, chunkcache, orderbound);
+    }
+    
+    public final static int importRowCount(final long blength, final Row rowdef) {
+        assert blength >= exportOverheadSize : "blength = " + blength;
+        if (blength < exportOverheadSize) return 0;
+        int c = (int) ((blength - exportOverheadSize) / (long) rowdef.objectsize);
+        assert c >= 0;
+        return c;
     }
     
     private RowSet(Row rowdef, byte[] chunkcache, int chunkcount, int sortBound, long lastTimeWrote) {
