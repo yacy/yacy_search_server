@@ -289,7 +289,7 @@ public class Load_RSS_p {
         
         if (record_api && rss != null && rss.getFeed() != null && rss.getFeed().getChannel() != null) {
             // record API action
-            RSSLoader.recordAPI(sb, url, rss.getFeed(), repeat_time, repeat_unit);
+            RSSLoader.recordAPI(sb, post.get(WorkTables.TABLE_API_COL_APICALL_PK, null), url, rss.getFeed(), repeat_time, repeat_unit);
         }
         
         // show items from rss

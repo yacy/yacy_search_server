@@ -74,7 +74,7 @@ public class RSSLoader extends Thread {
         indexAllRssFeed(sb, urlf, feed);
     
         // add the feed also to the scheduler
-        recordAPI(sb, urlf, feed, 7, "seldays");
+        recordAPI(sb, null, urlf, feed, 7, "seldays");
     }
     
     public static void indexAllRssFeed(Switchboard sb, DigestURI url, RSSFeed feed) {
@@ -119,12 +119,13 @@ public class RSSLoader extends Thread {
     }
     
     
-    public static void recordAPI(Switchboard sb, DigestURI url, RSSFeed feed, int repeat_time, String repeat_unit) {
+    public static void recordAPI(Switchboard sb, String apicall_pk, DigestURI url, RSSFeed feed, int repeat_time, String repeat_unit) {
         // record API action
         byte[] pk = null;
         serverObjects post = new serverObjects();
         post.put("url", url.toNormalform(true, false));
         post.put("indexAllItemContent", "");
+        if (apicall_pk != null) post.put(WorkTables.TABLE_API_COL_APICALL_PK, apicall_pk);
         if (repeat_time > 0) {
             // store as scheduled api call
             pk = sb.tables.recordAPICall(post, "Load_RSS_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "import feed " + url.toNormalform(true, false), repeat_time, repeat_unit.substring(3));
