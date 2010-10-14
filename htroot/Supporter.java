@@ -32,12 +32,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.ScoreCluster;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.search.Switchboard;
@@ -104,7 +105,7 @@ public class Supporter {
             accumulateVotes(sb, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
-            final ScoreCluster<String> ranking = new ScoreCluster<String>(); // score cluster for url hashes
+            final DynamicScore<String> ranking = new ScoreCluster<String>(); // score cluster for url hashes
             final Row rowdef = new Row("String url-255, String title-120, String description-120, String refid-" + (DateFormatter.PATTERN_SHORT_SECOND.length() + 12), NaturalOrder.naturalOrder);
             final HashMap<String, Entry> Supporter = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
@@ -197,7 +198,7 @@ public class Supporter {
     
     private static void accumulateSupporter(
             final Switchboard sb,
-            final HashMap<String, Entry> Supporter, final ScoreCluster<String> ranking, final Row rowdef,
+            final HashMap<String, Entry> Supporter, final DynamicScore<String> ranking, final Row rowdef,
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
         yacyNewsDB.Record record;

@@ -40,6 +40,8 @@ import java.util.TreeSet;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -52,11 +54,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.SplitTable;
-import net.yacy.kelondro.util.ScoreCluster;
 import net.yacy.repository.Blacklist;
-
-//import de.anomic.http.client.Client;
-//import de.anomic.http.server.ResponseContainer;
 
 public final class MetadataRepository implements Iterable<byte[]> {
 
@@ -610,7 +608,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         Map<String, hashStat> map = domainSampleCollector();
         
         // order elements by size
-        ScoreCluster<String> s = new ScoreCluster<String>();
+        DynamicScore<String> s = new ScoreCluster<String>();
         for (Map.Entry<String, hashStat> e: map.entrySet()) {
             s.addScore(e.getValue().urlhash, e.getValue().count);
         }

@@ -34,12 +34,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.storage.ScoreCluster;
+import net.yacy.cora.storage.StaticScore;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.LookAheadIterator;
-import net.yacy.kelondro.util.ScoreCluster;
 
 
 public class MapDataMining extends MapHeap {
@@ -48,7 +49,7 @@ public class MapDataMining extends MapHeap {
     private final static Double DOUBLE0 = Double.valueOf(0.0);
 
     private final String[] sortfields, longaccfields, doubleaccfields;
-    private Map<String, ScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
+    private Map<String, StaticScore<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
     private Map<String, Long>   accLong; // to store accumulations of Long cells
     private Map<String, Double> accDouble; // to store accumulations of Double cells
     
@@ -71,7 +72,7 @@ public class MapDataMining extends MapHeap {
 
         ScoreCluster<String>[] cluster = null;
         if (sortfields == null) sortClusterMap = null; else {
-            sortClusterMap = new ConcurrentHashMap<String, ScoreCluster<String>>();
+            sortClusterMap = new ConcurrentHashMap<String, StaticScore<String>>();
             cluster = new ScoreCluster[sortfields.length];
             for (int i = 0; i < sortfields.length; i++) {
                 cluster[i] = new ScoreCluster<String>();   
@@ -154,7 +155,7 @@ public class MapDataMining extends MapHeap {
     public synchronized void clear() {
     	super.clear();
         if (sortfields == null) sortClusterMap = null; else {
-            sortClusterMap = new HashMap<String, ScoreCluster<String>>();
+            sortClusterMap = new HashMap<String, StaticScore<String>>();
             for (int i = 0; i < sortfields.length; i++) {
             	sortClusterMap.put(sortfields[i], new ScoreCluster<String>());
             }
@@ -240,7 +241,7 @@ public class MapDataMining extends MapHeap {
 
     private void updateSortCluster(final String key, final Map<String, String> map) {
         Object cell;
-        ScoreCluster<String> cluster;
+        StaticScore<String> cluster;
         for (int i = 0; i < sortfields.length; i++) {
             cell = map.get(sortfields[i]);
             if (cell != null) {
@@ -278,7 +279,7 @@ public class MapDataMining extends MapHeap {
     
     private void deleteSortCluster(final String key) {
         if (key == null) return;
-        ScoreCluster<String> cluster;
+        StaticScore<String> cluster;
         for (int i = 0; i < sortfields.length; i++) {
             cluster = sortClusterMap.get(sortfields[i]);
             cluster.deleteScore(key);
@@ -289,7 +290,7 @@ public class MapDataMining extends MapHeap {
     public synchronized Iterator<byte[]> keys(final boolean up, /* sorted by */ final String field) {
         // sorted iteration using the sortClusters
         if (sortClusterMap == null) return null;
-        final ScoreCluster<String> cluster = sortClusterMap.get(field);
+        final StaticScore<String> cluster = sortClusterMap.get(field);
         if (cluster == null) return null; // sort field does not exist
         //System.out.println("DEBUG: cluster for field " + field + ": " + cluster.toString());
         return new string2bytearrayIterator(cluster.scores(up));

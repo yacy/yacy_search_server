@@ -38,6 +38,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreMap;
 import net.yacy.kelondro.logging.Log;
 
 /**
@@ -45,10 +47,17 @@ import net.yacy.kelondro.logging.Log;
  *
  */
 public class DidYouMeanLibrary {
-
-    private final File dictionaryPath;
-    private TreeSet<String> dict, tcid;
     
+    // common word cache
+    private static final int commonWordsMaxSize = 100000; // maximum size of common word cache
+    private static final int commonWordsMinLength = 4;    // words must have that length at minimum
+    private DynamicScore<String> commonWords = new ScoreMap<String>();    
+    
+    // dictionaries
+    private final File dictionaryPath;
+    private TreeSet<String> dict; // the word dictionary
+    private TreeSet<String> tcid; // the dictionary of reverse words
+
     /**
      * create a new dictionary
      * This loads all files that ends with '.words'
@@ -59,6 +68,20 @@ public class DidYouMeanLibrary {
     public DidYouMeanLibrary(final File dictionaryPath) {
         this.dictionaryPath = dictionaryPath;
         reload();
+    }
+    
+    /**
+     * add a word to the generic dictionary
+     * @param word
+     */
+    public void learn(String word) {
+        if (word == null) return;
+        word = word.trim().toLowerCase();
+        if (word.length() < commonWordsMinLength) return;
+        commonWords.incScore(word);
+        if (commonWords.size() >= commonWordsMaxSize) {
+            commonWords.shrinkToMaxSize(commonWordsMaxSize / 2);
+        }
     }
     
     /**

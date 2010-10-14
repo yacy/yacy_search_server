@@ -1,25 +1,24 @@
-// kelondroMScoreCluster.java
-// -----------------------
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-// last major change: 28.09.2004
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  ScoreCluster
+ *  Copyright 2004, 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  First released 28.09.2004 at http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package net.yacy.kelondro.util;
+package net.yacy.cora.storage;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,12 +30,13 @@ import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.util.kelondroOutOfLimitsException;
 
 
-public final class ScoreCluster<E> {
+public final class ScoreCluster<E> implements DynamicScore<E> {
     
-    protected final TreeMap<E, Long> refkeyDB; // a mapping from a reference to the cluster key
-    protected final TreeMap<Long, E> keyrefDB; // a mapping from the cluster key to the reference
+    protected final Map<E, Long> map; // a mapping from a reference to the cluster key
+    protected final TreeMap<Long, E> pam; // a mapping from the cluster key to the reference
     private long gcount;
     private int encnt;
     
@@ -45,19 +45,20 @@ public final class ScoreCluster<E> {
     }
     
     public ScoreCluster(Comparator<? super E> comparator)  {
-	if(comparator != null) {
-	    refkeyDB = new TreeMap<E, Long>(comparator);
-	} else {
-	    refkeyDB = new TreeMap<E, Long>();
-	}
-        keyrefDB = new TreeMap<Long, E>();
+        if (comparator == null) {
+            //map = new HashMap<E, Long>();
+            map = new TreeMap<E, Long>(comparator);
+        } else {
+            map = new TreeMap<E, Long>(comparator);
+        }
+        pam = new TreeMap<Long, E>();
         gcount = 0;
         encnt = 0;
     }
     
     public synchronized void clear() {
-        refkeyDB.clear();
-        keyrefDB.clear();
+        map.clear();
+        pam.clear();
         gcount = 0;
         encnt = 0;
     }
@@ -70,11 +71,11 @@ public final class ScoreCluster<E> {
         if (maxsize < 0) return;
         Long key;
         synchronized (this) {
-            while (refkeyDB.size() > maxsize) {
+            while (map.size() > maxsize) {
                 // find and remove smallest objects until cluster has demanded size
-                key = keyrefDB.firstKey();
+                key = pam.firstKey();
                 if (key == null) break;
-                refkeyDB.remove(keyrefDB.remove(key));
+                map.remove(pam.remove(key));
             }
         }
     }
@@ -87,13 +88,13 @@ public final class ScoreCluster<E> {
         int score;
         Long key;
         synchronized (this) {
-            while (keyrefDB.size() > 0) {
+            while (pam.size() > 0) {
                 // find and remove objects where their score is smaller than the demanded minimum score
-                key = keyrefDB.firstKey();
+                key = pam.firstKey();
                 if (key == null) break;
                 score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
                 if (score >= minScore) break;
-                refkeyDB.remove(keyrefDB.remove(key));
+                map.remove(pam.remove(key));
             }
         }
     }
@@ -178,19 +179,11 @@ public final class ScoreCluster<E> {
     }
     
     public synchronized int size() {
-        return refkeyDB.size();
+        return map.size();
     }
     
     public synchronized boolean isEmpty() {
-        return refkeyDB.isEmpty();
-    }
-    
-    public synchronized void incScore(final E[] objs) {
-        for (int i = 0; i < objs.length; i++) addScore(objs[i], 1);
-    }
-    
-    public synchronized void decScore(final E[] objs) {
-        for (int i = 0; i < objs.length; i++) addScore(objs[i], -1);
+        return map.isEmpty();
     }
     
     public synchronized void incScore(final E obj) {
@@ -204,7 +197,7 @@ public final class ScoreCluster<E> {
     public void setScore(final E obj, final int newScore) {
         if (obj == null) return;
         synchronized (this) {
-            Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+            Long usk = map.remove(obj); // get unique score key, old entry is not needed any more
             if (newScore < 0) throw new kelondroOutOfLimitsException(newScore);
             
             if (usk == null) {
@@ -212,12 +205,12 @@ public final class ScoreCluster<E> {
                 usk = Long.valueOf(scoreKey(encnt++, newScore));
                 
                 // put new value into cluster
-                refkeyDB.put(obj, usk);
-                keyrefDB.put(usk, obj);
+                map.put(obj, usk);
+                pam.put(usk, obj);
                 
             } else {
                 // delete old entry
-                keyrefDB.remove(usk);
+                pam.remove(usk);
                 
                 // get previous handle and score
                 final long c = usk.longValue();
@@ -227,8 +220,8 @@ public final class ScoreCluster<E> {
                 
                 // set new value
                 usk = Long.valueOf(scoreKey(oldHandle, newScore)); // generates an unique key for a specific score
-                refkeyDB.put(obj, usk);
-                keyrefDB.put(usk, obj);
+                map.put(obj, usk);
+                pam.put(usk, obj);
             }
         }        
         // increase overall counter
@@ -238,7 +231,7 @@ public final class ScoreCluster<E> {
     public void addScore(final E obj, final int incrementScore) {
         if (obj == null) return;
         synchronized (this) {
-            Long usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+            Long usk = map.remove(obj); // get unique score key, old entry is not needed any more
             
             if (usk == null) {
                 // set new value
@@ -246,12 +239,12 @@ public final class ScoreCluster<E> {
                 usk = Long.valueOf(scoreKey(encnt++, incrementScore));
                 
                 // put new value into cluster
-                refkeyDB.put(obj, usk);
-                keyrefDB.put(usk, obj);
+                map.put(obj, usk);
+                pam.put(usk, obj);
                 
             } else {
                 // delete old entry
-                keyrefDB.remove(usk);
+                pam.remove(usk);
                 
                 // get previous handle and score
                 final long c = usk.longValue();
@@ -262,8 +255,8 @@ public final class ScoreCluster<E> {
                 final int newValue = oldScore + incrementScore;
                 if (newValue < 0) throw new kelondroOutOfLimitsException(newValue);
                 usk = Long.valueOf(scoreKey(oldHandle, newValue)); // generates an unique key for a specific score
-                refkeyDB.put(obj, usk);
-                keyrefDB.put(usk, obj);
+                map.put(obj, usk);
+                pam.put(usk, obj);
             }
         }        
         // increase overall counter
@@ -275,11 +268,11 @@ public final class ScoreCluster<E> {
         if (obj == null) return 0;
         final Long usk;
         synchronized (this) {
-            usk = refkeyDB.remove(obj); // get unique score key, old entry is not needed any more
+            usk = map.remove(obj); // get unique score key, old entry is not needed any more
             if (usk == null) return 0;
     
             // delete old entry
-            keyrefDB.remove(usk);
+            pam.remove(usk);
         }
         
         // get previous handle and score
@@ -292,119 +285,46 @@ public final class ScoreCluster<E> {
     }
 
     public synchronized boolean existsScore(final E obj) {
-        return (refkeyDB.get(obj) != null);
+        return map.containsKey(obj);
     }
     
     public int getScore(final E obj) {
         if (obj == null) return 0;
         final Long cs;
         synchronized (this) {
-            cs = refkeyDB.get(obj);
+            cs = map.get(obj);
         }
         if (cs == null) return 0;
         return (int) ((cs.longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
     
     public synchronized int getMaxScore() {
-        if (refkeyDB.isEmpty()) return -1;
-        return (int) ((keyrefDB.lastKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
+        if (map.isEmpty()) return -1;
+        return (int) ((pam.lastKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
     public synchronized int getMinScore() {
-        if (refkeyDB.isEmpty()) return -1;
-        return (int) ((keyrefDB.firstKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
+        if (map.isEmpty()) return -1;
+        return (int) ((pam.firstKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
     public synchronized E getMaxObject() {
-        if (refkeyDB.isEmpty()) return null;
-        return keyrefDB.get(keyrefDB.lastKey());
+        if (map.isEmpty()) return null;
+        return pam.get(pam.lastKey());
     }
     
     public synchronized E getMinObject() {
-        if (refkeyDB.isEmpty()) return null;
-        return keyrefDB.get(keyrefDB.firstKey());
-    }
-    
-    public synchronized E[] getScores(final int maxCount, final boolean up) {
-        return getScores(maxCount, up, Integer.MIN_VALUE, Integer.MAX_VALUE);
-    }
-    
-    @SuppressWarnings("unchecked")
-	public synchronized E[] getScores(int maxCount, final boolean up, final int minScore, final int maxScore) {
-        if (maxCount > refkeyDB.size()) maxCount = refkeyDB.size();
-        E[] s = (E[]) new Object[maxCount];
-        final Iterator<E> it = scores(up, minScore, maxScore);
-        int i = 0;
-        while ((i < maxCount) && (it.hasNext())) s[i++] = it.next();
-        if (i < maxCount) {
-            // re-copy the result array
-            E[] sc = (E[]) new Object[i];
-            System.arraycopy(s, 0, sc, 0, i);
-            s = sc;
-        }
-        return s;
+        if (map.isEmpty()) return null;
+        return pam.get(pam.firstKey());
     }
     
     public String toString() {
-        return refkeyDB + " / " + keyrefDB;
+        return map + " / " + pam;
     }
     
     public synchronized Iterator<E> scores(final boolean up) {
         if (up) return new simpleScoreIterator<E>();
         return new reverseScoreIterator<E>();
-    }
-    
-    public synchronized Iterator<E> scores(final boolean up, final int minScore, final int maxScore) {
-        return new komplexScoreIterator<E>(up, minScore, maxScore);
-    }
-    
-    private class komplexScoreIterator<A extends E> implements Iterator<E> {
-
-        boolean up;
-        TreeMap<Long, E> keyrefDBcopy;
-        E n;
-        int min, max;
-        
-		@SuppressWarnings("unchecked")
-		public komplexScoreIterator(final boolean up, final int minScore, final int maxScore) {
-            this.up = up;
-            this.min = minScore;
-            this.max = maxScore;
-            this.keyrefDBcopy = (TreeMap<Long, E>) keyrefDB.clone(); // NoSuchElementException here?
-            internalNext();
-        }
-       
-        public boolean hasNext() {
-            return (n != null);
-        }
-        
-        private void internalNext() {
-            Long key;
-            int score = (max + min) / 2;
-            while (!keyrefDBcopy.isEmpty()) {
-                key = ((up) ? keyrefDBcopy.firstKey() : keyrefDBcopy.lastKey());
-                n = keyrefDBcopy.remove(key);
-                score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
-                if ((score >= min) && (score <= max)) return;
-                if (((up) && (score > max)) || ((!(up)) && (score < min))) {
-                    keyrefDBcopy = new TreeMap<Long, E>();
-                    n = null;
-                    return;
-                }
-            } 
-            n = null;
-        }
-        
-        public E next() {
-            final E o = n;
-            internalNext();
-            return o;
-        }
-        
-        public void remove() {
-            if (n != null) deleteScore(n);
-        }
-        
     }
     
     private class reverseScoreIterator<A extends E> implements Iterator<E> {
@@ -413,7 +333,7 @@ public final class ScoreCluster<E> {
         Long key;
         
         public reverseScoreIterator() {
-            view = keyrefDB;
+            view = pam;
         }
        
         public boolean hasNext() {
@@ -423,14 +343,14 @@ public final class ScoreCluster<E> {
         public E next() {
             key = view.lastKey();
             view = view.headMap(key);
-            final E value = keyrefDB.get(key);
+            final E value = pam.get(key);
             //System.out.println("cluster reverse iterator: score = " + ((((Long) key).longValue() & 0xFFFFFFFF00000000L) >> 32) + ", handle = " + (((Long) key).longValue() & 0xFFFFFFFFL) + ", value = " + value);
             return value;
         }
         
         public void remove() {
-            final Object val = keyrefDB.remove(key);
-            if (val != null) refkeyDB.remove(val);
+            final Object val = pam.remove(key);
+            if (val != null) map.remove(val);
         }
         
     }
@@ -441,7 +361,7 @@ public final class ScoreCluster<E> {
         Map.Entry<Long, E> entry;
         
         public simpleScoreIterator() {
-            ii = keyrefDB.entrySet().iterator();
+            ii = pam.entrySet().iterator();
         }
        
         public boolean hasNext() {
@@ -456,7 +376,7 @@ public final class ScoreCluster<E> {
         
         public void remove() {
             ii.remove();
-            if (entry.getValue() != null) refkeyDB.remove(entry.getValue());
+            if (entry.getValue() != null) map.remove(entry.getValue());
         }
         
     }
@@ -502,24 +422,12 @@ public final class ScoreCluster<E> {
         }
         
         System.out.println("result:");
-        Object[] result;
-        result = s.getScores(s.size(), true);
-        for (int i = 0; i < s.size(); i++) System.out.println("up: " + result[i]);
-        result = s.getScores(s.size(), false);
-        for (int i = 0; i < s.size(); i++) System.out.println("down: " + result[i]);
+        Iterator<String> i = s.scores(true);
+        while (i.hasNext()) System.out.println("up: " + i.next());
+        i = s.scores(false);
+        while (i.hasNext()) System.out.println("down: " + i.next());
 	
         System.out.println("finished create. time = " + (System.currentTimeMillis() - time));
         System.out.println("total=" + s.totalCount() + ", elements=" + s.size() + ", redundant count=" + c);
-
-        /*
-	// delete cluster
-        time = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
-	    s.deleteScore("score#" + i + "xxx" + i + "xxx" + i + "xxx" + i + "xxx");
-	    c -= i/10;
-	}
-        System.out.println("finished delete. time = " + (System.currentTimeMillis() - time));
-        System.out.println("total=" + s.totalCount() + ", elements=" + s.size() + ", redundant count=" + c);
-        */
     }
 }

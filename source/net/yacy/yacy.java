@@ -49,6 +49,8 @@ import java.util.zip.ZipOutputStream;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.blob.MapDataMining;
@@ -65,7 +67,6 @@ import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.ScoreCluster;
 import net.yacy.kelondro.util.OS;
 
 //import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
@@ -606,7 +607,7 @@ public final class yacy {
         final enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true, true);
         File f;
         byte[] h;
-        final ScoreCluster<byte[]> hs = new ScoreCluster<byte[]>();
+        final DynamicScore<byte[]> hs = new ScoreCluster<byte[]>(Base64Order.standardCoder);
         while (ef.hasMoreElements()) {
             f = ef.nextElement();
             h = f.getName().substring(0, Word.commonHashLength).getBytes();

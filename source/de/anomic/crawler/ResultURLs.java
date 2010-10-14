@@ -32,19 +32,20 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.storage.ScoreCluster;
+import net.yacy.cora.storage.DynamicScore;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.ReverseMapIterator;
-import net.yacy.kelondro.util.ScoreCluster;
 
 import de.anomic.crawler.retrieval.EventOrigin;
 
 public final class ResultURLs {
 
     private final Map<EventOrigin, Map<String, InitExecEntry>> resultStacks; // a mapping from urlHash to Entries
-    private final Map<EventOrigin, ScoreCluster<String>> resultDomains;
+    private final Map<EventOrigin, DynamicScore<String>> resultDomains;
 
     public class InitExecEntry {
         public byte[] initiatorHash, executorHash;
@@ -57,7 +58,7 @@ public final class ResultURLs {
     public ResultURLs(int initialStackCapacity) {
         // init result stacks
         resultStacks = new ConcurrentHashMap<EventOrigin, Map<String, InitExecEntry>>(initialStackCapacity);
-        resultDomains = new ConcurrentHashMap<EventOrigin, ScoreCluster<String>>(initialStackCapacity);
+        resultDomains = new ConcurrentHashMap<EventOrigin, DynamicScore<String>>(initialStackCapacity);
         for (EventOrigin origin: EventOrigin.values()) {
             resultStacks.put(origin, new LinkedHashMap<String, InitExecEntry>());
             resultDomains.put(origin, new ScoreCluster<String>());
@@ -82,7 +83,7 @@ public final class ResultURLs {
             return;
         }
         try {
-            final ScoreCluster<String> domains = getDomains(stackType);
+            final DynamicScore<String> domains = getDomains(stackType);
             if (domains != null) {
                 domains.incScore(e.metadata().url().getHost());
             }
@@ -99,7 +100,7 @@ public final class ResultURLs {
     }
     
     public int getDomainListSize(final EventOrigin stack) {
-        final ScoreCluster<String> domains = getDomains(stack);
+        final DynamicScore<String> domains = getDomains(stack);
         if (domains == null) return 0;
         return domains.size();
     }
@@ -155,7 +156,7 @@ public final class ResultURLs {
     private Map<String, InitExecEntry> getStack(final EventOrigin stack) {
         return resultStacks.get(stack);
     }
-    private ScoreCluster<String> getDomains(final EventOrigin stack) {
+    private DynamicScore<String> getDomains(final EventOrigin stack) {
         return resultDomains.get(stack);
     }
 
@@ -166,7 +167,7 @@ public final class ResultURLs {
     public synchronized void clearStack(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();
-        final ScoreCluster<String> resultDomains = getDomains(stack);
+        final DynamicScore<String> resultDomains = getDomains(stack);
         if (resultDomains != null) {
             // we do not clear this completely, just remove most of the less important entries
             resultDomains.shrinkToMaxSize(100);

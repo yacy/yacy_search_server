@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -36,7 +38,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.ScoreCluster;
 import net.yacy.kelondro.util.kelondroException;
 
 import de.anomic.yacy.yacyCore;
@@ -57,7 +58,7 @@ public class PeerSelection {
             byte[] wordhash,
             int redundancy, 
             HashMap<String, yacySeed> regularSeeds,
-            ScoreCluster<String> ranking) {
+            DynamicScore<String> ranking) {
         // this method is called from the search target computation
         long[] dhtVerticalTargets = seedDB.scheme.dhtPositions(wordhash);
         yacySeed seed;
@@ -339,7 +340,7 @@ public class PeerSelection {
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
 
         // fill a score object
-        final ScoreCluster<String> seedScore = new ScoreCluster<String>();
+        final DynamicScore<String> seedScore = new ScoreCluster<String>();
         yacySeed ys;
         long absage;
         final Iterator<yacySeed> s = seedDB.seedsConnected(true, false, null, (float) 0.0);

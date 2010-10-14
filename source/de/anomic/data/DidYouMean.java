@@ -7,11 +7,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
-import net.yacy.kelondro.util.ScoreCluster;
 
 
 /**
@@ -127,7 +128,7 @@ public class DidYouMean {
         if (this.word.indexOf(' ') > 0) return getSuggestions(this.word.split(" "), timeout, preSortSelection, this.index);
         SortedSet<String> preSorted = getSuggestions(timeout);
         if (System.currentTimeMillis() > timelimit) return preSorted;
-        ScoreCluster<String> scored = new ScoreCluster<String>();
+        DynamicScore<String> scored = new ScoreCluster<String>();
         for (final String s: preSorted) {
             if (System.currentTimeMillis() > timelimit) break;
             if (scored.size() >= 2 * preSortSelection) break;

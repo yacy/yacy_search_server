@@ -31,10 +31,11 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.util.ScoreCluster;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.ResultURLs;
@@ -185,7 +186,7 @@ public class yacySearch extends Thread {
         }
         
         // put in seeds according to dht
-        final ScoreCluster<String> ranking = new ScoreCluster<String>();
+        final DynamicScore<String> ranking = new ScoreCluster<String>();
         final HashMap<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>();
         final HashMap<String, yacySeed> matchingSeeds = new HashMap<String, yacySeed>();
         yacySeed seed;

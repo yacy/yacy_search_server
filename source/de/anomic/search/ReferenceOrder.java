@@ -33,6 +33,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -42,7 +44,6 @@ import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
-import net.yacy.kelondro.util.ScoreCluster;
 
 
 public class ReferenceOrder {
@@ -51,7 +52,7 @@ public class ReferenceOrder {
     
     private       int maxdomcount;
     private       WordReferenceVars min, max;
-    private final ScoreCluster<String> doms; // collected for "authority" heuristic 
+    private final DynamicScore<String> doms; // collected for "authority" heuristic 
     private final RankingProfile ranking;
     private final String language;
     
