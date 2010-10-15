@@ -28,11 +28,10 @@ package de.anomic.search;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -41,12 +40,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.ScoreCluster;
+import net.yacy.cora.storage.StaticScore;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -81,10 +81,11 @@ public final class RankingProcess extends Thread {
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
     
-    private final Navigator ref;  // reference score computation for the commonSense heuristic
-    private final Navigator hostNavigator;
-    private final Navigator authorNavigator;
-    private final Navigator namespaceNavigator;
+    private final DynamicScore<String> ref;  // reference score computation for the commonSense heuristic
+    private final DynamicScore<String> hostNavigator;
+    private final Map<String, String> hostResolver;
+    private final DynamicScore<String> authorNavigator;
+    private final DynamicScore<String> namespaceNavigator;
     private final ReferenceOrder order;
     private final long startTime;
     
@@ -108,10 +109,11 @@ public final class RankingProcess extends Thread {
         //this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
-        this.hostNavigator = new Navigator();
-        this.authorNavigator = new Navigator();
-        this.namespaceNavigator = new Navigator();
-        this.ref = new Navigator();
+        this.hostNavigator = new ScoreCluster<String>();
+        this.hostResolver = new ConcurrentHashMap<String, String>();
+        this.authorNavigator = new ScoreCluster<String>();
+        this.namespaceNavigator = new ScoreCluster<String>();
+        this.ref = new ScoreCluster<String>();
         this.feeders = 1;
         this.startTime = System.currentTimeMillis();
     }
@@ -220,7 +222,8 @@ public final class RankingProcess extends Thread {
 			    if (query.sitehash == null) {
 			        // no site constraint there; maybe collect host navigation information
 			        if (nav_hosts && query.urlMask_isCatchall) {
-	                    this.hostNavigator.inc(domhash, new String(iEntry.metadataHash()));
+	                    this.hostNavigator.inc(domhash);
+	                    this.hostResolver.put(domhash, new String(iEntry.metadataHash()));
 	                }
 			    } else {
 			        if (!domhash.equals(query.sitehash)) {
@@ -424,7 +427,8 @@ public final class RankingProcess extends Thread {
                 // in case that we do not have e catchall filter for urls
                 // we must also construct the domain navigator here
                 if (query.sitehash == null) {
-                    this.hostNavigator.inc(new String(urlhash, 6, 6), new String(urlhash));
+                    this.hostNavigator.inc(new String(urlhash, 6, 6));
+                    this.hostResolver.put(new String(urlhash, 6, 6), new String(urlhash));
                 }
             }
             
@@ -474,7 +478,7 @@ public final class RankingProcess extends Thread {
             	}
             	
             	// add author to the author navigator
-                this.authorNavigator.inc(authorhash, pageauthor);
+                this.authorNavigator.inc(pageauthor);
             } else if (this.query.authorhash != null) {
             	continue;
             }
@@ -486,7 +490,7 @@ public final class RankingProcess extends Thread {
                 p = pagepath.lastIndexOf('/');
                 if (p >= 0) {
                     pagepath = pagepath.substring(p + 1);
-                    this.namespaceNavigator.inc(pagepath, pagepath);
+                    this.namespaceNavigator.inc(pagepath);
                 }
             }
             
@@ -567,38 +571,25 @@ public final class RankingProcess extends Thread {
         return this.misses.iterator();
     }
     
-    public ArrayList<Navigator.Item> getNamespaceNavigator(int count) {
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ArrayList<Navigator.Item>(0);
-        
-        Navigator.Item[] hsa = this.namespaceNavigator.entries();
-        int rc = Math.min(count, hsa.length);
-        ArrayList<Navigator.Item> result = new ArrayList<Navigator.Item>();
-        for (int i = 0; i < rc; i++) result.add(hsa[i]);
-        if (result.size() < 2) result.clear(); // navigators with one entry are not useful
-        return result;
+    public StaticScore<String> getNamespaceNavigator() {
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ScoreCluster<String>();
+        if (this.namespaceNavigator.size() < 2) this.namespaceNavigator.clear(); // navigators with one entry are not useful
+        return this.namespaceNavigator;
     }
     
-    public List<Navigator.Item> getHostNavigator(int count) {
-        List<Navigator.Item> result = new ArrayList<Navigator.Item>();
+    public StaticScore<String> getHostNavigator() {
+        ScoreCluster<String> result = new ScoreCluster<String>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return result;
         
-        List<Navigator.Item> hsa = this.hostNavigator.entries(10);
-        URIMetadataRow mr;
-        DigestURI url;
-        String hostname;
-        Components metadata;
-        loop: for (Navigator.Item item: hsa) {
-            mr = this.query.getSegment().urlMetadata().load(item.name.getBytes(), null, 0);
-            if (mr == null) continue;
-            metadata = mr.metadata();
-            if (metadata == null) continue;
-            url = metadata.url();
-            if (url == null) continue;
-            hostname = url.getHost();
-            if (hostname == null) continue;
-            if (query.tenant != null && !hostname.contains(query.tenant) && !url.toNormalform(true, true).contains(query.tenant)) continue;
-            for (Navigator.Item entry: result) if (entry.name.equals(hostname)) continue loop; // check if one entry already exists
-            result.add(new Navigator.Item(hostname, item.count));
+        Iterator<String> domhashs = this.hostNavigator.keys(false);
+        URIMetadataRow row;
+        String domhash, urlhash, hostname;
+        while (domhashs.hasNext() && result.size() < 30) {
+            domhash = domhashs.next();
+            urlhash = this.hostResolver.get(domhash);
+            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(urlhash.getBytes(), null, 0);
+            hostname = row == null ? null : row.metadata().url().getHost();
+            if (hostname != null) result.set(hostname, this.hostNavigator.get(domhash));
         }
         if (result.size() < 2) result.clear(); // navigators with one entry are not useful
         return result;
@@ -611,18 +602,35 @@ public final class RankingProcess extends Thread {
             return 0;
         }
     };
-    
-    public Map<String, Navigator.Item> getTopics() {
-        return this.ref.map();
-    }
-    
-    public List<Navigator.Item> getTopicNavigator(final int count) {
+
+    public StaticScore<String> getTopicNavigator(int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return new ArrayList<Navigator.Item>(0);
-        List<Navigator.Item> result = this.ref.entries(count);
-        if (result.size() < 2) result.clear(); // navigators with one entry are not useful
-        return result;
+        ScoreCluster<String> result = new ScoreCluster<String>();
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return result;
+        if (this.ref.size() < 2) this.ref.clear(); // navigators with one entry are not useful
+        Map<String, Double> counts = new HashMap<String, Double>();
+        Iterator<String> i = this.ref.keys(false);
+        String word;
+        byte[] termHash;
+        int c;
+        double q, min = Double.MAX_VALUE, max = Double.MIN_NORMAL;
+        int ic = count;
+        while (ic-- > 0 && i.hasNext()) {
+            word = i.next();
+            termHash = Word.word2hash(word);
+            c = this.query.getSegment().termIndex().count(termHash);
+            if (c > 0) {
+                q = ((double) this.ref.get(word)) / ((double) c);
+                min = Math.min(min, q);
+                max = Math.max(max, q);
+                counts.put(word, q);
+            }
+        }
+        if (max > min) for (Map.Entry<String, Double> ce: counts.entrySet()) {
+            result.set(ce.getKey(), (int) (((double) count) * (ce.getValue() - min) / (max - min)));
+        }
+        return this.ref;
     }
     
     public void addTopic(final String[] words) {
@@ -630,12 +638,12 @@ public final class RankingProcess extends Thread {
         for (int i = 0; i < words.length; i++) {
             word = words[i].toLowerCase();
             if (word.length() > 2 &&
-                "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0 &&
+                "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off".indexOf(word) < 0 &&
                 !query.queryHashes.has(Word.word2hash(word)) &&
                 word.matches("[a-z]+") &&
                 !Switchboard.badwords.contains(word) &&
                 !Switchboard.stopwords.contains(word)) {
-                ref.inc(word, word);
+                ref.inc(word);
             }
         }
     }
@@ -651,13 +659,12 @@ public final class RankingProcess extends Thread {
         addTopic(descrcomps);
     }
     
-    public List<Navigator.Item> getAuthorNavigator(final int count) {
+    public StaticScore<String> getAuthorNavigator() {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ArrayList<Navigator.Item>(0);
-        List<Navigator.Item> result = this.authorNavigator.entries(count);
-        if (result.size() < 2) result.clear(); // navigators with one entry are not useful
-        return result;
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ScoreCluster<String>();
+        if (this.authorNavigator.size() < 2) this.authorNavigator.clear(); // navigators with one entry are not useful
+        return this.authorNavigator;
     }
     
     public static void loadYBR(final File rankingPath, final int count) {

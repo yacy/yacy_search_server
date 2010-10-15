@@ -78,7 +78,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         }
         // we fill the cache here
         long available = this.RAFile.length() - seek;
-        if (available < (long) len) throw new IOException("EOF, available = " + available + ", requested = " + len);
+        if (available < (long) len) throw new IOException("EOF, available = " + available + ", requested = " + len + ", this.RAFile.length() = " + this.RAFile.length() + ", seek = " + seek);
         if (cachestart + cachelen == seek && cache.length - cachelen >= len) {
             RAFile.readFully(cache, cachelen, len);
             //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": append fill " + len + " bytes");

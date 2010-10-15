@@ -24,15 +24,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.StaticScore;
 import net.yacy.kelondro.util.EventTracker;
 
 import de.anomic.data.LibraryProvider;
-import de.anomic.search.Navigator;
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
@@ -43,7 +41,7 @@ import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class yacysearchtrailer {
 
-    private static final int MAX_TOPWORDS = 10;
+    private static final int MAX_TOPWORDS = 16;
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
@@ -62,100 +60,108 @@ public class yacysearchtrailer {
         // compose search navigation
 
         // namespace navigators
-        List<Navigator.Item> namespaceNavigator = theSearch.getNamespaceNavigator(10);
+        StaticScore<String> namespaceNavigator = theSearch.getNamespaceNavigator();
+        String name;
+        int count;
+        Iterator<String> navigatorIterator;
         if (namespaceNavigator == null || namespaceNavigator.isEmpty()) {
             prop.put("nav-namespace", 0);
         } else {
             prop.put("nav-namespace", 1);
-            Navigator.Item entry;
-            int i;
-            for (i = 0; i < Math.min(10, namespaceNavigator.size()); i++) {
-                entry = namespaceNavigator.get(i);
-                prop.put("nav-namespace_element_" + i + "_name", entry.name);
-                prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + entry.name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-                prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + entry.name, theQuery.urlMask.toString(), theQuery.navigators));
-                prop.put("nav-namespace_element_" + i + "_count", entry.count);
-                prop.put("nav-namespace_element_" + i + "_modifier", "inurl:" + entry.name);
+            navigatorIterator = namespaceNavigator.keys(false);
+            int i = 0;
+            while (i < 10 && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next();
+                count = namespaceNavigator.get(name);
+                prop.put("nav-namespace_element_" + i + "_name", name);
+                prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
+                prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators));
+                prop.put("nav-namespace_element_" + i + "_count", count);
+                prop.put("nav-namespace_element_" + i + "_modifier", "inurl:" + name);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
+                i++;
             }
             i--;
             prop.put("nav-namespace_element_" + i + "_nl", 0);
-            prop.put("nav-namespace_element", namespaceNavigator.size());
+            prop.put("nav-namespace_element", i);
         }
         
         // host navigators
-        List<Navigator.Item> hostNavigator = theSearch.getHostNavigator(10);
+        StaticScore<String> hostNavigator = theSearch.getHostNavigator();
         if (hostNavigator == null || hostNavigator.isEmpty()) {
             prop.put("nav-domains", 0);
         } else {
             prop.put("nav-domains", 1);
-            Navigator.Item entry;
-            int i;
-            for (i = 0; i < Math.min(10, hostNavigator.size()); i++) {
-                entry = hostNavigator.get(i);
-                prop.put("nav-domains_element_" + i + "_name", entry.name);
-                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + entry.name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-                prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + entry.name, theQuery.urlMask.toString(), theQuery.navigators));
-                prop.put("nav-domains_element_" + i + "_count", entry.count);
-                prop.put("nav-domains_element_" + i + "_modifier", "site:" + entry.name);
+            navigatorIterator = hostNavigator.keys(false);
+            int i = 0;
+            while (i < 20 && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next();
+                count = hostNavigator.get(name);
+                prop.put("nav-domains_element_" + i + "_name", name);
+                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
+                prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + name, theQuery.urlMask.toString(), theQuery.navigators));
+                prop.put("nav-domains_element_" + i + "_count", count);
+                prop.put("nav-domains_element_" + i + "_modifier", "site:" + name);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
+                i++;
             }
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
-            prop.put("nav-domains_element", hostNavigator.size());
+            prop.put("nav-domains_element", i);
         }
         
         // author navigators
-        List<Navigator.Item> authorNavigator = theSearch.getAuthorNavigator(10);
+        StaticScore<String> authorNavigator = theSearch.getAuthorNavigator();
         if (authorNavigator == null || authorNavigator.isEmpty()) {
             prop.put("nav-authors", 0);
         } else {
             prop.put("nav-authors", 1);
-            Navigator.Item entry;
-            int i;
+            navigatorIterator = authorNavigator.keys(false);
+            int i = 0;
             String anav;
-            for (i = 0; i < Math.min(10, authorNavigator.size()); i++) {
-                entry = authorNavigator.get(i);
-                anav = (entry.name.indexOf(' ') < 0) ? "author:" + entry.name : "author:'" + entry.name.replace(" ", "+") + "'";
-                prop.put("nav-authors_element_" + i + "_name", entry.name);
-                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+            while (i < 20 && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next();
+                count = authorNavigator.get(name);
+                anav = (name.indexOf(' ') < 0) ? "author:" + name : "author:'" + name.replace(" ", "+") + "'";
+                prop.put("nav-authors_element_" + i + "_name", name);
+                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-authors_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators));
-                prop.put("nav-authors_element_" + i + "_count", entry.count);
-                prop.put("nav-authors_element_" + i + "_modifier", "author:'" + entry.name + "'");
+                prop.put("nav-authors_element_" + i + "_count", count);
+                prop.put("nav-authors_element_" + i + "_modifier", "author:'" + name + "'");
                 prop.put("nav-authors_element_" + i + "_nl", 1);
+                i++;
             }
             i--;
             prop.put("nav-authors_element_" + i + "_nl", 0);
-            prop.put("nav-authors_element", authorNavigator.size());
+            prop.put("nav-authors_element", i);
         }
 
         // topics navigator
-        List<Navigator.Item> topicNavigator = theSearch.getTopicNavigator(30);
+        StaticScore<String> topicNavigator = theSearch.getTopicNavigator(MAX_TOPWORDS);
         if (topicNavigator == null || topicNavigator.isEmpty()) {
-            topicNavigator = new ArrayList<Navigator.Item>(); 
             prop.put("nav-topics", "0");
         } else {
             prop.put("nav-topics", "1");
+            navigatorIterator = topicNavigator.keys(false);
             int i = 0;
-            Navigator.Item e;
-            Iterator<Navigator.Item> iter = topicNavigator.iterator();
-            while (iter.hasNext()) {
-                e = iter.next();
+            while (i < MAX_TOPWORDS && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next();
+                count = topicNavigator.get(name);
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
-                if (e != null && e.name != null) {
-                    prop.putHTML("nav-topics_element_" + i + "_name", e.name);
+                if (name != null) {
+                    prop.putHTML("nav-topics_element_" + i + "_name", name);
                     prop.put("nav-topics_element_" + i + "_url",
-                            "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + e.name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + e.name + "</a>");
-                            //+"<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+-" + e.name, theQuery.urlMask.toString(), theQuery.navigators) + "\">-</a>")*/;
-                    prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + e.name, theQuery.urlMask.toString(), theQuery.navigators));
-                    prop.put("nav-topics_element_" + i + "_count", e.count);
-                    prop.put("nav-topics_element_" + i + "_modifier", e.name);
-                    prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);
-                }
-                if (i++ > MAX_TOPWORDS) {
-                    break;
+                            "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + "</a>");
+                            //+"<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+-" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">-</a>")*/;
+                    prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators));
+                    prop.put("nav-topics_element_" + i + "_count", count);
+                    prop.put("nav-topics_element_" + i + "_modifier", name);
+                    prop.put("nav-topics_element_" + i + "_nl", 1);
+                    i++;
                 }
             }
+            i--;
+            prop.put("nav-topics_element_" + i + "_nl", 0);
             prop.put("nav-topics_element", i);
         }
         

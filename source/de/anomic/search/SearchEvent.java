@@ -27,15 +27,14 @@
 package de.anomic.search;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.storage.StaticScore;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.HandleSet;
@@ -330,22 +329,22 @@ public final class SearchEvent {
         return this.rankingProcess;
     }
 
-    public ArrayList<Navigator.Item> getNamespaceNavigator(int maxentries) {
-        return this.rankingProcess.getNamespaceNavigator(maxentries);
+    public StaticScore<String> getNamespaceNavigator() {
+        return this.rankingProcess.getNamespaceNavigator();
     }
     
-    public List<Navigator.Item> getHostNavigator(int maxentries) {
-        return this.rankingProcess.getHostNavigator(maxentries);
+    public StaticScore<String> getHostNavigator() {
+        return this.rankingProcess.getHostNavigator();
     }
     
-    public List<Navigator.Item> getTopicNavigator(final int maxentries) {
+    public StaticScore<String> getTopicNavigator(int count) {
         // returns a set of words that are computed as toplist
-        return this.rankingProcess.getTopicNavigator(maxentries);
+        return this.rankingProcess.getTopicNavigator(count);
     }
     
-    public List<Navigator.Item> getAuthorNavigator(final int maxentries) {
+    public StaticScore<String> getAuthorNavigator() {
         // returns a list of authors so far seen on result set
-        return this.rankingProcess.getAuthorNavigator(maxentries);
+        return this.rankingProcess.getAuthorNavigator();
     }
     
     public void addHeuristic(byte[] urlhash, String heuristicName, boolean redundant) {

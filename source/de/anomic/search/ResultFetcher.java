@@ -28,9 +28,9 @@ package de.anomic.search;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.storage.StaticScore;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
@@ -197,7 +197,7 @@ public class ResultFetcher {
                     // place the result to the result vector
                     // apply post-ranking
                     long ranking = Long.valueOf(rankingProcess.getOrder().cardinal(resultEntry.word()));
-                    ranking += postRanking(resultEntry, rankingProcess.getTopics());
+                    ranking += postRanking(resultEntry, rankingProcess.getTopicNavigator(10));
                     result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
                     if (nav_topics) rankingProcess.addTopics(resultEntry);
                 }
@@ -393,7 +393,7 @@ public class ResultFetcher {
 
     public long postRanking(
             final ResultEntry rentry,
-            final Map<String, Navigator.Item> topwords) {
+            final StaticScore<String> topwords) {
 
         long r = 0;
         
@@ -411,14 +411,14 @@ public class ResultFetcher {
         final String urlstring = rentry.url().toNormalform(true, true);
         final String[] urlcomps = MultiProtocolURI.urlComps(urlstring);
         final String[] descrcomps = MultiProtocolURI.splitpattern.split(rentry.title().toLowerCase());
-        Navigator.Item tc;
+        int tc;
         for (int j = 0; j < urlcomps.length; j++) {
             tc = topwords.get(urlcomps[j]);
-            if (tc != null) r += Math.max(1, tc.count) << query.ranking.coeff_urlcompintoplist;
+            if (tc > 0) r += Math.max(1, tc) << query.ranking.coeff_urlcompintoplist;
         }
         for (int j = 0; j < descrcomps.length; j++) {
             tc = topwords.get(descrcomps[j]);
-            if (tc != null) r += Math.max(1, tc.count) << query.ranking.coeff_descrcompintoplist;
+            if (tc > 0) r += Math.max(1, tc) << query.ranking.coeff_descrcompintoplist;
         }
         
         // apply query-in-result matching

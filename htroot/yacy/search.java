@@ -30,7 +30,6 @@
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -39,6 +38,7 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.StaticScore;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
@@ -51,7 +51,6 @@ import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.ContentDomain;
-import de.anomic.search.Navigator;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
@@ -338,13 +337,18 @@ public final class search {
             
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final List<Navigator.Item> ws = theSearch.getTopicNavigator(10);
+            StaticScore<String> topicNavigator = theSearch.getTopicNavigator(5);
             final StringBuilder refstr = new StringBuilder(6000);
-            for (Navigator.Item e: ws) {
-                refstr.append(",").append(e.name);
+            Iterator<String> navigatorIterator = topicNavigator.keys(false);
+            int i = 0;
+            String name;
+            while (i < 5 && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next();
+                refstr.append(",").append(name);
+                i++;
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.REFERENCECOLLECTION, "", ws.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.REFERENCECOLLECTION, "", i, System.currentTimeMillis() - timer), false);
         }
         prop.put("indexabstract", indexabstract.toString());
         
