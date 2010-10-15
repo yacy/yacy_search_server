@@ -5,7 +5,6 @@ import java.util.Date;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Data;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
@@ -28,15 +27,10 @@ public class add_ymark {
         
         if(isAdmin || isAuthUser) {
         	final String table = (isAuthUser ? user.getUserName() : "admin")+"_"+YMarkStatics.TABLE_BOOKMARKS_BASENAME;
-        	
-        	String url = post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL,"");
-        	if (!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
-                url="http://"+url;
-            }
-            // generate the url hash
+
             byte[] pk = null;
     		try {
-    			pk = (new DigestURI(url, null)).hash();
+    			pk = YMarkStatics.getBookmarkID(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL,""));
     		} catch (MalformedURLException e) {
     			Log.logException(e);
     		}
@@ -57,11 +51,11 @@ public class add_ymark {
                 if (row == null) {
                     // create and insert new entry
                     Data data = new Data();
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_URL, url.getBytes());
+                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_URL, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL,"").getBytes());
                     data.put(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE,"").getBytes());
                     data.put(YMarkStatics.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_DESC,"").getBytes());
                     data.put(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC,"false").getBytes());
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,"").getBytes());
+                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS, YMarkStatics.cleanTagsString(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,"")).getBytes());
                                     
                     byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
                     data.put(YMarkStatics.TABLE_BOOKMARKS_COL_DATE_ADDED, date);
@@ -74,7 +68,7 @@ public class add_ymark {
                     row.put(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE,row.get(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE,"")).getBytes());
                     row.put(YMarkStatics.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_DESC,row.get(YMarkStatics.TABLE_BOOKMARKS_COL_DESC,"")).getBytes());
                     row.put(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC,row.get(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC,"false")).getBytes());
-                    row.put(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,row.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,"")).getBytes());
+                    row.put(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS, YMarkStatics.cleanTagsString(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,row.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,""))).getBytes());
                 	            	
                     // modify date attribute
                     row.put(YMarkStatics.TABLE_BOOKMARKS_COL_DATE_MODIFIED, DateFormatter.formatShortMilliSecond(new Date()).getBytes());                
@@ -85,7 +79,7 @@ public class add_ymark {
             } catch (IOException e) {
                 Log.logException(e);
             }
-            Log.logInfo(YMarkStatics.TABLE_BOOKMARKS_LOG, "insertBookmark: "+url);
+            Log.logInfo(YMarkStatics.TABLE_BOOKMARKS_LOG, "insertBookmark: "+post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL,""));
             prop.put("result", "1");
         } else {
         	prop.put("AUTHENTICATE","Authentication required!");
