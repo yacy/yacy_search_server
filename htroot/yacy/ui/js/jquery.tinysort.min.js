@@ -1,0 +1,8 @@
+/*
+* jQuery TinySort 1.0.1
+* Copyright (c) 2008 Ron Valstar
+* Dual licensed under the MIT and GPL licenses:
+*   http://www.opensource.org/licenses/mit-license.php
+*   http://www.gnu.org/licenses/gpl.html
+*/
+(function(C){C.tinysort={id:"TinySort",version:"1.0.1",defaults:{order:"asc",attr:"",place:"start",returns:false}};C.fn.extend({tinysort:function(I,J){if(I&&typeof (I)!="string"){J=I;I=null}var F=C.extend({},C.tinysort.defaults,J);var P={};this.each(function(T){var V=(!I||I=="")?C(this):C(this).find(I);var U=F.order=="rand"?""+Math.random():(F.attr==""?V.text():V.attr(F.attr));var S=C(this).parent();if(!P[S]){P[S]={s:[],n:[]}}if(V.length>0){P[S].s.push({s:U,e:C(this),n:T})}else{P[S].n.push({e:C(this),n:T})}});for(var H in P){var E=P[H];E.s.sort(function K(U,T){var S=U.s.toLowerCase?U.s.toLowerCase():U.s;var V=T.s.toLowerCase?T.s.toLowerCase():T.s;if(D(U.s)&&D(T.s)){S=parseFloat(U.s);V=parseFloat(T.s)}return(F.order=="asc"?1:-1)*(S<V?-1:(S>V?1:0))})}var M=[];for(var H in P){var E=P[H];var N=[];var G=C(this).length;switch(F.place){case"first":C.each(E.s,function(S,T){G=Math.min(G,T.n)});break;case"org":C.each(E.s,function(S,T){N.push(T.n)});break;case"end":G=E.n.length;break;default:G=0}var Q=[0,0];for(var L=0;L<C(this).length;L++){var O=L>=G&&L<G+E.s.length;if(A(N,L)){O=true}var R=(O?E.s:E.n)[Q[O?0:1]].e;R.parent().append(R);if(O||!F.returns){M.push(R.get(0))}Q[O?0:1]++}}return this.setArray(M)}});function D(E){return(parseFloat(E)+"")==E}function A(F,G){var E=false;C.each(F,function(I,H){if(!E){E=H==G}});return E}function B(E){if(window.console&&window.console.log){if(typeof (E)=="string"){window.console.log(E)}else{for(var F in E){window.console.log(F+": "+E[F])}}}}C.fn.TinySort=C.fn.Tinysort=C.fn.tsort=C.fn.tinysort})(jQuery);

@@ -121,7 +121,7 @@ public class Surftips {
             //accumulateSurftips(surftips, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
         
             // read out surftipp array and create property entries
-            final Iterator<String> k = ranking.scores(false);
+            final Iterator<String> k = ranking.keys(false);
             int i = 0;
             Row.Entry row;
             String url, urlhash, refid, title, description;
@@ -159,7 +159,7 @@ public class Surftips {
                 prop.putXML("surftips_results_" + i + "_url", url);
                 prop.putXML("surftips_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
                 prop.putXML("surftips_results_" + i + "_urlhash", urlhash);
-                prop.putXML("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
+                prop.putXML("surftips_results_" + i + "_title", (showScore) ? ("(" + ranking.get(urlhash) + ") " + title) : title);
                 prop.putHTML("surftips_results_" + i + "_description", description);
                 i++;
                 
@@ -327,9 +327,9 @@ public class Surftips {
                 }
                 // consider double-entries
                 if (surftips.containsKey(urlhash)) {
-                    ranking.addScore(urlhash, score);
+                    ranking.inc(urlhash, score);
                 } else {
-                    ranking.setScore(urlhash, score);
+                    ranking.set(urlhash, score);
                     surftips.put(urlhash, entry);
                 }
             }

@@ -85,7 +85,7 @@ public final class ResultURLs {
         try {
             final DynamicScore<String> domains = getDomains(stackType);
             if (domains != null) {
-                domains.incScore(e.metadata().url().getHost());
+                domains.inc(e.metadata().url().getHost());
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/3: " + ex.toString());
@@ -117,7 +117,7 @@ public final class ResultURLs {
      */
     public Iterator<String> domains(final EventOrigin stack) {
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
-        return getDomains(stack).scores(false);
+        return getDomains(stack).keys(false);
     }
     
     public int deleteDomain(final EventOrigin stack, String host, String hosthash) {
@@ -132,7 +132,7 @@ public final class ResultURLs {
             if (urlhash == null || urlhash.substring(6).equals(hosthash)) i.remove();
         }
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
-        return getDomains(stack).deleteScore(host);
+        return getDomains(stack).delete(host);
     }
     
     /**
@@ -144,7 +144,7 @@ public final class ResultURLs {
     public int domainCount(final EventOrigin stack, String domain) {
         assert domain != null : "domain = null";
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
-        return getDomains(stack).getScore(domain);
+        return getDomains(stack).get(domain);
     }
     
     /**

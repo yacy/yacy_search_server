@@ -611,18 +611,18 @@ public final class yacy {
         while (ef.hasMoreElements()) {
             f = ef.nextElement();
             h = f.getName().substring(0, Word.commonHashLength).getBytes();
-            hs.addScore(h, (int) f.length());
+            hs.inc(h, (int) f.length());
         }
 
         // list the hashes in reverse order
         Log.logInfo("GEN-WORDSTAT", "listing words in reverse size order...");
         String w;
-        final Iterator<byte[]> i = hs.scores(false);
+        final Iterator<byte[]> i = hs.keys(false);
         while (i.hasNext()) {
             h = i.next();
             w = words.get(h);
             if (w == null) System.out.print("# " + h); else System.out.print(w);
-            System.out.println(" - " + hs.getScore(h));
+            System.out.println(" - " + hs.get(h));
         }
 
         // finished

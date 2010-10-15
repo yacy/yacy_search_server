@@ -186,15 +186,15 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         return map.isEmpty();
     }
     
-    public synchronized void incScore(final E obj) {
-        addScore(obj, 1);
+    public synchronized void inc(final E obj) {
+        inc(obj, 1);
     }
     
-    public synchronized void decScore(final E obj) {
-        addScore(obj, -1);
+    public synchronized void dec(final E obj) {
+        inc(obj, -1);
     }
     
-    public void setScore(final E obj, final int newScore) {
+    public void set(final E obj, final int newScore) {
         if (obj == null) return;
         synchronized (this) {
             Long usk = map.remove(obj); // get unique score key, old entry is not needed any more
@@ -228,7 +228,7 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         gcount += newScore;
     }
     
-    public void addScore(final E obj, final int incrementScore) {
+    public void inc(final E obj, final int incrementScore) {
         if (obj == null) return;
         synchronized (this) {
             Long usk = map.remove(obj); // get unique score key, old entry is not needed any more
@@ -262,8 +262,12 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         // increase overall counter
         gcount += incrementScore;
     }
+
+    public void dec(final E obj, final int incrementScore) {
+        inc(obj, -incrementScore);
+    }
     
-    public int deleteScore(final E obj) {
+    public int delete(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
         final Long usk;
@@ -284,11 +288,11 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         return oldScore;        
     }
 
-    public synchronized boolean existsScore(final E obj) {
+    public synchronized boolean containsKey(final E obj) {
         return map.containsKey(obj);
     }
     
-    public int getScore(final E obj) {
+    public int get(final E obj) {
         if (obj == null) return 0;
         final Long cs;
         synchronized (this) {
@@ -308,12 +312,12 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         return (int) ((pam.firstKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
-    public synchronized E getMaxObject() {
+    public synchronized E getMaxKey() {
         if (map.isEmpty()) return null;
         return pam.get(pam.lastKey());
     }
     
-    public synchronized E getMinObject() {
+    public synchronized E getMinKey() {
         if (map.isEmpty()) return null;
         return pam.get(pam.firstKey());
     }
@@ -322,7 +326,7 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         return map + " / " + pam;
     }
     
-    public synchronized Iterator<E> scores(final boolean up) {
+    public synchronized Iterator<E> keys(final boolean up) {
         if (up) return new simpleScoreIterator<E>();
         return new reverseScoreIterator<E>();
     }
@@ -405,7 +409,7 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
             for (int i = 0; i < count; i++) {
                 r = random.nextInt();
                 mem[i] = r;
-                s.addScore("score#" + r, r);
+                s.inc("score#" + r, r);
                 c += r;
             }
             
@@ -413,18 +417,18 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
             int p;
             for (int i = 0; i < (count / 2); i++) {
                 p = (int) (random.nextFloat() * count);
-                if (s.existsScore("score#" + mem[p])) {
+                if (s.containsKey("score#" + mem[p])) {
                     System.out.println("delete score#" + mem[p]);
-                    s.deleteScore("score#" + mem[p]);
+                    s.delete("score#" + mem[p]);
                     c -= mem[p];
                 }
             }
         }
         
         System.out.println("result:");
-        Iterator<String> i = s.scores(true);
+        Iterator<String> i = s.keys(true);
         while (i.hasNext()) System.out.println("up: " + i.next());
-        i = s.scores(false);
+        i = s.keys(false);
         while (i.hasNext()) System.out.println("down: " + i.next());
 	
         System.out.println("finished create. time = " + (System.currentTimeMillis() - time));

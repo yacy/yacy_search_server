@@ -78,7 +78,7 @@ public class DidYouMeanLibrary {
         if (word == null) return;
         word = word.trim().toLowerCase();
         if (word.length() < commonWordsMinLength) return;
-        commonWords.incScore(word);
+        commonWords.inc(word);
         if (commonWords.size() >= commonWordsMaxSize) {
             commonWords.shrinkToMaxSize(commonWordsMaxSize / 2);
         }

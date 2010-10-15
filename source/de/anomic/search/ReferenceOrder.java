@@ -166,7 +166,7 @@ public class ReferenceOrder {
                 final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
                 while (di.hasNext()) {
                     entry = di.next();
-                    doms.addScore(entry.getKey(), (entry.getValue()).intValue());
+                    doms.inc(entry.getKey(), (entry.getValue()).intValue());
                 }
                 if (!doms.isEmpty()) maxdomcount = doms.getMaxScore();
             } catch (InterruptedException e) {
@@ -184,7 +184,7 @@ public class ReferenceOrder {
     }
     
     public int authority(final byte[] urlHash) {
-        return (doms.getScore(new String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
+        return (doms.get(new String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
     }
 
     /**

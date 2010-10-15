@@ -620,7 +620,7 @@ public final class RankingProcess extends Thread {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return new ArrayList<Navigator.Item>(0);
-        List<Navigator.Item> result = this.ref.entries(10);
+        List<Navigator.Item> result = this.ref.entries(count);
         if (result.size() < 2) result.clear(); // navigators with one entry are not useful
         return result;
     }

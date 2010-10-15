@@ -113,7 +113,7 @@ public class Supporter {
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
         
             // read out surftipp array and create property entries
-            final Iterator<String> k = ranking.scores(false);
+            final Iterator<String> k = ranking.keys(false);
             int i = 0;
             Row.Entry row;
             String url, urlhash, refid, title, description;
@@ -150,7 +150,7 @@ public class Supporter {
                 prop.put("supporter_results_" + i + "_url", url);
                 prop.put("supporter_results_" + i + "_urlname", nxTools.shortenURLString(url, 60));
                 prop.put("supporter_results_" + i + "_urlhash", urlhash);
-                prop.putHTML("supporter_results_" + i + "_title", (showScore) ? ("(" + ranking.getScore(urlhash) + ") " + title) : title);
+                prop.putHTML("supporter_results_" + i + "_title", (showScore) ? ("(" + ranking.get(urlhash) + ") " + title) : title);
                 prop.putHTML("supporter_results_" + i + "_description", description);
                 i++;
                 
@@ -265,9 +265,9 @@ public class Supporter {
                 }
                 // consider double-entries
                 if (Supporter.containsKey(urlhash)) {
-                    ranking.addScore(urlhash, score);
+                    ranking.inc(urlhash, score);
                 } else {
-                    ranking.setScore(urlhash, score);
+                    ranking.set(urlhash, score);
                     Supporter.put(urlhash, entry);
                 }
             }

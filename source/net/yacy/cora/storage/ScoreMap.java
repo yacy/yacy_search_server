@@ -95,7 +95,7 @@ public class ScoreMap<E> implements DynamicScore<E> {
         return map.isEmpty();
     }
     
-    public void incScore(final E obj) {
+    public void inc(final E obj) {
         if (obj == null) return;
         synchronized (this) {
             IntScore score = this.map.get(obj);
@@ -109,7 +109,7 @@ public class ScoreMap<E> implements DynamicScore<E> {
         gcount++;
     }
     
-    public void decScore(final E obj) {
+    public void dec(final E obj) {
         if (obj == null) return;
         synchronized (this) {
             IntScore score = this.map.get(obj);
@@ -123,7 +123,7 @@ public class ScoreMap<E> implements DynamicScore<E> {
         gcount--;
     }
     
-    public void setScore(final E obj, final int newScore) {
+    public void set(final E obj, final int newScore) {
         if (obj == null) return;
         synchronized (this) {
             IntScore score = this.map.get(obj);
@@ -138,7 +138,7 @@ public class ScoreMap<E> implements DynamicScore<E> {
         gcount += newScore;
     }
     
-    public void addScore(final E obj, final int incrementScore) {
+    public void inc(final E obj, final int incrementScore) {
         if (obj == null) return;
         synchronized (this) {
             IntScore score = this.map.get(obj);
@@ -152,7 +152,11 @@ public class ScoreMap<E> implements DynamicScore<E> {
         gcount += incrementScore;
     }
     
-    public int deleteScore(final E obj) {
+    public void dec(final E obj, final int incrementScore) {
+        inc(obj, -incrementScore);
+    }
+    
+    public int delete(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
         final IntScore score;
@@ -166,11 +170,11 @@ public class ScoreMap<E> implements DynamicScore<E> {
         return score.intValue();
     }
 
-    public synchronized boolean existsScore(final E obj) {
+    public synchronized boolean containsKey(final E obj) {
         return map.containsKey(obj);
     }
     
-    public int getScore(final E obj) {
+    public int get(final E obj) {
         if (obj == null) return 0;
         final IntScore score;
         synchronized (this) {
@@ -202,7 +206,7 @@ public class ScoreMap<E> implements DynamicScore<E> {
         return minScore;
     }
 
-    public E getMaxObject() {
+    public E getMaxKey() {
         if (map.isEmpty()) return null;
         E maxObject = null;
         int maxScore = Integer.MIN_VALUE;
@@ -215,7 +219,7 @@ public class ScoreMap<E> implements DynamicScore<E> {
         return maxObject;
     }
     
-    public E getMinObject() {
+    public E getMinKey() {
         if (map.isEmpty()) return null;
         E minObject = null;
         int minScore = Integer.MAX_VALUE;
@@ -232,7 +236,7 @@ public class ScoreMap<E> implements DynamicScore<E> {
         return map.toString();
     }
 
-    public Iterator<E> scores(boolean up) {
+    public Iterator<E> keys(boolean up) {
         synchronized (this) {
             // re-organize entries
             TreeMap<IntScore, Set<E>> m = new TreeMap<IntScore, Set<E>>();

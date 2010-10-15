@@ -206,7 +206,7 @@ public class yacySearch extends Thread {
             if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
             score = (int) Math.round(Math.random() * ((c / 3) + 3));
             if (Log.isFine("PLASMA")) Log.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getWordCount() + ", score " + score);
-            ranking.addScore(seed.hash, score);
+            ranking.inc(seed.hash, score);
             regularSeeds.put(seed.hash, seed);
             c--;
         }
@@ -221,12 +221,12 @@ public class yacySearch extends Thread {
                 String specialized = seed.getPeerTags().toString();
                 if (!specialized.equals("[*]")) Log.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + specialized);
                 regularSeeds.remove(seed.hash);
-                ranking.deleteScore(seed.hash);
+                ranking.delete(seed.hash);
                 matchingSeeds.put(seed.hash, seed);
             } else if (seed.getFlagAcceptRemoteIndex() && seed.getAge() < 1) { // the 'workshop feature'
                 Log.logInfo("PLASMA", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
                 regularSeeds.remove(seed.hash);
-                ranking.deleteScore(seed.hash);
+                ranking.delete(seed.hash);
                 matchingSeeds.put(seed.hash, seed);
             }
         }
@@ -235,7 +235,7 @@ public class yacySearch extends Thread {
         seedcount = Math.min(ranking.size(), seedcount);
         final yacySeed[] result = new yacySeed[seedcount + matchingSeeds.size()];
         c = 0;
-        Iterator<String> iters = ranking.scores(false); // higher are better
+        Iterator<String> iters = ranking.keys(false); // higher are better
         while (iters.hasNext() && c < seedcount) {
             seed = regularSeeds.get(iters.next());
             seed.selectscore = c;

@@ -8,6 +8,14 @@
 </div>
 #(/cat-location)#
 
+#(nav-topics)#::
+<div style="float: right; margin-top:5px; width: 220px; height: 60px">
+<div><ul id="sidebar4" style="padding-left: 0px;">#{element}#
+<li value="#[count]#">#[url]#</li>
+#{/element}#</ul></div>
+</div>
+#(/nav-topics)#
+
 #(nav-domains)#::
 <div id="sidebar1" style="float: right; margin-top:5px; width: 220px;">
 <h3 style="padding-left:25px;">Domain Navigator</h3>
@@ -34,15 +42,6 @@
 #{/element}#</ul></div>
 </div>
 #(/nav-authors)#
-
-#(nav-topics)#::
-<div id="sidebar4" style="float: right; margin-top:5px; width: 220px;">
-<h3 style="padding-left:25px;">Topic Navigator</h3>
-<div><ul style="padding-left: 0px;">#{element}#
-<li>#[url]#</li>
-#{/element}#</ul></div>
-</div>
-#(/nav-topics)#
 
 #(nav-about)#::
 <div id="sidebarAbout" style="float: right; margin-top:5px; width: 220px;">

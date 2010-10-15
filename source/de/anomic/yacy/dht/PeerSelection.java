@@ -72,7 +72,7 @@ public class PeerSelection {
                 if (seed == null || seed.hash == null) continue;
                 if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
                 if (Log.isFine("PLASMA")) Log.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
-                ranking.addScore(seed.hash, 2 * c);
+                ranking.inc(seed.hash, 2 * c);
                 regularSeeds.put(seed.hash, seed);
                 c--;
             }
@@ -351,13 +351,13 @@ public class PeerSelection {
                 ys = s.next();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
                     absage = Math.abs(System.currentTimeMillis() + DateFormatter.dayMillis - ys.getLastSeenUTC());
-                    seedScore.addScore(ys.hash, (int) absage); // the higher absage, the older is the peer
+                    seedScore.inc(ys.hash, (int) absage); // the higher absage, the older is the peer
                 } catch (final Exception e) {}
             }
             
             // result is now in the score object; create a result vector
             final Map<String, yacySeed> result = new HashMap<String, yacySeed>();
-            final Iterator<String> it = seedScore.scores(up);
+            final Iterator<String> it = seedScore.keys(up);
             int c = 0;
             while ((c < count) && (it.hasNext())) {
                 c++;

@@ -610,11 +610,11 @@ public final class MetadataRepository implements Iterable<byte[]> {
         // order elements by size
         DynamicScore<String> s = new ScoreCluster<String>();
         for (Map.Entry<String, hashStat> e: map.entrySet()) {
-            s.addScore(e.getValue().urlhash, e.getValue().count);
+            s.inc(e.getValue().urlhash, e.getValue().count);
         }
     
         // fetch urls from the database to determine the host in clear text
-        Iterator<String> j = s.scores(false); // iterate urlhash-examples in reverse order (biggest first)
+        Iterator<String> j = s.keys(false); // iterate urlhash-examples in reverse order (biggest first)
         URIMetadataRow urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
@@ -630,7 +630,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
             comps = urlref.metadata();
             url = comps.url();
-            statsDump.add(new hostStat(url.getHost(), url.getPort(), urlhash.substring(6), s.getScore(urlhash)));
+            statsDump.add(new hostStat(url.getHost(), url.getPort(), urlhash.substring(6), s.get(urlhash)));
             count--;
             if (count == 0) break;
         }

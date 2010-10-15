@@ -132,13 +132,13 @@ public class DidYouMean {
         for (final String s: preSorted) {
             if (System.currentTimeMillis() > timelimit) break;
             if (scored.size() >= 2 * preSortSelection) break;
-            scored.addScore(s, index.count(Word.word2hash(s)));
+            scored.inc(s, index.count(Word.word2hash(s)));
         }
         SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
         int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
         while (scored.size() > 0 && countSorted.size() < preSortSelection) {
-            String s = scored.getMaxObject();
-            int score = scored.deleteScore(s);
+            String s = scored.getMaxKey();
+            int score = scored.delete(s);
             if (s.length() >= MinimumOutputWordLength && score > wc) countSorted.add(s);
             if (System.currentTimeMillis() > timelimit) break;
         }

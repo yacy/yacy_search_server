@@ -120,7 +120,7 @@ public class MapDataMining extends MapHeap {
                 
                 if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) {
                     cell = map.get(sortfields[i]);
-                    if (cell != null) cluster[i].setScore(new String(mapnameb), ScoreCluster.object2score(cell));
+                    if (cell != null) cluster[i].set(new String(mapnameb), ScoreCluster.object2score(cell));
                 }
 
                 if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) {
@@ -246,7 +246,7 @@ public class MapDataMining extends MapHeap {
             cell = map.get(sortfields[i]);
             if (cell != null) {
                 cluster = sortClusterMap.get(sortfields[i]);
-                cluster.setScore(key, ScoreCluster.object2score(cell));
+                cluster.set(key, ScoreCluster.object2score(cell));
                 sortClusterMap.put(sortfields[i], cluster);
             }
         }
@@ -282,7 +282,7 @@ public class MapDataMining extends MapHeap {
         StaticScore<String> cluster;
         for (int i = 0; i < sortfields.length; i++) {
             cluster = sortClusterMap.get(sortfields[i]);
-            cluster.deleteScore(key);
+            cluster.delete(key);
             sortClusterMap.put(sortfields[i], cluster);
         }
     }
@@ -293,7 +293,7 @@ public class MapDataMining extends MapHeap {
         final StaticScore<String> cluster = sortClusterMap.get(field);
         if (cluster == null) return null; // sort field does not exist
         //System.out.println("DEBUG: cluster for field " + field + ": " + cluster.toString());
-        return new string2bytearrayIterator(cluster.scores(up));
+        return new string2bytearrayIterator(cluster.keys(up));
     }
     
     public static class string2bytearrayIterator implements Iterator<byte[]> {

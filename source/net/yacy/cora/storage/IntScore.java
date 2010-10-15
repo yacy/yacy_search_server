@@ -81,7 +81,8 @@ public class IntScore implements Comparable<IntScore>, Comparator<IntScore> {
     }
     
     public int hashCode() {
-        return (int) (this.value ^ (this.value >>> 32));
+        return this.value;
+        // return (int) (this.value ^ (this.value >>> 32)); // hash code for long values
     }
 
     public int compareTo(IntScore o) {

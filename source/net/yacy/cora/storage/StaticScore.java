@@ -44,24 +44,24 @@ public interface StaticScore<E> {
     
     public boolean isEmpty();
     
-    public void setScore(final E obj, final int newScore);
+    public void set(final E obj, final int newScore);
     
-    public int deleteScore(final E obj);
+    public int delete(final E obj);
 
-    public boolean existsScore(final E obj);
+    public boolean containsKey(final E obj);
     
-    public int getScore(final E obj);
+    public int get(final E obj);
     
     public int getMaxScore();
 
     public int getMinScore();
 
-    public E getMaxObject();
+    public E getMaxKey();
     
-    public E getMinObject();
+    public E getMinKey();
     
     public String toString();
     
-    public Iterator<E> scores(final boolean up);
+    public Iterator<E> keys(final boolean up);
     
 }

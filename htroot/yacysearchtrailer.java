@@ -130,7 +130,7 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        List<Navigator.Item> topicNavigator = theSearch.getTopicNavigator(10);
+        List<Navigator.Item> topicNavigator = theSearch.getTopicNavigator(30);
         if (topicNavigator == null || topicNavigator.isEmpty()) {
             topicNavigator = new ArrayList<Navigator.Item>(); 
             prop.put("nav-topics", "0");
@@ -144,7 +144,9 @@ public class yacysearchtrailer {
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
                 if (e != null && e.name != null) {
                     prop.putHTML("nav-topics_element_" + i + "_name", e.name);
-                    prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + e.name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
+                    prop.put("nav-topics_element_" + i + "_url",
+                            "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + e.name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + e.name + "</a>");
+                            //+"<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+-" + e.name, theQuery.urlMask.toString(), theQuery.navigators) + "\">-</a>")*/;
                     prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + e.name, theQuery.urlMask.toString(), theQuery.navigators));
                     prop.put("nav-topics_element_" + i + "_count", e.count);
                     prop.put("nav-topics_element_" + i + "_modifier", e.name);

@@ -22,10 +22,10 @@ package net.yacy.cora.storage;
 
 public interface DynamicScore<E> extends StaticScore<E> {
     
-    public void incScore(final E obj);
+    public void inc(final E obj);
+    public void inc(final E obj, final int incrementScore);
     
-    public void decScore(final E obj);
-    
-    public void addScore(final E obj, final int incrementScore);
+    public void dec(final E obj);
+    public void dec(final E obj, final int incrementScore);
     
 }
