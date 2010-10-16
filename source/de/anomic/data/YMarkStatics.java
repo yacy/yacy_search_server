@@ -2,6 +2,7 @@ package de.anomic.data;
 
 import java.net.MalformedURLException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -10,22 +11,27 @@ import net.yacy.kelondro.data.word.Word;
 public class YMarkStatics {
 	
 	public final static String TABLE_BOOKMARKS_BASENAME = "bookmarks";
-
 	public final static String TABLE_BOOKMARKS_LOG = "BOOKMARKS";
 	
 	public final static String TABLE_BOOKMARKS_COL_ID = "id";
     public final static String TABLE_BOOKMARKS_COL_URL = "url";
     public final static String TABLE_BOOKMARKS_COL_TITLE = "title";
     public final static String TABLE_BOOKMARKS_COL_DESC = "desc";
-
     public final static String TABLE_BOOKMARKS_COL_DATE_ADDED = "added";
     public final static String TABLE_BOOKMARKS_COL_DATE_MODIFIED = "modified";
     public final static String TABLE_BOOKMARKS_COL_DATE_VISITED = "visited";
-
     public final static String TABLE_BOOKMARKS_COL_PUBLIC = "public";
     public final static String TABLE_BOOKMARKS_COL_TAGS = "tags";
     
-    public final static byte[] getBookmarkID(String url) throws MalformedURLException {
+	public final static String TABLE_TAGS_BASENAME = "tags";
+    public final static String TABLE_TAGS_COL_ID = "id";
+    public final static String TABLE_TAGS_COL_TAG = "tag";
+    public final static String TABLE_TAGS_COL_URLS = "urls";
+    
+    public final static int TABLE_TAGS_ACTION_ADD = 1;
+    public final static int TABLE_TAGS_ACTION_REMOVE = 2;
+    
+    public final static byte[] getBookmarkId(String url) throws MalformedURLException {
     	if (!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
             url="http://"+url;
         }
@@ -36,22 +42,48 @@ public class YMarkStatics {
         return Word.word2hash(tag.toLowerCase());
     }
     
-    public final static Set<String> getTagSet(final String tagsString) {
-        Set<String>tagSet = new HashSet<String>();
-        String[] tagArray = cleanTagsString(tagsString).split(",");
+    public final static HashSet<String> getTagSet(final String tagsString, boolean clean) {
+        HashSet<String>tagSet = new HashSet<String>();
+        final String[] tagArray = clean ? cleanTagsString(tagsString).split(",") : tagsString.split(",");
         for (final String tag : tagArray) {
         	tagSet.add(tag);
         } 
         return tagSet;
     }
     
-    public final static Set<byte[]> getTagHashSet(final String tagsString) {
-    	Set<byte[]>tagSet = new HashSet<byte[]>();
-        String[] tagArray = cleanTagsString(tagsString).split(",");
+    public final static HashSet<String> getTagSet(final String tagsString) {
+    	return getTagSet(tagsString, true);
+    }
+    
+    public final static HashSet<byte[]> getTagIdSet(final String tagsString, boolean clean) {
+    	HashSet<byte[]>tagSet = new HashSet<byte[]>();
+    	final String[] tagArray = clean ? cleanTagsString(tagsString).split(",") : tagsString.split(",");
         for (final String tag : tagArray) {
         	tagSet.add(getTagHash(tag));
         }        
     	return tagSet;
+    }
+    
+    public final static Set<byte[]> getTagIdSet(final String tagsString) {
+    	return getTagIdSet(tagsString, true);
+    }
+    
+    public final static byte[] keySetToBytes(final HashSet<String> urlSet) {
+    	final Iterator<String> urlIter = urlSet.iterator();
+    	String urls = "";
+    	while(urlIter.hasNext()) {
+    		urls = urls + "," + urlIter.next();
+    	}
+    	return cleanTagsString(urls).getBytes();
+    }
+    
+    public final static HashSet<String> keysStringToKeySet(final String keysString) {
+    	HashSet<String> keySet = new HashSet<String>();
+        final String[] keyArray = keysString.split(",");                    
+        for (final String key : keyArray) {
+        	keySet.add(key);
+        } 
+        return keySet;
     }
     
     public final static String cleanTagsString(String tagsString) {        

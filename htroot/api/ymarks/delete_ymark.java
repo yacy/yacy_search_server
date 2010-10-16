@@ -20,14 +20,16 @@ public class delete_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {
-        	final String table = (isAuthUser ? user.getUserName() : "admin")+"_"+YMarkStatics.TABLE_BOOKMARKS_BASENAME;
+        	final String bmk_table = (isAuthUser ? user.getUserName() : "admin")+"_"+YMarkStatics.TABLE_BOOKMARKS_BASENAME;
+        	final String tag_table = (isAuthUser ? user.getUserName() : "admin")+"_"+YMarkStatics.TABLE_TAGS_BASENAME;
+        	
             byte[] pk = null;
         	
         	if(post.containsKey(YMarkStatics.TABLE_BOOKMARKS_COL_ID)) {
         		pk = post.get(YMarkStatics.TABLE_BOOKMARKS_COL_ID).getBytes();
         	} else if(post.containsKey(YMarkStatics.TABLE_BOOKMARKS_COL_URL)) {
             	try {
-					pk = YMarkStatics.getBookmarkID(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL));
+					pk = YMarkStatics.getBookmarkId(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL));
 				} catch (MalformedURLException e) {
 					Log.logException(e);
 				}
@@ -37,7 +39,7 @@ public class delete_ymark {
         	}
             assert pk != null;
             try {
-				sb.tables.delete(table,pk);
+				sb.tables.delete(bmk_table,pk);
         		prop.put("result", "1");
 			} catch (IOException e) {
 				Log.logException(e);
