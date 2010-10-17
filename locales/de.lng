@@ -1314,7 +1314,7 @@ Statistics about the top-\#\[domains\]\# domains in the database:==Statistik üb
 "delete all"=="Alle Löschen"
 #Domain==Domain
 #URLs==URLs
-Sequential List of URL-Hashes==aufeinanderfolgende Liste der URL-Hashes
+Sequential List of URL-Hashes==Sequentielle Liste der URL-Hashes
 Loaded URL Export==Export geladener URLs
 Export File==Export-Datei
 #URL Filter==URL Filter
@@ -1343,6 +1343,7 @@ No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
 #Language</td>==Sprache</td>
 #Size</td>==Größe</td>
 #Words</td>==Wörter</td>
+"Show Content"=="Inhalt anzeigen"
 "Delete URL"=="URL löschen"
 this may produce unresolved references at other word indexes but they do not harm==dies mag ungelöste Referenzen an anderen Wort Indizes erzeugen, aber es richtet keinen Schaden an
 "Delete URL and remove all references from words"=="URL löschen und alle Referenzen zu Wörtern entfernen"

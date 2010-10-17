@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional and not Strict because iframes are in use -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>YaCy '#[clientname]#': View URL Content</title>
@@ -19,7 +20,7 @@
       <fieldset><legend>Get URL Viewer</legend>
         <dl>
           <dt>URL:</dt><dd><input type="text" size="60" name="url" value="#[url]#" />&nbsp;<input type="submit" name="show" value="Show" /></dd>
-          </dd>
+          <dd>&nbsp;</dd>
         </dl>
         <input type="hidden" name="display" value="#[display]#" />
       </fieldset>
@@ -71,7 +72,6 @@
 <span class="error">Unsupported protocol.</span>
 #(/error)#
 
-<p>
 #(viewMode)#
 :: <!-- 1 -->
 	<fieldset><legend>Original Content from Web</legend>
@@ -80,9 +80,9 @@
 	  </p>
 	</fieldset>
 :: <!-- 2 -->
-	<fieldset><legend>Parsed Content</legend>
-	  <form>
-	  <dl>
+<form action="">
+          <fieldset><legend>Parsed Content</legend>
+          <dl>
 	  <dt>dc:title</dt><dd>#[title]#</dd>
 	  <dt>dc:creator</dt><dd>#[creator]#</dd>
 	  <dt>dc:subject</dt><dd>#[subject]#</dd>
@@ -92,9 +92,9 @@
 	  <dt>dc:identifier</dt><dd>#[identifier]#</dd>
 	  <dt>dc:source</dt><dd>#[source]#</dd>
 	  </dl>
-	  </form>
 	  <p class="tt">#[parsedText]#</p>
-	</fieldset>
+          </fieldset>
+    </form>
 :: <!-- 3 -->
 	<fieldset><legend>Parsed Sentences</legend>
 	  <ol>#{sentences}#
@@ -110,25 +110,26 @@
 	  <iframe src="/CacheResource_p.html?url=#[url]#" width="800" height="400" />
 	</fieldset>
 :: <!-- 6 -->
-	<h3>Link List</h3><br>
+	<fieldset><legend>Link List</legend>
 	<table border="0" cellpadding="2" cellspacing="1">
 		#{links}#
 		<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
 			<td>#[nr]#</td>
-			<td class="tt">#[type]#</tt></td>
-			<td class="tt">#[text]#</tt></td>
-			<td class="tt"><a href="#[url]#">#[link]#</a></tt></td>
-			<td class="tt">#[attr]#</tt></td>
+			<td class="tt"><tt>#[type]#</tt></td>
+			<td class="tt"><tt>#[text]#</tt></td>
+			<td class="tt"><tt><a href="#[url]#">#[link]#</a></tt></td>
+			<td class="tt"><tt>#[attr]#</tt></td>
 		</tr>#{/links}#
-	</table>	
+	</table>
+        </fieldset>
 :: <!-- 7 -->
 	<fieldset><legend>Parsed Tokens</legend>
 	  <ol>#{words}#
-		<li class="tt">#[word]#</li>#{/words}#
+		<li class="tt"><tt>#[word]#</tt></li>#{/words}#
 	  </ol>
 	</fieldset>
 #(/viewMode)#
-</p>
+
 
 #%env/templates/footer.template%#
 </body>

@@ -308,7 +308,7 @@ public class ViewFile {
                     prop.put("viewMode_links_" + i + "_nr", i);
                     prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
                     prop.put("viewMode_links_" + i + "_type", "image");
-                    prop.put("viewMode_links_" + i + "_text", markup(wordArray, entry.alt()));
+                    prop.put("viewMode_links_" + i + "_text", (entry.alt().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.alt()));
                     prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(false, true));
                     prop.put("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(false, true)));
                     if (entry.width() > 0 && entry.height() > 0)
@@ -329,7 +329,7 @@ public class ViewFile {
         prop.put("error_url", url.toNormalform(false, true));
         prop.put("error_hash", urlHash);
         prop.put("error_wordCount", wordCount);
-        prop.putHTML("error_desc", descr);
+        prop.putHTML("error_desc", (descr.isEmpty()) ? "&nbsp;" : descr);
         prop.putNum("error_size", size);
         prop.put("error_mimeTypeAvailable", (response.getMimeType() == null) ? "0" : "1");
         prop.put("error_mimeTypeAvailable_mimeType", response.getMimeType());
@@ -376,10 +376,10 @@ public class ViewFile {
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", name);
-            prop.put("viewMode_links_" + c + "_text", markup(wordArray, entry.getValue()));
+            prop.put("viewMode_links_" + c + "_text", ((entry.getValue().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.getValue()) ));
             prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true, false)));
             prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true, false));
-            prop.putHTML("viewMode_links_" + c + "_attr", "");
+            prop.put("viewMode_links_" + c + "_attr", "&nbsp;");
             dark = !dark;
             c++;
             i++;

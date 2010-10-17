@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
+<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
 <html xmlns="http://www.w3.org/1999/xhtml">
 #(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexControlURLs_p.html">#(/reload)#
   <head>
@@ -7,7 +8,7 @@
   <script type="text/javascript">
 //<![CDATA[
 function xmlhttpPost() {
-    var searchform = document.forms['searchform'];
+    var searchform = document.getElementById('searchform');
     search(searchform.urlstring.value);
 }
 
@@ -46,12 +47,12 @@ function updatepage(str) {
     var item;
     html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
     html += "<tr class=\"TableHeader\" valign=\"bottom\">";
-    html += "<td>URL from index (total results = " + totalResults + ")</td>";
+    html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
     for (var i = 0; i < firstChannel.items.length; i++) {
         item = firstChannel.items[i];
-        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"IndexControlURLs_p.html?urlstringsearch=&urlstring=" + item.link + "\">" + item.link + "</a></td>";
+        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"IndexControlURLs_p.html?urlstringsearch=&amp;urlstring=" + item.link + "\">" + item.link + "<\/a><\/td>";
     }
-    html += "</table>";
+    html += "<\/table>";
   }
   document.getElementById("searchresults").innerHTML = html;
 }
@@ -63,7 +64,7 @@ function updatepage(str) {
     #%env/templates/submenuIndexControl.template%#
     <h2>Index Administration</h2>
     <p>The local index currently contains #[ucount]# URL references</p>
-    <form action="IndexControlURLs_p.html" name="searchform" method="post" enctype="multipart/form-data" onkeyup="xmlhttpPost(); return false;">
+    <form action="IndexControlURLs_p.html" id="searchform" method="post" enctype="multipart/form-data" onkeyup="xmlhttpPost(); return false;">
     <fieldset><legend>URL Retrieval</legend>
       <dl>
         <dt class="TableCellDark">Select Segment:</dt>
@@ -96,7 +97,7 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
     <fieldset><legend>Statistics about top-domains in URL Database</legend>
       <dl>
-        <dt class="TableCellLight"></dt>
+        <dt class="TableCellLight">&nbsp;</dt>
         <dd>Show top <input type="text" name="lines" value="#[lines]#" size="6" maxlength="6" /> domains from all URLs.
             <input type="submit" name="statistics" value="Generate Statistics" />
         </dd>
@@ -106,7 +107,7 @@ function updatepage(str) {
     #(/statistics)#
     
     #(statisticslines)#::
-    <p><em>Statistics about the top-#[domains]# domains in the database:</em>
+    <p><em>Statistics about the top-#[domains]# domains in the database:</em></p>
     <table cellpadding="2" cellspacing="1" >
       <tr class="TableHeader">
    		<td align="center"></td>
@@ -124,11 +125,11 @@ function updatepage(str) {
             </div>
           </form>
         </td>
-        <td><a href="http://#[domain]#/" target="_">#[domain]#</a></td>
+        <td><a href="http://#[domain]#/" target="_blank">#[domain]#</a></td>
         <td>#[count]#</td>
       </tr>
       #{/domains}#
-    </table></p>
+    </table>
     #(/statisticslines)#
     
     #(lurlexport)#::
@@ -151,7 +152,7 @@ function updatepage(str) {
             <input type="radio" name="format" value="url-rss" />XML (RSS)
             <br />
         </dd>
-        <dt class="TableCellLight"></dt>
+        <dt class="TableCellLight">&nbsp;</dt>
         <dd><input type="submit" name="lurlexport" value="Export URLs" />
         </dd>
       </dl>
