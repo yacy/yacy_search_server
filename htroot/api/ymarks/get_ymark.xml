@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <posts>
 #{bookmarks}#
-	<post href="#[link]#" hash="#[hash]#" tag="#[tags]#"/>
+	<post href="#[url]#" id="#[id]#" title="#[title]#" tag="#[tags]#" added="#[added]#"/>
 #{/bookmarks}#
 </posts>
