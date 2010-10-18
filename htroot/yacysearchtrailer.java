@@ -41,7 +41,7 @@ import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class yacysearchtrailer {
 
-    private static final int MAX_TOPWORDS = 16;
+    private static final int MAX_TOPWORDS = 12;
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();

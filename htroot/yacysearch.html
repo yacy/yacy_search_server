@@ -92,11 +92,11 @@ $(function() {
 		collapsible: true,
 		header: "h3"
 	});
-	$("#sidebar1").accordion({});
-	$("#sidebar2").accordion({});
-	$("#sidebar3").accordion({});
-	$("#sidebar3").accordion('activate', false);
-    $("#sidebar4").tagcloud({seed:0,sizemin:10,sizemax:20,height:80}).find("li").tsort();
+	$("#sidebarDomains").accordion({});
+	$("#sidebarNameSpace").accordion({});
+	$("#sidebarAuthors").accordion({});
+	$("#sidebarAuthors").accordion('activate', false);
+    $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
     $("#sidebarAbout").accordion({});
 	$("#search").focus();
 });
