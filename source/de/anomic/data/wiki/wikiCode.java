@@ -1,4 +1,4 @@
-// wikiCode.java 
+// wikiCode.java
 // -------------------------------------
 // part of YACY
 //
@@ -36,10 +36,10 @@ import net.yacy.document.parser.html.CharacterCoding;
 import de.anomic.server.serverCore;
 
 /** This class provides methods to handle texts that have been posted in the yacyWiki or other
- * parts of YaCy that use this class, like the blog or the profile.
- *
- * @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
- */
+* parts of YaCy that use this class, like the blog or the profile.
+*
+* @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
+*/
 public class wikiCode extends abstractWikiParser implements wikiParser {
     private static final String ASTERISK = "*";
     private static final String EMPTY = "";
@@ -60,7 +60,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private static final String HTML_OPEN_BLOCKQUOTE = "<blockquote>";
     private static final String HTML_OPEN_LIST_ELEMENT = "<li>";
     private static final String HTML_OPEN_ORDERED_LIST = "<ol>";
-    
+
     private static final String WIKI_CLOSE_LINK = "]]";
     private static final String WIKI_OPEN_LINK = "[[";
     private static final String WIKI_CLOSE_EXTERNAL_LINK = "]";
@@ -70,17 +70,23 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private static final String WIKI_EMPHASIZE_1 = "\'\'";
     private static final String WIKI_EMPHASIZE_2 = "\'\'\'";
     private static final String WIKI_EMPHASIZE_3 = "\'\'\'\'\'";
-    private static final String WIKI_HEADLINE_TAG_1 = "==";
-    private static final String WIKI_HEADLINE_TAG_2 = "===";
-    private static final String WIKI_HEADLINE_TAG_3 = "====";
+    private static final String WIKI_HEADLINE_TAG_1 = "=";
+    private static final String WIKI_HEADLINE_TAG_2 = "==";
+    private static final String WIKI_HEADLINE_TAG_3 = "===";
+    private static final String WIKI_HEADLINE_TAG_4 = "====";
+    private static final String WIKI_HEADLINE_TAG_5 = "=====";
+    private static final String WIKI_HEADLINE_TAG_6 = "======";
     private static final String WIKI_HR_LINE = "----";
     private static final String WIKI_IMAGE = "Image:";
     private static final String WIKI_OPEN_EXTERNAL_LINK = "[";
     private static final String WIKI_OPEN_PRE_ESCAPED = "&lt;pre&gt;";
 
     private static final char ONE = '1';
-    private static final char THREE = '3';
     private static final char TWO = '2';
+    private static final char THREE = '3';
+    private static final char FOUR = '4';
+    private static final char FIVE = '5';
+    private static final char SIX = '6';
     private static final char WIKI_FORMATTED = ' ';
     private static final char WIKI_INDENTION = ':';
 
@@ -101,9 +107,9 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private final static Map<String, String[]> PROPERTY_VALUES = new HashMap<String, String[]>();
 
     /** Tags for different types of headlines in wikiCode. */
-    private final static String[] HEADLINE_TAGS = new String[]{WIKI_HEADLINE_TAG_3, WIKI_HEADLINE_TAG_2, WIKI_HEADLINE_TAG_1};
+    private final static String[] HEADLINE_TAGS = new String[]{WIKI_HEADLINE_TAG_6, WIKI_HEADLINE_TAG_5, WIKI_HEADLINE_TAG_4, WIKI_HEADLINE_TAG_3, WIKI_HEADLINE_TAG_2, WIKI_HEADLINE_TAG_1};
 
-    private final static char[] HEADLINE_LEVEL = new char[]{ONE, TWO, THREE};
+    private final static char[] HEADLINE_LEVEL = new char[]{ONE, TWO, THREE, FOUR, FIVE, SIX};
 
     private String numberedListLevel = EMPTY;
     private String unorderedListLevel = EMPTY;
@@ -568,7 +574,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         //both <pre> and </pre> in the same line
         if ((positionOfOpeningTag >= 0) && (positionOfClosingTag > 0) && !escaped) {
             if (positionOfOpeningTag < positionOfClosingTag) {
-                String preformattedText = "<pre style=\"border:dotted;border-width:thin\">" + line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED, positionOfClosingTag) + "</pre>";
+                String preformattedText = "<pre style=\"border:dotted;border-width:thin;\">" + line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED, positionOfClosingTag) + "</pre>";
                 preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
                 line = processLineOfWikiCode(line.substring(0, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
                 line = line.replaceAll("!pre!txt!", preformattedText);
@@ -588,10 +594,11 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         else if ((positionOfOpeningTag >= 0) && !preformattedSpanning && !escaped) {
             processingPreformattedText = true;    //prevent surplus line breaks
             final StringBuilder openBlockQuoteTags = new StringBuilder();  //gets filled with <blockquote>s as needed
-            String preformattedText = "<pre style=\"border:dotted;border-width:thin\">" + line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED);
+            String preformattedText = "<pre style=\"border:dotted;border-width:thin;\">" + line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED);
             preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
             //taking care of indented lines
-            while (line.substring(preindented, positionOfOpeningTag).charAt(0) == WIKI_INDENTION) {
+            while (preindented < positionOfOpeningTag && positionOfOpeningTag < line.length() &&
+                    line.substring(preindented, positionOfOpeningTag).charAt(0) == WIKI_INDENTION) {
                 preindented++;
                 openBlockQuoteTags.append(HTML_OPEN_BLOCKQUOTE);
             }
@@ -600,17 +607,17 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             line = line.replaceAll("!pre!!", "!pre!");
             preformattedSpanning = true;
         } //end </pre>
-        else if ((positionOfOpeningTag >= 0) && preformattedSpanning && !escaped) {
+        else if ((positionOfClosingTag >= 0) && preformattedSpanning && !escaped) {
             preformattedSpanning = false;
             final StringBuilder endBlockQuoteTags = new StringBuilder(); //gets filled with </blockquote>s as needed
-            String preformattedText = line.substring(0, positionOfOpeningTag) + "</pre>";
+            String preformattedText = line.substring(0, positionOfClosingTag) + "</pre>";
             preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
             //taking care of indented lines
             while (preindented > 0) {
                 endBlockQuoteTags.append(HTML_CLOSE_BLOCKQUOTE);
                 preindented--;
             }
-            line = processLineOfWikiCode("!pre!txt!" + line.substring(positionOfOpeningTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
+            line = processLineOfWikiCode("!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
             line = line.replaceAll("!pre!txt!", preformattedText) + endBlockQuoteTags;
             line = line.replaceAll("!pre!!", "!pre!");
             processingPreformattedText = false;
@@ -637,6 +644,9 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         int level1 = 0;
         int level2 = 0;
         int level3 = 0;
+        int level4 = 0;
+        int level5 = 0;
+        int level6 = 0;
         int doubles = 0;
         String anchorext = EMPTY;
         if ((s = tableOfContentElements.size()) > 2) {
@@ -673,37 +683,91 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 final char l = element.charAt(0);
                 String temp = "";
                 if (Arrays.binarySearch(HEADLINE_LEVEL, l) >= 0 && element.length() > 0) {
-                    if (l == THREE) {
-                        if (level < 3) {
-                            level = 3;
-                            level3 = 0;
+                    
+                    switch (l) {
+
+                       case SIX: {
+                           if (level < 6) {
+                                level = 6;
+                                level6 = 0;
+                            }
+                            level6++;
+                            temp = element.substring(1);
+                            element = level1 + "." + level2 + "." + level3 + "." + level4 + "." + level5 + "." + level6 + " " + temp;
+                            directory.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#");
+                            break;
                         }
-                        level3++;
-                        temp = element.substring(1);
-                        element = level1 + "." + level2 + "." + level3 + " " + temp;
-                        directory.append("&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#");
-                    } else if (l == TWO) {
-                        if (level == 1) {
-                            level2 = 0;
-                            level = 2;
+                        case FIVE: {
+                            if (level == 1) {
+                                level2 = 0;
+                                level = 2;
+                            }
+                            if (level == 3) {
+                                level = 2;
+                            }
+                            level5++;
+                            temp = element.substring(1);
+                            element = level1 + "." + level2 + "." + level3 + "." + level4 + "." + level5 + " " + temp;
+                            directory.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#");
+                            break;
                         }
-                        if (level == 3) {
-                            level = 2;
+                        case FOUR: {
+                            if (level == 1) {
+                                level2 = 0;
+                                level = 2;
+                            }
+                            if (level == 3) {
+                                level = 2;
+                            }
+                            level4++;
+                            temp = element.substring(1);
+                            element = level1 + "." + level2 + "." + level3 + "." + level4 + " " + temp;
+                            directory.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#");
+                            break;
                         }
-                        level2++;
-                        temp = element.substring(1);
-                        element = level1 + "." + level2 + " " + temp;
-                        directory.append("&nbsp;&nbsp;<a href=\"#");
-                    } else if (l == ONE) {
-                        if (level > 1) {
-                            level = 1;
-                            level2 = 0;
-                            level3 = 0;
+                        case THREE: {
+                            if (level == 1) {
+                                level2 = 0;
+                                level = 2;
+                            }
+                            if (level == 3) {
+                                level = 2;
+                            }
+                            level3++;
+                            temp = element.substring(1);
+                            element = level1 + "." + level2 + "." + level3 + " " + temp;
+                            directory.append("&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#");
+                            break;
                         }
-                        level1++;
-                        temp = element.substring(1);
-                        element = level1 + ". " + temp;
-                        directory.append("<a href=\"#");
+                        case TWO: {
+                            if (level == 1) {
+                                level2 = 0;
+                                level = 2;
+                            }
+                            if (level == 3) {
+                                level = 2;
+                            }
+                            level2++;
+                            temp = element.substring(1);
+                            element = level1 + "." + level2 + " " + temp;
+                            directory.append("&nbsp;&nbsp;<a href=\"#");
+                            break;
+                        }
+                        case ONE: {
+                            if (level > 1) {
+                                level = 1;
+                                level2 = 0;
+                                level3 = 0;
+                                level4 = 0;
+                                level5 = 0;
+                                level6 = 0;
+                            }
+                            level1++;
+                            temp = element.substring(1);
+                            element = level1 + ". " + temp;
+                            directory.append("<a href=\"#");
+                            break;
+                        }
                     }
 
                     directory.append(temp.replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY));
@@ -722,7 +786,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         return directory;
     }
 
-    /** Replaces two occurences of a substring in a string by a pair of strings if 
+    /** Replaces two occurences of a substring in a string by a pair of strings if
      * that substring occurs twice in the string. This method is not greedy! You'll
      * have to run it in a loop if you want to replace all occurences of the substring.
      * This method provides special treatment for headlines.
@@ -790,14 +854,16 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
      * @return HTML fragment
      */
     public String processLineOfWikiCode(String line) {
-        //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
-        if (!replacedHtmlAlready || preformattedSpanning) {
+        //If HTML has not been replaced yet (can happen if method gets called in recursion), replace now!
+        if ((!replacedHtmlAlready || preformattedSpanning) && line.indexOf(WIKI_CLOSE_PRE_ESCAPED) < 0) {
             line = CharacterCoding.unicode2html(line, true);
             replacedHtmlAlready = true;
         }
 
         //check if line contains preformatted symbols or if we are in a preformatted sequence already.
-        if ((line.indexOf(WIKI_OPEN_PRE_ESCAPED) >= 0) || (line.indexOf(WIKI_CLOSE_PRE_ESCAPED) >= 0) || (preformattedSpanning)) {
+        if ((line.indexOf(WIKI_OPEN_PRE_ESCAPED) >= 0) ||
+                (line.indexOf(WIKI_CLOSE_PRE_ESCAPED) >= 0) ||
+                preformattedSpanning) {
             line = processPreformattedText(line);
         } else {
 
@@ -823,18 +889,21 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 }
                 line = head + line + tail;
             }
-            // end contrib [MN]	
+            // end contrib [MN]
 
             // format headers
-            line = pairReplace(line, WIKI_HEADLINE_TAG_3, "<h4>", "</h4>");
-            line = pairReplace(line, WIKI_HEADLINE_TAG_2, "<h3>", "</h3>");
-            line = pairReplace(line, WIKI_HEADLINE_TAG_1, "<h2>", "</h2>");
+            line = pairReplace(line, WIKI_HEADLINE_TAG_6, "<h6>", "</h6>");
+            line = pairReplace(line, WIKI_HEADLINE_TAG_5, "<h5>", "</h5>");
+            line = pairReplace(line, WIKI_HEADLINE_TAG_4, "<h4>", "</h4>");
+            line = pairReplace(line, WIKI_HEADLINE_TAG_3, "<h3>", "</h3>");
+            line = pairReplace(line, WIKI_HEADLINE_TAG_2, "<h2>", "</h2>");
+            line = pairReplace(line, WIKI_HEADLINE_TAG_1, "<h1>", "</h1>");
 
             line = pairReplace(line, WIKI_EMPHASIZE_3, "<b><i>", "</i></b>");
             line = pairReplace(line, WIKI_EMPHASIZE_2, "<b>", "</b>");
             line = pairReplace(line, WIKI_EMPHASIZE_1, "<i>", "</i>");
 
-            line = pairReplace(line, WIKI_OPEN_STRIKE, WIKI_CLOSE_STRIKE, "<s>", "</s>");
+            line = pairReplace(line, WIKI_OPEN_STRIKE, WIKI_CLOSE_STRIKE, "<span class=\"strike\">", "</span>");
 
             line = processUnorderedList(line);
             line = processOrderedList(line);

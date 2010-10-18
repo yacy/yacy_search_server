@@ -16,7 +16,7 @@
 # i.e. ".strong"; ".left"; ".error";
 ###############################################
 ## "privat classes"                          ##
-# all htnml-elements with a specific class
+# all HTML-elements with a specific class
 # i.e. "div.content"; "span.left";
 # and
 # "div.content span a."; "form.search fieldset legend";
@@ -117,6 +117,10 @@ margin-bottom:0px;
 vertical-align:text-bottom;
 }
 
+pre {
+    font-family:monospace;
+}
+
 /* --------------- global classes --------------------- */
 
 tt, *.tt {
@@ -161,6 +165,10 @@ tt, *.tt {
 
 .settingsValue {
   font-weight:bold;
+}
+
+.strike {
+  text-decoration: line-through;
 }
 
 .Headline {
