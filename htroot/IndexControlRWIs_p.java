@@ -517,7 +517,7 @@ public class IndexControlRWIs_p {
     }
 
     public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, Segment segment, final byte[] keyhash, final Bitfield filter) {
-        final QueryParams query = new QueryParams(new String(keyhash), -1, filter, segment, sb.getRanking());
+        final QueryParams query = new QueryParams(new String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
         final ReferenceOrder order = new ReferenceOrder(query.ranking, query.targetlang);
         final RankingProcess ranked = new RankingProcess(query, order, Integer.MAX_VALUE);
         ranked.run();

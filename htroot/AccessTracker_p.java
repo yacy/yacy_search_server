@@ -176,6 +176,7 @@ public class AccessTracker_p {
                 prop.putNum("page_list_" + entCount + "_urltime", searchProfile.urlretrievaltime);
                 prop.putNum("page_list_" + entCount + "_snippettime", searchProfile.snippetcomputationtime);
                 prop.putNum("page_list_" + entCount + "_resulttime", searchProfile.searchtime);
+                prop.putHTML("page_list_" + entCount + "_userAgent", searchProfile.userAgent);
                 qcountSum += searchProfile.itemsPerPage;
                 rcountSum += searchProfile.resultcount;
                 utimeSum += searchProfile.urlretrievaltime;

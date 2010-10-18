@@ -26,11 +26,11 @@
         <offset>#[offset]#</offset>
         <querycount>#[querycount]#</querycount>
         <resultcount>#[resultcount]#</resultcount>
-        <querytime>#[querytime]#</querytime>
         <resulttime>#[resulttime]#</resulttime>
         <urltime>#[urltime]#</urltime>
         <snippettime>#[snippettime]#</snippettime>
-        <querystring>#[querystring]#</querystring>	 
+        <querystring>#[querystring]#</querystring>
+        <useragent>#[userAgent]#</useragent>
 	  </entry>
 	  #{/list}#</localSearchLog>
 	  

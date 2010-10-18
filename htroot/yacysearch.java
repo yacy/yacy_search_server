@@ -491,7 +491,8 @@ public class yacysearch {
                     client,
                     authenticated,
                     indexSegment,
-                    ranking);
+                    ranking,
+                    header.get(RequestHeader.USER_AGENT, ""));
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.INITIALIZATION, "", 0, 0), false);
             

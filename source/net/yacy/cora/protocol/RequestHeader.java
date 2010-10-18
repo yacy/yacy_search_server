@@ -38,6 +38,7 @@ public class RequestHeader extends HeaderFramework {
     public static final String CONNECTION = "Connection";
     public static final String PROXY_CONNECTION = "Proxy-Connection";
     public static final String KEEP_ALIVE = "Keep-Alive";
+    public static final String USER_AGENT = "User-Agent";
     
     public static final String AUTHORIZATION = "Authorization";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";

@@ -189,7 +189,7 @@ public class DocumentIndex extends Segment {
      */    
     public ArrayList<DigestURI> find(String querystring, int count) {
         // make a query and start a search
-        QueryParams query = new QueryParams(querystring, count, null, this, textRankingDefault);
+        QueryParams query = new QueryParams(querystring, count, null, this, textRankingDefault, "DocumentIndex");
         ReferenceOrder order = new ReferenceOrder(query.ranking, query.targetlang);
         RankingProcess rankedCache = new RankingProcess(query, order, SearchEvent.max_results_preparation);
         rankedCache.start();
