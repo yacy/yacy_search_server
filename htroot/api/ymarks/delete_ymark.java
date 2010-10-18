@@ -4,7 +4,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.data.YMarkStatics;
+import de.anomic.data.YMarkTables;
 import de.anomic.data.userDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -24,16 +24,16 @@ public class delete_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkStatics.TABLE_BOOKMARKS_USER_ADMIN)+YMarkStatics.TABLE_BOOKMARKS_BASENAME;
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkStatics.TABLE_BOOKMARKS_USER_ADMIN)+YMarkStatics.TABLE_TAGS_BASENAME;
+        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_BOOKMARKS_BASENAME;
+        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_TAGS_BASENAME;
         	
             byte[] urlHash = null;
             
             try {
-	        	if(post.containsKey(YMarkStatics.TABLE_BOOKMARKS_COL_ID)) {
-	        		urlHash = post.get(YMarkStatics.TABLE_BOOKMARKS_COL_ID).getBytes();
-	        	} else if(post.containsKey(YMarkStatics.TABLE_BOOKMARKS_COL_URL)) {
-					urlHash = YMarkStatics.getBookmarkId(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL));
+	        	if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_ID)) {
+	        		urlHash = post.get(YMarkTables.TABLE_BOOKMARKS_COL_ID).getBytes();
+	        	} else if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_URL)) {
+					urlHash = YMarkTables.getBookmarkId(post.get(YMarkTables.TABLE_BOOKMARKS_COL_URL));
 	        	} else {
 	        		prop.put("result", "0");
 	        		return prop;
@@ -41,10 +41,10 @@ public class delete_ymark {
 	            Tables.Row bmk_row = null;
 	            bmk_row = sb.tables.select(bmk_table, urlHash);
 	            if(bmk_row != null) {
-		            final String tagsString = bmk_row.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT);
-		            final String[] tagArray = tagsString.split(YMarkStatics.TABLE_TAGS_SEPARATOR);                    
+		            final String tagsString = bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT);
+		            final String[] tagArray = tagsString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
 	                for (final String tag : tagArray) {
-	                	sb.tables.updateTAGTable(tag_table, tag, urlHash,YMarkStatics.TABLE_TAGS_ACTION_REMOVE);
+	                	sb.tables.bookmarks.updateTAGTable(tag_table, tag, urlHash,YMarkTables.TABLE_TAGS_ACTION_REMOVE);
 	                }
 	            }
 				sb.tables.delete(bmk_table,urlHash);
@@ -55,7 +55,7 @@ public class delete_ymark {
 				Log.logException(e);
 			}
         } else {
-        	prop.put(YMarkStatics.TABLE_BOOKMARKS_USER_AUTHENTICATE,YMarkStatics.TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG);
+        	prop.put(YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE,YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG);
         }       
         // return rewrite properties
         return prop;

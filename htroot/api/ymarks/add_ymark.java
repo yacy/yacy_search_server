@@ -9,7 +9,7 @@ import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
-import de.anomic.data.YMarkStatics;
+import de.anomic.data.YMarkTables;
 import de.anomic.data.userDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -29,18 +29,23 @@ public class add_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkStatics.TABLE_BOOKMARKS_USER_ADMIN)+YMarkStatics.TABLE_BOOKMARKS_BASENAME;
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkStatics.TABLE_BOOKMARKS_USER_ADMIN)+YMarkStatics.TABLE_TAGS_BASENAME;
+        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_BOOKMARKS_BASENAME;
+        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_TAGS_BASENAME;
         	
             byte[] urlHash = null;
-    		if(post.containsKey(YMarkStatics.TABLE_BOOKMARKS_COL_URL)) {
+            String url ="";
+    		if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_URL)) {
                 try {
-        			urlHash = YMarkStatics.getBookmarkId(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT));
+                	url = post.get(YMarkTables.TABLE_BOOKMARKS_COL_URL,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT);
+                	if (!url.toLowerCase().startsWith(YMarkTables.TABLE_BOOKMARKS_URL_PROTOCOL_HTTP) && !url.toLowerCase().startsWith(YMarkTables.TABLE_BOOKMARKS_URL_PROTOCOL_HTTPS)) {
+                        url=YMarkTables.TABLE_BOOKMARKS_URL_PROTOCOL_HTTP+url;
+                    }
+                	urlHash = YMarkTables.getBookmarkId(url);
         		} catch (MalformedURLException e) {
         			Log.logException(e);
         		}
-    		} else if (post.containsKey(YMarkStatics.TABLE_BOOKMARKS_COL_ID)) {
-    			urlHash = post.get(YMarkStatics.TABLE_BOOKMARKS_COL_ID).getBytes();
+    		} else if (post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_ID)) {
+    			urlHash = post.get(YMarkTables.TABLE_BOOKMARKS_COL_ID).getBytes();
     		}
     		if(urlHash == null) {
     			prop.put("result", "0");
@@ -62,39 +67,42 @@ public class add_ymark {
                 if (bmk_row == null) {
                     // create and insert new entry
                     Data data = new Data();
-                    final String tagsString = YMarkStatics.cleanTagsString(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT));
+                    final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));
                     final byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
                     
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_URL, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_URL,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT).getBytes());
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT).getBytes());
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_DESC,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT).getBytes());
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC,"false").getBytes());
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());               
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_DATE_ADDED, date);
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_DATE_MODIFIED, date);
-                    data.put(YMarkStatics.TABLE_BOOKMARKS_COL_DATE_VISITED, date);
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_URL, url.getBytes());
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT).getBytes());
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT).getBytes());
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC_FALSE).getBytes());
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_VISITS, YMarkTables.TABLE_BOOKMARKS_COL_VISITS_ZERO.getBytes());
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER, post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER,YMarkTables.TABLE_FOLDERS_UNSORTED).getBytes());
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_ADDED, date);
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED, date);
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_VISITED, date);
                     sb.tables.insert(bmk_table, urlHash, data);
                     
 
-                    final String[] tagArray = tagsString.split(YMarkStatics.TABLE_TAGS_SEPARATOR);                    
+                    final String[] tagArray = tagsString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
                     for (final String tag : tagArray) {
-                    	sb.tables.updateTAGTable(tag_table, tag, urlHash, YMarkStatics.TABLE_TAGS_ACTION_ADD);
+                    	sb.tables.bookmarks.updateTAGTable(tag_table, tag, urlHash, YMarkTables.TABLE_TAGS_ACTION_ADD);
                     } 
 
                     
                 } else {	
                 	// modify and update existing entry
-                    bmk_row.put(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE,bmk_row.get(YMarkStatics.TABLE_BOOKMARKS_COL_TITLE,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT)).getBytes());
-                    bmk_row.put(YMarkStatics.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_DESC,bmk_row.get(YMarkStatics.TABLE_BOOKMARKS_COL_DESC,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT)).getBytes());
-                    bmk_row.put(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC,bmk_row.get(YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC,YMarkStatics.TABLE_BOOKMARKS_COL_PUBLIC_FALSE)).getBytes());
-                	
-                    final String tagsString = YMarkStatics.cleanTagsString(post.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT));
-                	HashSet<String>old_tagSet = YMarkStatics.getTagSet(bmk_row.get(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS,YMarkStatics.TABLE_BOOKMARKS_COL_DEFAULT), false);
-                	HashSet<String>new_tagSet = YMarkStatics.getTagSet(tagsString, false);
-                    bmk_row.put(YMarkStatics.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());
+                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)).getBytes());
+                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)).getBytes());
+                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC_FALSE)).getBytes());
+                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER, post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER,YMarkTables.TABLE_FOLDERS_UNSORTED)).getBytes());
+                    
+                    final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));
+                	HashSet<String>old_tagSet = YMarkTables.getTagSet(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT), false);
+                	HashSet<String>new_tagSet = YMarkTables.getTagSet(tagsString, false);
+                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());
                 	            	
                     // modify date attribute
-                    bmk_row.put(YMarkStatics.TABLE_BOOKMARKS_COL_DATE_MODIFIED, DateFormatter.formatShortMilliSecond(new Date()).getBytes());                
+                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED, DateFormatter.formatShortMilliSecond(new Date()).getBytes());                
                     
                     // update bmk_table
                     sb.tables.update(bmk_table, bmk_row);
@@ -105,14 +113,14 @@ public class add_ymark {
                     new_tagSet.removeAll(old_tagSet);
                     tagIter = new_tagSet.iterator();
                     while(tagIter.hasNext()) {
-                    	sb.tables.updateTAGTable(tag_table, tagIter.next(), urlHash, YMarkStatics.TABLE_TAGS_ACTION_ADD);
+                    	sb.tables.bookmarks.updateTAGTable(tag_table, tagIter.next(), urlHash, YMarkTables.TABLE_TAGS_ACTION_ADD);
                     }
                     
-                    new_tagSet = YMarkStatics.getTagSet(tagsString, false);
+                    new_tagSet = YMarkTables.getTagSet(tagsString, false);
                     old_tagSet.removeAll(new_tagSet);
                     tagIter=old_tagSet.iterator();
                     while(tagIter.hasNext()) {
-                    	sb.tables.updateTAGTable(tag_table, tagIter.next(), urlHash, YMarkStatics.TABLE_TAGS_ACTION_REMOVE);
+                    	sb.tables.bookmarks.updateTAGTable(tag_table, tagIter.next(), urlHash, YMarkTables.TABLE_TAGS_ACTION_REMOVE);
                     }                    
                 }
             } catch (IOException e) {
@@ -120,7 +128,7 @@ public class add_ymark {
             }
             prop.put("result", "1");
         } else {
-        	prop.put(YMarkStatics.TABLE_BOOKMARKS_USER_AUTHENTICATE,YMarkStatics.TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG);
+        	prop.put(YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE,YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG);
         }
         // return rewrite properties
         return prop;

@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>YaCy Bookmarks</title>
+	</head>
+	<body>
+		<form action="/api/ymarks/import_html.xml" method="post"  enctype="multipart/form-data">
+			<fieldset>
+				<legend>Import HTML Bookmarks</legend>
+				<dl>
+					<dt>
+						<label for="file">File:</label>
+					</dt>
+					<dd>
+						<input type="file" name="htmlfile" id="htmlfile" />
+					</dd>
+					<dt>
+						<label for="tags">Default Tags:</label>
+					</dt>
+					<dd>
+						<input type="text" name="tags" id="tags" value="imported" />
+					</dd>
+					<dt>
+						<label for="public">import as Public:</label>
+					</dt>
+					<dd>
+						<select name="public" id="public">
+							<option value="public">yes</option>
+							<option value="private">no</option>
+						</select>
+					</dd>
+				</dl>
+				<input type="submit" name="importbookmarks" value="import" />
+			</fieldset>
+		</form>
+	</body>
+</html>

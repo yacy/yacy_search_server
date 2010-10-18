@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -43,7 +42,7 @@ import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.server.serverObjects;
 
 public class WorkTables extends Tables {
-
+	
     public final static String TABLE_API_NAME = "api";
     public final static String TABLE_API_TYPE_STEERING = "steering";
     public final static String TABLE_API_TYPE_CONFIGURATION = "configuration";
@@ -66,9 +65,11 @@ public class WorkTables extends Tables {
     public final static String TABLE_ACTIVECRAWLS_NAME = "crawljobsActive";
     public final static String TABLE_PASSIVECRAWLS_NAME = "crawljobsPassive";
     
+    public YMarkTables bookmarks;
     
     public WorkTables(final File workPath) {
         super(workPath, 12);
+        this.bookmarks = new YMarkTables(this);
     }
     
     /**
@@ -277,62 +278,4 @@ public class WorkTables extends Tables {
         d -= d % 60000; // remove seconds
         row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
     }
-    
-	/**
-	 * YMark function that updates the tag index
-	 * @param tag_table is the user specific tag index
-	 * @param tag is a single tag
-	 * @param url is the url has as returned by DigestURI.hash()
-	 * @param action is either add (1) or remove (2)
-	 * @return
-	 */
-    public int updateTAGTable(final String tag_table, final String tag, final byte[] url, final int action) {
-		Tables.Row tag_row = null;
-        final byte[] tagHash = YMarkStatics.getTagHash(tag);
-        final String urlHash = new String(url);
-        HashSet<String>urlSet = new HashSet<String>();
-		try {
-			tag_row = this.select(tag_table, tagHash);
-	        if(tag_row == null) {
-	            switch (action) {
-	            case YMarkStatics.TABLE_TAGS_ACTION_ADD:
-	            	urlSet.add(urlHash);
-	            	break;
-	            default:
-	            	return 0;
-	            }
-	            Data tagEntry = new Data();
-	            tagEntry.put(YMarkStatics.TABLE_TAGS_COL_TAG, tag.getBytes());
-	            tagEntry.put(YMarkStatics.TABLE_TAGS_COL_URLS, YMarkStatics.keySetToBytes(urlSet));
-	            this.insert(tag_table, tagHash, tagEntry);
-	            return 1;
-	        } else {
-	        	urlSet = YMarkStatics.keysStringToKeySet(new String(tag_row.get(YMarkStatics.TABLE_TAGS_COL_URLS)));
-	        	if(urlSet.contains(urlHash))
-	        		Log.logInfo(YMarkStatics.TABLE_BOOKMARKS_LOG, "ok, urlHash found!");
-	        	switch (action) {
-	            case YMarkStatics.TABLE_TAGS_ACTION_ADD:
-	            	urlSet.add(urlHash);
-	            	break;
-	            case YMarkStatics.TABLE_TAGS_ACTION_REMOVE:
-	            	urlSet.remove(urlHash);
-	            	if(urlSet.isEmpty()) {
-	            		this.delete(tag_table, tagHash);
-	            		return 1;
-	            	}
-	            	break;
-	            default:
-	            	return 1;
-	            }
-	        	tag_row.put(YMarkStatics.TABLE_TAGS_COL_URLS, YMarkStatics.keySetToBytes(urlSet));
-	        	this.update(tag_table, tag_row);
-	        	return 1;
-	        }
-		} catch (IOException e) {
-            Log.logException(e);
-		} catch (RowSpaceExceededException e) {
-            Log.logException(e);
-		}
-        return 0;
-	}
 }
