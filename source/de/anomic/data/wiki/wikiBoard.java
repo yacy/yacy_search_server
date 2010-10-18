@@ -194,7 +194,7 @@ public class wikiBoard {
          */
         public Entry(final String subject, final String author, final String ip, final String reason, final byte[] page) throws IOException {
             this.record = new HashMap<String, String>();
-            this.key = subject.substring(0, Math.min((key != null) ? key.length() : 0, keyLength));
+            this.key = subject.substring(0, Math.min((subject != null) ? subject.length() : 0, keyLength));
             this.record.put("date", dateString());
             this.record.put("author", Base64Order.enhancedCoder.encodeString((author != null && author.length() > 0) ? author : ANONYMOUS));
             this.record.put("ip", (ip != null && ip.length() > 0) ? ip : "");
