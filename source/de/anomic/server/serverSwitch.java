@@ -305,6 +305,7 @@ public class serverSwitch {
                 FileUtils.saveMap(configFile, configProps, configComment);
             }
         } catch (final IOException e) {
+        	log.logSevere("CONFIG: Cannot write config file " + configFile.toString() + ": " + e.getMessage());
             System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
         }
     }
