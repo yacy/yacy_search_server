@@ -206,7 +206,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     private static HandleSet removeAppearanceHashes(final String sentence, final HandleSet queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;
-        final TreeMap<byte[], Integer> hs = Condenser.hashSentence(sentence);
+        final TreeMap<byte[], Integer> hs = Condenser.hashSentence(sentence, null);
         final Iterator<byte[]> j = queryhashes.iterator();
         byte[] hash;
         Integer pos;

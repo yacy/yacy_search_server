@@ -294,7 +294,7 @@ public final class QueryParams {
      */
     public final boolean matchesText(final String text) {
         boolean ret = false;
-        final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text).keySet());
+        final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
         if (!SetTools.anymatch(wordhashes, this.excludeHashes)) {
             ret = SetTools.totalInclusion(this.queryHashes, wordhashes);
         }
@@ -304,7 +304,7 @@ public final class QueryParams {
     protected static final boolean anymatch(final String text, final HandleSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
-    	final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text).keySet());
+    	final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
     

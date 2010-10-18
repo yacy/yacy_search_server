@@ -1855,7 +1855,7 @@ public final class Switchboard extends serverSwitch {
         for (int i = 0; i < in.documents.length; i++) {
             // strip out words and generate statistics
             try {
-                condenser[i] = new Condenser(in.documents[i], in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia());
+                condenser[i] = new Condenser(in.documents[i], in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia(), LibraryProvider.dymLib);
     
                 // update image result list statistics
                 // its good to do this concurrently here, because it needs a DNS lookup
@@ -2035,7 +2035,7 @@ public final class Switchboard extends serverSwitch {
                 Document[] documents = response.parse();
                 if (documents != null) for (Document document: documents) {
                     if (document.indexingDenied()) throw new Parser.Failure("indexing is denied", url);
-                    Condenser condenser = new Condenser(document, true, true);
+                    Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib);
                     ResultImages.registerImages(url, document, true);
                     webStructure.generateCitationReference(url, document, condenser, response.lastModified());
                     storeDocumentIndex(process, response, document, condenser, searchEvent, "heuristic:" + heuristicName);

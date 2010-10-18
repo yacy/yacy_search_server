@@ -47,6 +47,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
+import de.anomic.data.LibraryProvider;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
@@ -277,9 +278,9 @@ public class ViewFile {
                     // Search word highlighting
                     for (StringBuilder s: sentences) {
                         sentence = s.toString();
-                        Enumeration<StringBuilder> tokens = Condenser.wordTokenizer(sentence, "UTF-8");
+                        Enumeration<String> tokens = Condenser.wordTokenizer(sentence, "UTF-8", LibraryProvider.dymLib);
                         while (tokens.hasMoreElements()) {
-                            token = tokens.nextElement().toString();
+                            token = tokens.nextElement();
                             if (token.length() > 0) {
                                 prop.put("viewMode_words_" + i + "_nr", i + 1);
                                 prop.put("viewMode_words_" + i + "_word", token);

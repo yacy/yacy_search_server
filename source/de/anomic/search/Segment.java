@@ -424,7 +424,7 @@ public class Segment {
             // get the word set
             Set<String> words = null;
             try {
-                words = new Condenser(document, true, true).words().keySet();
+                words = new Condenser(document, true, true, null).words().keySet();
             } catch (final UnsupportedEncodingException e) {
                 Log.logException(e);
             }

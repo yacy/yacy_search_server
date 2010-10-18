@@ -28,6 +28,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
+import de.anomic.data.LibraryProvider;
+
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Condenser;
@@ -109,7 +111,7 @@ public class torrentParser extends AbstractParser implements Parser {
             byte[] b = FileUtils.read(new File(args[0]));
             torrentParser parser = new torrentParser();
             Document[] d = parser.parse(new MultiProtocolURI("http://localhost/test.torrent"), null, "utf-8", new ByteArrayInputStream(b));
-            Condenser c = new Condenser(d[0], true, true);
+            Condenser c = new Condenser(d[0], true, true, LibraryProvider.dymLib);
             Map<String, Word> w = c.words();
             for (Map.Entry<String, Word> e: w.entrySet()) System.out.println("Word: " + e.getKey() + " - " + e.getValue().posInText);
         } catch (IOException e) {

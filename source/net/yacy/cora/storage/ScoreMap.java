@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -183,6 +184,14 @@ public class ScoreMap<E> implements DynamicScore<E> {
         if (score == null) return 0;
         return score.intValue();
     }
+    
+    public SortedMap<E, IntScore> tailMap(E obj) {
+        if (this.map instanceof TreeMap) {
+            return ((TreeMap<E, IntScore>) this.map).tailMap(obj);
+        }
+        throw new UnsupportedOperationException("map must have comparator");
+    }
+    
     
     public int getMaxScore() {
         if (map.isEmpty()) return -1;

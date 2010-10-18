@@ -33,12 +33,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.cora.storage.DynamicScore;
+import net.yacy.cora.storage.IntScore;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.kelondro.logging.Log;
 
@@ -50,8 +52,8 @@ public class DidYouMeanLibrary {
     
     // common word cache
     private static final int commonWordsMaxSize = 100000; // maximum size of common word cache
-    private static final int commonWordsMinLength = 4;    // words must have that length at minimum
-    private DynamicScore<String> commonWords = new ScoreMap<String>();    
+    private static final int commonWordsMinLength = 5;    // words must have that length at minimum
+    private ScoreMap<String> commonWords = new ScoreMap<String>(String.CASE_INSENSITIVE_ORDER);    
     
     // dictionaries
     private final File dictionaryPath;
@@ -76,10 +78,9 @@ public class DidYouMeanLibrary {
      */
     public void learn(String word) {
         if (word == null) return;
-        word = word.trim().toLowerCase();
         if (word.length() < commonWordsMinLength) return;
         commonWords.inc(word);
-        if (commonWords.size() >= commonWordsMaxSize) {
+        if (commonWords.size() > commonWordsMaxSize) {
             commonWords.shrinkToMaxSize(commonWordsMaxSize / 2);
         }
     }
@@ -139,6 +140,12 @@ public class DidYouMeanLibrary {
         SortedSet<String> t = this.dict.tailSet(string);
         for (final String r: t) {
             if (r.startsWith(string) && r.length() > string.length()) ret.add(r); else break;
+        }
+        SortedMap<String, IntScore> u = this.commonWords.tailMap(string);
+        String vv;
+        for (final Map.Entry<String, IntScore> v: u.entrySet()) {
+            vv = v.getKey();
+            if (vv.startsWith(string) && vv.length() > string.length()) ret.add(vv); else break;
         }
         string = reverse(string);
         t = this.tcid.tailSet(string);

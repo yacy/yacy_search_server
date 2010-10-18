@@ -417,7 +417,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
     
     private static boolean containsAllHashes(final String sentence, final HandleSet queryhashes) {
-        final TreeMap<byte[], Integer> m = Condenser.hashSentence(sentence);
+        final TreeMap<byte[], Integer> m = Condenser.hashSentence(sentence, null);
         for (byte[] b: queryhashes) {
             if (!(m.containsKey(b))) return false;
         }

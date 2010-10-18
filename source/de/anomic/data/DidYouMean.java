@@ -63,6 +63,7 @@ public class DidYouMean {
     private long timeLimit;
     private boolean createGen; // keeps the value 'true' as long as no entry in guessLib is written
     private final SortedSet<String> resultSet;
+    private final indexSizeComparator INDEX_SIZE_COMPARATOR;
     
 	
     /**
@@ -70,13 +71,14 @@ public class DidYouMean {
      * @param sort true/false -  sorts the resulting TreeSet by index.count(); <b>Warning:</b> this causes heavy i/o.
      */
     public DidYouMean(final IndexCell<WordReference> index, String word0) {
-        this.resultSet = Collections.synchronizedSortedSet(new TreeSet<String>(WORD_LENGTH_COMPARATOR));
+        this.resultSet = Collections.synchronizedSortedSet(new TreeSet<String>(new headMatchingComparator(word0, WORD_LENGTH_COMPARATOR)));
         this.word = word0.toLowerCase();
         this.wordLen = word.length();
         this.index = index;
         this.guessGen = new LinkedBlockingQueue<String>();
         this.guessLib = new LinkedBlockingQueue<String>();
         this.createGen = true;
+        this.INDEX_SIZE_COMPARATOR = new indexSizeComparator();
         
         // identify language
         if (this.word.length() == 0) {
@@ -134,7 +136,7 @@ public class DidYouMean {
             if (scored.size() >= 2 * preSortSelection) break;
             scored.inc(s, index.count(Word.word2hash(s)));
         }
-        SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
+        SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new headMatchingComparator(this.word, this.INDEX_SIZE_COMPARATOR)));
         int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
         while (scored.size() > 0 && countSorted.size() < preSortSelection) {
             String s = scored.getMaxKey();
@@ -351,9 +353,9 @@ public class DidYouMean {
                 } catch (InterruptedException e) {}
             }
 	}
-	
+    
     /**
-     * indexSizeComparator is used by DidYouMean to order terms by index.count()<p/>
+     * indexSizeComparator is used by DidYouMean to order terms by index.count()
      * <b>Warning:</b> this causes heavy i/o
      */
     private class indexSizeComparator implements Comparator<String> {
@@ -363,11 +365,11 @@ public class DidYouMean {
             final int i2 = index.count(Word.word2hash(o2));
             if (i1 == i2) return WORD_LENGTH_COMPARATOR.compare(o1, o2);
             return (i1 < i2) ? 1 : -1; // '<' is correct, because the largest count shall be ordered to be the first position in the result
-    	}    	
+        }       
     }
     
     /**
-     * wordLengthComparator is used by DidYouMean to order terms by the term length<p/>
+     * wordLengthComparator is used by DidYouMean to order terms by the term length
      * This is the default order if the indexSizeComparator is not used
      */
     private static class wordLengthComparator implements Comparator<String> {
@@ -376,11 +378,30 @@ public class DidYouMean {
             final int i1 = o1.length();
             final int i2 = o2.length();
             if (i1 == i2) return o1.compareTo(o2);
-            return (i1 > i2) ? 1 : -1; // '>' is correct, because the shortest word shall be first
+            return (i1 < i2) ? 1 : -1; // '<' is correct, because the longest word shall be first
         }
         
     }
 
+    /**
+     * headMatchingComparator is used to sort results in such a way that words that match with the given words are sorted first
+     */
+    private static class headMatchingComparator implements Comparator<String> {
+        private final String head;
+        private final Comparator<String> secondaryComparator;
+        public headMatchingComparator(String head, Comparator<String> secondaryComparator) {
+            this.head = head.toLowerCase();
+            this.secondaryComparator = secondaryComparator;
+        }
+        
+        public int compare(final String o1, final String o2) {
+            boolean o1m = o1.toLowerCase().startsWith(head);
+            boolean o2m = o2.toLowerCase().startsWith(head);
+            if ((o1m && o2m) || (!o1m && !o2m)) return secondaryComparator.compare(o1, o2);
+            return o1m ? -1 : 1;
+        }
+    }
+    
 }
 
 

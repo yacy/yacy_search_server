@@ -89,7 +89,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                             ("yacyshare " +
                              filename.replace('?', ' ') +
                              " " +
-                             urlcomps.dc_title())).keySet()),
+                             urlcomps.dc_title()), null).keySet()),
                              urlentry.hash());
                 } catch (IOException e) {
                     Log.logException(e);

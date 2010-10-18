@@ -42,6 +42,8 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import de.anomic.data.DidYouMeanLibrary;
+
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.language.Identificator;
 import net.yacy.document.parser.html.ContentScraper;
@@ -55,7 +57,7 @@ import net.yacy.kelondro.util.SetTools;
 
 
 public final class Condenser {
-
+    
     // this is the page analysis class
     public final static boolean pseudostemming = false; // switch for removal of words that appear in shortened form
     public final static int wordminsize = 2;
@@ -108,7 +110,8 @@ public final class Condenser {
     public Condenser(
             final Document document,
             final boolean indexText,
-            final boolean indexMedia
+            final boolean indexMedia,
+            final DidYouMeanLibrary meaningLib
             ) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
@@ -126,7 +129,7 @@ public final class Condenser {
         
         Map.Entry<MultiProtocolURI, String> entry;
         if (indexText) {
-            createCondensement(document.getText());        
+            createCondensement(document.getText(), meaningLib);        
             // the phrase counter:
             // phrase   0 are words taken from the URL
             // phrase   1 is the MainTitle
@@ -140,15 +143,15 @@ public final class Condenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.dc_title(),       1, WordReferenceRow.flag_app_dc_title, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_description(), 3, WordReferenceRow.flag_app_dc_description, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_creator(),     4, WordReferenceRow.flag_app_dc_creator, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_publisher(),   5, WordReferenceRow.flag_app_dc_creator, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_subject(' '),  6, WordReferenceRow.flag_app_dc_description, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_title(),       1, WordReferenceRow.flag_app_dc_title, RESULT_FLAGS, true, meaningLib);
+            insertTextToWords(document.dc_description(), 3, WordReferenceRow.flag_app_dc_description, RESULT_FLAGS, true, meaningLib);
+            insertTextToWords(document.dc_creator(),     4, WordReferenceRow.flag_app_dc_creator, RESULT_FLAGS, true, meaningLib);
+            insertTextToWords(document.dc_publisher(),   5, WordReferenceRow.flag_app_dc_creator, RESULT_FLAGS, true, meaningLib);
+            insertTextToWords(document.dc_subject(' '),  6, WordReferenceRow.flag_app_dc_description, RESULT_FLAGS, true, meaningLib);
             // missing: tags!
             final String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
-                insertTextToWords(titles[i], i + 10, WordReferenceRow.flag_app_emphasized, RESULT_FLAGS, true);
+                insertTextToWords(titles[i], i + 10, WordReferenceRow.flag_app_emphasized, RESULT_FLAGS, true, meaningLib);
             }
             
             // anchors: for text indexing we add only the anchor description
@@ -173,7 +176,7 @@ public final class Condenser {
         }
         
         // add the URL components to the word list
-        insertTextToWords(document.dc_source().toNormalform(false, true), 0, WordReferenceRow.flag_app_dc_identifier, RESULT_FLAGS, false);
+        insertTextToWords(document.dc_source().toNormalform(false, true), 0, WordReferenceRow.flag_app_dc_identifier, RESULT_FLAGS, false, meaningLib);
 
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
@@ -181,24 +184,24 @@ public final class Condenser {
             Iterator<Map.Entry<MultiProtocolURI, String>> i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasaudio, RESULT_FLAGS, false);
-                insertTextToWords(entry.getValue(), 99, flag_cat_hasaudio, RESULT_FLAGS, true);
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasaudio, RESULT_FLAGS, false, meaningLib);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasaudio, RESULT_FLAGS, true, meaningLib);
             }
 
             // video
             i = document.getVideolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasvideo, RESULT_FLAGS, false);
-                insertTextToWords(entry.getValue(), 99, flag_cat_hasvideo, RESULT_FLAGS, true);
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasvideo, RESULT_FLAGS, false, meaningLib);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasvideo, RESULT_FLAGS, true, meaningLib);
             }
 
             // applications
             i = document.getApplinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
-                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasapp, RESULT_FLAGS, false);
-                insertTextToWords(entry.getValue(), 99, flag_cat_hasapp, RESULT_FLAGS, true);
+                insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasapp, RESULT_FLAGS, false, meaningLib);
+                insertTextToWords(entry.getValue(), 99, flag_cat_hasapp, RESULT_FLAGS, true, meaningLib);
             }
 
             // images
@@ -206,8 +209,8 @@ public final class Condenser {
             ImageEntry ientry;
             while (j.hasNext()) {
                 ientry = j.next();
-                insertTextToWords(ientry.url().toNormalform(false, false), 99, flag_cat_hasimage, RESULT_FLAGS, false);
-                insertTextToWords(ientry.alt(), 99, flag_cat_hasimage, RESULT_FLAGS, true);
+                insertTextToWords(ientry.url().toNormalform(false, false), 99, flag_cat_hasimage, RESULT_FLAGS, false, meaningLib);
+                insertTextToWords(ientry.alt(), 99, flag_cat_hasimage, RESULT_FLAGS, true, meaningLib);
             }
         
             // finally check all words for missing flag entry
@@ -225,12 +228,18 @@ public final class Condenser {
         }
     }
     
-    private void insertTextToWords(final String text, final int phrase, final int flagpos, final Bitfield flagstemplate, boolean useForLanguageIdentification) {
+    private void insertTextToWords(
+            final String text,
+            final int phrase,
+            final int flagpos,
+            final Bitfield flagstemplate,
+            boolean useForLanguageIdentification,
+            DidYouMeanLibrary meaningLib) {
         String word;
         Word wprop;
         sievedWordsEnum wordenum;
         try {
-            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes("UTF-8")));
+            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes("UTF-8")), meaningLib);
         } catch (final UnsupportedEncodingException e) {
             return;
         }
@@ -250,11 +259,11 @@ public final class Condenser {
         }
     }
 
-    public Condenser(final InputStream text) throws UnsupportedEncodingException {
+    public Condenser(final InputStream text, DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         words = new TreeMap<String, Word>();
-        createCondensement(text);
+        createCondensement(text, meaningLib);
     }
     
     public int excludeWords(final TreeSet<String> stopwords) {
@@ -274,7 +283,7 @@ public final class Condenser {
         return this.languageIdentificator.getLanguage();
     }
 
-    private void createCondensement(final InputStream is) throws UnsupportedEncodingException {
+    private void createCondensement(final InputStream is, DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
         final HashSet<String> currsentwords = new HashSet<String>();
         StringBuilder sentence = new StringBuilder(100);
         String word = "";
@@ -293,7 +302,7 @@ public final class Condenser {
         final HashMap<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
         
         // read source
-        final sievedWordsEnum wordenum = new sievedWordsEnum(is);
+        final sievedWordsEnum wordenum = new sievedWordsEnum(is, meaningLib);
         while (wordenum.hasMoreElements()) {
             word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             if (languageIdentificator != null) languageIdentificator.add(word);
@@ -467,11 +476,11 @@ public final class Condenser {
      * @param sentence the sentence to be tokenized
      * @return a ordered map containing word hashes as key and positions as value. The map is orderd by the hash ordering
      */
-    public static TreeMap<byte[], Integer> hashSentence(final String sentence) {
+    public static TreeMap<byte[], Integer> hashSentence(final String sentence, DidYouMeanLibrary meaningLib) {
         final TreeMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        final Enumeration<StringBuilder> words = wordTokenizer(sentence, "UTF-8");
+        final Enumeration<String> words = wordTokenizer(sentence, "UTF-8", meaningLib);
         int pos = 0;
-        StringBuilder word;
+        String word;
         byte[] hash;
         Integer oldpos;
         while (words.hasMoreElements()) {
@@ -487,23 +496,25 @@ public final class Condenser {
         return map;
     }
     
-    public static Enumeration<StringBuilder> wordTokenizer(final String s, final String charset) {
+    public static Enumeration<String> wordTokenizer(final String s, final String charset, DidYouMeanLibrary meaningLib) {
         try {
-            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes(charset)));
+            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes(charset)), meaningLib);
         } catch (final Exception e) {
             return null;
         }
     }
 	
-    public static class sievedWordsEnum implements Enumeration<StringBuilder> {
+    public static class sievedWordsEnum implements Enumeration<String> {
         // this enumeration removes all words that contain either wrong characters or are too short
         
         StringBuilder buffer = null;
         unsievedWordsEnum e;
+        DidYouMeanLibrary meaningLib;
 
-        public sievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
-            e = new unsievedWordsEnum(is);
-            buffer = nextElement0();
+        public sievedWordsEnum(final InputStream is, DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
+            this.e = new unsievedWordsEnum(is);
+            this.buffer = nextElement0();
+            this.meaningLib = meaningLib;
         }
 
         public void pre(final boolean x) {
@@ -527,9 +538,11 @@ public final class Condenser {
             return buffer != null;
         }
 
-        public StringBuilder nextElement() {
-            final StringBuilder r = buffer;
+        public String nextElement() {
+            final String r = (buffer == null) ? null : buffer.toString();
             buffer = nextElement0();
+            // put word to words statistics cache
+            if (meaningLib != null) meaningLib.learn(r);
             return r;
         }
 
@@ -710,7 +723,7 @@ public final class Condenser {
         return s;
     }
 
-    public static Map<String, Word> getWords(final String text) {
+    public static Map<String, Word> getWords(final String text, DidYouMeanLibrary meaningLib) {
         // returns a word/indexWord relation map
         if (text == null) return null;
         ByteArrayInputStream buffer;
@@ -720,7 +733,7 @@ public final class Condenser {
 			buffer = new ByteArrayInputStream(text.getBytes());
 		}
         try {
-            return new Condenser(buffer).words();
+            return new Condenser(buffer, meaningLib).words();
         } catch (final UnsupportedEncodingException e) {
             return null;
         }

@@ -35,6 +35,8 @@ import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import de.anomic.data.LibraryProvider;
+
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.TextParser;
@@ -133,7 +135,7 @@ public class DocumentIndex extends Segment {
             throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
         Document document = Document.mergeDocuments(url, null, documents);
-        final Condenser condenser = new Condenser(document, true, true);
+        final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib);
         return super.storeDocument(
                 url,
                 null,
