@@ -193,8 +193,31 @@ public class AccessTracker_p {
             prop.put("page_num", m);
             prop.put("page_resultcount", rcount);
             
-            // Put -1 instead of NaN as result for empty search list
-            if (m == 0) m = -1;
+            // Put -1 instead of NaN as result for empty search list and return the safe HTML blank char for table output
+            if (m == 0) {
+                m = -1;
+                // return empty values to not break the table view
+                prop.put("page_list", 1);
+                prop.put("page_list_0_dark", 1 );
+                prop.put("page_list_0_host", "&nbsp;");
+                prop.put("page_list_0_date", "&nbsp;");
+                prop.put("page_list_0_timestamp", "&nbsp;");
+                if (page == 2) {
+                    // local search
+                    prop.putNum("page_list_0_offset", "");
+                    prop.put("page_list_0_querystring", "");
+                } else {
+                    // remote search
+                    prop.put("page_list_0_peername", "&nbsp;");
+                    prop.put("page_list_0_queryhashes", "&nbsp;");
+                }
+                prop.putNum("page_list_0_querycount", "");
+                prop.putNum("page_list_0_resultcount", "");
+                prop.putNum("page_list_0_urltime", "");
+                prop.putNum("page_list_0_snippettime", "");
+                prop.putNum("page_list_0_resulttime", "");
+                prop.put("page_list_0_userAgent", "&nbsp;");
+            }
             if (rcount == 0) rcount = -1;
             prop.putNum("page_querycount_avg", (double) qcountSum / m);
             prop.putNum("page_resultcount_avg", (double) rcountSum / m);
@@ -245,7 +268,19 @@ public class AccessTracker_p {
                 entCount++;
             }
             } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
-            prop.put("page_list", entCount);
+            // return empty values to not break the table view if no results can be listed
+            if (entCount==0) {                
+                prop.put("page_list", 1);
+                prop.put("page_list_0_dates_0_date", "&nbsp;");
+                prop.put("page_list_0_dates", 1);
+                prop.putNum("page_list_0_qph", "");
+                prop.put("page_list_0_dark", 1 );
+                prop.put("page_list_0_peername", "&nbsp;");
+                prop.put("page_list_0_host", "&nbsp;");
+                prop.putNum("page_list_0_count", "");
+            } else {
+                prop.put("page_list", entCount);
+            }
             prop.putNum("page_num", entCount);
             prop.putNum("page_total", (page == 3) ? sb.localSearches.size() : sb.remoteSearches.size());
             prop.putNum("page_qph_sum", qphSum);

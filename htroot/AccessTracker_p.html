@@ -82,22 +82,6 @@
         <td>User Agent</td>
       </tr>
     </thead>
-    <tbody>
-      #{list}#
-      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-        <td>#[host]#</td>
-        <td>#[date]#</td>
-        <td>#[offset]#</td>
-        <td>#[querycount]#</td>
-        <td>#[resultcount]#</td>
-        <td>#[resulttime]#</td>
-        <td>#[urltime]#</td>
-        <td>#[snippettime]#</td>
-        <td><a href="/yacysearch.html?query=#[querystring]#&resource=local">#[querystring]#</a></td>
-        <td>#[userAgent]#</td>
-      </tr>
-      #{/list}#
-    </tbody>
     <tfoot>
       <tr class="TableHeader">
         <td></td>
@@ -112,6 +96,22 @@
         <td></td>
       </tr>
     </tfoot>
+    <tbody>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[date]#</td>
+        <td>#[offset]#</td>
+        <td>#[querycount]#</td>
+        <td>#[resultcount]#</td>
+        <td>#[resulttime]#</td>
+        <td>#[urltime]#</td>
+        <td>#[snippettime]#</td>
+        <td><a href="/yacysearch.html?query=#[querystring]#&amp;resource=local">#[querystring]#</a></td>
+        <td>#[userAgent]#</td>
+      </tr>
+      #{/list}#
+    </tbody>
     </table>
     ::
     <h2>Local Search Host Tracker</h2>
@@ -126,6 +126,14 @@
         <td>Access Dates</td>
       </tr>
     </thead>
+    <tfoot>
+      <tr class="TableHeader">
+        <td></td>
+        <td>&#931; #[total]#</td>
+        <td>&#931; #[qph_sum]#</td>
+        <td></td>
+      </tr>
+    </tfoot>
     <tbody>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
@@ -136,14 +144,6 @@
       </tr>
       #{/list}#
     </tbody>
-    <tfoot>
-      <tr class="TableHeader">
-        <td></td>
-        <td>&#931; #[total]#</td>
-        <td>&#931; #[qph_sum]#</td>
-        <td></td>
-      </tr>
-    </tfoot>
     </table>
     ::
     <h2>Remote Search Log</h2>
@@ -163,21 +163,6 @@
         <td>Search Word Hashes</td>
       </tr>
     </thead>
-    <tbody>
-      #{list}#
-      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-        <td>#[host]#</td>
-        <td>#[peername]#</td>
-        <td>#[date]#</td>
-        <td>#[querycount]#</td>
-        <td>#[resultcount]#</td>
-        <td>#[resulttime]#</td>
-        <td>#[urltime]#</td>
-        <td>#[snippettime]#</td>
-        <td>#[queryhashes]#</td>
-      </tr>
-      #{/list}#
-    </tbody>
     <tfoot>
       <tr class="TableHeader">
         <td>Total: #[num]#
@@ -197,6 +182,21 @@
         <td></td>
       </tr>
     </tfoot>
+    <tbody>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[host]#</td>
+        <td>#[peername]#</td>
+        <td>#[date]#</td>
+        <td>#[querycount]#</td>
+        <td>#[resultcount]#</td>
+        <td>#[resulttime]#</td>
+        <td>#[urltime]#</td>
+        <td>#[snippettime]#</td>
+        <td>#[queryhashes]#</td>
+      </tr>
+      #{/list}#
+    </tbody>
     </table>
     ::
     <h2>Remote Search Host Tracker</h2>
@@ -212,6 +212,15 @@
         <td>Access Dates</td>
       </tr>
     </thead>
+    <tfoot>
+      <tr class="TableHeader">
+        <td></td>
+        <td></td>
+        <td>&#931; #[total]#</td>
+        <td>&#931; #[qph_sum]#</td>
+        <td></td>
+      </tr>
+    </tfoot>
     <tbody>
       #{list}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
@@ -223,15 +232,6 @@
       </tr>
       #{/list}#
     </tbody>
-    <tfoot>
-      <tr class="TableHeader">
-        <td></td>
-        <td></td>
-        <td>&#931; #[total]#</td>
-        <td>&#931; #[qph_sum]#</td>
-        <td></td>
-      </tr>
-    </tfoot>
     </table>
     #(/page)#
     #%env/templates/footer.template%#

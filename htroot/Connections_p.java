@@ -98,7 +98,7 @@ public final class Connections_p {
             if (userAddress == null) continue;
             
             String dest = null;
-            String prot = null;
+            String prot = "http"; // only httpd sessions listed
             
             if ((dest != null) && (dest.equals(virtualHost))) dest = sb.peers.mySeed().getName() + ".yacy";
             

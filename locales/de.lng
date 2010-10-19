@@ -37,6 +37,9 @@ Server Access Overview==Server Zugriff Überblick
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen HTTP Server innerhalb der letzten Stunde gestellt wurden.
 This is a list of requests to the local http server within the last hour.==Dies ist eine Liste von Anfragen, die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
 Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
+#>Host<==>Host<
+>Path<==>Pfad<
+Date<==Datum<
 Access Count During==Erfasster Zugriff während der
 last Second==letzten Sekunde
 last Minute==letzten Minute
@@ -55,7 +58,6 @@ Remote Search Host Tracker==Remote Suche Host Tracker
 This is a list of searches that had been requested from this\' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgeführt wurden.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# requests.==Es werden #[num]# Einträge von insgesamt #[total]# Anfragen angezeigt.
 Requesting Host==Anfragender Host
-Date</td>==Datum</td>
 Offset==Versatz
 Expected Results==Erwartete Ergebnisse
 Returned Results==Gefundene Ergebnisse
@@ -63,6 +65,7 @@ Used Time \(ms\)==Gebrauchte Zeit (in ms)
 URL fetch \(ms\)==URL Abruf (in ms)
 Snippet comp \(ms\)==Vorschau Erzeugung (in ms)
 Query==Suchwort
+#>User Agent<==>User Agent<
 Search Word Hashes==Suchwort Hash
 Count</td>==Anzahl</td>
 Queries Per Last Hour==Suchanfragen pro letzter Stunde
@@ -3161,11 +3164,10 @@ Pictures==Bilder
 
 #File: yacysearchtrailer.html
 #---------------------------
+Show search results for "\#\[query\]\#" on map==Zeige die Suchergebnisse für "#[query]#" auf der Karte
 #>Domain Navigator==>Domain Navigator
 >Name Space Navigator==>Namespace Navigator
 >Author Navigator==>Autoren Navigator
->Topic Navigator==>Themen Navigator
-#Show search results for "#\[query\]#" on map!==Zeige die Suchergebnisse für "#[query]#" auf der Karte!
 #-----------------------------
 
 ### Subdirectory api ###
