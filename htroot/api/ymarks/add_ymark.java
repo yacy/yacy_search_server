@@ -1,14 +1,13 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.data.YMarkTables;
 import de.anomic.data.userDB;
 import de.anomic.search.Switchboard;
@@ -31,6 +30,7 @@ public class add_ymark {
         if(isAdmin || isAuthUser) {
         	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_BOOKMARKS_BASENAME;
         	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_TAGS_BASENAME;
+        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_FOLDERS_BASENAME;
         	
             byte[] urlHash = null;
             String url ="";
@@ -63,12 +63,13 @@ public class add_ymark {
             }
             
             // insert or update entry
+            final byte[] date = String.valueOf(System.currentTimeMillis()).getBytes();
             try {
                 if (bmk_row == null) {
                     // create and insert new entry
-                    Data data = new Data();
-                    final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));
-                    final byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
+                    Data data = new Data();          
+                    final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));                
+                    final String foldersString = YMarkTables.cleanFoldersString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,YMarkTables.TABLE_FOLDERS_UNSORTED));
                     
                     data.put(YMarkTables.TABLE_BOOKMARKS_COL_URL, url.getBytes());
                     data.put(YMarkTables.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT).getBytes());
@@ -76,16 +77,20 @@ public class add_ymark {
                     data.put(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC_FALSE).getBytes());
                     data.put(YMarkTables.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());
                     data.put(YMarkTables.TABLE_BOOKMARKS_COL_VISITS, YMarkTables.TABLE_BOOKMARKS_COL_VISITS_ZERO.getBytes());
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER, post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER,YMarkTables.TABLE_FOLDERS_UNSORTED).getBytes());
+                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS, foldersString.getBytes());
                     data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_ADDED, date);
                     data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED, date);
                     data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_VISITED, date);
-                    sb.tables.insert(bmk_table, urlHash, data);
-                    
+                    sb.tables.insert(bmk_table, urlHash, data);                    
 
+                    final String[] folderArray = foldersString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
+                    for (final String folder : folderArray) {
+                    	sb.tables.bookmarks.updateIndexTable(folder_table, folder, urlHash, YMarkTables.TABLE_INDEX_ACTION_ADD);
+                    } 
+                    
                     final String[] tagArray = tagsString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
                     for (final String tag : tagArray) {
-                    	sb.tables.bookmarks.updateTAGTable(tag_table, tag, urlHash, YMarkTables.TABLE_TAGS_ACTION_ADD);
+                    	sb.tables.bookmarks.updateIndexTable(tag_table, tag, urlHash, YMarkTables.TABLE_INDEX_ACTION_ADD);
                     } 
 
                     
@@ -94,34 +99,27 @@ public class add_ymark {
                     bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)).getBytes());
                     bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)).getBytes());
                     bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC_FALSE)).getBytes());
-                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER, post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDER,YMarkTables.TABLE_FOLDERS_UNSORTED)).getBytes());
+                   
+                    HashSet<String> oldSet;
+                    HashSet<String>newSet;
+                    
+                    final String foldersString = post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,YMarkTables.TABLE_FOLDERS_UNSORTED));
+                	oldSet = YMarkTables.keysStringToSet(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,YMarkTables.TABLE_FOLDERS_UNSORTED));
+                	newSet = YMarkTables.keysStringToSet(foldersString);
+                    updateIndex(folder_table, urlHash, oldSet, newSet);
+                	bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS, foldersString.getBytes());
                     
                     final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));
-                	HashSet<String>old_tagSet = YMarkTables.getTagSet(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT), false);
-                	HashSet<String>new_tagSet = YMarkTables.getTagSet(tagsString, false);
-                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());
+                	oldSet = YMarkTables.keysStringToSet(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));
+                	newSet = YMarkTables.keysStringToSet(tagsString);
+                	updateIndex(tag_table, urlHash, oldSet, newSet);
+                	bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());
                 	            	
                     // modify date attribute
-                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED, DateFormatter.formatShortMilliSecond(new Date()).getBytes());                
+                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED, date);                
                     
                     // update bmk_table
-                    sb.tables.update(bmk_table, bmk_row);
-                    
-                    //update tag_table
-                    Iterator <String> tagIter;
-                    
-                    new_tagSet.removeAll(old_tagSet);
-                    tagIter = new_tagSet.iterator();
-                    while(tagIter.hasNext()) {
-                    	sb.tables.bookmarks.updateTAGTable(tag_table, tagIter.next(), urlHash, YMarkTables.TABLE_TAGS_ACTION_ADD);
-                    }
-                    
-                    new_tagSet = YMarkTables.getTagSet(tagsString, false);
-                    old_tagSet.removeAll(new_tagSet);
-                    tagIter=old_tagSet.iterator();
-                    while(tagIter.hasNext()) {
-                    	sb.tables.bookmarks.updateTAGTable(tag_table, tagIter.next(), urlHash, YMarkTables.TABLE_TAGS_ACTION_REMOVE);
-                    }                    
+                    sb.tables.update(bmk_table, bmk_row);                 
                 }
             } catch (IOException e) {
                 Log.logException(e);
@@ -132,5 +130,22 @@ public class add_ymark {
         }
         // return rewrite properties
         return prop;
-    }	
+    }
+	
+	private static void updateIndex(final String index_table, final byte[] urlHash, final HashSet<String> oldSet, final HashSet<String> newSet) {
+        Iterator <String> tagIter;        
+        HashSet<String> urlSet = new HashSet<String>(newSet);
+        
+        newSet.removeAll(oldSet);
+        tagIter = newSet.iterator();
+        while(tagIter.hasNext()) {
+        	sb.tables.bookmarks.updateIndexTable(index_table, tagIter.next(), urlHash, YMarkTables.TABLE_INDEX_ACTION_ADD);
+        }
+        
+        oldSet.removeAll(urlSet);
+        tagIter=oldSet.iterator();
+        while(tagIter.hasNext()) {
+        	sb.tables.bookmarks.updateIndexTable(index_table, tagIter.next(), urlHash, YMarkTables.TABLE_INDEX_ACTION_REMOVE);
+        }  
+	}
 }

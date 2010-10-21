@@ -72,6 +72,11 @@ public class WorkTables extends Tables {
         this.bookmarks = new YMarkTables(this);
     }
     
+    public void clear(final String tablename) throws IOException {
+    	super.clear(tablename);
+    	this.bookmarks.cleanCache(tablename);
+    }
+    
     /**
      * recording of a api call. stores the call parameters into the API database table
      * @param post the post arguments of the api call

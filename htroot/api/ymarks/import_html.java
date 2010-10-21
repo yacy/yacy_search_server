@@ -25,14 +25,14 @@ public class import_html {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_BOOKMARKS_BASENAME;
+        	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN);
         	if(post.containsKey("htmlfile")){
 				try {
 					final ByteArrayInputStream byteIn = new ByteArrayInputStream(post.get("htmlfile$file").getBytes("UTF-8"));
 					if(byteIn !=null) {
 						final InputStreamReader reader =  new InputStreamReader(byteIn,"UTF-8");
 						final ParserDelegator delegator =  new ParserDelegator();
-						final YMarksHTMLImporter htmlHandler = new YMarksHTMLImporter(sb.tables, bmk_table);
+						final YMarksHTMLImporter htmlHandler = new YMarksHTMLImporter(sb.tables, bmk_user);
 						delegator.parse(reader, htmlHandler, true);
 					}
 				} catch (UnsupportedEncodingException e) {

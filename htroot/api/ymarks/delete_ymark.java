@@ -26,6 +26,7 @@ public class delete_ymark {
         if(isAdmin || isAuthUser) {
         	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_BOOKMARKS_BASENAME;
         	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_TAGS_BASENAME;
+        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_FOLDERS_BASENAME;
         	
             byte[] urlHash = null;
             
@@ -42,10 +43,9 @@ public class delete_ymark {
 	            bmk_row = sb.tables.select(bmk_table, urlHash);
 	            if(bmk_row != null) {
 		            final String tagsString = bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT);
-		            final String[] tagArray = tagsString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
-	                for (final String tag : tagArray) {
-	                	sb.tables.bookmarks.updateTAGTable(tag_table, tag, urlHash,YMarkTables.TABLE_TAGS_ACTION_REMOVE);
-	                }
+		            removeIndexEntry(tag_table, tagsString, urlHash);
+		            final String foldersString = bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,YMarkTables.TABLE_FOLDERS_ROOT);
+		            removeIndexEntry(folder_table, foldersString, urlHash);
 	            }
 				sb.tables.delete(bmk_table,urlHash);
 	        	prop.put("result", "1");
@@ -59,5 +59,12 @@ public class delete_ymark {
         }       
         // return rewrite properties
         return prop;
+	}
+	
+	private static void removeIndexEntry(final String index_table, String keysString, final byte[] urlHash) {
+        final String[] keyArray = keysString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
+        for (final String tag : keyArray) {
+        	sb.tables.bookmarks.updateIndexTable(index_table, tag, urlHash, YMarkTables.TABLE_INDEX_ACTION_REMOVE);
+        }
 	}
 }
