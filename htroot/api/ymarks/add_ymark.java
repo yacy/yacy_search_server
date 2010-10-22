@@ -28,17 +28,21 @@ public class add_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_BOOKMARKS_BASENAME;
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_TAGS_BASENAME;
-        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_FOLDERS_BASENAME;
+        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
+        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
+        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
         	
             byte[] urlHash = null;
             String url ="";
-    		if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_URL)) {
+    		if(post.containsKey(YMarkTables.BOOKMARK.URL.key())) {
                 try {
-                	url = post.get(YMarkTables.TABLE_BOOKMARKS_COL_URL,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT);
-                	if (!url.toLowerCase().startsWith(YMarkTables.TABLE_BOOKMARKS_URL_PROTOCOL_HTTP) && !url.toLowerCase().startsWith(YMarkTables.TABLE_BOOKMARKS_URL_PROTOCOL_HTTPS)) {
-                        url=YMarkTables.TABLE_BOOKMARKS_URL_PROTOCOL_HTTP+url;
+                	url = post.get(YMarkTables.BOOKMARK.URL.key(),YMarkTables.BOOKMARK.URL.deflt());
+                	boolean hasProtocol = false;
+                	for (YMarkTables.PROTOCOL p : YMarkTables.PROTOCOL.values()) {
+                		hasProtocol = url.toLowerCase().startsWith(p.protocol());
+                	}
+                	if (!hasProtocol) {
+                        url=YMarkTables.PROTOCOL.HTTP.protocol(url);
                     }
                 	urlHash = YMarkTables.getBookmarkId(url);
         		} catch (MalformedURLException e) {
@@ -68,19 +72,19 @@ public class add_ymark {
                 if (bmk_row == null) {
                     // create and insert new entry
                     Data data = new Data();          
-                    final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));                
-                    final String foldersString = YMarkTables.cleanFoldersString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,YMarkTables.TABLE_FOLDERS_UNSORTED));
+                    final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt()));                
+                    final String foldersString = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.TABLE_FOLDERS_UNSORTED));
                     
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_URL, url.getBytes());
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT).getBytes());
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT).getBytes());
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC_FALSE).getBytes());
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_VISITS, YMarkTables.TABLE_BOOKMARKS_COL_VISITS_ZERO.getBytes());
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS, foldersString.getBytes());
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_ADDED, date);
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED, date);
-                    data.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_VISITED, date);
+                    data.put(YMarkTables.BOOKMARK.URL.key(), url.getBytes());
+                    data.put(YMarkTables.BOOKMARK.TITLE.key(), post.get(YMarkTables.BOOKMARK.TITLE.key(),YMarkTables.BOOKMARK.TITLE.deflt()));
+                    data.put(YMarkTables.BOOKMARK.DESC.key(), post.get(YMarkTables.BOOKMARK.DESC.key(),YMarkTables.BOOKMARK.DESC.deflt()));
+                    data.put(YMarkTables.BOOKMARK.PUBLIC.key(), post.get(YMarkTables.BOOKMARK.PUBLIC.key(),YMarkTables.BOOKMARK.PUBLIC.deflt()));
+                    data.put(YMarkTables.BOOKMARK.TAGS.key(), tagsString.getBytes());
+                    data.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.b_deflt());
+                    data.put(YMarkTables.BOOKMARK.FOLDERS.key(), foldersString.getBytes());
+                    data.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), date);
+                    data.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date);
+                    data.put(YMarkTables.BOOKMARK.DATE_VISITED.key(), date);
                     sb.tables.insert(bmk_table, urlHash, data);                    
 
                     final String[] folderArray = foldersString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
@@ -96,27 +100,27 @@ public class add_ymark {
                     
                 } else {	
                 	// modify and update existing entry
-                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_TITLE, post.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)).getBytes());
-                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_DESC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)).getBytes());
-                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC, post.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC_FALSE)).getBytes());
+                    bmk_row.put(YMarkTables.BOOKMARK.TITLE.key(), post.get(YMarkTables.BOOKMARK.TITLE.key(),bmk_row.get(YMarkTables.BOOKMARK.TITLE.key(),YMarkTables.BOOKMARK.TITLE.deflt())).getBytes());
+                    bmk_row.put(YMarkTables.BOOKMARK.DESC.key(), post.get(YMarkTables.BOOKMARK.DESC.key(),bmk_row.get(YMarkTables.BOOKMARK.DESC.key(),YMarkTables.BOOKMARK.DESC.deflt())).getBytes());
+                    bmk_row.put(YMarkTables.BOOKMARK.PUBLIC.key(), post.get(YMarkTables.BOOKMARK.PUBLIC.key(),bmk_row.get(YMarkTables.BOOKMARK.PUBLIC.key(),YMarkTables.BOOKMARK.PUBLIC.deflt())).getBytes());
                    
                     HashSet<String> oldSet;
                     HashSet<String>newSet;
                     
-                    final String foldersString = post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,YMarkTables.TABLE_FOLDERS_UNSORTED));
-                	oldSet = YMarkTables.keysStringToSet(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,YMarkTables.TABLE_FOLDERS_UNSORTED));
+                    final String foldersString = post.get(YMarkTables.BOOKMARK.FOLDERS.key(),bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.BOOKMARK.FOLDERS.deflt()));
+                	oldSet = YMarkTables.keysStringToSet(bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.BOOKMARK.FOLDERS.deflt()));
                 	newSet = YMarkTables.keysStringToSet(foldersString);
                     updateIndex(folder_table, urlHash, oldSet, newSet);
-                	bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS, foldersString.getBytes());
+                	bmk_row.put(YMarkTables.BOOKMARK.FOLDERS.key(), foldersString.getBytes());
                     
-                    final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));
-                	oldSet = YMarkTables.keysStringToSet(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT));
+                    final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt()));
+                	oldSet = YMarkTables.keysStringToSet(bmk_row.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt()));
                 	newSet = YMarkTables.keysStringToSet(tagsString);
                 	updateIndex(tag_table, urlHash, oldSet, newSet);
-                	bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_TAGS, tagsString.getBytes());
+                	bmk_row.put(YMarkTables.BOOKMARK.TAGS.key(), tagsString.getBytes());
                 	            	
                     // modify date attribute
-                    bmk_row.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED, date);                
+                    bmk_row.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date);                
                     
                     // update bmk_table
                     sb.tables.update(bmk_table, bmk_row);                 

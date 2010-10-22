@@ -23,18 +23,18 @@ public class delete_ymark {
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
-        if(isAdmin || isAuthUser) {
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_BOOKMARKS_BASENAME;
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_TAGS_BASENAME;
-        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_FOLDERS_BASENAME;
+        if(isAdmin || isAuthUser) {     	
+        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
+        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
+        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
         	
             byte[] urlHash = null;
             
             try {
 	        	if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_ID)) {
 	        		urlHash = post.get(YMarkTables.TABLE_BOOKMARKS_COL_ID).getBytes();
-	        	} else if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_URL)) {
-					urlHash = YMarkTables.getBookmarkId(post.get(YMarkTables.TABLE_BOOKMARKS_COL_URL));
+	        	} else if(post.containsKey(YMarkTables.BOOKMARK.URL.key())) {
+					urlHash = YMarkTables.getBookmarkId(post.get(YMarkTables.BOOKMARK.URL.key()));
 	        	} else {
 	        		prop.put("result", "0");
 	        		return prop;
@@ -42,9 +42,9 @@ public class delete_ymark {
 	            Tables.Row bmk_row = null;
 	            bmk_row = sb.tables.select(bmk_table, urlHash);
 	            if(bmk_row != null) {
-		            final String tagsString = bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT);
+		            final String tagsString = bmk_row.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt());
 		            removeIndexEntry(tag_table, tagsString, urlHash);
-		            final String foldersString = bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS,YMarkTables.TABLE_FOLDERS_ROOT);
+		            final String foldersString = bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.TABLE_FOLDERS_ROOT);
 		            removeIndexEntry(folder_table, foldersString, urlHash);
 	            }
 				sb.tables.delete(bmk_table,urlHash);

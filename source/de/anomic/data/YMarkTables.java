@@ -13,34 +13,79 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 public class YMarkTables {
+    
+	public static enum TABLES {
+		BOOKMARKS ("_bookmarks"),
+		TAGS ("_tags"),
+		FOLDERS ("_folders");
+		
+		private String basename;
+		
+		private TABLES(String b) {
+			this.basename = b;
+		}
+		public String basename() {
+			return this.basename;
+		}
+		public String tablename(String user) {
+			return user+this.basename;
+		}
+	}
 	
-	public final static String TABLE_BOOKMARKS_BASENAME = "_bookmarks";
+	public static enum PROTOCOL {
+    	HTTP ("http://"),
+    	HTTPS ("https://");
+    	
+    	private String protocol;
+    	
+    	private PROTOCOL(String s) {
+    		this.protocol = s;
+    	}
+    	public String protocol() {
+    		return this.protocol;
+    	}
+    	public String protocol(String s) {
+    		return this.protocol+s;
+    	}
+    }
+    
+    public static enum BOOKMARK {
+    	URL ("url", ""),
+    	TITLE ("title", ""),
+    	DESC ("desc", ""),
+    	DATE_ADDED ("date_added", ""),
+    	DATE_MODIFIED ("date_modified", ""),
+    	DATE_VISITED ("date_visited", ""),
+    	PUBLIC ("public", "flase"),
+    	TAGS ("tags", "unsorted"),
+    	VISITS ("visits", "0"),
+    	FOLDERS ("folders", "/unsorted");
+    	    	
+    	private String key;
+    	private String dflt;
+    	
+    	private BOOKMARK(String k, String s) {
+    		this.key = k;
+    		this.dflt = s;
+    	}    	
+    	public String key() {
+    		return this.key;
+    	}    	
+    	public String deflt() {
+    		return  this.dflt;
+    	}
+    	public byte[] b_deflt() {
+    		return  dflt.getBytes();
+    	}
+    }
+
 	public final static String TABLE_BOOKMARKS_LOG = "BOOKMARKS";
+    public final static String TABLE_BOOKMARKS_COL_ID = "id";
 	
 	public final static String TABLE_BOOKMARKS_USER_ADMIN = "admin";
 	public final static String TABLE_BOOKMARKS_USER_AUTHENTICATE = "AUTHENTICATE";
 	public final static String TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG = "Authentication required!";
 	
-    public final static String TABLE_BOOKMARKS_URL_PROTOCOL_HTTP = "http://";
-    public final static String TABLE_BOOKMARKS_URL_PROTOCOL_HTTPS = "https://";
-	
-	public final static String TABLE_BOOKMARKS_COL_ID = "id";
-    public final static String TABLE_BOOKMARKS_COL_URL = "url";
-    public final static String TABLE_BOOKMARKS_COL_TITLE = "title";
-    public final static String TABLE_BOOKMARKS_COL_DESC = "desc";
-    public final static String TABLE_BOOKMARKS_COL_DATE_ADDED = "added";
-    public final static String TABLE_BOOKMARKS_COL_DATE_MODIFIED = "modified";
-    public final static String TABLE_BOOKMARKS_COL_DATE_VISITED = "visited";
-    public final static String TABLE_BOOKMARKS_COL_PUBLIC = "public";
-    public final static String TABLE_BOOKMARKS_COL_TAGS = "tags";
-    public final static String TABLE_BOOKMARKS_COL_VISITS = "visits";
-    public final static String TABLE_BOOKMARKS_COL_FOLDERS = "folders";    
-    public final static String TABLE_BOOKMARKS_COL_DEFAULT = "";
-    public final static String TABLE_BOOKMARKS_COL_PUBLIC_TRUE = "true";
-    public final static String TABLE_BOOKMARKS_COL_PUBLIC_FALSE = "false";  
-    public final static String TABLE_BOOKMARKS_COL_VISITS_ZERO = "0";
-    
-	public final static String TABLE_TAGS_BASENAME = "_tags";	
 	public final static String TABLE_TAGS_SEPARATOR = ",";
 
 	public final static String TABLE_INDEX_COL_ID = "id";
@@ -49,8 +94,7 @@ public class YMarkTables {
     public final static String TABLE_INDEX_COL_URLS = "urls";    
     public final static short TABLE_INDEX_ACTION_ADD = 1;
     public final static short TABLE_INDEX_ACTION_REMOVE = 2;
-    
-    public final static String TABLE_FOLDERS_BASENAME = "_folders";
+
     public final static String TABLE_FOLDERS_SEPARATOR = "/"; 
     public final static String TABLE_FOLDERS_ROOT = "/"; 
     public final static String TABLE_FOLDERS_UNSORTED = "/unsorted";
@@ -75,7 +119,7 @@ public class YMarkTables {
     public final static byte[] keySetToBytes(final HashSet<String> urlSet) {
     	final Iterator<String> urlIter = urlSet.iterator();
     	final 
-    	StringBuilder urls = new StringBuilder();
+    	StringBuilder urls = new StringBuilder(urlSet.size()*20);
     	while(urlIter.hasNext()) {
     		urls.append(TABLE_TAGS_SEPARATOR);
     		urls.append(urlIter.next());

@@ -41,9 +41,9 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback {
 	}
 	
 	public YMarksHTMLImporter(final WorkTables worktables, final String user, final String folder, final String tagsString) {
-		this.bmk_table = user + YMarkTables.TABLE_BOOKMARKS_BASENAME;
-		this.tag_table = user + YMarkTables.TABLE_TAGS_BASENAME;
-		this.folder_table = user + YMarkTables.TABLE_FOLDERS_BASENAME;		
+		this.bmk_table = YMarkTables.TABLES.BOOKMARKS.tablename(user);
+		this.tag_table = YMarkTables.TABLES.TAGS.tablename(user);
+		this.folder_table = YMarkTables.TABLES.FOLDERS.tablename(user);		
 		this.worktables = worktables;
 		
 		if(folder.contains(YMarkTables.TABLE_TAGS_SEPARATOR))
@@ -71,19 +71,19 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback {
 					if(!worktables.has(this.bmk_table, urlHash)) {
 	        			// create and insert new entry                
 	                   final Data bmk = new Data();
-						bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_URL, this.href.getBytes());
-	                    bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_TITLE, (new String(data)).getBytes());
-	                    bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_DESC, YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT.getBytes());
-	                    bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC, YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC_FALSE.getBytes());
-	                    bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_VISITS, YMarkTables.TABLE_BOOKMARKS_COL_VISITS_ZERO.getBytes());
-	                    bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_ADDED, this.date_added.getBytes());
-	                    bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED, this.date_modified.getBytes());
-	                    bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_DATE_VISITED, this.date_visited.getBytes());
-	                    bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS, this.folder.getBytes());
+						bmk.put(YMarkTables.BOOKMARK.URL.key(), this.href.getBytes());
+	                    bmk.put(YMarkTables.BOOKMARK.TITLE.key(), (new String(data)).getBytes());
+	                    bmk.put(YMarkTables.BOOKMARK.DESC.key(), YMarkTables.BOOKMARK.DESC.b_deflt());
+	                    bmk.put(YMarkTables.BOOKMARK.PUBLIC.key(), YMarkTables.BOOKMARK.PUBLIC.b_deflt());
+	                    bmk.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.b_deflt());
+	                    bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), this.date_added.getBytes());
+	                    bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), this.date_modified.getBytes());
+	                    bmk.put(YMarkTables.BOOKMARK.DATE_VISITED.key(), this.date_visited.getBytes());
+	                    bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folder.getBytes());
 	                    this.worktables.bookmarks.updateIndexTable(this.folder_table, this.folder, urlHash, YMarkTables.TABLE_INDEX_ACTION_ADD);
 	                    Log.logInfo(YMarkTables.TABLE_BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folder);
 	                    if (this.tagsString != null) {
-	                    	bmk.put(YMarkTables.TABLE_BOOKMARKS_COL_TAGS, this.tagsString.getBytes());                   
+	                    	bmk.put(YMarkTables.BOOKMARK.TAGS.key(), this.tagsString.getBytes());                   
 	                        for (final String tag : tagArray) {
 	                        	this.worktables.bookmarks.updateIndexTable(this.tag_table, tag, urlHash, YMarkTables.TABLE_INDEX_ACTION_ADD);
 	                        } 

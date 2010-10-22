@@ -22,18 +22,21 @@ public class get_ymark {
         sb = (Switchboard) env;
         prop = new serverObjects();
         
+        boolean tags = false;
+        
         final userDB.Entry user = sb.userDB.getUser(header); 
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
     	final TreeSet<String> bookmarks = new TreeSet<String>();
         
         if(isAdmin || isAuthUser) {
-	    	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_BOOKMARKS_BASENAME;
-	    	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_TAGS_BASENAME;
-	    	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLE_FOLDERS_BASENAME;
-	    	
-	    	if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_TAGS)) {
-	    		final String[] tagArray = YMarkTables.cleanTagsString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS)).split(YMarkTables.TABLE_TAGS_SEPARATOR);
+        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
+        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
+        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
+        	
+	    	if(post.containsKey(YMarkTables.BOOKMARK.TAGS.key())) {
+	    		tags = true;
+	    		final String[] tagArray = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkTables.TABLE_TAGS_SEPARATOR);
 	    		try {
 					bookmarks.addAll(sb.tables.bookmarks.getBookmarks(tag_table, tagArray));
 				} catch (IOException e) {
@@ -41,10 +44,13 @@ public class get_ymark {
 				} catch (RowSpaceExceededException e) {
 					Log.logException(e);
 				}
-	    	} else if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS)) {
-	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.TABLE_BOOKMARKS_COL_FOLDERS)).split(YMarkTables.TABLE_TAGS_SEPARATOR);
-                try {
-					bookmarks.retainAll(sb.tables.bookmarks.getBookmarks(folder_table, folderArray));
+	    	} else if(post.containsKey(YMarkTables.BOOKMARK.FOLDERS.key())) {
+	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key())).split(YMarkTables.TABLE_TAGS_SEPARATOR);
+                try {                	
+					if(tags)
+						bookmarks.retainAll(sb.tables.bookmarks.getBookmarks(folder_table, folderArray));
+					else
+						bookmarks.addAll(sb.tables.bookmarks.getBookmarks(folder_table, folderArray));
 				} catch (IOException e) {
 					Log.logException(e);
 				} catch (RowSpaceExceededException e) {
@@ -70,15 +76,10 @@ public class get_ymark {
             try {
 				bmk_row = sb.tables.select(bmk_table, urlHash);
 	            if (bmk_row != null) {
-		   			prop.putXML("bookmarks_"+count+"_id", new String(urlHash));
-		   			prop.putXML("bookmarks_"+count+"_url", new String(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_URL,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)));
-		   			prop.putXML("bookmarks_"+count+"_title", new String(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TITLE,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)));
-		   			prop.putXML("bookmarks_"+count+"_desc", new String(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_DESC,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)));
-		   			prop.putXML("bookmarks_"+count+"_added", new String(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_DATE_ADDED,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)));
-		   			prop.putXML("bookmarks_"+count+"_modified", new String(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_DATE_MODIFIED,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)));
-		   			prop.putXML("bookmarks_"+count+"_visited", new String(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_DATE_VISITED,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)));
-		   			prop.putXML("bookmarks_"+count+"_public", new String(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC,YMarkTables.TABLE_BOOKMARKS_COL_PUBLIC_FALSE)));
-		   			prop.putXML("bookmarks_"+count+"_tags", new String(bmk_row.get(YMarkTables.TABLE_BOOKMARKS_COL_TAGS,YMarkTables.TABLE_BOOKMARKS_COL_DEFAULT)));
+            		prop.putXML("bookmarks_"+count+"_id", new String(urlHash));
+	            	for (YMarkTables.BOOKMARK bmk : YMarkTables.BOOKMARK.values()) {
+	            		prop.putXML("bookmarks_"+count+"_"+bmk.key(), new String(bmk_row.get(bmk.key(),bmk.deflt())));
+	            	}
 		            count++;
 	            }
 			} catch (IOException e) {
