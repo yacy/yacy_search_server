@@ -35,13 +35,13 @@ import net.yacy.document.parser.html.CharacterCoding;
 
 import de.anomic.server.serverCore;
 
-/** This class provides methods to handle texts that have been posted in the yacyWiki or other
-* parts of YaCy that use this class, like the blog or the profile.
-*
-* @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
-*/
+/** Provides methods to handle texts that have been posted in the yacyWiki or other
+  * parts of YaCy which use wiki code, like the blog or the profile.
+  *
+  * @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
+  */
 public class wikiCode extends abstractWikiParser implements wikiParser {
-    private static final String ASTERISK = "*";
+    
     private static final String EMPTY = "";
     private static final String PIPE_ESCAPED = "&#124;";
     private static final String REGEX_NOT_CHAR_NUM_OR_UNDERSCORE = "[^a-zA-Z0-9_]";
@@ -64,6 +64,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private static final String WIKI_CLOSE_LINK = "]]";
     private static final String WIKI_OPEN_LINK = "[[";
     private static final String WIKI_CLOSE_EXTERNAL_LINK = "]";
+    private static final String WIKI_OPEN_EXTERNAL_LINK = "[";
     private static final String WIKI_CLOSE_PRE_ESCAPED = "&lt;/pre&gt;";
     private static final String WIKI_OPEN_STRIKE = "&lt;s&gt;";
     private static final String WIKI_CLOSE_STRIKE = "&lt;/s&gt;";
@@ -78,9 +79,9 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private static final String WIKI_HEADLINE_TAG_6 = "======";
     private static final String WIKI_HR_LINE = "----";
     private static final String WIKI_IMAGE = "Image:";
-    private static final String WIKI_OPEN_EXTERNAL_LINK = "[";
     private static final String WIKI_OPEN_PRE_ESCAPED = "&lt;pre&gt;";
 
+    private static final char ASTERISK = '*';
     private static final char ONE = '1';
     private static final char TWO = '2';
     private static final char THREE = '3';
@@ -97,6 +98,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private static final int LEN_WIKI_OPEN_EXTERNAL_LINK = WIKI_OPEN_EXTERNAL_LINK.length();
     private static final int LEN_WIKI_CLOSE_EXTERNAL_LINK = WIKI_CLOSE_EXTERNAL_LINK.length();
     private static final int LEN_WIKI_HR_LINE = WIKI_HR_LINE.length();
+    private static final int LEN_PIPE_ESCAPED = PIPE_ESCAPED.length();
 
     private final List<String> tableOfContentElements = new ArrayList<String>();    //list of headlines used to create table of content of page
 
@@ -111,7 +113,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
 
     private final static char[] HEADLINE_LEVEL = new char[]{ONE, TWO, THREE, FOUR, FIVE, SIX};
 
-    private String numberedListLevel = EMPTY;
+    private String orderedListLevel = EMPTY;
     private String unorderedListLevel = EMPTY;
     private String defListLevel = EMPTY;
     private boolean processingCell = false;             //needed for prevention of double-execution of replaceHTML
@@ -142,6 +144,10 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         PROPERTY_VALUES.put("valign", array);
         Arrays.sort(array = new String[]{"left", "right", "center"});
         PROPERTY_VALUES.put("align", array);
+    }
+
+    private enum ListType {
+        ORDERED, UNORDERED;
     }
 
     /**
@@ -188,7 +194,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         final int lenTableEnd = tableEnd.length();
         final int lenAttribDivider = attribDivider.length();
 
-        if ((line.startsWith(tableStart)) && (!processingTable)) {
+        if (line.startsWith(tableStart) && !processingTable) {
             processingTable = true;
             newRowStart = true;
             out.append("<table");
@@ -196,14 +202,14 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 out.append(filterTableProperties(line.substring(lenTableStart).trim()));
             }
             out.append(">");
-        } else if (line.startsWith(newLine) && (processingTable)) {          // new row
+        } else if (line.startsWith(newLine) && processingTable) {          // new row
             if (!newRowStart) {
                 out.append("\t</tr>\n");
             } else {
                 newRowStart = false;
             }
             out.append("\t<tr>");
-        } else if ((line.startsWith(cellDivider)) && (processingTable)) {
+        } else if (line.startsWith(cellDivider) && processingTable) {
             out.append("\t\t<td");
             final int cellEnd = (line.indexOf(cellDivider, lenCellDivider) > 0) ? (line.indexOf(cellDivider, lenCellDivider)) : (line.length());
             int propEnd = line.indexOf(attribDivider, lenCellDivider);
@@ -250,7 +256,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     }
 
     // contributed by [MN], changes by [FB]
-    /** This method takes possible table properties and tests if they are valid.
+    /** Takes possible table properties and tests if they are valid.
      * Valid in this case means if they are a property for the table, tr or td
      * tag as stated in the HTML Pocket Reference by Jennifer Niederst (1st edition)
      * The method is important to avoid XSS attacks on the wiki via table properties.
@@ -265,13 +271,13 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         final int numberOfValues = values.length;
         for (int i = 0; i < numberOfValues; i++) {
             key = values[i].trim();
-            if (key.equals("nowrap")) {
+            if ("nowrap".equals(key)) {
                 appendKeyValuePair("nowrap", "nowrap", stringBuilder);
             } else if (i + 1 < numberOfValues) {
                 value = values[++i].trim();
-                if ((key.equals("summary"))
-                        || (key.equals("bgcolor") && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}"))
-                        || ((key.equals("width") || key.equals("height")) && value.matches("\\d+%{0,1}"))
+                if (("summary".equals(key))
+                        || ("bgcolor".equals(key) && value.matches("#{0,1}[0-9a-fA-F]{1,6}|[a-zA-Z]{3,}"))
+                        || (("width".equals(key) || "height".equals(key)) && value.matches("\\d+%{0,1}"))
                         || ((posVals = PROPERTY_VALUES.get(key)) != null && Arrays.binarySearch(posVals, value) >= 0)
                         || (Arrays.binarySearch(TABLE_PROPERTIES, key) >= 0 && value.matches("\\d+"))) {
                     appendKeyValuePair(key, value, stringBuilder);
@@ -297,141 +303,152 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    private String processOrderedList(String line) {
-        if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
-
-            //# sorted Lists contributed by [AS]
-            //## Sublist
-            if (line.startsWith(numberedListLevel + "#")) { //more #
-                line = HTML_OPEN_ORDERED_LIST + serverCore.CRLF_STRING
-                        + HTML_OPEN_LIST_ELEMENT
-                        + line.substring(numberedListLevel.length() + 1, line.length())
-                        + HTML_CLOSE_LIST_ELEMENT;
-                numberedListLevel += "#";
-            } else if (numberedListLevel.length() > 0 && line.startsWith(numberedListLevel)) { //equal number of #
-                line = HTML_OPEN_LIST_ELEMENT
-                        + line.substring(numberedListLevel.length(), line.length())
-                        + HTML_CLOSE_LIST_ELEMENT;
-            } else if (numberedListLevel.length() > 0) { //less #
-                int i = numberedListLevel.length();
-                String tmp = EMPTY;
-
-                while (!line.startsWith(numberedListLevel.substring(0, i))) {
-                    tmp += HTML_CLOSE_ORDERED_LIST;
-                    i--;
-                }
-                numberedListLevel = numberedListLevel.substring(0, i);
-                final int positionOfOpeningTag = numberedListLevel.length();
-                final int positionOfClosingTag = line.length();
-
-                if (numberedListLevel.length() > 0) {
-                    line = tmp
-                            + HTML_OPEN_LIST_ELEMENT
-                            + line.substring(positionOfOpeningTag, positionOfClosingTag)
-                            + HTML_CLOSE_LIST_ELEMENT;
-                } else {
-                    line = tmp + line.substring(positionOfOpeningTag, positionOfClosingTag);
-                }
-            }
-            // end contrib [AS]
-        }
-        return line;
+    private String processOrderedList(final String line) {
+        return processList(line, ListType.ORDERED);
     }
 
-    //contributed by [AS] put into it's own method by [MN]
     /**
      * Processes tags which are connected to unordered lists.
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
     private String processUnorderedList(String line) {
-        if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
-            //contributed by [AS]
-            if (line.startsWith(unorderedListLevel + ASTERISK)) { //more stars
-                line = HTML_OPEN_UNORDERED_LIST + serverCore.CRLF_STRING
-                        + HTML_OPEN_LIST_ELEMENT
-                        + line.substring(unorderedListLevel.length() + 1, line.length())
-                        + HTML_CLOSE_LIST_ELEMENT;
-                unorderedListLevel += ASTERISK;
-            } else if (unorderedListLevel.length() > 0 && line.startsWith(unorderedListLevel)) { //equal number of stars
-                line = HTML_OPEN_LIST_ELEMENT
-                        + line.substring(unorderedListLevel.length(), line.length())
-                        + HTML_CLOSE_LIST_ELEMENT;
-            } else if (unorderedListLevel.length() > 0) { //less stars
-                int i = unorderedListLevel.length();
-                String tmp = EMPTY;
-
-                while (unorderedListLevel.length() >= i && !line.startsWith(unorderedListLevel.substring(0, i))) {
-                    tmp += HTML_CLOSE_UNORDERED_LIST;
-                    i--;
-                }
-                int positionOfOpeningTag = unorderedListLevel.length();
-                if (i < positionOfOpeningTag) {
-                    unorderedListLevel = unorderedListLevel.substring(0, i);
-                    positionOfOpeningTag = unorderedListLevel.length();
-                }
-                final int positionOfClosingTag = line.length();
-
-                if (unorderedListLevel.length() > 0) {
-                    line = tmp
-                            + HTML_OPEN_LIST_ELEMENT
-                            + line.substring(positionOfOpeningTag, positionOfClosingTag)
-                            + HTML_CLOSE_LIST_ELEMENT;
-                } else {
-                    line = tmp + line.substring(positionOfOpeningTag, positionOfClosingTag);
-                }
-            }
-            //end contrib [AS]
-        }
-        return line;
+        return processList(line, ListType.UNORDERED);
     }
 
-    //contributed by [MN] based on unordered list code by [AS]
+    /**
+     * Processes tags which are connected to ordered or unordered lists.
+     * @author contains code by [AS]
+     * @param line line of text to be transformed from wiki code to HTML
+     * @param listType type of tags to be processed
+     * @return HTML fragment
+     */
+    private String processList(final String line, final ListType listType) {
+
+        final String ret;
+
+        if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>).
+
+            String listLevel;
+            final String htmlOpenList;
+            final String htmlCloseList;
+            final char symbol;
+
+            if (ListType.ORDERED.equals(listType)) {
+                listLevel = orderedListLevel;
+                symbol = '#';
+                htmlOpenList = HTML_OPEN_ORDERED_LIST;
+                htmlCloseList = HTML_CLOSE_ORDERED_LIST;
+            } else if (ListType.UNORDERED.equals(listType)) {
+                listLevel = unorderedListLevel;
+                symbol = ASTERISK;
+                htmlOpenList = HTML_OPEN_UNORDERED_LIST;
+                htmlCloseList = HTML_CLOSE_UNORDERED_LIST;
+            } else {
+                throw new IllegalArgumentException("Unknown list type " + listType);
+            }
+
+            if (line.startsWith(listLevel + symbol)) {      //more #
+                final StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(htmlOpenList);
+                stringBuilder.append(serverCore.CRLF_STRING);
+                stringBuilder.append(HTML_OPEN_LIST_ELEMENT);
+                stringBuilder.append(line.substring(listLevel.length() + 1).trim());
+                stringBuilder.append(HTML_CLOSE_LIST_ELEMENT);
+                ret = stringBuilder.toString();
+                listLevel += symbol;
+            } else if (listLevel.length() > 0 &&
+                    line.startsWith(listLevel)) {           //equal number of #
+                final StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(HTML_OPEN_LIST_ELEMENT);
+                stringBuilder.append(line.substring(listLevel.length()).trim());
+                stringBuilder.append(HTML_CLOSE_LIST_ELEMENT);
+                ret = stringBuilder.toString();
+            } else if (listLevel.length() > 0) {            //less #
+                final StringBuilder stringBuilder = new StringBuilder();
+                final StringBuilder tmp = new StringBuilder();
+
+                int i = listLevel.length();
+                while (!line.startsWith(listLevel.substring(0, i))) {
+                    tmp.append(htmlCloseList);
+                    i--;
+                }
+                listLevel = listLevel.substring(0, i);
+                
+                final int startOfContent = listLevel.length();
+
+                if (startOfContent > 0) {
+                    stringBuilder.append(tmp);
+                    stringBuilder.append(HTML_OPEN_LIST_ELEMENT);
+                    stringBuilder.append(line.substring(startOfContent).trim());
+                    stringBuilder.append(HTML_CLOSE_LIST_ELEMENT);
+                } else {
+                    stringBuilder.append(tmp);
+                    stringBuilder.append(line.substring(startOfContent).trim());
+                }
+                ret = stringBuilder.toString();
+            }  else {
+                ret = line;
+            }
+
+            if (ListType.ORDERED.equals(listType)) {
+                orderedListLevel = listLevel;
+            } else if (ListType.UNORDERED.equals(listType)) {
+                unorderedListLevel = listLevel;
+            }
+        } else {
+            ret = line;
+        }
+        return ret;
+    }
+
     /**
      * Processes tags which are connected to definition lists.
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    private String processDefinitionList(String line) {
+    private String processDefinitionList(final String line) {
+        final String ret;
+
         if (!noList) {    //lists only get processed if not forbidden (see code for [= and <pre>). [MN]
 
             if (line.startsWith(defListLevel + ";")) { //more semicolons
-                String definitionItem = EMPTY;
-                String definitionDescription = EMPTY;
+                final String copyOfLine = line.substring(defListLevel.length() + 1);
                 final int positionOfOpeningTag;
-                final int positionOfClosingTag = line.length();
-                final String copyOfLine = line.substring(defListLevel.length() + 1, positionOfClosingTag);
                 if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
-                    definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
-                    definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
-                    line = HTML_OPEN_DEFINITION_LIST +
-                            HTML_OPEN_DEFINITION_ITEM +
-                            definitionItem +
-                            HTML_CLOSE_DEFINITION_ITEM +
-                            HTML_OPEN_DEFINITION_DESCRIPTION +
-                            definitionDescription;
+                    final String definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
+                    final String definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
+                    final StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(HTML_OPEN_DEFINITION_LIST);
+                    stringBuilder.append(HTML_OPEN_DEFINITION_ITEM);
+                    stringBuilder.append(definitionItem);
+                    stringBuilder.append(HTML_CLOSE_DEFINITION_ITEM);
+                    stringBuilder.append(HTML_OPEN_DEFINITION_DESCRIPTION);
+                    stringBuilder.append(definitionDescription);
                     processingDefList = true;
+                    ret = stringBuilder.toString();
+                } else {
+                    ret = line;
                 }
                 defListLevel += ";";
             } else if (defListLevel.length() > 0 && line.startsWith(defListLevel)) { //equal number of semicolons
-                String definitionItem = EMPTY;
-                String definitionDescription = EMPTY;
+                final String copyOfLine = line.substring(defListLevel.length());
                 final int positionOfOpeningTag;
-                final int positionOfClosingTag = line.length();
-                final String copyOfLine = line.substring(defListLevel.length(), positionOfClosingTag);
                 if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
-                    definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
-                    definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
-                    line = HTML_OPEN_DEFINITION_ITEM +
-                            definitionItem +
-                            HTML_CLOSE_DEFINITION_ITEM +
-                            HTML_OPEN_DEFINITION_DESCRIPTION +
-                            definitionDescription;
+                    final String definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
+                    final String definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
+                    final StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(HTML_OPEN_DEFINITION_ITEM);
+                    stringBuilder.append(definitionItem);
+                    stringBuilder.append(HTML_CLOSE_DEFINITION_ITEM);
+                    stringBuilder.append(HTML_OPEN_DEFINITION_DESCRIPTION);
+                    stringBuilder.append(definitionDescription);
                     processingDefList = true;
+                    ret = stringBuilder.toString();
+                } else {
+                    ret = line;
                 }
             } else if (defListLevel.length() > 0) { //less semicolons
-                String definitionItem = EMPTY;
-                String definitionDescription = EMPTY;
                 int i = defListLevel.length();
                 String tmp = EMPTY;
                 while (!line.startsWith(defListLevel.substring(0, i))) {
@@ -440,26 +457,41 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 }
                 defListLevel = defListLevel.substring(0, i);
                 int positionOfOpeningTag = defListLevel.length();
-                final int positionOfClosingTag = line.length();
                 if (defListLevel.length() > 0) {
-                    final String copyOfLine = line.substring(positionOfOpeningTag, positionOfClosingTag);
+                    final String copyOfLine = line.substring(positionOfOpeningTag);
                     if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
-                        definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
-                        definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
-                        line = tmp + HTML_OPEN_DEFINITION_ITEM + definitionItem + HTML_CLOSE_DEFINITION_ITEM + HTML_OPEN_DEFINITION_DESCRIPTION + definitionDescription;
+                        final String definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
+                        final String definitionDescription = copyOfLine.substring(positionOfOpeningTag + 1);
+                        final StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append(tmp);
+                        stringBuilder.append(HTML_OPEN_DEFINITION_ITEM);
+                        stringBuilder.append(definitionItem);
+                        stringBuilder.append(HTML_CLOSE_DEFINITION_ITEM);
+                        stringBuilder.append(HTML_OPEN_DEFINITION_DESCRIPTION);
+                        stringBuilder.append(definitionDescription);
                         processingDefList = true;
+                        ret = stringBuilder.toString();
+                    } else {
+                        ret = line;
                     }
                 } else {
-                    line = tmp + line.substring(positionOfOpeningTag, positionOfClosingTag);
+                    final StringBuilder stringBuilder = new StringBuilder();
+                    stringBuilder.append(tmp);
+                    stringBuilder.append(line.substring(positionOfOpeningTag));
+                    ret = stringBuilder.toString();
                 }
+            } else {
+                ret = line;
             }
+        } else {
+            ret = line;
         }
-        return line;
+        return ret;
     }
 
-    //contributed by [AS] except where stated otherwise
     /**
      * Processes tags which are connected to links and images.
+     * @author [AS], [MN]
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
@@ -495,12 +527,12 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                         align = kv.substring(0, p);
                         //checking validity of value for align. Only non browser specific
                         //values get supported. Not supported: absmiddle, baseline, texttop
-                        if ((align.equals("bottom"))
-                                || (align.equals("center"))
-                                || (align.equals("left"))
-                                || (align.equals("middle"))
-                                || (align.equals("right"))
-                                || (align.equals("top"))) {
+                        if (("bottom".equals(align))
+                                || ("center".equals(align))
+                                || ("left".equals(align))
+                                || ("middle".equals(align))
+                                || ("right".equals(align))
+                                || ("top".equals(align))) {
                             align = " align=\"" + align + "\"";
                         } else {
                             align = EMPTY;
@@ -526,7 +558,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             // if it's no image, it might be an internal link
             else {
                 if ((p = kl.indexOf(PIPE_ESCAPED)) > 0) {
-                    kv = kl.substring(p + 6);
+                    kv = kl.substring(p + LEN_PIPE_ESCAPED);
                     kl = kl.substring(0, p);
                 } else {
                     kv = kl;
@@ -562,7 +594,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         return line;
     }
 
-    //contributed by [MN]
     /**
      * Processes tags which are connected preformatted text (&lt;pre&gt; &lt;/pre&gt;).
      * @param line line of text to be transformed from wiki code to HTML
@@ -574,10 +605,13 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         //both <pre> and </pre> in the same line
         if ((positionOfOpeningTag >= 0) && (positionOfClosingTag > 0) && !escaped) {
             if (positionOfOpeningTag < positionOfClosingTag) {
-                String preformattedText = "<pre style=\"border:dotted;border-width:thin;\">" + line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED, positionOfClosingTag) + "</pre>";
-                preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
+                final StringBuilder preformattedText = new StringBuilder();
+                preformattedText.append("<pre style=\"border:dotted;border-width:thin;\">");
+                preformattedText.append(line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED, positionOfClosingTag));
+                preformattedText.append("</pre>");
+
                 line = processLineOfWikiCode(line.substring(0, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
-                line = line.replaceAll("!pre!txt!", preformattedText);
+                line = line.replaceAll("!pre!txt!", preformattedText.toString().replaceAll("!pre!", "!pre!!"));
                 line = line.replaceAll("!pre!!", "!pre!");
             } //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
             else {
@@ -632,7 +666,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         return line;
     }
 
-    //method contributed by [MN]
     /** Creates table of contents for a wiki page.
      * @return HTML fragment
      */
@@ -675,7 +708,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                         doubles++;
                     }
                 }
-                //if there are doubles, create anchorextension
+                //if there are doubles, create anchor sextension
                 if (doubles > 0) {
                     anchorext = "_" + (doubles + 1);
                 }
