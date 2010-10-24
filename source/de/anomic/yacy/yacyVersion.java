@@ -40,10 +40,10 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      *  i.e. yacy_v0.51_20070321_3501.tar.gz
      * @param release
      */
-    public yacyVersion(String release) {
+    public yacyVersion(String release, String host) {
 
         this.name = release;
-        if ((release == null) || (!((release.endsWith(".tar.gz") || (release.endsWith(".tar")))))) {
+        if (release == null || !(release.endsWith(".tar.gz") || release.endsWith(".tar"))) {
             throw new RuntimeException("release file name '" + release + "' is not valid, no tar.gz");
         }
         // cut off tail
@@ -64,7 +64,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
         } catch (final NumberFormatException e) {
             throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[0] + "' should be a float number");
         }
-        this.mainRelease = ((int) (this.getReleaseNr() * 100)) % 10 == 0;
+        this.mainRelease = ((int) (this.getReleaseNr() * 100)) % 10 == 0 || (host != null && host.endsWith("yacy.net"));
         //System.out.println("Release version " + this.releaseNr + " is " + ((this.mainRelease) ? "main" : "std"));
         this.dateStamp = comp[1];
         if (this.getDateStamp().length() != 8) {
@@ -88,7 +88,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
                 "yacy" +
                 "_v" + yacyBuildProperties.getVersion() + "_" +
                 yacyBuildProperties.getBuildDate() + "_" +
-                yacyBuildProperties.getSVNRevision() + ".tar.gz");
+                yacyBuildProperties.getSVNRevision() + ".tar.gz", null);
         }
         return thisVersion;
     }
@@ -111,7 +111,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
     }
 
     public boolean equals(final Object obj) {
-        if(obj instanceof yacyVersion) {
+        if (obj instanceof yacyVersion) {
             final yacyVersion v = (yacyVersion) obj;
             return (this.getSvn() == v.getSvn()) && (this.getName().equals(v.getName()));
         }
@@ -166,7 +166,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      * @return timestamp
      */
     public String getDateStamp() {
-	return dateStamp;
+        return dateStamp;
     }
 
     /**
@@ -174,7 +174,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      * @return svn revision as integer
      */
     public int getSvn() {
-	return svn;
+        return svn;
     }
 
     /**
@@ -182,7 +182,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      * @return 
      */
     public boolean isMainRelease() {
-	return mainRelease;
+        return mainRelease;
     }
 
     /**
@@ -190,12 +190,12 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      * @return
      */
     public float getReleaseNr() {
-	return releaseNr;
+        return releaseNr;
     }
 
 
     public String getName() {
-	return name;
+        return name;
     }
 
 }

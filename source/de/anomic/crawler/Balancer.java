@@ -214,9 +214,7 @@ public class Balancer {
     }
     
     public boolean has(final byte[] urlhashb) {
-        synchronized (this) {
-            return this.urlFileIndex.has(urlhashb) || this.ddc.has(urlhashb);
-        }
+        return this.urlFileIndex.has(urlhashb) || this.ddc.has(urlhashb);
     }
     
     public boolean notEmpty() {

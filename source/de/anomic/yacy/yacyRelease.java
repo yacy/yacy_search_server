@@ -78,7 +78,7 @@ public final class yacyRelease extends yacyVersion {
     private PublicKey publicKey;
     
     public yacyRelease(final MultiProtocolURI url) {
-        super(url.getFileName());
+        super(url.getFileName(), url.getHost());
         this.url = url;
     }
     
@@ -88,7 +88,7 @@ public final class yacyRelease extends yacyVersion {
     }
     
     public yacyRelease(final File releaseFile) {
-        super(releaseFile.getName());
+        super(releaseFile.getName(), null);
         this.releaseFile = releaseFile;
     }
 
@@ -246,7 +246,7 @@ public final class yacyRelease extends yacyVersion {
             try {
                 yacyRelease release = new yacyRelease(url, location.getPublicKey());
                 //System.out.println("r " + release.toAnchor());
-                if(release.isMainRelease()) {
+                if (release.isMainRelease()) {
                     mainReleases.add(release);
                 } else {
                     devReleases.add(release);
@@ -582,7 +582,7 @@ public final class yacyRelease extends yacyVersion {
         final SortedSet<yacyVersion> downloadedreleases = new TreeSet<yacyVersion>();
         for (int j = 0; j < downloaded.length; j++) {
             try {
-                release = new yacyVersion(downloaded[j]);
+                release = new yacyVersion(downloaded[j], null);
                 downloadedreleases.add(release);
             } catch (final RuntimeException e) {
                 // not a valid release

@@ -118,15 +118,15 @@ public class IndexCreateWWWLocalQueue_p {
                                 if ((entry = iter.next()) == null) continue;
                                 String value = null;
                                 
-                                switch (option) {
-                                    case URL:       value = (entry.url() == null) ? null : entry.url().toString(); break;
-                                    case ANCHOR:    value = entry.name(); break;
-                                    case DEPTH:     value = Integer.toString(entry.depth()); break;
+                                location: switch (option) {
+                                    case URL:       value = (entry.url() == null) ? null : entry.url().toString(); break location;
+                                    case ANCHOR:    value = entry.name(); break location;
+                                    case DEPTH:     value = Integer.toString(entry.depth()); break location;
                                     case INITIATOR:
                                         value = (entry.initiator() == null || entry.initiator().length == 0) ? "proxy" : new String(entry.initiator());
-                                        break;
-                                    case MODIFIED:  value = daydate(entry.appdate()); break;
-                                    default: value = null;
+                                        break location;
+                                    case MODIFIED:  value = daydate(entry.appdate()); break location;
+                                    default: value = null; break location;
                                 }
                                 
                                 if (value != null) {

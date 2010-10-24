@@ -366,7 +366,7 @@ public class Network {
                                 location = MultiProtocolURI.generateLocation();
                             } else {
                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
-                               location = parseLocationInUserAgent(userAgent);
+                               location = MultiProtocolURI.parseLocationInUserAgent(userAgent);
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_location", location);
                             if (complete) {
@@ -478,39 +478,4 @@ public class Network {
         return prop;
     }
 
-    /**
-     * gets the location out of the user agent
-     * 
-     * location must be after last ; and before first )
-     * 
-     * @param userAgent in form "useragentinfo (some params; _location_) additional info"
-     * @return
-     */
-    private static String parseLocationInUserAgent(final String userAgent) {
-        final String location;
-
-        final int firstOpenParenthesis = userAgent.indexOf('(');
-        final int lastSemicolon = userAgent.lastIndexOf(';');
-        final int firstClosedParenthesis = userAgent.indexOf(')');
-
-        if (lastSemicolon < firstClosedParenthesis) {
-            // ; Location )
-            location = (firstClosedParenthesis > 0) ? userAgent.substring(lastSemicolon + 1, firstClosedParenthesis)
-                    .trim() : userAgent.substring(lastSemicolon + 1).trim();
-        } else {
-            if (firstOpenParenthesis < userAgent.length()) {
-                if (firstClosedParenthesis > firstOpenParenthesis) {
-                    // ( Location )
-                    location = userAgent.substring(firstOpenParenthesis + 1, firstClosedParenthesis).trim();
-                } else {
-                    // ( Location <end>
-                    location = userAgent.substring(firstOpenParenthesis + 1).trim();
-                }
-            } else {
-                location = "";
-            }
-        }
-
-        return location;
-    }
 }

@@ -64,7 +64,7 @@ public class ConfigUpdate_p {
 
         prop.put("candeploy_configCommit", "0");
         prop.put("candeploy_autoUpdate", "0");
-	prop.put("candeploy_downloadsAvailable", "0");
+        prop.put("candeploy_downloadsAvailable", "0");
         
         if (post != null) {
             // check if update is supposed to be installed and a release is defined
@@ -85,8 +85,7 @@ public class ConfigUpdate_p {
                 	
                 	// replace this version with version which contains public key
                 	yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);
-                	TreeSet<yacyRelease> mostReleases = versionToDownload.isMainRelease()
-                			? allReleases.main : allReleases.dev;
+                	TreeSet<yacyRelease> mostReleases = versionToDownload.isMainRelease() ? allReleases.main : allReleases.dev;
                 	for(yacyRelease rel : mostReleases) {
                 	    if(rel.equals(versionToDownload)) {
                 		versionToDownload = rel;
@@ -180,9 +179,9 @@ public class ConfigUpdate_p {
         }
         // latest downloaded release
         yacyVersion dflt = (downloadedReleases.isEmpty()) ? null : downloadedReleases.last();
-	// check if there are any downloaded releases and if there are enable the update buttons
+        // check if there are any downloaded releases and if there are enable the update buttons
         prop.put("candeploy_downloadsAvailable", (downloadedReleases.isEmpty()) ? "0" : "1");
-	prop.put("candeploy_deployenabled_buttonsActive", (downloadedReleases.isEmpty() || devenvironment) ? "0" : "1");
+        prop.put("candeploy_deployenabled_buttonsActive", (downloadedReleases.isEmpty() || devenvironment) ? "0" : "1");
 		
         int relcount = 0;
         for(yacyRelease release : downloadedReleases) {

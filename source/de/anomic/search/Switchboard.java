@@ -259,7 +259,7 @@ public final class Switchboard extends serverSwitch {
         
         // UPnP port mapping
         if (getConfigBool(SwitchboardConstants.UPNP_ENABLED, false))
-        	InstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", UPnP.log, 0);
+            InstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", UPnP.log, 0);
         
         // init TrayIcon if possible
         Tray.init(this);
@@ -306,7 +306,7 @@ public final class Switchboard extends serverSwitch {
 
         // load the network definition
         overwriteNetworkDefinition();
-
+        
         // start indexing management
         log.logConfig("Starting Indexing Management");
         final String networkName = getConfig(SwitchboardConstants.NETWORK_NAME, "");
@@ -317,7 +317,7 @@ public final class Switchboard extends serverSwitch {
         this.queuesRoot = new File(new File(indexPath, networkName), "QUEUES");
         this.networkRoot.mkdirs();
         this.queuesRoot.mkdirs();
-		final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
+        final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
         peers = new yacySeedDB(
                 networkRoot,
                 "seed.new.heap",
@@ -346,9 +346,9 @@ public final class Switchboard extends serverSwitch {
                 networkName,
                 log,
                 this.queuesRoot);
-		
-		
-		// init crawl results monitor cache
+        
+        
+        // init crawl results monitor cache
         crawlResults = new ResultURLs(100);
         
         // start yacy core
@@ -746,7 +746,7 @@ public final class Switchboard extends serverSwitch {
         }
         if (networkGroupDefinition.startsWith("http://")) {
             try {
-            	setConfig(Switchboard.loadFileAsMap(new DigestURI(networkGroupDefinition, null)));
+                setConfig(Switchboard.loadFileAsMap(new DigestURI(networkGroupDefinition, null)));
             } catch (final MalformedURLException e) { }
         } else {
             final File networkGroupDefinitionFile = new File(getAppPath(), networkGroupDefinition);
@@ -759,37 +759,37 @@ public final class Switchboard extends serverSwitch {
         // set release locations
         int i = 0;
         CryptoLib cryptoLib;
-	try {
-	    cryptoLib = new CryptoLib();
-	    while (true) {
-		String location = getConfig("network.unit.update.location" + i, "");
-		if (location.length() == 0) break;
-		DigestURI locationURL;
-		try {
-		    // try to parse url
-		    locationURL = new DigestURI(location, null);
-		} catch (final MalformedURLException e) {
-		    break;
-		}
-		PublicKey publicKey = null;
-		// get public key if it's in config
-		try {
-		    String publicKeyString = getConfig("network.unit.update.location" + i + ".key", null);
-		    if(publicKeyString != null) {
-			byte[] publicKeyBytes = Base64Order.standardCoder.decode(publicKeyString.trim());
-			publicKey = cryptoLib.getPublicKeyFromBytes(publicKeyBytes);
-		    }
-		} catch (InvalidKeySpecException e) {
-		    Log.logException(e);
-		}
-		yacyUpdateLocation updateLocation = new yacyUpdateLocation(locationURL, publicKey);
-		yacyRelease.latestReleaseLocations.add(updateLocation);
-		i++;
-	    }
-	} catch (NoSuchAlgorithmException e1) {
-	    // TODO Auto-generated catch block
-	    Log.logException(e1);
-	}
+        try {
+            cryptoLib = new CryptoLib();
+            while (true) {
+                String location = getConfig("network.unit.update.location" + i, "");
+                if (location.length() == 0) break;
+                DigestURI locationURL;
+                try {
+                    // try to parse url
+                    locationURL = new DigestURI(location, null);
+                } catch (final MalformedURLException e) {
+                    break;
+                }
+                PublicKey publicKey = null;
+                // get public key if it's in config
+                try {
+                    String publicKeyString = getConfig("network.unit.update.location" + i + ".key", null);
+                    if (publicKeyString != null) {
+                        byte[] publicKeyBytes = Base64Order.standardCoder.decode(publicKeyString.trim());
+                        publicKey = cryptoLib.getPublicKeyFromBytes(publicKeyBytes);
+                    }
+                } catch (InvalidKeySpecException e) {
+                    Log.logException(e);
+                }
+                yacyUpdateLocation updateLocation = new yacyUpdateLocation(locationURL, publicKey);
+                yacyRelease.latestReleaseLocations.add(updateLocation);
+                i++;
+            }
+        } catch (NoSuchAlgorithmException e1) {
+            // TODO Auto-generated catch block
+            Log.logException(e1);
+        }
         
         // initiate url license object
         licensedURLs = new URLLicense(8);
@@ -816,6 +816,7 @@ public final class Switchboard extends serverSwitch {
             setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
         }
         */
+        MultiProtocolURI.addBotInfo(getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig("network.unit.domain", "global"));
     }
     
     public void switchNetwork(final String networkDefinition) {
@@ -1006,55 +1007,55 @@ public final class Switchboard extends serverSwitch {
     }    
     
     public boolean isRobinsonMode() {
-    	// we are in robinson mode, if we do not exchange index by dht distribution
-    	// we need to take care that search requests and remote indexing requests go only
-    	// to the peers in the same cluster, if we run a robinson cluster.
-    	return !getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, false) && !getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+        // we are in robinson mode, if we do not exchange index by dht distribution
+        // we need to take care that search requests and remote indexing requests go only
+        // to the peers in the same cluster, if we run a robinson cluster.
+        return !getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, false) && !getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
     }
 
     public boolean isPublicRobinson() {
-    	// robinson peers may be member of robinson clusters, which can be public or private
-    	// this does not check the robinson attribute, only the specific subtype of the cluster
-    	final String clustermode = getConfig(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER);
-    	return (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) || (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER));
+        // robinson peers may be member of robinson clusters, which can be public or private
+        // this does not check the robinson attribute, only the specific subtype of the cluster
+        final String clustermode = getConfig(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER);
+        return (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) || (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER));
     }
     
     public boolean isInMyCluster(final String peer) {
-    	// check if the given peer is in the own network, if this is a robinson cluster
-    	// depending on the robinson cluster type, the peer String may be a peerhash (b64-hash)
-    	// or a ip:port String or simply a ip String
-    	// if this robinson mode does not define a cluster membership, false is returned
+        // check if the given peer is in the own network, if this is a robinson cluster
+        // depending on the robinson cluster type, the peer String may be a peerhash (b64-hash)
+        // or a ip:port String or simply a ip String
+        // if this robinson mode does not define a cluster membership, false is returned
         if (peer == null) return false;
-    	if (!isRobinsonMode()) return false;
-    	final String clustermode = getConfig(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER);
-    	if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER)) {
-    		// check if we got the request from a peer in the private cluster
-    		final String network = getConfig(SwitchboardConstants.CLUSTER_PEERS_IPPORT, "");
+        if (!isRobinsonMode()) return false;
+        final String clustermode = getConfig(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER);
+        if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER)) {
+            // check if we got the request from a peer in the private cluster
+            final String network = getConfig(SwitchboardConstants.CLUSTER_PEERS_IPPORT, "");
             return network.indexOf(peer) >= 0;
-    	} else if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
-    		// check if we got the request from a peer in the public cluster
+        } else if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
+            // check if we got the request from a peer in the public cluster
             return this.clusterhashes.containsKey(peer.getBytes());
-    	} else {
-    		return false;
-    	}
+        } else {
+            return false;
+        }
     }
     
     public boolean isInMyCluster(final yacySeed seed) {
-    	// check if the given peer is in the own network, if this is a robinson cluster
-    	// if this robinson mode does not define a cluster membership, false is returned
-    	if (seed == null) return false;
-		if (!isRobinsonMode()) return false;
-    	final String clustermode = getConfig(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER);
-    	if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER)) {
-    		// check if we got the request from a peer in the private cluster
-    		final String network = getConfig(SwitchboardConstants.CLUSTER_PEERS_IPPORT, "");
+        // check if the given peer is in the own network, if this is a robinson cluster
+        // if this robinson mode does not define a cluster membership, false is returned
+        if (seed == null) return false;
+        if (!isRobinsonMode()) return false;
+        final String clustermode = getConfig(SwitchboardConstants.CLUSTER_MODE, SwitchboardConstants.CLUSTER_MODE_PUBLIC_PEER);
+        if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER)) {
+            // check if we got the request from a peer in the private cluster
+            final String network = getConfig(SwitchboardConstants.CLUSTER_PEERS_IPPORT, "");
             return network.indexOf(seed.getPublicAddress()) >= 0;
-    	} else if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
-    	    // check if we got the request from a peer in the public cluster
+        } else if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
+            // check if we got the request from a peer in the public cluster
             return this.clusterhashes.containsKey(seed.hash.getBytes());
-    	} else {
-    		return false;
-    	}
+        } else {
+            return false;
+        }
     }
 
     public String urlExists(final Segments.Process process, final byte[] hash) {
@@ -1191,10 +1192,10 @@ public final class Switchboard extends serverSwitch {
         UPnP.deletePortMapping();
         Tray.removeTray();
         try {
-			HTTPClient.closeConnectionManager();
-		} catch (InterruptedException e) {
-			Log.logException(e);
-		}
+            HTTPClient.closeConnectionManager();
+        } catch (InterruptedException e) {
+            Log.logException(e);
+        }
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
@@ -1460,7 +1461,7 @@ public final class Switchboard extends serverSwitch {
             
             // refresh recrawl dates
             try{
-            	CrawlProfile selentry;
+                CrawlProfile selentry;
                 for (byte[] handle: crawler.profilesActiveCrawls.keySet()) {
                     selentry = new CrawlProfile(crawler.profilesActiveCrawls.get(handle));
                     assert selentry.handle() != null : "profile.name = " + selentry.name();
@@ -1470,29 +1471,29 @@ public final class Switchboard extends serverSwitch {
                     }
                     boolean insert = false;
                     if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY)) {
-                    	selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
-                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
+                        selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     // if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE));
                     if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)) {
                         selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
-                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) {
                         selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
-                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) {
                         selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
-                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) {
                         selentry.put(CrawlProfile.RECRAWL_IF_OLDER,
-                    			Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
+                                Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
                         insert = true;
                     }
                     if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE)) {
@@ -1603,19 +1604,19 @@ public final class Switchboard extends serverSwitch {
             
             // clean up seed-dbs
             if (getConfigBool("routing.deleteOldSeeds.permission",true)) {
-            	final long deleteOldSeedsTime = getConfigLong("routing.deleteOldSeeds.time",7)*24*3600000;
+                final long deleteOldSeedsTime = getConfigLong("routing.deleteOldSeeds.time",7)*24*3600000;
                 Iterator<yacySeed> e = this.peers.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
                 yacySeed seed = null;
                 final ArrayList<String> deleteQueue = new ArrayList<String>();
                 checkInterruption();
                 // clean passive seeds
                 while (e.hasNext()) {
-                	seed = e.next();
-                	if (seed != null) {
-                		//list is sorted -> break when peers are too young to delete
-                		if (seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime)) break;
-                		deleteQueue.add(seed.hash);
-                	}
+                    seed = e.next();
+                    if (seed != null) {
+                        //list is sorted -> break when peers are too young to delete
+                        if (seed.getLastSeenUTC() > (System.currentTimeMillis()-deleteOldSeedsTime)) break;
+                        deleteQueue.add(seed.hash);
+                    }
                 }
                 for (int i = 0; i < deleteQueue.size(); ++i) this.peers.removeDisconnected(deleteQueue.get(i));
                 deleteQueue.clear();
@@ -1623,12 +1624,12 @@ public final class Switchboard extends serverSwitch {
                 checkInterruption();
                 // clean potential seeds
                 while (e.hasNext()) {
-                	seed = e.next();
-                	if (seed != null) {
-                		//list is sorted -> break when peers are too young to delete
-                		if (seed.getLastSeenUTC() > (System.currentTimeMillis() - deleteOldSeedsTime)) break;
-                		deleteQueue.add(seed.hash);
-                	}
+                    seed = e.next();
+                    if (seed != null) {
+                        //list is sorted -> break when peers are too young to delete
+                        if (seed.getLastSeenUTC() > (System.currentTimeMillis() - deleteOldSeedsTime)) break;
+                        deleteQueue.add(seed.hash);
+                    }
                 }
                 for (int i = 0; i < deleteQueue.size(); ++i) this.peers.removePotential(deleteQueue.get(i));
             }
@@ -2139,25 +2140,25 @@ public final class Switchboard extends serverSwitch {
         
         thread = getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
         if (thread != null) {
-        	setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep));
-        	thread.setIdleSleep(2000);
+            setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep));
+            thread.setIdleSleep(2000);
         }        
     }
     
     public static int accessFrequency(final HashMap<String, TreeSet<Long>> tracker, final String host) {
-    	// returns the access frequency in queries per hour for a given host and a specific tracker
-    	final long timeInterval = 1000 * 60 * 60;
-    	final TreeSet<Long> accessSet = tracker.get(host);
-    	if (accessSet == null) return 0;
-    	return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
+        // returns the access frequency in queries per hour for a given host and a specific tracker
+        final long timeInterval = 1000 * 60 * 60;
+        final TreeSet<Long> accessSet = tracker.get(host);
+        if (accessSet == null) return 0;
+        return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
     }
     
     public String dhtShallTransfer(final String segment) {
         String cautionCause = onlineCaution();
-    	if (cautionCause != null) {
+        if (cautionCause != null) {
             return "online caution for " + cautionCause + ", dht transmission";
         }
-    	if (this.peers == null) {
+        if (this.peers == null) {
             return "no DHT distribution: seedDB == null";
         }
         if (this.peers.mySeed() == null) {
@@ -2196,7 +2197,7 @@ public final class Switchboard extends serverSwitch {
     }
     
     public boolean dhtTransferJob(final String segment) {
-    	final String rejectReason = dhtShallTransfer(segment);
+        final String rejectReason = dhtShallTransfer(segment);
         if (rejectReason != null) {
             if (this.log.isFine()) log.logFine(rejectReason);
             return false;
@@ -2205,7 +2206,7 @@ public final class Switchboard extends serverSwitch {
         final long kbytesUp = ConnectionInfo.getActiveUpbytes() / 1024;
         // accumulate RWIs to transmission cloud
         if (this.dhtDispatcher.cloudSize() > this.peers.scheme.verticalPartitions() * 2) {
-        	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
+            log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
         } else if (MemoryControl.available() < 1024*1024*25) {
             log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
         } else if (ConnectionInfo.getLoadPercent() > 50) {
@@ -2213,23 +2214,23 @@ public final class Switchboard extends serverSwitch {
             // close unused connections
 //            Client.cleanup();
         } else if (kbytesUp > 128) {
-        	log.logInfo("dhtTransferJob: too much upload(1), currently uploading: " + kbytesUp + " Kb");
+            log.logInfo("dhtTransferJob: too much upload(1), currently uploading: " + kbytesUp + " Kb");
         } else {
             byte[] startHash = null, limitHash = null;
             int tries = 10;
             while (tries-- > 0) {
-            	startHash = PeerSelection.selectTransferStart();
-            	assert startHash != null;
-            	limitHash = PeerSelection.limitOver(this.peers, startHash);
-            	if (limitHash != null) break;
+                startHash = PeerSelection.selectTransferStart();
+                assert startHash != null;
+                limitHash = PeerSelection.limitOver(this.peers, startHash);
+                if (limitHash != null) break;
             }
             if (limitHash == null || startHash == null) {
-            	log.logInfo("dhtTransferJob: approaching full DHT dispersion.");
-            	return false;
+                log.logInfo("dhtTransferJob: approaching full DHT dispersion.");
+                return false;
             }
-	        log.logInfo("dhtTransferJob: selected " + new String(startHash) + " as start hash");
-	        log.logInfo("dhtTransferJob: selected " + new String(limitHash) + " as limit hash");
-	        boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
+            log.logInfo("dhtTransferJob: selected " + new String(startHash) + " as start hash");
+            log.logInfo("dhtTransferJob: selected " + new String(limitHash) + " as limit hash");
+            boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
                     startHash,
                     limitHash,
                     dhtMaxContainerCount,
@@ -2241,17 +2242,17 @@ public final class Switchboard extends serverSwitch {
         
         // check if we can deliver entries to other peers
         if (this.dhtDispatcher.transmissionSize() >= 10) {
-        	log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());
+            log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());
         } else if (ConnectionInfo.getLoadPercent() > 75) {
             log.logInfo("dhtTransferJob: too many connections in httpc pool : " + ConnectionInfo.getCount());
             // close unused connections
 //            Client.cleanup();
         } else if (kbytesUp > 256) {
-        	log.logInfo("dhtTransferJob: too much upload(2), currently uploading: " + kbytesUp + " Kb");
+            log.logInfo("dhtTransferJob: too much upload(2), currently uploading: " + kbytesUp + " Kb");
         } else {
-        	boolean dequeued = this.dhtDispatcher.dequeueContainer();
-        	hasDoneSomething = hasDoneSomething | dequeued;
-        	log.logInfo("dhtTransferJob: result from dequeueing: " + ((dequeued) ? "true" : "false"));
+            boolean dequeued = this.dhtDispatcher.dequeueContainer();
+            hasDoneSomething = hasDoneSomething | dequeued;
+            log.logInfo("dhtTransferJob: result from dequeueing: " + ((dequeued) ? "true" : "false"));
         }
         return hasDoneSomething;
     }
@@ -2567,14 +2568,14 @@ public final class Switchboard extends serverSwitch {
      * @return
      */
     public static Map<String, String> loadFileAsMap(final DigestURI url) {
-    	final RequestHeader reqHeader = new RequestHeader();
+        final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
-    	try {
+        try {
             // sending request
 //            final Map<String, String> result = FileUtils.table(Client.wget(url.toString(), reqHeader, 10000));
-    		final Map<String, String> result = FileUtils.table(client.GETbytes(url.toString()));
+            final Map<String, String> result = FileUtils.table(client.GETbytes(url.toString()));
             if (result == null) return new HashMap<String, String>();
             return result;
         } catch (final Exception e) {
