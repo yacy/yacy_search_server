@@ -426,8 +426,9 @@ public final class SwitchboardConstants {
     
     public static final String UPNP_ENABLED			= "upnp.enabled";
     public static final String UPNP_REMOTEHOST		= "upnp.remoteHost";
-    
-    public static final String DEFAULT_SEARCHITEMS 	= "search.items";
+
+    public static final String SEARCH_ITEMS   = "search.items";
+    public static final String SEARCH_TARGET  = "search.target";
     
     /**
      * system tray

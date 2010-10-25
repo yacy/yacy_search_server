@@ -170,7 +170,7 @@ public class yacysearch {
         int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
         
         int newcount;
-        if ( authenticated && (newcount = post.getInt("count", 0)) > 0 ) sb.setConfig(SwitchboardConstants.DEFAULT_SEARCHITEMS, newcount); // set new default maximumRecords if search with "more options"
+        if ( authenticated && (newcount = post.getInt("count", 0)) > 0 ) sb.setConfig(SwitchboardConstants.SEARCH_ITEMS, newcount); // set new default maximumRecords if search with "more options"
         
         boolean global = post.get("resource", "local").equals("global") && sb.peers.sizeConnected() > 0;
         final boolean indexof = (post != null && post.get("indexof","").equals("on")); 

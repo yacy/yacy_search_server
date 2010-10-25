@@ -38,6 +38,18 @@
           <input type="radio" name="popup" value="interactive" #(popupInteractive)#::checked="checked"#(/popupInteractive)# />Interactive Search Page&nbsp;
           </dd>
           
+          <dt>Target for Click on Search Results</dt>
+          <dd>
+          <select name="target">
+            <option value="_blank" #(selected_blank)#::selected="selected"#(/selected_blank)#>"_blank" (new window)</option>
+            <option value="_self" #(selected_self)#::selected="selected"#(/selected_self)#>"_self" (same window)</option>
+            <option value="_parent" #(selected_parent)#::selected="selected"#(/selected_parent)#>"_parent" (the parent frame of a frameset)</option>
+            <option value="_top" #(selected_top)#::selected="selected"#(/selected_top)#>"_top" (top of all frames)</option>
+            <option value="searchresult" #(selected_searchresult)#::selected="selected"#(/selected_searchresult)#>"searchresult" (a default custom page name for search results)</option>
+          </select>
+          </dd>
+          
+          <dt></dt>
           <dd>
             <input type="submit" name="searchpage_set" value="Change Search Page" />&nbsp;&nbsp;
             <input type="submit" name="searchpage_default" value="Set to Default Values" />

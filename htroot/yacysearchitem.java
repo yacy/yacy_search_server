@@ -43,6 +43,7 @@ import de.anomic.search.SearchEvent;
 import de.anomic.search.ResultEntry;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.search.TextSnippet;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -125,6 +126,7 @@ public class yacysearchitem {
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_link", result.urlstring());
+            prop.putHTML("content_target", sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self"));
             prop.put("content_display", display);
             if (faviconURL != null && isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading

@@ -67,7 +67,7 @@ public class index {
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
-        final int maximumRecords = Integer.parseInt((sb.getConfig(SwitchboardConstants.DEFAULT_SEARCHITEMS, "10")));
+        final int maximumRecords = Integer.parseInt((sb.getConfig(SwitchboardConstants.SEARCH_ITEMS, "10")));
         final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
         final String constraint = (post == null) ? "" : post.get("constraint", "");

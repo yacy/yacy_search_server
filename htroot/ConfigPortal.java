@@ -66,6 +66,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, post.get(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, post.get(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, post.get(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET, post.get("target", "_self"));
             }
             if (post.containsKey("searchpage_default")) {
                 sb.setConfig(SwitchboardConstants.GREETING, "P2P Web Search");
@@ -73,6 +74,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, "/env/grafics/YaCyLogo_120ppi.png");
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, "/env/grafics/YaCyLogo_60ppi.png");
                 sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
+                sb.setConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
             }            
         }
 
@@ -95,6 +97,13 @@ public class ConfigPortal {
         } else {
             prop.put("popupStatus", 1);
         }
+        String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
+        prop.put("selected_blank", target.equals("_blank") ? 1 : 0);
+        prop.put("selected_self", target.equals("_self") ? 1 : 0);
+        prop.put("selected_parent", target.equals("_parent") ? 1 : 0);
+        prop.put("selected_top", target.equals("_top") ? 1 : 0);
+        prop.put("selected_searchresult", target.equals("searchresult") ? 1 : 0);
+                
         String myaddress = sb.peers.mySeed().getPublicAddress();
         if (myaddress == null) myaddress = "localhost:" + sb.getConfig("port", "8080");
         prop.put("myaddress", myaddress);

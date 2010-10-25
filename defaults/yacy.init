@@ -704,6 +704,12 @@ search.app = true
 # number of search results displayed by default
 search.items = 10
 
+# target for search results; this is the href target attribute inside every search result link
+# possible values:
+# "_blank" (new window), "_self" (same window), "_parent" (the parent frame of a frameset),
+# "_top" (top of all frames), "searchresult" (a default custom page name for search results)
+search.target = _self
+
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
 useYacyReferer = false
