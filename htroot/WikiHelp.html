@@ -1,13 +1,13 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
  <head>
   <title>YaCy '#[clientname]#': Wiki Help</title>
 #%env/templates/metas.template%#
  </head>
  <body>
- <div align="center">
+ <div style="padding: 5px">
   <h2>Wiki-Code</h2>
-  <table width="95%" border="1" cellspacing="0" cellpadding="4">
+  <table width="100%" border="1" cellspacing="0" cellpadding="4">
    <caption>
      This table contains a short description of the tags that can be used in the Wiki and several other servlets
      of YaCy. For a more detailed description visit the
@@ -23,10 +23,15 @@
    </tr>
    <tr valign="top">
     <td class="tt">
-     ==headline1==<br />===headline2===<br />====headline3====
+     =headline1=<br />
+     ==headline2==<br />
+     ===headline3===<br />
+     ====headline4====<br />
+     =====headline5=====<br />
+     ======headline6======<br />
     </td>
     <td>
-     These tags create headlines. If a page has three or more headlines, a directory will be created automatically.
+     These tags create headlines. If a page has three or more headlines, a table of content will be created automatically. Headlines of level 1 will be ignored in the table of content.
     </td>
    </tr>
 
@@ -42,7 +47,16 @@
 
    <tr valign="top">
     <td class="tt">
-     :text<br>::text
+        &lt;s&gt;text&lt;/s&gt;
+    </td>
+    <td>
+     Text will be displayed <span class="strike">stricken through</span>.
+    </td>
+   </tr>
+
+   <tr valign="top">
+    <td class="tt">
+     :text<br />::text
     </td>
     <td>
      Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.
@@ -69,10 +83,10 @@
 
    <tr valign="top">
     <td class="tt">
-     <nobr class="tt">;word 1:definition 1</nobr><br />
-     <nobr class="tt">;word 2:definition 2</nobr><br />
-     <nobr class="tt">;;word 3:definition 3</nobr><br />
-     <nobr class="tt">;word 4:definition 4</nobr>
+     <span class="tt" style="white-space: nowrap;">;word 1:definition 1</span><br />
+     <span class="tt" style="white-space: nowrap;">;word 2:definition 2</span><br />
+     <span class="tt" style="white-space: nowrap;">;;word 3:definition 3</span><br />
+     <span class="tt" style="white-space: nowrap;">;word 4:definition 4</span>
     </td>
     <td>
      These tags create a definition list.
@@ -90,8 +104,8 @@
 
    <tr valign="top">
     <td class="tt">
-     <nobr class="tt">[[pagename]]</nobr><br />
-     <nobr class="tt">[[pagename|description]]</nobr>
+     <span class="tt" style="white-space: nowrap;">[[pagename]]</span><br />
+     <span class="tt" style="white-space: nowrap;">[[pagename|description]]</span>
     </td>
     <td>
      This tag creates links to other pages of the wiki.
@@ -109,9 +123,9 @@
 
    <tr valign="top">
     <td class="tt">
-     <nobr class="tt">[[Image:url]]</nobr><br />
-     <nobr class="tt">[[Image:url|alt text]]</nobr><br />
-     <nobr class="tt">[[Image:url|align|alt text]]</nobr>
+     <span class="tt" style="white-space: nowrap;">[[Image:url]]</span><br />
+     <span class="tt" style="white-space: nowrap;">[[Image:url|alt text]]</span><br />
+     <span class="tt" style="white-space: nowrap;">[[Image:url|align|alt text]]</span>
     </td>
     <td>
      This tag displays an image, it can be aligned left, right or center.
@@ -122,9 +136,9 @@
     <td class="tt">
      {|<br />
      |-<br />
-     <nobr class="tt">||row 1, col 1||row 1, col 2</nobr><br />
+     <span class="tt" style="white-space: nowrap;">||row 1, col 1||row 1, col 2</span><br />
      |-<br />
-     <nobr class="tt">||row 2, col 1||row 2, col 2</nobr><br />
+     <span class="tt" style="white-space: nowrap;">||row 2, col 1||row 2, col 2</span><br />
      |}
     </td>
     <td>
@@ -151,9 +165,7 @@
      If a line starts with a space, it will be displayed in a non-proportional font.
     </td>
    </tr>
-
   </table>
  </div>
- <br>
  </body>
 </html>
