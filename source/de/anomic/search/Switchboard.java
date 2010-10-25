@@ -735,7 +735,9 @@ public final class Switchboard extends serverSwitch {
                     if (netdefmap == null || netdefmap.size() == 0) continue netload;
                     setConfig(netdefmap);
                     break netload;
-                } catch (final MalformedURLException e) {}
+                } catch (final Exception e) {
+                    continue netload;
+                }
             }
         } else {
             final File networkUnitDefinitionFile = (networkUnitDefinition.length() > 0 && networkUnitDefinition.charAt(0) == '/') ? new File(networkUnitDefinition) : new File(getAppPath(), networkUnitDefinition);
