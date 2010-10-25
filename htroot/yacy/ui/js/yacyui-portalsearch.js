@@ -157,7 +157,7 @@ function yrun() {
 
 			$("#ypopup").bind("scroll", function(e){
 				p1 = $("#ypopup h3 :last").position().top;
-				if(p1-yconf.height < 0) {
+				if(p1-$("#ypopup").dialog( "option", "height" ) < 0) {
 					startRecord = startRecord + maximumRecords;
 					yacysearch(submit, false);
 				}
@@ -313,7 +313,7 @@ function yacysearch(global, clear) {
 				if(count>0) {
 					autoOpenSidebar();
 					if ($("#ypopup").dialog('isOpen')) {					
-						if($("#ypopup h3 :last").position().top < yconf.height) {
+						if($("#ypopup h3 :last").position().top < $("#ypopup").dialog( "option", "height" )) {
 							startRecord = startRecord + maximumRecords;
 							yacysearch(submit, false);						
 						}
