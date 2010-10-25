@@ -24,15 +24,15 @@ public class delete_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {     	
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
-        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
+        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
+        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
+        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
         	
             byte[] urlHash = null;
             
             try {
-	        	if(post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_ID)) {
-	        		urlHash = post.get(YMarkTables.TABLE_BOOKMARKS_COL_ID).getBytes();
+	        	if(post.containsKey(YMarkTables.BOOKMARKS_ID)) {
+	        		urlHash = post.get(YMarkTables.BOOKMARKS_ID).getBytes();
 	        	} else if(post.containsKey(YMarkTables.BOOKMARK.URL.key())) {
 					urlHash = YMarkTables.getBookmarkId(post.get(YMarkTables.BOOKMARK.URL.key()));
 	        	} else {
@@ -44,7 +44,7 @@ public class delete_ymark {
 	            if(bmk_row != null) {
 		            final String tagsString = bmk_row.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt());
 		            removeIndexEntry(tag_table, tagsString, urlHash);
-		            final String foldersString = bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.TABLE_FOLDERS_ROOT);
+		            final String foldersString = bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.FOLDERS_ROOT);
 		            removeIndexEntry(folder_table, foldersString, urlHash);
 	            }
 				sb.tables.delete(bmk_table,urlHash);
@@ -55,16 +55,16 @@ public class delete_ymark {
 				Log.logException(e);
 			}
         } else {
-        	prop.put(YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE,YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG);
+        	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
         }       
         // return rewrite properties
         return prop;
 	}
 	
 	private static void removeIndexEntry(final String index_table, String keysString, final byte[] urlHash) {
-        final String[] keyArray = keysString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
+        final String[] keyArray = keysString.split(YMarkTables.TAGS_SEPARATOR);                    
         for (final String tag : keyArray) {
-        	sb.tables.bookmarks.updateIndexTable(index_table, tag, urlHash, YMarkTables.TABLE_INDEX_ACTION_REMOVE);
+        	sb.tables.bookmarks.updateIndexTable(index_table, tag, urlHash, YMarkTables.INDEX_ACTION.REMOVE);
         }
 	}
 }

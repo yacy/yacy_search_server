@@ -25,7 +25,7 @@ public class import_html {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN);
+        	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
         	if(post.containsKey("htmlfile")){
 				try {
 					final ByteArrayInputStream byteIn = new ByteArrayInputStream(post.get("htmlfile$file").getBytes("UTF-8"));

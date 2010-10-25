@@ -28,9 +28,9 @@ public class add_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
-        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
+        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
+        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
+        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
         	
             byte[] urlHash = null;
             String url ="";
@@ -38,18 +38,18 @@ public class add_ymark {
                 try {
                 	url = post.get(YMarkTables.BOOKMARK.URL.key(),YMarkTables.BOOKMARK.URL.deflt());
                 	boolean hasProtocol = false;
-                	for (YMarkTables.PROTOCOL p : YMarkTables.PROTOCOL.values()) {
+                	for (YMarkTables.PROTOCOLS p : YMarkTables.PROTOCOLS.values()) {
                 		hasProtocol = url.toLowerCase().startsWith(p.protocol());
                 	}
                 	if (!hasProtocol) {
-                        url=YMarkTables.PROTOCOL.HTTP.protocol(url);
+                        url=YMarkTables.PROTOCOLS.HTTP.protocol(url);
                     }
                 	urlHash = YMarkTables.getBookmarkId(url);
         		} catch (MalformedURLException e) {
         			Log.logException(e);
         		}
-    		} else if (post.containsKey(YMarkTables.TABLE_BOOKMARKS_COL_ID)) {
-    			urlHash = post.get(YMarkTables.TABLE_BOOKMARKS_COL_ID).getBytes();
+    		} else if (post.containsKey(YMarkTables.BOOKMARKS_ID)) {
+    			urlHash = post.get(YMarkTables.BOOKMARKS_ID).getBytes();
     		}
     		if(urlHash == null) {
     			prop.put("result", "0");
@@ -73,28 +73,28 @@ public class add_ymark {
                     // create and insert new entry
                     Data data = new Data();          
                     final String tagsString = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt()));                
-                    final String foldersString = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.TABLE_FOLDERS_UNSORTED));
+                    final String foldersString = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.FOLDERS_UNSORTED));
                     
                     data.put(YMarkTables.BOOKMARK.URL.key(), url.getBytes());
                     data.put(YMarkTables.BOOKMARK.TITLE.key(), post.get(YMarkTables.BOOKMARK.TITLE.key(),YMarkTables.BOOKMARK.TITLE.deflt()));
                     data.put(YMarkTables.BOOKMARK.DESC.key(), post.get(YMarkTables.BOOKMARK.DESC.key(),YMarkTables.BOOKMARK.DESC.deflt()));
                     data.put(YMarkTables.BOOKMARK.PUBLIC.key(), post.get(YMarkTables.BOOKMARK.PUBLIC.key(),YMarkTables.BOOKMARK.PUBLIC.deflt()));
                     data.put(YMarkTables.BOOKMARK.TAGS.key(), tagsString.getBytes());
-                    data.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.b_deflt());
+                    data.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.deflt().getBytes());
                     data.put(YMarkTables.BOOKMARK.FOLDERS.key(), foldersString.getBytes());
                     data.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), date);
                     data.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date);
                     data.put(YMarkTables.BOOKMARK.DATE_VISITED.key(), date);
                     sb.tables.insert(bmk_table, urlHash, data);                    
 
-                    final String[] folderArray = foldersString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
+                    final String[] folderArray = foldersString.split(YMarkTables.TAGS_SEPARATOR);                    
                     for (final String folder : folderArray) {
-                    	sb.tables.bookmarks.updateIndexTable(folder_table, folder, urlHash, YMarkTables.TABLE_INDEX_ACTION_ADD);
+                    	sb.tables.bookmarks.updateIndexTable(folder_table, folder, urlHash, YMarkTables.INDEX_ACTION.ADD);
                     } 
                     
-                    final String[] tagArray = tagsString.split(YMarkTables.TABLE_TAGS_SEPARATOR);                    
+                    final String[] tagArray = tagsString.split(YMarkTables.TAGS_SEPARATOR);                    
                     for (final String tag : tagArray) {
-                    	sb.tables.bookmarks.updateIndexTable(tag_table, tag, urlHash, YMarkTables.TABLE_INDEX_ACTION_ADD);
+                    	sb.tables.bookmarks.updateIndexTable(tag_table, tag, urlHash, YMarkTables.INDEX_ACTION.ADD);
                     } 
 
                     
@@ -107,7 +107,7 @@ public class add_ymark {
                     HashSet<String> oldSet;
                     HashSet<String>newSet;
                     
-                    final String foldersString = post.get(YMarkTables.BOOKMARK.FOLDERS.key(),bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.BOOKMARK.FOLDERS.deflt()));
+                    final String foldersString = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.BOOKMARK.FOLDERS.deflt()));
                 	oldSet = YMarkTables.keysStringToSet(bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.BOOKMARK.FOLDERS.deflt()));
                 	newSet = YMarkTables.keysStringToSet(foldersString);
                     updateIndex(folder_table, urlHash, oldSet, newSet);
@@ -130,7 +130,7 @@ public class add_ymark {
             }
             prop.put("result", "1");
         } else {
-        	prop.put(YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE,YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG);
+        	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
         }
         // return rewrite properties
         return prop;
@@ -143,13 +143,13 @@ public class add_ymark {
         newSet.removeAll(oldSet);
         tagIter = newSet.iterator();
         while(tagIter.hasNext()) {
-        	sb.tables.bookmarks.updateIndexTable(index_table, tagIter.next(), urlHash, YMarkTables.TABLE_INDEX_ACTION_ADD);
+        	sb.tables.bookmarks.updateIndexTable(index_table, tagIter.next(), urlHash, YMarkTables.INDEX_ACTION.ADD);
         }
         
         oldSet.removeAll(urlSet);
         tagIter=oldSet.iterator();
         while(tagIter.hasNext()) {
-        	sb.tables.bookmarks.updateIndexTable(index_table, tagIter.next(), urlHash, YMarkTables.TABLE_INDEX_ACTION_REMOVE);
+        	sb.tables.bookmarks.updateIndexTable(index_table, tagIter.next(), urlHash, YMarkTables.INDEX_ACTION.REMOVE);
         }  
 	}
 }

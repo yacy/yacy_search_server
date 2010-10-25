@@ -32,13 +32,13 @@ public class YMarkTables {
 		}
 	}
 	
-	public static enum PROTOCOL {
+	public static enum PROTOCOLS {
     	HTTP ("http://"),
     	HTTPS ("https://");
     	
     	private String protocol;
     	
-    	private PROTOCOL(String s) {
+    	private PROTOCOLS(String s) {
     		this.protocol = s;
     	}
     	public String protocol() {
@@ -48,25 +48,27 @@ public class YMarkTables {
     		return this.protocol+s;
     	}
     }
-    
+
     public static enum BOOKMARK {
-    	URL ("url", ""),
-    	TITLE ("title", ""),
-    	DESC ("desc", ""),
-    	DATE_ADDED ("date_added", ""),
-    	DATE_MODIFIED ("date_modified", ""),
-    	DATE_VISITED ("date_visited", ""),
-    	PUBLIC ("public", "flase"),
-    	TAGS ("tags", "unsorted"),
-    	VISITS ("visits", "0"),
-    	FOLDERS ("folders", "/unsorted");
+    	URL 			("url",				"",				"HREF"),
+    	TITLE 			("title",			"",				""),
+    	DESC 			("desc",			"",				""),
+    	DATE_ADDED 		("date_added",		"",				"ADD_DATE"),
+    	DATE_MODIFIED 	("date_modified",	"",				"LAST_MODIFIED"),
+    	DATE_VISITED 	("date_visited",	"",				"LAST_VISITED"),
+    	PUBLIC 			("public",			"flase",		""),
+    	TAGS 			("tags",			"unsorted",		"SHORTCUTURL"),
+    	VISITS 			("visits",			"0",			""),
+    	FOLDERS 		("folders",			"/unsorted",	"");
     	    	
     	private String key;
     	private String dflt;
+    	private String html_attrb;
     	
-    	private BOOKMARK(String k, String s) {
+    	private BOOKMARK(String k, String s, String a) {
     		this.key = k;
     		this.dflt = s;
+    		this.html_attrb = a;
     	}    	
     	public String key() {
     		return this.key;
@@ -74,31 +76,50 @@ public class YMarkTables {
     	public String deflt() {
     		return  this.dflt;
     	}
+    	public String html_attrb() {
+    		return this.html_attrb.toLowerCase();
+    	}
+    }
+    
+    public static enum INDEX {
+    	ID 		("id", ""),
+    	NAME 	("name", ""),
+    	DESC 	("desc", ""),
+    	URLS 	("urls", "");
+    	
+    	private String key;
+    	private String dflt;
+    	
+    	private INDEX(String k, String s) {
+    		this.key = k;
+    		this.dflt = s;
+    	}
+    	public String key() {
+    		return this.key;
+    	}
+    	public String deflt() {
+    		return  this.dflt;
+    	}
     	public byte[] b_deflt() {
     		return  dflt.getBytes();
     	}
     }
-
-	public final static String TABLE_BOOKMARKS_LOG = "BOOKMARKS";
-    public final static String TABLE_BOOKMARKS_COL_ID = "id";
-	
-	public final static String TABLE_BOOKMARKS_USER_ADMIN = "admin";
-	public final static String TABLE_BOOKMARKS_USER_AUTHENTICATE = "AUTHENTICATE";
-	public final static String TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG = "Authentication required!";
-	
-	public final static String TABLE_TAGS_SEPARATOR = ",";
-
-	public final static String TABLE_INDEX_COL_ID = "id";
-    public final static String TABLE_INDEX_COL_NAME = "name";
-    public final static String TABLE_INDEX_DESC = "desc";
-    public final static String TABLE_INDEX_COL_URLS = "urls";    
-    public final static short TABLE_INDEX_ACTION_ADD = 1;
-    public final static short TABLE_INDEX_ACTION_REMOVE = 2;
-
-    public final static String TABLE_FOLDERS_SEPARATOR = "/"; 
-    public final static String TABLE_FOLDERS_ROOT = "/"; 
-    public final static String TABLE_FOLDERS_UNSORTED = "/unsorted";
-    public final static String TABLE_FOLDERS_IMPORTED = "/imported"; 
+    
+    public static enum INDEX_ACTION {
+    	ADD,
+    	REMOVE
+    }
+    
+    public final static String TAGS_SEPARATOR = ",";
+    public final static String FOLDERS_SEPARATOR = "/";
+    public final static String FOLDERS_ROOT = "/"; 
+    public final static String FOLDERS_UNSORTED = "/unsorted";
+    public final static String FOLDERS_IMPORTED = "/imported"; 
+    public final static String BOOKMARKS_LOG = "BOOKMARKS";
+    public final static String BOOKMARKS_ID = "id";
+	public final static String USER_ADMIN = "admin";
+	public final static String USER_AUTHENTICATE = "AUTHENTICATE";
+	public final static String USER_AUTHENTICATE_MSG = "Authentication required!";
     
     private WorkTables worktables;
     public ConcurrentARC<String, byte[]> cache;
@@ -121,7 +142,7 @@ public class YMarkTables {
     	final 
     	StringBuilder urls = new StringBuilder(urlSet.size()*20);
     	while(urlIter.hasNext()) {
-    		urls.append(TABLE_TAGS_SEPARATOR);
+    		urls.append(TAGS_SEPARATOR);
     		urls.append(urlIter.next());
     	}
     	urls.deleteCharAt(0);
@@ -130,42 +151,49 @@ public class YMarkTables {
     
     public final static HashSet<String> keysStringToSet(final String keysString) {
     	HashSet<String> keySet = new HashSet<String>();
-        final String[] keyArray = keysString.split(TABLE_TAGS_SEPARATOR);                    
+        final String[] keyArray = keysString.split(TAGS_SEPARATOR);                    
         for (final String key : keyArray) {
         	keySet.add(key);
         }
         return keySet;
     }
     
-    public final static String cleanTagsString(String tagsString) {        
-        // get rid of heading, trailing and double commas since they are useless
-        while (tagsString.length() > 0 && tagsString.charAt(0) == TABLE_TAGS_SEPARATOR.charAt(0)) {
-            tagsString = tagsString.substring(1);
-        }
-        while (tagsString.endsWith(TABLE_TAGS_SEPARATOR)) {
-            tagsString = tagsString.substring(0,tagsString.length() -1);
-        }
-        while (tagsString.contains(",,")){
-            tagsString = tagsString.replaceAll(",,", TABLE_TAGS_SEPARATOR);
-        }
-        // space characters following a comma are removed
-        tagsString = tagsString.replaceAll(",\\s+", TABLE_TAGS_SEPARATOR);         
-        return tagsString;
+    public final static String cleanTagsString(final String tagsString) {        
+    	StringBuilder ts = new StringBuilder(tagsString);    	
+    	// get rid of double commas and space characters following a comma
+    	for (int i = 0; i < ts.length()-1; i++) {
+    		if (ts.charAt(i) == TAGS_SEPARATOR.charAt(0)) {
+    			if (ts.charAt(i+1) == TAGS_SEPARATOR.charAt(0) || ts.charAt(i+1) == ' ') {
+    				ts.deleteCharAt(i+1);
+    				i--;
+    			}
+    		}
+    	}
+		// get rid of heading and trailing comma
+		if (ts.charAt(0) == TAGS_SEPARATOR.charAt(0))
+			ts.deleteCharAt(0);
+		if (ts.charAt(ts.length()-1) == TAGS_SEPARATOR.charAt(0))
+			ts.deleteCharAt(ts.length()-1);
+    	return ts.toString();
     }
     
-    public final static String cleanFoldersString(String foldersString) {        
-    	foldersString = cleanTagsString(foldersString);    	
-        // get rid of double and trailing slashes
-        while (foldersString.endsWith(TABLE_FOLDERS_SEPARATOR)){
-        	foldersString = foldersString.substring(0, foldersString.length() -1);
-        }
-        while (foldersString.contains("/,")){
-        	foldersString = foldersString.replaceAll("/,", TABLE_TAGS_SEPARATOR);
-        }
-        while (foldersString.contains("//")){
-        	foldersString = foldersString.replaceAll("//", TABLE_FOLDERS_SEPARATOR);
-        }        
-        return foldersString;
+    public final static String cleanFoldersString(final String foldersString) {        
+    	StringBuilder fs = new StringBuilder(cleanTagsString(foldersString));    	
+    	for (int i = 0; i < fs.length()-1; i++) {
+    		if (fs.charAt(i) == FOLDERS_SEPARATOR.charAt(0)) {
+    			if (fs.charAt(i+1) == TAGS_SEPARATOR.charAt(0) || fs.charAt(i+1) == FOLDERS_SEPARATOR.charAt(0)) {
+    				fs.deleteCharAt(i);
+    				i--;
+    			} else if (fs.charAt(i+1) == ' ') {
+    				fs.deleteCharAt(i+1);
+    				i--;
+    			}
+    		}
+    	}
+		if (fs.charAt(fs.length()-1) == FOLDERS_SEPARATOR.charAt(0)) {
+			fs.deleteCharAt(fs.length()-1);
+		}
+    	return fs.toString();
     }
 
     public void cleanCache(final String tablename) {
@@ -186,8 +214,8 @@ public class YMarkTables {
         
 		this.cache.insert(cacheKey, BurlSet);	
     	
-    	tagEntry.put(TABLE_INDEX_COL_NAME, keyname);
-        tagEntry.put(TABLE_INDEX_COL_URLS, BurlSet);
+    	tagEntry.put(INDEX.NAME.key, keyname);
+        tagEntry.put(INDEX.URLS.key, BurlSet);
         this.worktables.insert(index_table, key, tagEntry);
     }
     
@@ -196,9 +224,9 @@ public class YMarkTables {
 		if (this.cache.containsKey(cacheKey)) {
 			return keysStringToSet(new String(this.cache.get(cacheKey)));
 		} else {
-			final Tables.Row idx_row = this.worktables.select(index_table, YMarkTables.getKeyId(keyname));
+			final Tables.Row idx_row = this.worktables.select(index_table, getKeyId(keyname));
 			if (idx_row != null) {						
-				final byte[] keys = idx_row.get(YMarkTables.TABLE_INDEX_COL_URLS);
+				final byte[] keys = idx_row.get(INDEX.URLS.key);
 				this.cache.put(cacheKey, keys);
 				return keysStringToSet(new String(keys));
 			}
@@ -228,7 +256,7 @@ public class YMarkTables {
 	 * @param url is the url has as returned by DigestURI.hash()
 	 * @param action is either add (1) or remove (2)
 	 */
-    public void updateIndexTable(final String index_table, final String keyname, final byte[] url, final int action) {
+    public void updateIndexTable(final String index_table, final String keyname, final byte[] url, final INDEX_ACTION action) {
         final byte[] key = YMarkTables.getKeyId(keyname);
         final String urlHash = new String(url);        		        
         Tables.Row row = null;
@@ -243,11 +271,11 @@ public class YMarkTables {
     		// key has no index_table entry
     		if(row == null) {
     			switch (action) {
-					case TABLE_INDEX_ACTION_ADD:		        		
+					case ADD:		        		
 						urlSet.add(urlHash);        			
 	        			createIndexEntry(index_table, keyname, urlSet);
 			            break;
-					case TABLE_INDEX_ACTION_REMOVE:
+					case REMOVE:
 						// key has no index_table entry but a cache entry
 						// TODO: this shouldn't happen
 						if(!urlSet.isEmpty()) {
@@ -265,13 +293,13 @@ public class YMarkTables {
     			// key has no cache entry
     			if (urlSet.isEmpty()) {
 	    			// load urlSet from index_table
-    				urlSet = keysStringToSet(new String(row.get(TABLE_INDEX_COL_URLS)));	   
+    				urlSet = keysStringToSet(new String(row.get(INDEX.URLS.key)));	   
     			}    			
     			switch (action) {
-					case TABLE_INDEX_ACTION_ADD:
+					case ADD:
 		        		urlSet.add(urlHash);
 	        			break;
-					case TABLE_INDEX_ACTION_REMOVE:
+					case REMOVE:
 						urlSet.remove(urlHash);
 						break;					
 					default:
@@ -283,7 +311,7 @@ public class YMarkTables {
     			} else {
     	        	BurlSet = keySetToBytes(urlSet);
         			this.cache.insert(cacheKey, BurlSet);
-        			row.put(TABLE_INDEX_COL_URLS, BurlSet);
+        			row.put(INDEX.URLS.key, BurlSet);
         			this.worktables.update(index_table, row);
     			}
     		}

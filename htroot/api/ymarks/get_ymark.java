@@ -30,13 +30,13 @@ public class get_ymark {
     	final TreeSet<String> bookmarks = new TreeSet<String>();
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
-        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.TABLE_BOOKMARKS_USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
+        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
+        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
+        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
         	
 	    	if(post.containsKey(YMarkTables.BOOKMARK.TAGS.key())) {
 	    		tags = true;
-	    		final String[] tagArray = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkTables.TABLE_TAGS_SEPARATOR);
+	    		final String[] tagArray = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkTables.TAGS_SEPARATOR);
 	    		try {
 					bookmarks.addAll(sb.tables.bookmarks.getBookmarks(tag_table, tagArray));
 				} catch (IOException e) {
@@ -45,7 +45,7 @@ public class get_ymark {
 					Log.logException(e);
 				}
 	    	} else if(post.containsKey(YMarkTables.BOOKMARK.FOLDERS.key())) {
-	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key())).split(YMarkTables.TABLE_TAGS_SEPARATOR);
+	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key())).split(YMarkTables.TAGS_SEPARATOR);
                 try {                	
 					if(tags)
 						bookmarks.retainAll(sb.tables.bookmarks.getBookmarks(folder_table, folderArray));
@@ -61,7 +61,7 @@ public class get_ymark {
 	    	putBookmarks(bookmarks, bmk_table);
 	    	
         } else {
-        	prop.put(YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE,YMarkTables.TABLE_BOOKMARKS_USER_AUTHENTICATE_MSG);
+        	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
         }
         // return rewrite properties
         return prop;
