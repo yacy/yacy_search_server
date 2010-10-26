@@ -886,7 +886,7 @@ public final class HTTPDFileHandler {
                                 // save position
                                 fis.mark(1000);
                                 // scrape document to look up charset
-                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis,"UTF-8",new DigestURI("http://localhost", null),null,false);
+                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis,"UTF-8",new DigestURI("http://localhost"),null,false);
                                 final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
                                 if(charset != null)
                                     mimeType = mimeType + "; charset="+charset;

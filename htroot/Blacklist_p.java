@@ -92,7 +92,7 @@ public class Blacklist_p {
                         !urlstring.startsWith("file://")) urlstring = "http://"+urlstring;
                 DigestURI testurl = null;
 				try {
-					testurl = new DigestURI(urlstring, null);
+					testurl = new DigestURI(urlstring);
 				} catch (final MalformedURLException e) { testurl = null; }
 				if(testurl != null) {
 					prop.putHTML("testlist_url",testurl.toString());

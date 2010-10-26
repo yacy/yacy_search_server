@@ -490,7 +490,7 @@ public class MediawikiImporter extends Thread implements Importer {
         }
         public void genDocument() throws Parser.Failure {
             try {
-				url = new DigestURI(urlStub + title, null);
+				url = new DigestURI(urlStub + title);
 				document = Document.mergeDocuments(url, "text/html", TextParser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8")));
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				document.setTitle(title);

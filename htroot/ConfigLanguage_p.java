@@ -102,7 +102,7 @@ public class ConfigLanguage_p {
                 final String url = post.get("url");
                 Iterator<String> it;
                 try{
-                    final DigestURI u = new DigestURI(url, null);
+                    final DigestURI u = new DigestURI(url);
                     it = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
                 }catch(final IOException e){
                     prop.put("status", "1");//unable to get url

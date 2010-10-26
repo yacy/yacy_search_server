@@ -131,7 +131,7 @@ public class Crawler_p {
 
                 // normalize URL
                 DigestURI crawlingStartURL = null;
-                try {crawlingStartURL = new DigestURI(crawlingStart, null);} catch (final MalformedURLException e1) {}
+                try {crawlingStartURL = new DigestURI(crawlingStart);} catch (final MalformedURLException e1) {}
                 crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                
                 // set new properties
@@ -240,7 +240,7 @@ public class Crawler_p {
                         
                         // stack request
                         // first delete old entry, if exists
-                        final DigestURI url = new DigestURI(crawlingStart, null);
+                        final DigestURI url = new DigestURI(crawlingStart);
                         final byte[] urlhash = url.hash();
                         indexSegment.urlMetadata().remove(urlhash);
                         sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
@@ -358,7 +358,7 @@ public class Crawler_p {
                             FileUtils.copy(fileString, writer);
                             writer.close();
                             final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
-                            final DigestURI crawlURL = new DigestURI("file://" + file.toString(), null);
+                            final DigestURI crawlURL = new DigestURI("file://" + file.toString());
                             final CrawlProfile profile = new CrawlProfile(
                                     fileName,
                                     crawlURL,
@@ -413,7 +413,7 @@ public class Crawler_p {
                 } else if (crawlingMode.equals("sitemap")) {
                     String sitemapURLStr = post.get("sitemapURL","");
                 	try {
-                		final DigestURI sitemapURL = new DigestURI(sitemapURLStr, null);
+                		final DigestURI sitemapURL = new DigestURI(sitemapURLStr);
                 		final CrawlProfile pe = new CrawlProfile(
                 				sitemapURLStr,
                 				sitemapURL,
@@ -443,7 +443,7 @@ public class Crawler_p {
                 	}
                 } else if (crawlingMode.equals("sitelist")) {
                     try {
-                        final DigestURI sitelistURL = new DigestURI(crawlingStart, null);
+                        final DigestURI sitelistURL = new DigestURI(crawlingStart);
                         // download document
                         ContentScraper scraper = null;
                         scraper = sb.loader.parseResource(sitelistURL, CrawlProfile.CacheStrategy.IFFRESH);

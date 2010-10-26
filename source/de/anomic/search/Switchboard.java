@@ -731,7 +731,7 @@ public final class Switchboard extends serverSwitch {
             netload: for (String netdef: netdefs) {
                 netdef = netdef.trim();
                 try {
-                    netdefmap = Switchboard.loadFileAsMap(new DigestURI(netdef, null));
+                    netdefmap = Switchboard.loadFileAsMap(new DigestURI(netdef));
                     if (netdefmap == null || netdefmap.size() == 0) continue netload;
                     setConfig(netdefmap);
                     break netload;
@@ -748,7 +748,7 @@ public final class Switchboard extends serverSwitch {
         }
         if (networkGroupDefinition.startsWith("http://")) {
             try {
-                setConfig(Switchboard.loadFileAsMap(new DigestURI(networkGroupDefinition, null)));
+                setConfig(Switchboard.loadFileAsMap(new DigestURI(networkGroupDefinition)));
             } catch (final MalformedURLException e) { }
         } else {
             final File networkGroupDefinitionFile = new File(getAppPath(), networkGroupDefinition);
@@ -769,7 +769,7 @@ public final class Switchboard extends serverSwitch {
                 DigestURI locationURL;
                 try {
                     // try to parse url
-                    locationURL = new DigestURI(location, null);
+                    locationURL = new DigestURI(location);
                 } catch (final MalformedURLException e) {
                     break;
                 }
@@ -1812,7 +1812,7 @@ public final class Switchboard extends serverSwitch {
                 try {
                     crawlStacker.enqueueEntry(new Request(
                             response.initiator(),
-                            new DigestURI(u, null),
+                            new DigestURI(u),
                             response.url().hash(),
                             nextEntry.getValue(),
                             new Date(),
@@ -2289,7 +2289,7 @@ public final class Switchboard extends serverSwitch {
             // get the links for a specific site
             DigestURI url;
             try {
-                url = new DigestURI(r, null);
+                url = new DigestURI(r);
             } catch (MalformedURLException e) {
                 Log.logException(e);
                 return;
@@ -2325,7 +2325,7 @@ public final class Switchboard extends serverSwitch {
             final String urlString = "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=" + query.trim().replaceAll(" ", "+") + "&n=2";
             DigestURI url;
             try {
-                url = new DigestURI(MultiProtocolURI.unescape(urlString), null);
+                url = new DigestURI(MultiProtocolURI.unescape(urlString));
             } catch (MalformedURLException e1) {
                 return;
             }
@@ -2441,7 +2441,7 @@ public final class Switchboard extends serverSwitch {
                 // load the seed list
                 try {
                     
-                    url = new DigestURI(seedListFileURL, null);
+                    url = new DigestURI(seedListFileURL);
                     //final long start = System.currentTimeMillis();
                     client.HEADResponse(url.toString());
                     header = new ResponseHeader(client.getHttpResponse().getAllHeaders());

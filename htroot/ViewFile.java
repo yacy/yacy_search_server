@@ -149,7 +149,7 @@ public class ViewFile {
             }
 
             // define an url by post parameter
-            url = new DigestURI(MultiProtocolURI.unescape(urlString), null);
+            url = new DigestURI(MultiProtocolURI.unescape(urlString));
             urlHash = new String(url.hash());
             pre = post.get("pre", "false").equals("true");
         } catch (final MalformedURLException e) {}

@@ -627,7 +627,7 @@ public class yacyCore {
                 )) {
                     throw new MalformedURLException("Unsupported protocol.");
                 }
-                seedURL = new DigestURI(seedURLStr, null);
+                seedURL = new DigestURI(seedURLStr);
             } catch (final MalformedURLException e) {
                 final String errorMsg = "Malformed seed file URL '" + sb.peers.mySeed().get(yacySeed.SEEDLIST, "") + "'. " + e.getMessage();
                 log.logWarning("SaveSeedList: " + errorMsg);

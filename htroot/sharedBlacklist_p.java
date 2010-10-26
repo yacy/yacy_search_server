@@ -141,7 +141,7 @@ public class sharedBlacklist_p {
                     // download the blacklist
                     try {
                         // get List
-                        DigestURI u = new DigestURI(downloadURLOld, null);
+                        DigestURI u = new DigestURI(downloadURLOld);
 
                         otherBlacklist = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
                     } catch (final Exception e) {
@@ -159,7 +159,7 @@ public class sharedBlacklist_p {
                 prop.putHTML("page_source", downloadURL);
 
                 try {
-                    final DigestURI u = new DigestURI(downloadURL, null);
+                    final DigestURI u = new DigestURI(downloadURL);
                     otherBlacklist = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);

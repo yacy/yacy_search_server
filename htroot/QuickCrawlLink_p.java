@@ -125,12 +125,12 @@ public class QuickCrawlLink_p {
         
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            try {crawlingStart = new DigestURI(crawlingStart, null).toNormalform(true, true);} catch (final MalformedURLException e1) {}
+            try {crawlingStart = new DigestURI(crawlingStart).toNormalform(true, true);} catch (final MalformedURLException e1) {}
             
             // check if url is proper
             DigestURI crawlingStartURL = null;
             try {
-                crawlingStartURL = new DigestURI(crawlingStart, null);
+                crawlingStartURL = new DigestURI(crawlingStart);
             } catch (final MalformedURLException e) {
                 prop.put("mode_status", "1");
                 prop.put("mode_code", "1");

@@ -104,7 +104,7 @@ public class SitemapImporter extends Thread {
         byte[] nexturlhash = null;
         DigestURI url = null;
         try {
-            url = new DigestURI(entry.url(), null);
+            url = new DigestURI(entry.url());
             nexturlhash = url.hash();
         } catch (final MalformedURLException e1) {
         }

@@ -43,7 +43,7 @@ public class CacheResource_p {
         final String u = post.get("url", "");
         DigestURI url;
         try {
-            url = new DigestURI(u, null);
+            url = new DigestURI(u);
         } catch (MalformedURLException e) {
             Log.logException(e);
             return prop;

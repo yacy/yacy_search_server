@@ -115,7 +115,7 @@ public class DCEntry extends TreeMap<String, String> {
             u = bestU(urls);
         }
         try {
-            return new DigestURI(u, null);
+            return new DigestURI(u);
         } catch (MalformedURLException e) {
             if (useRelationAsAlternative) {
                 DigestURI relation = this.getRelation();
@@ -136,7 +136,7 @@ public class DCEntry extends TreeMap<String, String> {
             u = bestU(urls);
         }
         try {
-            return new DigestURI(u, null);
+            return new DigestURI(u);
         } catch (MalformedURLException e) {
             Log.logWarning("DCEntry", "getRelation: url is bad: " + e.getMessage());
             return null;

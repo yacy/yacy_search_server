@@ -76,7 +76,7 @@ public class URLAnalysis {
     private static DigestURI poison = null;
     static {
         try {
-            poison = new DigestURI("http://poison.org/poison", null);
+            poison = new DigestURI("http://poison.org/poison");
         } catch (MalformedURLException e) {
             poison = null;
         }
@@ -177,7 +177,7 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        DigestURI url = new DigestURI(line, null);
+                        DigestURI url = new DigestURI(line);
                         in.put(url);
                     } catch (InterruptedException e) {
                         Log.logException(e);
@@ -279,7 +279,7 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        DigestURI url = new DigestURI(line, null);
+                        DigestURI url = new DigestURI(line);
                         hosts.add(url.getHost());
                     } catch (MalformedURLException e) {
                         continue;
@@ -369,7 +369,7 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        DigestURI url = new DigestURI(line, null);
+                        DigestURI url = new DigestURI(line);
                         urls.add(url.toNormalform(true, true));
                     } catch (MalformedURLException e) {
                         continue;

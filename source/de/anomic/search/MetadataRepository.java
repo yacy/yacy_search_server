@@ -286,7 +286,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     if ((pos = oldUrlStr.indexOf("://")) != -1) {
                         // trying to correct the url
                         final String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
-                        final DigestURI newUrl = new DigestURI(newUrlStr, null);
+                        final DigestURI newUrl = new DigestURI(newUrlStr);
 
                         // doing a http head request to test if the url is correct
 //                        final Client client = new Client(10000);

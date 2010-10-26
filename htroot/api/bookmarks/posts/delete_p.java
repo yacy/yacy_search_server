@@ -23,7 +23,7 @@ public class delete_p {
         			return prop;
     		} 
         	try {
-                if (post.containsKey("url") && switchboard.bookmarksDB.removeBookmark(new String((new DigestURI(post.get("url", "nourl"), null)).hash()))) {
+                if (post.containsKey("url") && switchboard.bookmarksDB.removeBookmark(new String((new DigestURI(post.get("url", "nourl"))).hash()))) {
                 	prop.put("result", "1");
                 } else if (post.containsKey("urlhash") && switchboard.bookmarksDB.removeBookmark(post.get("urlhash", "nohash"))) {
                 	prop.put("result", "1");

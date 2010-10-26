@@ -135,7 +135,7 @@ public class Surftips {
                 
                 url = row.getColString(0, null);
                 try{
-                	if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new DigestURI(url, null)))
+                	if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new DigestURI(url)))
                 		continue;
                 }catch(final MalformedURLException e){continue;};
                 title = row.getColString(1,"UTF-8");
@@ -305,13 +305,13 @@ public class Surftips {
             // add/subtract votes and write record
             if (entry != null) {
                 try {
-                    urlhash = new String((new DigestURI(url, null)).hash());
+                    urlhash = new String((new DigestURI(url)).hash());
                 } catch (final MalformedURLException e) {
                     urlhash = null;
                 }
                 if (urlhash == null)
                     try {
-                        urlhash = new String((new DigestURI("http://"+url, null)).hash());
+                        urlhash = new String((new DigestURI("http://"+url)).hash());
                     } catch (final MalformedURLException e) {
                         urlhash = null;
                     }

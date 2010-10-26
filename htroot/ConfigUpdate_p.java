@@ -81,7 +81,7 @@ public class ConfigUpdate_p {
                 final String release = post.get("releasedownload", "");
                 if (release.length() > 0) {
                     try {
-                	yacyRelease versionToDownload = new yacyRelease(new DigestURI(release, null));
+                	yacyRelease versionToDownload = new yacyRelease(new DigestURI(release));
                 	
                 	// replace this version with version which contains public key
                 	yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);

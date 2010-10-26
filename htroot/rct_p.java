@@ -61,7 +61,7 @@ public class rct_p {
                         // put url on remote crawl stack
                         DigestURI url;
                         try {
-                            url = new DigestURI(item.getLink(), null);
+                            url = new DigestURI(item.getLink());
                         } catch (final MalformedURLException e) {
                             url = null;
                         }

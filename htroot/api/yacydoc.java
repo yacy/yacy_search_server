@@ -75,7 +75,7 @@ public class yacydoc {
 
         if (urlstring.length() > 0 && urlhash.length() == 0) {
             try {
-                DigestURI url = new DigestURI(urlstring, null);
+                DigestURI url = new DigestURI(urlstring);
                 urlhash = new String(url.hash());
             } catch (MalformedURLException e) {
                 Log.logException(e);

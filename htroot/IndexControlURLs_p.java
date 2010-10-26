@@ -163,7 +163,7 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("urldelete")) {
             try {
-                urlhash = new String((new DigestURI(urlstring, null)).hash());
+                urlhash = new String((new DigestURI(urlstring)).hash());
             } catch (final MalformedURLException e) {
                 urlhash = null;
             }
@@ -179,7 +179,7 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("urlstringsearch")) {
             try {
-                final DigestURI url = new DigestURI(urlstring, null);
+                final DigestURI url = new DigestURI(urlstring);
                 urlhash = new String(url.hash());
                 prop.put("urlhash", urlhash);
                 final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes(), null, 0);

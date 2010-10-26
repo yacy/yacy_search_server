@@ -74,7 +74,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         String url = ResumptionToken.truncatedURL(source);
         if (!url.endsWith("?")) url = url + "?";
         try {
-            this.source = new DigestURI(url + "verb=ListRecords&metadataPrefix=oai_dc", null);
+            this.source = new DigestURI(url + "verb=ListRecords&metadataPrefix=oai_dc");
         } catch (MalformedURLException e) {
             // this should never happen
             Log.logException(e);

@@ -50,7 +50,7 @@ public class getpageinfo_p {
             if (actions.indexOf("title")>=0) {
                 DigestURI u = null;
                 try {
-                    u = new DigestURI(url, null);
+                    u = new DigestURI(url);
                 } catch (final MalformedURLException e) {
                     // fail, do nothing
                 }
@@ -101,7 +101,7 @@ public class getpageinfo_p {
             }
             if (actions.indexOf("robots")>=0) {
                 try {
-                    final DigestURI theURL = new DigestURI(url, null);
+                    final DigestURI theURL = new DigestURI(url);
                     
                 	// determine if crawling of the current URL is allowed
                 	prop.put("robots-allowed", sb.robots.isDisallowed(theURL) ? "0" : "1");

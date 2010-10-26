@@ -260,7 +260,7 @@ public class PhpBB3Dao implements Dao {
     ) {
         try {
             // generate output file name and attributes
-            String targethost = new DigestURI(this.urlstub, null).getHost();
+            String targethost = new DigestURI(this.urlstub).getHost();
             int fc = 0;
             File outputfiletmp = null, outputfile = null;
             

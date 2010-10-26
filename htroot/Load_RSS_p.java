@@ -246,7 +246,7 @@ public class Load_RSS_p {
         
         DigestURI url = null;
         try {
-            url = post.containsKey("url") ? new DigestURI(post.get("url", ""), null) : null;
+            url = post.containsKey("url") ? new DigestURI(post.get("url", "")) : null;
         } catch (MalformedURLException e) {
             Log.logWarning("Load_RSS_p", "url not well-formed: '" + post.get("url", "") + "'");
         }
@@ -311,7 +311,7 @@ public class Load_RSS_p {
             int i = 0;
             for (final Hit item: feed) {
                 try {
-                    DigestURI messageurl = new DigestURI(item.getLink(), null);
+                    DigestURI messageurl = new DigestURI(item.getLink());
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();

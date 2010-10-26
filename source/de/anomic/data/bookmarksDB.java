@@ -491,7 +491,7 @@ public class bookmarksDB {
                 url="http://"+url;
             }
             try {
-                this.urlHash = new String((new DigestURI(url, null)).hash());
+                this.urlHash = new String((new DigestURI(url)).hash());
             } catch (final MalformedURLException e) {
                 this.urlHash = null;
             }
@@ -512,7 +512,7 @@ public class bookmarksDB {
         }
         
         public Bookmark(final Map<String, String> map) throws MalformedURLException {
-            this(new String((new DigestURI(map.get(BOOKMARK_URL), null)).hash()), map);
+            this(new String((new DigestURI(map.get(BOOKMARK_URL))).hash()), map);
         }
         
         Map<String, String> toMap() {

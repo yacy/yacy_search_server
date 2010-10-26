@@ -68,7 +68,7 @@ public class ViewImage {
         
         DigestURI url = null;
         if ((urlString.length() > 0) && (auth)) try {
-            url = new DigestURI(urlString, null);
+            url = new DigestURI(urlString);
         } catch (final MalformedURLException e1) {
             url = null;
         }

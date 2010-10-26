@@ -38,7 +38,13 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteArray;
 
-
+/**
+ * URI-object providing YaCy-hash computation
+ * 
+ * Hashes for URIs are split in several parts
+ * For URIs pointing to resources not globally available,
+ * the domainhash-part gets one reserved value
+ */
 public class DigestURI extends MultiProtocolURI implements Serializable {
     
     private static final long serialVersionUID = -1173233022912141885L;
@@ -47,12 +53,17 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     // class variables
     private byte[] hash;
     
+    /**
+     * Shortcut, calculate hash for shorted url/hostname
+     * @param host
+     * @return
+     */
     public static String domhash(final String host) {
         String h = host;
         if (!h.startsWith("http://")) h = "http://" + h;
         DigestURI url = null;
         try {
-            url = new DigestURI(h, null);
+            url = new DigestURI(h);
         } catch (MalformedURLException e) {
             Log.logException(e);
             return null;
@@ -60,24 +71,45 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return (url == null) ? null : new String(url.hash(), 6, 6);
     }
     
+    /**
+     * DigestURI from File
+     */
     public DigestURI(final File file) throws MalformedURLException {
         this("file", "", -1, file.getAbsolutePath());
     }
 
+    /**
+     * DigestURI from URI string
+     */
     public DigestURI(final String url) throws MalformedURLException {
         this(url, null);
     }
     
+    /**
+     * DigestURI from URI string, hash is already calculated
+     * @param url 
+     * @param hash already calculated hash for url
+     * @throws MalformedURLException
+     */
     public DigestURI(final String url, final byte[] hash) throws MalformedURLException {
         super(url);
         this.hash = hash;
     }
     
+    /**
+     * DigestURI from general URI
+     * @param baseURL
+     */
     public DigestURI(final MultiProtocolURI baseURL) {
         super(baseURL);
         this.hash = null;
     }
     
+    /**
+     * DigestURI from general URI, hash already calculated
+     * @param baseURL
+     * @param hash
+     */
     public DigestURI(final MultiProtocolURI baseURL, final byte[] hash) {
         super(baseURL);
         this.hash = hash;
@@ -113,6 +145,10 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return (Base64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 3);
     }
 
+    /**
+     * get YaCy-hash of URI
+     * @return
+     */
     public final byte[] hash() {
         // in case that the object was initialized without a known url hash, compute it now
         synchronized (this) {
@@ -121,6 +157,14 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return this.hash;
     }
 
+    /**
+     * calculated YaCy-Hash of this URI
+     * 
+     * @note needs DNS lookup to check if the addresses domain is local
+     * that causes that this method may be very slow
+     * 
+     * @return hash
+     */
     private final byte[] urlHashComputation() {
         // the url hash computation needs a DNS lookup to check if the addresses domain is local
         // that causes that this method may be very slow
@@ -266,7 +310,9 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return domDomain(urlHash) == id;
     }
 
-    // checks for local/global IP range and local IP
+    /**
+     *  checks for local/global IP range and local IP
+     */
     public final boolean isLocal() {
         if (this.isSMB() || this.isFile()) return true;
         if (this.hash == null) synchronized (this) {
@@ -277,6 +323,11 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         return domDomain(this.hash) == 7;
     }
 
+    /**
+     * checks, if hash is in local/global IP range
+     * @param urlhash
+     * @return
+     */
     public static final boolean isLocal(final byte[] urlhash) {
         return domDomain(urlhash) == 7;
     }

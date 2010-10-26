@@ -324,7 +324,7 @@ public final class HTTPDProxyHandler {
                     final String newUrl = redirectorReader.readLine();
                     if (!newUrl.equals("")) {
                         try {
-                            url = new DigestURI(newUrl, null);
+                            url = new DigestURI(newUrl);
                         } catch(final MalformedURLException e){}//just keep the old one
                     }
                     if (log.isFinest()) log.logFinest(reqID +"    using redirector to "+ url);

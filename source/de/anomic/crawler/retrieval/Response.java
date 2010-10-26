@@ -747,7 +747,7 @@ public class Response {
         try {
             String r = requestHeader.get(RequestHeader.REFERER, null);
             if (r == null) return null;
-            return new DigestURI(r, null);
+            return new DigestURI(r);
         } catch (final Exception e) {
             return null;
         }
@@ -758,7 +758,7 @@ public class Response {
         String u = requestHeader.get(RequestHeader.REFERER, "");
         if (u == null || u.length() == 0) return null;
         try {
-            return new DigestURI(u, null).hash();
+            return new DigestURI(u).hash();
         } catch (final Exception e) {
             return null;
         }

@@ -420,12 +420,12 @@ public class CrawlQueues {
             
             // put url on remote crawl stack
             try {
-                url = new DigestURI(item.getLink(), null);
+                url = new DigestURI(item.getLink());
             } catch (final MalformedURLException e) {
                 continue;
             }
             try {
-                referrer = new DigestURI(item.getReferrer(), null);
+                referrer = new DigestURI(item.getReferrer());
             } catch (final MalformedURLException e) {
                 referrer = null;
             }

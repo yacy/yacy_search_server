@@ -47,7 +47,7 @@ public class webstructure {
             DigestURI url = null;
             if (about.length() > 6) {
                 try {
-                    url = new DigestURI(about, null);
+                    url = new DigestURI(about);
                     about = new String(url.hash(), 6, 6);
                 } catch (MalformedURLException e) {
                     about = null;

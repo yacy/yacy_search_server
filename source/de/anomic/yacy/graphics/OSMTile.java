@@ -102,7 +102,7 @@ public class OSMTile {
     public static BufferedImage getSingleTile(final tileCoordinates tile, int retry) {
         DigestURI tileURL;
         try {
-            tileURL = new DigestURI(tile.url(retry), null);
+            tileURL = new DigestURI(tile.url(retry));
         } catch (final MalformedURLException e) {
             return null;
         }

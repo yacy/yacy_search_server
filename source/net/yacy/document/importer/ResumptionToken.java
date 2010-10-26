@@ -135,7 +135,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         
         // encoded state
         if (token.indexOf("from=") >= 0) {
-            return new DigestURI(url + "verb=ListRecords&" + token, null);
+            return new DigestURI(url + "verb=ListRecords&" + token);
         }
         
         // cached result set
@@ -146,7 +146,7 @@ public class ResumptionToken extends TreeMap<String, String> {
             // the resumption token is still fresh
         }
         String u = url + "verb=ListRecords&resumptionToken=" + escape(token);
-        return new DigestURI(u, null);
+        return new DigestURI(u);
     }
     
     public static StringBuilder escape(final String s) {

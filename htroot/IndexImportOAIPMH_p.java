@@ -59,7 +59,7 @@ public class IndexImportOAIPMH_p {
                 if (oaipmhurl.indexOf("?") < 0) oaipmhurl = oaipmhurl + "?verb=ListRecords&metadataPrefix=oai_dc";
                 DigestURI url = null;
                 try {
-                    url = new DigestURI(oaipmhurl, null);
+                    url = new DigestURI(oaipmhurl);
                     OAIPMHLoader r = new OAIPMHLoader(sb.loader, url, sb.surrogatesInPath, "oaipmh-one");
                     ResumptionToken rt = r.getResumptionToken();
                     prop.put("import-one", 1);
@@ -93,7 +93,7 @@ public class IndexImportOAIPMH_p {
                 sb.tables.recordAPICall(post, "IndexImportOAIPMH_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "OAI-PMH import for " + oaipmhurl);
                 DigestURI url = null;
                 try {
-                    url = new DigestURI(oaipmhurl, null);
+                    url = new DigestURI(oaipmhurl);
                     OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
                     job.start();
                     prop.put("status", 1);
@@ -129,7 +129,7 @@ public class IndexImportOAIPMH_p {
                 while (sourceList.size() > 0) {
                     String oaipmhurl = sourceList.remove(r.nextInt(sourceList.size()));
                     try {
-                        url = new DigestURI(oaipmhurl, null);
+                        url = new DigestURI(oaipmhurl);
                         OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
                         job.start();
                     } catch (MalformedURLException e) {
