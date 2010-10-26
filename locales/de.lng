@@ -635,6 +635,14 @@ Default Pop-Up Page<==Standard Pop-up<
 >Search Front Page==>Frontseite Suche
 >Search Page \(small header\)==>Suchseite (kleine Kopfzeile)
 >Interactive Search Page==>Interaktive Suchseite
+Target for Click on Search Results==Zielfenster beim Klicken auf ein Suchergebnis
+
+\"_blank\" \(new window\)=="_blank" (Neues Fenster)
+\"_self\" \(same window\)=="_self" (Selbes Fenster)
+\"_parent\" \(the parent frame of a frameset\)=="_parent" (Der Parent Frame eines Framesets)
+\"_top\" \(top of all frames\)=="_top" (Oberster Frame)
+\"searchresult\" \(a default custom page name for search results\)=="Suchergebnis" (Eine standardmäßig konfigurierbare Setie für Suchergebnisse)
+
 "Change Search Page"=="Ändere die Suchseite"
 "Set to Default Values"=="Standardwerte setzen"
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigenen Webseiten eingebaut werden. Verwenden Sie dazu den folgenden Code:
@@ -3085,11 +3093,13 @@ This table contains a short description of the tags that can be used in the Wiki
 of YaCy. For a more detailed description visit the==in YaCy benutzt werden können. Für eine detailliertere Beschreibung besuchen Sie bitte das
 #YaCy Wiki==YaCy Wiki
 Description==Beschreibung
-\=\=headline====Überschrift
-These tags create headlines. If a page has three or more headlines, a directory will be created automatically.==Diese Tags erzeugen Überschriften. Wenn die Seite drei oder mehr Überschriften enthält, wird automatisch ein Inhaltsverzeichnis erstellt.
+\=headline===Überschrift
+These tags create headlines. If a page has three or more headlines, a table of content will be created automatically.==Diese Tags erzeugen Überschriften. Wenn die Seite drei oder mehr Überschriften enthält, wird automatisch ein Inhaltsverzeichnis erstellt.
+Headlines of level 1 will be ignored in the table of content.==Überschriften im ersten Level werden beim Erstellen des Inhaltsverzeichnisses ignoriert.
 #text==Text
 These tags create stressed texts. The first pair emphasizes the text \(most browsers will display it in italics\),==Diese Tags erzeugen hervorgehobenen Text. Das erste Paar betont den Text (die meisten Browser zeigen die Texte kursiv),
 the second one emphazises it more strongly \(i.e. bold\) and the last tags create a combination of both.==das Zweite betont den Text stärker (z.B. fett) und der letzte Tag erzeugt eine Mischung aus beidem.
+Text will be displayed <span class=\"strike\">stricken through</span>.==Text wird <span class="strike">durchgestrichen</span> angezeigt.
 Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Der Text erscheint eingerückt. Dieser Tag eignet sich, um Zitate zu markieren, wird aber auch zum Designen benutzt.
 point==Punkt
 These tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
