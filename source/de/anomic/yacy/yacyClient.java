@@ -167,7 +167,7 @@ public final class yacyClient {
             } else {
             	otherPeer = yacySeed.genRemoteSeed(seed, salt, false);
             	if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
-            	    yacyCore.log.logInfo("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
+            	    yacyCore.log.logInfo("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null) ? ("seed=" + seed) : otherPeer.getName()) + "' wrong");
             		return -1; // no success
             	}
             }

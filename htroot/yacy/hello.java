@@ -89,7 +89,7 @@ public final class hello {
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
         
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
-        if ((remoteSeed == null) || (remoteSeed.hash == null)) {
+        if (remoteSeed == null || remoteSeed.hash == null) {
             prop.put("message", "cannot parse your seed");
             return prop;
         }
@@ -104,7 +104,7 @@ public final class hello {
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();
 
-        if ((sb.isRobinsonMode()) && (!sb.isPublicRobinson())) {
+        if (sb.isRobinsonMode() && !sb.isPublicRobinson()) {
         	// if we are a robinson cluster, answer only if this client is known by our network definition
             prop.put("message", "I am robinson, I do not answer");
             return prop;

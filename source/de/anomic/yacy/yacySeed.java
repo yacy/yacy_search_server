@@ -71,7 +71,7 @@ import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
 public class yacySeed implements Cloneable {
 
-    public static final int maxsize = 4096;
+    public static final int maxsize = 16000;
     /**
      * <b>substance</b> "sI" (send index/words)
      */
