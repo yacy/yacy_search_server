@@ -28,6 +28,7 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -173,7 +174,13 @@ public final class search {
         final HandleSet abstractSet = (abstracts.length() == 0 || abstracts.equals("auto")) ? null : QueryParams.hashes2Set(abstracts);
         
         // store accessing peer
-        final yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
+        yacySeed remoteSeed;
+        try {
+            remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
+        } catch (IOException e) {
+            yacyCore.log.logInfo("yacy.search: access with bad seed: " + e.getMessage());
+            remoteSeed = null;
+        }
         if (sb.peers == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {

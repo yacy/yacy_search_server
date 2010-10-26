@@ -2463,13 +2463,17 @@ public final class Switchboard extends serverSwitch {
                         enu = FileUtils.strings(content);
                         lc = 0;
                         while (enu.hasNext()) {
-                            ys = yacySeed.genRemoteSeed(enu.next(), null, false);
-                            if ((ys != null) &&
-                                ((!peers.mySeedIsDefined()) || !peers.mySeed().hash.equals(ys.hash))) {
-                                if (peers.peerActions.connectPeer(ys, false)) lc++;
-                                //seedDB.writeMap(ys.hash, ys.getMap(), "init");
-                                //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
-                                //lc++;
+                            try {
+                                ys = yacySeed.genRemoteSeed(enu.next(), null, false);
+                                if ((ys != null) &&
+                                        ((!peers.mySeedIsDefined()) || !peers.mySeed().hash.equals(ys.hash))) {
+                                        if (peers.peerActions.connectPeer(ys, false)) lc++;
+                                        //seedDB.writeMap(ys.hash, ys.getMap(), "init");
+                                        //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
+                                        //lc++;
+                                    }
+                            } catch (IOException e) {
+                                yacyCore.log.logInfo("BOOTSTRAP: bad seed: " + e.getMessage());
                             }
                         }
                         yacyCore.log.logInfo("BOOTSTRAP: " + lc + " seeds from seed-list URL " + seedListFileURL + ", AGE=" + (header.age() / 3600000) + "h");

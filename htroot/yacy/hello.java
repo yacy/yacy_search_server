@@ -27,6 +27,7 @@
 // javac -classpath .:../../classes hello.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -86,7 +87,14 @@ public final class hello {
             prop.put("message", "your seed is too long (" + seed.length() + ")");
             return prop;
         }
-        final yacySeed remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
+        yacySeed remoteSeed;
+        try {
+            remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
+        } catch (IOException e) {
+            yacyCore.log.logInfo("hello/server: bad seed: " + e.getMessage());
+            prop.put("message", "bad seed: " + e.getMessage());
+            return prop;
+        }
         
 //      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if (remoteSeed == null || remoteSeed.hash == null) {

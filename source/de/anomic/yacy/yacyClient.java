@@ -165,11 +165,16 @@ public final class yacyClient {
         	if (seed.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	otherPeer = yacySeed.genRemoteSeed(seed, salt, false);
-            	if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
-            	    yacyCore.log.logInfo("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null) ? ("seed=" + seed) : otherPeer.getName()) + "' wrong");
-            		return -1; // no success
-            	}
+            	try {
+                    otherPeer = yacySeed.genRemoteSeed(seed, salt, false);
+                    if (!otherPeer.hash.equals(otherHash)) {
+                        yacyCore.log.logInfo("yacyClient.publishMySeed: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + otherHash);
+                        return -1; // no success
+                    }
+                } catch (IOException e) {
+                    yacyCore.log.logInfo("yacyClient.publishMySeed: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
+                    return -1; // no success
+                }
             }
         }
 
@@ -227,13 +232,19 @@ public final class yacyClient {
         int i = 0;
         int count = 0;
         String seedStr;
+        yacySeed s;
         while ((seedStr = result.get("seed" + i++)) != null) {
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
         	if (seedStr.length() > yacySeed.maxsize) {
             	yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
             } else {
-            	if (peerActions.peerArrival(yacySeed.genRemoteSeed(seedStr, salt, false), (i == 1))) count++;
+                try {
+                    s = yacySeed.genRemoteSeed(seedStr, salt, false);
+                    if (peerActions.peerArrival(s, (i == 1))) count++;
+                } catch (IOException e) {
+                    yacyCore.log.logInfo("hello/client: rejected contacting seed; bad (" + e.getMessage() + ")");
+                }
             }
         }
         return count;

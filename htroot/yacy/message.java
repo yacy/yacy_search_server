@@ -108,7 +108,13 @@ public final class message {
                 return prop;
             }
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
-            final yacySeed otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, false);
+            yacySeed otherSeed;
+            try {
+                otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, false);
+            } catch (IOException e) {
+                prop.put("response", "-1"); // don't accept messages for bad seeds
+                return prop;
+            }
 
             String subject = crypt.simpleDecode(post.get("subject", ""), key); // message's subject
             String message = crypt.simpleDecode(post.get("message", ""), key); // message body

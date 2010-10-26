@@ -764,27 +764,26 @@ public class yacySeed implements Cloneable {
         return hash.getBytes();
     }
 
-    public static yacySeed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed) {
+    public static yacySeed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed) throws IOException {
         // this method is used to convert the external representation of a seed into a seed object
         // yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
 
         // check protocol and syntax of seed
-        if (seedStr == null || seedStr.length() == 0) return null;
+        if (seedStr == null) throw new IOException("seedStr == null");
+        if (seedStr.length() == 0) throw new IOException("seedStr.length() == 0");
         final String seed = crypt.simpleDecode(seedStr, key);
-        if (seed == null || seed.length() == 0) return null;
+        if (seed == null) throw new IOException("seed == null");
+        if (seed.length() == 0) throw new IOException("seed.length() == 0");
         
         // extract hash
         final ConcurrentHashMap<String, String> dna = MapTools.string2map(seed, ",");
         final String hash = dna.remove(yacySeed.HASH);
-        if (hash == null) return null;
+        if (hash == null) throw new IOException("hash == null");
         final yacySeed resultSeed = new yacySeed(hash, dna);
 
         // check semantics of content
         final String testResult = resultSeed.isProper(ownSeed);
-        if (testResult != null) {
-            if (yacyCore.log.isFinest()) yacyCore.log.logFinest("seed is not proper (" + testResult + "): " + resultSeed);
-            return null;
-        }
+        if (testResult != null) throw new IOException("seed is not proper (" + testResult + "): " + resultSeed);
         
         // seed ok
         return resultSeed;
@@ -874,7 +873,7 @@ public class yacySeed implements Cloneable {
         fr.read(b, 0, b.length);
         fr.close();
         final yacySeed mySeed = genRemoteSeed(new String(b), null, true);
-        if (mySeed == null) return null;
+        assert mySeed != null; // in case of an error, an IOException is thrown
         mySeed.dna.put(yacySeed.IP, ""); // set own IP as unknown
         return mySeed;
     }
