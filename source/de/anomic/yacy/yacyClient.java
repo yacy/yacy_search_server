@@ -150,8 +150,8 @@ public final class yacyClient {
             result = null;
         }
         
-        if (result == null || result.size() < 3) {
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.publishMySeed result error: " +
+        if (result == null) {
+            yacyCore.log.logInfo("yacyClient.publishMySeed result error: " +
             ((result == null) ? "result null" : ("result=" + result.toString())));
             return -1;
         }
@@ -167,7 +167,7 @@ public final class yacyClient {
             } else {
             	otherPeer = yacySeed.genRemoteSeed(seed, salt, false);
             	if (otherPeer == null || !otherPeer.hash.equals(otherHash)) {
-            	    if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
+            	    yacyCore.log.logInfo("yacyClient.publishMySeed: consistency error: other peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' wrong");
             		return -1; // no success
             	}
             }
