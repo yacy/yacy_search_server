@@ -76,7 +76,8 @@ public class genericImageParser extends AbstractParser implements Parser {
         SUPPORTED_EXTENSIONS.add("bmp");
         SUPPORTED_MIME_TYPES.add("image/png");
         SUPPORTED_MIME_TYPES.add("image/gif");
-        SUPPORTED_MIME_TYPES.add("image/jpg");
+        SUPPORTED_MIME_TYPES.add("image/jpeg");
+        SUPPORTED_MIME_TYPES.add("image/jpg"); // this is in fact a 'wrong' mime type. We leave it here because that is a common error that occurs in the internet frequently
         SUPPORTED_MIME_TYPES.add("image/bmp");
     }
     
