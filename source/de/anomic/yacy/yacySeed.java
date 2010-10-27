@@ -153,7 +153,7 @@ public class yacySeed implements Cloneable {
     public static final String CRTCNT    = "CRTCnt";
     public static final String IP        = "IP";
     public static final String PORT      = "Port";
-    public static final String SEEDLIST  = "seedURL";
+    public static final String SEEDLISTURL = "seedURL";
     /** zero-value */
     private static final String ZERO      = "0";
     
@@ -789,6 +789,7 @@ public class yacySeed implements Cloneable {
         return resultSeed;
     }
 
+    // TODO: add here IP ranges to accept also intranet networks
     public final String isProper(final boolean checkOwnIP) {
         // checks if everything is ok with that seed
         
@@ -816,7 +817,7 @@ public class yacySeed implements Cloneable {
         }
         
         // seedURL
-        final String seedURL = this.dna.get(SEEDLIST);
+        final String seedURL = this.dna.get(SEEDLISTURL);
         if (seedURL != null && seedURL.length() > 0) {
             if (!seedURL.startsWith("http://") && !seedURL.startsWith("https://")) return "wrong protocol for seedURL";
             try {
@@ -832,11 +833,11 @@ public class yacySeed implements Cloneable {
     
     public static final String isProperIP(final String ipString) {
         // returns null if ipString is proper, a string with the cause otherwise
-        if (ipString == null) return "IP is null";
-        if (ipString.length() > 0 && ipString.length() < 8) return "IP is too short: " + ipString;
+        if (ipString == null) return ipString + " -> IP is null";
+        if (ipString.length() > 0 && ipString.length() < 8) return ipString + " -> IP is too short: ";
         InetAddress ip = Domains.dnsResolve(ipString);
-        if (ip == null) return "IP is not proper: " + ipString; //this does not work with staticIP
-        if (ipString.equals("localhost") || ipString.startsWith("127.") || (ipString.startsWith("0:0:0:0:0:0:0:1"))) return "IP for localhost rejected";
+        if (ip == null) return ipString + " -> IP is not proper"; //this does not work with staticIP
+        if (ipString.equals("localhost") || ipString.startsWith("127.") || ipString.startsWith("0:0:0:0:0:0:0:1")) return ipString + " - IP for localhost rejected";
         return null;
     }
 

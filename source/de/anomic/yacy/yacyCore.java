@@ -619,7 +619,7 @@ public class yacyCore {
             // ensure that the seed file url is configured properly
             DigestURI seedURL;
             try {
-                final String seedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLIST, "");
+                final String seedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLISTURL, "");
                 if (seedURLStr.length() == 0) { throw new MalformedURLException("The seed-file url must not be empty."); }
                 if (!(
                         seedURLStr.toLowerCase().startsWith("http://") ||
@@ -629,7 +629,7 @@ public class yacyCore {
                 }
                 seedURL = new DigestURI(seedURLStr);
             } catch (final MalformedURLException e) {
-                final String errorMsg = "Malformed seed file URL '" + sb.peers.mySeed().get(yacySeed.SEEDLIST, "") + "'. " + e.getMessage();
+                final String errorMsg = "Malformed seed file URL '" + sb.peers.mySeed().get(yacySeed.SEEDLISTURL, "") + "'. " + e.getMessage();
                 log.logWarning("SaveSeedList: " + errorMsg);
                 return errorMsg;
             }

@@ -347,7 +347,7 @@ public class SettingsAck_p {
             // get the currently used uploading method
             final String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
             final String newSeedUploadMethod = post.get("seedUploadMethod");
-            final String oldSeedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLIST, "");
+            final String oldSeedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLISTURL, "");
             final String newSeedURLStr = post.get("seedURL");
             
             final boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
@@ -358,7 +358,7 @@ public class SettingsAck_p {
             
             if (seedUrlChanged || uploadMethodChanged) {
                 env.setConfig("seedUploadMethod", newSeedUploadMethod);
-                sb.peers.mySeed().put(yacySeed.SEEDLIST, newSeedURLStr);
+                sb.peers.mySeed().put(yacySeed.SEEDLISTURL, newSeedURLStr);
                 
                 // try an upload
                 String error;

@@ -199,7 +199,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (myOwnSeedFile.length() > 0) try {
             // load existing identity
             mySeed = yacySeed.load(myOwnSeedFile);
-            if(mySeed == null) throw new IOException("current seed is null");
+            if (mySeed == null) throw new IOException("current seed is null");
         } catch (final IOException e) {
             // create new identity
             Log.logSevere("SEEDDB", "could not load stored mySeed.txt from " + myOwnSeedFile.toString() + ": " + e.getMessage() + ". creating new seed.", e);

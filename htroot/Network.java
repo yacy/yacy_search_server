@@ -145,7 +145,7 @@ public class Network {
                 prop.putNum("table_my-qph-pubremote", Math.round(6000d * sb.averageQPMGlobal()) / 100d);
                 prop.putNum("table_my-seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
                 prop.putNum("table_my-connects", Double.parseDouble(seed.get(yacySeed.CCOUNT, "0")));
-                prop.put("table_my-url", seed.get(yacySeed.SEEDLIST, ""));
+                prop.put("table_my-url", seed.get(yacySeed.SEEDLISTURL, ""));
                 
                 // generating the location string
                 prop.putHTML("table_my-location", MultiProtocolURI.generateLocation());
@@ -392,7 +392,7 @@ public class Network {
                             } else if(seed.isPrincipal()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_type", 2);
                             }
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_type_url", seed.get(yacySeed.SEEDLIST, "http://nowhere/"));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_type_url", seed.get(yacySeed.SEEDLISTURL, "http://nowhere/"));
 
                             final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
                             if (page == 1 && lastseen > 720) {

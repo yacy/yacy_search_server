@@ -148,7 +148,7 @@ public class serverSwitch {
     public String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
         final String staticIP = getConfig("staticIP", "");
-        if ((!staticIP.equals(""))) {
+        if (staticIP.length() > 0) {
             return staticIP;
         }
 

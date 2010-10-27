@@ -288,12 +288,16 @@ public class yacySearch extends Thread {
         final yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
             if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
-            searchThreads[i] = new yacySearch(
+            try {
+                searchThreads[i] = new yacySearch(
                     wordhashes, excludehashes, "", prefer, filter, language,
                     sitehash, authorhash,
                     count, maxDist, true, targets, targetPeers[i],
                     indexSegment, peers, crawlResults, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
-            searchThreads[i].start();
+                searchThreads[i].start();
+            } catch (OutOfMemoryError e) {
+                break;
+            }
         }
         return searchThreads;
     }

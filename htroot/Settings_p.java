@@ -189,7 +189,7 @@ public final class Settings_p {
         }
         
         // general settings
-        prop.put("seedURL", sb.peers.mySeed().get(yacySeed.SEEDLIST, ""));
+        prop.put("seedURL", sb.peers.mySeed().get(yacySeed.SEEDLISTURL, ""));
         
         /*
          * Message forwarding configuration

@@ -65,26 +65,35 @@ public class TimeoutRequest<E> {
      */
     public E call(long timeout) throws ExecutionException {
         ExecutorService service = Executors.newSingleThreadExecutor();
-        final Future<E> taskFuture = service.submit(this.call);
-        Runnable t = new Runnable() {         
-            public void run() { taskFuture.cancel(true); }
-        };
-        service.execute(t);
-        service.shutdown();
         try {
-            return taskFuture.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (CancellationException e) {
-            // callable was interrupted
-            throw new ExecutionException(e);
-        } catch (InterruptedException e) {
-            // service was shutdown
-            throw new ExecutionException(e);
-        } catch (ExecutionException e) {
-            // callable failed unexpectedly
-            throw e;
-        } catch (TimeoutException e) {
-            // time-out
-            throw new ExecutionException(e);
+            final Future<E> taskFuture = service.submit(this.call);
+            Runnable t = new Runnable() {         
+                public void run() { taskFuture.cancel(true); }
+            };
+            service.execute(t);
+            service.shutdown();
+            try {
+                return taskFuture.get(timeout, TimeUnit.MILLISECONDS);
+            } catch (CancellationException e) {
+                // callable was interrupted
+                throw new ExecutionException(e);
+            } catch (InterruptedException e) {
+                // service was shutdown
+                throw new ExecutionException(e);
+            } catch (ExecutionException e) {
+                // callable failed unexpectedly
+                throw e;
+            } catch (TimeoutException e) {
+                // time-out
+                throw new ExecutionException(e);
+            }
+        } catch (OutOfMemoryError e) {
+            // in case that no memory is there to create a new native thread
+            try {
+                return this.call.call();
+            } catch (Exception e1) {
+                throw new ExecutionException(e1);
+            }
         }
     }
     

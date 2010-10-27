@@ -231,7 +231,7 @@ public class Status {
         } else if (peerStatus.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             prop.put(PEERSTATUS, "3");
             prop.put("hintStatusPrincipal", "1");
-            prop.put("hintStatusPrincipal_seedURL", sb.peers.mySeed().get(yacySeed.SEEDLIST, "?"));
+            prop.put("hintStatusPrincipal_seedURL", sb.peers.mySeed().get(yacySeed.SEEDLISTURL, "?"));
         }
         prop.putHTML("peerName", thisName);
         prop.put("hash", thisHash);
