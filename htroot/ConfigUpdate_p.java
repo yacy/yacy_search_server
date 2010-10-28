@@ -126,10 +126,10 @@ public class ConfigUpdate_p {
                     prop.putHTML("candeploy_autoUpdate_downloadedRelease", updateVersion.getName());
                     final boolean devenvironment = new File(sb.getAppPath(), ".svn").exists();
                     if (devenvironment) {
-                        sb.getLog().logInfo("AUTO-UPDATE: omiting update because this is a development environment");
+                        sb.getLog().logInfo("AUTO-UPDATE: omitting update because this is a development environment");
                         prop.put("candeploy_autoUpdate", "3");
                     } else if ((downloaded == null) || (!downloaded.exists()) || (downloaded.length() == 0)) {
-                        sb.getLog().logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found, is too small or signature was bad)");
+                        sb.getLog().logInfo("AUTO-UPDATE: omitting update because download failed (file cannot be found, is too small or signature was bad)");
                         prop.put("candeploy_autoUpdate", "4");
                     } else {
                         yacyRelease.deployRelease(downloaded);

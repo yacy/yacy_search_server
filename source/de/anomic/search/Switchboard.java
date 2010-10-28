@@ -1645,9 +1645,9 @@ public final class Switchboard extends serverSwitch {
                 final File downloaded = updateVersion.downloadRelease();
                 final boolean devenvironment = new File(this.getAppPath(), ".svn").exists();
                 if (devenvironment) {
-                    log.logInfo("AUTO-UPDATE: omiting update because this is a development environment");
+                    log.logInfo("AUTO-UPDATE: omitting update because this is a development environment");
                 } else if ((downloaded == null) || (!downloaded.exists()) || (downloaded.length() == 0)) {
-                    log.logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found, is too small or signature is bad)");
+                    log.logInfo("AUTO-UPDATE: omitting update because download failed (file cannot be found, is too small or signature is bad)");
                 } else {
                     yacyRelease.deployRelease(downloaded);
                     terminate(10, "auto-update to install " + downloaded.getName());
