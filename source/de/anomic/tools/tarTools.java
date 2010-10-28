@@ -29,6 +29,7 @@ package de.anomic.tools;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
@@ -41,8 +42,17 @@ import org.apache.tools.tar.TarInputStream;
 public class tarTools {
 	
 	public static InputStream getInputStream(final String tarFileName) throws Exception{
-		if(tarFileName.endsWith(".gz")){
-			return new GZIPInputStream(new FileInputStream(new File(tarFileName)));
+		if (tarFileName.endsWith(".gz")) {
+		    try {
+		        return new GZIPInputStream(new FileInputStream(new File(tarFileName)));
+		    } catch (IOException e) {
+		        // this might happen if the stream is not in gzip format.
+		        // there may be a 'gz' extension, but it may stil be a raw tar file
+		        // this can be caused by 'one too much gzip-content header' that was attached
+		        // by a release file server
+		        // so just try to open is as normal stream
+		        return new FileInputStream(new File(tarFileName));
+		    }
 		}
 		return new FileInputStream(new File(tarFileName));
 	}
