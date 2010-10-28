@@ -2,6 +2,7 @@ package de.anomic.data;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import net.yacy.cora.storage.ConcurrentARC;
@@ -50,25 +51,27 @@ public class YMarkTables {
     }
 
     public static enum BOOKMARK {
-    	URL 			("url",				"",				"HREF"),
-    	TITLE 			("title",			"",				""),
-    	DESC 			("desc",			"",				""),
-    	DATE_ADDED 		("date_added",		"",				"ADD_DATE"),
-    	DATE_MODIFIED 	("date_modified",	"",				"LAST_MODIFIED"),
-    	DATE_VISITED 	("date_visited",	"",				"LAST_VISITED"),
-    	PUBLIC 			("public",			"flase",		""),
-    	TAGS 			("tags",			"unsorted",		"SHORTCUTURL"),
-    	VISITS 			("visits",			"0",			""),
-    	FOLDERS 		("folders",			"/unsorted",	"");
+    	URL 			("url",				"",				"href",					"href"),
+    	TITLE 			("title",			"",				"",						""),
+    	DESC 			("desc",			"",				"",						""),
+    	DATE_ADDED 		("date_added",		"",				"add_date",				"added"),
+    	DATE_MODIFIED 	("date_modified",	"",				"last_modified",		"modified"),
+    	DATE_VISITED 	("date_visited",	"",				"last_visited",			"visited"),
+    	PUBLIC 			("public",			"flase",		"",						""),
+    	TAGS 			("tags",			"unsorted",		"shortcuturl",			""),
+    	VISITS 			("visits",			"0",			"",						""),
+    	FOLDERS 		("folders",			"/unsorted",	"",						"");
     	    	
     	private String key;
     	private String dflt;
     	private String html_attrb;
+    	private String xbel_attrb;
     	
-    	private BOOKMARK(String k, String s, String a) {
+    	private BOOKMARK(String k, String s, String a, String x) {
     		this.key = k;
     		this.dflt = s;
     		this.html_attrb = a;
+    		this.xbel_attrb = x;
     	}    	
     	public String key() {
     		return this.key;
@@ -77,7 +80,10 @@ public class YMarkTables {
     		return  this.dflt;
     	}
     	public String html_attrb() {
-    		return this.html_attrb.toLowerCase();
+    		return this.html_attrb;
+    	}
+    	public String xbel_attrb() {
+    		return this.xbel_attrb;
     	}
     }
     
@@ -110,6 +116,7 @@ public class YMarkTables {
     	REMOVE
     }
     
+    public final static HashMap<String,String> POISON = new HashMap<String,String>();
     public final static String TAGS_SEPARATOR = ",";
     public final static String FOLDERS_SEPARATOR = "/";
     public final static String FOLDERS_ROOT = "/"; 
@@ -319,6 +326,75 @@ public class YMarkTables {
             Log.logException(e);
 		} catch (RowSpaceExceededException e) {
             Log.logException(e);
+		}
+	}
+    
+	public void addBookmark(final HashMap<String,String> bmk, final String bmk_user) {
+		final String bmk_table = bmk_user + TABLES.BOOKMARKS.basename();
+		final String folder_table = bmk_user + TABLES.FOLDERS.basename();
+		final String tag_table = bmk_user + TABLES.TAGS.basename();
+		
+		Tables.Row bmk_row = null;
+		byte[] urlHash = null;     		
+		
+		try {
+			urlHash = getBookmarkId(bmk.get(BOOKMARK.URL.key()));
+		} catch (MalformedURLException e) {
+			Log.logInfo(BOOKMARKS_LOG, "Malformed URL:"+bmk.get(BOOKMARK.URL.key()));
+			return;
+		}
+		if (urlHash != null) {
+			try {
+				bmk_row = this.worktables.select(bmk_table, urlHash);
+			} catch (IOException e) {
+				Log.logException(e);
+			} catch (RowSpaceExceededException e) {
+				Log.logException(e);
+			}
+
+	        if (bmk_row == null) {
+	        	Data data = new Data();
+	            for (BOOKMARK b : BOOKMARK.values()) {
+	            	switch(b) {
+	    				case DATE_ADDED:
+	    				case DATE_MODIFIED:
+	    					if(bmk.containsKey(b.key())) {
+	    						data.put(b.key(), bmk.get(b.key()));
+	    					} else {
+	    						data.put(b.key(), String.valueOf(System.currentTimeMillis()).getBytes());
+	    					}
+	    					break;
+	    				case TAGS:
+	    					if(bmk.containsKey(b.key())) {
+	    						final String[] tagArray = bmk.get(b.key()).split(TAGS_SEPARATOR);                    
+	    						for (final String tag : tagArray) {
+	    							this.worktables.bookmarks.updateIndexTable(tag_table, tag, urlHash, INDEX_ACTION.ADD);
+	    						}
+	    						data.put(b.key(), bmk.get(b.key()));
+	    					}
+	    					break;
+	    				case FOLDERS:
+	    					if(bmk.containsKey(b.key())) {
+	    						final String[] folderArray = bmk.get(b.key()).split(TAGS_SEPARATOR);                    
+	    						for (final String folder : folderArray) {
+	    							this.worktables.bookmarks.updateIndexTable(folder_table, folder, urlHash, INDEX_ACTION.ADD);
+	    						}
+	    						data.put(b.key(), bmk.get(b.key()));
+	    					}
+	    					break;	
+	    				default:
+	    					if(bmk.containsKey(b.key())) {
+	    						data.put(b.key(), bmk.get(b.key()));
+	    					}
+	            	 }
+	             }
+	             try {
+	            	 Log.logInfo(BOOKMARKS_LOG, "Add URL:"+bmk.get(BOOKMARK.URL.key()));
+	            	 this.worktables.insert(bmk_table, urlHash, data);
+				} catch (IOException e) {
+					Log.logException(e);
+				}
+	        }
 		}
 	}
 }

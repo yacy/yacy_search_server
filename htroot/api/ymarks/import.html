@@ -33,5 +33,34 @@
 				<input type="submit" name="importbookmarks" value="import" />
 			</fieldset>
 		</form>
+		<form action="/api/ymarks/import_html.xml" method="post"  enctype="multipart/form-data">
+			<fieldset>
+				<legend>Import XBEL Bookmarks</legend>
+				<dl>
+					<dt>
+						<label for="file">File:</label>
+					</dt>
+					<dd>
+						<input type="file" name="xbelfile" id="xbelfile" />
+					</dd>
+					<dt>
+						<label for="tags">Default Tags:</label>
+					</dt>
+					<dd>
+						<input type="text" name="tags" id="tags" value="imported" />
+					</dd>
+					<dt>
+						<label for="public">import as Public:</label>
+					</dt>
+					<dd>
+						<select name="public" id="public">
+							<option value="public">yes</option>
+							<option value="private">no</option>
+						</select>
+					</dd>
+				</dl>
+				<input type="submit" name="importbookmarks" value="import" />
+			</fieldset>
+		</form>
 	</body>
 </html>
