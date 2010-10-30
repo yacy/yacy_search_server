@@ -17,12 +17,12 @@ $_GET['yacyrevnr']	not used yet
 if ($_GET['what'] == 'jre') {
 	
 	if($_GET['version'] == 32)
-		// jre-6u21-windows-i586.exe
-		header('Location: http://javadl.sun.com/webapps/download/AutoDL?BundleId=41724');
+		// jre-6u22-windows-i586.exe
+		header('Location: http://javadl.sun.com/webapps/download/AutoDL?BundleId=42733');
 
 	if($_GET['version'] == 64)
-		// jre-6u21-windows-x64.exe
-		header('Location: http://javadl.sun.com/webapps/download/AutoDL?BundleId=41293');
+		// jre-6u22-windows-x64.exe
+		header('Location: http://javadl.sun.com/webapps/download/AutoDL?BundleId=42735');
 
 }
 

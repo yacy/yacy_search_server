@@ -123,7 +123,7 @@ LangString finishPage 0 "Zeige die Windows Firewall Konfiguration fuer YaCy."
 
 Section "YaCy"
 	SectionIn 1 RO
-	SetShellVarContext current
+	SetShellVarContext current ; use system variables (folders) for current user
 	RMDir /r "$SMPROGRAMS\YaCy" ;clear old shortcuts
 	Delete "$QUICKLAUNCH\YaCy-Search.lnk" ;old
 	Delete "$DESKTOP\YaCy-Search.lnk" ;old
@@ -142,7 +142,7 @@ Section "YaCy"
 SectionEnd
 
 Section "Sun Java"
-    SectionIn 1
+    SectionIn 1 RO
     SetShellVarContext current
     Call DetectJRE
 SectionEnd
