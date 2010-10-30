@@ -38,6 +38,7 @@ package de.anomic.search;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -47,6 +48,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
@@ -111,6 +113,7 @@ import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
@@ -224,6 +227,7 @@ public final class Switchboard extends serverSwitch {
     public  TreeMap<byte[], String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  URLLicense                     licensedURLs;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
+    public  FilterEngine                   domainList;
     public  Dispatcher                     dhtDispatcher;
     public  LinkedBlockingQueue<String>    trail;
     public  yacySeedDB                     peers;
@@ -553,7 +557,8 @@ public final class Switchboard extends serverSwitch {
                 this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
                 this.peers,
                 isIntranetMode(),
-                isGlobalMode()); // Intranet and Global mode may be both true!
+                isGlobalMode(),
+                this.domainList); // Intranet and Global mode may be both true!
 
         // initializing dht chunk generation
         this.dhtMaxReferenceCount = (int) getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
@@ -819,6 +824,15 @@ public final class Switchboard extends serverSwitch {
         }
         */
         MultiProtocolURI.addBotInfo(getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig("network.unit.domain", "global"));
+        
+        try {
+        	this.domainList = null;
+			Reader r = getConfigFileFromWebOrLocally(getConfig("network.unit.domainlist", ""), getAppPath().getAbsolutePath());
+			this.domainList = new FilterEngine();
+			this.domainList.loadList(new BufferedReader(r), null);
+		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
+		}
     }
     
     public void switchNetwork(final String networkDefinition) {
@@ -902,13 +916,24 @@ public final class Switchboard extends serverSwitch {
             // create new web structure
             this.webStructure = new WebStructureGraph(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", CRDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));
             
+            
+            try {
+            	this.domainList = null;
+    			Reader r = getConfigFileFromWebOrLocally(getConfig("network.unit.domainList", ""), getAppPath().getAbsolutePath());
+    			this.domainList = new FilterEngine();
+    			this.domainList.loadList(new BufferedReader(r), null);
+    		} catch (FileNotFoundException e) {
+    		} catch (IOException e) {
+    		}
+            
             this.crawlStacker = new CrawlStacker(
                     this.crawlQueues,
                     this.crawler,
                     this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
                     this.peers,
                     "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
-                    "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
+                    "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
+                    this.domainList);
 
         }
         // start up crawl jobs

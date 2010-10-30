@@ -40,6 +40,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.FilterEngine;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.Segment;
@@ -58,6 +59,7 @@ public final class CrawlStacker {
     private final Segment           indexSegment;
     private final yacySeedDB        peers;
     private final boolean           acceptLocalURLs, acceptGlobalURLs;
+    private final FilterEngine      domainList;
 
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
@@ -67,7 +69,8 @@ public final class CrawlStacker {
             Segment indexSegment,
             yacySeedDB peers,
             boolean acceptLocalURLs,
-            boolean acceptGlobalURLs) {
+            boolean acceptGlobalURLs,
+            FilterEngine domainList) {
         this.nextQueue = cq;
         this.crawler = cs;
         this.indexSegment = indexSegment;
@@ -76,6 +79,7 @@ public final class CrawlStacker {
         this.dnsMiss = 0;
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
+        this.domainList = domainList;
 
         this.fastQueue = new WorkflowProcessor<Request>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
         this.slowQueue = new WorkflowProcessor<Request>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
@@ -350,6 +354,12 @@ public final class CrawlStacker {
     public String urlInAcceptedDomain(final DigestURI url) {
         // returns true if the url can be accepted according to network.unit.domain
         if (url == null) return "url is null";
+        // check domainList from network-definition
+        if(this.domainList != null) {
+        	if(!this.domainList.isListed(url, null)) {
+        		return "the url '" + url + "' is not in domainList of this network";
+        	}
+        }
         final boolean local = url.isLocal();
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;

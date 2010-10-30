@@ -21,8 +21,15 @@
 
 package de.anomic.server;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,12 +38,18 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverAccessTracker.Track;
 import de.anomic.server.serverCore.Session;
 
@@ -552,6 +565,41 @@ public class serverSwitch {
     
     public Iterator<String> accessHosts() {
         return this.accessTracker.accessHosts();
+    }
+    
+    /**
+     * Retrieve text data (e. g. config file) from file
+     * 
+     * file may be an url or a filename with path relative to rootPath parameter
+     * @param file url or filename
+     * @param rootPath searchpath for file
+     */
+    public Reader getConfigFileFromWebOrLocally(String uri, String rootPath) throws IOException, FileNotFoundException {
+    	if(uri.startsWith("http://") || uri.startsWith("https://")) {
+            String[] uris = uri.split(",");
+            for (String netdef: uris) {
+                netdef = netdef.trim();
+                try {
+                    final RequestHeader reqHeader = new RequestHeader();
+                    reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+                    final HTTPClient client = new HTTPClient();
+                    client.setHeader(reqHeader.entrySet());
+                    byte[] data = client.GETbytes(uri);
+                    if (data == null || data.length == 0) continue;
+                    return new InputStreamReader(new BufferedInputStream(new ByteArrayInputStream(data)));
+                } catch (final Exception e) {
+                    continue;
+                }
+            }
+            throw new FileNotFoundException();
+    	} else {
+            final File f = (uri.length() > 0 && uri.charAt(0) == '/') ? new File(uri) : new File(rootPath, uri);
+            if (f.exists()) {
+            	return new FileReader(f);
+            } else {
+            	throw new FileNotFoundException();
+            }
+    	}
     }
     
 }
