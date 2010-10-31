@@ -73,6 +73,7 @@ public class UPnP {
 		try {
 			if (IGDs == null) IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
 			localHostIP = Domains.myPublicLocalIP().getHostAddress();
+			if (localHostIP.startsWith("127.")) log.logWarning("found odd local address: " + localHostIP + "; UPnP may fail");
 		} catch (IOException e) {
 			init = false;
 		}
