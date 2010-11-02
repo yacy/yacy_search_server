@@ -345,6 +345,20 @@ public final class Switchboard extends serverSwitch {
         // set the default segment names
         setDefaultSegments();
         
+        // load domainList
+        try {
+        	this.domainList = null;
+        	if(!getConfig("network.unit.domainlist", "").equals("")) {
+        		Reader r = getConfigFileFromWebOrLocally(getConfig("network.unit.domainlist", ""), getAppPath().getAbsolutePath(), new File(this.networkRoot, "domainlist.txt"));
+        		this.domainList = new FilterEngine();
+        		this.domainList.loadList(new BufferedReader(r), null);
+        	}
+		} catch (FileNotFoundException e) {
+			log.logSevere("CONFIG: domainlist not found: " + e.getMessage());
+		} catch (IOException e) {
+			log.logSevere("CONFIG: error while retrieving domainlist: " + e.getMessage());
+		}
+        
         // create a crawler
         crawler = new CrawlSwitchboard(
                 networkName,
@@ -824,15 +838,7 @@ public final class Switchboard extends serverSwitch {
         }
         */
         MultiProtocolURI.addBotInfo(getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig("network.unit.domain", "global"));
-        
-        try {
-        	this.domainList = null;
-			Reader r = getConfigFileFromWebOrLocally(getConfig("network.unit.domainlist", ""), getAppPath().getAbsolutePath());
-			this.domainList = new FilterEngine();
-			this.domainList.loadList(new BufferedReader(r), null);
-		} catch (FileNotFoundException e) {
-		} catch (IOException e) {
-		}
+
     }
     
     public void switchNetwork(final String networkDefinition) {
@@ -917,13 +923,18 @@ public final class Switchboard extends serverSwitch {
             this.webStructure = new WebStructureGraph(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", CRDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));
             
             
+            // load domainList
             try {
             	this.domainList = null;
-    			Reader r = getConfigFileFromWebOrLocally(getConfig("network.unit.domainList", ""), getAppPath().getAbsolutePath());
-    			this.domainList = new FilterEngine();
-    			this.domainList.loadList(new BufferedReader(r), null);
+            	if(!getConfig("network.unit.domainlist", "").equals("")) {
+            		Reader r = getConfigFileFromWebOrLocally(getConfig("network.unit.domainlist", ""), getAppPath().getAbsolutePath(), new File(this.networkRoot, "domainlist.txt"));
+            		this.domainList = new FilterEngine();
+            		this.domainList.loadList(new BufferedReader(r), null);
+            	}
     		} catch (FileNotFoundException e) {
+    			log.logSevere("CONFIG: domainlist not found: " + e.getMessage());
     		} catch (IOException e) {
+    			log.logSevere("CONFIG: error while retrieving domainlist: " + e.getMessage());
     		}
             
             this.crawlStacker = new CrawlStacker(

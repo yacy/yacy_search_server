@@ -22,10 +22,10 @@
 package de.anomic.server;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,13 +43,11 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
-import de.anomic.search.Switchboard;
 import de.anomic.server.serverAccessTracker.Track;
 import de.anomic.server.serverCore.Session;
 
@@ -573,8 +571,9 @@ public class serverSwitch {
      * file may be an url or a filename with path relative to rootPath parameter
      * @param file url or filename
      * @param rootPath searchpath for file
+     * @param file file to use when remote fetching fails (null if unused)
      */
-    public Reader getConfigFileFromWebOrLocally(String uri, String rootPath) throws IOException, FileNotFoundException {
+    public Reader getConfigFileFromWebOrLocally(String uri, String rootPath, File file) throws IOException, FileNotFoundException {
     	if(uri.startsWith("http://") || uri.startsWith("https://")) {
             String[] uris = uri.split(",");
             for (String netdef: uris) {
@@ -586,12 +585,22 @@ public class serverSwitch {
                     client.setHeader(reqHeader.entrySet());
                     byte[] data = client.GETbytes(uri);
                     if (data == null || data.length == 0) continue;
+                    // save locally in case next fetch fails
+                    if (file != null) {
+                    	FileOutputStream f = new FileOutputStream(file);
+                    	f.write(data);
+                    	f.close();
+                    }
                     return new InputStreamReader(new BufferedInputStream(new ByteArrayInputStream(data)));
                 } catch (final Exception e) {
                     continue;
                 }
             }
-            throw new FileNotFoundException();
+            if (file != null && file.exists()) {
+            	return new FileReader(file);
+            } else {
+            	throw new FileNotFoundException();
+            }
     	} else {
             final File f = (uri.length() > 0 && uri.charAt(0) == '/') ? new File(uri) : new File(rootPath, uri);
             if (f.exists()) {

@@ -447,7 +447,7 @@ public class HTTPClient {
     	byte[] content = null;
     	try {
     		execute(httpUriRequest);
-    		if (httpResponse == null) return null;
+    		if (httpResponse == null || httpResponse.getStatusLine().getStatusCode() != 200) return null;
         	// get the response body
         	final HttpEntity httpEntity = httpResponse.getEntity();
         	if (httpEntity != null) {
