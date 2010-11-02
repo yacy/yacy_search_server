@@ -447,11 +447,11 @@ public class HTTPClient {
     	byte[] content = null;
     	try {
     		execute(httpUriRequest);
-    		if (httpResponse == null || httpResponse.getStatusLine().getStatusCode() != 200) return null;
+    		if (httpResponse == null) return null;
         	// get the response body
         	final HttpEntity httpEntity = httpResponse.getEntity();
         	if (httpEntity != null) {
-        		if (httpEntity.getContentLength()  < maxBytes) {
+        		if (getStatusCode() == 200 && httpEntity.getContentLength()  < maxBytes) {
         			content = EntityUtils.toByteArray(httpEntity);
         		}
         		// TODO: The name of this method is misnomer.
