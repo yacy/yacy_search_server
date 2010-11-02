@@ -41,8 +41,8 @@ public class import_html {
 					}
 				} catch (UnsupportedEncodingException e) {
 					Log.logException(e);
-				} catch (IOException e) {
-					Log.logException(e);
+				//} catch (IOException e) {
+				//	Log.logException(e);
 				}
 				prop.put("result", "1");
         	}

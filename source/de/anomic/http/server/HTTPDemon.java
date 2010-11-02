@@ -1274,7 +1274,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 	httpHeader outgoingHeader=requestProperties.getOutgoingHeader();
                 	if (outgoingHeader!=null)
                 	{*/
-                	final Iterator<ResponseHeader.Entry> it = responseHeader.getCookies();
+                	final Iterator<ResponseHeader.Entry> it = responseHeader.getAdditionalHeaderProperties().iterator();
                 	while(it.hasNext()) {
                 		//Append user properties to the main String
                 		//TODO: Should we check for user properites. What if they intersect properties that are already in header?

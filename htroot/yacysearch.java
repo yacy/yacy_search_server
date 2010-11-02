@@ -36,6 +36,7 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -67,6 +68,7 @@ import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.graphics.ProfilingGraph;
 import de.anomic.yacy.yacyChannel;
@@ -100,7 +102,7 @@ public class yacysearch {
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
         String querystring =  originalquerystring.replace('+', ' ');
         CrawlProfile.CacheStrategy snippetFetchStrategy = (post == null) ? null : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
-        final serverObjects prop = new serverObjects();
+        final servletProperties prop = new servletProperties();
 
         // get segment
         Segment indexSegment = null;
@@ -114,7 +116,7 @@ public class yacysearch {
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
         
-        //final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
+        final boolean rss = header.get("EXT", "").equals("rss");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
@@ -161,6 +163,13 @@ public class yacysearch {
         } else {
         	prop.put("jsonp-start", "");
         	prop.put("jsonp-end", "");
+        }
+        
+        // Adding CORS Access header for yacysearch.rss output
+        if (rss) {
+            final ResponseHeader outgoingHeader = new ResponseHeader();
+            outgoingHeader.addHeader(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
+            prop.setOutgoingHeader(outgoingHeader);
         }
         
         // collect search attributes

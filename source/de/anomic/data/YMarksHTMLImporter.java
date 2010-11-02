@@ -35,7 +35,7 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 	private final BlockingQueue<HashMap<String,String>> bookmarks;
 	private final ParserDelegator htmlParser;
 	
-	public YMarksHTMLImporter(final InputStream input, int queueSize) throws IOException {		
+	public YMarksHTMLImporter(final InputStream input, int queueSize) {		
 		this.state = STATE.NOTHING;
 		this.prevTag = null;
 		this.bmk = new HashMap<String,String>();

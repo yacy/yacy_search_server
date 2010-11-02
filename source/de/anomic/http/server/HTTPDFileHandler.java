@@ -802,7 +802,7 @@ public final class HTTPDFileHandler {
                                 if (location.length() == 0) location = path;
                                 
                                 final ResponseHeader headers = getDefaultHeaders(path);
-                                headers.setCookieVector(templatePatterns.getOutgoingHeader().getCookieVector()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
+                                headers.setAdditionalHeaderProperties(templatePatterns.getOutgoingHeader().getAdditionalHeaderProperties()); //put the cookies into the new header TODO: can we put all headerlines, without trouble?
                                 headers.put(HeaderFramework.LOCATION,location);
                                 HTTPDemon.sendRespondHeader(conProp,out,httpVersion,302,headers);
                                 return;

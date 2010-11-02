@@ -113,6 +113,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String SET_COOKIE2 = "Set-Cookie2";
     public static final String EXPIRES = "Expires";
     
+    public static final String CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin"; // Cross-Origin Resource Sharing properties (http://www.w3.org/TR/cors/)
+
 
     
     /* =============================================================
@@ -594,7 +596,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * Holds header properties
      */
     //Since properties such as cookies can be multiple, we cannot use HashMap here. We have to use Vector.
-    private Vector<Entry> cookies = new Vector<Entry>();
+    private Vector<Entry> headerProps = new Vector<Entry>();
     
     /**
      * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
@@ -642,7 +644,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         if (path != null) cookieString += " path=" + path + ";";
         if (domain != null) cookieString += " domain=" + domain + ";";
         if (secure) cookieString += " secure;";
-        cookies.add(new Entry("Set-Cookie", cookieString));
+        headerProps.add(new Entry("Set-Cookie", cookieString));
     }
     /**
      * Sets Cookie on the client machine.
@@ -715,31 +717,19 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         }
         return "";
     }
-    public Vector<Entry> getCookieVector(){
-        return cookies;
+    
+    public void addHeader(final String key, final String value) {
+        headerProps.add(new Entry(key, value));
     }
-    public void setCookieVector(final Vector<Entry> mycookies){
-        cookies=mycookies;
+    
+    public Vector<Entry> getAdditionalHeaderProperties() {
+        return headerProps;
     }
-    /**
-     * Returns an iterator within all properties can be reached.
-     * Is used mainly by httpd.
-     *
-     * <p>Example:</p>
-     * <pre>
-     * Iterator it=serverObjects.getRequestProperties();
-     * while(it.hasNext())
-     * {
-     *  java.util.Map.Entry e=(java.util.Map.Entry)it.next();
-     *  String propertyName=e.getKey();
-     *  String propertyValue=e.getValue();
-     * }</pre>
-     * @return iterator to read all request properties.
-     */
-    public Iterator<Entry> getCookies()
-    {
-        return cookies.iterator();
+    
+    public void setAdditionalHeaderProperties(final Vector<Entry> mycookies){
+        headerProps=mycookies;
     }
+    
     /*
      * Patch END:
      * Name: Header Property Patch
