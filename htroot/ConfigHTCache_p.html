@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Indexing with Proxy</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="ConfigHTCache">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    <h2>Hypertext Cache Configuration</h2>
+    <p>
+      The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.
+      The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.
+    </p>
+    
+    <form action="ConfigHTCache_p.html" method="post" enctype="multipart/form-data">
+      <fieldset><legend>HTCache Configuration</legend>
+        <dl>
+          <dt><label for="HTCachePath">The path where the cache is stored</label></dt>
+          <dd><input name="HTCachePath" id="HTCachePath" type="text" size="20" maxlength="300" value="#[HTCachePath]#" /></dd>
+          <dt><label for="actualCacheSize">The current size of the cache</label></dt>
+          <dd>#[actualCacheSize]# MB</dd>
+          <dt><label for="maxCacheSize">The maximum size of the cache</label></dt>
+          <dd><input name="maxCacheSize" id="maxCacheSize" type="text" size="8" maxlength="24" value="#[maxCacheSize]#" /> MB</dd>
+          <dt>&nbsp;</dt>
+          <dd><input type="submit" name="set" value="Set" /></dd>
+        </dl>
+      </fieldset>
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

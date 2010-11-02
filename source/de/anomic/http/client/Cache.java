@@ -96,9 +96,17 @@ public final class Cache {
      * This method changes the HTCache size.<br>
      * @param the new cache size in bytes
      */
-    public static void setCacheSize(final long newCacheSize) {
+    public static void setMaxCacheSize(final long newCacheSize) {
         maxCacheSize = newCacheSize;
         fileDBunbuffered.setMaxSize(maxCacheSize);
+    }
+    
+    /**
+     * get the current actual cache size
+     * @return
+     */
+    public static long getActualCacheSize() {
+        return fileDBunbuffered.length();
     }
     
     /**

@@ -95,7 +95,7 @@ public class ProxyIndexingMonitor_p {
                 newProxyCacheSize = getStringLong(post.get(SwitchboardConstants.PROXY_CACHE_SIZE, "64"));
                 if (getLong(newProxyCacheSize) < 4) { newProxyCacheSize = "4"; }
                 env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
-                Cache.setCacheSize(Long.parseLong(newProxyCacheSize) * 1024 * 1024);                
+                Cache.setMaxCacheSize(Long.parseLong(newProxyCacheSize) * 1024 * 1024);                
 
                 // implant these settings also into the crawling profile for the proxy
                 if (sb.crawler.defaultProxyProfile == null) {

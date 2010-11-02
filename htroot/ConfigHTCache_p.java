@@ -1,0 +1,76 @@
+// ConfigHTCache_p.java 
+// ---------------------------
+// (C) by Michael Peter Christen; mc@yacy.net
+// first published on http://www.anomic.de
+// Frankfurt, Germany, 2004
+//
+// $LastChangedDate: 2010-09-02 21:24:22 +0200 (Do, 02 Sep 2010) $
+// $LastChangedRevision: 7092 $
+// $LastChangedBy: orbiter $
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+// You must compile this file with
+// javac -classpath .:../classes ProxyIndexingMonitor_p.java
+// if the shell's current path is HTROOT
+
+import java.io.File;
+
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.logging.Log;
+
+import de.anomic.http.client.Cache;
+import de.anomic.search.SwitchboardConstants;
+import de.anomic.server.serverObjects;
+import de.anomic.server.serverSwitch;
+
+public class ConfigHTCache_p {
+
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        // return variable that accumulates replacements
+        final serverObjects prop = new serverObjects();
+
+        String oldProxyCachePath, newProxyCachePath;
+        int newProxyCacheSize;
+
+        if (post != null && post.containsKey("set")) try {
+          
+            // proxyCache - check and create the directory
+            oldProxyCachePath = env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
+            newProxyCachePath = post.get("HTCachePath", SwitchboardConstants.HTCACHE_PATH_DEFAULT);
+            newProxyCachePath = newProxyCachePath.replace('\\', '/');
+            if (newProxyCachePath.endsWith("/")) {
+                newProxyCachePath = newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
+            }
+            env.setConfig(SwitchboardConstants.HTCACHE_PATH, newProxyCachePath);
+            final File cache = env.getDataPath(SwitchboardConstants.HTCACHE_PATH, oldProxyCachePath);
+            if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
+
+            // proxyCacheSize 
+            newProxyCacheSize = post.getInt("maxCacheSize", 64);
+            if (newProxyCacheSize < 4) { newProxyCacheSize = 4; }
+            env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
+            Cache.setMaxCacheSize(newProxyCacheSize * 1024 * 1024);                
+        } catch (final Exception e) {
+            Log.logException(e);
+        }
+
+        prop.put("HTCachePath", env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT));
+        prop.put("actualCacheSize", (Cache.getActualCacheSize() / 1024 / 1024));
+        prop.put("maxCacheSize", env.getConfigLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64));
+        // return rewrite properties
+        return prop;
+    }
+}

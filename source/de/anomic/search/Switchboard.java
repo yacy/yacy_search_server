@@ -885,6 +885,10 @@ public final class Switchboard extends serverSwitch {
             // clear statistic data
             this.crawlResults.clearStacks();
             
+            // remove heuristics
+            setConfig("heuristic.site", false);
+            setConfig("heuristic.scroogle", false);
+            
             // relocate
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
             final File mySeedFile = new File(this.networkRoot, yacySeedDB.DBFILE_OWN_SEED);

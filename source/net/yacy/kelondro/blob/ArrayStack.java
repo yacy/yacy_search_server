@@ -379,6 +379,7 @@ public class ArrayStack implements BLOB {
     public void setMaxSize(long maxSize) {
         this.repositorySizeMax = maxSize;
         this.fileSizeLimit = Math.min((long) Integer.MAX_VALUE, maxSize / 10L);
+        executeLimits();
     }
     
     private void executeLimits() {
