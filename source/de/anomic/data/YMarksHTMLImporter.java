@@ -134,7 +134,7 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 			state = STATE.FOLDER_DESC;
 	    } else if (t == HTML.Tag.DL) {
 	    	if(!folder.equals(YMarkTables.FOLDERS_IMPORTED)) {
-	    		folder = folder.replaceAll("(/.[^/]*$)", "");
+	    		folder = folder.replaceAll(YMarkIndex.PATTERN_REPLACE, "");
 	    	}
 	    } else {
 	    	state = STATE.NOTHING;

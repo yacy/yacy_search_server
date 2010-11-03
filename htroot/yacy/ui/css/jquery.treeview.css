@@ -65,4 +65,17 @@
 .filetree span.folder, .filetree span.file { padding: 1px 0px 0px 18px; display: block; }
 .filetree span.folder { background: url(../img/treeview/folder.gif) 0 0 no-repeat; }
 .filetree li.expandable span.folder { background: url(../img/treeview/folder-closed.gif) 0 0 no-repeat; }
-.filetree span.file { background: url(../img/treeview/file.gif) 0 0 no-repeat; }
+.filetree span.file { background: url(../img-2/article_text.png) 0 0 no-repeat; }
+
+.filetree span.meta,
+.filetree span.date, 
+.filetree span.lock, 
+.filetree span.stat, 
+.filetree span.link, 
+.filetree span.tag { padding: 2px 0px 0px 20px; display: block; }
+.filetree span.meta { background: url(../img-2/code.png) 0 0 no-repeat; }
+.filetree span.date { background: url(../img-2/calendar.png) 0 0 no-repeat; }
+.filetree span.lock { background: url(../img-2/lock.png) 0 0 no-repeat; }
+.filetree span.stat { background: url(../img-2/bar_graph.png) 0 0 no-repeat; }
+.filetree span.link { background: url(../img-2/link.png) 0 0 no-repeat; }
+.filetree span.tag { background: url(../img/tags/tag_blue.png) 0 0 no-repeat; }

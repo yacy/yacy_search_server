@@ -2,9 +2,12 @@ package de.anomic.data;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -49,28 +52,42 @@ public class YMarkTables {
     }
 
     public static enum BOOKMARK {
-    	URL 			("url",				"",				"href",					"href"),
-    	TITLE 			("title",			"",				"",						""),
-    	DESC 			("desc",			"",				"",						""),
-    	DATE_ADDED 		("date_added",		"",				"add_date",				"added"),
-    	DATE_MODIFIED 	("date_modified",	"",				"last_modified",		"modified"),
-    	DATE_VISITED 	("date_visited",	"",				"last_visited",			"visited"),
-    	PUBLIC 			("public",			"flase",		"",						""),
-    	TAGS 			("tags",			"unsorted",		"shortcuturl",			""),
-    	VISITS 			("visits",			"0",			"",						""),
-    	FOLDERS 		("folders",			"/unsorted",	"",						"");
+    	URL 			("url",				"",				"href",					"href",			"link"),
+    	TITLE 			("title",			"",				"",						"",				"meta"),
+    	DESC 			("desc",			"",				"",						"",				"comment"),
+    	DATE_ADDED 		("date_added",		"",				"add_date",				"added",		"date"),
+    	DATE_MODIFIED 	("date_modified",	"",				"last_modified",		"modified",		"date"),
+    	DATE_VISITED 	("date_visited",	"",				"last_visited",			"visited",		"date"),
+    	PUBLIC 			("public",			"flase",		"",						"",				"lock"),
+    	TAGS 			("tags",			"unsorted",		"shortcuturl",			"",				"tag"),
+    	VISITS 			("visits",			"0",			"",						"",				"stat"),
+    	FOLDERS 		("folders",			"/unsorted",	"",						"",				"folder");
     	    	
     	private String key;
     	private String dflt;
     	private String html_attrb;
     	private String xbel_attrb;
+    	private String type;
+
+        private static final Map<String,BOOKMARK> lookup = new HashMap<String,BOOKMARK>();
+        static {
+        	for(BOOKMARK b : EnumSet.allOf(BOOKMARK.class))
+        		lookup.put(b.key(), b);
+        }
     	
-    	private BOOKMARK(String k, String s, String a, String x) {
+    	private BOOKMARK(String k, String s, String a, String x, String t) {
     		this.key = k;
     		this.dflt = s;
     		this.html_attrb = a;
     		this.xbel_attrb = x;
-    	}    	
+    		this.type = t;
+    	}
+    	public static BOOKMARK get(String key) { 
+            return lookup.get(key); 
+    	}
+    	public static boolean contains(String key) {
+    		return lookup.containsKey(key);
+    	}
     	public String key() {
     		return this.key;
     	}    	
@@ -83,20 +100,30 @@ public class YMarkTables {
     	public String xbel_attrb() {
     		return this.xbel_attrb;
     	}
+    	public String type() {
+    		return this.type;
+    	}
     }
     
     public final static HashMap<String,String> POISON = new HashMap<String,String>();
+    
     public final static String TAGS_SEPARATOR = ",";
+    
     public final static String FOLDERS_SEPARATOR = "/";
     public final static String FOLDERS_ROOT = "/"; 
     public final static String FOLDERS_UNSORTED = "/unsorted";
-    public final static String FOLDERS_IMPORTED = "/imported"; 
+    public final static String FOLDERS_IMPORTED = "/imported";
+        
     public final static String BOOKMARKS_LOG = "BOOKMARKS";
     public final static String BOOKMARKS_ID = "id";
-	public final static String USER_ADMIN = "admin";
+	
+    public final static String USER_ADMIN = "admin";
 	public final static String USER_AUTHENTICATE = "AUTHENTICATE";
 	public final static String USER_AUTHENTICATE_MSG = "Authentication required!";
     
+	
+	
+	
     private WorkTables worktables;
     public YMarkIndex tags;
     public YMarkIndex folders;
@@ -177,7 +204,7 @@ public class YMarkTables {
 		}
     	return fs.toString();
     }
-    
+   
     public void clearIndex(String tablename) {
     	if (tablename.endsWith(TABLES.TAGS.basename()))
     		this.tags.clearCache();

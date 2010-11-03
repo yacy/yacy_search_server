@@ -40,7 +40,11 @@ public class YMarkIndex {
     	ADD,
     	REMOVE
     }
-
+    
+    public final static String PATTERN_PREFIX = "^";
+    public final static String PATTERN_POSTFIX = YMarkTables.FOLDERS_SEPARATOR + ".*$";
+    public final static String PATTERN_REPLACE = "("+YMarkTables.FOLDERS_SEPARATOR+".[^"+YMarkTables.FOLDERS_SEPARATOR+"]*$)";
+    
     private final WorkTables worktables;
     private final String table_basename;
     private final ConcurrentARC<String, byte[]> cache;
@@ -51,24 +55,30 @@ public class YMarkIndex {
     	this.cache = new ConcurrentARC<String, byte[]>(50,1);
     }
     
+    public String getKeyname(final String user, final byte[] key) throws IOException, RowSpaceExceededException {
+    	final String index_table = user + this.table_basename;
+    	Tables.Row row = this.worktables.select(index_table, key);
+   		return new String(row.get(INDEX.NAME.key(), INDEX.NAME.deflt()));
+    }
+    
     public Iterator<String> getFolders(final String user, final String root) throws IOException {
     	final String index_table = user + this.table_basename;
     	final TreeSet<String> folders = new TreeSet<String>();
-    	final Pattern r = Pattern.compile("^"+root);
+    	final Pattern r = Pattern.compile(PATTERN_PREFIX + root + PATTERN_POSTFIX);
     	final Iterator<Row> it = this.worktables.iterator(index_table, INDEX.NAME.key(), r);
-    	        
+        
         String path = "";
         Row folder;
         
         while (it.hasNext()) {
-            folder = it.next();          
+            folder = it.next();
             path = new String(folder.get(INDEX.NAME.key(), INDEX.NAME.deflt()));
             while(path.length() > 0 && !path.equals(root)){
                 folders.add(path);                  
-                path = path.replaceAll("(/.[^/]*$)", "");
+                path = path.replaceAll(PATTERN_REPLACE, "");
             }
         }
-        if (!root.equals(YMarkTables.FOLDERS_ROOT)) { folders.add(root); }        
+        if (!root.equals(YMarkTables.FOLDERS_ROOT)) { folders.add(root); }
         return folders.iterator(); 
     }
     
