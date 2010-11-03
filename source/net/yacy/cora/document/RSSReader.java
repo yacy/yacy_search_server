@@ -97,7 +97,7 @@ public class RSSReader extends DefaultHandler {
         if (!equals(a, "<?xml".getBytes())) {
             throw new IOException("response does not contain valid xml");
         }
-        final String end = new String(a, a.length - 10, 10);
+        final String end = new String(a, a.length - 80, 80);
         Type type = Type.none;
         if (end.indexOf("rss") > 0) type = Type.rss; 
         if (end.indexOf("feed") > 0) type = Type.atom; 
