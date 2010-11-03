@@ -1,1 +1,1 @@
-[#[query]#,[#[suggestions]#]]
+["#[query]#",[#{suggestions}#"#[text]#"#(eol)#,::#(/eol)##{/suggestions}#]]

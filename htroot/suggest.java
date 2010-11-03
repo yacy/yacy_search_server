@@ -20,7 +20,9 @@
 
 import java.util.Iterator;
 
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 
 import de.anomic.data.DidYouMean;
 import de.anomic.search.Segment;
@@ -28,12 +30,20 @@ import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.servletProperties;
 
 /**
+ * for json format:
  * implementation of the opensearch suggestion extension, see
  * http://www.opensearch.org/Specifications/OpenSearch/Extensions/Suggestions/1.1
  * or
  * https://wiki.mozilla.org/Search_Service/Suggestions
+ * 
+ * for xml format:
+ * see Microsoft Search Suggestion Format
+ * http://msdn.microsoft.com/en-us/library/cc848863%28VS.85%29.aspx
+ * and
+ * http://msdn.microsoft.com/en-us/library/cc848862%28v=VS.85%29.aspx
  */
 public class suggest {
     
@@ -41,7 +51,11 @@ public class suggest {
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        final serverObjects prop = new serverObjects();
+        final servletProperties prop = new servletProperties();
+
+        final String ext = header.get("EXT", "");
+        final boolean json = ext.equals("json");
+        final boolean xml = ext.equals("xml");
         
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
@@ -63,17 +77,29 @@ public class suggest {
         
         DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
         Iterator<String> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
-        int meanCount = 0;
+        int c = 0;
         String suggestion;
-        StringBuilder suggestions = new StringBuilder(120);
-        while (meanCount < meanMax && meanIt.hasNext()) {
+        //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
+        while (c < meanMax && meanIt.hasNext()) {
             suggestion = meanIt.next();
-            suggestions.append(',').append('"').append(suggestion).append('"');
-            meanCount++;
+            if (json) prop.putJSON("suggestions_" + c + "_text", suggestion);
+            else if (xml) prop.putXML("suggestions_" + c + "_text", suggestion);
+            else prop.putHTML("suggestions_" + c + "_text", suggestion);
+            prop.put("suggestions_" + c + "_eol", 0);
+            c++;
         }
+        if (c > 0) prop.put("suggestions_" + (c - 1) + "_eol", 1);
+        prop.put("suggestions", c);
+        if (json) prop.putJSON("query", originalquerystring);
+        else if (xml) prop.putXML("query", originalquerystring);
+        else prop.putHTML("query", originalquerystring);
 
-        prop.put("query", '"' + originalquerystring + '"');
-        prop.put("suggestions", suggestions.length() > 0 ? suggestions.substring(1) : "");
+        // Adding CORS Access header for xml output
+        if (xml) {
+            final ResponseHeader outgoingHeader = new ResponseHeader();
+            outgoingHeader.addHeader(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
+            prop.setOutgoingHeader(outgoingHeader);
+        }
         
         // return rewrite properties
         return prop;

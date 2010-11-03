@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<SearchSuggestion xmlns ="http://schemas.microsoft.com/Search/2008/suggestions">
+<Query>#[query]#</Query>
+<Section>
+#{suggestions}#
+  <Item>
+    <Text>#[text]#</Text>
+  </Item>
+#{/suggestions}#
+</Section>
+</SearchSuggestion>

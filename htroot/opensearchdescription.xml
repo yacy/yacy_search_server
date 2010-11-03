@@ -18,7 +18,8 @@
   ::
   <Url type="text/html" method="GET" template="http://#[thisaddress]#/compare_yacy.html?verify=true&amp;resource=global&amp;nav=all&amp;query={searchTerms}" />
   #(/compareyacy)#
-  <Url type="application/x-suggestions+json" template="http://#[thisaddress]#/suggest?query={searchTerms}"/>
+  <Url type="application/x-suggestions+json" template="http://#[thisaddress]#/suggest.json?query={searchTerms}"/>
+  <Url type="application/x-suggestions+xml" template="http://#[thisaddress]#/suggest.xml?query={searchTerms}"/>
   <!-- syntax according to http://www.loc.gov/standards/sru/. Set verify=true to get snippets in the search results -->
   <Developer>See http://developer.berlios.de/projects/yacy/</Developer>
   <Query role="example" searchTerms="yacy+open+source" />
