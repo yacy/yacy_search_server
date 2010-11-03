@@ -132,8 +132,9 @@ public final class robotsParser {
                     continue lineparser;
                 }
                 
-                // parse sitemap
-                if (lineUpper.startsWith(ROBOTS_SITEMAP)) {
+                // parse sitemap; if there are several sitemaps then take the first url
+                // TODO: support for multiple sitemaps
+                if (lineUpper.startsWith(ROBOTS_SITEMAP) && (sitemap == null || sitemap.length() == 0)) {
                     pos = line.indexOf(' ');
                     if (pos != -1) {
                         sitemap = line.substring(pos).trim();

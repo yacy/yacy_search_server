@@ -25,20 +25,12 @@
 
 package de.anomic.crawler;
 
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.zip.GZIPInputStream;
 
-import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.parser.sitemapParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.io.ByteCountInputStream;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.Segments;
@@ -60,45 +52,16 @@ public class SitemapImporter extends Thread {
     }
 
     public void run() {
-        // download document
-        final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
-        final HTTPClient client = new HTTPClient();
-        client.setTimout(5000);
-        client.setHeader(requestHeader.entrySet());
         try {
-            try {
-                client.GET(siteMapURL.toString());
-                if (client.getStatusCode() != 200) {
-                    logger.logWarning("Unable to download the sitemap file " + this.siteMapURL +
-                            "\nServer returned status: " + client.getHttpResponse().getStatusLine());
-                    return;
-                }
-
-                // get some metadata
-                final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
-                final String contentMimeType = header.mime();
-
-                InputStream contentStream = client.getContentstream();
-                if (contentMimeType != null && (contentMimeType.equals("application/x-gzip") || contentMimeType.equals("application/gzip"))) {
-                    if (logger.isFine()) logger.logFine("Sitemap file has mimetype " + contentMimeType);
-                    contentStream = new GZIPInputStream(contentStream);
-                }
-
-                final ByteCountInputStream counterStream = new ByteCountInputStream(contentStream, null);
-                // parse it
-                logger.logInfo("Start parsing sitemap file " + this.siteMapURL + "\n\tMimeType: " + contentMimeType + "\n\tLength:   " + header.getContentLength());
-                sitemapParser.SitemapReader parser = sitemapParser.parse(counterStream);
-                for (sitemapParser.SitemapEntry entry: parser) process(entry);
-            } finally {
-                client.finish();
-            }
+            logger.logInfo("Start parsing sitemap file " + this.siteMapURL);
+            sitemapParser.SitemapReader parser = sitemapParser.parse(this.siteMapURL);
+            for (sitemapParser.URLEntry entry: parser) process(entry);
         } catch (final Exception e) {
             logger.logWarning("Unable to parse sitemap file " + this.siteMapURL, e);
         }
     }
 
-    public void process(sitemapParser.SitemapEntry entry) {
+    public void process(sitemapParser.URLEntry entry) {
 
         // get the url hash
         byte[] nexturlhash = null;
