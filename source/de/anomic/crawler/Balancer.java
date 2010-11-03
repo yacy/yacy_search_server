@@ -361,7 +361,7 @@ public class Balancer {
 		        //final int s = urlFileIndex.size();
 		        Row.Entry rowEntry = (nexthash == null) ? null : urlFileIndex.remove(nexthash);
 		        if (rowEntry == null) {
-		            System.out.println("*** rowEntry=null, nexthash=" + new String(nexthash));
+		            //System.out.println("*** rowEntry=null, nexthash=" + new String(nexthash));
 		        	rowEntry = urlFileIndex.removeOne();
 		        	if (rowEntry == null) {
 		        	    nexthash = null;

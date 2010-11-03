@@ -467,9 +467,12 @@ public final class SearchEvent {
         
         public void run() {
             try {
+                int t = 0;
                 while (this.trigger.tryAcquire(10000, TimeUnit.MILLISECONDS)) {
                     // a trigger was released
                     prepareSecondarySearch();
+                    t++;
+                    if (t > 10) break;
                 }
             } catch (InterruptedException e) {
                 // the thread was interrupted

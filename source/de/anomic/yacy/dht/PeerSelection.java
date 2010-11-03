@@ -350,7 +350,8 @@ public class PeerSelection {
             while ((s.hasNext()) && (searchcount-- > 0)) {
                 ys = s.next();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
-                    absage = Math.abs(System.currentTimeMillis() + DateFormatter.dayMillis - ys.getLastSeenUTC());
+                    absage = Math.abs(System.currentTimeMillis() + DateFormatter.dayMillis - ys.getLastSeenUTC()) / 1000 / 60;
+                    if (absage > Integer.MAX_VALUE) absage = Integer.MAX_VALUE;
                     seedScore.inc(ys.hash, (int) absage); // the higher absage, the older is the peer
                 } catch (final Exception e) {}
             }

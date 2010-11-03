@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +41,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.logging.Log;
 
 public class SetTools {
 
@@ -133,16 +135,23 @@ public class SetTools {
     private final static <A, B> TreeMap<A, B> joinConstructiveByTest(final TreeMap<A, B> small, final TreeMap<A, B> large, final boolean concatStrings) {
         final Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
         final TreeMap<A, B> result = new TreeMap<A, B>(large.comparator());
-        Map.Entry<A, B> mentry1;
-        B mobj2;
-        while (mi.hasNext()) {
-            mentry1 = mi.next();
-            mobj2 = large.get(mentry1.getKey());
-            if (mobj2 != null) {
-                if (mentry1.getValue() instanceof String) {
-                    result.put(mentry1.getKey(), (B) ((concatStrings) ? (mentry1.getValue() + (String) mobj2) : mentry1.getValue()));
-                } else {
-                    result.put(mentry1.getKey(), mentry1.getValue());
+        synchronized (mi) {
+            Map.Entry<A, B> mentry1;
+            B mobj2;
+            loop: while (mi.hasNext()) {
+                try {
+                    mentry1 = mi.next();
+                    mobj2 = large.get(mentry1.getKey());
+                    if (mobj2 != null) {
+                        if (mentry1.getValue() instanceof String) {
+                            result.put(mentry1.getKey(), (B) ((concatStrings) ? (mentry1.getValue() + (String) mobj2) : mentry1.getValue()));
+                        } else {
+                            result.put(mentry1.getKey(), mentry1.getValue());
+                        }
+                    }
+                } catch (ConcurrentModificationException e) {
+                    Log.logWarning("SetTools", e.getMessage(), e);
+                    break loop;
                 }
             }
         }
