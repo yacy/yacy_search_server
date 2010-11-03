@@ -71,6 +71,8 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
     		case BOOKMARK:
 				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), new String(data));
 				this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folder);
+				this.bmk.put(YMarkTables.BOOKMARK.PUBLIC.key(), YMarkTables.BOOKMARK.PUBLIC.deflt());
+				this.bmk.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.deflt());
 				break;
     		case FOLDER:
     			this.folder = this.folder + YMarkTables.FOLDERS_SEPARATOR + new String(data);

@@ -37,6 +37,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
     public static enum STATE {
     	NOTHING,
     	BOOKMARK,
+    	INFO,
     	FOLDER,
     	FOLDER_DESC
     }
@@ -129,6 +130,9 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
             	return;
             }
         	this.parsingValue = true;
+        } else if (XBEL.INFO.tag().equals(tag)) {
+        	this.parsingValue = false;
+        	this.state = STATE.INFO;
         } else {
         	this.parsingValue = false;
         	this.state = STATE.NOTHING;
@@ -158,6 +162,8 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 	    		folder = folder.replaceAll("(/.[^/]*$)", "");
 	    		this.state = STATE.FOLDER;
         	}        	
+        } else if (XBEL.INFO.tag().equals(tag)) {
+        	this.state = STATE.BOOKMARK;
         }
     }
 

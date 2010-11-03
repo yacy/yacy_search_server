@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.YMarkTables;
 import de.anomic.data.YMarksHTMLImporter;
@@ -16,10 +17,8 @@ import de.anomic.server.serverSwitch;
 
 public class import_html {
 	
-	private static Switchboard sb = null;	
-	
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        sb = (Switchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final userDB.Entry user = sb.userDB.getUser(header); 
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
@@ -28,23 +27,28 @@ public class import_html {
         if(isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);        	
         	if(post.containsKey("htmlfile")){
+        		ByteArrayInputStream byteIn = null;
 				try {
-					final ByteArrayInputStream byteIn = new ByteArrayInputStream(post.get("htmlfile$file").getBytes("UTF-8"));
-					if(byteIn !=null) {
-						final YMarksHTMLImporter htmlImporter = new YMarksHTMLImporter(byteIn, 100);
-			            Thread t = new Thread(htmlImporter, "YMarks - HTML Importer");
-			            t.start();
-			            HashMap<String,String> bmk;
-			            while ((bmk = htmlImporter.take()) != YMarkTables.POISON) {
-			            	sb.tables.bookmarks.addBookmark(bmk, bmk_user);
-			            }
-					}
+					byteIn = new ByteArrayInputStream(post.get("htmlfile$file").getBytes("UTF-8"));
 				} catch (UnsupportedEncodingException e) {
 					Log.logException(e);
-				//} catch (IOException e) {
-				//	Log.logException(e);
 				}
-				prop.put("result", "1");
+        		if(byteIn !=null) {
+					final YMarksHTMLImporter htmlImporter = new YMarksHTMLImporter(byteIn, 100);
+		            Thread t = new Thread(htmlImporter, "YMarks - HTML Importer");
+		            t.start();
+		            HashMap<String,String> bmk;
+		            while ((bmk = htmlImporter.take()) != YMarkTables.POISON) {
+						try {
+							sb.tables.bookmarks.addBookmark(bmk_user, bmk, true);
+						} catch (IOException e) {
+							Log.logWarning(YMarkTables.BOOKMARKS_LOG.toString(), "IOException for URL: "+bmk.get(YMarkTables.BOOKMARK.URL.key()));
+							continue;
+						} catch (RowSpaceExceededException e) {
+							Log.logException(e);
+						}
+		            }
+				}
         	}
         	if(post.containsKey("xbelfile")){
 				try {
@@ -55,7 +59,11 @@ public class import_html {
 			            t.start();
 			            HashMap<String,String> bmk;
 			            while ((bmk = xbelImporter.take()) != YMarkTables.POISON) {
-			            	sb.tables.bookmarks.addBookmark(bmk, bmk_user);
+			            	try {
+								sb.tables.bookmarks.addBookmark(bmk_user, bmk, true);
+							} catch (RowSpaceExceededException e) {
+							    Log.logException(e);
+							}
 			            }
 					}
 				} catch (UnsupportedEncodingException e) {

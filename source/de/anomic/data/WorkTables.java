@@ -74,7 +74,7 @@ public class WorkTables extends Tables {
     
     public void clear(final String tablename) throws IOException {
     	super.clear(tablename);
-    	this.bookmarks.cleanCache(tablename);
+    	this.bookmarks.clearIndex(tablename);
     }
     
     /**

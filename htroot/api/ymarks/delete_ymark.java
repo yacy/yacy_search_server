@@ -1,7 +1,6 @@
 import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.YMarkTables;
@@ -24,12 +23,8 @@ public class delete_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {     	
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
-        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
-        	
+        	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
             byte[] urlHash = null;
-            
             try {
 	        	if(post.containsKey(YMarkTables.BOOKMARKS_ID)) {
 	        		urlHash = post.get(YMarkTables.BOOKMARKS_ID).getBytes();
@@ -39,15 +34,7 @@ public class delete_ymark {
 	        		prop.put("result", "0");
 	        		return prop;
 	        	}
-	            Tables.Row bmk_row = null;
-	            bmk_row = sb.tables.select(bmk_table, urlHash);
-	            if(bmk_row != null) {
-		            final String tagsString = bmk_row.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt());
-		            removeIndexEntry(tag_table, tagsString, urlHash);
-		            final String foldersString = bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.FOLDERS_ROOT);
-		            removeIndexEntry(folder_table, foldersString, urlHash);
-	            }
-				sb.tables.delete(bmk_table,urlHash);
+	        	sb.tables.bookmarks.deleteBookmark(bmk_user, urlHash);
 	        	prop.put("result", "1");
 			} catch (IOException e) {
 				Log.logException(e);
@@ -59,12 +46,5 @@ public class delete_ymark {
         }       
         // return rewrite properties
         return prop;
-	}
-	
-	private static void removeIndexEntry(final String index_table, String keysString, final byte[] urlHash) {
-        final String[] keyArray = keysString.split(YMarkTables.TAGS_SEPARATOR);                    
-        for (final String tag : keyArray) {
-        	sb.tables.bookmarks.updateIndexTable(index_table, tag, urlHash, YMarkTables.INDEX_ACTION.REMOVE);
-        }
 	}
 }

@@ -5,13 +5,11 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 
 public class YMarkTables {
     
@@ -87,35 +85,6 @@ public class YMarkTables {
     	}
     }
     
-    public static enum INDEX {
-    	ID 		("id", ""),
-    	NAME 	("name", ""),
-    	DESC 	("desc", ""),
-    	URLS 	("urls", "");
-    	
-    	private String key;
-    	private String dflt;
-    	
-    	private INDEX(String k, String s) {
-    		this.key = k;
-    		this.dflt = s;
-    	}
-    	public String key() {
-    		return this.key;
-    	}
-    	public String deflt() {
-    		return  this.dflt;
-    	}
-    	public byte[] b_deflt() {
-    		return  dflt.getBytes();
-    	}
-    }
-    
-    public static enum INDEX_ACTION {
-    	ADD,
-    	REMOVE
-    }
-    
     public final static HashMap<String,String> POISON = new HashMap<String,String>();
     public final static String TAGS_SEPARATOR = ",";
     public final static String FOLDERS_SEPARATOR = "/";
@@ -129,11 +98,13 @@ public class YMarkTables {
 	public final static String USER_AUTHENTICATE_MSG = "Authentication required!";
     
     private WorkTables worktables;
-    public ConcurrentARC<String, byte[]> cache;
+    public YMarkIndex tags;
+    public YMarkIndex folders;
     
     public YMarkTables(final Tables wt) {
     	this.worktables = (WorkTables)wt;
-    	this.cache = new ConcurrentARC<String, byte[]>(50,1);
+    	this.folders = new YMarkIndex(this.worktables, TABLES.FOLDERS.basename());
+    	this.tags = new YMarkIndex(this.worktables, TABLES.TAGS.basename());
     }
     
     public final static byte[] getBookmarkId(String url) throws MalformedURLException {
@@ -145,6 +116,10 @@ public class YMarkTables {
     }
     
     public final static byte[] keySetToBytes(final HashSet<String> urlSet) {
+    	return keySetToString(urlSet).getBytes();
+    }
+    
+    public final static String keySetToString(final HashSet<String> urlSet) {
     	final Iterator<String> urlIter = urlSet.iterator();
     	final 
     	StringBuilder urls = new StringBuilder(urlSet.size()*20);
@@ -153,7 +128,7 @@ public class YMarkTables {
     		urls.append(urlIter.next());
     	}
     	urls.deleteCharAt(0);
-    	return urls.toString().getBytes();
+    	return urls.toString();
     }
     
     public final static HashSet<String> keysStringToSet(final String keysString) {
@@ -202,158 +177,42 @@ public class YMarkTables {
 		}
     	return fs.toString();
     }
-
-    public void cleanCache(final String tablename) {
-    	final Iterator<String> iter = this.cache.keySet().iterator();
-    	while(iter.hasNext()) {
-    		final String key = iter.next();
-    		if (key.startsWith(tablename)) {
-    			this.cache.remove(key);
-    		}    			
-    	}
+    
+    public void clearIndex(String tablename) {
+    	if (tablename.endsWith(TABLES.TAGS.basename()))
+    		this.tags.clearCache();
+    	if (tablename.endsWith(TABLES.FOLDERS.basename()))
+    		this.folders.clearCache();
     }
     
-    public void createIndexEntry(final String index_table, final  String keyname, final HashSet<String> urlSet) throws IOException {
-        final byte[] key = YMarkTables.getKeyId(keyname);
-        final String cacheKey = index_table+":"+keyname;
-    	final byte[] BurlSet = keySetToBytes(urlSet);
-        Data tagEntry = new Data();
-        
-		this.cache.insert(cacheKey, BurlSet);	
-    	
-    	tagEntry.put(INDEX.NAME.key, keyname);
-        tagEntry.put(INDEX.URLS.key, BurlSet);
-        this.worktables.insert(index_table, key, tagEntry);
+    public void deleteBookmark(final String bmk_user, final byte[] urlHash) throws IOException, RowSpaceExceededException {
+        final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+    	Tables.Row bmk_row = null;
+        bmk_row = this.worktables.select(bmk_table, urlHash);
+        if(bmk_row != null) {
+            final String tagsString = bmk_row.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt());
+            tags.removeIndexEntry(bmk_user, tagsString, urlHash);
+            final String foldersString = bmk_row.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.FOLDERS_ROOT);
+            folders.removeIndexEntry(bmk_user, foldersString, urlHash);
+    		this.worktables.delete(bmk_table,urlHash);
+        }
     }
     
-	public HashSet<String> getBookmarks(final String index_table, final String keyname) throws IOException, RowSpaceExceededException {
-		final String cacheKey = index_table+":"+keyname;
-		if (this.cache.containsKey(cacheKey)) {
-			return keysStringToSet(new String(this.cache.get(cacheKey)));
-		} else {
-			final Tables.Row idx_row = this.worktables.select(index_table, getKeyId(keyname));
-			if (idx_row != null) {						
-				final byte[] keys = idx_row.get(INDEX.URLS.key);
-				this.cache.put(cacheKey, keys);
-				return keysStringToSet(new String(keys));
-			}
-		}
-		return new HashSet<String>();
-	}
-	
-	public HashSet<String> getBookmarks(final String index_table, final String[] keyArray) throws IOException, RowSpaceExceededException {
-    	final HashSet<String> urlSet = new HashSet<String>();
-		urlSet.addAll(getBookmarks(index_table, keyArray[0]));
-		if (urlSet.isEmpty())
-			return urlSet;
-		if (keyArray.length > 1) {
-			for (final String keyname : keyArray) {
-				urlSet.retainAll(getBookmarks(index_table, keyname));
-				if (urlSet.isEmpty())
-					return urlSet;
-			}
-		}
-		return urlSet;		
-	}
+    public void deleteBookmark(final String bmk_user, final String url) throws IOException, RowSpaceExceededException {
+    	this.deleteBookmark(bmk_user, getBookmarkId(url));
+    }
     
-	/**
-	 * YMark function that updates the tag/folder index
-	 * @param index_table is the user specific index
-	 * @param keyname
-	 * @param url is the url has as returned by DigestURI.hash()
-	 * @param action is either add (1) or remove (2)
-	 */
-    public void updateIndexTable(final String index_table, final String keyname, final byte[] url, final INDEX_ACTION action) {
-        final byte[] key = YMarkTables.getKeyId(keyname);
-        final String urlHash = new String(url);        		        
-        Tables.Row row = null;
-        
-        // try to load urlSet from cache
-        final String cacheKey = index_table+":"+keyname;
-        HashSet<String>urlSet = this.cache.containsKey(cacheKey) ? keysStringToSet(new String(this.cache.get(cacheKey))) : new HashSet<String>();
-        
-    	try {
-    		row = this.worktables.select(index_table, key);    		
-    		
-    		// key has no index_table entry
-    		if(row == null) {
-    			switch (action) {
-					case ADD:		        		
-						urlSet.add(urlHash);        			
-	        			createIndexEntry(index_table, keyname, urlSet);
-			            break;
-					case REMOVE:
-						// key has no index_table entry but a cache entry
-						// TODO: this shouldn't happen
-						if(!urlSet.isEmpty()) {
-							urlSet.remove(urlHash);	        			
-		        			createIndexEntry(index_table, keyname, urlSet);
-						}
-						break;
-					default:
-						break;       					
-				}    			
-    		} 
-    		// key has an existing index_table entry
-    		else {
-    	        byte[] BurlSet = null;
-    			// key has no cache entry
-    			if (urlSet.isEmpty()) {
-	    			// load urlSet from index_table
-    				urlSet = keysStringToSet(new String(row.get(INDEX.URLS.key)));	   
-    			}    			
-    			switch (action) {
-					case ADD:
-		        		urlSet.add(urlHash);
-	        			break;
-					case REMOVE:
-						urlSet.remove(urlHash);
-						break;					
-					default:
-						break;
-    			}
-    			if (urlSet.isEmpty()) {
-    				this.cache.remove(cacheKey);
-    				this.worktables.delete(index_table, key);
-    			} else {
-    	        	BurlSet = keySetToBytes(urlSet);
-        			this.cache.insert(cacheKey, BurlSet);
-        			row.put(INDEX.URLS.key, BurlSet);
-        			this.worktables.update(index_table, row);
-    			}
-    		}
-    	}  catch (IOException e) {
-            Log.logException(e);
-		} catch (RowSpaceExceededException e) {
-            Log.logException(e);
-		}
-	}
-    
-	public void addBookmark(final HashMap<String,String> bmk, final String bmk_user) {
-		final String bmk_table = bmk_user + TABLES.BOOKMARKS.basename();
-		final String folder_table = bmk_user + TABLES.FOLDERS.basename();
-		final String tag_table = bmk_user + TABLES.TAGS.basename();
-		
+	public void addBookmark(final String bmk_user, final HashMap<String,String> bmk, final boolean importer) throws IOException, RowSpaceExceededException {
+		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+        final String date = String.valueOf(System.currentTimeMillis());
+		final byte[] urlHash = getBookmarkId(bmk.get(BOOKMARK.URL.key()));
 		Tables.Row bmk_row = null;
-		byte[] urlHash = null;     		
-		
-		try {
-			urlHash = getBookmarkId(bmk.get(BOOKMARK.URL.key()));
-		} catch (MalformedURLException e) {
-			Log.logInfo(BOOKMARKS_LOG, "Malformed URL:"+bmk.get(BOOKMARK.URL.key()));
-			return;
-		}
-		if (urlHash != null) {
-			try {
-				bmk_row = this.worktables.select(bmk_table, urlHash);
-			} catch (IOException e) {
-				Log.logException(e);
-			} catch (RowSpaceExceededException e) {
-				Log.logException(e);
-			}
 
+		if (urlHash != null) {
+			bmk_row = this.worktables.select(bmk_table, urlHash);
 	        if (bmk_row == null) {
-	        	Data data = new Data();
+	        	// create and insert new entry
+	        	final Data data = new Data();
 	            for (BOOKMARK b : BOOKMARK.values()) {
 	            	switch(b) {
 	    				case DATE_ADDED:
@@ -366,20 +225,20 @@ public class YMarkTables {
 	    					break;
 	    				case TAGS:
 	    					if(bmk.containsKey(b.key())) {
-	    						final String[] tagArray = bmk.get(b.key()).split(TAGS_SEPARATOR);                    
-	    						for (final String tag : tagArray) {
-	    							this.worktables.bookmarks.updateIndexTable(tag_table, tag, urlHash, INDEX_ACTION.ADD);
-	    						}
+	    						this.tags.insertIndexEntry(bmk_user, bmk.get(b.key()), urlHash);
 	    						data.put(b.key(), bmk.get(b.key()));
+	    					} else {
+	    						this.tags.insertIndexEntry(bmk_user, b.deflt(), urlHash);
+	    						data.put(b.key(), b.deflt());	
 	    					}
 	    					break;
 	    				case FOLDERS:
 	    					if(bmk.containsKey(b.key())) {
-	    						final String[] folderArray = bmk.get(b.key()).split(TAGS_SEPARATOR);                    
-	    						for (final String folder : folderArray) {
-	    							this.worktables.bookmarks.updateIndexTable(folder_table, folder, urlHash, INDEX_ACTION.ADD);
-	    						}
+	    						this.folders.insertIndexEntry(bmk_user, bmk.get(b.key()), urlHash);
 	    						data.put(b.key(), bmk.get(b.key()));
+	    					} else {
+	    						this.folders.insertIndexEntry(bmk_user, b.deflt(), urlHash);
+	    						data.put(b.key(), b.deflt());	
 	    					}
 	    					break;	
 	    				default:
@@ -388,13 +247,65 @@ public class YMarkTables {
 	    					}
 	            	 }
 	             }
-	             try {
-	            	 Log.logInfo(BOOKMARKS_LOG, "Add URL:"+bmk.get(BOOKMARK.URL.key()));
-	            	 this.worktables.insert(bmk_table, urlHash, data);
-				} catch (IOException e) {
-					Log.logException(e);
-				}
-	        }
+            	 this.worktables.insert(bmk_table, urlHash, data);
+	        } else {	
+            	// modify and update existing entry
+                HashSet<String> oldSet;
+                HashSet<String> newSet;
+	        	for (BOOKMARK b : BOOKMARK.values()) {
+	            	switch(b) {
+	    				case DATE_ADDED:
+	    					if(!bmk_row.containsKey(b.key))
+	    						bmk_row.put(b.key(), date); 
+	    					break;
+	    				case DATE_MODIFIED:
+	    					bmk_row.put(b.key(), date); 
+	    					break;
+	    				case TAGS:
+	    	            	oldSet = keysStringToSet(bmk_row.get(b.key(),b.deflt()));
+	    	            	if(bmk.containsKey(b.key())) {
+	    	            		newSet = keysStringToSet(bmk.get(b.key()));
+	    	            		if(importer) {
+		    	            		newSet.addAll(oldSet);
+		    	            		bmk_row.put(b.key(), keySetToString(newSet));
+		    	            		oldSet.clear();
+	    	            		} else {
+	    	            			bmk_row.put(b.key, bmk.get(b.key()));
+	    	            		}
+	    	            	} else {
+	    	            		newSet = new HashSet<String>();
+	    	            		bmk_row.put(b.key, bmk_row.get(b.key(), b.deflt()));
+	    	            	}
+	    	            	this.tags.updateIndexEntry(bmk_user, urlHash, oldSet, newSet);	    					
+	    	            	break;
+	    				case FOLDERS:
+	    					oldSet = keysStringToSet(bmk_row.get(b.key(),b.deflt()));
+	    					if(bmk.containsKey(b.key())) {
+	    	            		newSet = keysStringToSet(bmk.get(b.key()));
+	    	            		if(importer) {
+		    	            		newSet.addAll(oldSet);
+		    	            		bmk_row.put(b.key(), keySetToString(newSet));
+		    	            		oldSet.clear();
+	    	            		} else {
+	    	            			bmk_row.put(b.key, bmk.get(b.key()));
+	    	            		}
+	    	            	} else {
+	    	            		newSet = new HashSet<String>();
+	    	            		bmk_row.put(b.key, bmk_row.get(b.key(), b.deflt()));
+	    	            	}
+	    	            	this.folders.updateIndexEntry(bmk_user, urlHash, oldSet, newSet);
+	    					break;	
+	    				default:
+	    					if(bmk.containsKey(b.key())) {
+	    						bmk_row.put(b.key, bmk.get(b.key()));
+	    					} else {
+	    						bmk_row.put(b.key, bmk_row.get(b.key(), b.deflt()));
+	    					}
+	            	 }
+	             }
+                // update bmk_table
+                this.worktables.update(bmk_table, bmk_row); 
+            }
 		}
 	}
 }

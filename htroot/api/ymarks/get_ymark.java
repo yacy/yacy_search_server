@@ -30,35 +30,33 @@ public class get_ymark {
     	final TreeSet<String> bookmarks = new TreeSet<String>();
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.BOOKMARKS.basename();
-        	final String tag_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.TAGS.basename();
-        	final String folder_table = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN)+YMarkTables.TABLES.FOLDERS.basename();
+        	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
         	
 	    	if(post.containsKey(YMarkTables.BOOKMARK.TAGS.key())) {
 	    		tags = true;
 	    		final String[] tagArray = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkTables.TAGS_SEPARATOR);
 	    		try {
-					bookmarks.addAll(sb.tables.bookmarks.getBookmarks(tag_table, tagArray));
-				} catch (IOException e) {
-					Log.logException(e);
-				} catch (RowSpaceExceededException e) {
-					Log.logException(e);
-				}
-	    	} else if(post.containsKey(YMarkTables.BOOKMARK.FOLDERS.key())) {
-	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key())).split(YMarkTables.TAGS_SEPARATOR);
-                try {                	
-					if(tags)
-						bookmarks.retainAll(sb.tables.bookmarks.getBookmarks(folder_table, folderArray));
-					else
-						bookmarks.addAll(sb.tables.bookmarks.getBookmarks(folder_table, folderArray));
+					bookmarks.addAll(sb.tables.bookmarks.tags.getBookmarks(bmk_user, tagArray));
 				} catch (IOException e) {
 					Log.logException(e);
 				} catch (RowSpaceExceededException e) {
 					Log.logException(e);
 				}
 	    	}
-	    	
-	    	putBookmarks(bookmarks, bmk_table);
+	    	if(post.containsKey(YMarkTables.BOOKMARK.FOLDERS.key())) {
+	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key())).split(YMarkTables.TAGS_SEPARATOR);
+                try {                	
+					if(tags)
+						bookmarks.retainAll(sb.tables.bookmarks.folders.getBookmarks(bmk_user, folderArray));
+					else
+						bookmarks.addAll(sb.tables.bookmarks.folders.getBookmarks(bmk_user, folderArray));
+				} catch (IOException e) {
+					Log.logException(e);
+				} catch (RowSpaceExceededException e) {
+					Log.logException(e);
+				}
+	    	}
+	    	putBookmarks(bookmarks, YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user));
 	    	
         } else {
         	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
