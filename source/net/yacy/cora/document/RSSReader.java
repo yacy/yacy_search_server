@@ -42,7 +42,7 @@ public class RSSReader extends DefaultHandler {
     private final RSSFeed theChannel;
     private Type type;
     
-    public enum Type { rss, atom, none };
+    public enum Type { rss, atom, rdf, none };
     
     private RSSReader(int maxsize) {
         theChannel = new RSSFeed(maxsize);
@@ -99,8 +99,9 @@ public class RSSReader extends DefaultHandler {
         }
         final String end = new String(a, a.length - 80, 80);
         Type type = Type.none;
-        if (end.indexOf("rss") > 0) type = Type.rss; 
-        if (end.indexOf("feed") > 0) type = Type.atom; 
+        if (end.indexOf("rss") > 0) type = Type.rss;
+        if (end.indexOf("feed") > 0) type = Type.atom;
+        if (end.indexOf("rdf") > 0) type = Type.rdf;
         if (type == Type.none) {
             throw new IOException("response incomplete");
         }
