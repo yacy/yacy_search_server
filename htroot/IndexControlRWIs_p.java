@@ -55,6 +55,7 @@ import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.listManager;
+import de.anomic.http.client.Cache;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.ReferenceOrder;
@@ -145,11 +146,20 @@ public class IndexControlRWIs_p {
             }
             
             // delete everything
-            if (post.containsKey("deletecomplete") && post.containsKey("confirmDelete")) {
-                segment.clear();
-                sb.crawlQueues.clear();
-                sb.crawlStacker.clear();
-                sb.robots.clear();
+            if (post.containsKey("deletecomplete")) {
+                if (post.get("deleteIndex", "").equals("on")) {
+                    segment.clear();
+                }
+                if (post.get("deleteCrawlQueues", "").equals("on")) {
+                    sb.crawlQueues.clear();
+                    sb.crawlStacker.clear();
+                }
+                if (post.get("deleteCache", "").equals("on")) {
+                    Cache.clear();
+                }
+                if (post.get("deleteRobots", "").equals("on")) {
+                    sb.robots.clear();
+                }
                 post.remove("deletecomplete");
             }
     

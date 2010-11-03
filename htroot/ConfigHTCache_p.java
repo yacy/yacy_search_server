@@ -29,9 +29,9 @@
 import java.io.File;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.client.Cache;
+import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -40,13 +40,13 @@ public class ConfigHTCache_p {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         String oldProxyCachePath, newProxyCachePath;
         int newProxyCacheSize;
 
-        if (post != null && post.containsKey("set")) try {
-          
+        if (post != null && post.containsKey("set")) {
             // proxyCache - check and create the directory
             oldProxyCachePath = env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
             newProxyCachePath = post.get("HTCachePath", SwitchboardConstants.HTCACHE_PATH_DEFAULT);
@@ -63,8 +63,15 @@ public class ConfigHTCache_p {
             if (newProxyCacheSize < 4) { newProxyCacheSize = 4; }
             env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
             Cache.setMaxCacheSize(newProxyCacheSize * 1024 * 1024);                
-        } catch (final Exception e) {
-            Log.logException(e);
+        }
+        
+        if (post != null && post.containsKey("deletecomplete")) {
+            if (post.get("deleteCache", "").equals("on")) {
+                Cache.clear();
+            }
+            if (post.get("deleteRobots", "").equals("on")) {
+                sb.robots.clear();
+            }
         }
 
         prop.put("HTCachePath", env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT));

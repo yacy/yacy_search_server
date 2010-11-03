@@ -39,8 +39,14 @@
     <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
     <fieldset><legend>Cleanup</legend>
       <dl>
-        <dt class="TableCellDark"><input type="checkbox" name="confirmDelete"/> Index Deletion<br />(deletes all words and all urls)</dt>
-        <dd><input type="submit" name="deletecomplete" value="Delete index"/>
+        <dt class="TableCellDark">Index Deletion</dt>
+        <dd><input type="checkbox" name="deleteIndex" id="deleteIndex"
+             onclick="x=document.getElementById('deleteIndex').checked;document.getElementById('deleteCache').checked=x;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';if(x){c='';}document.getElementById('deleteCache').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;"
+            />Delete Search Index<br/>
+            <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" />Stop Crawler and delete Crawl Queues<br/>
+            <input type="checkbox" name="deleteCache" id="deleteCache" disabled="disabled" />Delete HTTP &amp; FTP Cache<br/>
+            <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" />Delete robots.txt Cache<br/><br/><br/>
+            <input type="submit" name="deletecomplete" value="Delete"/>
         </dd>
       </dl>
     </fieldset>

@@ -28,6 +28,21 @@
       </fieldset>
     </form>
     
+    </form>
+    <form action="ConfigHTCache_p.html" method="post" enctype="multipart/form-data">
+    <fieldset><legend>Cleanup</legend>
+      <dl>
+        <dt class="TableCellDark">Cache Deletion</dt>
+        <dd><input type="checkbox" name="deleteCache" id="deleteCache"
+             onclick="x=document.getElementById('deleteCache').checked;document.getElementById('deleteRobots').checked=x;c='disabled';if(x){c='';}document.getElementById('deleteRobots').disabled=c;"
+            />Delete HTTP &amp; FTP Cache<br/>
+            <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" />Delete robots.txt Cache<br/><br/><br/>
+            <input type="submit" name="deletecomplete" value="Delete"/>
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    
     #%env/templates/footer.template%#
   </body>
 </html>

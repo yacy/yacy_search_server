@@ -91,6 +91,23 @@ public final class Cache {
             Log.logException(e);
         }
     }
+    
+    /**
+     * clear the cache
+     */
+    public static void clear() {
+        responseHeaderDB.clear();
+        try {
+            fileDB.clear();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+        try {
+            fileDBunbuffered.clear();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+    }
 
     /**
      * This method changes the HTCache size.<br>
