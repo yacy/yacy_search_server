@@ -522,14 +522,14 @@ public class ArrayStack implements BLOB {
      * @return
      * @throws IOException
      */
-    public synchronized boolean containsKey(byte[] key) {
+    public boolean containsKey(byte[] key) {
     	blobItem bi = keeperOf(key);
     	return bi != null;
         //for (blobItem bi: blobs) if (bi.blob.has(key)) return true;
         //return false;
     }
     
-    public synchronized blobItem keeperOf(final byte[] key) {
+    public blobItem keeperOf(final byte[] key) {
         // because the index is stored only in one table,
         // and the index is completely in RAM, a concurrency will create
         // not concurrent File accesses
@@ -538,41 +538,43 @@ public class ArrayStack implements BLOB {
         // start a concurrent query to database tables
         final CompletionService<blobItem> cs = new ExecutorCompletionService<blobItem>(executor);
         int accepted = 0;
-        for (final blobItem bi : blobs) {
-            try {
-                cs.submit(new Callable<blobItem>() {
-                    public blobItem call() {
-                        if (bi.blob.containsKey(key)) return bi;
-                        return null;
-                    }
-                });
-                accepted++;
-            } catch (final RejectedExecutionException e) {
-                // the executor is either shutting down or the blocking queue is full
-                // execute the search direct here without concurrency
-                if (bi.blob.containsKey(key)) return bi;
-            }
-        }
-
-        // read the result
-        try {
-            for (int i = 0; i < accepted; i++) {
-                final Future<blobItem> f = cs.take();
-                //hash(System.out.println("**********accepted = " + accepted + ", i =" + i);
-                if (f == null) continue;
-                final blobItem index = f.get();
-                if (index != null) {
-                    //System.out.println("*DEBUG SplitTable success.time = " + (System.currentTimeMillis() - start) + " ms");
-                	return index;
+        synchronized (this) {
+            for (final blobItem bi : blobs) {
+                try {
+                    cs.submit(new Callable<blobItem>() {
+                        public blobItem call() {
+                            if (bi.blob.containsKey(key)) return bi;
+                            return null;
+                        }
+                    });
+                    accepted++;
+                } catch (final RejectedExecutionException e) {
+                    // the executor is either shutting down or the blocking queue is full
+                    // execute the search direct here without concurrency
+                    if (bi.blob.containsKey(key)) return bi;
                 }
             }
-            //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
-            return null;
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (final ExecutionException e) {
-            Log.logSevere("ArrayStack", "", e);
-            throw new RuntimeException(e.getCause());
+    
+            // read the result
+            try {
+                for (int i = 0; i < accepted; i++) {
+                    final Future<blobItem> f = cs.take();
+                    //hash(System.out.println("**********accepted = " + accepted + ", i =" + i);
+                    if (f == null) continue;
+                    final blobItem index = f.get();
+                    if (index != null) {
+                        //System.out.println("*DEBUG SplitTable success.time = " + (System.currentTimeMillis() - start) + " ms");
+                    	return index;
+                    }
+                }
+                //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
+                return null;
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch (final ExecutionException e) {
+                Log.logSevere("ArrayStack", "", e);
+                throw new RuntimeException(e.getCause());
+            }
         }
         //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
         return null;

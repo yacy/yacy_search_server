@@ -50,13 +50,13 @@ public class DidYouMean {
         for (char a = '\u4e00'; a <= '\u4eff'; a++) ALPHABET_KANJI[0xff & (a - '\u4e00') + 256] = a;
     }
     private static final char[][] ALPHABETS = {ALPHABET_LATIN, ALPHABET_KANJI};
+    private static char[] alphabet = ALPHABET_LATIN;
     
     private   static final String POISON_STRING = "\n";
     public    static final int AVAILABLE_CPU = Runtime.getRuntime().availableProcessors();
     private static final wordLengthComparator WORD_LENGTH_COMPARATOR = new wordLengthComparator();
 	
     private final IndexCell<WordReference> index;
-    private       char[] alphabet;
     private final String word;
     private final int wordLen;
     private final LinkedBlockingQueue<String> guessGen, guessLib;
@@ -81,24 +81,23 @@ public class DidYouMean {
         this.INDEX_SIZE_COMPARATOR = new indexSizeComparator();
         
         // identify language
-        if (this.word.length() == 0) {
-            this.alphabet = ALPHABET_LATIN;
-        } else {
+        if (this.word.length() > 0) {
             char testchar = this.word.charAt(0);
-            this.alphabet = null;
+            boolean alphafound = false;
             alphatest: for (char[] alpha: ALPHABETS) {
                 if (isAlphabet(alpha, testchar)) {
-                    this.alphabet = alpha;
+                    alphabet = alpha;
+                    alphafound = true;
                     break alphatest;
                 }
             }
-            if (this.alphabet == null) {
+            if (!alphafound) {
                 // generate generic alphabet using simply a character block of 256 characters
                 char firstchar = (char) ((0xff & (testchar / 256)) * 256);
                 char lastchar = (char) (firstchar + 255);
-                this.alphabet = new char[256];
+                alphabet = new char[256];
                 for (char a = firstchar; a <= lastchar; a++) {
-                    this.alphabet[0xff & (a - firstchar)] = a;
+                    alphabet[0xff & (a - firstchar)] = a;
                 }
             }
         }
@@ -129,7 +128,12 @@ public class DidYouMean {
         long timelimit = startTime + timeout;
         if (this.word.indexOf(' ') > 0) return getSuggestions(this.word.split(" "), timeout, preSortSelection, this.index);
         SortedSet<String> preSorted = getSuggestions(timeout);
-        if (System.currentTimeMillis() > timelimit) return preSorted;
+        if (System.currentTimeMillis() > timelimit) {
+            Log.logInfo("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (1); execution time: "
+                + (System.currentTimeMillis() - startTime) + "ms");
+            return preSorted;
+        }
+        
         DynamicScore<String> scored = new ScoreCluster<String>();
         for (final String s: preSorted) {
             if (System.currentTimeMillis() > timelimit) break;
@@ -146,8 +150,13 @@ public class DidYouMean {
         }
 
         // finished
-        Log.logInfo("DidYouMean", "found " + preSorted.size() + " terms, returned " + countSorted.size() + " suggestions; execution time: "
-                        + (System.currentTimeMillis() - startTime) + "ms" + " - remaining queue size: " + guessLib.size());
+        if (countSorted.size() == 0) {
+            Log.logInfo("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (2); execution time: "
+                    + (System.currentTimeMillis() - startTime) + "ms");
+                return preSorted;
+        }
+        Log.logInfo("DidYouMean", "found " + preSorted.size() + " unsorted terms, returned " + countSorted.size() + " sorted suggestions; execution time: "
+                        + (System.currentTimeMillis() - startTime) + "ms");
 
         return countSorted;
     }
