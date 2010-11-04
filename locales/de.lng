@@ -461,7 +461,7 @@ When using this heuristic, then every search request line is used for a call to 
 Hypertext Cache Configuration==Hypertext Cache Konfiguration
 The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Der Hypertext Cache speichert Inhalte die per HTTP und FTP Protokoll geholt wurden. Dokumente von smb:// und file:// Umgebungen werden nicht gecached.
 The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Der Cache ist ein rotierender Cache: Wenn er voll ist werden die ältesten Einträge gelöscht und neue werden am selben Speicherplatz abgelegt.
-HTCache Configuration
+HTCache Configuration==HTCache Konfiguration
 The path where the cache is stored==Der Pfad an dem der Cache gespeichert wird
 The current size of the cache==Die aktuelle Größe des Caches
 The maximum size of the cache==Die maximale Größe des Caches
