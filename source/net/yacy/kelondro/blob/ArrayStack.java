@@ -79,6 +79,7 @@ public class ArrayStack implements BLOB {
      * time-out. Deletions are not made automatically, they must be triggered using this method.
      */
     
+    public static final long maxFileSize = Integer.MAX_VALUE;
     public static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
     
     protected     int            keylength;
@@ -109,7 +110,7 @@ public class ArrayStack implements BLOB {
         this.buffersize = buffersize;
         this.heapLocation = heapLocation;
         this.fileAgeLimit = oneMonth;
-        this.fileSizeLimit = (long) Integer.MAX_VALUE;
+        this.fileSizeLimit = maxFileSize;
         this.repositoryAgeMax = Long.MAX_VALUE;
         this.repositorySizeMax = Long.MAX_VALUE;
         this.trimall = trimall;
@@ -378,7 +379,7 @@ public class ArrayStack implements BLOB {
     
     public void setMaxSize(long maxSize) {
         this.repositorySizeMax = maxSize;
-        this.fileSizeLimit = Math.min((long) Integer.MAX_VALUE, maxSize / 10L);
+        this.fileSizeLimit = Math.min(maxFileSize, maxSize / 100L);
         executeLimits();
     }
     
