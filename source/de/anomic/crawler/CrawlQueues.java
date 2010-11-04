@@ -520,7 +520,12 @@ public class CrawlQueues {
             this.code = Integer.valueOf(entry.hashCode());
             if (!workers.containsKey(code)) {
                 workers.put(code, this);
-                this.start();
+                try {
+                    this.start();
+                } catch (OutOfMemoryError e) {
+                    Log.logWarning("CrawlQueues", "crawlWorker sequential fail-over: " + e.getMessage());
+                    this.run();
+                }
             }
             this.setPriority(Thread.MIN_PRIORITY); // http requests from the crawler should not cause that other functions work worse
         }
