@@ -456,6 +456,23 @@ When using this heuristic, then every search request line is used for a call to 
 20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.==20 Ergebnisse werden von Scroogle geholt und simultan geladen, geparst und sofort indexiert.	  
 #-----------------------------
 
+#File: ConfigHTCache_p.html
+#---------------------------
+Hypertext Cache Configuration==Hypertext Cache Konfiguration
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==Der Hypertext Cache speichert Inhalte die per HTTP und FTP Protokoll geholt wurden. Dokumente von smb:// und file:// Umgebungen werden nicht gecached.
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==Der Cache ist ein rotierender Cache: Wenn er voll ist werden die ältesten Einträge gelöscht und neue werden am selben Speicherplatz abgelegt.
+HTCache Configuration
+The path where the cache is stored==Der Pfad an dem der Cache gespeichert wird
+The current size of the cache==Die aktuelle Größe des Caches
+The maximum size of the cache==Die maximale Größe des Caches
+"Set"=="Setzen"
+Cleanup==Aufräumen
+Cache Deletion==Cache Löschen
+Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
+Delete robots.txt Cache==Lösche robots.txt Cache
+"Delete"=="Löschen"
+#-----------------------------
+
 #File: ConfigLanguage_p.html
 #---------------------------
 Language selection==Sprachauswahl
@@ -1236,8 +1253,12 @@ Retrieve by Word-Hash==Abfrage nach Wort-Hash
 "Show URL Entries for Word-Hash"=="URL Einträge für Wort-Hash zeigen"
 "Generate List"=="Liste erstellen"
 Cleanup==Aufräumen
-Index Deletion<br />\(deletes all words and all urls\)==Index Löschung<br />(löscht alle Wörter und alle URLs)
-"Delete index"=="Index löschen"
+>Index Deletion<==>Index Löschung<
+>Delete Search Index<==>Lösche Suchindex<
+Stop Crawler and delete Crawl Queues==Crawler anhalten und Crawler Warteschlangen löschen
+Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
+Delete robots.txt Cache==Lösche robots.txt Cache
+"Delete"=="Löschen"
 No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
 No entry for word hash==Keinen Eintrag zu Wort-Hash
 Search result==Suchergebnis
@@ -3306,6 +3327,7 @@ System Update==System Aktualisierung
 Advanced Settings==Erweiterte Einstellungen
 Parser Configuration==Parser Einstellungen
 Local robots.txt==Lokale robots.txt
+#Web Cache==Web Cache
 Advanced Properties==Erweiterte Konfiguration
 #-----------------------------
 
