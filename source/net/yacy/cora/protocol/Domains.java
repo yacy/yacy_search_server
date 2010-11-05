@@ -29,7 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.ARC;
@@ -459,13 +458,15 @@ public class Domains {
     public static String getHostName(final InetAddress i) {
         Collection<String> hosts = nameCacheHit.getKeys(i);
         if (hosts.size() > 0) return hosts.iterator().next();
-        
+        return i.getHostName();
+        /*
         // call i.getHostName() using concurrency to interrupt execution in case of a time-out
         try {
-            return TimeoutRequest.getHostName(i, 1000);
+            //TimeoutRequest.getHostName(i, 1000);
         } catch (ExecutionException e) {
             return i.getHostAddress();
         }
+        */
     }
     
     public static InetAddress dnsResolve(String host) {
@@ -484,7 +485,7 @@ public class Domains {
         // call dnsResolveNetBased(host) using concurrency to interrupt execution in case of a time-out
         try {
             boolean doCaching = true;
-            ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
+            ip = InetAddress.getByName(host); //TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
             if ((ip == null) ||
                 (ip.isLoopbackAddress()) ||
                 (nameCacheNoCachingList.containsKey(host))
@@ -503,7 +504,7 @@ public class Domains {
                 nameCacheHit.put(host, ip);
             }
             return ip;
-        } catch (final ExecutionException e) {
+        } catch (final UnknownHostException e) {
             // remove old entries
             flushMissNameCache();
             
