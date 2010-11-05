@@ -198,7 +198,15 @@ public class WeakPriorityBlockingQueue<E> {
         }
         synchronized (this) {
             if (position >= this.queue.size() + this.drained.size()) return null; // we don't have that element
-            while (position >= this.drained.size()) this.poll();
+            Element<E> p;
+            int s;
+            while (position >= this.drained.size()) {
+                s = this.drained.size();
+                p = this.poll();
+                if (this.drained.size() <= s) break;
+                if (p == null) break;
+            }
+            if (position >= this.drained.size()) return null;
             return this.drained.get(position);
         }
     }
