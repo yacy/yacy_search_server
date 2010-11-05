@@ -757,6 +757,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             addressStr = addressStr.substring(0,pos);
         }
         seedIPAddress = Domains.dnsResolve(addressStr);
+        if (seedIPAddress == null) return null;
         if (mySeed.isProper(false) == null) ipLookupCache.put(seedIPAddress,  new SoftReference<yacySeed>(mySeed));
         if (seedIPAddress.equals(peerIP)) return mySeed;
         // nothing found
