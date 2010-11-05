@@ -1,6 +1,6 @@
 README for YaCy (C) by Michael Peter Christen; mc@yacy.net
 ---------------------------------------------------------------------------
-Please visit www.yacy.net for latest changes or new documentation.
+Please visit http://yacy.net for latest changes or new documentation.
 YaCy comes with ABSOLUTELY NO WARRANTY!
 This is free software, and you are welcome to redistribute it
 under certain conditions; see file gpl.txt for details.
@@ -8,36 +8,43 @@ under certain conditions; see file gpl.txt for details.
 
 WHAT IS THIS?
 
-This is a Open Source Web Search Engine.
-It can use a Peer-to-Peer protocol to create a distributed search engine
-without a search central.
-You can also use this software to set up your own search portal, for your
-intranet or the internet.
-
-
-WHAT CAN I DO WITH THIS SOFTWARE?
-
+YaCy is a search engine for the Web (supporting also ftp).
+It is neither a search portal nor a portal software but a peer-to-peer
+software that works on principles similar to file sharing.
+The difference is that you do not share any kind of data but web indexes.
+YaCy also generates the indexes it organizes. YaCy is a web crawler for 
+everybody, without censorship and central data retention:
 - search the web (automatically using all other YaCy peers)
-- crawl the web (and you contribute to the global web index)
+- co-operative crawling; support for other crawlers
+- intranet indexing and search
 - set up your own search portal
-- use it as your personal web server
-- use it as your web proxy (..and visited pages are indexed)
-- ensure your privacy when browsing and searching the web
-- many more
+- all users have equal rights
+- comprehensive concept to anonymise the users' index
+To be able to perform a search using the YaCy network, every user has to
+set up their own node. More users are leading to higher index capacity
+and better distributed indexing performance.
 
 
 WHERE IS THE DOCUMENTATION?
 
-The complete documentation can be found at:
-(English)  http://yacy.net/
-(Wiki:de)  http://www.yacy-websuche.de/wiki/index.php/De:Start
-(Wiki:en)  http://www.yacy-websearch.net/wiki/index.php/En:Start
+Documentation can be found at:
+(Home Page)     http://yacy.net/
+(German Forum)  http://forum.yacy.de/
+(Wiki:de)       http://www.yacy-websuche.de/wiki/index.php/De:Start
+(Wiki:en)       http://www.yacy-websearch.net/wiki/index.php/En:Start
+
+Every of these locations has a (YaCy) search functionality which combines
+all these locations into one search result.
 
 
 DEPENDENCIES? WHAT OTHER SOFTWARE DO I NEED?
 
 You need java 1.5 or later to run YaCy.
-Please download it from http://java.sun.com
+Please download it from http://www.java.com
+
+YaCy also runs on IcedTea6.
+See http://icedtea.classpath.org
+
 NO OTHER SOFTWARE IS REQUIRED!
 (you don't need apache, tomcat or mysql or whatever)
 
@@ -75,7 +82,8 @@ ANY MORE CONFIGURATIONS?
   just open http://localhost:8080
   all you have to do (should do) is to enter a password for your peer
 
-- You can use YaCy as your web proxy. This is an option, you don't need to do that.
+- You can use YaCy as your web proxy.
+  This is an option, you don't need to do that.
   Simply configure your internet connection to use a proxy at port 8080.
 
 
@@ -92,5 +100,5 @@ feel free to ask the author for a business proposal to customize YaCy
 according to your needs. We also provide integration solutions if the
 software is about to be integrated into your enterprise application.
 
-Germany, Frankfurt a.M., 14.01.2009
+Germany, Frankfurt a.M., 05.11.2010
 Michael Peter Christen
