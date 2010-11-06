@@ -56,7 +56,7 @@ public class IndexCleaner_p {
         if (post!=null) {
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
-                    urldbCleanerThread = indexSegment.urlMetadata().getBlacklistCleaner(Switchboard.urlBlacklist);
+                    urldbCleanerThread = indexSegment.urlMetadata().getBlacklistCleaner(Switchboard.urlBlacklist, sb.crawlStacker);
                     urldbCleanerThread.start();
                 }
                 else {

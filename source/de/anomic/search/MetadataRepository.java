@@ -38,6 +38,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import de.anomic.crawler.CrawlStacker;
+
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.DynamicScore;
@@ -322,8 +324,8 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
     }
 
-    public BlacklistCleaner getBlacklistCleaner(final Blacklist blacklist) {
-        return new BlacklistCleaner(blacklist);
+    public BlacklistCleaner getBlacklistCleaner(final Blacklist blacklist, final CrawlStacker crawlStacker) {
+        return new BlacklistCleaner(blacklist, crawlStacker);
     }
     
     public class BlacklistCleaner extends Thread {
@@ -337,9 +339,11 @@ public final class MetadataRepository implements Iterable<byte[]> {
         public String lastUrl = "";
         public String lastHash = "";
         private final Blacklist blacklist;
+        private final CrawlStacker crawlStacker;
 
-        public BlacklistCleaner(final Blacklist blacklist) {
+        public BlacklistCleaner(final Blacklist blacklist, final CrawlStacker crawlStacker) {
             this.blacklist = blacklist;
+            this.crawlStacker = crawlStacker;
         }
 
         public void run() {
@@ -377,7 +381,8 @@ public final class MetadataRepository implements Iterable<byte[]> {
                             continue;
                         }
                         if (blacklist.isListed(Blacklist.BLACKLIST_CRAWLER, metadata.url()) ||
-                            blacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url())) {
+                            blacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url()) ||
+                            (crawlStacker.urlInAcceptedDomain(metadata.url()) != null)) {
                             lastBlacklistedUrl = metadata.url().toNormalform(true, true);
                             lastBlacklistedHash = new String(entry.hash());
                             if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + new String(entry.hash()) + " " + metadata.url().toNormalform(false, true));
