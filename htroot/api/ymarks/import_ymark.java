@@ -15,7 +15,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 
-public class import_html {
+public class import_ymark {
 	
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
@@ -49,6 +49,7 @@ public class import_html {
 						}
 		            }
 				}
+        		prop.put("result", "1");
         	}
         	if(post.containsKey("xbelfile")){
 				try {
@@ -73,7 +74,9 @@ public class import_html {
 				}
 				prop.put("result", "1");
         	}
-        }
+        }  else {
+        	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
+        } 
         // return rewrite properties
         return prop;
 	}

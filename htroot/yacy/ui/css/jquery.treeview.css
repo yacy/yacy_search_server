@@ -67,6 +67,7 @@
 .filetree li.expandable span.folder { background: url(../img/treeview/folder-closed.gif) 0 0 no-repeat; }
 .filetree span.file { background: url(../img-2/article_text.png) 0 0 no-repeat; }
 
+.filetree span.comment,
 .filetree span.meta,
 .filetree span.date, 
 .filetree span.lock, 
@@ -79,3 +80,4 @@
 .filetree span.stat { background: url(../img-2/bar_graph.png) 0 0 no-repeat; }
 .filetree span.link { background: url(../img-2/link.png) 0 0 no-repeat; }
 .filetree span.tag { background: url(../img/tags/tag_blue.png) 0 0 no-repeat; }
+.filetree span.comment { background: url(../img-2/comment_blue.png) 0 0 no-repeat; }

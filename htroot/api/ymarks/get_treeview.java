@@ -13,24 +13,11 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
-public class get_ymark_tree {    
+public class get_treeview {    
 	
 	public static final String ROOT = "root";
 	public static final String SOURCE = "source";
-	
-	// for some reason enums don't work in servlet classes ?!?!
-    /*
-	private static final Map<String, String> TYPE = createMap();
-    private static Map<String, String> createMap() {
-        Map<String, String> result = new HashMap<String, String>();
-        result.put("tags", "tag");
-        result.put("url", "link");
-        result.put("public", "lock");
-        result.put("visits", "stat");
-        return Collections.unmodifiableMap(result);
-    }
-    */
-	
+		
 	static serverObjects prop;
 	
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -74,12 +61,11 @@ public class get_ymark_tree {
 				}
 	        	int n = root.split(YMarkTables.FOLDERS_SEPARATOR).length;
 	        	if (n == 0) n = 1;
-
 	        	while (it.hasNext()) {    		   		
 	        		String folder = it.next();
 	        		foldername = folder.split(YMarkTables.FOLDERS_SEPARATOR);
 	        		if (foldername.length == n+1) {
-	    	    		prop.put("folders_"+count+"_foldername", foldername[n]);
+	        			prop.put("folders_"+count+"_foldername", foldername[n]);
 	    	    		prop.put("folders_"+count+"_expanded", "false");
 	    	    		prop.put("folders_"+count+"_type", "folder");
 	    	    		prop.put("folders_"+count+"_hash", folder);				//TODO: switch from pathString to folderHash
@@ -161,7 +147,9 @@ public class get_ymark_tree {
 					Log.logException(e);
 				}
 	        }
-        } 
+        } else {
+        	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
+        }  
         // return rewrite properties
         return prop;
 	}

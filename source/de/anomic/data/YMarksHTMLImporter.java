@@ -29,7 +29,7 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 	private STATE state;
 	private HTML.Tag prevTag;
 	private HashMap<String,String> bmk;
-	private String folder;
+	private StringBuilder folder;
 	
     private final InputStream input;
 	private final BlockingQueue<HashMap<String,String>> bookmarks;
@@ -39,7 +39,8 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 		this.state = STATE.NOTHING;
 		this.prevTag = null;
 		this.bmk = new HashMap<String,String>();
-		this.folder = YMarkTables.FOLDERS_IMPORTED;
+		this.folder = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+		this.folder.append(YMarkTables.FOLDERS_IMPORTED);
 		this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
 		this.input = input;
 		this.htmlParser = new ParserDelegator();
@@ -70,12 +71,13 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
     			break;
     		case BOOKMARK:
 				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), new String(data));
-				this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folder);
+				this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folder.toString());
 				this.bmk.put(YMarkTables.BOOKMARK.PUBLIC.key(), YMarkTables.BOOKMARK.PUBLIC.deflt());
 				this.bmk.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.deflt());
 				break;
     		case FOLDER:
-    			this.folder = this.folder + YMarkTables.FOLDERS_SEPARATOR + new String(data);
+    			this.folder.append(YMarkTables.FOLDERS_SEPARATOR);
+    			this.folder.append(data);
     			break;
     		case FOLDER_DESC:
     			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folder+" desc: "+new String(data));
@@ -133,9 +135,10 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 		if (t == HTML.Tag.H3) {
 			state = STATE.FOLDER_DESC;
 	    } else if (t == HTML.Tag.DL) {
-	    	if(!folder.equals(YMarkTables.FOLDERS_IMPORTED)) {
-	    		folder = folder.replaceAll(YMarkIndex.PATTERN_REPLACE, "");
-	    	}
+            //TODO: get rid of .toString.equals()
+        	if(!this.folder.toString().equals(YMarkTables.FOLDERS_IMPORTED)) {
+	    		folder.setLength(folder.lastIndexOf(YMarkTables.FOLDERS_SEPARATOR));
+        	}
 	    } else {
 	    	state = STATE.NOTHING;
 	    }

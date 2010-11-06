@@ -2,6 +2,7 @@ package de.anomic.data;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -19,6 +20,7 @@ import org.xml.sax.helpers.DefaultHandler;
 public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 
 	public static enum XBEL {
+		NOTHING,
 		XBEL,
 		TITLE,
 		DESC,
@@ -34,29 +36,23 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 		}
 	}
 	
-    public static enum STATE {
-    	NOTHING,
-    	BOOKMARK,
-    	INFO,
-    	FOLDER,
-    	FOLDER_DESC
-    }
-	
 	private HashMap<String,String> bmk;
-    private boolean parsingValue;
-    private STATE state;
-	private String keyname;
-	private String folder;
-	private final InputStream input;
+	private XBEL outer_state;					// BOOKMARK, FOLDER, NOTHING
+    private XBEL inner_state;					// DESC, TITLE, INFO, ALIAS, (METADATA), NOTHING
+    private boolean parse_value;
     private final StringBuilder buffer;
+	private final StringBuilder folder;
+	
+	private final InputStream input;
 	private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;
 	private final SAXParser saxParser;
 
     
     public YMarksXBELImporter (final InputStream input, int queueSize) throws IOException {
-        this.buffer = new StringBuilder();
         this.bmk = null;
-		this.folder = YMarkTables.FOLDERS_IMPORTED;
+    	this.buffer = new StringBuilder();
+        this.folder = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+        this.folder.append(YMarkTables.FOLDERS_IMPORTED);
         this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
         this.input = input;
         final SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -95,47 +91,61 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
     }
     
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
-        if (tag == null) return;
+        String date;
+    	if (tag == null) return;
         tag = tag.toLowerCase();              
         if (XBEL.BOOKMARK.tag().equals(tag)) {
             this.bmk = new HashMap<String,String>();
             this.bmk.put(YMarkTables.BOOKMARK.URL.key(), atts.getValue(uri, YMarkTables.BOOKMARK.URL.xbel_attrb()));
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), atts.getValue(uri, YMarkTables.BOOKMARK.DATE_ADDED.xbel_attrb()));
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_VISITED.key(), atts.getValue(uri, YMarkTables.BOOKMARK.DATE_VISITED.xbel_attrb()));
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), atts.getValue(uri, YMarkTables.BOOKMARK.DATE_MODIFIED.xbel_attrb()));
-            state = STATE.BOOKMARK;
-            this.parsingValue = false;            
+            try {
+				date = String.valueOf(YMarkTables.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_ADDED.xbel_attrb())));
+			} catch (ParseException e) {
+				date = String.valueOf(System.currentTimeMillis());
+			}
+            this.bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), date);
+            try {
+				date = String.valueOf(YMarkTables.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_VISITED.xbel_attrb())));
+	            this.bmk.put(YMarkTables.BOOKMARK.DATE_VISITED.key(), date);
+            } catch (ParseException e) {
+			}
+            try {
+				date = String.valueOf(YMarkTables.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_MODIFIED.xbel_attrb())));
+			} catch (ParseException e) {
+				date = String.valueOf(System.currentTimeMillis());
+			}
+            this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date);
+            outer_state = XBEL.BOOKMARK;
+            inner_state = XBEL.NOTHING;
+            this.parse_value = false;            
         } else if(XBEL.FOLDER.tag().equals(tag)) {
-        	this.state = STATE.FOLDER;
+        	this.outer_state = XBEL.FOLDER;
+        	this.inner_state = XBEL.NOTHING;
         } else if (XBEL.DESC.tag().equals(tag)) {
-            if(this.state == STATE.FOLDER) {
-            	this.keyname = null;
-            	this.state = STATE.FOLDER_DESC;            	
-            } else if (this.state == STATE.BOOKMARK) {
-            	this.keyname = YMarkTables.BOOKMARK.DESC.key();
-            } else {
-            	Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksXBELImporter - state: "+this.state+" tag: "+tag);
-            	this.parsingValue = false;
-            	return;
-            }
-        	this.parsingValue = true;
+            this.inner_state = XBEL.DESC;
+        	this.parse_value = true;
         } else if (XBEL.TITLE.tag().equals(tag)) {
-            if(this.state == STATE.FOLDER) {
-            	this.keyname = null;
-            } else if (this.state == STATE.BOOKMARK) {
-            	this.keyname = YMarkTables.BOOKMARK.TITLE.key();
-            } else {
-            	Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksXBELImporter - state: "+this.state+" tag: "+tag);
-            	this.parsingValue = false;
-            	return;
-            }
-        	this.parsingValue = true;
+        	this.inner_state = XBEL.TITLE;
+        	this.parse_value = true;
         } else if (XBEL.INFO.tag().equals(tag)) {
-        	this.parsingValue = false;
-        	this.state = STATE.INFO;
-        } else {
-        	this.parsingValue = false;
-        	this.state = STATE.NOTHING;
+        	this.inner_state = XBEL.INFO;
+        	this.parse_value = false;
+        } else if (XBEL.METADATA.tag().equals(tag)) {
+        	/*
+        	this.meta_owner = atts.getValue(uri, "owner");
+        	this.inner_state = XBEL.METADATA;
+        	this.parse_value = true;
+        	*/
+        } else if (XBEL.ALIAS.tag().equals(tag)) {
+        	/*
+        	this.alias_ref = atts.getValue(uri, "ref");
+        	this.inner_state = XBEL.ALIAS;
+        	this.parse_value = false;
+        	*/
+        }
+        else {
+        	this.outer_state = XBEL.NOTHING;
+        	this.inner_state = XBEL.NOTHING;
+        	this.parse_value = false;
         }
         
     }
@@ -146,7 +156,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
         if(XBEL.BOOKMARK.tag().equals(tag)) {
 			// write bookmark
         	if (!this.bmk.isEmpty()) {
-				this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folder);
+				this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folder.toString());
         		try {
 					this.bookmarks.put(this.bmk);
 					bmk = new HashMap<String,String>();
@@ -154,32 +164,60 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 					Log.logException(e);
 				}
 			}
-        	this.state = STATE.FOLDER;
+        	this.outer_state = XBEL.FOLDER;
         } else if (XBEL.FOLDER.tag().equals(tag)) {
-        	this.state = STATE.NOTHING;
         	// go up one folder
-        	if(!folder.equals(YMarkTables.FOLDERS_IMPORTED)) {
-	    		folder = folder.replaceAll(YMarkIndex.PATTERN_REPLACE, "");
-	    		this.state = STATE.FOLDER;
-        	}        	
+            //TODO: get rid of .toString.equals()
+        	if(!this.folder.toString().equals(YMarkTables.FOLDERS_IMPORTED)) {
+	    		folder.setLength(folder.lastIndexOf(YMarkTables.FOLDERS_SEPARATOR));
+        	}
+        	this.outer_state = XBEL.FOLDER;
         } else if (XBEL.INFO.tag().equals(tag)) {
-        	this.state = STATE.BOOKMARK;
+        	this.inner_state = XBEL.NOTHING;
+        } else if (XBEL.METADATA.tag().equals(tag)) {
+        	this.inner_state = XBEL.INFO;
         }
     }
 
     public void characters(final char ch[], final int start, final int length) {
-        if (parsingValue) {
+        if (parse_value) {
             buffer.append(ch, start, length);
-            if (this.state == STATE.BOOKMARK) {
-            	this.bmk.put(this.keyname, this.buffer.toString());
-            } else if (this.state == STATE.FOLDER) {
-            	this.folder = this.folder + YMarkTables.FOLDERS_SEPARATOR + this.buffer.toString();
-            } else if (this.state == STATE.FOLDER_DESC) {
-            	Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksXBELImporter - folder: "+this.folder+" desc: "+this.buffer.toString());
-            	this.state = STATE.FOLDER;
-            }
-        this.buffer.setLength(0);
-        this.parsingValue = false;
+            switch(outer_state) {
+            	case BOOKMARK:
+            		switch(inner_state) {
+            			case DESC:
+            				this.bmk.put(YMarkTables.BOOKMARK.DESC.key(), this.buffer.toString());
+            				break;
+            			case TITLE:
+            				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), this.buffer.toString());
+            				break;
+        				case METADATA:	
+        					// this.meta_data = this.buffer.toString();
+        					break;
+            			default:
+            				break;		
+            		}
+            		break;
+            	case FOLDER:
+            		switch(inner_state) {
+	        			case DESC:
+	        				break;
+	        			case TITLE:
+	        				this.folder.append(YMarkTables.FOLDERS_SEPARATOR);
+	        				this.folder.append(this.buffer);
+	        				break;
+	        			case METADATA:
+        					// this.meta_data = this.buffer.toString();
+	        				break;
+	        			default:
+	        				break;		
+            		}
+            		break;
+            	default:
+            		break;
+             }
+            this.buffer.setLength(0);
+            this.parse_value = false;
         }
     }
 

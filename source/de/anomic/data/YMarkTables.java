@@ -2,6 +2,9 @@ package de.anomic.data;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +16,7 @@ import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 
 public class YMarkTables {
     
@@ -50,7 +54,7 @@ public class YMarkTables {
     		return this.protocol+s;
     	}
     }
-
+	
     public static enum BOOKMARK {
     	URL 			("url",				"",				"href",					"href",			"link"),
     	TITLE 			("title",			"",				"",						"",				"meta"),
@@ -113,16 +117,14 @@ public class YMarkTables {
     public final static String FOLDERS_ROOT = "/"; 
     public final static String FOLDERS_UNSORTED = "/unsorted";
     public final static String FOLDERS_IMPORTED = "/imported";
-        
+	public static final int FOLDER_BUFFER_SIZE = 100;    
+    
     public final static String BOOKMARKS_LOG = "BOOKMARKS";
     public final static String BOOKMARKS_ID = "id";
 	
     public final static String USER_ADMIN = "admin";
 	public final static String USER_AUTHENTICATE = "AUTHENTICATE";
 	public final static String USER_AUTHENTICATE_MSG = "Authentication required!";
-    
-	
-	
 	
     private WorkTables worktables;
     public YMarkIndex tags;
@@ -132,6 +134,21 @@ public class YMarkTables {
     	this.worktables = (WorkTables)wt;
     	this.folders = new YMarkIndex(this.worktables, TABLES.FOLDERS.basename());
     	this.tags = new YMarkIndex(this.worktables, TABLES.TAGS.basename());
+    }
+    
+    public static Date parseISO8601(final String s) throws ParseException {
+        if(s == null)
+        	throw new ParseException("parseISO8601 - NPE", 0);
+    	StringBuilder date = new StringBuilder(s);
+    	SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz"); 
+        if(date.charAt(date.length()) == 'Z') {
+        	date.deleteCharAt(date.length());
+        	date.append("GMT-00:00");
+        } else {
+            date.insert(date.length()-6, "GMT");
+        }
+        Log.logInfo(YMarkTables.BOOKMARKS_LOG, "ISO8601: "+s+" =? "+dateformat.toString());
+        return dateformat.parse(date.toString());
     }
     
     public final static byte[] getBookmarkId(String url) throws MalformedURLException {
@@ -166,7 +183,7 @@ public class YMarkTables {
         }
         return keySet;
     }
-    
+        
     public final static String cleanTagsString(final String tagsString) {        
     	StringBuilder ts = new StringBuilder(tagsString);    	
     	// get rid of double commas and space characters following a comma
@@ -244,14 +261,14 @@ public class YMarkTables {
 	            	switch(b) {
 	    				case DATE_ADDED:
 	    				case DATE_MODIFIED:
-	    					if(bmk.containsKey(b.key())) {
+	    					if(bmk.containsKey(b.key()) && bmk.get(b.key()) != null) {
 	    						data.put(b.key(), bmk.get(b.key()));
 	    					} else {
 	    						data.put(b.key(), String.valueOf(System.currentTimeMillis()).getBytes());
 	    					}
 	    					break;
 	    				case TAGS:
-	    					if(bmk.containsKey(b.key())) {
+	    					if(bmk.containsKey(b.key()) && bmk.get(b.key()) != null) {
 	    						this.tags.insertIndexEntry(bmk_user, bmk.get(b.key()), urlHash);
 	    						data.put(b.key(), bmk.get(b.key()));
 	    					} else {
@@ -260,7 +277,7 @@ public class YMarkTables {
 	    					}
 	    					break;
 	    				case FOLDERS:
-	    					if(bmk.containsKey(b.key())) {
+	    					if(bmk.containsKey(b.key()) && bmk.get(b.key()) != null) {
 	    						this.folders.insertIndexEntry(bmk_user, bmk.get(b.key()), urlHash);
 	    						data.put(b.key(), bmk.get(b.key()));
 	    					} else {
@@ -269,7 +286,7 @@ public class YMarkTables {
 	    					}
 	    					break;	
 	    				default:
-	    					if(bmk.containsKey(b.key())) {
+	    					if(bmk.containsKey(b.key()) && bmk.get(b.key()) != null) {
 	    						data.put(b.key(), bmk.get(b.key()));
 	    					}
 	            	 }

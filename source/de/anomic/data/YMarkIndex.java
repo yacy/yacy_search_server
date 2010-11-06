@@ -40,10 +40,9 @@ public class YMarkIndex {
     	ADD,
     	REMOVE
     }
-    
-    public final static String PATTERN_PREFIX = "^";
-    public final static String PATTERN_POSTFIX = YMarkTables.FOLDERS_SEPARATOR + ".*$";
-    public final static String PATTERN_REPLACE = "("+YMarkTables.FOLDERS_SEPARATOR+".[^"+YMarkTables.FOLDERS_SEPARATOR+"]*$)";
+
+    public final static String PATTERN_PREFIX = "^\\Q";
+    public final static String PATTERN_POSTFIX = YMarkTables.FOLDERS_SEPARATOR+"\\E.*$";
     
     private final WorkTables worktables;
     private final String table_basename;
@@ -61,21 +60,30 @@ public class YMarkIndex {
    		return new String(row.get(INDEX.NAME.key(), INDEX.NAME.deflt()));
     }
     
+    public static int getFolderDepth(String folder) {
+    	final int depth = folder.split(YMarkTables.FOLDERS_SEPARATOR).length;
+    	if (depth == 0) 
+    		return 1;
+    	else
+    		return depth;
+    }
+    
     public Iterator<String> getFolders(final String user, final String root) throws IOException {
     	final String index_table = user + this.table_basename;
     	final TreeSet<String> folders = new TreeSet<String>();
     	final Pattern r = Pattern.compile(PATTERN_PREFIX + root + PATTERN_POSTFIX);
     	final Iterator<Row> it = this.worktables.iterator(index_table, INDEX.NAME.key(), r);
-        
-        String path = "";
+    	final StringBuilder path = new StringBuilder(100);
         Row folder;
         
         while (it.hasNext()) {
             folder = it.next();
-            path = new String(folder.get(INDEX.NAME.key(), INDEX.NAME.deflt()));
-            while(path.length() > 0 && !path.equals(root)){
-                folders.add(path);                  
-                path = path.replaceAll(PATTERN_REPLACE, "");
+            path.setLength(0);
+            path.append(new String(folder.get(INDEX.NAME.key(), INDEX.NAME.deflt())));
+            //TODO: get rid of .toString.equals()
+            while(path.length() > 0 && !path.toString().equals(root)){
+                folders.add(path.toString());                  
+                path.setLength(path.lastIndexOf(YMarkTables.FOLDERS_SEPARATOR));
             }
         }
         if (!root.equals(YMarkTables.FOLDERS_ROOT)) { folders.add(root); }
