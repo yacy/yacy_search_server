@@ -17,6 +17,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DateFormatter;
 
 public class YMarkTables {
     
@@ -149,6 +150,15 @@ public class YMarkTables {
         }
         Log.logInfo(YMarkTables.BOOKMARKS_LOG, "ISO8601: "+s+" =? "+dateformat.toString());
         return dateformat.parse(date.toString());
+    }
+    
+    public static String getISO8601(final byte[] date) {
+    	if(date != null) {
+        	final String s = new String(date);
+        	if(!s.isEmpty())
+        		return DateFormatter.formatISO8601(new Date(Long.parseLong(s)));	
+    	}
+    	return "";
     }
     
     public final static byte[] getBookmarkId(String url) throws MalformedURLException {

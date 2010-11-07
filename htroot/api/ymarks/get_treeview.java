@@ -85,7 +85,7 @@ public class get_treeview {
 			        		final String url = new String(bmk_row.get(YMarkTables.BOOKMARK.URL.key()));
 			        		final String title = new String(bmk_row.get(YMarkTables.BOOKMARK.TITLE.key(), YMarkTables.BOOKMARK.TITLE.deflt()));
 			        			
-			        		// TODO: get rid of bmtype
+			        		// TODO: get_treeview - get rid of bmtype
 			        		if (post.containsKey("bmtype")) {    			 
 			        			if (post.get("bmtype").equals("title")) {
 			        				prop.put("folders_"+count+"_foldername", title);

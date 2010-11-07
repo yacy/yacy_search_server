@@ -61,9 +61,9 @@ public class YMarkIndex {
     }
     
     public static int getFolderDepth(String folder) {
-    	final int depth = folder.split(YMarkTables.FOLDERS_SEPARATOR).length;
-    	if (depth == 0) 
-    		return 1;
+    	final int depth = folder.split(YMarkTables.FOLDERS_SEPARATOR).length -1;
+    	if (depth < 0) 
+    		return 0;
     	else
     		return depth;
     }

@@ -48,7 +48,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 	private final SAXParser saxParser;
 
     
-    public YMarksXBELImporter (final InputStream input, int queueSize) throws IOException {
+    public YMarksXBELImporter (final InputStream input, int queueSize) throws SAXException {
         this.bmk = null;
     	this.buffer = new StringBuilder();
         this.folder = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
@@ -60,10 +60,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
             this.saxParser = factory.newSAXParser();
         } catch (ParserConfigurationException e) {
             Log.logException(e);
-            throw new IOException(e.getMessage());
-        } catch (SAXException e) {
-            Log.logException(e);
-            throw new IOException(e.getMessage());
+            throw new SAXException (e.getMessage());
         }
     }
     
@@ -136,6 +133,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
         	this.parse_value = true;
         	*/
         } else if (XBEL.ALIAS.tag().equals(tag)) {
+        	// TODO: handle xbel aliases
         	/*
         	this.alias_ref = atts.getValue(uri, "ref");
         	this.inner_state = XBEL.ALIAS;
@@ -192,6 +190,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
             				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), this.buffer.toString());
             				break;
         				case METADATA:	
+        					// TODO: handle xbel bookmark metadata
         					// this.meta_data = this.buffer.toString();
         					break;
             			default:
@@ -207,7 +206,8 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 	        				this.folder.append(this.buffer);
 	        				break;
 	        			case METADATA:
-        					// this.meta_data = this.buffer.toString();
+        					// TODO: handle xbel folder metadata
+	        				// this.meta_data = this.buffer.toString();
 	        				break;
 	        			default:
 	        				break;		

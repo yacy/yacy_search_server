@@ -6,57 +6,22 @@
 	<body>
 		<form action="/api/ymarks/import_ymark.xml" method="post"  enctype="multipart/form-data">
 			<fieldset>
-				<legend>Import HTML Bookmarks</legend>
+				<legend>Import Bookmarks</legend>
 				<dl>
+					<dt>
+						<label for="importer">Importer:</label>
+					</dt>
+					<dd>
+						<select name="importer" id="importer">
+							<option value="xbel">XBEL Importer</option>
+							<option value="html">Netscape HTML Importer</option>
+						</select>
+					</dd>
 					<dt>
 						<label for="file">File:</label>
 					</dt>
 					<dd>
-						<input type="file" name="htmlfile" id="htmlfile" />
-					</dd>
-					<dt>
-						<label for="tags">Default Tags:</label>
-					</dt>
-					<dd>
-						<input type="text" name="tags" id="tags" value="imported" />
-					</dd>
-					<dt>
-						<label for="public">import as Public:</label>
-					</dt>
-					<dd>
-						<select name="public" id="public">
-							<option value="public">yes</option>
-							<option value="private">no</option>
-						</select>
-					</dd>
-				</dl>
-				<input type="submit" name="importbookmarks" value="import" />
-			</fieldset>
-		</form>
-		<form action="/api/ymarks/import_ymark.xml" method="post"  enctype="multipart/form-data">
-			<fieldset>
-				<legend>Import XBEL Bookmarks</legend>
-				<dl>
-					<dt>
-						<label for="file">File:</label>
-					</dt>
-					<dd>
-						<input type="file" name="xbelfile" id="xbelfile" />
-					</dd>
-					<dt>
-						<label for="tags">Default Tags:</label>
-					</dt>
-					<dd>
-						<input type="text" name="tags" id="tags" value="imported" />
-					</dd>
-					<dt>
-						<label for="public">import as Public:</label>
-					</dt>
-					<dd>
-						<select name="public" id="public">
-							<option value="public">yes</option>
-							<option value="private">no</option>
-						</select>
+						<input type="file" name="bmkfile" id="bmkfile" />
 					</dd>
 				</dl>
 				<input type="submit" name="importbookmarks" value="import" />
