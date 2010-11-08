@@ -36,13 +36,18 @@ public class FilterEngine {
 
 	protected enum listTypes { type1 };
 	
-	protected class FilterEntry {
+	protected class FilterEntry implements Comparable<FilterEntry> {
 		public String path;
 		public EnumSet<listTypes> types;
 		
 		public FilterEntry(String path, EnumSet<listTypes>types) {
 			this.path = path;
 			this.types = types;
+		}
+
+		@Override
+		public int compareTo(FilterEntry fe) {
+			return this.path.compareToIgnoreCase(fe.path);
 		}
 	}
 	
