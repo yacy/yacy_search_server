@@ -16,7 +16,6 @@ import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
 public class YMarkTables {
@@ -57,15 +56,16 @@ public class YMarkTables {
     }
 	
     public static enum BOOKMARK {
+    	//				key					dflt			html_attrb				xbel_attrb		type
     	URL 			("url",				"",				"href",					"href",			"link"),
     	TITLE 			("title",			"",				"",						"",				"meta"),
     	DESC 			("desc",			"",				"",						"",				"comment"),
     	DATE_ADDED 		("date_added",		"",				"add_date",				"added",		"date"),
     	DATE_MODIFIED 	("date_modified",	"",				"last_modified",		"modified",		"date"),
     	DATE_VISITED 	("date_visited",	"",				"last_visited",			"visited",		"date"),
-    	PUBLIC 			("public",			"flase",		"",						"",				"lock"),
-    	TAGS 			("tags",			"unsorted",		"shortcuturl",			"",				"tag"),
-    	VISITS 			("visits",			"0",			"",						"",				"stat"),
+    	PUBLIC 			("public",			"flase",		"",						"yacy:public",	"lock"),
+    	TAGS 			("tags",			"unsorted",		"shortcuturl",			"yacy:tags",	"tag"),
+    	VISITS 			("visits",			"0",			"",						"yacy:visits",	"stat"),
     	FOLDERS 		("folders",			"/unsorted",	"",						"",				"folder");
     	    	
     	private String key;
@@ -80,6 +80,8 @@ public class YMarkTables {
         		lookup.put(b.key(), b);
         }
     	
+        private static StringBuilder buffer = new StringBuilder(25);;
+        
     	private BOOKMARK(String k, String s, String a, String x, String t) {
     		this.key = k;
     		this.dflt = s;
@@ -105,6 +107,16 @@ public class YMarkTables {
     	public String xbel_attrb() {
     		return this.xbel_attrb;
     	}
+    	public String xbel() {
+    		buffer.setLength(0);
+    		buffer.append('"');
+    		buffer.append('\n');
+    		buffer.append(' ');
+    		buffer.append(this.xbel_attrb);
+    		buffer.append('=');
+    		buffer.append('"');
+    		return buffer.toString();
+    	}
     	public String type() {
     		return this.type;
     	}
@@ -117,7 +129,7 @@ public class YMarkTables {
     public final static String FOLDERS_SEPARATOR = "/";
     public final static String FOLDERS_ROOT = "/"; 
     public final static String FOLDERS_UNSORTED = "/unsorted";
-    public final static String FOLDERS_IMPORTED = "/imported";
+    public final static String FOLDERS_IMPORTED = "";
 	public static final int FOLDER_BUFFER_SIZE = 100;    
     
     public final static String BOOKMARKS_LOG = "BOOKMARKS";
@@ -138,17 +150,22 @@ public class YMarkTables {
     }
     
     public static Date parseISO8601(final String s) throws ParseException {
-        if(s == null)
-        	throw new ParseException("parseISO8601 - NPE", 0);
     	StringBuilder date = new StringBuilder(s);
-    	SimpleDateFormat dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz"); 
-        if(date.charAt(date.length()) == 'Z') {
-        	date.deleteCharAt(date.length());
-        	date.append("GMT-00:00");
-        } else {
-            date.insert(date.length()-6, "GMT");
-        }
-        Log.logInfo(YMarkTables.BOOKMARKS_LOG, "ISO8601: "+s+" =? "+dateformat.toString());
+    	SimpleDateFormat dateformat;
+    	if(s == null || s.isEmpty()) { 
+    		throw new ParseException("parseISO8601 - empty string, nothing to parse", 0);
+    	}
+    	if(s.length()==10)
+    		dateformat = new SimpleDateFormat("yyyy-MM-dd");
+    	else {
+    		dateformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz"); 
+	        if(date.charAt(date.length()-1) == 'Z') {
+	        	date.deleteCharAt(date.length()-1);
+	        	date.append("GMT-00:00");
+	        } else {
+	            date.insert(date.length()-6, "GMT");
+	        }
+    	}
         return dateformat.parse(date.toString());
     }
     

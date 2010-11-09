@@ -122,10 +122,13 @@ public class get_treeview {
 			            while(it.hasNext()) {
 			            	final String key = it.next();
 			            	if(key.startsWith("date")) {
-				            	final String date = DateFormatter.formatISO8601(new Date(Long.parseLong(new String(bmk_row.get(key)))));
-				            	prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> " + date + "</small>");
-		    					putProp(count, "date");
-		    					count++;
+				            	final String d = new String(bmk_row.get(key));
+				            	if(!d.isEmpty()) {
+				            		final String date = DateFormatter.formatISO8601(new Date(Long.parseLong(d)));
+					            	prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> " + date + "</small>");
+			    					putProp(count, "date");
+			    					count++;
+				            	}
 			            	} else {
 								final String value = new String(bmk_row.get(key));
 								prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> " + value + "</small>");								

@@ -60,14 +60,6 @@ public class YMarkIndex {
    		return new String(row.get(INDEX.NAME.key(), INDEX.NAME.deflt()));
     }
     
-    public static int getFolderDepth(String folder) {
-    	final int depth = folder.split(YMarkTables.FOLDERS_SEPARATOR).length -1;
-    	if (depth < 0) 
-    		return 0;
-    	else
-    		return depth;
-    }
-    
     public Iterator<String> getFolders(final String user, final String root) throws IOException {
     	final String index_table = user + this.table_basename;
     	final TreeSet<String> folders = new TreeSet<String>();
