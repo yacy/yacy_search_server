@@ -33,8 +33,8 @@ public class YMarkTables {
 		public String basename() {
 			return this.basename;
 		}
-		public String tablename(String user) {
-			return user+this.basename;
+		public String tablename(String bmk_user) {
+			return bmk_user+this.basename;
 		}
 	}
 	
@@ -129,7 +129,7 @@ public class YMarkTables {
     public final static String FOLDERS_SEPARATOR = "/";
     public final static String FOLDERS_ROOT = "/"; 
     public final static String FOLDERS_UNSORTED = "/unsorted";
-    public final static String FOLDERS_IMPORTED = "";
+    public final static String FOLDERS_IMPORTED = "/imported";
 	public static final int FOLDER_BUFFER_SIZE = 100;    
     
     public final static String BOOKMARKS_LOG = "BOOKMARKS";
@@ -150,11 +150,11 @@ public class YMarkTables {
     }
     
     public static Date parseISO8601(final String s) throws ParseException {
-    	StringBuilder date = new StringBuilder(s);
-    	SimpleDateFormat dateformat;
-    	if(s == null || s.isEmpty()) { 
+    	if(s == null || s.isEmpty()) {     		
     		throw new ParseException("parseISO8601 - empty string, nothing to parse", 0);
     	}
+    	SimpleDateFormat dateformat;
+    	StringBuilder date = new StringBuilder(s);
     	if(s.length()==10)
     		dateformat = new SimpleDateFormat("yyyy-MM-dd");
     	else {

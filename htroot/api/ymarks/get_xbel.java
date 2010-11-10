@@ -65,8 +65,7 @@ public class get_xbel {
 			
 			while (fit.hasNext()) {    		   		
         		String folder = fit.next();
-        		foldername = folder.split(YMarkTables.FOLDERS_SEPARATOR);        		
-    			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "folder: "+folder+" n: "+n+" folder_length: "+foldername.length);
+        		foldername = folder.split(YMarkTables.FOLDERS_SEPARATOR); 
         		if (n != root_depth && foldername.length <= n) {
 					prop.put("xbel_"+count+"_elements", "</folder>");
             		count++;
@@ -80,7 +79,7 @@ public class get_xbel {
                 		count++;	
         			}
             		try {
-            			bit = sb.tables.bookmarks.folders.getBookmarks(bmk_user, folder).iterator();
+            			bit = sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, folder).iterator();
             	    	Tables.Row bmk_row = null;
             	    	String urlHash;
             			while(bit.hasNext()){ 

@@ -74,17 +74,23 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 	private final InputSource input;
 	private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;
 	private final XMLReader xmlReader;
+	private final String RootFolder;
     
-    public YMarksXBELImporter (final InputStream input, int queueSize) throws SAXException {
+    public YMarksXBELImporter (final InputStream input, int queueSize, String root) throws SAXException {
         this.bmk = 				null;
-    	this.buffer = 			new StringBuilder();
+        this.RootFolder =		root;
+        
+        this.buffer = 			new StringBuilder();
     	this.foldersString = 	new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
     	this.folder = 			new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
-        this.folder.append(YMarkTables.FOLDERS_IMPORTED);
-    	this.bmkRef = 			new HashMap<String,HashMap<String,String>>();
+        
+        this.folder.append(this.RootFolder);
+        
+        this.input = 			new InputSource(input);
+        this.bmkRef = 			new HashMap<String,HashMap<String,String>>();
     	this.aliasRef = 		new HashSet<HashMap<String,String>>();
         this.bookmarks = 		new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
-        this.input = 			new InputSource(input);
+        
         this.xmlReader = 		XMLReaderFactory.createXMLReader();
         this.xmlReader.setContentHandler(this);
         this.xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
@@ -103,6 +109,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
             Log.logException(e);
         } finally {
         	try {
+        		Log.logInfo(YMarkTables.BOOKMARKS_LOG, "XBEL Importer inserted poison pill in queue");
 				this.bookmarks.put(YMarkTables.POISON);
 			} catch (InterruptedException e1) {
 			    Log.logException(e1);
@@ -111,8 +118,11 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
     }
     
     public void endDocument() throws SAXException {
-    	// no need to keep the bookmark references any longer
-    	// this.bmkRef.clear();
+    	// put alias references in the bookmark queue to ensure that folders get updated
+    	// we do that at endDocument to ensure all referenced bookmarks already exist
+    	this.bookmarks.addAll(this.aliasRef);
+    	this.aliasRef.clear();
+    	this.bmkRef.clear();
     }
     
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
@@ -140,7 +150,6 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 				date = String.valueOf(System.currentTimeMillis());
 			}
             this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date);
-            
             UpdateBmkRef(atts.getValue(uri, "id"), true);
             outer_state = XBEL.BOOKMARK;
             inner_state = XBEL.NOTHING;
@@ -162,7 +171,6 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
         	atts.getValue(uri, "owner");
         	*/
         } else if (XBEL.ALIAS.tag().equals(tag)) {
-        	Log.logInfo(YMarkTables.BOOKMARKS_LOG, "ALIAS: "+this.ref.get(YMarkTables.BOOKMARK.URL.key()));
         	final String r = atts.getValue(uri, "ref");
         	UpdateBmkRef(r, false);
         	this.aliasRef.add(this.bmkRef.get(r));
@@ -192,8 +200,8 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
         } else if (XBEL.FOLDER.tag().equals(tag)) {
         	// go up one folder
             //TODO: get rid of .toString.equals()
-        	if(!this.folder.toString().equals(YMarkTables.FOLDERS_IMPORTED)) {
-	    		folder.setLength(folder.lastIndexOf(YMarkTables.FOLDERS_SEPARATOR));
+        	if(!this.folder.toString().equals(this.RootFolder)) {
+        		folder.setLength(folder.lastIndexOf(YMarkTables.FOLDERS_SEPARATOR));
         	}
         	this.outer_state = XBEL.FOLDER;
         } else if (XBEL.INFO.tag().equals(tag)) {
@@ -205,7 +213,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 
     public void characters(final char ch[], final int start, final int length) {
         if (parse_value) {
-            buffer.append(ch, start, length);
+        	buffer.append(ch, start, length);
             switch(outer_state) {
             	case BOOKMARK:
             		switch(inner_state) {
@@ -252,10 +260,6 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
             Log.logException(e);
             return null;
         }
-    }
-    
-    public HashSet<HashMap<String,String>> getAliases() {
-    	return this.aliasRef;
     }
     
     private void UpdateBmkRef(final String id, final boolean url) {

@@ -77,7 +77,7 @@ public class get_treeview {
 	        	}
 	        	// loop through bookmarkList
 	        	try {
-					it = sb.tables.bookmarks.folders.getBookmarks(bmk_user, root).iterator();
+					it = sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, root).iterator();
 		        	while (it.hasNext()) {
 		        		final String urlHash = new String(it.next());
 		        		bmk_row = sb.tables.select(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), urlHash.getBytes());

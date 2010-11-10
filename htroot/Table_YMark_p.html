@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Table Viewer</title>
+    #(showtable)#::
+    <link rel="alternate" type="application/xml" title="Tables" href="Tables.rss?table=#[table]#" />
+    #(/showtable)#
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+    <!--
+    function setall(name, check){
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        if (check) for(i = 0; i < count; i++) {
+    	    if (selectForm.elements["item_" + i].checked) {
+        	    check = false;
+        	    break;
+    	    }
+        }
+        for(i = 0; i < count; i++) {
+            selectForm.elements["item_" + i].checked = check;
+        }
+    }
+    -->
+    </script>
+    <script type="text/javascript" src="/js/sorttable.js"></script>
+  </head>
+  <body id="YMark">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    #(showselection)#::
+    <h2>YMark Table Administration</h2>
+    <form action="Table_YMark_p.html" method="get">
+    #(/showselection)#
+    <div style="width:70%; height:700px; float:left;">
+    #(showtable)#::
+    <form action="Table_YMark_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="tablelisting">
+      <fieldset>
+      <legend><label for="tablelisting">Table Editor: showing table '#[table]#'</label></legend>
+      <div style="float:left;">
+      <p>
+      <input type="hidden" name="table" value="#[table]#" />
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="editrow" value="Edit Selected Row" />
+      <input type="submit" name="addrow" value="Add a new Row" disabled/>
+      <input type="submit" name="deleterows" value="Delete Selected Rows" />
+      <input type="submit" name="deletetable" value="Delete Table" />
+      <input type="submit" name="rebuildindex" value="Rebuild Index" disabled/>
+      </p>
+      </div>
+      <div style="width:750px; height:600px; float:left; overflow:scroll;">
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
+          <td>PK</td>
+          #{columns}#
+          <td>#[header]#</td>
+          #{/columns}#
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td>#[pk]#</td>
+          #{columns}#
+          <td align="left">#[cell]#</td>
+          #{/columns}#
+        </tr>
+        #{/list}#
+      </table>
+      </div>
+      </fieldset>
+    </form>
+    #(/showtable)#
+    #(showedit)#::
+    <div style="width:800px; height:600px; float:left; overflow:auto;">
+    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset><legend>Row Editor</legend>
+      <dl>
+        <dt class="TableCellLight">Primary Key</dt>
+        <dd>#[pk]#</dd>
+        #{list}#
+        <dt class="TableCellLight">#[key]#</dt>
+        <dd>
+          <input type="text" name="col_#[key]#" value="#[value]#" size="65"/>
+        </dd>
+        #{/list}#
+        <dt class="TableCellDark"></dt>
+        <dd>
+          <input type="hidden" name="table" value="#[table]#" />
+          <input type="hidden" name="pk" value="#[pk]#" />
+          <input type="submit" name="commitrow" value="Commit" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    </div>
+    #(/showedit)#
+    </div>
+    #(showselection)#::
+	<div style="width:320px; float:right;">
+      	<fieldset><legend>Table Selection</legend>
+	      <dl>
+	        <dt>
+	          <label for="table">Select Table:</label>
+	        </dt>
+	        <dd>	          
+	          <select name="table" onchange='this.form.submit()'>
+	            #{tables}#
+	            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+	            #{/tables}#
+	          </select>
+	        </dd>
+	        <dt>
+	          <label for="count">show max.</label>
+	        </dt>
+	        <dd>
+	         <select name="count" onchange='this.form.submit()'>
+	            <option value="10">10</option>
+	            <option value="100" selected="selected">100</option>
+	            <option value="1000">1000</option>
+	            <option value="all">all</option>
+	          </select>
+	          <b>entries</b>
+			</dd>
+			<dt>
+	          <label for="columns">Display columns:</label>
+	        </dt>
+	        <dd>	          
+	          <select name="columns" multiple onchange='this.form.submit()'>
+	            #{columns}#
+	            <option value="#[col]#">#[col]#</option>
+	            #{/columns}#
+	          </select>
+	        </dd>
+	      </dl>
+		</fieldset>
+      <fieldset>
+      <legend>Search Table</legend>
+      <dl>
+		<dt>
+		<label for="search">search rows for</label>
+		</dt>
+		<dd>
+		<input type="text" name="search" value="#[pattern]#" />
+		<input type="submit" name="edittable" value="Search" />
+		</dd>
+      </dl>
+      </fieldset>
+     <fieldset>
+      <legend>Filter Table</legend>
+     	    <dt>
+	          <label for="tags">Tags</label>
+	        </dt>
+	        <dd>
+	         <select name="tags" onchange='this.form.submit()'>
+	            <option value="" selected>select a tag</option>
+	            #{tags}#
+	            <option value="#[tagName]#">#[tagName]#</option>
+	             #{/tags}#
+	          </select>
+			</dd>
+			<dt>
+	          <label for="folders">Folders</label>
+	        </dt>
+	        <dd>
+	         <select name="folders" style="width: 200px" onchange='this.form.submit()'>
+	            <option value="" selected>select a folder</option>
+	            #{folders}#
+	            <option value="#[folderName]#">#[folderName]#</option>
+	            #{/folders}#
+	          </select>
+			</dd>
+     
+      </fieldset>
+     <fieldset>
+		<legend>Import Bookmarks</legend>
+		<dl>
+			<dt>
+				<label for="importer">Importer:</label>
+			</dt>
+			<dd>
+				<select name="importer" id="importer">
+					<option value="xbel">XBEL Importer</option>
+					<option value="html">Netscape HTML Importer</option>
+				</select>
+			</dd>
+			<dt>
+				<label for="file">File:</label>
+			</dt>
+			<dd>
+				<input type="file" name="bmkfile" id="bmkfile" size="10"/>
+				<input type="submit" name="importbookmarks" value="import" disabled />
+			</dd>
+		</dl>
+
+	</fieldset>
+    </form>
+    </div>
+    #(/showselection)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

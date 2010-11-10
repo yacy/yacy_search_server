@@ -36,7 +36,7 @@ public class get_ymark {
 	    		tags = true;
 	    		final String[] tagArray = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkTables.TAGS_SEPARATOR);
 	    		try {
-					bookmarks.addAll(sb.tables.bookmarks.tags.getBookmarks(bmk_user, tagArray));
+					bookmarks.addAll(sb.tables.bookmarks.tags.getBookmarkIds(bmk_user, tagArray));
 				} catch (IOException e) {
 					Log.logException(e);
 				} catch (RowSpaceExceededException e) {
@@ -47,9 +47,9 @@ public class get_ymark {
 	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key())).split(YMarkTables.TAGS_SEPARATOR);
                 try {                	
 					if(tags)
-						bookmarks.retainAll(sb.tables.bookmarks.folders.getBookmarks(bmk_user, folderArray));
+						bookmarks.retainAll(sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, folderArray));
 					else
-						bookmarks.addAll(sb.tables.bookmarks.folders.getBookmarks(bmk_user, folderArray));
+						bookmarks.addAll(sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, folderArray));
 				} catch (IOException e) {
 					Log.logException(e);
 				} catch (RowSpaceExceededException e) {

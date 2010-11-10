@@ -127,7 +127,7 @@ public class YMarkIndex {
         }  
 	}
     
-	public HashSet<String> getBookmarks(final String user, final String keyname) throws IOException, RowSpaceExceededException {
+	public HashSet<String> getBookmarkIds(final String user, final String keyname) throws IOException, RowSpaceExceededException {
 		final String index_table = user + this.table_basename;
 		final String cacheKey = index_table+":"+keyname;
 		if (this.cache.containsKey(cacheKey)) {
@@ -143,14 +143,23 @@ public class YMarkIndex {
 		return new HashSet<String>();
 	}
 	
-	public HashSet<String> getBookmarks(final String user, final String[] keyArray) throws IOException, RowSpaceExceededException {
+	public Iterator<Tables.Row> getBookmarks(final String user, final String keyname) throws IOException, RowSpaceExceededException {
+		final Iterator<String> bit = getBookmarkIds(user, keyname).iterator();
+		final HashSet<Tables.Row> bookmarks = new HashSet<Tables.Row>();
+		while(bit.hasNext()) {
+			bookmarks.add(this.worktables.select(YMarkTables.TABLES.BOOKMARKS.tablename(user), bit.next().getBytes()));
+		}
+		return bookmarks.iterator();
+	}
+	
+	public HashSet<String> getBookmarkIds(final String user, final String[] keyArray) throws IOException, RowSpaceExceededException {
 		final HashSet<String> urlSet = new HashSet<String>();
-		urlSet.addAll(getBookmarks(user, keyArray[0]));
+		urlSet.addAll(getBookmarkIds(user, keyArray[0]));
 		if (urlSet.isEmpty())
 			return urlSet;
 		if (keyArray.length > 1) {
 			for (final String keyname : keyArray) {
-				urlSet.retainAll(getBookmarks(user, keyname));
+				urlSet.retainAll(getBookmarkIds(user, keyname));
 				if (urlSet.isEmpty())
 					return urlSet;
 			}

@@ -2,8 +2,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Iterator;
-
 import org.xml.sax.SAXException;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -62,7 +60,8 @@ public class import_ymark {
         		} else if(post.get("importer").equals("xbel") && byteIn != null) {
         			final YMarksXBELImporter xbelImporter;	
     				try {
-						 xbelImporter = new YMarksXBELImporter(byteIn, 100);
+						//TODO: make RootFold 
+    					xbelImporter = new YMarksXBELImporter(byteIn, 100, YMarkTables.FOLDERS_IMPORTED);
 					} catch (SAXException e) {
 						//TODO: display an error message
 						Log.logException(e);
@@ -74,21 +73,6 @@ public class import_ymark {
 		            while ((bmk = xbelImporter.take()) != YMarkTables.POISON) {
 						try {
 							sb.tables.bookmarks.addBookmark(bmk_user, bmk, true);
-						} catch (IOException e) {
-							Log.logWarning(YMarkTables.BOOKMARKS_LOG.toString(), "XBEL Importer - IOException for URL: "+bmk.get(YMarkTables.BOOKMARK.URL.key()));
-							continue;
-						} catch (RowSpaceExceededException e) {
-							//TODO: display an error message
-							Log.logException(e);
-							prop.put("result", "0");
-							return prop;
-						}
-		            }
-		            // update bookmarks with aliases
-		            final Iterator<HashMap<String,String>> it = xbelImporter.getAliases().iterator();
-		            while (it.hasNext()) {
-		            	try {
-							sb.tables.bookmarks.addBookmark(bmk_user, it.next(), true);
 						} catch (IOException e) {
 							Log.logWarning(YMarkTables.BOOKMARKS_LOG.toString(), "XBEL Importer - IOException for URL: "+bmk.get(YMarkTables.BOOKMARK.URL.key()));
 							continue;
