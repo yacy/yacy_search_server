@@ -25,7 +25,7 @@ public class Table_YMark_p {
         prop.put("showedit", 0);
         prop.put("showselection", 0);
         
-        String table = (post == null) ? null : post.get("table", null);
+        String table = (post == null) ? "admin_bookmarks" : post.get("table", "admin_bookmarks");
         if (table != null && !sb.tables.hasHeap(table)) table = null;
         
         // get the user name for the selected table
@@ -85,18 +85,33 @@ public class Table_YMark_p {
         prop.put("pattern", pattern);
         
         List<String> columns = null;
-        if (table != null) try {
+        columns = new ArrayList<String>();
+        for (Map.Entry<String, String> entry: post.entrySet()) {
+            if (entry.getKey().startsWith("col_")) {
+            	columns.add(entry.getKey().substring(4));
+            }
+        }
+        if (columns.isEmpty() && table != null) try {
             columns = sb.tables.columns(table);
         } catch (IOException e) {
             Log.logException(e);
-            columns = new ArrayList<String>();
         }
         
-        final Iterator<String> cit = columns.iterator();
         count = 0;
-        while(cit.hasNext()) {
-			prop.put("showselection_columns_" + count + "_col", cit.next());
-			count++;	
+        if (table != null) {
+            Iterator<String> cit;
+            String col;
+            try {
+    			cit = sb.tables.columns(table).iterator();
+    	        while(cit.hasNext()) {
+    				col = cit.next();
+    	        	prop.put("showselection_columns_" + count + "_col", col);
+    				prop.put("showselection_columns_" + count + "_checked", columns.contains(col) ? 1 : 0);
+    				count++;	
+    	        }
+    		} catch (IOException e) {
+                Log.logException(e);
+    		}      	
         }
         prop.put("showselection_columns", count);
         
