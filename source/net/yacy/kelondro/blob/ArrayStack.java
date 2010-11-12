@@ -940,7 +940,8 @@ public class ArrayStack implements BLOB {
             ByteOrder ordering, HeapWriter writer) throws IOException, RowSpaceExceededException {
         assert i1.hasNext();
         assert i2.hasNext();
-        ReferenceContainer<ReferenceType> c1, c2, c1o, c2o;
+        byte[] c1lh, c2lh;
+        ReferenceContainer<ReferenceType> c1, c2;
         c1 = i1.next();
         c2 = i2.next();
         int e;
@@ -951,9 +952,9 @@ public class ArrayStack implements BLOB {
             if (e < 0) {
                 writer.add(c1.getTermHash(), c1.exportCollection());
                 if (i1.hasNext()) {
-                    c1o = c1;
+                    c1lh = c1.getTermHash();
                     c1 = i1.next();
-                    assert ordering.compare(c1.getTermHash(), c1o.getTermHash()) > 0;
+                    assert ordering.compare(c1.getTermHash(), c1lh) > 0;
                     continue;
                 }
                 c1 = null;
@@ -962,9 +963,9 @@ public class ArrayStack implements BLOB {
             if (e > 0) {
                 writer.add(c2.getTermHash(), c2.exportCollection());
                 if (i2.hasNext()) {
-                    c2o = c2;
+                    c2lh = c2.getTermHash();
                     c2 = i2.next();
-                    assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
+                    assert ordering.compare(c2.getTermHash(), c2lh) > 0;
                     continue;
                 }
                 c2 = null;
@@ -972,25 +973,26 @@ public class ArrayStack implements BLOB {
             }
             assert e == 0;
             // merge the entries
-            writer.add(c1.getTermHash(), (c1.merge(c2)).exportCollection());
-            c1o = c1;
-            c2o = c2;
+            c1 = c1.merge(c2);
+            writer.add(c1.getTermHash(), c1.exportCollection());
+            c1lh = c1.getTermHash();
+            c2lh = c2.getTermHash();
             if (i1.hasNext() && i2.hasNext()) {
                 c1 = i1.next();
-                assert ordering.compare(c1.getTermHash(), c1o.getTermHash()) > 0;
+                assert ordering.compare(c1.getTermHash(), c1lh) > 0;
                 c2 = i2.next();
-                assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
+                assert ordering.compare(c2.getTermHash(), c2lh) > 0;
                 continue;
             }
             c1 = null;
             c2 = null;
             if (i1.hasNext()) {
                 c1 = i1.next();
-                assert ordering.compare(c1.getTermHash(), c1o.getTermHash()) > 0;
+                assert ordering.compare(c1.getTermHash(), c1lh) > 0;
             }
             if (i2.hasNext()) {
                 c2 = i2.next();
-                assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
+                assert ordering.compare(c2.getTermHash(), c2lh) > 0;
             }
             break;
            
@@ -1002,9 +1004,9 @@ public class ArrayStack implements BLOB {
             //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
             writer.add(c1.getTermHash(), c1.exportCollection());
             if (i1.hasNext()) {
-                c1o = c1;
+                c1lh = c1.getTermHash();
                 c1 = i1.next();
-                assert ordering.compare(c1.getTermHash(), c1o.getTermHash()) > 0;
+                assert ordering.compare(c1.getTermHash(), c1lh) > 0;
             } else {
                 c1 = null;
             }
@@ -1013,9 +1015,9 @@ public class ArrayStack implements BLOB {
             //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
             writer.add(c2.getTermHash(), c2.exportCollection());
             if (i2.hasNext()) {
-                c2o = c2;
+                c2lh = c2.getTermHash();
                 c2 = i2.next();
-                assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
+                assert ordering.compare(c2.getTermHash(), c2lh) > 0;
             } else {
                 c2 = null;
             }
@@ -1027,15 +1029,16 @@ public class ArrayStack implements BLOB {
             CloneableIterator<ReferenceContainer<ReferenceType>> i,
             ByteOrder ordering, HeapWriter writer) throws IOException, RowSpaceExceededException {
         assert i.hasNext();
-        ReferenceContainer<ReferenceType> c, co;
+        byte[] clh;
+        ReferenceContainer<ReferenceType> c;
         c = i.next();
         while (true) {
             assert c != null;
             writer.add(c.getTermHash(), c.exportCollection());
             if (i.hasNext()) {
-                co = c;
+                clh = c.getTermHash();
                 c = i.next();
-                assert ordering.compare(c.getTermHash(), co.getTermHash()) > 0;
+                assert ordering.compare(c.getTermHash(), clh) > 0;
                 continue;
             }
             break;
