@@ -33,6 +33,9 @@ public class Table_YMark_p {
         if (table != null)
         	bmk_user = table.substring(0,table.indexOf('_'));
         
+        // currently selected table
+        prop.put("showselection_table", table);
+        
         // show table selection
         int count = 0;
         Iterator<String> ti = sb.tables.tables();

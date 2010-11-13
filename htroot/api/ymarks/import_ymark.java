@@ -29,9 +29,13 @@ public class import_ymark {
 		ByteArrayInputStream byteIn = null;
         
         if(isAdmin || isAuthUser) {
-        	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);        	
+        	String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);        	
+        	if(isAdmin && post.containsKey("table") && post.get("table").length() > 0) {
+        		bmk_user = post.get("table").substring(0, post.get("table").indexOf('_'));
+        	}
+        	
         	if(post.containsKey("bmkfile") && post.containsKey("importer")){
-				try {
+        		try {
 					byteIn = new ByteArrayInputStream(post.get("bmkfile$file").getBytes("UTF-8"));
 				} catch (UnsupportedEncodingException e) {
 					//TODO: display an error message
@@ -84,11 +88,15 @@ public class import_ymark {
 						}
 		            }
     				prop.put("result", "1");
-            	}        			
+            	}
         	}
         }  else {
         	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
-        } 
+        }
+		if(post.containsKey("redirect") && post.get("redirect").length() > 0) {
+			prop.put("redirect_url", post.get("redirect"));
+			prop.put("redirect", "1");
+		}
         // return rewrite properties
         return prop;
 	}

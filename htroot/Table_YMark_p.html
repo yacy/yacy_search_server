@@ -156,7 +156,7 @@
 				<label for="tags">Tags</label>
 					</dt>
 					<dd>
-					 <select name="tags" onchange='this.form.submit()'>
+					 <select name="tags" style="width: 180px" onchange='this.form.submit()'>
 						<option value="" selected>select a tag</option>
 						#{tags}#
 						<option value="#[tagName]#">#[tagName]#</option>
@@ -167,7 +167,7 @@
 					  <label for="folders">Folders</label>
 					</dt>
 					<dd>
-					 <select name="folders" style="width: 200px" onchange='this.form.submit()'>
+					 <select name="folders" style="width: 180px" onchange='this.form.submit()'>
 						<option value="" selected>select a folder</option>
 						#{folders}#
 						<option value="#[folderName]#">#[folderName]#</option>
@@ -176,8 +176,12 @@
 					</dd>
 			  </dl>
 			  </fieldset>
+			 </form>
 			 <fieldset>
 				<legend>Import Bookmarks</legend>
+				<form action="/api/ymarks/import_ymark.html" method="post"  enctype="multipart/form-data" accept-charset="UTF-8">
+				<input type="hidden" name="table" value="#[table]#" />
+				<input type="hidden" name="redirect" value="/Table_YMark_p.html?table=#[table]#&count=100" />
 				<dl>
 					<dt>
 						<label for="importer">Importer:</label>
@@ -195,9 +199,9 @@
 						<input type="file" name="bmkfile" id="bmkfile" size="10"/>
 					</dd>
 				</dl>
-				<input type="submit" name="importbookmarks" value="import" disabled />
+				<input type="submit" name="importbookmarks" value="import" />
+			</form>
 			</fieldset>
-		</form>
 		</div>
 		#(/showselection)#
     #%env/templates/footer.template%#
