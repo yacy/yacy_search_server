@@ -127,6 +127,14 @@ public class Table_YMark_p {
             Log.logException(e);
         }
         
+        // apply rebuildIndex request
+        if (post.get("rebuildindex", "").length() > 0) try { 
+        	sb.tables.bookmarks.folders.rebuildIndex(bmk_user);
+        	sb.tables.bookmarks.tags.rebuildIndex(bmk_user);
+        }  catch (IOException e) {
+            Log.logException(e);
+        }
+        
         if (post.get("deleterows", "").length() > 0) {
             for (Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {

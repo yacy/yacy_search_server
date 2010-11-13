@@ -100,8 +100,8 @@ public class YMarkIndex {
     
     protected void removeIndexEntry(final String user, String keysString, final byte[] urlHash) {
 		final String[] keyArray = keysString.split(YMarkTables.TAGS_SEPARATOR);                    
-        for (final String tag : keyArray) {
-        	this.updateIndexTable(user, tag, urlHash, INDEX_ACTION.REMOVE);
+        for (final String key : keyArray) {
+        	this.updateIndexTable(user, key, urlHash, INDEX_ACTION.REMOVE);
         }
 	}
     
@@ -165,6 +165,21 @@ public class YMarkIndex {
 			}
 		}
 		return urlSet;		
+	}
+	
+	public void rebuildIndex(final String bmk_user) throws IOException {
+		final Iterator<Tables.Row> plainIterator = this.worktables.iterator(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user));
+		this.clearCache();
+		this.worktables.clear(bmk_user + this.table_basename);
+		while (plainIterator.hasNext()) {
+			Tables.Row row = plainIterator.next();
+			if (row != null && row.containsKey(this.table_basename.substring(1))) {
+				final String url = new String(row.get(YMarkTables.BOOKMARK.URL.key()));
+				final String key = this.table_basename.substring(1);
+				final String keysString = row.get(key, YMarkTables.BOOKMARK.get(key).deflt());
+				this.insertIndexEntry(bmk_user, keysString, YMarkTables.getBookmarkId(url));
+			}
+		}
 	}
     
 	/**
