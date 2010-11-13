@@ -84,7 +84,8 @@ public class ConfigBasic {
         
         // language settings
         if ((post != null) && (!(post.get("language", "default").equals(lang)))) {
-            translator.changeLang(env, langPath, post.get("language", "default") + ".lng");
+        	if (translator.changeLang(env, langPath, post.get("language", "default") + ".lng"))
+        		prop.put("changedLanguage", "1");
         }
         
         // peer name settings
@@ -92,7 +93,7 @@ public class ConfigBasic {
         
         // port settings
         long port = env.getConfigLong("port", 8080); //this allows a low port, but it will only get one, if the user edits the config himself.
-		if (post != null && Integer.parseInt(post.get("port")) > 1023) {
+		if (post != null && post.containsKey("port") && Integer.parseInt(post.get("port")) > 1023) {
 			port = post.getLong("port", 8080);
 		}
 
