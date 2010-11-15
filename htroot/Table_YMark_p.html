@@ -52,7 +52,7 @@
 		  <input type="hidden" name="table" value="#[table]#" />
 		  <input type="hidden" name="num" value="#[num]#" />
 		  <input type="submit" name="editrow" value="Edit Selected Row" />
-		  <input type="submit" name="addrow" value="Add a new Row" disabled/>
+		  <input type="submit" name="addrow" value="Add a new Row" disabled="disabled"/>
 		  <input type="submit" name="deleterows" value="Delete Selected Rows" />
 		  <input type="submit" name="deletetable" value="Delete Table" />
 		  <input type="submit" name="rebuildindex" value="Rebuild Index" />
@@ -111,7 +111,7 @@
 			<fieldset><legend>Table Selection</legend>
 			  <dl>
 				<dt>
-				  <label for="table">Select Table:</label>
+				  <label>Select Table:</label>
 				</dt>
 				<dd>	          
 				  <select name="table" onchange='this.form.submit()'>
@@ -124,7 +124,7 @@
 				  <label for="count">show max. entries</label>
 				</dt>
 				<dd>
-				 <select name="count" onchange='this.form.submit()'>
+				 <select name="count" id="count" onchange='this.form.submit()'>
 					<option value="10">10</option>
 					<option value="100">100</option>
 					<option value="1000">1000</option>
@@ -132,7 +132,7 @@
 				  </select>
 				</dd>
 				<dt>
-				  <label for="columns">Display columns:</label>
+				  <label>Display columns:</label>
 				</dt>
 				<dd>         
 					#{columns}#
@@ -146,18 +146,18 @@
 			  <legend>Search/Filter Table</legend>
 			  <dl>
 				<dt>
-				<label for="search">search rows for</label>
+					<label for="search">search rows for</label>
 				</dt>
 				<dd>
-				<input type="text" name="search" value="#[pattern]#" />
-				<input type="submit" name="edittable" value="Search" />
+					<input type="text" name="search" value="#[pattern]#" id="search" />
+					<input type="submit" name="edittable" value="Search" />
 				</dd>
 				<dt>
 				<label for="tags">Tags</label>
 					</dt>
 					<dd>
-					 <select name="tags" style="width: 180px" onchange='this.form.submit()'>
-						<option value="" selected>select a tag</option>
+					 <select name="tags" style="width: 180px" onchange='this.form.submit()' id="tags">
+						<option value="" selected="selected">select a tag</option>
 						#{tags}#
 						<option value="#[tagName]#">#[tagName]#</option>
 						 #{/tags}#
@@ -167,8 +167,8 @@
 					  <label for="folders">Folders</label>
 					</dt>
 					<dd>
-					 <select name="folders" style="width: 180px" onchange='this.form.submit()'>
-						<option value="" selected>select a folder</option>
+					 <select name="folders" style="width: 180px" onchange='this.form.submit()' id="folders">
+						<option value="" selected="selected">select a folder</option>
 						#{folders}#
 						<option value="#[folderName]#">#[folderName]#</option>
 						#{/folders}#
@@ -180,27 +180,29 @@
 			 <fieldset>
 				<legend>Import Bookmarks</legend>
 				<form action="/api/ymarks/import_ymark.html" method="post"  enctype="multipart/form-data" accept-charset="UTF-8">
-				<input type="hidden" name="table" value="#[table]#" />
-				<input type="hidden" name="redirect" value="/Table_YMark_p.html?table=#[table]#&count=100" />
-				<dl>
-					<dt>
-						<label for="importer">Importer:</label>
-					</dt>
-					<dd>
-						<select name="importer" id="importer">
-							<option value="xbel">XBEL Importer</option>
-							<option value="html">Netscape HTML Importer</option>
-						</select>
-					</dd>
-					<dt>
-						<label for="file">File:</label>
-					</dt>
-					<dd>
-						<input type="file" name="bmkfile" id="bmkfile" size="10"/>
-					</dd>
-				</dl>
+				<fieldset>
+					<input type="hidden" name="table" value="#[table]#" />
+					<input type="hidden" name="redirect" value="/Table_YMark_p.html?table=#[table]#&amp;count=100" />
+					<dl>
+						<dt>
+							<label for="importer">Importer:</label>
+						</dt>
+						<dd>
+							<select name="importer" id="importer">
+								<option value="xbel">XBEL Importer</option>
+								<option value="html">Netscape HTML Importer</option>
+							</select>
+						</dd>
+						<dt>
+							<label for="bmkfile">File:</label>
+						</dt>
+						<dd>
+							<input type="file" name="bmkfile" id="bmkfile" size="10"/>
+						</dd>
+					</dl>
 				<input type="submit" name="importbookmarks" value="import" />
-			</form>
+				</fieldset>
+				</form>
 			</fieldset>
 		</div>
 		#(/showselection)#
