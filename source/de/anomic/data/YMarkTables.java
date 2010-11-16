@@ -4,19 +4,30 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-
+import net.yacy.document.Condenser;
+import net.yacy.document.Document;
+import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.repository.LoaderDispatcher;
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.retrieval.Response;
+import de.anomic.search.Segment;
 
 public class YMarkTables {
     
@@ -121,6 +132,25 @@ public class YMarkTables {
     		return this.type;
     	}
     }
+    
+	public enum METADATA {
+		TITLE,
+		DESCRIPTION,
+		FAVICON,
+		KEYWORDS,
+		LANGUAGE,
+		CREATOR,
+		PUBLISHER,
+		CHARSET,
+		MIMETYPE,
+		SIZE,
+		WORDCOUNT,
+		IN_URLDB,
+		FRESHDATE,
+		LOADDATE,
+		MODDATE,
+		SNIPPET
+	}
     
     public final static HashMap<String,String> POISON = new HashMap<String,String>();
     
@@ -378,5 +408,97 @@ public class YMarkTables {
                 this.worktables.update(bmk_table, bmk_row); 
             }
 		}
+	}
+	
+	public static EnumMap<METADATA, String> getMetadata(final byte[] urlHash, final Segment indexSegment) throws MalformedURLException {
+        final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
+        final URIMetadataRow urlEntry = indexSegment.urlMetadata().load(urlHash, null, 0);
+        if (urlEntry != null) {
+        	metadata.put(METADATA.IN_URLDB, "true");
+        	metadata.put(METADATA.SIZE, String.valueOf(urlEntry.size()));
+        	metadata.put(METADATA.FRESHDATE, DateFormatter.formatISO8601(urlEntry.freshdate()));
+        	metadata.put(METADATA.LOADDATE, DateFormatter.formatISO8601(urlEntry.loaddate()));
+        	metadata.put(METADATA.MODDATE, DateFormatter.formatISO8601(urlEntry.moddate()));
+        	metadata.put(METADATA.SNIPPET, String.valueOf(urlEntry.snippet()));
+        	metadata.put(METADATA.WORDCOUNT, String.valueOf(urlEntry.wordCount()));
+        	metadata.put(METADATA.MIMETYPE, String.valueOf(urlEntry.doctype()));
+        	metadata.put(METADATA.LANGUAGE, urlEntry.language());
+        	
+        	final URIMetadataRow.Components meta = urlEntry.metadata();
+        	if (meta != null) {	        	
+	        	metadata.put(METADATA.TITLE, meta.dc_title()); 
+	        	metadata.put(METADATA.CREATOR, meta.dc_creator());
+	        	metadata.put(METADATA.KEYWORDS, meta.dc_subject());
+	        	metadata.put(METADATA.PUBLISHER, meta.dc_publisher());
+        	}
+        } 
+        return metadata;
+	}
+	
+	public static EnumMap<METADATA, String> loadMetadata(final String url, final LoaderDispatcher loader) throws MalformedURLException {
+		final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
+		metadata.put(METADATA.IN_URLDB, "false");
+        final DigestURI u = new DigestURI(url);
+        Response response = null;
+        try {
+			response = loader.load(loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
+			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+			if(document != null) {
+	        	metadata.put(METADATA.TITLE, document.dc_title()); 
+	        	metadata.put(METADATA.CREATOR, document.dc_creator());
+	        	metadata.put(METADATA.KEYWORDS, document.dc_subject(','));
+	        	metadata.put(METADATA.PUBLISHER, document.dc_publisher());
+	        	metadata.put(METADATA.DESCRIPTION, document.dc_description());
+	        	metadata.put(METADATA.MIMETYPE, document.dc_format());
+	        	metadata.put(METADATA.LANGUAGE, document.dc_language());
+	        	metadata.put(METADATA.CHARSET, document.getCharset());
+	        	metadata.put(METADATA.SIZE, String.valueOf(document.getTextLength()));
+			}
+        } catch (IOException e) {
+			Log.logException(e);
+		} catch (Failure e) {
+			Log.logException(e);
+		}
+		return metadata;
+	}
+	
+	public static Map<String, Integer> getWordFrequencies(final String url, final LoaderDispatcher loader) throws MalformedURLException {
+		final Map<String,Integer> words = new HashMap<String,Integer>();
+        final DigestURI u = new DigestURI(url);
+        Response response = null;
+        int wordcount = 0;
+        String sentence, token;
+        try {
+			response = loader.load(loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
+			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+			if(document != null) {
+				final Collection<StringBuilder> sentences = document.getSentences(false);
+	            if (sentences != null) {
+	            	for (StringBuilder s: sentences) {
+	                    sentence = s.toString();
+	                    Enumeration<String> tokens = Condenser.wordTokenizer(sentence, "UTF-8", LibraryProvider.dymLib);
+	                    while (tokens.hasMoreElements()) {
+	                    	token = tokens.nextElement();
+	                        if (token.length() > 2) {
+	                        	wordcount++;
+	                        	if(words.containsKey(token)) {
+	                        		int count = words.get(token);
+	                        		count++;
+	                        		words.put(token, count);
+	                        	} else {
+	                        		words.put(token, 1);
+	                        	}
+	                        }
+	                    }
+	                }
+	            } 
+	            document.close();
+			}
+		} catch (IOException e) {
+			Log.logException(e);
+		} catch (Failure e) {
+			Log.logException(e);
+		}
+		return words;
 	}
 }

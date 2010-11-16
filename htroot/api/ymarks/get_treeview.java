@@ -1,7 +1,9 @@
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.Iterator;
-
+import java.util.Map;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -9,6 +11,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.data.YMarkTables;
 import de.anomic.data.userDB;
+import de.anomic.data.YMarkTables.METADATA;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -26,14 +30,17 @@ public class get_treeview {
         final userDB.Entry user = sb.userDB.getUser(header); 
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
         final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
+
         
         if(isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
-
-        	
+            
         	String root = YMarkTables.FOLDERS_ROOT;  	
         	String[] foldername = null;
         	boolean isFolder = true;
+        	boolean isBookmark = false;
+        	boolean isMetadata = false;
+        	boolean isWordCount = false;
 
         	if (post != null){
         		if (post.containsKey(ROOT)) {
@@ -41,8 +48,14 @@ public class get_treeview {
             			root = "";
             		} else if (post.get(ROOT).startsWith(YMarkTables.FOLDERS_ROOT)) {
             			root = post.get(ROOT);
-            		} else {
-            			// root = YMarkTables.FOLDERS_ROOT + post.get(ROOT);
+            		} else if (post.get(ROOT).startsWith("b:")) {
+            			isBookmark = true;
+            			isFolder = false;
+            		} else if (post.get(ROOT).startsWith("m:")) {
+            			isMetadata = true;
+            			isFolder = false;
+            		} else if (post.get(ROOT).startsWith("w:")) {
+            			isWordCount = true;
             			isFolder = false;
             		}
         		}
@@ -99,7 +112,7 @@ public class get_treeview {
 			        		prop.put("folders_"+count+"_expanded", "false");
 			        		prop.put("folders_"+count+"_url", url);
 			        		prop.put("folders_"+count+"_type", "file");
-			        		prop.put("folders_"+count+"_hash", urlHash);
+			        		prop.put("folders_"+count+"_hash", "b:"+urlHash);
 			        		prop.put("folders_"+count+"_hasChildren", "true");
 			        		prop.put("folders_"+count+"_comma", ",");
 			        		count++;   
@@ -114,9 +127,11 @@ public class get_treeview {
 				} catch (RowSpaceExceededException e) {
 					Log.logException(e);
 				}
-	        } else {
+	        } else if(isBookmark) {
 	        	try {
-					bmk_row = sb.tables.select(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), post.get(ROOT).getBytes());
+					final String urlHash = post.get(ROOT).substring(2);
+	        		String url = "";
+					bmk_row = sb.tables.select(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), urlHash.getBytes());
 					if(bmk_row != null) {
 			            it = bmk_row.keySet().iterator();
 			            while(it.hasNext()) {
@@ -131,6 +146,8 @@ public class get_treeview {
 				            	}
 			            	} else {
 								final String value = new String(bmk_row.get(key));
+								if (key.equals("url"))
+									url = value;
 								prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> " + value + "</small>");								
 								if(YMarkTables.BOOKMARK.contains(key))
 									putProp(count, YMarkTables.BOOKMARK.get(key).type());
@@ -139,14 +156,64 @@ public class get_treeview {
 								count++;	
 			            	}
 			            }
-			            count--;
-    		        	prop.put("folders_"+count+"_comma", "");
-    		        	count++;	
+			            prop.put("folders_"+count+"_foldername","<small><b>MetaData</b></small>");
+			            putProp(count, "meta");
+			            prop.put("folders_"+count+"_hash", "m:"+url);
+			    		prop.put("folders_"+count+"_hasChildren", "true");
+			            count++;
+			            prop.put("folders_"+count+"_foldername","<small><b>WordCount</b></small>");
+			            putProp(count, "meta");
+			            prop.put("folders_"+count+"_hash", "w:"+url);
+			    		prop.put("folders_"+count+"_hasChildren", "true");
+						prop.put("folders_"+count+"_comma", "");
+			    		count++;	
 		        		prop.put("folders", count);
 					}
 				} catch (IOException e) {
 					Log.logException(e);
 				} catch (RowSpaceExceededException e) {
+					Log.logException(e);
+				}
+	        } else if (isWordCount) {
+	        	try {
+					final Map<String, Integer> words = YMarkTables.getWordFrequencies(post.get(ROOT).substring(2), sb.loader);
+					final Iterator<String> iter = words.keySet().iterator();
+					while (iter.hasNext()) {
+						String key = iter.next();
+						int value = words.get(key);
+						if(value > 5 && value < 15) {
+							prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> [" + value + "]</small>");
+	    					putProp(count, "meta");
+	    					count++;	
+						}
+					}
+					count--;
+					prop.put("folders_"+count+"_comma", "");
+					count++;
+	        		prop.put("folders", count);
+				} catch (MalformedURLException e) {
+					Log.logException(e);
+				}
+	        } else if (isMetadata) {
+				try {
+					final String url = post.get(ROOT).substring(2);
+					EnumMap<METADATA, String> metadata;
+					metadata = YMarkTables.getMetadata(YMarkTables.getBookmarkId(url), sb.indexSegments.segment(Segments.Process.PUBLIC));
+					if (metadata.isEmpty())
+						metadata = YMarkTables.loadMetadata(url, sb.loader);
+					final Iterator<METADATA> iter = metadata.keySet().iterator();
+					while (iter.hasNext()) {
+						final METADATA key = iter.next();
+						final String value = metadata.get(key);
+						prop.put("folders_"+count+"_foldername","<small><b>"+key.toString().toLowerCase()+":</b> " + value + "</small>");
+						putProp(count, "meta");
+						count++;
+					}
+					count--;
+					prop.put("folders_"+count+"_comma", "");
+					count++;
+	        		prop.put("folders", count);
+				} catch (MalformedURLException e) {
 					Log.logException(e);
 				}
 	        }

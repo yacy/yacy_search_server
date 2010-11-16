@@ -216,14 +216,12 @@ public class Table_YMark_p {
                 count = 0;
                 try {
                 	Iterator<Tables.Row> mapIterator;
-                	                    
                 	if(post.containsKey("folders") && !post.get("folders").isEmpty()) {
-                    	mapIterator = sb.tables.bookmarks.folders.getBookmarks(bmk_user, post.get("folders"));
+                    	mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.folders.getBookmarks(bmk_user, post.get("folders")), maxcount).iterator();
                     } else if(post.containsKey("tags") && !post.get("tags").isEmpty()) {
-                    	mapIterator = sb.tables.bookmarks.tags.getBookmarks(bmk_user, post.get("tags"));
+                    	mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.tags.getBookmarks(bmk_user, post.get("tags")), maxcount).iterator();
                     } else {
-                    	final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table, matcher);
-                    	mapIterator = sb.tables.orderByPK(plainIterator, maxcount).iterator();
+                    	mapIterator = sb.tables.orderByPK(sb.tables.iterator(table, matcher), maxcount).iterator();
                     }
                     
                     Tables.Row row;
