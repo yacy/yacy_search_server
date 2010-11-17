@@ -3,12 +3,14 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.List;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
+import de.anomic.data.YMarkKeyValueEntry;
 import de.anomic.data.YMarkTables;
 import de.anomic.data.userDB;
 import de.anomic.data.YMarkTables.METADATA;
@@ -176,16 +178,13 @@ public class get_treeview {
 				}
 	        } else if (isWordCount) {
 	        	try {
-					final Map<String, Integer> words = YMarkTables.getWordFrequencies(post.get(ROOT).substring(2), sb.loader);
-					final Iterator<String> iter = words.keySet().iterator();
+					final List<YMarkKeyValueEntry<String, Integer>> list = YMarkTables.getWordFrequencies(post.get(ROOT).substring(2), sb.loader, 10);
+					final Iterator<YMarkKeyValueEntry<String, Integer>> iter = list.iterator();
 					while (iter.hasNext()) {
-						String key = iter.next();
-						int value = words.get(key);
-						if(value > 5 && value < 15) {
-							prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> [" + value + "]</small>");
-	    					putProp(count, "meta");
-	    					count++;	
-						}
+						YMarkKeyValueEntry<String, Integer> e = iter.next();
+						prop.put("folders_"+count+"_foldername","<small><b>"+e.getKey()+":</b> [" + e.getValue() + "]</small>");
+    					putProp(count, "meta");
+    					count++;
 					}
 					count--;
 					prop.put("folders_"+count+"_comma", "");

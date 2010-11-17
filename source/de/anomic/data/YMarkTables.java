@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -12,6 +14,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -452,7 +455,7 @@ public class YMarkTables {
 	        	metadata.put(METADATA.MIMETYPE, document.dc_format());
 	        	metadata.put(METADATA.LANGUAGE, document.dc_language());
 	        	metadata.put(METADATA.CHARSET, document.getCharset());
-	        	metadata.put(METADATA.SIZE, String.valueOf(document.getTextLength()));
+	        	// metadata.put(METADATA.SIZE, String.valueOf(document.getTextLength()));
 			}
         } catch (IOException e) {
 			Log.logException(e);
@@ -462,12 +465,13 @@ public class YMarkTables {
 		return metadata;
 	}
 	
-	public static Map<String, Integer> getWordFrequencies(final String url, final LoaderDispatcher loader) throws MalformedURLException {
-		final Map<String,Integer> words = new HashMap<String,Integer>();
-        final DigestURI u = new DigestURI(url);
+	public static List<YMarkKeyValueEntry<String, Integer>> getWordFrequencies(final String url, final LoaderDispatcher loader, final int top) throws MalformedURLException {
+        final List<YMarkKeyValueEntry<String, Integer>> list = new ArrayList<YMarkKeyValueEntry<String, Integer>>();
+		final DigestURI u = new DigestURI(url);
         Response response = null;
         int wordcount = 0;
         String sentence, token;
+        final YMarkKeyValueEntry<String, Integer> entry = new YMarkKeyValueEntry<String, Integer>();
         try {
 			response = loader.load(loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
 			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
@@ -481,12 +485,12 @@ public class YMarkTables {
 	                    	token = tokens.nextElement();
 	                        if (token.length() > 2) {
 	                        	wordcount++;
-	                        	if(words.containsKey(token)) {
-	                        		int count = words.get(token);
-	                        		count++;
-	                        		words.put(token, count);
+	                        	entry.set(token.toLowerCase(), 1);
+	                        	if(list.contains(entry)) {	                        		
+	                        		int v = list.get(list.indexOf(entry)).getValue() + 1;
+	                        		list.get(list.indexOf(entry)).setValue(v);
 	                        	} else {
-	                        		words.put(token, 1);
+	                        		list.add(new YMarkKeyValueEntry<String, Integer>(token.toLowerCase(), 1));	                        		
 	                        	}
 	                        }
 	                    }
@@ -499,6 +503,14 @@ public class YMarkTables {
 		} catch (Failure e) {
 			Log.logException(e);
 		}
-		return words;
+		Collections.sort(list);
+		float c = list.size();
+		Log.logInfo(YMarkTables.BOOKMARKS_LOG, "size: "+c);
+		int end = (int) (c*0.9);
+		int start = end - top;
+		if (start < 0)
+			start = 0;
+		Log.logInfo(YMarkTables.BOOKMARKS_LOG, "start: "+start+" end: "+end);
+		return list.subList(start,end);
 	}
 }
