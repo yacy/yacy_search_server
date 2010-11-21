@@ -46,6 +46,47 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private static final String PIPE_ESCAPED = "&#124;";
     private static final String REGEX_NOT_CHAR_NUM_OR_UNDERSCORE = "[^a-zA-Z0-9_]";
 
+    private static enum Tags {
+        HEADLINE_1("=", "<h1>", "</h1>"),
+        HEADLINE_2("==", "<h2>", "</h2>"),
+        HEADLINE_3("===", "<h3>", "</h3>"),
+        HEADLINE_4("====", "<h4>", "</h4>"),
+        HEADLINE_5("=====", "<h5>", "</h5>"),
+        HEADLINE_6("======", "<h6>", "</h6>"),
+
+        EMPHASIZE_1("\'\'", "<i>", "</i>"),
+        EMPHASIZE_2("\'\'\'", "<b>", "</b>"),
+        EMPHASIZE_3("\'\'\'\'\'", "<b><i>", "</i></b>"),
+
+        STRIKE("&lt;s&gt;", "&lt;/s&gt;", "<span class=\"strike\">", "</span>");
+
+        final String openHTML;
+        final String closeHTML;
+        final String openWiki;
+        final String closeWiki;
+
+        final int openWikiLength;
+        final int closeWikiLength;
+
+        Tags(final String openWiki, final String closeWiki, final String openHTML, final String closeHTML) {
+            if (openHTML == null || closeHTML == null || openWiki == null || closeWiki == null) {
+                throw new IllegalArgumentException("");
+            }
+
+            this.openHTML = openHTML;
+            this.closeHTML = closeHTML;
+            this.openWiki = openWiki;
+            this.closeWiki = closeWiki;
+
+            openWikiLength = openWiki.length();
+            closeWikiLength = closeWiki.length();
+        }
+
+        Tags(final String wiki, final String openHTML, final String closeHTML) {
+            this(wiki, wiki, openHTML, closeHTML);
+        }
+    }
+
     private static final String HTML_OPEN_DEFINITION_DESCRIPTION = "<dd>";
     private static final String HTML_CLOSE_DEFINITION_DESCRIPTION = "</dd>";
     private static final String HTML_OPEN_DEFINITION_ITEM = "<dt>";
@@ -66,17 +107,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private static final String WIKI_CLOSE_EXTERNAL_LINK = "]";
     private static final String WIKI_OPEN_EXTERNAL_LINK = "[";
     private static final String WIKI_CLOSE_PRE_ESCAPED = "&lt;/pre&gt;";
-    private static final String WIKI_OPEN_STRIKE = "&lt;s&gt;";
-    private static final String WIKI_CLOSE_STRIKE = "&lt;/s&gt;";
-    private static final String WIKI_EMPHASIZE_1 = "\'\'";
-    private static final String WIKI_EMPHASIZE_2 = "\'\'\'";
-    private static final String WIKI_EMPHASIZE_3 = "\'\'\'\'\'";
-    private static final String WIKI_HEADLINE_TAG_1 = "=";
-    private static final String WIKI_HEADLINE_TAG_2 = "==";
-    private static final String WIKI_HEADLINE_TAG_3 = "===";
-    private static final String WIKI_HEADLINE_TAG_4 = "====";
-    private static final String WIKI_HEADLINE_TAG_5 = "=====";
-    private static final String WIKI_HEADLINE_TAG_6 = "======";
     private static final String WIKI_HR_LINE = "----";
     private static final String WIKI_IMAGE = "Image:";
     private static final String WIKI_OPEN_PRE_ESCAPED = "&lt;pre&gt;";
@@ -109,7 +139,13 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private final static Map<String, String[]> PROPERTY_VALUES = new HashMap<String, String[]>();
 
     /** Tags for different types of headlines in wikiCode. */
-    private final static String[] HEADLINE_TAGS = new String[]{WIKI_HEADLINE_TAG_6, WIKI_HEADLINE_TAG_5, WIKI_HEADLINE_TAG_4, WIKI_HEADLINE_TAG_3, WIKI_HEADLINE_TAG_2, WIKI_HEADLINE_TAG_1};
+    private final static String[] HEADLINE_TAGS =
+            new String[]{Tags.HEADLINE_6.openWiki,
+                         Tags.HEADLINE_5.openWiki,
+                         Tags.HEADLINE_4.openWiki,
+                         Tags.HEADLINE_3.openWiki,
+                         Tags.HEADLINE_2.openWiki,
+                         Tags.HEADLINE_1.openWiki};
 
     private final static char[] HEADLINE_LEVEL = new char[]{ONE, TWO, THREE, FOUR, FIVE, SIX};
 
@@ -600,68 +636,70 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
      * @return HTML fragment
      */
     private String processPreformattedText(String line) {
-        final int positionOfOpeningTag = line.indexOf(WIKI_OPEN_PRE_ESCAPED);
-        final int positionOfClosingTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED);
-        //both <pre> and </pre> in the same line
-        if ((positionOfOpeningTag >= 0) && (positionOfClosingTag > 0) && !escaped) {
-            if (positionOfOpeningTag < positionOfClosingTag) {
-                final StringBuilder preformattedText = new StringBuilder();
-                preformattedText.append("<pre style=\"border:dotted;border-width:thin;\">");
-                preformattedText.append(line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED, positionOfClosingTag));
-                preformattedText.append("</pre>");
+        if (!escaped) {
+            final int positionOfOpeningTag = line.indexOf(WIKI_OPEN_PRE_ESCAPED);
+            final int positionOfClosingTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED);
+            //both <pre> and </pre> in the same line
+            if (positionOfOpeningTag >= 0 && positionOfClosingTag > 0) {
+                if (positionOfOpeningTag < positionOfClosingTag) {
+                    final StringBuilder preformattedText = new StringBuilder();
+                    preformattedText.append("<pre style=\"border:dotted;border-width:thin;\">");
+                    preformattedText.append(line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED, positionOfClosingTag));
+                    preformattedText.append("</pre>");
 
-                line = processLineOfWikiCode(line.substring(0, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
-                line = line.replaceAll("!pre!txt!", preformattedText.toString().replaceAll("!pre!", "!pre!!"));
+                    line = processLineOfWikiCode(line.substring(0, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
+                    line = line.replaceAll("!pre!txt!", preformattedText.toString().replaceAll("!pre!", "!pre!!"));
+                    line = line.replaceAll("!pre!!", "!pre!");
+                } //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
+                else {
+                    processingPreformattedText = true;
+                    final String temp1 = processLineOfWikiCode(line.substring(0, positionOfOpeningTag - 1).replaceAll("!tmp!", "!tmp!!") + "!tmp!txt!");
+                    noList = true;
+                    final String temp2 = processLineOfWikiCode(line.substring(positionOfOpeningTag));
+                    noList = false;
+                    line = temp1.replaceAll("!tmp!txt!", temp2);
+                    line = line.replaceAll("!tmp!!", "!tmp!");
+                    processingPreformattedText = false;
+                }
+            } //start <pre>
+            else if (positionOfOpeningTag >= 0 && !preformattedSpanning) {
+                processingPreformattedText = true;    //prevent surplus line breaks
+                final StringBuilder openBlockQuoteTags = new StringBuilder();  //gets filled with <blockquote>s as needed
+                String preformattedText = "<pre style=\"border:dotted;border-width:thin;\">" + line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED);
+                preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
+                //taking care of indented lines
+                while (preindented < positionOfOpeningTag && positionOfOpeningTag < line.length() &&
+                        line.substring(preindented, positionOfOpeningTag).charAt(0) == WIKI_INDENTION) {
+                    preindented++;
+                    openBlockQuoteTags.append(HTML_OPEN_BLOCKQUOTE);
+                }
+                line = processLineOfWikiCode(line.substring(preindented, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
+                line = openBlockQuoteTags + line.replaceAll("!pre!txt!", preformattedText);
                 line = line.replaceAll("!pre!!", "!pre!");
-            } //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
-            else {
-                processingPreformattedText = true;
-                final String temp1 = processLineOfWikiCode(line.substring(0, positionOfOpeningTag - 1).replaceAll("!tmp!", "!tmp!!") + "!tmp!txt!");
-                noList = true;
-                final String temp2 = processLineOfWikiCode(line.substring(positionOfOpeningTag));
-                noList = false;
-                line = temp1.replaceAll("!tmp!txt!", temp2);
-                line = line.replaceAll("!tmp!!", "!tmp!");
+                preformattedSpanning = true;
+            } //end </pre>
+            else if (positionOfClosingTag >= 0 && preformattedSpanning) {
+                preformattedSpanning = false;
+                final StringBuilder endBlockQuoteTags = new StringBuilder(); //gets filled with </blockquote>s as needed
+                String preformattedText = line.substring(0, positionOfClosingTag) + "</pre>";
+                preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
+                //taking care of indented lines
+                while (preindented > 0) {
+                    endBlockQuoteTags.append(HTML_CLOSE_BLOCKQUOTE);
+                    preindented--;
+                }
+                line = processLineOfWikiCode("!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
+                line = line.replaceAll("!pre!txt!", preformattedText) + endBlockQuoteTags;
+                line = line.replaceAll("!pre!!", "!pre!");
                 processingPreformattedText = false;
+            } //Getting rid of surplus </pre>
+            else if (positionOfOpeningTag >= 0 && !preformattedSpanning) {
+                int posTag;
+                while ((posTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED)) >= 0) {
+                    line = line.substring(0, posTag) + line.substring(posTag + LEN_WIKI_CLOSE_PRE_ESCAPED);
+                }
+                line = processLineOfWikiCode(line);
             }
-        } //start <pre>
-        else if ((positionOfOpeningTag >= 0) && !preformattedSpanning && !escaped) {
-            processingPreformattedText = true;    //prevent surplus line breaks
-            final StringBuilder openBlockQuoteTags = new StringBuilder();  //gets filled with <blockquote>s as needed
-            String preformattedText = "<pre style=\"border:dotted;border-width:thin;\">" + line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED);
-            preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
-            //taking care of indented lines
-            while (preindented < positionOfOpeningTag && positionOfOpeningTag < line.length() &&
-                    line.substring(preindented, positionOfOpeningTag).charAt(0) == WIKI_INDENTION) {
-                preindented++;
-                openBlockQuoteTags.append(HTML_OPEN_BLOCKQUOTE);
-            }
-            line = processLineOfWikiCode(line.substring(preindented, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
-            line = openBlockQuoteTags + line.replaceAll("!pre!txt!", preformattedText);
-            line = line.replaceAll("!pre!!", "!pre!");
-            preformattedSpanning = true;
-        } //end </pre>
-        else if ((positionOfClosingTag >= 0) && preformattedSpanning && !escaped) {
-            preformattedSpanning = false;
-            final StringBuilder endBlockQuoteTags = new StringBuilder(); //gets filled with </blockquote>s as needed
-            String preformattedText = line.substring(0, positionOfClosingTag) + "</pre>";
-            preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
-            //taking care of indented lines
-            while (preindented > 0) {
-                endBlockQuoteTags.append(HTML_CLOSE_BLOCKQUOTE);
-                preindented--;
-            }
-            line = processLineOfWikiCode("!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
-            line = line.replaceAll("!pre!txt!", preformattedText) + endBlockQuoteTags;
-            line = line.replaceAll("!pre!!", "!pre!");
-            processingPreformattedText = false;
-        } //Getting rid of surplus </pre>
-        else if ((positionOfOpeningTag >= 0) && !preformattedSpanning && !escaped) {
-            int posTag;
-            while ((posTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED)) >= 0) {
-                line = line.substring(0, posTag) + line.substring(posTag + LEN_WIKI_CLOSE_PRE_ESCAPED);
-            }
-            line = processLineOfWikiCode(line);
         }
         return line;
     }
@@ -698,17 +736,17 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     if (j >= tableOfContentElements.size()) {
                         break;
                     }
-                    String d = tableOfContentElements.get(j);
+                    final String d = tableOfContentElements.get(j);
                     if (d == null || d.length() < 1) {
                         continue;
                     }
-                    String a = d.substring(1).replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY);
-                    String b = element.substring(1).replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY);
+                    final String a = d.substring(1).replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY);
+                    final String b = element.substring(1).replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY);
                     if (a.equals(b)) {
                         doubles++;
                     }
                 }
-                //if there are doubles, create anchor sextension
+                //if there are doubles, create anchor extension
                 if (doubles > 0) {
                     anchorext = "_" + (doubles + 1);
                 }
@@ -819,41 +857,31 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         return directory;
     }
 
-    /** Replaces two occurences of a substring in a string by a pair of strings if
-     * that substring occurs twice in the string. This method is not greedy! You'll
-     * have to run it in a loop if you want to replace all occurences of the substring.
-     * This method provides special treatment for headlines.
-     * @param input the string that something is to be replaced in
-     * @param pat substring to be replaced
-     * @param repl1 string substring gets replaced by on uneven occurences
-     * @param repl2 string substring gets replaced by on even occurences
+    /**
+     * Replaces the wiki representation of tags with the HTML representation.
+     * @param input String which potentially contains tags to be replaced.
+     * @param tags tags to be replaced.
+     * @return input String with replaced tags.
      */
-    //[MN]
-    private String pairReplace(String input, final String pat, final String repl1, final String repl2) {
-        return pairReplace(input, pat, pat, repl1, repl2);
-    }
-
-    private String pairReplace(String input, final String pat1, final String pat2,
-            final String repl1, final String repl2) {
+    private String tagReplace(String input, final Tags tags) {
         String direlem = null;    //string to keep headlines until they get added to List dirElements
+
         int firstPosition;
         final int secondPosition;
-        final int pat1Len = pat1.length();
-        final int pat2Len = pat2.length();
         //replace pattern if a pair of the pattern can be found in the line
-        if (((firstPosition = input.indexOf(pat1)) >= 0) && ((secondPosition = input.indexOf(pat2, firstPosition + pat1Len)) >= 0)) {
+        if (((firstPosition = input.indexOf(tags.openWiki)) >= 0) &&
+                ((secondPosition = input.indexOf(tags.closeWiki, firstPosition + tags.openWikiLength)) >= 0)) {
             //extra treatment for headlines
-            if (Arrays.binarySearch(HEADLINE_TAGS, pat1) >= 0) {
+            if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
                 //add anchor and create headline
-                direlem = input.substring(firstPosition + pat1Len, secondPosition);
-                if (direlem != null) {
+                if ((direlem = input.substring(firstPosition + tags.openWikiLength, secondPosition)) != null) {
                     //counting double headlines
                     int doubles = 0;
-                    for (int i = 0; i < tableOfContentElements.size(); i++) {
+                    for (final String tableOfContentElement : tableOfContentElements) {
                         // no element with null value should ever be in directory
-                        assert (tableOfContentElements.get(i) != null);
+                        assert (tableOfContentElement != null);
 
-                        if (tableOfContentElements.size() > i && tableOfContentElements.get(i).substring(1).equals(direlem)) {
+                        if (tableOfContentElement.substring(1).equals(direlem)) {
                             doubles++;
                         }
                     }
@@ -862,22 +890,22 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     if (doubles > 0) {
                         anchor = anchor + "_" + (doubles + 1);
                     }
-                    input = input.substring(0, firstPosition) + "<a name=\"" + anchor + "\"></a>" + repl1
-                            + direlem + repl2 + input.substring(secondPosition + pat2Len);
+                    input = input.substring(0, firstPosition) + "<a name=\"" + anchor + "\"></a>" + tags.openHTML
+                            + direlem + tags.closeHTML + input.substring(secondPosition + tags.closeWikiLength);
                     //add headlines to list of headlines (so TOC can be created)
-                    if (Arrays.binarySearch(HEADLINE_TAGS, pat1) >= 0) {
-                        tableOfContentElements.add((pat1Len - 1) + direlem);
+                    if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
+                        tableOfContentElements.add((tags.openWikiLength - 1) + direlem);
                     }
                 }
             } else {
-                input = input.substring(0, firstPosition) + repl1
-                        + (input.substring(firstPosition + pat1Len, secondPosition)) + repl2
-                        + input.substring(secondPosition + pat2Len);
+                input = input.substring(0, firstPosition) + tags.openHTML
+                        + (input.substring(firstPosition + tags.openWikiLength, secondPosition)) + tags.closeHTML
+                        + input.substring(secondPosition + tags.closeWikiLength);
             }
         }
         //recursion if another pair of the pattern can still be found in the line
-        if (((firstPosition = input.indexOf(pat1)) >= 0) && (input.indexOf(pat2, firstPosition + pat1Len) >= 0)) {
-            input = pairReplace(input, pat1, pat2, repl1, repl2);
+        if (((firstPosition = input.indexOf(tags.openWiki)) >= 0) && (input.indexOf(tags.closeWiki, firstPosition + tags.openWikiLength) >= 0)) {
+            input = tagReplace(input, tags);
         }
         return input;
     }
@@ -925,18 +953,18 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             // end contrib [MN]
 
             // format headers
-            line = pairReplace(line, WIKI_HEADLINE_TAG_6, "<h6>", "</h6>");
-            line = pairReplace(line, WIKI_HEADLINE_TAG_5, "<h5>", "</h5>");
-            line = pairReplace(line, WIKI_HEADLINE_TAG_4, "<h4>", "</h4>");
-            line = pairReplace(line, WIKI_HEADLINE_TAG_3, "<h3>", "</h3>");
-            line = pairReplace(line, WIKI_HEADLINE_TAG_2, "<h2>", "</h2>");
-            line = pairReplace(line, WIKI_HEADLINE_TAG_1, "<h1>", "</h1>");
+            line = tagReplace(line, Tags.HEADLINE_6);
+            line = tagReplace(line, Tags.HEADLINE_5);
+            line = tagReplace(line, Tags.HEADLINE_4);
+            line = tagReplace(line, Tags.HEADLINE_3);
+            line = tagReplace(line, Tags.HEADLINE_2);
+            line = tagReplace(line, Tags.HEADLINE_1);
 
-            line = pairReplace(line, WIKI_EMPHASIZE_3, "<b><i>", "</i></b>");
-            line = pairReplace(line, WIKI_EMPHASIZE_2, "<b>", "</b>");
-            line = pairReplace(line, WIKI_EMPHASIZE_1, "<i>", "</i>");
+            line = tagReplace(line, Tags.EMPHASIZE_3);
+            line = tagReplace(line, Tags.EMPHASIZE_2);
+            line = tagReplace(line, Tags.EMPHASIZE_1);
 
-            line = pairReplace(line, WIKI_OPEN_STRIKE, WIKI_CLOSE_STRIKE, "<span class=\"strike\">", "</span>");
+            line = tagReplace(line, Tags.STRIKE);
 
             line = processUnorderedList(line);
             line = processOrderedList(line);
