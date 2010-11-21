@@ -143,11 +143,11 @@ public class BookmarkHelper {
             writer.close();
             links = scraper.getAnchors();           
         } catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-        for (Entry<MultiProtocolURI, String> link: links.entrySet()) {
+        for (final Entry<MultiProtocolURI, String> link: links.entrySet()) {
             url = link.getKey();
             title = link.getValue();
             Log.logInfo("BOOKMARKS", "links.get(url)");
-            if (title.equals("")) {//cannot be displayed
+            if ("".equals(title)) {//cannot be displayed
                 title = url.toString();
             }
             bm = db.new Bookmark(url.toString());
@@ -176,13 +176,12 @@ public class BookmarkHelper {
     }
     
     private static int importFromXML(BookmarksDB db, final InputStream input, final boolean importPublic){
-        final DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
+        final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setValidating(false);
         factory.setNamespaceAware(false);
-        DocumentBuilder builder;
         try {
-            builder = factory.newDocumentBuilder();
-            final Document doc=builder.parse(input);
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document doc = builder.parse(input);
             return parseXMLimport(db, doc, importPublic);
         } catch (final ParserConfigurationException e) {  
         } catch (final SAXException e) {
@@ -194,35 +193,35 @@ public class BookmarkHelper {
     
     private static int parseXMLimport(BookmarksDB db, final Node doc, final boolean importPublic){
         int importCount = 0;
-        if (doc.getNodeName().equals("post")) {
+        if ("post".equals(doc.getNodeName())) {
             final NamedNodeMap attributes = doc.getAttributes();
-            final String url=attributes.getNamedItem("href").getNodeValue();
-            if(url.equals("")){
+            final String url = attributes.getNamedItem("href").getNodeValue();
+            if("".equals(url)){
                 return 0;
             }
-            final Bookmark bm=db.new Bookmark(url);
-            String tagsString="";
-            String title="";
-            String description="";
-            String time="";
-            if(attributes.getNamedItem("tag")!=null){
-                tagsString=attributes.getNamedItem("tag").getNodeValue();
+            final Bookmark bm = db.new Bookmark(url);
+            String tagsString = "";
+            String title = "";
+            String description = "";
+            String time = "";
+            if(attributes.getNamedItem("tag") != null){
+                tagsString = attributes.getNamedItem("tag").getNodeValue();
             }
-            if(attributes.getNamedItem("description")!=null){
-                title=attributes.getNamedItem("description").getNodeValue();
+            if(attributes.getNamedItem("description") != null){
+                title = attributes.getNamedItem("description").getNodeValue();
             }
-            if(attributes.getNamedItem("extended")!=null){
-                description=attributes.getNamedItem("extended").getNodeValue();
+            if(attributes.getNamedItem("extended") != null){
+                description = attributes.getNamedItem("extended").getNodeValue();
             }
-            if(attributes.getNamedItem("time")!=null){
-                time=attributes.getNamedItem("time").getNodeValue();
+            if(attributes.getNamedItem("time") != null){
+                time = attributes.getNamedItem("time").getNodeValue();
             }
-            Set<String> tags=new HashSet<String>();
+            Set<String> tags = new HashSet<String>();
             
-            if(title != null){
+            if (title != null) {
                 bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
             }
-            if(tagsString!=null){
+            if (tagsString != null) {
                 tags = ListManager.string2set(tagsString.replace(' ', ','));
             }
             bm.setTags(tags, true);
@@ -262,7 +261,7 @@ public class BookmarkHelper {
         
         while (tagIterator.hasNext()) {
             tag=tagIterator.next();          
-            if (tag.getFriendlyName().startsWith((root.equals("/") ? root : root+"/"))) {
+            if (tag.getFriendlyName().startsWith(("/".equals(root) ? root : root+"/"))) {
                 path = tag.getFriendlyName();
                 path = BookmarkHelper.cleanTagsString(path);                  
                 while(path.length() > 0 && !path.equals(root)){
@@ -271,7 +270,7 @@ public class BookmarkHelper {
                 }                   
             }
         }
-        if (!root.equals("/")) { folders.add(root); }
+        if (!"/".equals(root)) { folders.add(root); }
         folders.add("\uffff");
         return folders.iterator();      
     }

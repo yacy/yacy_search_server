@@ -68,7 +68,7 @@ public class AttrSeq {
         this.structure = null;
         this.created = -1;
         this.name = "";
-        this.entries = (tree) ? (Map<String, Object>) new TreeMap<String, Object>() : (Map<String, Object>) new HashMap<String, Object>();
+        this.entries = (tree) ? new TreeMap<String, Object>() : new HashMap<String, Object>();
         readAttrFile(file);
     }
 
@@ -77,7 +77,7 @@ public class AttrSeq {
         this.structure = new Structure(struct);
         this.created = System.currentTimeMillis();
         this.name = name;
-        this.entries = (tree) ? (Map<String, Object>) new TreeMap<String, Object>() : (Map<String, Object>) new HashMap<String, Object>();
+        this.entries = (tree) ? new TreeMap<String, Object>() : new HashMap<String, Object>();
     }
         
     public void setLogger(final Logger newLogger) {
@@ -170,16 +170,13 @@ public class AttrSeq {
     public void toFile(final File out) throws IOException {
         // generate header
         final StringBuilder sb = new StringBuilder(2000);
-        sb.append("# Name=" + this.name); sb.append((char) 13); sb.append((char) 10);
-        sb.append("# Created=" + this.created); sb.append((char) 13); sb.append((char) 10);
-        sb.append("# Structure=" + this.structure.toString()); sb.append((char) 13); sb.append((char) 10);
+        sb.append("# Name="); sb.append(this.name); sb.append((char) 13); sb.append((char) 10);
+        sb.append("# Created="); sb.append(this.created); sb.append((char) 13); sb.append((char) 10);
+        sb.append("# Structure="); sb.append(this.structure.toString()); sb.append((char) 13); sb.append((char) 10);
         sb.append("# ---"); sb.append((char) 13); sb.append((char) 10);
-        final Iterator<Map.Entry<String, Object>> i = entries.entrySet().iterator();
-        Map.Entry<String, Object> entry;
         String k;
         Object v;
-        while (i.hasNext()) {
-            entry = i.next();
+        for (final Map.Entry<String, Object> entry : entries.entrySet()) {
             k = entry.getKey();
             v = entry.getValue();
             sb.append(k); sb.append('=');
@@ -202,7 +199,7 @@ public class AttrSeq {
         return new Entry(pivot, new HashMap<String, Long>(), (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>());
     }
     
-    public Entry newEntry(final String pivot, final HashMap<String, Long> props, final Set<String> seq) {
+    public Entry newEntry(final String pivot, final Map<String, Long> props, final Set<String> seq) {
         return new Entry(pivot, props, seq);
     }
     
@@ -322,6 +319,7 @@ public class AttrSeq {
             seqrow = new Row(new String(rowdef), null);
         }
         
+        @Override
         public String toString() {
             final StringBuilder sb = new StringBuilder(100);
             sb.append('<'); sb.append(pivot_name); sb.append('-'); sb.append(Integer.toString(pivot_len)); sb.append(">,'=',");
@@ -342,10 +340,10 @@ public class AttrSeq {
     
     public class Entry {
         String                pivot;
-        HashMap<String, Long> attrs;
+        Map<String, Long>     attrs;
         Set<String>           seq;
         
-        public Entry(final String pivot, final HashMap<String, Long> attrs, final Set<String> seq) {
+        public Entry(final String pivot, final Map<String, Long> attrs, final Set<String> seq) {
             this.pivot = pivot;
             this.attrs = attrs;
             this.seq = seq;
@@ -373,7 +371,7 @@ public class AttrSeq {
             }
         }
         
-        public HashMap<String, Long> getAttrs() {
+        public Map<String, Long> getAttrs() {
             return attrs;
         }
         
@@ -408,6 +406,7 @@ public class AttrSeq {
             this.seq.add(s/*, seqattrs*/);
         }
         
+        @Override
         public String toString() {
             // creates only the attribute field and the sequence, not the pivot
             final StringBuilder sb = new StringBuilder(100 + structure.seq_len[0] * seq.size());
@@ -450,7 +449,7 @@ public class AttrSeq {
     public static void main(final String[] args) {
         // java -classpath source de.anomic.kelondro.kelondroPropFile -transcode DATA/RANKING/GLOBAL/CRG-test-unsorted-original.cr DATA/RANKING/GLOBAL/CRG-test-generated.cr
         try {
-            if ((args.length == 3) && (args[0].equals("-transcode"))) {
+            if ((args.length == 3) && ("-transcode".equals(args[0]))) {
                 transcode(new File(args[1]), new File(args[2]));
             }
         } catch (final IOException e) {

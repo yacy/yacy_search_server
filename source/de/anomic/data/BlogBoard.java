@@ -1,9 +1,13 @@
-// blogBoard.java 
+// BlogBoard.java 
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 // last major change: 20.07.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -170,7 +174,7 @@ public class BlogBoard {
     }
     
     private boolean parseXMLimport(final Document doc) {
-    	if(!doc.getDocumentElement().getTagName().equals("blog")) {
+    	if(!"blog".equals(doc.getDocumentElement().getTagName())) {
             return false;
         }
     	
@@ -183,23 +187,23 @@ public class BlogBoard {
             String key = null, ip = null, StrSubject = null, StrAuthor = null, StrPage = null, StrDate = null;
             Date date = null;
 
-            if(!items.item(i).getNodeName().equals("item")) continue;
+            if(!"item".equals(items.item(i).getNodeName())) continue;
 
             final NodeList currentNodeChildren = items.item(i).getChildNodes();
 
             for (int j = 0, m = currentNodeChildren.getLength(); j < m; ++j) {
                 final Node currentNode = currentNodeChildren.item(j);
-                if (currentNode.getNodeName().equals("id")) {
+                if ("id".equals(currentNode.getNodeName())) {
                     key = currentNode.getFirstChild().getNodeValue();
-                } else if (currentNode.getNodeName().equals("ip")) {
+                } else if ("ip".equals(currentNode.getNodeName())) {
                     ip = currentNode.getFirstChild().getNodeValue();
-                } else if (currentNode.getNodeName().equals("timestamp")) {
+                } else if ("timestamp".equals(currentNode.getNodeName())) {
                     StrDate = currentNode.getFirstChild().getNodeValue();
-                } else if (currentNode.getNodeName().equals("subject")) {
+                } else if ("subject".equals(currentNode.getNodeName())) {
                     StrSubject = currentNode.getFirstChild().getNodeValue();
-                } else if (currentNode.getNodeName().equals("author")) {
+                } else if ("author".equals(currentNode.getNodeName())) {
                     StrAuthor = currentNode.getFirstChild().getNodeValue();
-                } else if (currentNode.getNodeName().equals("content")) {
+                } else if ("content".equals(currentNode.getNodeName())) {
                     StrPage = currentNode.getFirstChild().getNodeValue();
                 }
             }
@@ -371,7 +375,7 @@ public class BlogBoard {
             if (this.record.get("comments") == null) {
                 this.record.put("comments", ListManager.collection2string(new ArrayList<String>()));
             }
-            if (this.record.get("commentMode") == null || this.record.get("commentMode").equals("")) {
+            if (this.record.get("commentMode") == null || this.record.get("commentMode").length() < 1) {
                 this.record.put("commentMode", "2");
             }
         }

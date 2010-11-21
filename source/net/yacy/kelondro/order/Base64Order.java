@@ -74,8 +74,8 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         byte acc, bcc;
         byte c;
         // pre-compute comparisment results: this omits one single ahpla lookup during comparisment
-        for (char ac: alpha) {
-            for (char bc: alpha) {
+        for (final char ac: alpha) {
+            for (final char bc: alpha) {
                 acc = ahpla[ac];
                 bcc = ahpla[bc];
                 c = 0;
@@ -92,9 +92,11 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return new HandleSet(keylength, this, space);
     }
 
-    public static byte[] zero(int length) {
+    public static byte[] zero(final int length) {
         final byte[] z = new byte[length];
-        while (length > 0) { length--; z[length] = (byte) alpha_standard[0]; }
+        for (byte b : z) {
+            b = (byte) alpha_standard[0];
+        }
         return z;
     }
     
@@ -119,10 +121,10 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
     
     public final static ByteOrder bySignature(final String signature) {
-        if (signature.equals("Bd")) return new Base64Order(false, false);
-        if (signature.equals("bd")) return new Base64Order(false, true);
-        if (signature.equals("Bu")) return new Base64Order(true, false);
-        if (signature.equals("bu")) return new Base64Order(true, true);
+        if ("Bd".equals(signature)) return new Base64Order(false, false);
+        if ("bd".equals(signature)) return new Base64Order(false, true);
+        if ("Bu".equals(signature)) return new Base64Order(true, false);
+        if ("bu".equals(signature)) return new Base64Order(true, true);
         return null;
     }
     
@@ -533,27 +535,27 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             System.out.println("usage: -[ec|dc|es|ds|clcn] <arg>");
             System.exit(0);
         }
-        if (s[0].equals("-ec")) {
+        if ("-ec".equals(s[0])) {
             // generate a b64 encoding from a given cardinal
             System.out.println(b64.encodeLong(Long.parseLong(s[1]), 4));
         }
-        if (s[0].equals("-dc")) {
+        if ("-dc".equals(s[0])) {
             // generate a b64 decoding from a given cardinal
             System.out.println(b64.decodeLong(s[1]));
         }
-        if (s[0].equals("-es")) {
+        if ("-es".equals(s[0])) {
             // generate a b64 encoding from a given string
             System.out.println(b64.encodeString(s[1]));
         }
-        if (s[0].equals("-ds")) {
+        if ("-ds".equals(s[0])) {
             // generate a b64 decoding from a given string
             System.out.println(b64.decodeString(s[1]));
         }
-        if (s[0].equals("-cl")) {
+        if ("-cl".equals(s[0])) {
             // return the cardinal of a given string as long value with the enhanced encoder
             System.out.println(Base64Order.enhancedCoder.cardinal(s[1].getBytes()));
         }
-        if (s[0].equals("-cn")) {
+        if ("-cn".equals(s[0])) {
             // return the cardinal of a given string as normalized float 0 .. 1 with the enhanced encoder
             System.out.println(((double) Base64Order.enhancedCoder.cardinal(s[1].getBytes())) / ((double) Long.MAX_VALUE));
         }

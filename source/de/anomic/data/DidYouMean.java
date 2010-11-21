@@ -70,7 +70,7 @@ public class DidYouMean {
      * @param index a termIndex - most likely retrieved from a switchboard object.
      * @param sort true/false -  sorts the resulting TreeSet by index.count(); <b>Warning:</b> this causes heavy i/o.
      */
-    public DidYouMean(final IndexCell<WordReference> index, String word0) {
+    public DidYouMean(final IndexCell<WordReference> index, final String word0) {
         this.resultSet = Collections.synchronizedSortedSet(new TreeSet<String>(new headMatchingComparator(word0, WORD_LENGTH_COMPARATOR)));
         this.word = word0.toLowerCase();
         this.wordLen = word.length();
@@ -103,8 +103,8 @@ public class DidYouMean {
         }
     }
 	
-    private static final boolean isAlphabet(char[] alpha, char testchar) {
-        for (char a: alpha) if (a == testchar) return true;
+    private static final boolean isAlphabet(final char[] alpha, final char testchar) {
+        for (final char a: alpha) if (a == testchar) return true;
         return false;
     }
     
@@ -122,28 +122,28 @@ public class DidYouMean {
      * @param preSortSelection the number of words that participate in the IO-intensive sort
      * @return
      */
-    public SortedSet<String> getSuggestions(long timeout, int preSortSelection) {
+    public SortedSet<String> getSuggestions(final long timeout, final int preSortSelection) {
         if (this.word.length() < MinimumInputWordLength) return this.resultSet; // return nothing if input is too short
-        long startTime = System.currentTimeMillis();
-        long timelimit = startTime + timeout;
+        final long startTime = System.currentTimeMillis();
+        final long timelimit = startTime + timeout;
         if (this.word.indexOf(' ') > 0) return getSuggestions(this.word.split(" "), timeout, preSortSelection, this.index);
-        SortedSet<String> preSorted = getSuggestions(timeout);
+        final SortedSet<String> preSorted = getSuggestions(timeout);
         if (System.currentTimeMillis() > timelimit) {
             Log.logInfo("DidYouMean", "found and returned " + preSorted.size() + " unsorted suggestions (1); execution time: "
                 + (System.currentTimeMillis() - startTime) + "ms");
             return preSorted;
         }
         
-        DynamicScore<String> scored = new ScoreCluster<String>();
+        final DynamicScore<String> scored = new ScoreCluster<String>();
         for (final String s: preSorted) {
             if (System.currentTimeMillis() > timelimit) break;
             if (scored.size() >= 2 * preSortSelection) break;
             scored.inc(s, index.count(Word.word2hash(s)));
         }
-        SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new headMatchingComparator(this.word, this.INDEX_SIZE_COMPARATOR)));
-        int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
+        final SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new headMatchingComparator(this.word, this.INDEX_SIZE_COMPARATOR)));
+        final int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
         while (scored.size() > 0 && countSorted.size() < preSortSelection) {
-            String s = scored.getMaxKey();
+            final String s = scored.getMaxKey();
             int score = scored.delete(s);
             if (s.length() >= MinimumOutputWordLength && score > wc) countSorted.add(s);
             if (System.currentTimeMillis() > timelimit) break;
@@ -169,7 +169,7 @@ public class DidYouMean {
      * @return
      */
     @SuppressWarnings("unchecked")
-    private static SortedSet<String> getSuggestions(final String[] words, long timeout, int preSortSelection, final IndexCell<WordReference> index) {
+    private static SortedSet<String> getSuggestions(final String[] words, final long timeout, final int preSortSelection, final IndexCell<WordReference> index) {
         final SortedSet<String>[] s = new SortedSet[words.length];
         for (int i = 0; i < words.length; i++) {
             s[i] = new DidYouMean(index, words[i]).getSuggestions(timeout / words.length, preSortSelection);
@@ -195,14 +195,14 @@ public class DidYouMean {
      * @param timeout execution time in ms.
      * @return a Set&lt;String&gt; with word variations contained in term index.
      */
-    private SortedSet<String> getSuggestions(long timeout) {
+    private SortedSet<String> getSuggestions(final long timeout) {
         long startTime = System.currentTimeMillis();
         this.timeLimit = startTime + timeout;
         
         // create one consumer thread that checks the guessLib queue
         // for occurrences in the index. If the producers are started next, their
         // results can be consumers directly
-        Consumer[] consumers = new Consumer[AVAILABLE_CPU];
+        final Consumer[] consumers = new Consumer[AVAILABLE_CPU];
         consumers[0] = new Consumer();
         consumers[0].start();
 
@@ -219,7 +219,7 @@ public class DidYouMean {
         // the CPU load to create the guessed words is very low, but the testing
         // against the library may be CPU intensive. Since it is possible to test
         // words in the library concurrently, it is a good idea to start separate threads
-        Thread[] producers = new Thread[4];
+        final Thread[] producers = new Thread[4];
         producers[0] = new ChangingOneLetter();
         producers[1] = new AddingOneLetter();
         producers[2] = new DeletingOneLetter();
@@ -261,7 +261,7 @@ public class DidYouMean {
     }
 	
     private void test(final String s) throws InterruptedException {
-        Set<String> libr = LibraryProvider.dymLib.recommend(s);
+        final Set<String> libr = LibraryProvider.dymLib.recommend(s);
         libr.addAll(LibraryProvider.geoLoc.recommend(s));
         if (!libr.isEmpty()) createGen = false;
         for (final String t: libr) {
@@ -398,7 +398,7 @@ public class DidYouMean {
     private static class headMatchingComparator implements Comparator<String> {
         private final String head;
         private final Comparator<String> secondaryComparator;
-        public headMatchingComparator(String head, Comparator<String> secondaryComparator) {
+        public headMatchingComparator(final String head, final Comparator<String> secondaryComparator) {
             this.head = head.toLowerCase();
             this.secondaryComparator = secondaryComparator;
         }

@@ -1,9 +1,13 @@
-// BookmarkHelper.java 
+// BookmarkDate.java 
 // -------------------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // Methods from this file has been originally contributed by Alexander Schier
 // and had been refactored by Michael Christen for better a method structure 30.01.2010
@@ -30,6 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import de.anomic.data.BookmarksDB.Bookmark;
@@ -43,7 +48,7 @@ public class BookmarkDate {
 
     MapHeap datesTable;
     
-    public BookmarkDate(File datesFile) throws IOException {
+    public BookmarkDate(final File datesFile) throws IOException {
         this.datesTable = new MapHeap(datesFile, 20, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
     }
     
@@ -68,18 +73,16 @@ public class BookmarkDate {
     // rebuilds the datesDB from the bookmarksDB
     public void init(final Iterator<Bookmark> it) {
         Log.logInfo("BOOKMARKS", "start init dates.db from bookmarks.db...");
-        //final Iterator<Bookmark> it=bookmarkIterator(true);
         Bookmark bookmark;        
         String date;
         Entry bmDate;
         int count = 0;
         while (it.hasNext()) {
-            bookmark=it.next();
-//            if (bookmark == null) continue;
+            bookmark = it.next();
             date = String.valueOf(bookmark.getTimeStamp());
             bmDate=getDate(date);
-            if(bmDate==null){
-                bmDate=new Entry(date);
+            if (bmDate == null) {
+                bmDate = new Entry(date);
             }
             bmDate.add(bookmark.getUrlHash());
             bmDate.setDatesTable();
@@ -98,49 +101,46 @@ public class BookmarkDate {
 
         public Entry(final String mydate){
             //round to seconds, but store as milliseconds (java timestamp)
-            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
-            mem=new HashMap<String, String>();
+            date = String.valueOf((Long.parseLong(mydate)/1000)*1000);
+            mem = new HashMap<String, String>();
             mem.put(URL_HASHES, "");
         }
 
         public Entry(final String mydate, final Map<String, String> map){
             //round to seconds, but store as milliseconds (java timestamp)
-            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
-            mem=map;
+            date = String.valueOf((Long.parseLong(mydate)/1000)*1000);
+            mem = map;
         }
-        public Entry(final String mydate, final ArrayList<String> entries){
+
+        public Entry(final String mydate, final List<String> entries){
             //round to seconds, but store as milliseconds (java timestamp)
-            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
-            mem=new HashMap<String, String>();
+            date = String.valueOf((Long.parseLong(mydate)/1000)*1000);
+            mem = new HashMap<String, String>();
             mem.put(URL_HASHES, ListManager.collection2string(entries));
         }
+
         public void add(final String urlHash){
             final String urlHashes = mem.get(URL_HASHES);
-            ArrayList<String> list;
-            if(urlHashes != null && !urlHashes.equals("")){
-                list=ListManager.string2arraylist(urlHashes);
+            List<String> list;
+            if(urlHashes != null && !"".equals(urlHashes)){
+                list = ListManager.string2arraylist(urlHashes);
             }else{
-                list=new ArrayList<String>();
+                list = new ArrayList<String>();
             }
-            if(!list.contains(urlHash) && urlHash != null && !urlHash.equals("")){
+            if(!list.contains(urlHash) && urlHash != null && !"".equals(urlHashes)){
                 list.add(urlHash);
             }
             this.mem.put(URL_HASHES, ListManager.collection2string(list));
-            /*if(urlHashes!=null && !urlHashes.equals("") ){
-                if(urlHashes.indexOf(urlHash) <0){
-                    this.mem.put(URL_HASHES, urlHashes+","+urlHash);
-                }
-            }else{
-                this.mem.put(URL_HASHES, urlHash);
-            }*/
         }
+
         public void delete(final String urlHash){
-            final ArrayList<String> list=ListManager.string2arraylist(this.mem.get(URL_HASHES));
+            final List<String> list = ListManager.string2arraylist(this.mem.get(URL_HASHES));
             if(list.contains(urlHash)){
                 list.remove(urlHash);
             }
             this.mem.put(URL_HASHES, ListManager.collection2string(list));
         }
+
         public void setDatesTable() {
             if (this.size() >0) {
                 try {
@@ -156,12 +156,15 @@ public class BookmarkDate {
                 }
             }
         }
+
         public String getDateString(){
             return date;
         }
-        public ArrayList<String> getBookmarkList(){
+
+        public List<String> getBookmarkList(){
             return ListManager.string2arraylist(this.mem.get(URL_HASHES));
         }
+
         public int size(){
             return ListManager.string2arraylist(this.mem.get(URL_HASHES)).size();
         }

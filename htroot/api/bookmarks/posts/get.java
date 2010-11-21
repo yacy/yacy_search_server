@@ -1,9 +1,8 @@
 
 
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Digest;
@@ -20,16 +19,16 @@ public class get {
         final Switchboard switchboard = (Switchboard) env;
         final boolean isAdmin=switchboard.verifyAuthentication(header, true);
         final serverObjects prop = new serverObjects();
-        String tag=null;
-        String date;
+        String tag = null;
+        final String date;
         //String url=""; //urlfilter not yet implemented
         
-        if(post != null && post.containsKey("tag")){
+        if (post != null && post.containsKey("tag")) {
             tag=post.get("tag");
         }
-        if(post != null && post.containsKey("date")){
+        if (post != null && post.containsKey("date")) {
             date=post.get("date");
-        }else{
+        } else {
             date=DateFormatter.formatISO8601(new Date(System.currentTimeMillis()));
         }
         
@@ -40,16 +39,15 @@ public class get {
         
         Date parsedDate = null; 
         try {
-			parsedDate = DateFormatter.parseISO8601(date);
-		} catch (final ParseException e) {
-			parsedDate = new Date();
-		}
+            parsedDate = DateFormatter.parseISO8601(date);
+        } catch (final ParseException e) {
+            parsedDate = new Date();
+        }
         
-        final ArrayList<String> bookmark_hashes=switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
-        final Iterator<String> it=bookmark_hashes.iterator();
-        BookmarksDB.Bookmark bookmark=null;
-        while(it.hasNext()){
-            bookmark=switchboard.bookmarksDB.getBookmark(it.next());
+        final List<String> bookmark_hashes = switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
+        BookmarksDB.Bookmark bookmark = null;
+        for (final String bookmark_hash : bookmark_hashes){
+            bookmark=switchboard.bookmarksDB.getBookmark(bookmark_hash);
             if(DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())).equals(date) &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){

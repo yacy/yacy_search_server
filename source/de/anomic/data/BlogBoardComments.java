@@ -1,9 +1,13 @@
-// wikiBoard.java 
+// BlogBoardComments.java 
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 // last major change: 20.07.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -158,7 +162,7 @@ public class BlogBoardComments {
     }
     
     private boolean parseXMLimport(final Document doc) {
-    	if(!doc.getDocumentElement().getTagName().equals("blog")) {
+    	if(!"blog".equals(doc.getDocumentElement().getTagName())) {
             return false;
         }
     	
@@ -171,7 +175,7 @@ public class BlogBoardComments {
             String key = null, ip = null, StrSubject = null, StrAuthor = null, StrPage = null, StrDate = null;
             Date date = null;
 
-            if(!items.item(i).getNodeName().equals("item"))
+            if(!"item".equals(items.item(i).getNodeName()))
                 continue;
 
             final NodeList currentNodeChildren = items.item(i).getChildNodes();
@@ -179,17 +183,17 @@ public class BlogBoardComments {
             for(int j=0, m = currentNodeChildren.getLength(); j < m; ++j) {
 
                 final Node currentNode = currentNodeChildren.item(j);
-                if (currentNode.getNodeName().equals("id")) {
+                if ("id".equals(currentNode.getNodeName())) {
                     key = currentNode.getFirstChild().getNodeValue();
-                } else if(currentNode.getNodeName().equals("ip")) {
+                } else if("ip".equals(currentNode.getNodeName())) {
                     ip = currentNode.getFirstChild().getNodeValue();
-                } else if(currentNode.getNodeName().equals("timestamp")) {
+                } else if("timestamp".equals(currentNode.getNodeName())) {
                     StrDate = currentNode.getFirstChild().getNodeValue();
-                } else if(currentNode.getNodeName().equals("subject")) {
+                } else if("subject".equals(currentNode.getNodeName())) {
                     StrSubject = currentNode.getFirstChild().getNodeValue();
-                } else if(currentNode.getNodeName().equals("author")) {
+                } else if("author".equals(currentNode.getNodeName())) {
                     StrAuthor = currentNode.getFirstChild().getNodeValue();
-                } else if(currentNode.getNodeName().equals("content")) {
+                } else if("content".equals(currentNode.getNodeName())) {
                     StrPage = currentNode.getFirstChild().getNodeValue();
                 }
             }
@@ -363,7 +367,7 @@ public class BlogBoardComments {
          * @return 
          */
         public boolean isAllowed() {
-            return (record.get("moderated") != null) && record.get("moderated").equals("true");
+            return "true".equals(record.get("moderated"));
         } 
         public void allow() {
             record.put("moderated", "true");

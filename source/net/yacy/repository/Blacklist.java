@@ -1,4 +1,4 @@
-// indexDefaultReference.java
+// Blacklist.java
 // (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 11.07.2005 on http://yacy.net
 //
@@ -23,7 +23,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
 package net.yacy.repository;
 
 import java.io.File;
@@ -50,123 +49,145 @@ import net.yacy.kelondro.util.SetTools;
 
 public class Blacklist {
 
-
-    public static final String BLACKLIST_DHT      = "dht";
-    public static final String BLACKLIST_CRAWLER  = "crawler";
-    public static final String BLACKLIST_PROXY    = "proxy";
-    public static final String BLACKLIST_SEARCH   = "search";
+    public static final String BLACKLIST_DHT = "dht";
+    public static final String BLACKLIST_CRAWLER = "crawler";
+    public static final String BLACKLIST_PROXY = "proxy";
+    public static final String BLACKLIST_SEARCH = "search";
     public static final String BLACKLIST_SURFTIPS = "surftips";
-    public static final String BLACKLIST_NEWS     = "news";
-
+    public static final String BLACKLIST_NEWS = "news";
     public final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
-    
-    public static final int ERR_TWO_WILDCARDS_IN_HOST = 1;
-    public static final int ERR_SUBDOMAIN_XOR_WILDCARD = 2;
-    public static final int ERR_PATH_REGEX = 3;
-    public static final int ERR_WILDCARD_BEGIN_OR_END = 4;
-    public static final int ERR_HOST_WRONG_CHARS = 5;
-    public static final int ERR_DOUBLE_OCCURANCE = 6;
-    public static final int ERR_HOST_REGEX = 7;
 
-    protected static final HashSet<String> BLACKLIST_TYPES = new HashSet<String>(Arrays.asList(new String[]{
-            Blacklist.BLACKLIST_CRAWLER,
-            Blacklist.BLACKLIST_PROXY,
-            Blacklist.BLACKLIST_DHT,
-            Blacklist.BLACKLIST_SEARCH,
-            Blacklist.BLACKLIST_SURFTIPS,
-            Blacklist.BLACKLIST_NEWS
-    }));
-    public static final String BLACKLIST_TYPES_STRING="proxy,crawler,dht,search,surftips,news";
-    
+    public static enum BlacklistError {
+
+        NO_ERROR(0),
+        TWO_WILDCARDS_IN_HOST(1),
+        SUBDOMAIN_XOR_WILDCARD(2),
+        PATH_REGEX(3),
+        WILDCARD_BEGIN_OR_END(4),
+        HOST_WRONG_CHARS(5),
+        DOUBLE_OCCURANCE(6),
+        HOST_REGEX(7);
+        final int errorCode;
+
+        BlacklistError(final int errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        public int getInt() {
+            return errorCode;
+        }
+
+        public long getLong() {
+            return (long) errorCode;
+        }
+    }
+    protected static final Set<String> BLACKLIST_TYPES = new HashSet<String>(Arrays.asList(new String[]{
+                Blacklist.BLACKLIST_CRAWLER,
+                Blacklist.BLACKLIST_PROXY,
+                Blacklist.BLACKLIST_DHT,
+                Blacklist.BLACKLIST_SEARCH,
+                Blacklist.BLACKLIST_SURFTIPS,
+                Blacklist.BLACKLIST_NEWS
+            }));
+    public static final String BLACKLIST_TYPES_STRING = "proxy,crawler,dht,search,surftips,news";
     protected File blacklistRootPath = null;
-    protected HashMap<String, HandleSet> cachedUrlHashs = null; 
+    protected HashMap<String, HandleSet> cachedUrlHashs = null;
     //protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths_matchable = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths_notmatchable = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
-    
+
     public Blacklist(final File rootPath) {
         this.setRootPath(rootPath);
-        
+
         this.blacklistRootPath = rootPath;
-        
+
         // prepare the data structure
         //this.hostpaths = new HashMap<String, HashMap<String, ArrayList<String>>>();
         this.hostpaths_matchable = new HashMap<String, HashMap<String, ArrayList<String>>>();
         this.hostpaths_notmatchable = new HashMap<String, HashMap<String, ArrayList<String>>>();
         this.cachedUrlHashs = new HashMap<String, HandleSet>();
-        
-        final Iterator<String> iter = BLACKLIST_TYPES.iterator();
-        while (iter.hasNext()) {
-            final String blacklistType = iter.next();
+
+        for (final String blacklistType : BLACKLIST_TYPES) {
             //this.hostpaths.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.hostpaths_matchable.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.hostpaths_notmatchable.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.cachedUrlHashs.put(blacklistType, new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
-        }            
+        }
     }
 
     public void setRootPath(final File rootPath) {
-        if (rootPath == null) 
+        if (rootPath == null) {
             throw new NullPointerException("The blacklist root path must not be null.");
-        if (!rootPath.isDirectory()) 
+        }
+        if (!rootPath.isDirectory()) {
             throw new IllegalArgumentException("The blacklist root path is not a directory.");
-        if (!rootPath.canRead())
+        }
+        if (!rootPath.canRead()) {
             throw new IllegalArgumentException("The blacklist root path is not readable.");
-        
+        }
+
         this.blacklistRootPath = rootPath;
     }
-    
-    protected HashMap<String, ArrayList<String>> getBlacklistMap(final String blacklistType,final boolean matchable) {
-        if (blacklistType == null) throw new IllegalArgumentException();
-        if (!BLACKLIST_TYPES.contains(blacklistType)) throw new IllegalArgumentException("Unknown blacklist type: "+blacklistType+".");        
-        
-        return (matchable)? this.hostpaths_matchable.get(blacklistType) : this.hostpaths_notmatchable.get(blacklistType);
+
+    protected Map<String, ArrayList<String>> getBlacklistMap(final String blacklistType, final boolean matchable) {
+        if (blacklistType == null) {
+            throw new IllegalArgumentException();
+        }
+        if (!BLACKLIST_TYPES.contains(blacklistType)) {
+            throw new IllegalArgumentException("Unknown blacklist type: " + blacklistType + ".");
+        }
+
+        return (matchable) ? this.hostpaths_matchable.get(blacklistType) : this.hostpaths_notmatchable.get(blacklistType);
     }
-    
+
     protected HandleSet getCacheUrlHashsSet(final String blacklistType) {
-        if (blacklistType == null) throw new IllegalArgumentException();
-        if (!BLACKLIST_TYPES.contains(blacklistType)) throw new IllegalArgumentException("Unknown backlist type.");        
+        if (blacklistType == null) {
+            throw new IllegalArgumentException();
+        }
+        if (!BLACKLIST_TYPES.contains(blacklistType)) {
+            throw new IllegalArgumentException("Unknown backlist type.");
+        }
 
         return this.cachedUrlHashs.get(blacklistType);
     }
-    
+
     public void clear() {
-        for (final HashMap<String, ArrayList<String>> entry: this.hostpaths_matchable.values()) {
+        for (final Map<String, ArrayList<String>> entry : this.hostpaths_matchable.values()) {
             entry.clear();
         }
-        for (final HashMap<String, ArrayList<String>> entry: this.hostpaths_notmatchable.values()) {
+        for (final Map<String, ArrayList<String>> entry : this.hostpaths_notmatchable.values()) {
             entry.clear();
         }
-        for (final HandleSet entry: this.cachedUrlHashs.values()) {
+        for (final HandleSet entry : this.cachedUrlHashs.values()) {
             entry.clear();
         }
     }
 
     public int size() {
         int size = 0;
-        for(final String entry: this.hostpaths_matchable.keySet()) {
-            for(final ArrayList<String> ientry: this.hostpaths_matchable.get(entry).values()) {
+        for (final String entry : this.hostpaths_matchable.keySet()) {
+            for (final ArrayList<String> ientry : this.hostpaths_matchable.get(entry).values()) {
                 size += ientry.size();
             }
         }
-        for(final String entry: this.hostpaths_notmatchable.keySet()) {
-            for(final ArrayList<String> ientry: this.hostpaths_notmatchable.get(entry).values()) {
+        for (final String entry : this.hostpaths_notmatchable.keySet()) {
+            for (final ArrayList<String> ientry : this.hostpaths_notmatchable.get(entry).values()) {
                 size += ientry.size();
             }
         }
         return size;
     }
-    
-    public void loadList(final BlacklistFile[] blFiles, final String sep) {        
+
+    public void loadList(final BlacklistFile[] blFiles, final String sep) {
         for (int j = 0; j < blFiles.length; j++) {
             final BlacklistFile blf = blFiles[j];
             loadList(blf.getType(), blf.getFileName(), sep);
         }
     }
-    
+
     private void loadList(final BlacklistFile blFile, final String sep) {
-        final HashMap<String, ArrayList<String>> blacklistMapMatch = getBlacklistMap(blFile.getType(),true);
-        final HashMap<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(),false);
+        final Map<String, ArrayList<String>> blacklistMapMatch = getBlacklistMap(blFile.getType(), true);
+        final Map<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(), false);
         Set<Map.Entry<String, ArrayList<String>>> loadedBlacklist;
         Map.Entry<String, ArrayList<String>> loadedEntry;
         ArrayList<String> paths;
@@ -180,21 +201,22 @@ public class Blacklist {
                 try {
                     file.createNewFile();
                 } catch (final IOException e) { /* */ }
-                
+
                 // join all blacklists from files into one internal blacklist map
                 loadedBlacklist = SetTools.loadMapMultiValsPerKey(file.toString(), sep).entrySet();
-                for (final Iterator<Map.Entry<String, ArrayList<String>>> mi = loadedBlacklist.iterator(); mi.hasNext(); ) {
+                for (final Iterator<Map.Entry<String, ArrayList<String>>> mi = loadedBlacklist.iterator(); mi.hasNext();) {
                     loadedEntry = mi.next();
                     loadedPaths = loadedEntry.getValue();
-                    
+
                     // create new entry if host mask unknown, otherwise merge
                     // existing one with path patterns from blacklist file 
                     paths = (isMatchable(loadedEntry.getKey())) ? blacklistMapMatch.get(loadedEntry.getKey()) : blacklistMapNotMatch.get(loadedEntry.getKey());
                     if (paths == null) {
-                        if(isMatchable(loadedEntry.getKey()))
+                        if (isMatchable(loadedEntry.getKey())) {
                             blacklistMapMatch.put(loadedEntry.getKey(), loadedPaths);
-                        else
+                        } else {
                             blacklistMapNotMatch.put(loadedEntry.getKey(), loadedPaths);
+                        }
                     } else {
                         // TODO check for duplicates? (refactor List -> Set)
                         paths.addAll(loadedPaths);
@@ -203,51 +225,63 @@ public class Blacklist {
             }
         }
     }
-    
+
     public void loadList(final String blacklistType, final String fileNames, final String sep) {
         // method for not breaking older plasmaURLPattern interface
         final BlacklistFile blFile = new BlacklistFile(fileNames, blacklistType);
-        
+
         loadList(blFile, sep);
     }
-    
+
     public void removeAll(final String blacklistType, final String host) {
-        getBlacklistMap(blacklistType,true).remove(host);
-        getBlacklistMap(blacklistType,false).remove(host);
+        getBlacklistMap(blacklistType, true).remove(host);
+        getBlacklistMap(blacklistType, false).remove(host);
     }
-    
+
     public void remove(final String blacklistType, final String host, final String path) {
-        
-        final HashMap<String, ArrayList<String>> blacklistMap = getBlacklistMap(blacklistType,true);
+
+        final Map<String, ArrayList<String>> blacklistMap = getBlacklistMap(blacklistType, true);
         ArrayList<String> hostList = blacklistMap.get(host);
-        if(hostList != null) {
+        if (hostList != null) {
             hostList.remove(path);
-            if (hostList.isEmpty())
+            if (hostList.isEmpty()) {
                 blacklistMap.remove(host);
+            }
         }
-        final HashMap<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blacklistType,false);
+        final Map<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blacklistType, false);
         hostList = blacklistMapNotMatch.get(host);
         if (hostList != null) {
             hostList.remove(path);
-            if (hostList.isEmpty())
+            if (hostList.isEmpty()) {
                 blacklistMapNotMatch.remove(host);
+            }
         }
     }
 
     public void add(final String blacklistType, String host, String path) {
-        if (host == null) throw new NullPointerException();
-        if (path == null) throw new NullPointerException();
-        
-        if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
-        
-        HashMap<String, ArrayList<String>> blacklistMap;
-        blacklistMap = (isMatchable(host)) ? getBlacklistMap(blacklistType,true) : getBlacklistMap(blacklistType,false);
-        
+        if (host == null) {
+            throw new NullPointerException();
+        }
+        if (path == null) {
+            throw new NullPointerException();
+        }
+
+        if (path.length() > 0 && path.charAt(0) == '/') {
+            path = path.substring(1);
+        }
+
+        Map<String, ArrayList<String>> blacklistMap;
+        blacklistMap = (isMatchable(host)) ? getBlacklistMap(blacklistType, true) : getBlacklistMap(blacklistType, false);
+
         // avoid PatternSyntaxException e
-        if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') host = "." + host;
-        
+        if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') {
+            host = "." + host;
+        }
+
         ArrayList<String> hostList = blacklistMap.get(host.toLowerCase());
-        if (hostList == null) blacklistMap.put(host.toLowerCase(), (hostList = new ArrayList<String>()));
+        if (hostList == null) {
+            blacklistMap.put(host.toLowerCase(), (hostList = new ArrayList<String>()));
+        }
         hostList.add(path);
     }
 
@@ -258,11 +292,11 @@ public class Blacklist {
             final HandleSet blacklistMap = this.cachedUrlHashs.get(iter.next());
             size += blacklistMap.size();
         }
-        return size;        
+        return size;
     }
 
     public boolean hashInBlacklistedCache(final String blacklistType, final byte[] urlHash) {
-        final HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);   
+        final HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);
         return urlHashCache.has(urlHash);
     }
 
@@ -270,21 +304,27 @@ public class Blacklist {
         boolean ret = false;
 
         if (blacklistType != null && host != null && path != null) {
-            HashMap<String, ArrayList<String>> blacklistMap;
-            blacklistMap = (isMatchable(host)) ? getBlacklistMap(blacklistType,true) : getBlacklistMap(blacklistType,false);
+            Map<String, ArrayList<String>> blacklistMap;
+            blacklistMap = (isMatchable(host)) ? getBlacklistMap(blacklistType, true) : getBlacklistMap(blacklistType, false);
 
             // avoid PatternSyntaxException e
-            if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') host = "." + host;
+            if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') {
+                host = "." + host;
+            }
 
             ArrayList<String> hostList = blacklistMap.get(host.toLowerCase());
-            if (hostList != null) ret = hostList.contains(path);
+            if (hostList != null) {
+                ret = hostList.contains(path);
+            }
         }
         return ret;
     }
 
     public boolean isListed(final String blacklistType, final DigestURI url) {
-        if (url.getHost() == null) return false;
-        final HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);        
+        if (url.getHost() == null) {
+            return false;
+        }
+        final HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);
         if (!urlHashCache.has(url.hash())) {
             final boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
             if (temp) {
@@ -294,24 +334,30 @@ public class Blacklist {
                     Log.logException(e);
                 }
             }
-            return temp;   
-        }        
-        return true;  
+            return temp;
+        }
+        return true;
     }
-    
-    public static boolean isMatchable (final String host) {
+
+    public static boolean isMatchable(final String host) {
         try {
-            if(Pattern.matches("^[a-z0-9.-]*$", host)) // simple Domain (yacy.net or www.yacy.net)
+            if (Pattern.matches("^[a-z0-9.-]*$", host)) // simple Domain (yacy.net or www.yacy.net)
+            {
                 return true;
-            if(Pattern.matches("^\\*\\.[a-z0-9-.]*$", host)) // start with *. (not .* and * must follow a dot)
+            }
+            if (Pattern.matches("^\\*\\.[a-z0-9-.]*$", host)) // start with *. (not .* and * must follow a dot)
+            {
                 return true;
-            if(Pattern.matches("^[a-z0-9-.]*\\.\\*$", host)) // ends with .* (not *. and befor * must be a dot)
+            }
+            if (Pattern.matches("^[a-z0-9-.]*\\.\\*$", host)) // ends with .* (not *. and befor * must be a dot)
+            {
                 return true;
+            }
         } catch (final PatternSyntaxException e) {
             //System.out.println(e.toString());
             return false;
         }
-       return false;
+        return false;
     }
 
     public String getEngineInfo() {
@@ -319,27 +365,33 @@ public class Blacklist {
     }
 
     public boolean isListed(final String blacklistType, final String hostlow, String path) {
-        if (hostlow == null) throw new NullPointerException();
-        if (path == null) throw new NullPointerException();
+        if (hostlow == null) {
+            throw new NullPointerException();
+        }
+        if (path == null) {
+            throw new NullPointerException();
+        }
 
         // getting the proper blacklist
-        final HashMap<String, ArrayList<String>> blacklistMapMatched = getBlacklistMap(blacklistType,true);
+        final Map<String, ArrayList<String>> blacklistMapMatched = getBlacklistMap(blacklistType, true);
 
-        if (path.length() > 0 && path.charAt(0) == '/') path = path.substring(1);
-        ArrayList<String> app;
+        if (path.length() > 0 && path.charAt(0) == '/') {
+            path = path.substring(1);
+        }
+        List<String> app;
         boolean matched = false;
         String pp = ""; // path-pattern
 
         // try to match complete domain
         if (!matched && (app = blacklistMapMatched.get(hostlow)) != null) {
-            for (int i=app.size()-1; !matched && i>-1; i--) {
+            for (int i = app.size() - 1; !matched && i > -1; i--) {
                 pp = app.get(i);
                 if (pp.indexOf("?*") > 0) {
                     // prevent "Dangling meta character '*'" exception
                     Log.logWarning("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + pp);
                     continue;
                 }
-                matched |= ((pp.equals("*")) || (path.matches(pp)));
+                matched |= (("*".equals(pp)) || (path.matches(pp)));
             }
         }
         // first try to match the domain with wildcard '*'
@@ -347,47 +399,48 @@ public class Blacklist {
         int index = 0;
         while (!matched && (index = hostlow.indexOf('.', index + 1)) != -1) {
             if ((app = blacklistMapMatched.get(hostlow.substring(0, index + 1) + "*")) != null) {
-                for (int i=app.size()-1; !matched && i>-1; i--) {
+                for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= ((pp.equals("*")) || (path.matches(pp)));
+                    matched |= (("*".equals(pp)) || (path.matches(pp)));
                 }
             }
             if ((app = blacklistMapMatched.get(hostlow.substring(0, index))) != null) {
-                for (int i=app.size()-1; !matched && i>-1; i--) {
+                for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= ((pp.equals("*")) || (path.matches(pp)));
+                    matched |= (("*".equals(pp)) || (path.matches(pp)));
                 }
             }
         }
         index = hostlow.length();
         while (!matched && (index = hostlow.lastIndexOf('.', index - 1)) != -1) {
             if ((app = blacklistMapMatched.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
-                for (int i=app.size()-1; !matched && i>-1; i--) {
+                for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= ((pp.equals("*")) || (path.matches(pp)));
+                    matched |= (("*".equals(pp)) || (path.matches(pp)));
                 }
             }
-            if ((app = blacklistMapMatched.get(hostlow.substring(index +1, hostlow.length()))) != null) {
-                for (int i=app.size()-1; !matched && i>-1; i--) {
+            if ((app = blacklistMapMatched.get(hostlow.substring(index + 1, hostlow.length()))) != null) {
+                for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= ((pp.equals("*")) || (path.matches(pp)));
+                    matched |= (("*".equals(pp)) || (path.matches(pp)));
                 }
             }
         }
 
 
         // loop over all Regexentrys
-        if(!matched) {
-            final HashMap<String, ArrayList<String>> blacklistMapNotMatched = getBlacklistMap(blacklistType,false);
+        if (!matched) {
+            final Map<String, ArrayList<String>> blacklistMapNotMatched = getBlacklistMap(blacklistType, false);
             String key;
-            for(final Entry<String, ArrayList<String>> entry: blacklistMapNotMatched.entrySet()) {
+            for (final Entry<String, ArrayList<String>> entry : blacklistMapNotMatched.entrySet()) {
                 key = entry.getKey();
                 try {
-                    if(Pattern.matches(key, hostlow)) {
+                    if (Pattern.matches(key, hostlow)) {
                         app = entry.getValue();
-                        for (int i=0; i<app.size(); i++) {
-                            if(Pattern.matches(app.get(i), path)) 
+                        for (int i = 0; i < app.size(); i++) {
+                            if (Pattern.matches(app.get(i), path)) {
                                 return true;
+                            }
                         }
                     }
                 } catch (final PatternSyntaxException e) {
@@ -398,7 +451,7 @@ public class Blacklist {
         return matched;
     }
 
-    public int checkError(String element, Map<String, String> properties) {
+    public BlacklistError checkError(String element, Map<String, String> properties) {
 
         boolean allowRegex = true;
         int slashPos;
@@ -422,36 +475,36 @@ public class Blacklist {
             // check whether host begins illegally
             if (!host.matches("([A-Za-z0-9_-]+|\\*)(\\.([A-Za-z0-9_-]+|\\*))*")) {
                 if (i == 0 && host.length() > 1 && host.charAt(1) != '.') {
-                    return ERR_SUBDOMAIN_XOR_WILDCARD;
+                    return BlacklistError.SUBDOMAIN_XOR_WILDCARD;
                 }
-                return ERR_HOST_WRONG_CHARS;
+                return BlacklistError.HOST_WRONG_CHARS;
             }
 
             // in host-part only full sub-domains may be wildcards
             if (host.length() > 0 && i > -1) {
                 if (!(i == 0 || i == host.length() - 1)) {
-                    return  ERR_WILDCARD_BEGIN_OR_END;
+                    return BlacklistError.WILDCARD_BEGIN_OR_END;
                 }
 
                 if (i == host.length() - 1 && host.length() > 1 && host.charAt(i - 1) != '.') {
-                    return ERR_SUBDOMAIN_XOR_WILDCARD;
+                    return BlacklistError.SUBDOMAIN_XOR_WILDCARD;
                 }
             }
 
             // check for double-occurences of "*" in host
             if (host.indexOf("*", i + 1) > -1) {
-                return ERR_TWO_WILDCARDS_IN_HOST;
+                return BlacklistError.TWO_WILDCARDS_IN_HOST;
             }
         } else if (allowRegex && !isValidRegex(host)) {
-            return ERR_HOST_REGEX;
+            return BlacklistError.HOST_REGEX;
         }
 
         // check for errors on regex-compiling path
         if (!isValidRegex(path) && !path.equals("*")) {
-            return ERR_PATH_REGEX;
+            return BlacklistError.PATH_REGEX;
         }
 
-        return 0;
+        return BlacklistError.DOUBLE_OCCURANCE.NO_ERROR;
     }
 
     /**
@@ -469,10 +522,12 @@ public class Blacklist {
         }
         return ret;
     }
-    
-    public static final String defaultBlacklist(final File listsPath) {
+
+    public static String defaultBlacklist(final File listsPath) {
         List<String> dirlist = FileUtils.getDirListing(listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
-        if (dirlist.isEmpty()) return null;
+        if (dirlist.isEmpty()) {
+            return null;
+        }
         return dirlist.get(0);
     }
 
@@ -490,5 +545,4 @@ public class Blacklist {
         }
         return ret;
     }
-    
 }

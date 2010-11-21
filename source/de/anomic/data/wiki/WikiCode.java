@@ -70,7 +70,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
         Tags(final String openWiki, final String closeWiki, final String openHTML, final String closeHTML) {
             if (openHTML == null || closeHTML == null || openWiki == null || closeWiki == null) {
-                throw new IllegalArgumentException("");
+                throw new IllegalArgumentException("Parameter may not be null.");
             }
 
             this.openHTML = openHTML;

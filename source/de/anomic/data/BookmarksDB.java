@@ -338,7 +338,7 @@ public class BookmarksDB {
                 tagSet = bookmark.getTags();
                 tagSet.remove(oldName);
                 bookmark.setTags(tagSet, true);						// might not be needed, but doesn't hurt
-                if(!newName.equals("")) bookmark.addTag(newName);                
+                if(!"".equals(newName)) bookmark.addTag(newName);
                 saveBookmark(bookmark);
             }
             return true;
@@ -589,14 +589,14 @@ public class BookmarksDB {
         
         public boolean getPublic(){
             if(entry.containsKey(BOOKMARK_PUBLIC)){
-                return entry.get(BOOKMARK_PUBLIC).equals("public");
+                return "public".equals(entry.get(BOOKMARK_PUBLIC));
             }
             return false;
         }
         
         public boolean getFeed(){
             if(entry.containsKey(BOOKMARK_IS_FEED)){
-                return entry.get(BOOKMARK_IS_FEED).equals("true");
+                return "true".equals(entry.get(BOOKMARK_IS_FEED));
             }
             return false;
         }

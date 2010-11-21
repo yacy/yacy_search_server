@@ -155,7 +155,7 @@ public class Browser {
     }
     
     public static void main(final String[] args) {
-        if (args[0].equals("-u")) {
+        if ("-u".equals(args[0])) {
             openBrowser(args[1]);
         }
     }
