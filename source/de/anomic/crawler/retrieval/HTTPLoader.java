@@ -109,45 +109,16 @@ public final class HTTPLoader {
 
         // HTTP-Client
         final HTTPClient client = new HTTPClient();
+        client.setRedirecting(false); // we want to handle redirection ourselves, so we don't index pages twice
         client.setTimout(socketTimeout);
         client.setHeader(requestHeader.entrySet());
             // send request
         	final byte[] responseBody = client.GETbytes(request.url().toString(), maxFileSize);
         	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
         	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
-            // FIXME: 30*-handling (bottom) is never reached
-            // we always get the final content because httpClient.followRedirects = true
 
-        	if (responseBody == null) {
-        	    // no response, reject file
-                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no response body (you may increase the maxmimum file size)");
-                throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
-        	} else if (code == 200 || code == 203) {
-                // the transfer is ok
-                
-                // we write the new cache entry to file system directly
-                long contentLength = responseBody.length;
-                ByteCount.addAccountCount(ByteCount.CRAWLER, contentLength);
-
-                // check length again in case it was not possible to get the length before loading
-                if (maxFileSize > 0 && contentLength > maxFileSize) {
-                	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "file size limit exceeded");                    
-                	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
-                }
-
-                // create a new cache entry
-                final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
-                response = new Response(
-                        request,
-                        requestHeader,
-                        header, 
-                        Integer.toString(code),
-                        mp == null ? null : new CrawlProfile(mp),
-                        responseBody
-                );
-
-                return response;
-        	} else if (code > 299 && code < 310) {
+        	if (code > 299 && code < 310) {
+        		// redirection (content may be empty)
                 if (header.containsKey(HeaderFramework.LOCATION)) {
                     // getting redirection URL
                 	String redirectionUrlString = header.get(HeaderFramework.LOCATION);
@@ -181,13 +152,45 @@ public final class HTTPLoader {
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
                     return load(request, retryCount - 1, maxFileSize);
+                } else {
+                	// no redirection url provided
+                    sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no redirection url provided");
+                    throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
                 }
-            } else {
+            } else if (responseBody == null) {
+        	    // no response, reject file
+                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no response body (you may increase the maxmimum file size)");
+                throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
+        	} else if (code == 200 || code == 203) {
+                // the transfer is ok
+                
+                // we write the new cache entry to file system directly
+                long contentLength = responseBody.length;
+                ByteCount.addAccountCount(ByteCount.CRAWLER, contentLength);
+
+                // check length again in case it was not possible to get the length before loading
+                if (maxFileSize > 0 && contentLength > maxFileSize) {
+                	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "file size limit exceeded");                    
+                	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
+                }
+
+                // create a new cache entry
+                final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
+                response = new Response(
+                        request,
+                        requestHeader,
+                        header, 
+                        Integer.toString(code),
+                        mp == null ? null : new CrawlProfile(mp),
+                        responseBody
+                );
+
+                return response;
+        	} else {
                 // if the response has not the right response type then reject file
             	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code " + code);
                 throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
             }
-        return response;
     }
     
     public static Response load(final Request request) throws IOException {
