@@ -42,7 +42,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.data.diff;
-import de.anomic.data.wiki.wikiBoard;
+import de.anomic.data.wiki.WikiBoard;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -78,7 +78,7 @@ public class Wiki {
         final String ip = get(post, HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
         String author = get(post, "author", ANONYMOUS);
         if (author.equals(ANONYMOUS)) {
-            author = wikiBoard.guessAuthor(ip);
+            author = WikiBoard.guessAuthor(ip);
             if (author == null) {
                 author = (sb.peers.mySeed() == null) ? ANONYMOUS : sb.peers.mySeed().get("Name", ANONYMOUS);
             }
@@ -101,7 +101,7 @@ public class Wiki {
             prop.put("mode_access", "1");
         }
 
-        wikiBoard.Entry page = sb.wikiDB.read(pagename);
+        WikiBoard.Entry page = sb.wikiDB.read(pagename);
         
         if (post != null && post.containsKey("submit")) {
             
@@ -118,7 +118,7 @@ public class Wiki {
             } catch (final UnsupportedEncodingException e) {
                 content = post.get("content", "").getBytes();
             }
-            final wikiBoard.Entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
+            final WikiBoard.Entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
             sb.wikiDB.write(newEntry);
             // create a news message
             final Map<String, String> map = new HashMap<String, String>();
@@ -172,8 +172,8 @@ public class Wiki {
                 int count=0;
                 while (i.hasNext()) {
                     final String subject = new String(i.next());
-                    final wikiBoard.Entry entry = sb.wikiDB.read(subject);
-                    prop.putHTML("mode_pages_" + count + "_name",wikiBoard.webalize(subject));
+                    final WikiBoard.Entry entry = sb.wikiDB.read(subject);
+                    prop.putHTML("mode_pages_" + count + "_name",WikiBoard.webalize(subject));
                     prop.putHTML("mode_pages_" + count + "_subject", subject);
                     prop.put("mode_pages_" + count + "_date", dateString(entry.date()));
                     prop.putHTML("mode_pages_" + count + "_author", entry.author());
@@ -197,20 +197,20 @@ public class Wiki {
             
             try {
                 final Iterator<byte[]> it = sb.wikiDB.keysBkp(true);
-                wikiBoard.Entry entry;
-                wikiBoard.Entry oentry = null;
-                wikiBoard.Entry nentry = null;
+                WikiBoard.Entry entry;
+                WikiBoard.Entry oentry = null;
+                WikiBoard.Entry nentry = null;
                 int count = 0;
                 boolean oldselected = false, newselected = false;
                 while (it.hasNext()) {
                     entry = sb.wikiDB.readBkp(new String(it.next()));
-                    prop.put("mode_error_versions_" + count + "_date", wikiBoard.dateString(entry.date()));
+                    prop.put("mode_error_versions_" + count + "_date", WikiBoard.dateString(entry.date()));
                     prop.put("mode_error_versions_" + count + "_fdate", dateString(entry.date()));
-                    if (wikiBoard.dateString(entry.date()).equals(post.get("old", null))) {
+                    if (WikiBoard.dateString(entry.date()).equals(post.get("old", null))) {
                         prop.put("mode_error_versions_" + count + "_oldselected", "1");
                         oentry = entry;
                         oldselected = true;
-                    } else if (wikiBoard.dateString(entry.date()).equals(post.get("new", null))) {
+                    } else if (WikiBoard.dateString(entry.date()).equals(post.get("new", null))) {
                         prop.put("mode_error_versions_" + count + "_newselected", "1");
                         nentry = entry;
                         newselected = true;
@@ -234,7 +234,7 @@ public class Wiki {
                 
                 entry = sb.wikiDB.read(pagename);
                 if (entry != null) {
-                    prop.put("mode_error_curdate", wikiBoard.dateString(entry.date()));
+                    prop.put("mode_error_curdate", WikiBoard.dateString(entry.date()));
                     prop.put("mode_error_curfdate", dateString(entry.date()));
                 }
                 
