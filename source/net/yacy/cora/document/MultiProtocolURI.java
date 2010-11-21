@@ -682,7 +682,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 }
                 int p = q.toLowerCase().indexOf("&" + sid.toLowerCase() + "=");
                 if (p < 0) continue;
-                int p1 = q.indexOf('&', p);
+                int p1 = q.indexOf('&', p+1);
                 if (p1 < 0) {
                     q = q.substring(0, p);
                 } else {
