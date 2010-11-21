@@ -32,11 +32,11 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
-abstract class abstractWikiParser implements wikiParser {
+abstract class AbstractWikiParser implements WikiParser {
     
     final String address;
     
-    public abstractWikiParser(final String address) {
+    public AbstractWikiParser(final String address) {
         this.address = address;
     }
     

@@ -53,7 +53,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.data.wiki.wikiBoard;
+import de.anomic.data.wiki.WikiBoard;
 
 public class blogBoardComments {
     
@@ -102,7 +102,7 @@ public class blogBoardComments {
     }
 
     public String guessAuthor(final String ip) {
-        return wikiBoard.guessAuthor(ip);
+        return WikiBoard.guessAuthor(ip);
     }
 
     public CommentEntry newEntry(final String key, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page) {
@@ -255,7 +255,7 @@ public class blogBoardComments {
             setIp(ip);
             setPage(page);
             
-            wikiBoard.setAuthor(ip, new String(author));
+            WikiBoard.setAuthor(ip, new String(author));
         }
     
         CommentEntry(final String key, final Map<String, String> record) {

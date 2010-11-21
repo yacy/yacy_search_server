@@ -44,7 +44,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 /**
  * 
  */
-public class wikiBoard {
+public class WikiBoard {
 
     public  static final int keyLength = 64;
     private static final String DATE_FORMAT = "yyyyMMddHHmmss";
@@ -66,7 +66,7 @@ public class wikiBoard {
      * @param bkppath path of backup database.
      * @throws IOException if error occurs during HDD access.
      */
-    public wikiBoard(final File actpath, final File bkppath) throws IOException {
+    public WikiBoard(final File actpath, final File bkppath) throws IOException {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
             //datbase = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, actpathNew), 500, '_');

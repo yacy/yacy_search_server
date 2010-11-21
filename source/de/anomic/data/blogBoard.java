@@ -55,7 +55,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.data.wiki.wikiBoard;
+import de.anomic.data.wiki.WikiBoard;
 import java.util.List;
 import java.util.Set;
 
@@ -97,7 +97,7 @@ public class blogBoard {
     }
     
     public String guessAuthor(final String ip) {
-        return wikiBoard.guessAuthor(ip);
+        return WikiBoard.guessAuthor(ip);
     }
     
     /**
@@ -362,7 +362,7 @@ public class blogBoard {
             // TODO: implement this function
             record.put("privacy", "public");
             
-            wikiBoard.setAuthor(ip, new String(author));
+            WikiBoard.setAuthor(ip, new String(author));
         }
         
         BlogEntry(final String key, final Map<String, String> record) {

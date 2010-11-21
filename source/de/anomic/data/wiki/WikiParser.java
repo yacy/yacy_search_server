@@ -1,4 +1,4 @@
-// wikiParserException.java
+// wikiParser.java
 // ---------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -25,21 +25,12 @@
 
 package de.anomic.data.wiki;
 
-public class wikiParserException extends Exception {
+import java.io.UnsupportedEncodingException;
+
+public interface WikiParser {
     
-    private static final long serialVersionUID = 1L;
+    public String transform(String text);
+    public String transform(byte[] text) throws UnsupportedEncodingException;
+    public String transform(byte[] text, String encoding) throws UnsupportedEncodingException;
     
-    public wikiParserException() {  }
-    
-    public wikiParserException(final String message) {
-        super(message);
-    }
-    
-    public wikiParserException(final Throwable cause) {
-        super(cause);
-    }
-    
-    public wikiParserException(final String message, final Throwable cause) {
-        super(message, cause);
-    }
 }

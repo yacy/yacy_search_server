@@ -59,8 +59,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import de.anomic.data.wiki.wikiCode;
-import de.anomic.data.wiki.wikiParser;
+import de.anomic.data.wiki.WikiCode;
+import de.anomic.data.wiki.WikiParser;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format
@@ -79,7 +79,7 @@ public class MediawikiImporter extends Thread implements Importer {
     
     public static Importer job; // if started from a servlet, this object is used to store the thread
     
-    protected wikiParser wparser;
+    protected WikiParser wparser;
     protected String urlStub;
     public    File sourcefile;
     public    File targetdir;
@@ -95,7 +95,7 @@ public class MediawikiImporter extends Thread implements Importer {
     	this.approxdocs = (int) (this.docsize * (long) docspermbinxmlbz2 / 1024L / 1024L);
     	this.targetdir = targetdir;
         this.urlStub = baseURL;
-        this.wparser = new wikiCode(new URL(baseURL).getHost());
+        this.wparser = new WikiCode(new URL(baseURL).getHost());
         this.count = 0;
         this.start = 0;
     }

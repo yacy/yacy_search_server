@@ -40,7 +40,7 @@ import de.anomic.server.serverCore;
   *
   * @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
   */
-public class wikiCode extends abstractWikiParser implements wikiParser {
+public class WikiCode extends AbstractWikiParser implements WikiParser {
     
     private static final String EMPTY = "";
     private static final String PIPE_ESCAPED = "&#124;";
@@ -190,7 +190,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
      * Constructor
      * @param address
      */
-    public wikiCode(final String address) {
+    public WikiCode(final String address) {
         super(address);
     }
 

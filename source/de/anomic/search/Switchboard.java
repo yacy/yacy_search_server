@@ -138,9 +138,9 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
-import de.anomic.data.wiki.wikiBoard;
-import de.anomic.data.wiki.wikiCode;
-import de.anomic.data.wiki.wikiParser;
+import de.anomic.data.wiki.WikiBoard;
+import de.anomic.data.wiki.WikiCode;
+import de.anomic.data.wiki.WikiParser;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.RobotsTxtConfig;
@@ -181,7 +181,7 @@ public final class Switchboard extends serverSwitch {
     public static HandleSet stopwordHashes = null;    
     public static Blacklist urlBlacklist = null;
     
-    public static wikiParser wikiParser = null;
+    public static WikiParser wikiParser = null;
     
     // storage management
     public  File                           htCachePath;
@@ -203,7 +203,7 @@ public final class Switchboard extends serverSwitch {
     public  ResultURLs                     crawlResults;
     public  CrawlStacker                   crawlStacker;
     public  messageBoard                   messageDB;
-    public  wikiBoard                      wikiDB;
+    public  WikiBoard                      wikiDB;
     public  blogBoard                      blogDB;
     public  blogBoardComments              blogCommentDB;
     public  RobotsTxt                      robots;
@@ -559,7 +559,7 @@ public final class Switchboard extends serverSwitch {
         log.logConfig("Initializing Snippet Cache");
         
         // init the wiki
-        wikiParser = new wikiCode(this.peers.mySeed().getClusterAddress());
+        wikiParser = new WikiCode(this.peers.mySeed().getClusterAddress());
         
         // initializing the resourceObserver
         InstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", ResourceObserver.log, 0);
@@ -1004,7 +1004,7 @@ public final class Switchboard extends serverSwitch {
     public void initWiki() throws IOException {
         this.log.logConfig("Starting Wiki Board");
         final File wikiDbFile = new File(workPath, "wiki.heap");
-        this.wikiDB = new wikiBoard(wikiDbFile, new File(workPath, "wiki-bkp.heap"));
+        this.wikiDB = new WikiBoard(wikiDbFile, new File(workPath, "wiki-bkp.heap"));
         this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() +
         ", " + this.wikiDB.size() + " entries" +
         ", " + ppRamString(wikiDbFile.length()/1024));
