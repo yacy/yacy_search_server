@@ -55,7 +55,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.data.wiki.WikiBoard;
 
-public class blogBoardComments {
+public class BlogBoardComments {
     
     private final static int KEY_LENGTH = 64;
     private final static String DATE_FORMAT = "yyyyMMddHHmmss";
@@ -67,7 +67,7 @@ public class blogBoardComments {
     
     private MapHeap database = null;
     
-    public blogBoardComments(final File actpath) throws IOException {
+    public BlogBoardComments(final File actpath) throws IOException {
         new File(actpath.getParent()).mkdir();
         //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
         database = new MapHeap(actpath, KEY_LENGTH, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
@@ -262,7 +262,7 @@ public class blogBoardComments {
             this.key = key;
             this.record = record;
             if (this.record.get("comments") == null) {
-                this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
+                this.record.put("comments", ListManager.collection2string(new ArrayList<String>()));
             }
         }
         

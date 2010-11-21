@@ -5,9 +5,9 @@ import java.util.Set;
 import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.data.BookmarkHelper;
-import de.anomic.data.bookmarksDB;
-import de.anomic.data.listManager;
-import de.anomic.data.userDB;
+import de.anomic.data.BookmarksDB;
+import de.anomic.data.ListManager;
+import de.anomic.data.UserDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -18,7 +18,7 @@ public class add_p {
     
 	private static final serverObjects prop = new serverObjects();
 	private static Switchboard sb = null;
-	private static userDB.Entry user = null;
+	private static UserDB.Entry user = null;
 	private static boolean isAdmin = false;	
 	
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -46,11 +46,11 @@ public class add_p {
 			String tagsString = post.get("tags","");
 			String pathString = post.get("path","/unsorted");
 			tagsString=tagsString+","+pathString;
-			final Set<String> tags=listManager.string2set(BookmarkHelper.cleanTagsString(tagsString)); 
-			final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
+			final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(tagsString));
+			final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
 			if(bookmark != null){
-				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
-				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
+				bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
+				bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
 				if(user!=null){ 
 					bookmark.setOwner(user.getUserName());
 				}

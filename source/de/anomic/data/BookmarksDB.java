@@ -42,7 +42,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 
-public class bookmarksDB {
+public class BookmarksDB {
     
 	// ------------------------------------
 	// Declaration of Class-Attributes
@@ -64,7 +64,7 @@ public class bookmarksDB {
 	// bookmarksDB's class constructor
 	// ------------------------------------
 
-    public bookmarksDB(final File bookmarksFile, final File datesFile) throws IOException {
+    public BookmarksDB(final File bookmarksFile, final File datesFile) throws IOException {
         
         // bookmarks
         bookmarksFile.getParentFile().mkdirs();
@@ -159,7 +159,7 @@ public class bookmarksDB {
         final Bookmark bookmark = getBookmark(urlHash);
         if (bookmark == null) return false; //does not exist
         final Set<String> tagSet = bookmark.getTags();
-        bookmarksDB.Tag tag=null;
+        BookmarksDB.Tag tag=null;
         final Iterator<String> it=tagSet.iterator();
         while(it.hasNext()){
             tag=getTag(BookmarkHelper.tagHash(it.next()));
@@ -374,7 +374,7 @@ public class bookmarksDB {
             tagHash = hash;
             mem = map;
             if (mem.containsKey(URL_HASHES)) {
-                urlHashes = listManager.string2set(mem.get(URL_HASHES));
+                urlHashes = ListManager.string2set(mem.get(URL_HASHES));
             } else {
                 urlHashes = new HashSet<String>();
             }
@@ -393,7 +393,7 @@ public class bookmarksDB {
         }
         
         public Map<String, String> getMap(){
-            mem.put(URL_HASHES, listManager.collection2string(this.urlHashes));
+            mem.put(URL_HASHES, ListManager.collection2string(this.urlHashes));
             return mem;
         }
         
@@ -469,7 +469,7 @@ public class bookmarksDB {
             entry = map;
             this.urlHash = urlHash;
             tagNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-            if (map.containsKey(BOOKMARK_TAGS)) tagNames.addAll(listManager.string2set(map.get(BOOKMARK_TAGS)));
+            if (map.containsKey(BOOKMARK_TAGS)) tagNames.addAll(ListManager.string2set(map.get(BOOKMARK_TAGS)));
             loadTimestamp();
         }
 
@@ -516,7 +516,7 @@ public class bookmarksDB {
         }
         
         Map<String, String> toMap() {
-            entry.put(BOOKMARK_TAGS, listManager.collection2string(tagNames));
+            entry.put(BOOKMARK_TAGS, ListManager.collection2string(tagNames));
             entry.put(BOOKMARK_TIMESTAMP, String.valueOf(this.timestamp));
             return entry;
         }
@@ -539,7 +539,7 @@ public class bookmarksDB {
         }
         
         public String getTagsString() {        	
-            final String s[] = listManager.collection2string(getTags()).split(",");
+            final String s[] = ListManager.collection2string(getTags()).split(",");
             final StringBuilder stringBuilder = new StringBuilder();
             for (final String element : s){
                 if(!element.startsWith("/")){
@@ -551,7 +551,7 @@ public class bookmarksDB {
         }
         
         public String getFoldersString(){
-            final String s[] = listManager.collection2string(getTags()).split(",");
+            final String s[] = ListManager.collection2string(getTags()).split(",");
             final StringBuilder stringBuilder = new StringBuilder();
             for (final String element : s){
                 if(element.startsWith("/")){
@@ -676,7 +676,7 @@ public class bookmarksDB {
         
         public bookmarkIterator(final boolean up) throws IOException {
             //flushBookmarkCache(); //XXX: this will cost performance
-            this.bookmarkIter = bookmarksDB.this.bookmarks.keys(up, false);
+            this.bookmarkIter = BookmarksDB.this.bookmarks.keys(up, false);
             //this.nextEntry = null;
         }
         

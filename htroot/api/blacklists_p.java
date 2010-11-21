@@ -6,7 +6,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
-import de.anomic.data.listManager;
+import de.anomic.data.ListManager;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -16,8 +16,8 @@ public class blacklists_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         
-        listManager.listsPath = new File(listManager.switchboard.getDataPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        final List<String> dirlist = FileUtils.getDirListing(listManager.listsPath);
+        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
         int blacklistCount=0;
 
         final String blackListName = (post == null) ? "" : post.get("listname", "");
@@ -30,7 +30,7 @@ public class blacklists_p {
                 if (blackListName.equals("") || element.equals(blackListName)) {
                     prop.putXML("lists_" + blacklistCount + "_name", element);
 
-                    if (listManager.listSetContains("BlackLists.Shared", element)) {
+                    if (ListManager.listSetContains("BlackLists.Shared", element)) {
                         prop.put("lists_" + blacklistCount + "_shared", "1");
                     } else {
                         prop.put("lists_" + blacklistCount + "_shared", "0");
@@ -40,12 +40,12 @@ public class blacklists_p {
                     for (int j=0; j<types.length; j++) {
                         prop.putXML("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
                         prop.put("lists_" + blacklistCount + "_types_" + j + "_value",
-                                listManager.listSetContains(types[j] + ".BlackLists", element) ? 1 : 0);
+                                ListManager.listSetContains(types[j] + ".BlackLists", element) ? 1 : 0);
                     }
                     prop.put("lists_" + blacklistCount + "_types", types.length);
 
                     if ( ! (attrOnly.equals("1") || attrOnly.equals("true"))) {
-                	list = FileUtils.getListArray(new File(listManager.listsPath, element));
+                	list = FileUtils.getListArray(new File(ListManager.listsPath, element));
 
                 	count=0;
                 	for (int j=0;j<list.size();++j){

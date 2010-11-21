@@ -4,7 +4,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.YMarkTables;
-import de.anomic.data.userDB;
+import de.anomic.data.UserDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -18,9 +18,9 @@ public class delete_ymark {
         sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
-        final userDB.Entry user = sb.userDB.getUser(header); 
+        final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
-        final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
+        final boolean isAuthUser = user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {     	
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);

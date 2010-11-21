@@ -34,7 +34,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 
-import de.anomic.data.userDB;
+import de.anomic.data.UserDB;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -46,7 +46,7 @@ public class User{
     public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final Switchboard sb = Switchboard.getSwitchboard();
-        userDB.Entry entry=null;
+        UserDB.Entry entry=null;
 
         //default values
         prop.put("logged_in", "0");
@@ -128,7 +128,7 @@ public class User{
         			if(post.get("newpass").equals(post.get("newpass2"))){
         			if(!post.get("newpass", "").equals("")){
         				try {
-							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
+							entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
 							prop.put("status_password", "0"); //changes
 						} catch (final Exception e) {
 						    Log.logException(e);
@@ -147,9 +147,9 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in", "0");
             if(entry != null){
-                entry.logout((requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
+                entry.logout((requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "xxxxxx")), UserDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
             }else{
-                sb.userDB.adminLogout(userDB.getLoginToken(requestHeader.getHeaderCookies()));
+                sb.userDB.adminLogout(UserDB.getLoginToken(requestHeader.getHeaderCookies()));
             }
             //XXX: This should not be needed anymore, because of isLoggedout
             if(! (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){

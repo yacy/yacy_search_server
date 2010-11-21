@@ -44,11 +44,11 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.data.blogBoard;
-import de.anomic.data.blogBoardComments;
-import de.anomic.data.messageBoard;
-import de.anomic.data.userDB;
-import de.anomic.data.blogBoard.BlogEntry;
+import de.anomic.data.BlogBoard;
+import de.anomic.data.BlogBoardComments;
+import de.anomic.data.MessageBoard;
+import de.anomic.data.UserDB;
+import de.anomic.data.BlogBoard.BlogEntry;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -66,7 +66,7 @@ public class BlogComments {
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        blogBoard.BlogEntry page = null;
+        BlogBoard.BlogEntry page = null;
         boolean hasRights = sb.verifyAuthentication(header, true);
 
         if (hasRights) prop.put("mode_admin", "1");
@@ -78,8 +78,8 @@ public class BlogComments {
         }
 
         if(!hasRights){
-            final userDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
-            if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
+            final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
+            if(userentry != null && userentry.hasRight(UserDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             }
             //opens login window if login link is clicked - contrib [MN]
@@ -152,7 +152,7 @@ public class BlogComments {
                 sb.blogCommentDB.write(sb.blogCommentDB.newEntry(commentID, subject, author, ip, date, content));
                 prop.putHTML("LOCATION","BlogComments.html?page=" + pagename);
 
-                messageBoard.entry msgEntry = null;
+                MessageBoard.entry msgEntry = null;
                 try {
                     sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                             "blogComment",
@@ -190,7 +190,7 @@ public class BlogComments {
         }
 
         if(hasRights && post.containsKey("allow") && post.containsKey("page") && post.containsKey("comment")) {
-            final blogBoardComments.CommentEntry entry = sb.blogCommentDB.read(post.get("comment"));
+            final BlogBoardComments.CommentEntry entry = sb.blogCommentDB.read(post.get("comment"));
             entry.allow();
             sb.blogCommentDB.write(entry);
         }
@@ -244,7 +244,7 @@ public class BlogComments {
                     final Iterator<String> i = page.getComments().iterator();
                     final int commentMode = page.getCommentMode();
                     String pageid;
-                    blogBoardComments.CommentEntry entry;
+                    BlogBoardComments.CommentEntry entry;
                     boolean xml = false;
                     if(post.containsKey("xml")) {
                         xml = true;
@@ -326,7 +326,7 @@ public class BlogComments {
         return prop;
     }
 
-    private static void messageForwardingViaEmail(final Switchboard sb, final messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(final Switchboard sb, final MessageBoard.entry msgEntry) {
         try {
             if (!Boolean.parseBoolean(sb.getConfig("msgForwardingEnabled","false"))) return;
 

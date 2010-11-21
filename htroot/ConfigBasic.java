@@ -37,7 +37,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 
 import de.anomic.data.WorkTables;
-import de.anomic.data.translator;
+import de.anomic.data.Translator;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HTTPDFileHandler;
 import de.anomic.net.UPnP;
@@ -84,7 +84,7 @@ public class ConfigBasic {
         
         // language settings
         if ((post != null) && (!(post.get("language", "default").equals(lang)))) {
-        	if (translator.changeLang(env, langPath, post.get("language", "default") + ".lng"))
+        	if (Translator.changeLang(env, langPath, post.get("language", "default") + ".lng"))
         		prop.put("changedLanguage", "1");
         }
         

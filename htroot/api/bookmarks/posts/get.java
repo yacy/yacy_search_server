@@ -9,7 +9,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.data.bookmarksDB;
+import de.anomic.data.BookmarksDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -47,7 +47,7 @@ public class get {
         
         final ArrayList<String> bookmark_hashes=switchboard.bookmarksDB.getDate(Long.toString(parsedDate.getTime())).getBookmarkList();
         final Iterator<String> it=bookmark_hashes.iterator();
-        bookmarksDB.Bookmark bookmark=null;
+        BookmarksDB.Bookmark bookmark=null;
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark(it.next());
             if(DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())).equals(date) &&

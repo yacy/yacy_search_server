@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.data.bookmarksDB.Bookmark;
+import de.anomic.data.BookmarksDB.Bookmark;
 
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -112,20 +112,20 @@ public class BookmarkDate {
             //round to seconds, but store as milliseconds (java timestamp)
             date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
             mem=new HashMap<String, String>();
-            mem.put(URL_HASHES, listManager.collection2string(entries));
+            mem.put(URL_HASHES, ListManager.collection2string(entries));
         }
         public void add(final String urlHash){
             final String urlHashes = mem.get(URL_HASHES);
             ArrayList<String> list;
             if(urlHashes != null && !urlHashes.equals("")){
-                list=listManager.string2arraylist(urlHashes);
+                list=ListManager.string2arraylist(urlHashes);
             }else{
                 list=new ArrayList<String>();
             }
             if(!list.contains(urlHash) && urlHash != null && !urlHash.equals("")){
                 list.add(urlHash);
             }
-            this.mem.put(URL_HASHES, listManager.collection2string(list));
+            this.mem.put(URL_HASHES, ListManager.collection2string(list));
             /*if(urlHashes!=null && !urlHashes.equals("") ){
                 if(urlHashes.indexOf(urlHash) <0){
                     this.mem.put(URL_HASHES, urlHashes+","+urlHash);
@@ -135,11 +135,11 @@ public class BookmarkDate {
             }*/
         }
         public void delete(final String urlHash){
-            final ArrayList<String> list=listManager.string2arraylist(this.mem.get(URL_HASHES));
+            final ArrayList<String> list=ListManager.string2arraylist(this.mem.get(URL_HASHES));
             if(list.contains(urlHash)){
                 list.remove(urlHash);
             }
-            this.mem.put(URL_HASHES, listManager.collection2string(list));
+            this.mem.put(URL_HASHES, ListManager.collection2string(list));
         }
         public void setDatesTable() {
             if (this.size() >0) {
@@ -160,10 +160,10 @@ public class BookmarkDate {
             return date;
         }
         public ArrayList<String> getBookmarkList(){
-            return listManager.string2arraylist(this.mem.get(URL_HASHES));
+            return ListManager.string2arraylist(this.mem.get(URL_HASHES));
         }
         public int size(){
-            return listManager.string2arraylist(this.mem.get(URL_HASHES)).size();
+            return ListManager.string2arraylist(this.mem.get(URL_HASHES)).size();
         }
     }
 }

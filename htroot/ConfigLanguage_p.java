@@ -43,7 +43,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.data.WorkTables;
-import de.anomic.data.translator;
+import de.anomic.data.Translator;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -82,7 +82,7 @@ public class ConfigLanguage_p {
                  * directory traversal attacks!
                  */
                 if (langFiles.contains(selectedLanguage) || selectedLanguage.startsWith("default")) {
-                    translator.changeLang(env, langPath, selectedLanguage);
+                    Translator.changeLang(env, langPath, selectedLanguage);
                 }
 
                 //delete language file
@@ -122,7 +122,7 @@ public class ConfigLanguage_p {
                     return prop;
                 }
                 if(post.containsKey("use_lang") && (post.get("use_lang")).equals("on")){
-                    translator.changeLang(env, langPath, url.substring(url.lastIndexOf('/'), url.length()));
+                    Translator.changeLang(env, langPath, url.substring(url.lastIndexOf('/'), url.length()));
                 }
             }
         }
@@ -130,7 +130,7 @@ public class ConfigLanguage_p {
         //reread language files
         langFiles = FileUtils.getDirListing(langPath, LANG_FILENAME_FILTER);
         Collections.sort(langFiles);
-        final Map<String, String> langNames = translator.langMap(env);
+        final Map<String, String> langNames = Translator.langMap(env);
         String langKey, langName;
 
         //virtual entry

@@ -40,7 +40,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,11 +57,11 @@ import java.util.Set;
  *
  * Uses a Property like file with phrases or single words to translate a string or a file
  * */
-public class translator {
+public class Translator {
     public static String translate(final String source, final Map<String, String> translationTable){
         final Set<String> keys = translationTable.keySet();
         String result = source;
-        for (String key : keys){
+        for (final String key : keys){
             final Pattern pattern = Pattern.compile(key);
             final Matcher matcher = pattern.matcher(result);
             if (matcher.find()) {
@@ -82,15 +81,15 @@ public class translator {
      * @return a Hashtable, which contains for each File a Hashtable with translations.
      */
     public static Map<String, Map<String, String>> loadTranslationsLists(final File translationFile){
-        final Map<String, Map<String, String>> lists = new Hashtable<String, Map<String, String>>(); //list of translationLists for different files.
-        Map<String, String> translationList = new Hashtable<String, String>(); //current Translation Table
+        final Map<String, Map<String, String>> lists = new HashMap<String, Map<String, String>>(); //list of translationLists for different files.
+        Map<String, String> translationList = new HashMap<String, String>(); //current Translation Table
 
         final List<String> list = FileUtils.getListArray(translationFile);
         String forFile = "";
 
         for (final String line : list){
             if (line.length() == 0 || line.charAt(0) != '#'){
-                String[] split = line.split("==", 2);
+                final String[] split = line.split("==", 2);
                 if (split.length == 2) {
                     translationList.put(split[0], split[1]);
                 //}else{ //Invalid line
@@ -105,9 +104,9 @@ public class translator {
                     forFile=line.substring(6);
                 }
                 if (lists.containsKey(forFile)) {
-                    translationList=lists.get(forFile);
+                    translationList = lists.get(forFile);
                 } else {
-                    translationList = new Hashtable<String, String>();
+                    translationList = new HashMap<String, String>();
                 }
             }
         }
@@ -149,7 +148,7 @@ public class translator {
         }catch(final IOException e){
             return false;
         } finally {
-            if(bw != null) {
+            if (bw != null) {
                 try {
                     bw.close();
                 } catch (final Exception e) {}
@@ -166,13 +165,13 @@ public class translator {
     public static boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final Map<String, Map<String, String>> translationLists, final String extensions){
         destDir.mkdirs();
         final File[] sourceFiles = sourceDir.listFiles();
-        final List<String> exts = listManager.string2vector(extensions);
+        final List<String> exts = ListManager.string2vector(extensions);
         boolean rightExtension;
         String relativePath;
-        for(final File sourceFile : sourceFiles){
+        for (final File sourceFile : sourceFiles) {
              rightExtension=false;
-             for(final String ext : exts){
-                 if(sourceFile.getName().endsWith(ext)){
+             for (final String ext : exts) {
+                 if (sourceFile.getName().endsWith(ext)) {
                      rightExtension=true;
                      break;
                  }
@@ -181,7 +180,7 @@ public class translator {
                 try {
                     relativePath=sourceFile.getAbsolutePath().substring(baseDir.getAbsolutePath().length()+1); //+1 to get the "/"
                     relativePath = relativePath.replace(File.separatorChar, '/');
-                } catch (final IndexOutOfBoundsException e){
+                } catch (final IndexOutOfBoundsException e) {
                     Log.logSevere("TRANSLATOR", "Error creating relative Path for "+sourceFile.getAbsolutePath());
                     relativePath = "wrong path"; //not in translationLists
                 } 
@@ -205,8 +204,8 @@ public class translator {
     public static boolean translateFilesRecursive(final File sourceDir, final File destDir, final File translationFile, final String extensions, final String notdir){
         final List<File> dirList=FileUtils.getDirsRecursive(sourceDir, notdir);
         dirList.add(sourceDir);
-        for (final File file : dirList){
-            if(file.isDirectory() && !file.getName().equals(notdir)){
+        for (final File file : dirList) {
+            if(file.isDirectory() && !file.getName().equals(notdir)) {
                 //cuts the sourcePath and prepends the destPath
                 File file2 = new File(destDir, file.getPath().substring(sourceDir.getPath().length()));
                 translateFiles(file, file2, sourceDir, translationFile, extensions);
@@ -229,7 +228,7 @@ public class translator {
     public static boolean changeLang(final serverSwitch env, final String langPath, final String lang) {
         boolean ret = false;
 
-        if ((lang.equals("default")) || (lang.equals("default.lng"))) {
+        if ("default".equals(lang) || "default.lng".equals(lang)) {
             env.setConfig("locale.language", "default");
             ret = true;
         } else {
@@ -242,7 +241,7 @@ public class translator {
             final File translationFile = new File(langPath, lang);
 
             //if (translator.translateFiles(sourceDir, destDir, translationFile, "html")) {
-            if (translator.translateFilesRecursive(sourceDir, destDir, translationFile, "html,template,inc", "locale")) {
+            if (Translator.translateFilesRecursive(sourceDir, destDir, translationFile, "html,template,inc", "locale")) {
                 env.setConfig("locale.language", lang.substring(0, lang.length() - 4));
                 Formatter.setLocale(env.getConfig("locale.language", "en"));
                 try {

@@ -48,9 +48,9 @@ import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.BookmarkHelper;
-import de.anomic.data.bookmarksDB;
-import de.anomic.data.listManager;
-import de.anomic.data.userDB;
+import de.anomic.data.BookmarksDB;
+import de.anomic.data.ListManager;
+import de.anomic.data.UserDB;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -62,7 +62,7 @@ public class Bookmarks {
 
 	private static final serverObjects prop = new serverObjects();
 	private static Switchboard sb = null;
-	private static userDB.Entry user = null;
+	private static UserDB.Entry user = null;
 	private static boolean isAdmin = false;	
 
 	final static int SORT_ALPHA = 1;
@@ -82,7 +82,7 @@ public class Bookmarks {
     	prop.clear();
     	sb = (Switchboard) env;
     	user = sb.userDB.getUser(header);   
-    	isAdmin=(sb.verifyAuthentication(header, true) || user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
+    	isAdmin=(sb.verifyAuthentication(header, true) || user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT));
     
     	// set user name
     	if(user != null) username=user.getUserName();
@@ -145,11 +145,11 @@ public class Bookmarks {
     				pathString="/unsorted"; //default folder
     			}
     			tagsString=tagsString+","+pathString;
-    			final Set<String> tags=listManager.string2set(BookmarkHelper.cleanTagsString(tagsString)); 
-    			final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
+    			final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(tagsString));
+    			final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
     			if(bookmark != null){
-    				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
-    				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
+    				bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, title);
+    				bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_DESCRIPTION, description);
     				if(user!=null){ 
     					bookmark.setOwner(user.getUserName());
     				}
@@ -184,7 +184,7 @@ public class Bookmarks {
     				prop.put("mode_public", "0");
     				prop.put("mode_feed", "0");
     			} else {
-                    final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
+                    final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
                         final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash.getBytes(), null, 0);
@@ -272,7 +272,7 @@ public class Bookmarks {
 	    	//-----------------------
 	    	int count=0;
 	        Iterator<String> it = null;    	
-	       	bookmarksDB.Bookmark bookmark;
+	       	BookmarksDB.Bookmark bookmark;
 	       	Set<String> tags;
 	       	Iterator<String> tagsIt;
 	       	int tagCount;
@@ -359,8 +359,8 @@ public class Bookmarks {
     
     private static void printTagList(final String id, final String tagName, final int comp, final int max, final boolean opt){    	
     	int count=0;
-    	bookmarksDB.Tag tag;
-    	Iterator<bookmarksDB.Tag> it = null;
+    	BookmarksDB.Tag tag;
+    	Iterator<BookmarksDB.Tag> it = null;
     	
         if (tagName.equals("")) {
         	it = sb.bookmarksDB.getTagIterator(isAdmin, comp, max);
@@ -391,7 +391,7 @@ public class Bookmarks {
     
     private static int recurseFolders(final Iterator<String> it, String root, int count, final boolean next, final String prev){
     	String fn="";    	
-    	bookmarksDB.Bookmark bookmark;
+    	BookmarksDB.Bookmark bookmark;
     	
     	if (next) fn = it.next();    		
     	else fn = prev;

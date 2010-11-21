@@ -9,8 +9,8 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.BookmarkHelper;
-import de.anomic.data.bookmarksDB;
-import de.anomic.data.userDB;
+import de.anomic.data.BookmarksDB;
+import de.anomic.data.UserDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -19,7 +19,7 @@ public class get_bookmarks {
 	
 	private static final serverObjects prop = new serverObjects();
 	private static Switchboard sb = null;
-	private static userDB.Entry user = null;
+	private static UserDB.Entry user = null;
 	private static boolean isAdmin = false;
 	
 	private static int R = 1; // TODO: solve the recursion problem an remove global variable
@@ -43,7 +43,7 @@ public class get_bookmarks {
 		prop.clear();
     	sb = (Switchboard) env;
     	user = sb.userDB.getUser(header);   
-    	isAdmin = (sb.verifyAuthentication(header, true) || user != null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
+    	isAdmin = (sb.verifyAuthentication(header, true) || user != null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT));
     	    	    	
     	// set user name
     	final String username;
@@ -90,7 +90,7 @@ public class get_bookmarks {
     	int start = 0;    	
 
     	final Iterator<String> it;
-    	bookmarksDB.Bookmark bookmark;
+    	BookmarksDB.Bookmark bookmark;
        	
        	switch (display) {
        	case XBEL:       		
@@ -228,7 +228,7 @@ public class get_bookmarks {
     }
 	
     private static int print_XBEL(final Iterator<String> bit, int count) {
-    	bookmarksDB.Bookmark bookmark;
+    	BookmarksDB.Bookmark bookmark;
     	Date date;
     	while(bit.hasNext()){    			
 			bookmark=sb.bookmarksDB.getBookmark(bit.next());

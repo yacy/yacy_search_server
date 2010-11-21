@@ -39,7 +39,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.data.listManager;
+import de.anomic.data.ListManager;
 import de.anomic.data.list.ListAccumulator;
 import de.anomic.data.list.XMLBlacklistImporter;
 import de.anomic.search.SearchEventCache;
@@ -87,12 +87,12 @@ public class sharedBlacklist_p {
         if (post != null) {
             
             // initialize the list manager
-            listManager.switchboard = (Switchboard) env;
-            listManager.listsPath = new File(listManager.switchboard.getDataPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+            ListManager.switchboard = (Switchboard) env;
+            ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
             
             // loading all blacklist files located in the directory
-            final List<String> dirlist = FileUtils.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER);
+            final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER);
             
             // List BlackLists
             int blacklistCount = 0;
@@ -215,7 +215,7 @@ public class sharedBlacklist_p {
                 PrintWriter pw = null;
                 try {
                     // open the blacklist file
-                    pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, selectedBlacklistName), true));
+                    pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, selectedBlacklistName), true));
                     
                     // loop through the received entry list
                     final int num = Integer.parseInt( post.get("num") );
@@ -245,7 +245,7 @@ public class sharedBlacklist_p {
                                 final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
 
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",selectedBlacklistName)) {
+                                    if (ListManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",selectedBlacklistName)) {
                                         Switchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
                                     }
                                 }
@@ -271,7 +271,7 @@ public class sharedBlacklist_p {
             // generate the html list
             if (otherBlacklist != null) {
                 // loading the current blacklist content
-                final HashSet<String> Blacklist = new HashSet<String>(FileUtils.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
+                final HashSet<String> Blacklist = new HashSet<String>(FileUtils.getListArray(new File(ListManager.listsPath, selectedBlacklistName)));
                 
                 int count = 0;
                 while (otherBlacklist.hasNext()) {

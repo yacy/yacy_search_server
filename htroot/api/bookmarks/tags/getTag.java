@@ -3,7 +3,7 @@ import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
 
-import de.anomic.data.bookmarksDB;
+import de.anomic.data.BookmarksDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -18,7 +18,7 @@ public class getTag {
         final Switchboard switchboard = (Switchboard) env;
         final boolean isAdmin=switchboard.verifyAuthentication(header, true);
         final serverObjects prop = new serverObjects();
-        Iterator<bookmarksDB.Tag> it = null;
+        Iterator<BookmarksDB.Tag> it = null;
         String tagName = "";
         int top = SHOW_ALL;
         int comp = SORT_ALPHA;
@@ -55,7 +55,7 @@ public class getTag {
         
         int count=0;
         if(it != null) {
-            bookmarksDB.Tag tag;
+            BookmarksDB.Tag tag;
             while (it.hasNext()) {
                 tag = it.next();
                 if(!tag.getTagName().startsWith("/")) {						// ignore folder tags

@@ -5,7 +5,7 @@ import java.util.List;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.data.listManager;
+import de.anomic.data.ListManager;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -14,8 +14,8 @@ public class blacklists {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
 
-        listManager.listsPath = new File(listManager.switchboard.getDataPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        final List<String> dirlist = FileUtils.getDirListing(listManager.listsPath);
+        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
         int blacklistCount=0;
 
         final String blackListName = (post == null) ? "" : post.get("listname", "");
@@ -27,9 +27,9 @@ public class blacklists {
                 if (blackListName.equals("") || element.equals(blackListName)) {
                     prop.putXML("lists_" + blacklistCount + "_name", element);
 
-                    if (listManager.listSetContains("BlackLists.Shared", element)) {
+                    if (ListManager.listSetContains("BlackLists.Shared", element)) {
 
-                        list = FileUtils.getListArray(new File(listManager.listsPath, element));
+                        list = FileUtils.getListArray(new File(ListManager.listsPath, element));
 
                         count=0;
                         for (int j=0;j<list.size();++j){

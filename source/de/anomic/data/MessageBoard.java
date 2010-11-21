@@ -39,7 +39,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
 
 
-public class messageBoard {
+public class MessageBoard {
     
     private static final int categoryLength = 12;
     private static final String dateFormat = "yyyyMMddHHmmss";
@@ -53,7 +53,7 @@ public class messageBoard {
     private MapHeap database = null;
     private int sn = 0;
 
-    public messageBoard(final File path) throws IOException {
+    public MessageBoard(final File path) throws IOException {
         new File(path.getParent()).mkdir();
         if (database == null) {
             //database = new MapView(BLOBTree.toHeap(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, pathNew), 500, '_');

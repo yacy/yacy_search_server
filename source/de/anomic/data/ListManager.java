@@ -43,7 +43,7 @@ import java.util.List;
 
 // The Naming of the functions is a bit strange...
 
-public class listManager {
+public class ListManager {
     public static Switchboard switchboard = null;
     public static File listsPath = null;
 

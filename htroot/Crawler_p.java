@@ -49,8 +49,8 @@ import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.WorkTables;
-import de.anomic.data.bookmarksDB;
-import de.anomic.data.listManager;
+import de.anomic.data.BookmarksDB;
+import de.anomic.data.ListManager;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -279,12 +279,12 @@ public class Crawler_p {
                         
                         if (reasonString == null) {
                         	// create a bookmark from crawl start url
-                        	Set<String> tags=listManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));                                
+                        	Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
                             tags.add("crawlStart");
                         	if (post.get("createBookmark","off").equals("on")) {
-                            	bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
+                            	BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
                     			if(bookmark != null){
-                    				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, post.get("bookmarkTitle", crawlingStart));                        				
+                    				bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, post.get("bookmarkTitle", crawlingStart));
                     				bookmark.setOwner("admin");                        				
                     				bookmark.setPublic(false);    
                     				bookmark.setTags(tags, true);

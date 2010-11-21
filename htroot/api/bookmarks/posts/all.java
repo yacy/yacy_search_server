@@ -6,7 +6,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.data.bookmarksDB;
+import de.anomic.data.BookmarksDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -29,7 +29,7 @@ public class all {
         final boolean extendedXML = (post != null && post.containsKey("extendedXML"));
         
         int count=0;
-        bookmarksDB.Bookmark bookmark;
+        BookmarksDB.Bookmark bookmark;
         Date date;
         while(it.hasNext()){
             bookmark=switchboard.bookmarksDB.getBookmark(it.next());

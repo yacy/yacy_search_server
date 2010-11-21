@@ -36,7 +36,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 /**
  * This class provides a diff-functionality.
  */
-public class diff {
+public class Diff {
     
     private   final ArrayList <Part> parts = new ArrayList<Part>();
     protected final Object[] original;
@@ -47,7 +47,7 @@ public class diff {
      * @param changed the new <code>String</code>
      * @throws NullPointerException if one of the arguments is <code>null</code>
      */
-    public diff(final String original, final String changed) {
+    public Diff(final String original, final String changed) {
         this(original, changed, 1);
     }
     
@@ -60,7 +60,7 @@ public class diff {
      * @throws NullPointerException if <code>original</code> or <code>changed</code> is
      * <code>null</code>
      */
-    public diff(final String original, final String changed, final int minConsecutive) {
+    public Diff(final String original, final String changed, final int minConsecutive) {
         if (original == null || changed == null) throw new NullPointerException("input Strings must be null");
         this.original = new Comparable[original.length()];
         for (int i=0; i<original.length(); i++)
@@ -71,7 +71,7 @@ public class diff {
         parse((minConsecutive > 0) ? minConsecutive : 1);
     }
     
-    public diff(final Object[] original, final Object[] changed, final int minConsecutive) {
+    public Diff(final Object[] original, final Object[] changed, final int minConsecutive) {
         if (original == null || changed == null) throw new NullPointerException("input Objects must be null");
         this.original = original;
         this.changed = changed;
@@ -222,10 +222,10 @@ public class diff {
             final StringBuilder sb = new StringBuilder(this.posNew - this.posOld);
             if (this.action == ADDED) {
                 for (int i = this.posOld; i < this.posNew; i++)
-                    sb.append(diff.this.changed[i]);
+                    sb.append(Diff.this.changed[i]);
             } else {
                 for (int i = this.posOld; i < this.posNew; i++)
-                    sb.append(diff.this.original[i]);
+                    sb.append(Diff.this.original[i]);
             }
             return sb.toString();
         }
@@ -245,18 +245,18 @@ public class diff {
         }
     }
     
-    public static String toHTML(final diff[] diffs) {
+    public static String toHTML(final Diff[] diffs) {
         final StringBuilder sb = new StringBuilder(diffs.length * 60);
-        diff.Part[] ps;
-        for (diff d : diffs) {
+        Diff.Part[] ps;
+        for (Diff d : diffs) {
             sb.append("<p class=\"diff\">\n");
             ps = d.getParts();
-            for (diff.Part part :ps) {
+            for (Diff.Part part :ps) {
                 sb.append("<span\nclass=\"");
                 switch (part.getAction()) {
-                    case diff.Part.UNCHANGED: sb.append("unchanged"); break;
-                    case diff.Part.ADDED: sb.append("added"); break;
-                    case diff.Part.DELETED: sb.append("deleted"); break;
+                    case Diff.Part.UNCHANGED: sb.append("unchanged"); break;
+                    case Diff.Part.ADDED: sb.append("added"); break;
+                    case Diff.Part.DELETED: sb.append("deleted"); break;
                 }
                 sb.append("\">").append(CharacterCoding.unicode2html(part.getString(), true).replaceAll("\n", "<br />"));
                 sb.append("</span>");

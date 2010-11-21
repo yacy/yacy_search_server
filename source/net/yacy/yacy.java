@@ -71,7 +71,7 @@ import net.yacy.kelondro.util.OS;
 
 //import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
-import de.anomic.data.translator;
+import de.anomic.data.Translator;
 //import de.anomic.http.client.Client;
 import de.anomic.http.server.HTTPDemon;
 //import de.anomic.http.server.ResponseContainer;
@@ -359,7 +359,7 @@ public final class yacy {
                     if (!currentRev.equals(sb.getConfig("svnRevision", ""))) try { //is this another version?!
                         final File sourceDir = new File(sb.getConfig("htRootPath", "htroot"));
                         final File destDir = new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), lang);
-                        if (translator.translateFilesRecursive(sourceDir, destDir, new File(locale_work, lang + ".lng"), "html,template,inc", "locale")){ //translate it
+                        if (Translator.translateFilesRecursive(sourceDir, destDir, new File(locale_work, lang + ".lng"), "html,template,inc", "locale")){ //translate it
                             //write the new Versionnumber
                             final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(new File(destDir, "version"))));
                             bw.write(sb.getConfig("svnRevision", "Error getting Version"));

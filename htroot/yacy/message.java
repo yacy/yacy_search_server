@@ -40,7 +40,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.data.messageBoard;
+import de.anomic.data.MessageBoard;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -132,7 +132,7 @@ public final class message {
             prop.put("response", "Thank you!");
 
             // save message
-            messageBoard.entry msgEntry = null;
+            MessageBoard.entry msgEntry = null;
             byte[] mb;
             try {
                 mb = message.getBytes("UTF-8");
@@ -171,7 +171,7 @@ public final class message {
 
      #[message]#
      */
-    private static void messageForwardingViaEmail(final Switchboard sb, final messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(final Switchboard sb, final MessageBoard.entry msgEntry) {
         try {
             if (!Boolean.parseBoolean(sb.getConfig("msgForwardingEnabled","false"))) return;
 

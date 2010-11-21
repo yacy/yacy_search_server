@@ -50,8 +50,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.data.bookmarksDB.Bookmark;
-import de.anomic.data.bookmarksDB.Tag;
+import de.anomic.data.BookmarksDB.Bookmark;
+import de.anomic.data.BookmarksDB.Tag;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
@@ -112,7 +112,7 @@ public class BookmarkHelper {
     // bookmarksDB's Import/Export functions
     // --------------------------------------
     
-    public static int importFromBookmarks(bookmarksDB db, final DigestURI baseURL, final String input, final String tag, final boolean importPublic){
+    public static int importFromBookmarks(BookmarksDB db, final DigestURI baseURL, final String input, final String tag, final boolean importPublic){
         try {
             // convert string to input stream
             final ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
@@ -125,7 +125,7 @@ public class BookmarkHelper {
         }           
     }
     
-    private static int importFromBookmarks(bookmarksDB db, final DigestURI baseURL, final InputStreamReader input, final String tag, final boolean importPublic){
+    private static int importFromBookmarks(BookmarksDB db, final DigestURI baseURL, final InputStreamReader input, final String tag, final boolean importPublic){
             
         int importCount = 0;
         
@@ -133,7 +133,7 @@ public class BookmarkHelper {
         String title;
         MultiProtocolURI url;
         Bookmark bm;
-        final Set<String> tags=listManager.string2set(tag); //this allow multiple default tags
+        final Set<String> tags=ListManager.string2set(tag); //this allow multiple default tags
         try {
             //load the links
             final ContentScraper scraper = new ContentScraper(baseURL);         
@@ -163,7 +163,7 @@ public class BookmarkHelper {
     }
     
     
-    public static int importFromXML(bookmarksDB db, final String input, final boolean importPublic){
+    public static int importFromXML(BookmarksDB db, final String input, final boolean importPublic){
         try {
             // convert string to input stream
             final ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
@@ -175,7 +175,7 @@ public class BookmarkHelper {
         }       
     }
     
-    private static int importFromXML(bookmarksDB db, final InputStream input, final boolean importPublic){
+    private static int importFromXML(BookmarksDB db, final InputStream input, final boolean importPublic){
         final DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
         factory.setValidating(false);
         factory.setNamespaceAware(false);
@@ -192,7 +192,7 @@ public class BookmarkHelper {
         
     }
     
-    private static int parseXMLimport(bookmarksDB db, final Node doc, final boolean importPublic){
+    private static int parseXMLimport(BookmarksDB db, final Node doc, final boolean importPublic){
         int importCount = 0;
         if (doc.getNodeName().equals("post")) {
             final NamedNodeMap attributes = doc.getAttributes();
@@ -223,7 +223,7 @@ public class BookmarkHelper {
                 bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
             }
             if(tagsString!=null){
-                tags = listManager.string2set(tagsString.replace(' ', ','));
+                tags = ListManager.string2set(tagsString.replace(' ', ','));
             }
             bm.setTags(tags, true);
             if(time != null){

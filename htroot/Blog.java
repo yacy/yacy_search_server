@@ -40,8 +40,8 @@ import java.util.Locale;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
-import de.anomic.data.blogBoard;
-import de.anomic.data.userDB;
+import de.anomic.data.BlogBoard;
+import de.anomic.data.UserDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -63,7 +63,7 @@ public class Blog {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        blogBoard.BlogEntry page = null;
+        BlogBoard.BlogEntry page = null;
 
         boolean hasRights = sb.verifyAuthentication(header, true);
         
@@ -91,8 +91,8 @@ public class Blog {
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if(!hasRights){
-            final userDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
-            if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
+            final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
+            if(userentry != null && userentry.hasRight(UserDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             } else if(post.containsKey("login")) {
                 //opens login window if login link is clicked - contrib [MN]
@@ -316,7 +316,7 @@ public class Blog {
 
     private static serverObjects putBlogEntry(
             final serverObjects prop,
-            final blogBoard.BlogEntry entry,
+            final BlogBoard.BlogEntry entry,
             final String address,
             final int number,
             final boolean hasRights,

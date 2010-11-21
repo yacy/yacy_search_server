@@ -59,13 +59,13 @@ import de.anomic.data.wiki.WikiBoard;
 import java.util.List;
 import java.util.Set;
 
-public class blogBoard {
+public class BlogBoard {
     
     private static final int KEY_LENGTH = 64;
     
     private MapHeap database = null;
     
-    public blogBoard(final File actpath) throws IOException {
+    public BlogBoard(final File actpath) throws IOException {
         new File(actpath.getParent()).mkdir();
         //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
         database = new MapHeap(actpath, KEY_LENGTH, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
@@ -308,7 +308,7 @@ public class blogBoard {
         Iterator<byte[]> blogIter;
         //blogBoard.BlogEntry nextEntry;
         public BlogIterator(final boolean up) throws IOException {
-            this.blogIter = blogBoard.this.database.keys(up, false);
+            this.blogIter = BlogBoard.this.database.keys(up, false);
             //this.nextEntry = null;
         }
         
@@ -369,7 +369,7 @@ public class blogBoard {
             this.key = key;
             this.record = record;
             if (this.record.get("comments") == null) {
-                this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
+                this.record.put("comments", ListManager.collection2string(new ArrayList<String>()));
             }
             if (this.record.get("commentMode") == null || this.record.get("commentMode").equals("")) {
                 this.record.put("commentMode", "2");
@@ -457,19 +457,19 @@ public class blogBoard {
                     record.put("comments", record.get("comments").substring(1));
                     writeBlogEntry(this);
             }
-            final List<String> commentsize = listManager.string2arraylist(record.get("comments"));
+            final List<String> commentsize = ListManager.string2arraylist(record.get("comments"));
             return commentsize.size();
         }
         
         public List<String> getComments() {
-            return listManager.string2arraylist(record.get("comments"));
+            return ListManager.string2arraylist(record.get("comments"));
         }
         
         private void setComments(final List<String> comments) {
             if (comments == null) {
-                record.put("comments", listManager.collection2string(new ArrayList<String>()));
+                record.put("comments", ListManager.collection2string(new ArrayList<String>()));
             } else {
-                record.put("comments", listManager.collection2string(comments));
+                record.put("comments", ListManager.collection2string(comments));
             }
         }
         
@@ -503,15 +503,15 @@ public class blogBoard {
         }
         
         public void addComment(final String commentID) {
-            final List<String> comments = listManager.string2arraylist(record.get("comments"));
+            final List<String> comments = ListManager.string2arraylist(record.get("comments"));
             comments.add(commentID);
-            record.put("comments", listManager.collection2string(comments));
+            record.put("comments", ListManager.collection2string(comments));
         }
         
         public boolean removeComment(final String commentID) {
-            final List<String> comments = listManager.string2arraylist(record.get("comments"));
+            final List<String> comments = ListManager.string2arraylist(record.get("comments"));
             final boolean success = comments.remove(commentID);
-            record.put("comments", listManager.collection2string(comments));
+            record.put("comments", ListManager.collection2string(comments));
             return success;
         }
         

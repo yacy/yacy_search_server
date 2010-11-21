@@ -12,7 +12,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.data.YMarkKeyValueEntry;
 import de.anomic.data.YMarkTables;
-import de.anomic.data.userDB;
+import de.anomic.data.UserDB;
 import de.anomic.data.YMarkTables.METADATA;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -29,9 +29,9 @@ public class get_treeview {
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 		final Switchboard sb = (Switchboard) env;
 		prop = new serverObjects();        
-        final userDB.Entry user = sb.userDB.getUser(header); 
+        final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
-        final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
+        final boolean isAuthUser = user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT);
 
         
         if(isAdmin || isAuthUser) {

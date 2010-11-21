@@ -132,12 +132,12 @@ import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.LibraryProvider;
 import de.anomic.data.WorkTables;
 import de.anomic.data.URLLicense;
-import de.anomic.data.blogBoard;
-import de.anomic.data.blogBoardComments;
-import de.anomic.data.bookmarksDB;
-import de.anomic.data.listManager;
-import de.anomic.data.messageBoard;
-import de.anomic.data.userDB;
+import de.anomic.data.BlogBoard;
+import de.anomic.data.BlogBoardComments;
+import de.anomic.data.BookmarksDB;
+import de.anomic.data.ListManager;
+import de.anomic.data.MessageBoard;
+import de.anomic.data.UserDB;
 import de.anomic.data.wiki.WikiBoard;
 import de.anomic.data.wiki.WikiCode;
 import de.anomic.data.wiki.WikiParser;
@@ -202,10 +202,10 @@ public final class Switchboard extends serverSwitch {
     public  CrawlQueues                    crawlQueues;
     public  ResultURLs                     crawlResults;
     public  CrawlStacker                   crawlStacker;
-    public  messageBoard                   messageDB;
+    public  MessageBoard                   messageDB;
     public  WikiBoard                      wikiDB;
-    public  blogBoard                      blogDB;
-    public  blogBoardComments              blogCommentDB;
+    public  BlogBoard                      blogDB;
+    public  BlogBoardComments              blogCommentDB;
     public  RobotsTxt                      robots;
     public  boolean                        rankingOn;
     public  CRDistribution                 rankingOwnDistribution;
@@ -214,8 +214,8 @@ public final class Switchboard extends serverSwitch {
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
     public  ResourceObserver               observer;
-    public  userDB                         userDB;
-    public  bookmarksDB                    bookmarksDB;
+    public  UserDB                         userDB;
+    public  BookmarksDB                    bookmarksDB;
     public  WebStructureGraph              webStructure;
     public  ArrayList<QueryParams>         localSearches; // array of search result properties as HashMaps
     public  ArrayList<QueryParams>         remoteSearches; // array of search result properties as HashMaps
@@ -410,9 +410,9 @@ public final class Switchboard extends serverSwitch {
         this.log.logConfig("Loading blacklist ...");
         final File blacklistsPath = getDataPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
         urlBlacklist = new Blacklist(blacklistsPath);
-        listManager.switchboard = this;
-        listManager.listsPath = blacklistsPath;        
-        listManager.reloadBlacklists();
+        ListManager.switchboard = this;
+        ListManager.listsPath = blacklistsPath;
+        ListManager.reloadBlacklists();
 
         // load badwords (to filter the topwords)
         if (badwords == null || badwords.isEmpty()) {
@@ -479,7 +479,7 @@ public final class Switchboard extends serverSwitch {
         // Init User DB
         this.log.logConfig("Loading User DB");
         final File userDbFile = new File(getDataPath(), "DATA/SETTINGS/user.heap");
-        this.userDB = new userDB(userDbFile);
+        this.userDB = new UserDB(userDbFile);
         this.log.logConfig("Loaded User DB from file " + userDbFile.getName() +
         ", " + this.userDB.size() + " entries" +
         ", " + ppRamString(userDbFile.length()/1024));
@@ -995,7 +995,7 @@ public final class Switchboard extends serverSwitch {
     public void initMessages() throws IOException {
         this.log.logConfig("Starting Message Board");
         final File messageDbFile = new File(workPath, "message.heap");
-        this.messageDB = new messageBoard(messageDbFile);
+        this.messageDB = new MessageBoard(messageDbFile);
         this.log.logConfig("Loaded Message Board DB from file " + messageDbFile.getName() +
         ", " + this.messageDB.size() + " entries" +
         ", " + ppRamString(messageDbFile.length()/1024));
@@ -1013,13 +1013,13 @@ public final class Switchboard extends serverSwitch {
     public void initBlog() throws IOException {
         this.log.logConfig("Starting Blog");
         final File blogDbFile = new File(workPath, "blog.heap");
-        this.blogDB = new blogBoard(blogDbFile);
+        this.blogDB = new BlogBoard(blogDbFile);
         this.log.logConfig("Loaded Blog DB from file " + blogDbFile.getName() +
         ", " + this.blogDB.size() + " entries" +
         ", " + ppRamString(blogDbFile.length()/1024));
 
         final File blogCommentDbFile = new File(workPath, "blogComment.heap");
-        this.blogCommentDB = new blogBoardComments(blogCommentDbFile);
+        this.blogCommentDB = new BlogBoardComments(blogCommentDbFile);
         this.log.logConfig("Loaded Blog-Comment DB from file " + blogCommentDbFile.getName() +
         ", " + this.blogCommentDB.size() + " entries" +
         ", " + ppRamString(blogCommentDbFile.length()/1024));
@@ -1031,7 +1031,7 @@ public final class Switchboard extends serverSwitch {
         final File tagsFile = new File(workPath, "bookmarkTags.heap");
         final File datesFile = new File(workPath, "bookmarkDates.heap");
         tagsFile.delete();
-        this.bookmarksDB = new bookmarksDB(bookmarksFile, datesFile);
+        this.bookmarksDB = new BookmarksDB(bookmarksFile, datesFile);
         this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
         this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
     }

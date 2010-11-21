@@ -43,7 +43,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.data.listManager;
+import de.anomic.data.ListManager;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -72,8 +72,8 @@ public class BlacklistCleaner_p {
         final serverObjects prop = new serverObjects();
         
         // initialize the list manager
-        listManager.switchboard = (Switchboard) env;
-        listManager.listsPath = new File(env.getDataPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
+        ListManager.switchboard = (Switchboard) env;
+        ListManager.listsPath = new File(env.getDataPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
         String blacklistToUse = null;
 
         // get the list of supported blacklist types
@@ -89,13 +89,13 @@ public class BlacklistCleaner_p {
 
             if (post.containsKey("listNames")) {
                 blacklistToUse = post.get("listNames");
-                if (blacklistToUse.length() == 0 || !listManager.listSetContains("listManager.listsPath", blacklistToUse)) {
+                if (blacklistToUse.length() == 0 || !ListManager.listSetContains("listManager.listsPath", blacklistToUse)) {
                     prop.put("results", "2");
 
                 }
             }
 
-            putBlacklists(prop, FileUtils.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
 
             if (blacklistToUse != null) {
                 prop.put("results", "1");
@@ -128,7 +128,7 @@ public class BlacklistCleaner_p {
             }
         } else {
             prop.put("results", "0");
-            putBlacklists(prop, FileUtils.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
         }
         
         return prop;
@@ -242,7 +242,7 @@ public class BlacklistCleaner_p {
         final Map<String, Integer> illegalEntries = new HashMap<String, Integer>();
         final Set<String> legalEntries = new HashSet<String>();
         
-        final List<String> list = FileUtils.getListArray(new File(listManager.listsPath, blacklistToUse));
+        final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
         final Map<String, String> properties= new HashMap<String, String>();
         properties.put("allowRegex", String.valueOf(allowRegex));
 
@@ -277,7 +277,7 @@ public class BlacklistCleaner_p {
      */
     private static int removeEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final String[] entries) {
         // load blacklist data from file
-        final ArrayList<String> list = FileUtils.getListArray(new File(listManager.listsPath, blacklistToUse));
+        final ArrayList<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
         
         boolean listChanged = false;
         
@@ -302,7 +302,7 @@ public class BlacklistCleaner_p {
             
             // remove the entry from the running blacklist engine
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
+                if (ListManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
                     final String host = (s.indexOf('/') == -1) ? s : s.substring(0, s.indexOf('/'));
                     final String path = (s.indexOf('/') == -1) ? ".*" : s.substring(s.indexOf('/') + 1);
                     try {
@@ -316,7 +316,7 @@ public class BlacklistCleaner_p {
             SearchEventCache.cleanupEvents(true);
         }
         if (listChanged){
-            FileUtils.writeList(new File(listManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
+            FileUtils.writeList(new File(ListManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
         }
         return entries.length;
     }
@@ -337,7 +337,7 @@ public class BlacklistCleaner_p {
         removeEntries(blacklistToUse, supportedBlacklistTypes, oldEntry);
         PrintWriter pw = null;
         try {
-            pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
+            pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklistToUse), true));
             String host, path;
             for (int i=0, pos; i<newEntry.length; i++) {
                 pos = newEntry[i].indexOf('/');
@@ -350,7 +350,7 @@ public class BlacklistCleaner_p {
                 }
                 pw.println(host + "/" + path);
                 for (int blTypes = 0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
+                    if (ListManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         Switchboard.urlBlacklist.add(
                                 supportedBlacklistTypes[blTypes],
                                 host,

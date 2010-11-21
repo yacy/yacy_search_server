@@ -37,7 +37,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 
-import de.anomic.data.userDB;
+import de.anomic.data.UserDB;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -48,7 +48,7 @@ public class ConfigAccounts_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = Switchboard.getSwitchboard();
-        userDB.Entry entry=null;
+        UserDB.Entry entry=null;
 
         // admin password
         boolean localhostAccess = sb.getConfigBool("adminAccountForLocalhost", false);
@@ -107,8 +107,8 @@ public class ConfigAccounts_p {
         prop.put("address", "");
         prop.put("timelimit", "");
         prop.put("timeused", "");
-        final String[] rightNames=userDB.Entry.RIGHT_NAMES.split(",");
-        final String[] rights=userDB.Entry.RIGHT_TYPES.split(",");
+        final String[] rightNames=UserDB.Entry.RIGHT_NAMES.split(",");
+        final String[] rights=UserDB.Entry.RIGHT_TYPES.split(",");
         int i;
         for(i=0;i<rights.length;i++){
         		prop.put("rights_"+i+"_name", rights[i]);
@@ -175,13 +175,13 @@ public class ConfigAccounts_p {
             if( post.get("current_user").equals("newuser")){ //new user
                 
 				if(!pw1.equals("")){ //change only if set
-	                mem.put(userDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
+	                mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
 				}
-				mem.put(userDB.Entry.USER_FIRSTNAME, firstName);
-				mem.put(userDB.Entry.USER_LASTNAME, lastName);
-				mem.put(userDB.Entry.USER_ADDRESS, address);
-				mem.put(userDB.Entry.TIME_LIMIT, timeLimit);
-				mem.put(userDB.Entry.TIME_USED, timeUsed);
+				mem.put(UserDB.Entry.USER_FIRSTNAME, firstName);
+				mem.put(UserDB.Entry.USER_LASTNAME, lastName);
+				mem.put(UserDB.Entry.USER_ADDRESS, address);
+				mem.put(UserDB.Entry.TIME_LIMIT, timeLimit);
+				mem.put(UserDB.Entry.TIME_USED, timeUsed);
 				for(i=0;i<rights.length;i++)
 					mem.put(rights[i], rightsSet.get(rights[i]));
 
@@ -200,13 +200,13 @@ public class ConfigAccounts_p {
 				if(entry != null){
 	                try{
 						if(! pw1.equals("")){
-			                entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
+			                entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
 						}
-						entry.setProperty(userDB.Entry.USER_FIRSTNAME, firstName);
-						entry.setProperty(userDB.Entry.USER_LASTNAME, lastName);
-						entry.setProperty(userDB.Entry.USER_ADDRESS, address);
-						entry.setProperty(userDB.Entry.TIME_LIMIT, timeLimit);
-						entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
+						entry.setProperty(UserDB.Entry.USER_FIRSTNAME, firstName);
+						entry.setProperty(UserDB.Entry.USER_LASTNAME, lastName);
+						entry.setProperty(UserDB.Entry.USER_ADDRESS, address);
+						entry.setProperty(UserDB.Entry.TIME_LIMIT, timeLimit);
+						entry.setProperty(UserDB.Entry.TIME_USED, timeUsed);
 						for(i=0;i<rights.length;i++)
 							entry.setProperty(rights[i], rightsSet.get(rights[i]));
 		            } catch (final Exception e) {
@@ -222,7 +222,7 @@ public class ConfigAccounts_p {
         }
 		
 		//Generate Userlist
-        final Iterator<userDB.Entry> it = sb.userDB.iterator(true);
+        final Iterator<UserDB.Entry> it = sb.userDB.iterator(true);
         int numUsers=0;
         while(it.hasNext()){
             entry = it.next();

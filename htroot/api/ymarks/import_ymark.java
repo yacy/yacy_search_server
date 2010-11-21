@@ -10,7 +10,7 @@ import net.yacy.kelondro.logging.Log;
 import de.anomic.data.YMarkTables;
 import de.anomic.data.YMarksHTMLImporter;
 import de.anomic.data.YMarksXBELImporter;
-import de.anomic.data.userDB;
+import de.anomic.data.UserDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -21,9 +21,9 @@ public class import_ymark {
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        final userDB.Entry user = sb.userDB.getUser(header); 
+        final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
-        final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
+        final boolean isAuthUser = user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT);
         Thread t;
         HashMap<String,String> bmk;
 		ByteArrayInputStream byteIn = null;

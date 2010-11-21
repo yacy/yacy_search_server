@@ -41,7 +41,7 @@ import java.util.Locale;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
-import de.anomic.data.diff;
+import de.anomic.data.Diff;
 import de.anomic.data.wiki.WikiBoard;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -243,10 +243,10 @@ public class Wiki {
                 }
                 if (post.containsKey("compare") && oentry != null && nentry != null) {
                     // TODO: split into paragraphs and compare them with the same diff-algo
-                    final diff diff = new diff(
+                    final Diff diff = new Diff(
                             new String(oentry.page(), "UTF-8"),
                             new String(nentry.page(), "UTF-8"), 3);
-                    prop.put("mode_versioning_diff", de.anomic.data.diff.toHTML(new diff[] { diff }));
+                    prop.put("mode_versioning_diff", de.anomic.data.Diff.toHTML(new Diff[] { diff }));
                     prop.put("mode_versioning", "1");
                 } else if (post.containsKey("viewold") && oentry != null) {
                     prop.put("mode_versioning", "2");

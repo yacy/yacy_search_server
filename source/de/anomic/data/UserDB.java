@@ -47,7 +47,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
 
-public final class userDB {
+public final class UserDB {
     
     private static final int USERNAME_MIN_LENGTH = 4;
     
@@ -56,7 +56,7 @@ public final class userDB {
     private final Map<String, String> ipUsers = new HashMap<String, String>();
     private final Map<String, Object> cookieUsers = new HashMap<String, Object>();
     
-    public userDB(final File userTableFile) throws IOException {
+    public UserDB(final File userTableFile) throws IOException {
         this.userTableFile = userTableFile;
         userTableFile.getParentFile().mkdirs();
         //this.userTable = new MapView(BLOBTree.toHeap(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, userTableFile), 10, '_');
@@ -488,7 +488,7 @@ public final class userDB {
             }
             
             try {
-                userDB.this.userTable.insert(getUserName().getBytes(), this.mem); 
+                UserDB.this.userTable.insert(getUserName().getBytes(), this.mem);
             } catch(final Exception e){
                 Log.logException(e);
             }
@@ -505,7 +505,7 @@ public final class userDB {
         
         public void setProperty(final String propName, final String newValue) throws IOException, RowSpaceExceededException {
             this.mem.put(propName,  newValue);
-            userDB.this.userTable.insert(getUserName().getBytes(), this.mem);
+            UserDB.this.userTable.insert(getUserName().getBytes(), this.mem);
         }
         
         public String getProperty(final String propName, final String defaultValue) {
@@ -621,7 +621,7 @@ public final class userDB {
         //userDB.Entry nextEntry;
         
         public userIterator(final boolean up) throws IOException {
-            this.userIter = userDB.this.userTable.keys(up, false);
+            this.userIter = UserDB.this.userTable.keys(up, false);
             //this.nextEntry = null;
         }
         

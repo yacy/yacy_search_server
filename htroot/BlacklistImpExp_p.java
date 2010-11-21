@@ -33,7 +33,7 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import de.anomic.data.listManager;
+import de.anomic.data.ListManager;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -50,11 +50,11 @@ public class BlacklistImpExp_p {
         final Switchboard sb = (Switchboard) env;
         
         // initialize the list manager
-        listManager.switchboard = (Switchboard) env;
-        listManager.listsPath = new File(listManager.switchboard.getDataPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        ListManager.switchboard = (Switchboard) env;
+        ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
         // loading all blacklist files located in the directory
-        final List<String> dirlist = FileUtils.getDirListing(listManager.listsPath);
+        final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
         
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();

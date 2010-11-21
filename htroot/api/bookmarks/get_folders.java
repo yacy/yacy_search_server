@@ -5,8 +5,8 @@ import java.util.Iterator;
 import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.data.BookmarkHelper;
-import de.anomic.data.bookmarksDB;
-import de.anomic.data.userDB;
+import de.anomic.data.BookmarksDB;
+import de.anomic.data.UserDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -15,7 +15,7 @@ public class get_folders {
 	
 	private static final serverObjects prop = new serverObjects();
 	private static Switchboard sb = null;
-	private static userDB.Entry user = null;
+	private static UserDB.Entry user = null;
 	private static boolean isAdmin = false;
 	
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -23,7 +23,7 @@ public class get_folders {
 		prop.clear();
     	sb = (Switchboard) env;
     	user = sb.userDB.getUser(header);   
-    	isAdmin = (sb.verifyAuthentication(header, true) || user != null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
+    	isAdmin = (sb.verifyAuthentication(header, true) || user != null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT));
     	    	    	
     	// set user name
     	final String username;
@@ -72,7 +72,7 @@ public class get_folders {
     	
     	// loop through bookmarkList
     	it = sb.bookmarksDB.getBookmarksIterator(root, isAdmin); 
-    	bookmarksDB.Bookmark bm;
+    	BookmarksDB.Bookmark bm;
     	while (it.hasNext()) {
     		bm = sb.bookmarksDB.getBookmark(it.next());
     		// TODO: get rid of bmtype

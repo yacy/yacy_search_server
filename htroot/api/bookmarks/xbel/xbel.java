@@ -8,7 +8,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.BookmarkHelper;
-import de.anomic.data.bookmarksDB;
+import de.anomic.data.BookmarksDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -104,7 +104,7 @@ public class xbel {
     	return count;
     }
     private static int print_XBEL(final Iterator<String> bit, int count) {
-    	bookmarksDB.Bookmark bookmark;
+    	BookmarksDB.Bookmark bookmark;
     	Date date;
     	while(bit.hasNext()){    			
 			bookmark=switchboard.bookmarksDB.getBookmark(bit.next());

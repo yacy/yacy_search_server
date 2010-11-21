@@ -37,7 +37,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.data.messageBoard;
+import de.anomic.data.MessageBoard;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -92,7 +92,7 @@ public class Messages_p {
         prop.put("mode_error", "0");
 
         String action = ((post == null) ? "list" : post.get("action", "list"));
-        messageBoard.entry message;
+        MessageBoard.entry message;
 
         // first reset notification
         final File notifierSource = new File(sb.getAppPath(), sb.getConfig("htRootPath", "htroot") + "/env/grafics/empty.gif");

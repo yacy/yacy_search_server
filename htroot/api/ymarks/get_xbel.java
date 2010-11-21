@@ -9,7 +9,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.YMarkTables;
 import de.anomic.data.YMarksXBELImporter;
-import de.anomic.data.userDB;
+import de.anomic.data.UserDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -23,9 +23,9 @@ public class get_xbel {
 		final serverObjects prop = new serverObjects();        
 		final HashSet<String> alias = new HashSet<String>();
 		final StringBuilder buffer = new StringBuilder(250);
-		final userDB.Entry user = sb.userDB.getUser(header); 
+		final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
-        final boolean isAuthUser = user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT);
+        final boolean isAuthUser = user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT);
 		final String bmk_user;
         
         if(isAdmin || isAuthUser) {

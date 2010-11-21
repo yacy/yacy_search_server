@@ -54,7 +54,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.data.listManager;
+import de.anomic.data.ListManager;
 import de.anomic.http.client.Cache;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
@@ -320,7 +320,7 @@ public class IndexControlRWIs_p {
                     PrintWriter pw;
                     try {
                         final String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
-                        pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
+                        pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
                         DigestURI url;
                         for (byte[] b: urlb) {
                             try {
@@ -334,7 +334,7 @@ public class IndexControlRWIs_p {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
+                                    if (ListManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
                                         Switchboard.urlBlacklist.add(
                                                 supportedBlacklistTypes[blTypes],
                                                 url.getHost(),
@@ -353,7 +353,7 @@ public class IndexControlRWIs_p {
                     PrintWriter pw;
                     try {
                         final String[] supportedBlacklistTypes = Blacklist.BLACKLIST_TYPES_STRING.split(",");
-                        pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
+                        pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
                         DigestURI url;
                         for (byte[] b: urlb) {
                             try {
@@ -367,7 +367,7 @@ public class IndexControlRWIs_p {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/.*");
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                                    if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
+                                    if (ListManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
                                         Switchboard.urlBlacklist.add(
                                                 supportedBlacklistTypes[blTypes],
                                                 url.getHost(), ".*");
@@ -477,7 +477,7 @@ public class IndexControlRWIs_p {
             prop.put("genUrlList_urlList", i);
             prop.putHTML("genUrlList_keyString", keystring);
             prop.put("genUrlList_count", i);
-            putBlacklists(prop, FileUtils.getDirListing(listManager.listsPath));
+            putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath));
         }
     }
     

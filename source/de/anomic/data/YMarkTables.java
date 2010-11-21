@@ -183,7 +183,7 @@ public class YMarkTables {
     }
     
     public static Date parseISO8601(final String s) throws ParseException {
-    	if(s == null || s.isEmpty()) {     		
+    	if(s == null || s.length() < 1) {
     		throw new ParseException("parseISO8601 - empty string, nothing to parse", 0);
     	}
     	SimpleDateFormat dateformat;
@@ -205,7 +205,7 @@ public class YMarkTables {
     public static String getISO8601(final byte[] date) {
     	if(date != null) {
         	final String s = new String(date);
-        	if(!s.isEmpty())
+        	if(s != null && s.length() > 0)
         		return DateFormatter.formatISO8601(new Date(Long.parseLong(s)));	
     	}
     	return "";
