@@ -40,6 +40,8 @@ import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.Latency;
+import de.anomic.http.server.AlternativeDomainNames;
+import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 
@@ -80,11 +82,13 @@ public final class HTTPLoader {
             throw new IOException("Redirection counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
         }
         
-        final String host = request.url().getHost();
+        DigestURI url = request.url();
+        
+        final String host = url.getHost();
         if (host == null || host.length() < 2) throw new IOException("host is not well-formed: '" + host + "'");
-        final String path = request.url().getFile();
-        int port = request.url().getPort();
-        final boolean ssl = request.url().getProtocol().equals("https");
+        final String path = url.getFile();
+        int port = url.getPort();
+        final boolean ssl = url.getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
         
         // check if url is in blacklist
@@ -92,6 +96,15 @@ public final class HTTPLoader {
         if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
             sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "url in blacklist");
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
+        }
+        
+        // resolve yacy and yacyh domains
+        AlternativeDomainNames yacyResolver = HTTPDemon.getAlternativeResolver();
+        if(yacyResolver != null) {
+        	String yAddress = yacyResolver.resolve(host);
+        	if(yAddress != null) {
+        		url = new DigestURI(url.getProtocol() + "://" + yAddress + path);
+        	}
         }
         
         // take a file from the net
@@ -113,7 +126,7 @@ public final class HTTPLoader {
         client.setTimout(socketTimeout);
         client.setHeader(requestHeader.entrySet());
             // send request
-        	final byte[] responseBody = client.GETbytes(request.url().toString(), maxFileSize);
+        	final byte[] responseBody = client.GETbytes(url.toString(), maxFileSize);
         	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
         	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
 

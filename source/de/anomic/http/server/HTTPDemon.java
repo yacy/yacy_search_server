@@ -1427,7 +1427,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     /**
      * @return the alternativeResolver
      */
-    static AlternativeDomainNames getAlternativeResolver() {
+    public static AlternativeDomainNames getAlternativeResolver() {
         return alternativeResolver;
     }
     
