@@ -70,48 +70,50 @@ public class Status {
                 prop.put("LOCATION","");
                 return prop;
             } else if (post.containsKey("pauseCrawlJob")) {
-        		final String jobType = post.get("jobType");
-        		if (jobType.equals("localCrawl")) 
+                final String jobType = post.get("jobType");
+                if ("localCrawl".equals(jobType)) {
                     sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-        		else if (jobType.equals("remoteTriggeredCrawl")) 
+                } else if ("remoteTriggeredCrawl".equals(jobType)) {
                     sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-        		redirect = true;
-        	} else if (post.containsKey("continueCrawlJob")) {
-        		final String jobType = post.get("jobType");
-        		if (jobType.equals("localCrawl")) 
+                }
+                redirect = true;
+            } else if (post.containsKey("continueCrawlJob")) {
+                final String jobType = post.get("jobType");
+                if ("localCrawl".equals(jobType)) {
                     sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-        		else if (jobType.equals("remoteTriggeredCrawl")) 
+        	} else if ("remoteTriggeredCrawl".equals(jobType)) {
                     sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-        		redirect = true;
-        	} else if (post.containsKey("ResetTraffic")) {
-//        		ByteCountInputStream.resetCount();
-//        		ByteCountOutputStream.resetCount();
-        		ByteCount.resetCount();
-        		redirect = true;
-        	} else if (post.containsKey("popup")) {
+                }
+                redirect = true;
+            } else if (post.containsKey("ResetTraffic")) {
+//              ByteCountInputStream.resetCount();
+//              ByteCountOutputStream.resetCount();
+                ByteCount.resetCount();
+                redirect = true;
+            } else if (post.containsKey("popup")) {
                 final String trigger_enabled = post.get("popup");
-                if (trigger_enabled.equals("false")) {
+                if ("false".equals(trigger_enabled)) {
                     sb.setConfig("browserPopUpTrigger", "false");
-                } else if (trigger_enabled.equals("true")){
+                } else if ("true".equals(trigger_enabled)){
                     sb.setConfig("browserPopUpTrigger", "true");
                 }
                 redirect = true;
-        	} else if (post.containsKey("tray")) {
+            } else if (post.containsKey("tray")) {
                 final String trigger_enabled = post.get("tray");
-                if (trigger_enabled.equals("false")) {
+                if ("false".equals(trigger_enabled)) {
                     sb.setConfig("trayIcon", "false");
-                } else if (trigger_enabled.equals("true")){
+                } else if ("true".equals(trigger_enabled)){
                     sb.setConfig("trayIcon", "true");
                 }
                 redirect = true;
-        	}
+            }
         	
-        	if (redirect) {
-        		prop.put("LOCATION","");
-        		return prop;
-        	}
+            if (redirect) {
+                    prop.put("LOCATION","");
+                    return prop;
+            }
         }
-        
+
         // update seed info
         sb.updateMySeed();
 
@@ -138,18 +140,18 @@ public class Status {
 
         // resource observer status
         if (adminaccess) {
-	        if (!sb.observer.getDiskAvailable()){
-	            final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSpace());
-	            prop.put("warningDiskSpaceLow", "1");
-	            prop.put("warningDiskSpaceLow_minSpace", minFree);
-	        }
-	        if (!sb.observer.getMemoryAvailable()){
-	            final String minFree = Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L);
-	            prop.put("warningMemoryLow", "1");
-	            prop.put("warningMemoryLow_minSpace", minFree);
-	        }
+            if (!sb.observer.getDiskAvailable()){
+                final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSpace());
+                prop.put("warningDiskSpaceLow", "1");
+                prop.put("warningDiskSpaceLow_minSpace", minFree);
+            }
+            if (!sb.observer.getMemoryAvailable()){
+                final String minFree = Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L);
+                prop.put("warningMemoryLow", "1");
+                prop.put("warningMemoryLow_minSpace", minFree);
+            }
 	        
-	    }
+        }
         
         
         // version information
@@ -170,23 +172,23 @@ public class Status {
         final String extendedPortString = sb.getConfig("port", "8080");
         final int pos = extendedPortString.indexOf(":"); 
         prop.put("port",serverCore.getPortNr(extendedPortString));
-        if (pos!=-1) {
+        if (pos != -1) {
             prop.put("extPortFormat", "1");
             prop.putHTML("extPortFormat_extPort",extendedPortString);
         } else {
             prop.put("extPortFormat", "0");
         }
         InetAddress hostIP = Domains.myPublicLocalIP();
-        prop.put("host", hostIP!=null ? hostIP.getHostAddress() : "Unkown IP");
+        prop.put("host", hostIP != null ? hostIP.getHostAddress() : "Unkown IP");
         
         // ssl support
         prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
 
-        if (sb.getConfig("remoteProxyUse", "false").equals("true")) {
+        if ("true".equals(sb.getConfig("remoteProxyUse", "false"))) {
             prop.put("remoteProxy", "1");
             prop.putXML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"));
             prop.putXML("remoteProxy_port", sb.getConfig("remoteProxyPort", "<unknown>"));
-            prop.put("remoteProxy_4Yacy", sb.getConfig("remoteProxyUse4Yacy", "true").equalsIgnoreCase("true") ? "0" : "1");
+            prop.put("remoteProxy_4Yacy", "true".equalsIgnoreCase(sb.getConfig("remoteProxyUse4Yacy", "true")) ? "0" : "1");
         } else {
             prop.put("remoteProxy", "0"); // not used
         }
@@ -219,16 +221,16 @@ public class Status {
             }
         }
         final String peerStatus = ((sb.peers.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
-        if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN) && sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
+        if (yacySeed.PEERTYPE_VIRGIN.equals(peerStatus) && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))) {
             prop.put(PEERSTATUS, "0");
             prop.put("urgentStatusVirgin", "1");
-        } else if (peerStatus.equals(yacySeed.PEERTYPE_JUNIOR) && sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
+        } else if (yacySeed.PEERTYPE_JUNIOR.equals(peerStatus) && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))) {
             prop.put(PEERSTATUS, "1");
             prop.put("warningStatusJunior", "1");
-        } else if (peerStatus.equals(yacySeed.PEERTYPE_SENIOR)) {
+        } else if (yacySeed.PEERTYPE_SENIOR.equals(peerStatus)) {
             prop.put(PEERSTATUS, "2");
             prop.put("hintStatusSenior", "1");
-        } else if (peerStatus.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
+        } else if (yacySeed.PEERTYPE_PRINCIPAL.equals(peerStatus)) {
             prop.put(PEERSTATUS, "3");
             prop.put("hintStatusPrincipal", "1");
             prop.put("hintStatusPrincipal_seedURL", sb.peers.mySeed().get(yacySeed.SEEDLISTURL, "?"));
@@ -237,10 +239,10 @@ public class Status {
         prop.put("hash", thisHash);
         
         final String seedUploadMethod = sb.getConfig("seedUploadMethod", "");
-        if (!seedUploadMethod.equalsIgnoreCase("none") || 
-            (seedUploadMethod.equals("") && sb.getConfig("seedFTPPassword", "").length() > 0) ||
-            (seedUploadMethod.equals("") && sb.getConfig("seedFilePath", "").length() > 0)) {
-            if (seedUploadMethod.equals("")) {
+        if (!"none".equalsIgnoreCase(seedUploadMethod) ||
+            ("".equals(seedUploadMethod) && (sb.getConfig("seedFTPPassword", "").length() > 0 ||
+            sb.getConfig("seedFilePath", "").length() > 0))) {
+            if ("".equals(seedUploadMethod)) {
                 if (sb.getConfig("seedFTPPassword", "").length() > 0) {
                     sb.setConfig("seedUploadMethod","Ftp");
                 }
@@ -249,13 +251,13 @@ public class Status {
                 }
             }
 
-            if (seedUploadMethod.equalsIgnoreCase("ftp")) {
+            if ("ftp".equalsIgnoreCase(seedUploadMethod)) {
                 prop.put(SEEDSERVER, "1"); // enabled
                 prop.putHTML("seedServer_seedServer", sb.getConfig("seedFTPServer", ""));
-            } else if (seedUploadMethod.equalsIgnoreCase("scp")) {
+            } else if ("scp".equalsIgnoreCase(seedUploadMethod)) {
                 prop.put(SEEDSERVER, "1"); // enabled
                 prop.putHTML("seedServer_seedServer", sb.getConfig("seedScpServer", ""));
-            } else if (seedUploadMethod.equalsIgnoreCase("file")) {
+            } else if ("file".equalsIgnoreCase(seedUploadMethod)) {
                 prop.put(SEEDSERVER, "2"); // enabled
                 prop.putHTML("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
@@ -272,7 +274,7 @@ public class Status {
             prop.put("otherPeers", "0"); // not online
         }
 
-        if (sb.getConfig("browserPopUpTrigger", "false").equals("false")) {
+        if ("false".equals(sb.getConfig("browserPopUpTrigger", "false"))) {
             prop.put("popup", "0");
         } else {
             prop.put("popup", "1");
@@ -280,7 +282,7 @@ public class Status {
         
         if (!OS.isWindows) {
         	prop.put("tray", "2");
-        } else if (sb.getConfig("trayIcon", "false").equals("false")) {
+        } else if ("false".equals(sb.getConfig("trayIcon", "false"))) {
             prop.put("tray", "0");
         } else {
             prop.put("tray", "1");
