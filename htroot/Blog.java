@@ -90,12 +90,12 @@ public class Blog {
         final int start = post.getInt("start",0); //indicates from where entries should be shown
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
-        if(!hasRights){
+        if (!hasRights) {
             final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
-            if(userentry != null && userentry.hasRight(UserDB.Entry.BLOG_RIGHT)){
+            if (userentry != null && userentry.hasRight(UserDB.Entry.BLOG_RIGHT)) {
                 hasRights=true;
-            } else if(post.containsKey("login")) {
-                //opens login window if login link is clicked - contrib [MN]
+            } else if (post.containsKey("login")) {
+                //opens login window if login link is clicked
                 prop.put("AUTHENTICATE","admin log-in");
             }
         }
@@ -105,7 +105,7 @@ public class Blog {
 
         String StrAuthor = post.get("author", "");
 
-        if (StrAuthor.equals("anonymous")) {
+        if ("anonymous".equals(StrAuthor)) {
             StrAuthor = sb.blogDB.guessAuthor(ip);
 
             if (StrAuthor == null || StrAuthor.length() == 0) {
@@ -124,7 +124,7 @@ public class Blog {
             author = StrAuthor.getBytes();
         }
 
-        if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
+        if (hasRights && post.containsKey("delete") && "sure".equals(post.get("delete"))) {
             page = sb.blogDB.readBlogEntry(pagename);
             for (final String comment : page.getComments()) {
                 sb.blogCommentDB.delete(comment);
@@ -137,7 +137,7 @@ public class Blog {
             pagename = DEFAULT_PAGE;
         }
 
-        if (post.containsKey("submit") && (hasRights)) {
+        if (post.containsKey("submit") && hasRights) {
             // store a new/edited blog-entry
             byte[] content;
             try {
@@ -146,12 +146,13 @@ public class Blog {
                 content = post.get("content", "").getBytes();
             }
 
-            Date date = null;
+            final Date date;
             List<String> comments = null;
 
             //set name for new entry or date for old entry
-            if(pagename.equals(DEFAULT_PAGE)) {
+            if (DEFAULT_PAGE.equals(pagename)) {
                 pagename = String.valueOf(System.currentTimeMillis());
+                date = null;
             } else {
                 page = sb.blogDB.readBlogEntry(pagename);
                 comments = page.getComments();
@@ -213,7 +214,7 @@ public class Blog {
                 prop.put("mode", "3"); //access denied (no rights)
             }
         }
-        else if(post.get("delete", "").equals("try")) {
+        else if("try".equals(post.get("delete", ""))) {
             if(hasRights) {
                 prop.put("mode", "4");
                 prop.putHTML("mode_pageid", pagename);
@@ -246,7 +247,7 @@ public class Blog {
         else {
             // show blog-entry/entries
             prop.put("mode", "0"); //viewing
-            if(pagename.equals(DEFAULT_PAGE)) {
+            if(DEFAULT_PAGE.equals(pagename)) {
                 // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
                 prop.putHTML("peername", sb.peers.mySeed().getName());
@@ -274,43 +275,44 @@ public class Blog {
             final boolean hasRights,
             final boolean xml) 
     {
-            final Iterator<String> i = switchboard.blogDB.getBlogIterator(false);
-            String pageid;
-            int count = 0;                        //counts how many entries are shown to the user
-            if(xml) num = 0;
-            final int nextstart = start+num;      //indicates the starting offset for next results
-            int prevstart = start-num;            //indicates the starting offset for previous results
-            boolean prev = false;                 //indicates if there were previous comments to the ones that are dispalyed
-            if (start > 0) prev = true;
-            while(i.hasNext() && (num == 0 || num > count)) {
-                pageid = i.next();
-                if(0 < start--) continue;
-                putBlogEntry(
-                        prop,
-                        switchboard.blogDB.readBlogEntry(pageid),
-                        address,
-                        count++,
-                        hasRights,
-                        xml);
-            }
-            prop.put("mode_entries", count);
+        final Iterator<String> i = switchboard.blogDB.getBlogIterator(false);
 
-            if(i.hasNext()) {
-                prop.put("mode_moreentries", "1"); //more entries are availible
-                prop.put("mode_moreentries_start", nextstart);
-                prop.put("mode_moreentries_num", num);
-            } else {
-                prop.put("moreentries", "0");
+        int count = 0;                        //counts how many entries are shown to the user
+        if (xml) {
+            num = 0;
+        }
+        final int nextstart = start+num;      //indicates the starting offset for next results
+        int prevstart = start-num;            //indicates the starting offset for previous results
+
+        while (i.hasNext() && (num == 0 || num > count)) {
+            if(0 < start--) continue;
+            putBlogEntry(
+                    prop,
+                    switchboard.blogDB.readBlogEntry(i.next()),
+                    address,
+                    count++,
+                    hasRights,
+                    xml);
+        }
+        prop.put("mode_entries", count);
+
+        if (i.hasNext()) {
+            prop.put("mode_moreentries", "1"); //more entries are availible
+            prop.put("mode_moreentries_start", nextstart);
+            prop.put("mode_moreentries_num", num);
+        } else {
+            prop.put("moreentries", "0");
+        }
+
+        if (start > 0) {
+            prop.put("mode_preventries", "1");
+            if (prevstart < 0) {
+                prevstart = 0;
             }
-            
-            if(prev) {
-                prop.put("mode_preventries", "1");
-                if (prevstart < 0) prevstart = 0;
-                prop.put("mode_preventries_start", prevstart);
-                prop.put("mode_preventries_num", num);
-            } else prop.put("mode_preventries", "0");
-            
-            
+            prop.put("mode_preventries_start", prevstart);
+            prop.put("mode_preventries_num", num);
+        } else prop.put("mode_preventries", "0");
+                
         return prop;
     }
 
@@ -337,7 +339,7 @@ public class Blog {
         }
 
         // comments
-        if(entry.getCommentMode() == 0) {
+        if (entry.getCommentMode() == 0) {
             prop.put("mode_entries_" + number + "_commentsactive", "0");
         } else {
             prop.put("mode_entries_" + number + "_commentsactive", "1");
@@ -352,14 +354,14 @@ public class Blog {
         prop.put("mode_entries_" + number + "_address", address);
         prop.put("mode_entries_" + number + "_ip", entry.getIp());
 
-        if(xml) {
+        if (xml) {
             prop.put("mode_entries_" + number + "_page", entry.getPage());
             prop.put("mode_entries_" + number + "_timestamp", entry.getTimestamp());
         } else {
             prop.putWiki("mode_entries_" + number + "_page", entry.getPage());
         }
 
-        if(hasRights) {
+        if (hasRights) {
             prop.put("mode_entries_" + number + "_admin", "1");
             prop.put("mode_entries_" + number + "_admin_pageid",entry.getKey());
         } else {

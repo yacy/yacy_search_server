@@ -1,4 +1,4 @@
-//User_p.java 
+//Config_Accounts_p.java 
 //-----------------------
 //part of the AnomicHTTPD caching proxy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -42,24 +42,26 @@ import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import java.util.Map;
 
 public class ConfigAccounts_p {
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+
         final serverObjects prop = new serverObjects();
         final Switchboard sb = Switchboard.getSwitchboard();
-        UserDB.Entry entry=null;
+        UserDB.Entry entry = null;
 
         // admin password
         boolean localhostAccess = sb.getConfigBool("adminAccountForLocalhost", false);
-        if ((post != null) && (post.containsKey("setAdmin"))) {
-            localhostAccess = post.get("access", "").equals("localhost");
-            final String user   = (post == null) ? "" : post.get("adminuser", "");
-            final String pw1    = (post == null) ? "" : post.get("adminpw1", "");
-            final String pw2    = (post == null) ? "" : post.get("adminpw2", "");
+        if (post != null && post.containsKey("setAdmin")) {
+            localhostAccess = "localhost".equals(post.get("access", ""));
+            final String user = (post == null) ? "" : post.get("adminuser", "");
+            final String pw1  = (post == null) ? "" : post.get("adminpw1", "");
+            final String pw2  = (post == null) ? "" : post.get("adminpw2", "");
 
             // may be overwritten if new password is given
-            if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
+            if (user.length() > 0 && pw1.length() > 3 && pw1.equals(pw2)) {
                 // check passed. set account:
                 env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig("adminAccount", "");
@@ -107,32 +109,34 @@ public class ConfigAccounts_p {
         prop.put("address", "");
         prop.put("timelimit", "");
         prop.put("timeused", "");
-        final String[] rightNames=UserDB.Entry.RIGHT_NAMES.split(",");
-        final String[] rights=UserDB.Entry.RIGHT_TYPES.split(",");
-        int i;
-        for(i=0;i<rights.length;i++){
-        		prop.put("rights_"+i+"_name", rights[i]);
-        		prop.put("rights_"+i+"_friendlyName", rightNames[i]);
-        		prop.put("rights_"+i+"_set", "0");
+        final String[] rightNames = UserDB.Entry.RIGHT_NAMES.split(",");
+        final String[] rights = UserDB.Entry.RIGHT_TYPES.split(",");
+        int c = 0;
+        for (final String right : rights) {
+            prop.put("rights_" + c + "_name", right);
+            prop.put("rights_" + c +"_friendlyName", rightNames[c]);
+            prop.put("rights_" + c + "_set", "0");
+            c++;
         }
-        prop.put("rights", i);
+        prop.put("rights", c);
         
         prop.put("users", "0");
         
-        if (sb.userDB == null)
+        if (sb.userDB == null) {
             return prop;
+        }
         
-        if(post == null){
+        if (post == null) {
             //do nothing
 
             //user != current_user
             //user=from userlist
             //current_user = edited user
-        } else if(post.containsKey("user") && !(post.get("user")).equals("newuser")){
-            if(post.containsKey("change_user")){
+        } else if (post.containsKey("user") && !"newuser".equals(post.get("user"))){
+            if (post.containsKey("change_user")) {
                 //defaults for newuser are set above                
-                entry=sb.userDB.getEntry(post.get("user"));
-                // program crashes if a submit with emty username was made on previous mask and the user clicked on the 
+                entry = sb.userDB.getEntry(post.get("user"));
+                // program crashes if a submit with empty username was made on previous mask and the user clicked on the
                 // link: "If you want to manage more Users, return to the user page." (parameter "user" is empty)
                 if (entry != null) {
                     //TODO: set username read-only in html
@@ -143,90 +147,107 @@ public class ConfigAccounts_p {
                     prop.putHTML("address", entry.getAddress());
                     prop.put("timelimit", entry.getTimeLimit());
                     prop.put("timeused", entry.getTimeUsed());
-                    for(i=0;i<rights.length;i++){
-                        prop.put("rights_"+i+"_set", entry.hasRight(rights[i]) ? "1" : "0");
+                    int count = 0;
+                    for (final String right : rights){
+                        prop.put("rights_" + count + "_set", entry.hasRight(right) ? "1" : "0");
+                        count++;
                     }
-                    prop.put("rights", i);
+                    prop.put("rights", count);
                 }
-            }else if( post.containsKey("delete_user") && !(post.get("user")).equals("newuser") ){
+            } else if (post.containsKey("delete_user") && !post.get("user").equals("newuser")){
                 sb.userDB.removeEntry(post.get("user"));
             }
-        } else if(post.containsKey("change")) { //New User / edit User
+        } else if (post.containsKey("change")) { //New User / edit User
             prop.put("text", "0");
             prop.put("error", "0");
 
-            final String username=post.get("username");
-            final String pw1=post.get("password");
-            final String pw2=post.get("password2");
-            if(! pw1.equals(pw2)){
+            final String username = post.get("username");
+            final String pw1 = post.get("password");
+            final String pw2 = post.get("password2");
+
+            if (pw1 == null || !pw1.equals(pw2)) {
                 prop.put("error", "2"); //PW does not match
                 return prop;
             }
-            final String firstName=post.get("firstname");
-            final String lastName=post.get("lastname");
-            final String address=post.get("address");
-            final String timeLimit=post.get("timelimit");
-            final String timeUsed=post.get("timeused");
-            final HashMap<String, String> rightsSet=new HashMap<String, String>();
-            for(i=0;i<rights.length;i++){
-        	    		rightsSet.put(rights[i], post.containsKey(rights[i])&&(post.get(rights[i])).equals("on") ? "true" : "false");
+
+            final String firstName = post.get("firstname");
+            final String lastName = post.get("lastname");
+            final String address = post.get("address");
+            final String timeLimit = post.get("timelimit");
+            final String timeUsed = post.get("timeused");
+            final Map<String, String> rightsSet = new HashMap<String, String>();
+
+            for(final String right : rights) {
+                rightsSet.put(right, post.containsKey(right)&&(post.get(right)).equals("on") ? "true" : "false");
             }
-            final HashMap<String, String> mem=new HashMap<String, String>();
+            
+            final Map<String, String> mem = new HashMap<String, String>();
             if( post.get("current_user").equals("newuser")){ //new user
                 
-				if(!pw1.equals("")){ //change only if set
-	                mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
-				}
-				mem.put(UserDB.Entry.USER_FIRSTNAME, firstName);
-				mem.put(UserDB.Entry.USER_LASTNAME, lastName);
-				mem.put(UserDB.Entry.USER_ADDRESS, address);
-				mem.put(UserDB.Entry.TIME_LIMIT, timeLimit);
-				mem.put(UserDB.Entry.TIME_USED, timeUsed);
-				for(i=0;i<rights.length;i++)
-					mem.put(rights[i], rightsSet.get(rights[i]));
+                if(!"".equals(pw1)){ //change only if set
+                    mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username + ":" + pw1));
+                }
 
-                try{
-                    entry=sb.userDB.createEntry(username, mem);
+                mem.put(UserDB.Entry.USER_FIRSTNAME, firstName);
+                mem.put(UserDB.Entry.USER_LASTNAME, lastName);
+                mem.put(UserDB.Entry.USER_ADDRESS, address);
+                mem.put(UserDB.Entry.TIME_LIMIT, timeLimit);
+                mem.put(UserDB.Entry.TIME_USED, timeUsed);
+
+                for (final String right : rights) {
+                    mem.put(right, rightsSet.get(right));
+                }
+
+                try {
+                    entry = sb.userDB.createEntry(username, mem);
                     sb.userDB.addEntry(entry);
                     prop.putHTML("text_username", username);
                     prop.put("text", "1");
-                }catch(final IllegalArgumentException e){
+                } catch (final IllegalArgumentException e) {
                     prop.put("error", "3");
                 }
                 
             } else { //edit user
 
                 entry = sb.userDB.getEntry(username);
-				if(entry != null){
-	                try{
-						if(! pw1.equals("")){
-			                entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
-						}
-						entry.setProperty(UserDB.Entry.USER_FIRSTNAME, firstName);
-						entry.setProperty(UserDB.Entry.USER_LASTNAME, lastName);
-						entry.setProperty(UserDB.Entry.USER_ADDRESS, address);
-						entry.setProperty(UserDB.Entry.TIME_LIMIT, timeLimit);
-						entry.setProperty(UserDB.Entry.TIME_USED, timeUsed);
-						for(i=0;i<rights.length;i++)
-							entry.setProperty(rights[i], rightsSet.get(rights[i]));
-		            } catch (final Exception e) {
-		                Log.logException(e);
-					}
-                }else{
-					prop.put("error", "1");
-				}
-				prop.putHTML("text_username", username);
-				prop.put("text", "2");
+
+                if (entry != null) {
+                    try{
+                        if (!"".equals(pw1)) {
+                            entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username+":"+pw1));
+                        }
+
+                        entry.setProperty(UserDB.Entry.USER_FIRSTNAME, firstName);
+                        entry.setProperty(UserDB.Entry.USER_LASTNAME, lastName);
+                        entry.setProperty(UserDB.Entry.USER_ADDRESS, address);
+                        entry.setProperty(UserDB.Entry.TIME_LIMIT, timeLimit);
+                        entry.setProperty(UserDB.Entry.TIME_USED, timeUsed);
+
+                        for(final String right : rights) {
+                            entry.setProperty(right, rightsSet.get(right));
+                        }
+
+                    } catch (final Exception e) {
+                        Log.logException(e);
+                    }
+
+                } else {
+                    prop.put("error", "1");
+                }
+                prop.putHTML("text_username", username);
+                prop.put("text", "2");
             }//edit user
-			prop.putHTML("username", username);
+            prop.putHTML("username", username);
         }
 		
-		//Generate Userlist
+        //Generate Userlist
         final Iterator<UserDB.Entry> it = sb.userDB.iterator(true);
         int numUsers=0;
-        while(it.hasNext()){
+        while (it.hasNext()) {
             entry = it.next();
-            if (entry == null) continue;
+            if (entry == null) {
+                continue;
+            }
             prop.putHTML("users_"+numUsers+"_user", entry.getUserName());
             numUsers++;
         }

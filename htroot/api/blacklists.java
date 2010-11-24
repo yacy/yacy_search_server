@@ -16,29 +16,30 @@ public class blacklists {
 
         ListManager.listsPath = new File(ListManager.switchboard.getDataPath(),ListManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         final List<String> dirlist = FileUtils.getDirListing(ListManager.listsPath);
-        int blacklistCount=0;
+        int blacklistCount = 0;
 
         final String blackListName = (post == null) ? "" : post.get("listname", "");
         
-        List<String> list;
-        int count;
         if (dirlist != null) {
-            for (String element : dirlist) {
-                if (blackListName.equals("") || element.equals(blackListName)) {
+            for (final String element : dirlist) {
+                if ("".equals(blackListName) || element.equals(blackListName)) {
                     prop.putXML("lists_" + blacklistCount + "_name", element);
 
                     if (ListManager.listSetContains("BlackLists.Shared", element)) {
 
-                        list = FileUtils.getListArray(new File(ListManager.listsPath, element));
+                        final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, element));
 
-                        count=0;
-                        for (int j=0;j<list.size();++j){
-                            final String nextEntry = list.get(j);
+                        int count=0;
+                        for (final String entry : list){
 
-                            if (nextEntry.length() == 0) continue;
-                            if (nextEntry.charAt(0) == '#') continue;
+                            if (entry.length() == 0) {
+                                continue;
+                            }
+                            if (entry.charAt(0) == '#') {
+                                continue;
+                            }
 
-                            prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
+                            prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", entry);
                             count++;
                         }
                         prop.put("lists_" + blacklistCount + "_items", count);

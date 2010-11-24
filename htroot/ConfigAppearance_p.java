@@ -96,7 +96,7 @@ public class ConfigAppearance_p {
                 // load skin from URL
                 final String url = post.get("url");
 
-                Iterator<String> it;
+                final Iterator<String> it;
                 try {
                     final DigestURI u = new DigestURI(url);
                     it = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
@@ -112,12 +112,13 @@ public class ConfigAppearance_p {
                     while (it.hasNext()) {
                         bw.write(it.next() + "\n");
                     }
+                    
                     bw.close();
                 } catch (final IOException e) {
                     prop.put("status", "2");// error saving the skin
                     return prop;
                 }
-                if (post.containsKey("use_skin") && (post.get("use_skin", "")).equals("on")) {
+                if (post.containsKey("use_skin") && "on".equals(post.get("use_skin", ""))) {
                     changeSkin(sb, skinPath, url.substring(url.lastIndexOf('/'), url.length()));
                 }
             }
@@ -126,8 +127,10 @@ public class ConfigAppearance_p {
                 if (skinFiles.contains(selectedSkin)) {
                     changeSkin(sb, skinPath, selectedSkin);
                 }
-                for (Map.Entry<String, String> entry: post.entrySet()) {
-                    if (entry.getKey().startsWith("color_")) env.setConfig(entry.getKey(), "#" + entry.getValue());
+                for (final Map.Entry<String, String> entry: post.entrySet()) {
+                    if (entry.getKey().startsWith("color_")) {
+                        env.setConfig(entry.getKey(), "#" + entry.getValue());
+                    }
                 }
             }
         }
@@ -136,7 +139,7 @@ public class ConfigAppearance_p {
         skinFiles = FileUtils.getDirListing(skinPath, SKIN_FILENAME_FILTER);
         Collections.sort(skinFiles);
         int count = 0;
-        for (String skinFile : skinFiles) {
+        for (final String skinFile : skinFiles) {
             if (skinFile.endsWith(".css")) {
                 prop.put("skinlist_" + count + "_file", skinFile);
                 prop.put("skinlist_" + count + "_name", skinFile.substring(0, skinFile.length() - 4));
@@ -148,9 +151,8 @@ public class ConfigAppearance_p {
         
         // write colors from generic skin
         Iterator<String> i = env.configKeys();
-        String key;
         while (i.hasNext()) {
-            key = i.next();
+            final String key = i.next();
             if (key.startsWith("color_")) prop.put(key, env.getConfig(key, "#000000").substring(1));
         }
         return prop;

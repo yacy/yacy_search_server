@@ -23,11 +23,10 @@ public class blacklists_p {
         final String blackListName = (post == null) ? "" : post.get("listname", "");
         final String attrOnly = (post == null) ? "" : post.get("attrOnly", "");
 
-        List<String> list;
         int count;
         if (dirlist != null) {
-            for (String element : dirlist) {
-                if (blackListName.equals("") || element.equals(blackListName)) {
+            for (final String element : dirlist) {
+                if ("".equals(blackListName) || element.equals(blackListName)) {
                     prop.putXML("lists_" + blacklistCount + "_name", element);
 
                     if (ListManager.listSetContains("BlackLists.Shared", element)) {
@@ -37,24 +36,24 @@ public class blacklists_p {
                     }
 
                     final String[] types = Blacklist.BLACKLIST_TYPES_STRING.split(",");
-                    for (int j=0; j<types.length; j++) {
-                        prop.putXML("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
+                    int j = 0;
+                    for (final String type : types) {
+                        prop.putXML("lists_" + blacklistCount + "_types_" + j + "_name", type);
                         prop.put("lists_" + blacklistCount + "_types_" + j + "_value",
-                                ListManager.listSetContains(types[j] + ".BlackLists", element) ? 1 : 0);
+                                ListManager.listSetContains(type + ".BlackLists", element) ? 1 : 0);
+                        j++;
                     }
                     prop.put("lists_" + blacklistCount + "_types", types.length);
 
-                    if ( ! (attrOnly.equals("1") || attrOnly.equals("true"))) {
-                	list = FileUtils.getListArray(new File(ListManager.listsPath, element));
+                    if (!"1".equals(attrOnly) && !"true".equals(attrOnly)) {
+                	final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, element));
 
                 	count=0;
-                	for (int j=0;j<list.size();++j){
-                	    final String nextEntry = list.get(j);
+                	for (final String entry : list){
+                	    if (entry.length() == 0) continue;
+                	    if (entry.charAt(0) == '#') continue;
 
-                	    if (nextEntry.length() == 0) continue;
-                	    if (nextEntry.charAt(0) == '#') continue;
-
-                	    prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
+                	    prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", entry);
                 	    count++;
                 	}
                 	prop.put("lists_" + blacklistCount + "_items", count);

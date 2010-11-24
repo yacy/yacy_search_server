@@ -93,7 +93,7 @@ public class BlogComments {
 
         String StrAuthor = post.get("author", "anonymous");
 
-        if (StrAuthor.equals("anonymous")) {
+        if ("anonymous".equals(StrAuthor)) {
             StrAuthor = sb.blogDB.guessAuthor(ip);
 
             if (StrAuthor == null || StrAuthor.length() == 0) {
@@ -126,9 +126,10 @@ public class BlogComments {
         if (post.containsKey("submit") && page.getCommentMode() != 0 && pageExists) {
             // store a new/edited blog-entry
             byte[] content;
-            if(!post.get("content", "").equals(""))
-            {
-                if(post.get("subject", "").equals("")) post.putHTML("subject", "no title");
+            if (!"".equals(post.get("content", ""))) {
+                if ("".equals(post.get("subject", ""))) {
+                    post.putHTML("subject", "no title");
+                }
                 try {
                     content = post.get("content", "").getBytes("UTF-8");
                 } catch (final UnsupportedEncodingException e) {
@@ -183,19 +184,18 @@ public class BlogComments {
             }
         }
 
-        if(hasRights && post.containsKey("delete") && post.containsKey("page") && post.containsKey("comment")) {
-            if(page.removeComment(post.get("comment"))) {
-                sb.blogCommentDB.delete(post.get("comment"));
-            }
+        if (hasRights && post.containsKey("delete") && post.containsKey("page") &&
+                post.containsKey("comment") && page.removeComment(post.get("comment"))) {
+            sb.blogCommentDB.delete(post.get("comment"));
         }
 
-        if(hasRights && post.containsKey("allow") && post.containsKey("page") && post.containsKey("comment")) {
+        if (hasRights && post.containsKey("allow") && post.containsKey("page") && post.containsKey("comment")) {
             final BlogBoardComments.CommentEntry entry = sb.blogCommentDB.read(post.get("comment"));
             entry.allow();
             sb.blogCommentDB.write(entry);
         }
 
-        if(post.containsKey("preview") && page.getCommentMode() != 0) {
+        if (post.containsKey("preview") && page.getCommentMode() != 0) {
             //preview the page
             prop.put("mode", "1");//preview
             prop.putHTML("mode_pageid", pagename);
@@ -214,7 +214,7 @@ public class BlogComments {
         } else {
             // show blog-entry/entries
             prop.put("mode", "0"); //viewing
-            if(pagename.equals("blog_default")) {
+            if("blog_default".equals(pagename)) {
                 prop.put("LOCATION","Blog.html");
             } else {
                 //show 1 blog entry
@@ -235,7 +235,7 @@ public class BlogComments {
                 prop.put("mode_comments", page.getCommentsSize());
                 prop.put("mode_date", dateString(page.getDate()));
                 prop.putWiki("mode_page", page.getPage());
-                if(hasRights) {
+                if (hasRights) {
                     prop.put("mode_admin", "1");
                     prop.put("mode_admin_pageid", page.getKey());
                 }
@@ -246,19 +246,23 @@ public class BlogComments {
                     String pageid;
                     BlogBoardComments.CommentEntry entry;
                     boolean xml = false;
-                    if(post.containsKey("xml")) {
+                    if (post.containsKey("xml")) {
                         xml = true;
                     }
                     int count = 0; //counts how many entries are shown to the user
                     int start = post.getInt("start",0); //indicates from where entries should be shown
                     int num   = post.getInt("num",10);  //indicates how many entries should be shown
-                    boolean prev = false;               //indicates if there were previous comments to the ones that are dispalyed
-                    if(xml) num = 0;
-                    if (start < 0) start = 0;       
-                    if (start > 1) prev = true;
-                    final int nextstart = start+num;      //indicates the starting offset for next results
-                    int prevstart = start-num;      //indicates the starting offset for previous results
-                    while(i.hasNext() && count < num) {
+
+                    if (xml) {
+                        num = 0;
+                    }
+                    if (start < 0) {
+                        start = 0;
+                    }
+
+                    final int nextstart = start + num;  //indicates the starting offset for next results
+                    int prevstart = start - num;        //indicates the starting offset for previous results
+                    while (i.hasNext() && count < num) {
 
                         pageid = i.next();
                         
@@ -269,17 +273,17 @@ public class BlogComments {
                             
                         entry = sb.blogCommentDB.read(pageid);
 
-                        if (commentMode == 2 && !hasRights && !entry.isAllowed())
+                        if (commentMode == 2 && !hasRights && !entry.isAllowed()) {
                             continue;
+                        }
 
                         prop.put("mode", "0");
                         prop.put("mode_entries_"+count+"_pageid", entry.getKey());
-                        if(!xml) {
+                        if (!xml) {
                             prop.putHTML("mode_entries_"+count+"_subject", new String(entry.getSubject(),"UTF-8"));
                             prop.putHTML("mode_entries_"+count+"_author", new String(entry.getAuthor(),"UTF-8"));
                             prop.putWiki("mode_entries_"+count+"_page", entry.getPage());
-                        }
-                        else {
+                        } else {
                             prop.putHTML("mode_entries_"+count+"_subject", new String(entry.getSubject(),"UTF-8"));
                             prop.putHTML("mode_entries_"+count+"_author", new String(entry.getAuthor(),"UTF-8"));
                             prop.put("mode_entries_"+count+"_page", entry.getPage());
@@ -301,15 +305,15 @@ public class BlogComments {
                         else prop.put("mode_entries_"+count+"_admin", 0);
                         ++count;
                     }
-                    prop.put("mode_entries", count);
-                    if(i.hasNext()) {
+                    prop.put ("mode_entries", count);
+                    if (i.hasNext()) {
                         prop.put("mode_moreentries", "1"); //more entries are availible
                         prop.put("mode_moreentries_start", nextstart);
                         prop.put("mode_moreentries_num", num);
                         prop.put("mode_moreentries_pageid", page.getKey());
                     }
                     else prop.put("mode_moreentries", "0");
-                    if(prev) {
+                    if (start > 1) {
                         prop.put("mode_preventries", "1");
                         if (prevstart < 0) prevstart = 0;
                         prop.put("mode_preventries_start", prevstart);
@@ -328,7 +332,9 @@ public class BlogComments {
 
     private static void messageForwardingViaEmail(final Switchboard sb, final MessageBoard.entry msgEntry) {
         try {
-            if (!Boolean.parseBoolean(sb.getConfig("msgForwardingEnabled","false"))) return;
+            if (!Boolean.parseBoolean(sb.getConfig("msgForwardingEnabled","false"))) {
+                return;
+            }
 
             // get the recipient address
             final String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
