@@ -18,7 +18,6 @@ import java.util.TreeMap;
 
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
-import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -27,9 +26,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.repository.LoaderDispatcher;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.Response;
 import de.anomic.search.Segment;
 import de.anomic.data.YMarkWordCountComparator;
 
@@ -439,106 +435,80 @@ public class YMarkTables {
         return metadata;
 	}
 	
-	public static EnumMap<METADATA, String> loadMetadata(final String url, final LoaderDispatcher loader) throws MalformedURLException {
+	public static EnumMap<METADATA, String> getMetadata(final Document document) {
 		final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
 		metadata.put(METADATA.IN_URLDB, "false");
-        final DigestURI u = new DigestURI(url);
-        Response response = null;
-        try {
-			response = loader.load(loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
-			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-			if(document != null) {
-	        	metadata.put(METADATA.TITLE, document.dc_title()); 
-	        	metadata.put(METADATA.CREATOR, document.dc_creator());
-	        	metadata.put(METADATA.KEYWORDS, document.dc_subject(' '));
-	        	metadata.put(METADATA.PUBLISHER, document.dc_publisher());
-	        	metadata.put(METADATA.DESCRIPTION, document.dc_description());
-	        	metadata.put(METADATA.MIMETYPE, document.dc_format());
-	        	metadata.put(METADATA.LANGUAGE, document.dc_language());
-	        	metadata.put(METADATA.CHARSET, document.getCharset());
-	        	// metadata.put(METADATA.SIZE, String.valueOf(document.getTextLength()));
-			}
-        } catch (IOException e) {
-			Log.logException(e);
-		} catch (Failure e) {
-			Log.logException(e);
+        if(document != null) {
+			metadata.put(METADATA.TITLE, document.dc_title()); 
+			metadata.put(METADATA.CREATOR, document.dc_creator());
+			metadata.put(METADATA.KEYWORDS, document.dc_subject(' '));
+			metadata.put(METADATA.PUBLISHER, document.dc_publisher());
+			metadata.put(METADATA.DESCRIPTION, document.dc_description());
+			metadata.put(METADATA.MIMETYPE, document.dc_format());
+			metadata.put(METADATA.LANGUAGE, document.dc_language());
+			metadata.put(METADATA.CHARSET, document.getCharset());
+			// metadata.put(METADATA.SIZE, String.valueOf(document.getTextLength()));
 		}
 		return metadata;
 	}
 	
-	public String autoTag(final String url, final LoaderDispatcher loader, final String bmk_user, final int count) throws MalformedURLException {
+	public String autoTag(final Document document, final String bmk_user, final int count) {
         final StringBuilder buffer = new StringBuilder();
 		final Map<String, Word> words;
-        final DigestURI u = new DigestURI(url);
-        Response response = null;
-        try {
-			response = loader.load(loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
-			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-			if(document != null) {
-	            try {
-					words = new Condenser(document, true, true, LibraryProvider.dymLib).words();
-		            buffer.append(document.dc_title());
-		            buffer.append(document.dc_description());
-		            buffer.append(document.dc_subject(' '));
-		            final Enumeration<String> tokens = Condenser.wordTokenizer(buffer.toString(), "UTF-8", LibraryProvider.dymLib);
-		            while(tokens.hasMoreElements()) {
-		            	int max = 1;
-		            	String token = tokens.nextElement();
-		            	Word word = words.get(token);
-		            	if (words.containsKey(token)) {
-		            		if (this.worktables.has(TABLES.TAGS.tablename(bmk_user), getKeyId(token))) {
-		            			max = word.occurrences() * 1000;
-		            		} else if (token.length()>3) {
-		            			max = word.occurrences() * 100;
-		            		}
-		            		for(int i=0; i<max; i++) {
-		            			word.inc();
-		            		}
-		            	}
-		            }
-		            buffer.setLength(0);
-					final ArrayList<String> topwords = new ArrayList<String>(sortWordCounts(words).descendingKeySet());
-					for(int i=0; i<count && i<topwords.size() ; i++) {
-						if(words.get(topwords.get(i)).occurrences() > 100) {
-							buffer.append(topwords.get(i));
-							/*
-							buffer.append('[');
-							buffer.append(words.get(topwords.get(i)).occurrences());
-							buffer.append(']');
-							*/
-							buffer.append(',');	
-						}
+        if(document != null) {
+		    try {
+				words = new Condenser(document, true, true, LibraryProvider.dymLib).words();
+		        buffer.append(document.dc_title());
+		        buffer.append(document.dc_description());
+		        buffer.append(document.dc_subject(' '));
+		        final Enumeration<String> tokens = Condenser.wordTokenizer(buffer.toString(), "UTF-8", LibraryProvider.dymLib);
+		        while(tokens.hasMoreElements()) {
+		        	int max = 1;
+		        	String token = tokens.nextElement();
+		        	Word word = words.get(token);
+		        	if (words.containsKey(token)) {
+		        		if (this.worktables.has(TABLES.TAGS.tablename(bmk_user), getKeyId(token))) {
+		        			max = word.occurrences() * 1000;
+		        		} else if (token.length()>3) {
+		        			max = word.occurrences() * 100;
+		        		}
+		        		for(int i=0; i<max; i++) {
+		        			word.inc();
+		        		}
+		        	}
+		        }
+		        buffer.setLength(0);
+				final ArrayList<String> topwords = new ArrayList<String>(sortWordCounts(words).descendingKeySet());
+				for(int i=0; i<count && i<topwords.size() ; i++) {
+					if(words.get(topwords.get(i)).occurrences() > 100) {
+						buffer.append(topwords.get(i));
+						/*
+						buffer.append('[');
+						buffer.append(words.get(topwords.get(i)).occurrences());
+						buffer.append(']');
+						*/
+						buffer.append(',');	
 					}
-					if(buffer.length() > 0) {
-						buffer.deleteCharAt(buffer.length()-1);
-					}
-	
-				} catch (UnsupportedEncodingException e) {
-					Log.logException(e);
-				} catch (IOException e) {
-					Log.logException(e);
-				} 
-			}
-        } catch (IOException e) {
-			Log.logException(e);
-		} catch (Failure e) {
-			Log.logException(e);
+				}
+				if(buffer.length() > 0) {
+					buffer.deleteCharAt(buffer.length()-1);
+				}
+
+			} catch (UnsupportedEncodingException e) {
+				Log.logException(e);
+			} catch (IOException e) {
+				Log.logException(e);
+			} 
 		}
 		return buffer.toString();
 	}
 	
-	public static TreeMap<String,Word> getWordCounts(final String url, final LoaderDispatcher loader) throws MalformedURLException {
-		final DigestURI u = new DigestURI(url);
-        Response response = null;        
+	public static TreeMap<String,Word> getWordCounts(final Document document) {
         try {
-			response = loader.load(loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
-			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 			if(document != null) {
                 return sortWordCounts(new Condenser(document, true, true, LibraryProvider.dymLib).words());
 			}
 		} catch (IOException e) {			
-			Log.logException(e);
-		} catch (Failure e) {
 			Log.logException(e);
 		}
 		return new TreeMap<String, Word>();
