@@ -1,18 +1,19 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.Iterator;
-import java.util.List;
+import java.util.TreeMap;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
-import de.anomic.data.YMarkKeyValueEntry;
-import de.anomic.data.YMarkTables;
 import de.anomic.data.UserDB;
+import de.anomic.data.YMarkTables;
 import de.anomic.data.YMarkTables.METADATA;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -163,7 +164,7 @@ public class get_treeview {
 			            prop.put("folders_"+count+"_hash", "m:"+url);
 			    		prop.put("folders_"+count+"_hasChildren", "true");
 			            count++;
-			            prop.put("folders_"+count+"_foldername","<small><b>WordCount</b></small>");
+			            prop.put("folders_"+count+"_foldername","<small><b>WordCounts</b></small>");
 			            putProp(count, "meta");
 			            prop.put("folders_"+count+"_hash", "w:"+url);
 			    		prop.put("folders_"+count+"_hasChildren", "true");
@@ -178,11 +179,12 @@ public class get_treeview {
 				}
 	        } else if (isWordCount) {
 	        	try {
-					final List<YMarkKeyValueEntry<String, Integer>> list = YMarkTables.getWordFrequencies(post.get(ROOT).substring(2), sb.loader, 10);
-					final Iterator<YMarkKeyValueEntry<String, Integer>> iter = list.iterator();
-					while (iter.hasNext()) {
-						YMarkKeyValueEntry<String, Integer> e = iter.next();
-						prop.put("folders_"+count+"_foldername","<small><b>"+e.getKey()+":</b> [" + e.getValue() + "]</small>");
+					final TreeMap<String,Word> words = YMarkTables.getWordCounts(post.get(ROOT).substring(2), sb.loader);
+					final ArrayList<String> topwords = new ArrayList<String>(words.descendingKeySet());
+					for(int i = 0; i < 20 && i < topwords.size(); i++) {
+						String word = topwords.get(i);
+						int occur = words.get(word).occurrences();
+						prop.put("folders_"+count+"_foldername","<small><b>"+word+":</b> [" + occur + "]</small>");
     					putProp(count, "meta");
     					count++;
 					}
@@ -208,8 +210,8 @@ public class get_treeview {
 						putProp(count, "meta");
 						count++;
 					}
-					count--;
-					prop.put("folders_"+count+"_comma", "");
+					prop.put("folders_"+count+"_foldername","<small><b>autotag:</b> " + sb.tables.bookmarks.autoTag(post.get(ROOT).substring(2), sb.loader, bmk_user, 5) + "</small>");
+					putProp(count, "meta");
 					count++;
 	        		prop.put("folders", count);
 				} catch (MalformedURLException e) {

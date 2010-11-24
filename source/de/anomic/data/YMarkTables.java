@@ -1,12 +1,11 @@
 package de.anomic.data;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -14,8 +13,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
@@ -31,6 +31,7 @@ import net.yacy.repository.LoaderDispatcher;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.search.Segment;
+import de.anomic.data.YMarkWordCountComparator;
 
 public class YMarkTables {
     
@@ -449,7 +450,7 @@ public class YMarkTables {
 			if(document != null) {
 	        	metadata.put(METADATA.TITLE, document.dc_title()); 
 	        	metadata.put(METADATA.CREATOR, document.dc_creator());
-	        	metadata.put(METADATA.KEYWORDS, document.dc_subject(','));
+	        	metadata.put(METADATA.KEYWORDS, document.dc_subject(' '));
 	        	metadata.put(METADATA.PUBLISHER, document.dc_publisher());
 	        	metadata.put(METADATA.DESCRIPTION, document.dc_description());
 	        	metadata.put(METADATA.MIMETYPE, document.dc_format());
@@ -465,52 +466,88 @@ public class YMarkTables {
 		return metadata;
 	}
 	
-	public static List<YMarkKeyValueEntry<String, Integer>> getWordFrequencies(final String url, final LoaderDispatcher loader, final int top) throws MalformedURLException {
-        final List<YMarkKeyValueEntry<String, Integer>> list = new ArrayList<YMarkKeyValueEntry<String, Integer>>();
-		final DigestURI u = new DigestURI(url);
+	public String autoTag(final String url, final LoaderDispatcher loader, final String bmk_user, final int count) throws MalformedURLException {
+        final StringBuilder buffer = new StringBuilder();
+		final Map<String, Word> words;
+        final DigestURI u = new DigestURI(url);
         Response response = null;
-        int wordcount = 0;
-        String sentence, token;
-        final YMarkKeyValueEntry<String, Integer> entry = new YMarkKeyValueEntry<String, Integer>();
         try {
 			response = loader.load(loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
 			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 			if(document != null) {
-				final Collection<StringBuilder> sentences = document.getSentences(false);
-	            if (sentences != null) {
-	            	for (StringBuilder s: sentences) {
-	                    sentence = s.toString();
-	                    Enumeration<String> tokens = Condenser.wordTokenizer(sentence, "UTF-8", LibraryProvider.dymLib);
-	                    while (tokens.hasMoreElements()) {
-	                    	token = tokens.nextElement();
-	                        if (token.length() > 2) {
-	                        	wordcount++;
-	                        	entry.set(token.toLowerCase(), 1);
-	                        	if(list.contains(entry)) {	                        		
-	                        		int v = list.get(list.indexOf(entry)).getValue() + 1;
-	                        		list.get(list.indexOf(entry)).setValue(v);
-	                        	} else {
-	                        		list.add(new YMarkKeyValueEntry<String, Integer>(token.toLowerCase(), 1));	                        		
-	                        	}
-	                        }
-	                    }
-	                }
-	            } 
-	            document.close();
+	            try {
+					words = new Condenser(document, true, true, LibraryProvider.dymLib).words();
+		            buffer.append(document.dc_title());
+		            buffer.append(document.dc_description());
+		            buffer.append(document.dc_subject(' '));
+		            final Enumeration<String> tokens = Condenser.wordTokenizer(buffer.toString(), "UTF-8", LibraryProvider.dymLib);
+		            while(tokens.hasMoreElements()) {
+		            	int max = 1;
+		            	String token = tokens.nextElement();
+		            	Word word = words.get(token);
+		            	if (words.containsKey(token)) {
+		            		if (this.worktables.has(TABLES.TAGS.tablename(bmk_user), getKeyId(token))) {
+		            			max = word.occurrences() * 1000;
+		            		} else if (token.length()>3) {
+		            			max = word.occurrences() * 100;
+		            		}
+		            		for(int i=0; i<max; i++) {
+		            			word.inc();
+		            		}
+		            	}
+		            }
+		            buffer.setLength(0);
+					final ArrayList<String> topwords = new ArrayList<String>(sortWordCounts(words).descendingKeySet());
+					for(int i=0; i<count && i<topwords.size() ; i++) {
+						if(words.get(topwords.get(i)).occurrences() > 100) {
+							buffer.append(topwords.get(i));
+							/*
+							buffer.append('[');
+							buffer.append(words.get(topwords.get(i)).occurrences());
+							buffer.append(']');
+							*/
+							buffer.append(',');	
+						}
+					}
+					if(buffer.length() > 0) {
+						buffer.deleteCharAt(buffer.length()-1);
+					}
+	
+				} catch (UnsupportedEncodingException e) {
+					Log.logException(e);
+				} catch (IOException e) {
+					Log.logException(e);
+				} 
 			}
-		} catch (IOException e) {
+        } catch (IOException e) {
 			Log.logException(e);
 		} catch (Failure e) {
 			Log.logException(e);
 		}
-		Collections.sort(list);
-		float c = list.size();
-		Log.logInfo(YMarkTables.BOOKMARKS_LOG, "size: "+c);
-		int end = (int) (c*0.9);
-		int start = end - top;
-		if (start < 0)
-			start = 0;
-		Log.logInfo(YMarkTables.BOOKMARKS_LOG, "start: "+start+" end: "+end);
-		return list.subList(start,end);
+		return buffer.toString();
 	}
+	
+	public static TreeMap<String,Word> getWordCounts(final String url, final LoaderDispatcher loader) throws MalformedURLException {
+		final DigestURI u = new DigestURI(url);
+        Response response = null;        
+        try {
+			response = loader.load(loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
+			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
+			if(document != null) {
+                return sortWordCounts(new Condenser(document, true, true, LibraryProvider.dymLib).words());
+			}
+		} catch (IOException e) {			
+			Log.logException(e);
+		} catch (Failure e) {
+			Log.logException(e);
+		}
+		return new TreeMap<String, Word>();
+	}
+	
+	public static TreeMap<String,Word> sortWordCounts(final Map<String, Word> unsorted_words) {		
+        final TreeMap<String, Word> sorted_words = new TreeMap<String, Word>(new YMarkWordCountComparator(unsorted_words));
+        sorted_words.putAll(unsorted_words);
+        return sorted_words;	
+    }
+
 }
