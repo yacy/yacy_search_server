@@ -29,7 +29,7 @@
   			var width = document.documentElement.clientWidth;
   			var height = document.documentElement.clientHeight;
   			width = width - 490;
-			height = height - 225;
+			height = height - 250;
 			$("#table").width(width);
   			$("#table").height(height);
 			$("#content_area").width(width);
@@ -47,7 +47,8 @@
 		#(showtable)#::
 		<form action="Table_YMark_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="tablelisting">
 		  <fieldset>
-		  <legend><label for="tablelisting">Table Editor: showing table '#[table]#'</label></legend>
+		  <legend><label for="tablelisting">Table Editor: showing table '#[table]#' containing #[bmksize]# bookmarks with #[tagsize]# tags in #[foldersize]# folders
+		  </label></legend>		  
 		  <p>
 		  <input type="hidden" name="table" value="#[table]#" />
 		  <input type="hidden" name="num" value="#[num]#" />
@@ -159,7 +160,7 @@
 					 <select name="tags" style="width: 180px" onchange='this.form.submit()' id="tags">
 						<option value="" selected="selected">select a tag</option>
 						#{tags}#
-						<option value="#[tagName]#">#[tagName]#</option>
+						<option value="#[tagName]#">#[tagName]# [#[tagCount]#]</option>
 						 #{/tags}#
 					  </select>
 					</dd>
@@ -170,7 +171,7 @@
 					 <select name="folders" style="width: 180px" onchange='this.form.submit()' id="folders">
 						<option value="" selected="selected">select a folder</option>
 						#{folders}#
-						<option value="#[folderName]#">#[folderName]#</option>
+						<option value="#[folderName]#">#[folderName]# [#[folderCount]#]</option>
 						#{/folders}#
 					  </select>
 					</dd>

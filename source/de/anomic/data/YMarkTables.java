@@ -27,7 +27,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.search.Segment;
-import de.anomic.data.YMarkWordCountComparator;
 
 public class YMarkTables {
     
@@ -243,6 +242,8 @@ public class YMarkTables {
         
     public final static String cleanTagsString(final String tagsString) {        
     	StringBuilder ts = new StringBuilder(tagsString);    	
+    	if(ts.length() == 0)
+    		return YMarkTables.BOOKMARK.TAGS.deflt();
     	// get rid of double commas and space characters following a comma
     	for (int i = 0; i < ts.length()-1; i++) {
     		if (ts.charAt(i) == TAGS_SEPARATOR.charAt(0)) {
@@ -262,6 +263,8 @@ public class YMarkTables {
     
     public final static String cleanFoldersString(final String foldersString) {        
     	StringBuilder fs = new StringBuilder(cleanTagsString(foldersString));    	
+    	if(fs.length() == 0)
+    		return YMarkTables.BOOKMARK.FOLDERS.deflt();
     	for (int i = 0; i < fs.length()-1; i++) {
     		if (fs.charAt(i) == FOLDERS_SEPARATOR.charAt(0)) {
     			if (fs.charAt(i+1) == TAGS_SEPARATOR.charAt(0) || fs.charAt(i+1) == FOLDERS_SEPARATOR.charAt(0)) {
@@ -482,25 +485,16 @@ public class YMarkTables {
 				for(int i=0; i<count && i<topwords.size() ; i++) {
 					if(words.get(topwords.get(i)).occurrences() > 100) {
 						buffer.append(topwords.get(i));
-						/*
-						buffer.append('[');
-						buffer.append(words.get(topwords.get(i)).occurrences());
-						buffer.append(']');
-						*/
-						buffer.append(',');	
+						buffer.append(YMarkTables.TAGS_SEPARATOR);	
 					}
 				}
-				if(buffer.length() > 0) {
-					buffer.deleteCharAt(buffer.length()-1);
-				}
-
 			} catch (UnsupportedEncodingException e) {
 				Log.logException(e);
 			} catch (IOException e) {
 				Log.logException(e);
 			} 
 		}
-		return buffer.toString();
+		return YMarkTables.cleanTagsString(buffer.toString());
 	}
 	
 	public static TreeMap<String,Word> getWordCounts(final Document document) {

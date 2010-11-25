@@ -103,11 +103,12 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 	    	final String url = (String)a.getAttribute(HTML.Attribute.HREF);
 			this.bmk.put(YMarkTables.BOOKMARK.URL.key(), url);
 	    	
-			for (YMarkTables.BOOKMARK bmk : YMarkTables.BOOKMARK.values()) {    			
-	    		final String s = (String)a.getAttribute(bmk.html_attrb());    			
+			for (YMarkTables.BOOKMARK bmk : YMarkTables.BOOKMARK.values()) {    
+				final String s = (String)a.getAttribute(bmk.html_attrb());    			
     			if(s != null) {
 	    			switch(bmk) {	    					
 	    				case TAGS:
+	    					// mozilla shortcuturl
 	    					this.bmk.put(bmk.key(), YMarkTables.cleanTagsString(s));
 	    	    			break;
 	    				case DATE_ADDED:

@@ -57,12 +57,15 @@ public class Table_YMark_p {
         // get available tags and folders
         count = 0;
         byte[] key;
+        String name;
         try {
 			Iterator<byte[]> iter = sb.tables.keys(YMarkTables.TABLES.TAGS.tablename(bmk_user));
 			while(iter.hasNext()) {
 				key = iter.next();
+				name = sb.tables.bookmarks.tags.getKeyname(bmk_user, key);
 				prop.put("showselection_tags_" + count + "_tagHash", new String(key));
-				prop.put("showselection_tags_" + count + "_tagName", sb.tables.bookmarks.tags.getKeyname(bmk_user, key));
+				prop.put("showselection_tags_" + count + "_tagName", name);
+				prop.put("showselection_tags_" + count + "_tagCount", sb.tables.bookmarks.tags.getBookmarkIds(bmk_user, name).size());
 				count++;
 			}
 			prop.put("showselection_tags", count);
@@ -70,8 +73,10 @@ public class Table_YMark_p {
 			iter = sb.tables.keys(YMarkTables.TABLES.FOLDERS.tablename(bmk_user));
 			while(iter.hasNext()) {
 				key = iter.next();
+				name = sb.tables.bookmarks.folders.getKeyname(bmk_user, key);
 				prop.put("showselection_folders_" + count + "_folderHash", new String(key));
-				prop.put("showselection_folders_" + count + "_folderName", sb.tables.bookmarks.folders.getKeyname(bmk_user, key));
+				prop.put("showselection_folders_" + count + "_folderName", name);
+				prop.put("showselection_folders_" + count + "_folderCount", sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, name).size());
 				count++;
 			}
 			prop.put("showselection_folders", count);
@@ -198,6 +203,18 @@ public class Table_YMark_p {
             } else {
                 prop.put("showtable", 1);
                 prop.put("showtable_table", table);
+               
+                
+                try {
+                	prop.put("showtable_bmksize", sb.tables.size(table));
+                	prop.put("showtable_tagsize", sb.tables.size(YMarkTables.TABLES.TAGS.tablename(bmk_user)));
+                	prop.put("showtable_foldersize", sb.tables.size(YMarkTables.TABLES.FOLDERS.tablename(bmk_user)));
+				} catch (IOException e) {
+                    Log.logException(e);
+                	prop.put("showtable_bmksize", 0);
+                	prop.put("showtable_tagsize", 0);
+                	prop.put("showtable_foldersize", 0);
+				}
                 
                 // insert the columns
                 
