@@ -54,7 +54,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 <h2>Web Structure</h2>
 
 <div id="left">
-<form action="/WatchWebStructure_p.html" onSubmit="return checkform(this);">
+<form action="/WatchWebStructure_p.html" onsubmit="return checkform(this);">
 <fieldset>
   <dl>
 	<dt>host</dt>
@@ -92,9 +92,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 </fieldset>
 </form>
 </div><br />
-
-<img align="right" src="WebStructurePicture_p.png?host=#[besthost]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#" alt="WebStructurePicture"/>
-
+<div style="text-align:right;">
+  <img src="WebStructurePicture_p.png?host=#[besthost]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#&amp;colortext=#[colortext]#&amp;colorback=#[colorback]#&amp;colordot=#[colordot]#&amp;colorline=#[colorline]#&amp;colorlineend=#[colorlineend]#" alt="WebStructurePicture"/>
+</div>
 #%env/templates/footer.template%# 
 </body>
 </html>
