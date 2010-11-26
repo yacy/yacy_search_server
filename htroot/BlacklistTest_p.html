@@ -11,10 +11,10 @@
     <h2>Blacklist Test</h2>
     <p>Used Blacklist engine: <span class="settingsValue">#[blacklistEngine]#</span></p>
     <!-- blacklist selection -->
-    <fieldset>
-      <legend>Test list:</legend>
-      <form action="BlacklistTest_p.html" method="post" enctype="multipart/form-data">
-        <input type="text" name="testurl" size="50" value="#[url]#" />&nbsp;
+    <form action="BlacklistTest_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <legend>Test list:</legend>
+        <input type="text" name="testurl" size="50" value="#[url]#" />
         <input type="submit" name="testList" value="Test" />
         
         #(testlist)#::
@@ -35,8 +35,8 @@
           <br /><br />
           <div>The tested URL was not valid.</div>
         #(/testlist)#
-      </form>
-    </fieldset>
+      </fieldset>
+    </form>
     #%env/templates/footer.template%#
   </body>
 </html>
