@@ -91,15 +91,15 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
         return new HandleSet(keylength, this, space);
     }
-
-    public static byte[] zero(final int length) {
+    
+    public static byte[] zero(int length) {
         final byte[] z = new byte[length];
-        for (byte b : z) {
-            b = (byte) alpha_standard[0];
+        while (length > 0) {
+            length--; z[length] = (byte) alpha_standard[0];
         }
         return z;
     }
-    
+        
     public Order<byte[]> clone() {
         final Base64Order o = new Base64Order(this.asc, this.rfc1113compliant);
         o.rotate(zero);

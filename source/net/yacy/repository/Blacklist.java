@@ -504,7 +504,7 @@ public class Blacklist {
             return BlacklistError.PATH_REGEX;
         }
 
-        return BlacklistError.DOUBLE_OCCURANCE.NO_ERROR;
+        return BlacklistError.NO_ERROR;
     }
 
     /**

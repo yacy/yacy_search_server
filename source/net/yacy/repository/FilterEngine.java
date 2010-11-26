@@ -45,7 +45,6 @@ public class FilterEngine {
 			this.types = types;
 		}
 
-		@Override
 		public int compareTo(FilterEntry fe) {
 			return this.path.compareToIgnoreCase(fe.path);
 		}
