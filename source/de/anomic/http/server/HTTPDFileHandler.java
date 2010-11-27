@@ -907,7 +907,10 @@ public final class HTTPDFileHandler {
                         // apply templates
                         TemplateEngine.writeTemplate(fis, o, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         fis.close();
-                        HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(), null, "chunked", nocache);
+                        HTTPDemon.sendRespondHeader(conProp, out,
+                                httpVersion, 200, null, mimeType, -1,
+                                targetDate, null, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         final ChunkedOutputStream chos = new ChunkedOutputStream(out);
                         ServerSideIncludes.writeSSI(o, chos, authorization, clientIP);

@@ -1194,7 +1194,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
         
         if (contentType == null) contentType = "text/html; charset=UTF-8";
-        headers.put(HeaderFramework.CONTENT_TYPE, contentType);  
+        if (headers.get(HeaderFramework.CONTENT_TYPE) == null) headers.put(HeaderFramework.CONTENT_TYPE, contentType);  
         if (contentLength > 0)   headers.put(HeaderFramework.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
         if (expires != null)     headers.put(HeaderFramework.EXPIRES, HeaderFramework.formatRFC1123(expires));

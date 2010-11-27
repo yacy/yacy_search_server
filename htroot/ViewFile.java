@@ -209,8 +209,14 @@ public class ViewFile {
             
         } else if (viewMode.equals("iframeCache")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CACHE);
-            prop.put("viewMode_url", url.toNormalform(false, true));
-            
+            String ext = url.getFileExtension();
+            if ("jpg.jpeg.png.gif".indexOf(ext) >= 0) {
+                prop.put("viewMode_png", 1);
+                prop.put("viewMode_png_url", url.toNormalform(false, true));
+            } else {
+                prop.put("viewMode_html", 1);
+                prop.put("viewMode_html_url", url.toNormalform(false, true));
+            }
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences")  || viewMode.equals("words") || viewMode.equals("links")) {
             // parsing the resource content
             Document document = null;

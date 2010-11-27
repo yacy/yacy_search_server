@@ -24,18 +24,22 @@
 
 import java.net.MalformedURLException;
 
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.document.ImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.client.Cache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.servletProperties;
 
 public class CacheResource_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        final serverObjects prop = new serverObjects();
+    public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final servletProperties prop = new servletProperties();
         prop.put("resource", new byte[0]);
         
         if (post == null) return prop;
@@ -52,10 +56,24 @@ public class CacheResource_p {
         byte[] resource = null;
         resource = Cache.getContent(url);
         if (resource == null) return prop;
-        //ResponseHeader responseHeader = Cache.getResponseHeader(url);
-        //String resMime = responseHeader.mime();
         
-        prop.put("resource", resource);
-        return prop;
+        // check request type
+        if (header.get("EXT", "html").equals("png")) {
+            // a png was requested
+            return ImageParser.parse(u, resource);
+        } else {
+            // get response header and set mime type
+            ResponseHeader responseHeader = Cache.getResponseHeader(url);
+            String resMime = responseHeader == null ? null : responseHeader.mime();
+            if (resMime != null) {
+                final ResponseHeader outgoingHeader = new ResponseHeader();
+                outgoingHeader.put(HeaderFramework.CONTENT_TYPE, resMime);
+                prop.setOutgoingHeader(outgoingHeader);
+            }        
+    
+            // add resource
+            prop.put("resource", resource);
+            return prop;
+        }
     }
 }
