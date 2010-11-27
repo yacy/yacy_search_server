@@ -241,7 +241,7 @@ public class Blacklist_p {
                 } else { // inactive list -> enable
                     ListManager.updateListSet(BLACKLIST_SHARED, blacklistToUse);
                 }
-            } else if (action.equals("deleteBlacklistEntry")) {
+            } else if ("deleteBlacklistEntry".equals(action)) {
                 
                 /* ===========================================================
                  * Delete an entry from a blacklist

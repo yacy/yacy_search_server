@@ -24,7 +24,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
@@ -47,18 +46,19 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverAccessTracker.Track;
 import de.anomic.yacy.yacySeed;
+import java.util.List;
 
 public class AccessTracker_p {
 	
-	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
-    
-	private static final Collection<Track> listclone(final Collection<Track> m) {
+    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
+
+    private static Collection<Track> listclone (final Collection<Track> m) {
         final Collection<Track> accessClone = new ConcurrentLinkedQueue<Track>();
         try {
             accessClone.addAll(m);
         } catch (final ConcurrentModificationException e) {}
         return accessClone;
-	}
+    }
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
@@ -67,7 +67,9 @@ public class AccessTracker_p {
         final serverObjects prop = new serverObjects();
         prop.setLocalized(!(header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml"));
         int page = 0;
-        if (post != null) page = post.getInt("page", 0);
+        if (post != null) {
+            page = post.getInt("page", 0);
+        }
         prop.put("page", page);
      
         final int maxCount = 1000;
@@ -77,70 +79,68 @@ public class AccessTracker_p {
             String host;
             int entCount = 0;
             try {
-            while ((entCount < maxCount) && (i.hasNext())) {
-                host = i.next();
-                prop.putHTML("page_list_" + entCount + "_host", host);
-                prop.putNum("page_list_" + entCount + "_countSecond", sb.latestAccessCount(host, 1000));
-                prop.putNum("page_list_" + entCount + "_countMinute", sb.latestAccessCount(host, 1000 * 60));
-                prop.putNum("page_list_" + entCount + "_count10Minutes", sb.latestAccessCount(host, 1000 * 60 * 10));
-                prop.putNum("page_list_" + entCount + "_countHour", sb.latestAccessCount(host, 1000 * 60 * 60));
-                entCount++;
-            }
+                while ((entCount < maxCount) && (i.hasNext())) {
+                    host = i.next();
+                    prop.putHTML("page_list_" + entCount + "_host", host);
+                    prop.putNum("page_list_" + entCount + "_countSecond", sb.latestAccessCount(host, 1000));
+                    prop.putNum("page_list_" + entCount + "_countMinute", sb.latestAccessCount(host, 1000 * 60));
+                    prop.putNum("page_list_" + entCount + "_count10Minutes", sb.latestAccessCount(host, 1000 * 60 * 10));
+                    prop.putNum("page_list_" + entCount + "_countHour", sb.latestAccessCount(host, 1000 * 60 * 60));
+                    entCount++;
+                }
             } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
             
             entCount = 0;
             try {
-            for (final Map.Entry<String, Integer> bfe: serverCore.bfHost.entrySet()) {
-                prop.putHTML("page_bflist_" + entCount + "_host", bfe.getKey());
-                prop.putNum("page_bflist_" + entCount + "_countSecond", bfe.getValue());
-                entCount++;
-            }
+                for (final Map.Entry<String, Integer> bfe: serverCore.bfHost.entrySet()) {
+                    prop.putHTML("page_bflist_" + entCount + "_host", bfe.getKey());
+                    prop.putNum("page_bflist_" + entCount + "_countSecond", bfe.getValue());
+                    entCount++;
+                }
             } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
             prop.put("page_bflist", entCount);
-        }
-        if (page == 1) {
+        } else if (page == 1) {
             String host = (post == null) ? "" : post.get("host", "");
             int entCount = 0;
             Collection<Track> access;
             Track entry;
             if (host.length() > 0) {
-				access = sb.accessTrack(host);
-				if (access != null) {
-					try {
-						final Iterator<Track> ii = listclone(access).iterator();
-						while (ii.hasNext()) {
-							entry = ii.next();
-							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(entry.getTime())));
-							prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
-							entCount++;
-						}
-					} catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
-				}
-			} else {
+                access = sb.accessTrack(host);
+                if (access != null) {
+                    try {
+                        final Iterator<Track> ii = listclone(access).iterator();
+                        while (ii.hasNext()) {
+                            entry = ii.next();
+                            prop.putHTML("page_list_" + entCount + "_host", host);
+                            prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(entry.getTime())));
+                            prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
+                            entCount++;
+                        }
+                    } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
+                }
+            } else {
                 try {
-                	final Iterator<String> i = sb.accessHosts();
+                    final Iterator<String> i = sb.accessHosts();
                     while ((entCount < maxCount) && (i.hasNext())) {
-						host = i.next();
-						access = sb.accessTrack(host);
-						final Iterator<Track> ii = listclone(access).iterator();
-						while (ii.hasNext()) {
-							entry = ii.next();
-							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(entry.getTime())));
-							prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
-							entCount++;
-						}
-					}
-				} catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
-			}
+                        host = i.next();
+                        access = sb.accessTrack(host);
+                        final Iterator<Track> ii = listclone(access).iterator();
+                        while (ii.hasNext()) {
+                                entry = ii.next();
+                                prop.putHTML("page_list_" + entCount + "_host", host);
+                                prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(entry.getTime())));
+                                prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
+                                entCount++;
+                        }
+                    }
+                } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
+            }
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
-        }
-        if ((page == 2) || (page == 4)) {
-            final ArrayList<QueryParams> array = (page == 2) ? sb.localSearches : sb.remoteSearches;
+        } else if ((page == 2) || (page == 4)) {
+            final List<QueryParams> array = (page == 2) ? sb.localSearches : sb.remoteSearches;
             QueryParams searchProfile;
             int m = Math.min(maxCount, array.size());
             long qcountSum = 0;
@@ -229,8 +229,7 @@ public class AccessTracker_p {
             prop.putNum("page_snippettime_avg1", (double) stimeSum1 / rcount);
             prop.putNum("page_resulttime_avg1", (double) rtimeSum1 / rcount);
             prop.putNum("page_total", (page == 2) ? sb.localSearches.size() : sb.remoteSearches.size());
-        }
-        if ((page == 3) || (page == 5)) {
+        } else if ((page == 3) || (page == 5)) {
             final Iterator<Entry<String, TreeSet<Long>>> i = (page == 3) ? sb.localSearchTracker.entrySet().iterator() : sb.remoteSearchTracker.entrySet().iterator();
             String host;
             TreeSet<Long> handles;
@@ -246,10 +245,10 @@ public class AccessTracker_p {
                 int dateCount = 0;
                 final Iterator<Long> ii = handles.iterator();
                 while (ii.hasNext()) {
-                	final Long timestamp = ii.next();
-                	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", SimpleFormatter.format(new Date(timestamp.longValue())));
-                	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_timestamp", timestamp.toString());
-                	dateCount++;
+                    final Long timestamp = ii.next();
+                    prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", SimpleFormatter.format(new Date(timestamp.longValue())));
+                    prop.put("page_list_" + entCount + "_dates_" + dateCount + "_timestamp", timestamp.toString());
+                    dateCount++;
                 }
                 prop.put("page_list_" + entCount + "_dates", dateCount);
                 final int qph = handles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size();

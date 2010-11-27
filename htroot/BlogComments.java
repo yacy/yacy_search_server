@@ -6,7 +6,6 @@
 // Frankfurt, Germany, 2004
 //
 // This File is contributed by Jan Sandbrink
-// Contains contributions from Marc Nause [MN]
 //
 //$LastChangedDate$
 //$LastChangedRevision$
@@ -56,34 +55,32 @@ import de.anomic.yacy.yacyCore;
 
 public class BlogComments {
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
+    private final static SimpleDateFormat SIMPLE_FORMATTER = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     // TODO: make userdefined date/time-strings (localisation)
 
     public static String dateString(final Date date) {
-        return SimpleFormatter.format(date);
+        return SIMPLE_FORMATTER.format(date);
     }
 
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        BlogBoard.BlogEntry page = null;
         boolean hasRights = sb.verifyAuthentication(header, true);
 
-        if (hasRights) prop.put("mode_admin", "1");
-        else prop.put("mode_admin", "0");
+        prop.put("mode_admin", hasRights ? "1" : "0");
 
         if (post == null) {
             post = new serverObjects();
             post.put("page", "blog_default");
         }
 
-        if(!hasRights){
+        if (!hasRights) {
             final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
-            if(userentry != null && userentry.hasRight(UserDB.Entry.BLOG_RIGHT)){
-                hasRights=true;
+            if (userentry != null && userentry.hasRight(UserDB.Entry.BLOG_RIGHT)) {
+                hasRights = true;
             }
-            //opens login window if login link is clicked - contrib [MN]
-            else if(post.containsKey("login")){
+            //opens login window if login link is clicked
+            else if (post.containsKey("login")) {
                 prop.put("AUTHENTICATE","admin log-in");
             }
         }
@@ -99,8 +96,7 @@ public class BlogComments {
             if (StrAuthor == null || StrAuthor.length() == 0) {
                 if (sb.peers.mySeed() == null) {
                     StrAuthor = "anonymous";
-                }
-                else {
+                } else {
                     StrAuthor = sb.peers.mySeed().get("Name", "anonymous");
                 }
             }
@@ -113,15 +109,11 @@ public class BlogComments {
             author = StrAuthor.getBytes();
         }
 
-        page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
-        final boolean pageExists = sb.blogDB.contains(pagename); // [MN]
+        final BlogBoard.BlogEntry page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
+        final boolean pageExists = sb.blogDB.contains(pagename);
         
         // comments not allowed
-        if (page.getCommentMode() == 0) {
-            prop.put("mode_allow", 0);
-        } else {
-            prop.put("mode_allow", 1);
-        } 
+        prop.put("mode_allow", (page.getCommentMode() == 0) ? 0 : 1);
 
         if (post.containsKey("submit") && page.getCommentMode() != 0 && pageExists) {
             // store a new/edited blog-entry
@@ -245,10 +237,7 @@ public class BlogComments {
                     final int commentMode = page.getCommentMode();
                     String pageid;
                     BlogBoardComments.CommentEntry entry;
-                    boolean xml = false;
-                    if (post.containsKey("xml")) {
-                        xml = true;
-                    }
+                    final boolean xml = post.containsKey("xml");
                     int count = 0; //counts how many entries are shown to the user
                     int start = post.getInt("start",0); //indicates from where entries should be shown
                     int num   = post.getInt("num",10);  //indicates how many entries should be shown

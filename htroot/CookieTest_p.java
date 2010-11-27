@@ -1,4 +1,4 @@
-// index.java
+// CookieTest_p.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -50,43 +50,37 @@ public class CookieTest_p {
         }
         
         final servletProperties prop = new servletProperties();
-        if(post.containsKey("act")&&post.get("act").equals("clear_cookie")) {
+        if (post.containsKey("act") && "clear_cookie".equals(post.get("act"))) {
             final ResponseHeader outgoingHeader = new ResponseHeader();
-        	final Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
-        	Map.Entry<String, String> e;
-        	while (it.hasNext()) {
-        		e = it.next();
-        		if (e.getKey().equals("Cookie")) {
-        			final String coockie[]=e.getValue().split(";");
-        			for(int i=0;i<coockie.length;i++)
-        			{
-        				final String nameValue[]=coockie[i].split("=");
-        				outgoingHeader.setCookie(nameValue[0].trim(),nameValue.length>1?(nameValue[1].trim()):"","Thu, 01-Jan-99 00:00:01 GMT");	
-        			}
-        		}
-
-        		
-        		
-        	}
+            final Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
+            Map.Entry<String, String> e;
+            while (it.hasNext()) {
+                e = it.next();
+                if (e.getKey().equals("Cookie")) {
+                    final String cookies[] = e.getValue().split(";");
+                    for(final String cookie : cookies)
+                    {
+                        final String nameValue[] = cookie.split("=");
+                        outgoingHeader.setCookie(nameValue[0].trim(),nameValue.length>1 ? (nameValue[1].trim()) : "","Thu, 01-Jan-99 00:00:01 GMT");
+                    }
+                }
+            }
         	
-         prop.setOutgoingHeader(outgoingHeader);
-         prop.put("coockiesout", "0");
-         //header.
+            prop.setOutgoingHeader(outgoingHeader);
+            prop.put("coockiesout", "0");
+            //header.
          
-        }
-        else if(post.containsKey("act")&&post.get("act").equals("set_cookie"))
-       {
-        final String cookieName = post.get("cookie_name").trim();
-        final String cookieValue = post.get("cookie_value").trim();
-        final ResponseHeader outgoingHeader=new ResponseHeader();
-        
-        outgoingHeader.setCookie(cookieName,cookieValue);
-        prop.setOutgoingHeader(outgoingHeader);
-        prop.put("cookiesin", "1");
-        prop.putHTML("cookiesin_0_name", cookieName);
-        prop.putHTML("cookiesin_0_value", cookieValue);
-        //header.
-        
+        } else if (post.containsKey("act") && post.get("act").equals("set_cookie")) {
+            final String cookieName = post.get("cookie_name").trim();
+            final String cookieValue = post.get("cookie_value").trim();
+            final ResponseHeader outgoingHeader = new ResponseHeader();
+
+            outgoingHeader.setCookie(cookieName,cookieValue);
+            prop.setOutgoingHeader(outgoingHeader);
+            prop.put("cookiesin", "1");
+            prop.putHTML("cookiesin_0_name", cookieName);
+            prop.putHTML("cookiesin_0_value", cookieValue);
+            //header.
        }
 
         prop.put("cookiesout", "1");

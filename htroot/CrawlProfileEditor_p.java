@@ -28,6 +28,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -79,7 +80,7 @@ public class CrawlProfileEditor_p {
         }
     }
     
-    private static final ArrayList <eentry> labels = new ArrayList<eentry>();
+    private static final List <eentry> labels = new ArrayList<eentry>();
     static {
         labels.add(new eentry(CrawlProfile.NAME,                "Name",                  true,  eentry.STRING));
         labels.add(new eentry(CrawlProfile.START_URL,           "Start URL",             true,  eentry.STRING));
@@ -120,7 +121,7 @@ public class CrawlProfileEditor_p {
                 sb.crawler.profilesPassiveCrawls.remove(handle.getBytes());
             }
             if (post.containsKey("deleteTerminatedProfiles")) {
-                for (byte[] h: sb.crawler.profilesPassiveCrawls.keySet()) {
+                for (final byte[] h: sb.crawler.profilesPassiveCrawls.keySet()) {
                     sb.crawler.profilesPassiveCrawls.remove(h);
                 }
             }
@@ -128,15 +129,15 @@ public class CrawlProfileEditor_p {
         
         // generate handle list: first sort by handle name
         CrawlProfile selentry;
-        TreeMap<String, String> orderdHandles = new TreeMap<String, String>();
-        for (byte[] h: sb.crawler.profilesActiveCrawls.keySet()) {
+        Map<String, String> orderdHandles = new TreeMap<String, String>();
+        for (final byte[] h : sb.crawler.profilesActiveCrawls.keySet()) {
             selentry = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(h));
             if (ignoreNames.contains(selentry.name())) continue;
             orderdHandles.put(selentry.name(), selentry.handle());
         }
         // then write into pop-up menu list
         int count = 0;
-        for (Map.Entry<String, String> NameHandle: orderdHandles.entrySet()) {
+        for (final Map.Entry<String, String> NameHandle: orderdHandles.entrySet()) {
             prop.put("profiles_" + count + "_name", NameHandle.getKey());
             prop.put("profiles_" + count + "_handle", NameHandle.getValue());
             if (handle.equals(NameHandle.getValue())) {
@@ -146,7 +147,7 @@ public class CrawlProfileEditor_p {
         }
         prop.put("profiles", count);
         final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(handle.getBytes());
-        selentry = mp == null ? null : new CrawlProfile(mp);
+        selentry = (mp == null) ? null : new CrawlProfile(mp);
         assert selentry == null || selentry.handle() != null;
         // read post for change submit
         if ((post != null) && (selentry != null)) {
@@ -177,7 +178,7 @@ public class CrawlProfileEditor_p {
         final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
         CrawlProfile profile;
         // put active crawls into list
-        for (byte[] h: sb.crawler.profilesActiveCrawls.keySet()) {
+        for (final byte[] h: sb.crawler.profilesActiveCrawls.keySet()) {
             profile = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(h));
             putProfileEntry(prop, profile, true, dark, count, domlistlength);
             dark = !dark;
@@ -185,7 +186,7 @@ public class CrawlProfileEditor_p {
         }
         // put passive crawls into list
         boolean existPassiveCrawls = false;
-        for (byte[] h: sb.crawler.profilesPassiveCrawls.keySet()) {
+        for (final byte[] h: sb.crawler.profilesPassiveCrawls.keySet()) {
             profile = new CrawlProfile(sb.crawler.profilesPassiveCrawls.get(h));
             putProfileEntry(prop, profile, false, dark, count, domlistlength);
             dark = !dark;
@@ -193,13 +194,9 @@ public class CrawlProfileEditor_p {
             existPassiveCrawls = true;
         }
         prop.put("crawlProfiles", count);
-        
-        if (existPassiveCrawls) {
-            prop.put("existPassiveCrawls", "1");
-        } else {
-            prop.put("existPassiveCrawls", "0");
-        }
-        
+
+        prop.put("existPassiveCrawls", existPassiveCrawls ? "1" : "0");
+
         // generate edit field
         if (selentry == null) {
         	prop.put("edit", "0");
@@ -248,16 +245,15 @@ public class CrawlProfileEditor_p {
         // start contrib [MN]
         int i = 0;
         String item;
-        while ((i <= domlistlength) && !((item = profile.domName(true, i)).equals(""))){
-            if(i == domlistlength){
+        while (i <= domlistlength && !"".equals(item = profile.domName(true, i))){
+            if (i == domlistlength) {
                 item = item + " ...";
             }
-            prop.putHTML(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent_"+i+"_item", item);
+            prop.putHTML(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterContent_" + i + "_item", item);
             i++;
         }
 
         prop.put(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent", i);
-        // end contrib [MN]
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(profile.domMaxPages()));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_withQuery", (profile.crawlingQ()) ? "1" : "0");

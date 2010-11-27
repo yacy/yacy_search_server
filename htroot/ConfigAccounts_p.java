@@ -77,7 +77,7 @@ public class ConfigAccounts_p {
                     sb.setConfig("adminAccountForLocalhost", true);
                     // if an localhost access is configured, check if a local password is given
                     // if not, set a random password
-                    if (post != null && env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+                    if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                         // make a 'random' password
                         env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "0000" + Digest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
                         env.setConfig("adminAccount", "");
@@ -154,7 +154,7 @@ public class ConfigAccounts_p {
                     }
                     prop.put("rights", count);
                 }
-            } else if (post.containsKey("delete_user") && !post.get("user").equals("newuser")){
+            } else if (post.containsKey("delete_user") && !"newuser".equals(post.get("user"))){
                 sb.userDB.removeEntry(post.get("user"));
             }
         } else if (post.containsKey("change")) { //New User / edit User
@@ -178,13 +178,13 @@ public class ConfigAccounts_p {
             final Map<String, String> rightsSet = new HashMap<String, String>();
 
             for(final String right : rights) {
-                rightsSet.put(right, post.containsKey(right)&&(post.get(right)).equals("on") ? "true" : "false");
+                rightsSet.put(right, post.containsKey(right)&&"on".equals(post.get(right)) ? "true" : "false");
             }
             
             final Map<String, String> mem = new HashMap<String, String>();
-            if( post.get("current_user").equals("newuser")){ //new user
+            if( "newuser".equals(post.get("current_user"))){ //new user
                 
-                if(!"".equals(pw1)){ //change only if set
+                if (!"".equals(pw1)) { //change only if set
                     mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(username + ":" + pw1));
                 }
 

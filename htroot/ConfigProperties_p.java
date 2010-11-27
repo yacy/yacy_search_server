@@ -50,18 +50,20 @@ public class ConfigProperties_p {
         if(post != null && post.containsKey("key") && post.containsKey("value")){
             key = post.get("key");
             final String value = post.get("value");
-            if (!key.equals("")) {
+            if (!"".equals(key)) {
                 env.setConfig(key, value);
             }
         }
         Iterator<String> keys = env.configKeys();
 
         final List<String> list = new ArrayList<String>(250);
+        
         while(keys.hasNext()){
             list.add(keys.next());
         }
         
         Collections.sort(list);
+        
         keys = list.iterator();
         while(keys.hasNext()){
             key = keys.next();

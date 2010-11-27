@@ -46,19 +46,19 @@ public class ConfigPortal {
             }
             
             if (post.containsKey("popup")) {
-                String popup = post.get("popup", "status");
-                if (popup.equals("front")) {
+                final String popup = post.get("popup", "status");
+                if ("front".equals(popup)) {
                     sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html?display=2");
-                } else if (popup.equals("search")) {
+                } else if ("search".equals(popup)) {
                     sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "yacysearch.html?display=2");
-                } else if (popup.equals("interactive")) {
+                } else if ("interactive".equals(popup)) {
                     sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "yacyinteractive.html?display=2");
                 } else {
                     sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
                 }
             }
             if (post.containsKey("searchpage_set")) {
-                String newGreeting = post.get(SwitchboardConstants.GREETING, "");
+                final String newGreeting = post.get(SwitchboardConstants.GREETING, "");
                 // store this call as api call
                 sb.tables.recordAPICall(post, "ConfigPortal.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "new portal design. greeting: " + newGreeting);
                 
@@ -97,15 +97,18 @@ public class ConfigPortal {
         } else {
             prop.put("popupStatus", 1);
         }
-        String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
-        prop.put("selected_blank", target.equals("_blank") ? 1 : 0);
-        prop.put("selected_self", target.equals("_self") ? 1 : 0);
-        prop.put("selected_parent", target.equals("_parent") ? 1 : 0);
-        prop.put("selected_top", target.equals("_top") ? 1 : 0);
-        prop.put("selected_searchresult", target.equals("searchresult") ? 1 : 0);
+        
+        final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
+        prop.put("selected_blank", "_blank".equals(target) ? 1 : 0);
+        prop.put("selected_self", "_self".equals(target) ? 1 : 0);
+        prop.put("selected_parent", "_parent".equals(target) ? 1 : 0);
+        prop.put("selected_top", "_top".equals(target) ? 1 : 0);
+        prop.put("selected_searchresult", "searchresult".equals(target) ? 1 : 0);
                 
         String myaddress = sb.peers.mySeed().getPublicAddress();
-        if (myaddress == null) myaddress = "localhost:" + sb.getConfig("port", "8080");
+        if (myaddress == null) {
+            myaddress = "localhost:" + sb.getConfig("port", "8080");
+        }
         prop.put("myaddress", myaddress);
         return prop;
     }

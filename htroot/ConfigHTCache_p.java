@@ -43,33 +43,31 @@ public class ConfigHTCache_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        String oldProxyCachePath, newProxyCachePath;
-        int newProxyCacheSize;
-
         if (post != null && post.containsKey("set")) {
             // proxyCache - check and create the directory
-            oldProxyCachePath = env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
-            newProxyCachePath = post.get("HTCachePath", SwitchboardConstants.HTCACHE_PATH_DEFAULT);
+            final String oldProxyCachePath = env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
+            String newProxyCachePath = post.get("HTCachePath", SwitchboardConstants.HTCACHE_PATH_DEFAULT);
             newProxyCachePath = newProxyCachePath.replace('\\', '/');
             if (newProxyCachePath.endsWith("/")) {
                 newProxyCachePath = newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
             }
             env.setConfig(SwitchboardConstants.HTCACHE_PATH, newProxyCachePath);
             final File cache = env.getDataPath(SwitchboardConstants.HTCACHE_PATH, oldProxyCachePath);
-            if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
+            if (!cache.isDirectory() && !cache.isFile()) {
+                cache.mkdirs();
+            }
 
             // proxyCacheSize 
-            newProxyCacheSize = post.getInt("maxCacheSize", 64);
-            if (newProxyCacheSize < 4) { newProxyCacheSize = 4; }
+            final int newProxyCacheSize = Math.max(post.getInt("maxCacheSize", 64), 4);
             env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
             Cache.setMaxCacheSize(newProxyCacheSize * 1024 * 1024);                
         }
         
         if (post != null && post.containsKey("deletecomplete")) {
-            if (post.get("deleteCache", "").equals("on")) {
+            if ("on".equals(post.get("deleteCache", ""))) {
                 Cache.clear();
             }
-            if (post.get("deleteRobots", "").equals("on")) {
+            if ("on".equals(post.get("deleteRobots", ""))) {
                 sb.robots.clear();
             }
         }

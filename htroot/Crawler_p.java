@@ -102,9 +102,9 @@ public class Crawler_p {
         if (post != null && post.containsKey("continue")) {
             // continue queue
             final String queue = post.get("continue", "");
-            if (queue.equals("localcrawler")) {
+            if ("localcrawler".equals(queue)) {
                 sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-            } else if (queue.equals("remotecrawler")) {
+            } else if ("remotecrawler".equals(queue)) {
                 sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
         }
@@ -112,9 +112,9 @@ public class Crawler_p {
         if (post != null && post.containsKey("pause")) {
             // pause queue
             final String queue = post.get("pause", "");
-            if (queue.equals("localcrawler")) {
+            if ("localcrawler".equals(queue)) {
                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-            } else if (queue.equals("remotecrawler")) {
+            } else if ("remotecrawler".equals(queue)) {
                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
         }
@@ -135,8 +135,8 @@ public class Crawler_p {
                 crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                
                 // set new properties
-                final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
-                final boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
+                final boolean fullDomain = "domain".equals(post.get("range", "wide")); // special property in simple crawl start
+                final boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
                 
                 // set the crawl filter
                 String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL);
@@ -165,21 +165,21 @@ public class Crawler_p {
                 
                 // recrawl
                 final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
-                boolean crawlingIfOlderCheck = post.get("crawlingIfOlderCheck", "off").equals("on");
+                boolean crawlingIfOlderCheck = "on".equals(post.get("crawlingIfOlderCheck", "off"));
                 int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
                 String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year"); // year, month, day, hour
                 int repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
                 final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
                 
-                if (recrawl.equals("scheduler") && repeat_time > 0) {
+                if ("scheduler".equals(recrawl) && repeat_time > 0) {
                     // set crawlingIfOlder attributes that are appropriate for scheduled crawling 
                     crawlingIfOlderCheck = true;
-                    crawlingIfOlderNumber = repeat_unit.equals("selminutes") ? 1 : repeat_unit.equals("selhours") ? repeat_time / 2 : repeat_time * 12;
+                    crawlingIfOlderNumber = "selminutes".equals(repeat_unit) ? 1 : "selhours".equals(repeat_unit) ? repeat_time / 2 : repeat_time * 12;
                     crawlingIfOlderUnit = "hour";
-                } else if (recrawl.equals("reload")) {
+                } else if ("reload".equals(recrawl)) {
                     repeat_time = -1;
                     crawlingIfOlderCheck = true;
-                } else if (recrawl.equals("nodoubles")) {
+                } else if ("nodoubles".equals(recrawl)) {
                     repeat_time = -1;
                     crawlingIfOlderCheck = false;
                 }
@@ -195,37 +195,37 @@ public class Crawler_p {
                     sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + crawlingStart);
                 }                    
                 
-                final boolean crawlingDomMaxCheck = post.get("crawlingDomMaxCheck", "off").equals("on");
+                final boolean crawlingDomMaxCheck = "on".equals(post.get("crawlingDomMaxCheck", "off"));
                 final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? Integer.parseInt(post.get("crawlingDomMaxPages", "-1")) : -1;
                 env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
                 
-                final boolean crawlingQ = post.get("crawlingQ", "off").equals("on");
+                final boolean crawlingQ = "on".equals(post.get("crawlingQ", "off"));
                 env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
                 
-                final boolean indexText = post.get("indexText", "off").equals("on");
+                final boolean indexText = "on".equals(post.get("indexText", "off"));
                 env.setConfig("indexText", (indexText) ? "true" : "false");
                 
-                final boolean indexMedia = post.get("indexMedia", "off").equals("on");
+                final boolean indexMedia = "on".equals(post.get("indexMedia", "off"));
                 env.setConfig("indexMedia", (indexMedia) ? "true" : "false");
                 
-                boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
+                boolean storeHTCache = "on".equals(post.get("storeHTCache", "off"));
                 if (crawlingStartURL!= null &&(crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                 env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
                 
                 CrawlProfile.CacheStrategy cachePolicy = CrawlProfile.CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
                 if (cachePolicy == null) cachePolicy = CrawlProfile.CacheStrategy.IFFRESH;
                 
-                final boolean xsstopw = post.get("xsstopw", "off").equals("on");
+                final boolean xsstopw = "on".equals(post.get("xsstopw", "off"));
                 env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
                 
-                final boolean xdstopw = post.get("xdstopw", "off").equals("on");
+                final boolean xdstopw = "on".equals(post.get("xdstopw", "off"));
                 env.setConfig("xdstopw", (xdstopw) ? "true" : "false");
                 
-                final boolean xpstopw = post.get("xpstopw", "off").equals("on");
+                final boolean xpstopw = "on".equals(post.get("xpstopw", "off"));
                 env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                 
                 final String crawlingMode = post.get("crawlingMode","url");
-                if (crawlingMode.equals("url")) {
+                if ("url".equals(crawlingMode)) {
                     
                     // check if pattern matches
                     if ((crawlingStart == null || crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
@@ -278,18 +278,18 @@ public class Crawler_p {
                                 ));
                         
                         if (reasonString == null) {
-                        	// create a bookmark from crawl start url
-                        	Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
+                            // create a bookmark from crawl start url
+                            Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
                             tags.add("crawlStart");
-                        	if (post.get("createBookmark","off").equals("on")) {
-                            	BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
-                    			if(bookmark != null){
-                    				bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, post.get("bookmarkTitle", crawlingStart));
-                    				bookmark.setOwner("admin");                        				
-                    				bookmark.setPublic(false);    
-                    				bookmark.setTags(tags, true);
-                    				sb.bookmarksDB.saveBookmark(bookmark);
-                    			}
+                            if ("on".equals(post.get("createBookmark","off"))) {
+                            BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
+                                if (bookmark != null) {
+                                    bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, post.get("bookmarkTitle", crawlingStart));
+                                    bookmark.setOwner("admin");
+                                    bookmark.setPublic(false);
+                                    bookmark.setTags(tags, true);
+                                    sb.bookmarksDB.saveBookmark(bookmark);
+                                }
                             }
                             // liftoff!
                             prop.put("info", "8");//start msg
@@ -318,20 +318,20 @@ public class Crawler_p {
                             prop.putHTML("info_reasonString", reasonString);
                             
                             sb.crawlQueues.errorURL.push(
-                                    new Request(
-                                            sb.peers.mySeed().hash.getBytes(), 
-                                            crawlingStartURL, 
-                                            null, 
-                                            "", 
-                                            new Date(),
-                                            pe.handle(),
-                                            0, 
-                                            0, 
-                                            0),
-                                    sb.peers.mySeed().hash.getBytes(),
-                                    new Date(),
-                                    1,
-                                    reasonString);
+                                new Request(
+                                        sb.peers.mySeed().hash.getBytes(),
+                                        crawlingStartURL,
+                                        null,
+                                        "",
+                                        new Date(),
+                                        pe.handle(),
+                                        0,
+                                        0,
+                                        0),
+                                sb.peers.mySeed().hash.getBytes(),
+                                new Date(),
+                                1,
+                                reasonString);
                         }
                     } catch (final PatternSyntaxException e) {
                         prop.put("info", "4"); //crawlfilter does not match url
@@ -345,7 +345,7 @@ public class Crawler_p {
                         Log.logException(e);
                     }
                     
-                } else if (crawlingMode.equals("file")) {
+                } else if ("file".equals(crawlingMode)) {
                     if (post.containsKey("crawlingFile")) {
                         final String fileName = post.get("crawlingFile");  
                         try {
@@ -410,7 +410,7 @@ public class Crawler_p {
                         }
                         sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                     }
-                } else if (crawlingMode.equals("sitemap")) {
+                } else if ("sitemap".equals(crawlingMode)) {
                     String sitemapURLStr = post.get("sitemapURL","");
                 	try {
                 		final DigestURI sitemapURL = new DigestURI(sitemapURLStr);
@@ -441,7 +441,7 @@ public class Crawler_p {
                 		prop.putHTML("info_error", e.getMessage());
                 		Log.logException(e);
                 	}
-                } else if (crawlingMode.equals("sitelist")) {
+                } else if ("sitelist".equals(crawlingMode)) {
                     try {
                         final DigestURI sitelistURL = new DigestURI(crawlingStart);
                         // download document
@@ -451,7 +451,7 @@ public class Crawler_p {
                         // String description = scraper.getDescription();
                         
                         // get links and generate filter
-                        StringBuilder filter = new StringBuilder();
+                        final StringBuilder filter = new StringBuilder();
                         final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
                         for (MultiProtocolURI uri: hyperlinks.keySet()) {
                             filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
@@ -530,10 +530,10 @@ public class Crawler_p {
     
     private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
         if (!recrawlIfOlderCheck) return 0L;
-        if (crawlingIfOlderUnit.equals("year")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
-        if (crawlingIfOlderUnit.equals("month")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
-        if (crawlingIfOlderUnit.equals("day")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
-        if (crawlingIfOlderUnit.equals("hour")) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L;
+        if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
+        if ("month".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 30L;
+        if ("day".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L;
+        if ("hour".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L;
         return System.currentTimeMillis() - (long) recrawlIfOlderNumber;
     }
     
@@ -544,8 +544,8 @@ public class Crawler_p {
         try {
             wantedPPM = Integer.parseInt(post.get("customPPM", Integer.toString(wantedPPM)));
         } catch (final NumberFormatException e) {}
-        if (crawlingPerformance.toLowerCase().equals("minimum")) wantedPPM = 10;
-        if (crawlingPerformance.toLowerCase().equals("maximum")) wantedPPM = 30000;
+        if ("minimum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 10;
+        if ("maximum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 30000;
         sb.setPerformance(wantedPPM);
     }
     

@@ -160,7 +160,7 @@ public class Bookmarks {
                         bookmark.setOwner(user.getUserName());
                     }
 
-                    if ((post.get("public")).equals("public")) {
+                    if ("public".equals(post.get("public"))) {
                         bookmark.setPublic(true);
                         publishNews(url, title, description, tagsString);
                     } else {
@@ -242,7 +242,7 @@ public class Bookmarks {
                 Log.logInfo("BOOKMARKS", "Trying to import bookmarks from HTML-file");
 
                 try {
-                    final File file=new File(post.get("htmlfile"));
+                    final File file = new File(post.get("htmlfile"));
                     BookmarkHelper.importFromBookmarks(sb.bookmarksDB, new DigestURI(file), post.get("htmlfile$file"), tags, isPublic);
                 } catch (final MalformedURLException e) {}
 
@@ -415,7 +415,7 @@ public class Bookmarks {
             return count;
     	}
    
-    	if (fn.startsWith((root.equals("/") ? root : root+"/"))) {
+    	if (fn.startsWith(("/".equals(root) ? root : root + "/"))) {
             prop.put("display_folderlist_"+count+"_folder", "<li>"+fn.replaceFirst(root+"/*","")+"<ul class=\"folder\">");
             count++;
             final Iterator<String> bit = sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);

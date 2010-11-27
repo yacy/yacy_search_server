@@ -46,7 +46,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 
 public class BookmarkDate {
 
-    MapHeap datesTable;
+    private MapHeap datesTable;
     
     public BookmarkDate(final File datesFile) throws IOException {
         this.datesTable = new MapHeap(datesFile, 20, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
@@ -66,7 +66,9 @@ public class BookmarkDate {
         } catch (RowSpaceExceededException e) {
             map = null;
         }
-        if (map == null) return new Entry(date);
+        if (map == null) {
+            return new Entry(date);
+        }
         return new Entry(date, map);
     }
     

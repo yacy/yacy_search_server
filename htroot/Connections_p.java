@@ -64,58 +64,60 @@ public final class Connections_p {
         final WorkflowThread httpd = sb.getThread("10_httpd");
         
         // determines if name lookup should be done or not 
-        boolean doNameLookup = false;
+        final boolean doNameLookup;
         if (post != null) {  
-            if (post.containsKey("nameLookup") && post.get("nameLookup","true").equals("true")) {
-                doNameLookup = true;
-            }
+            doNameLookup = (post.containsKey("nameLookup") && "true".equals(post.get("nameLookup","true")));
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
                 sb.closeSessions("10_httpd", sessionName);
                 prop.put("LOCATION","");
                 return prop;                
             }
-        }  
+        } else {
+            doNameLookup = false;
+        }
         
         // waiting for all threads to finish
         int idx = 0, numActiveRunning = 0, numActivePending = 0;
         boolean dark = true;
-        for (Session s: ((serverCore) httpd).getJobList()) {
+        for (final Session s: ((serverCore) httpd).getJobList()) {
             if (!s.isAlive()) continue;
             
             // get the session runtime
             final long sessionTime = s.getTime();
             
             // get the request command line
-            boolean blockingRequest = false;
             String commandLine = s.getCommandLine();
-            if (commandLine == null) blockingRequest = true;                
+            final boolean blockingRequest = (commandLine == null);;
             final int commandCount = s.getCommandCount();
             
             // get the source ip address and port
             final InetAddress userAddress = s.getUserAddress();
             final int userPort = s.getUserPort();
-            if (userAddress == null) continue;
+            if (userAddress == null) {
+                continue;
+            }
             
             String dest = null;
             String prot = "http"; // only httpd sessions listed
-            
-            if ((dest != null) && (dest.equals(virtualHost))) dest = sb.peers.mySeed().getName() + ".yacy";
+
+            // What is the purpose of the following lines? Condition can never be true anyway. [MN wonders...]
+            if ((dest != null) && (dest.equals(virtualHost))) {
+                dest = sb.peers.mySeed().getName() + ".yacy";
+            }
             
             // determining if the source is a yacy host
             yacySeed seed = null;
             if (doNameLookup) {
                 seed = sb.peers.lookupByIP(userAddress,true,false,false);
-                if (seed != null) {
-                    if ((seed.hash.equals(sb.peers.mySeed().hash)) && 
-                            (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
-                        seed = null;
-                    }
+                if (seed != null && (seed.hash.equals(sb.peers.mySeed().hash)) &&
+                        (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
+                    seed = null;
                 }
             }
             
             prop.put("list_" + idx + "_dark", dark ? "1" : "0");
-            dark=!dark;
+            dark = !dark;
             try {
                 prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(s.getName(),"UTF8"));
             } catch (final UnsupportedEncodingException e) {

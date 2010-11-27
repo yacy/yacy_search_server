@@ -39,8 +39,8 @@ public class CrawlMonitorRemoteStart {
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        Switchboard sb = (Switchboard) env;
-        serverObjects prop = new serverObjects();
+        final Switchboard sb = (Switchboard) env;
+        final serverObjects prop = new serverObjects();
         
         boolean dark = true;   
         
@@ -52,19 +52,24 @@ public class CrawlMonitorRemoteStart {
         String peername;
         while (recordIterator.hasNext()) {
             record = recordIterator.next();
-            if (record == null) continue;
+            if (record == null) {
+                continue;
+            }
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                 peer = sb.peers.get(record.originator());
-                if (peer == null) peername = record.originator(); else peername = peer.getName();
+                peername = (peer == null) ? record.originator() : peer.getName();
+
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_dark", dark ? "1" : "0");
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_cre", record.created().toString());
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_peername", peername);
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
                 prop.put("otherCrawlStartInProgress_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
-                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? "1" : "0");
+                prop.put("otherCrawlStartInProgress_" + showedCrawl + "_crawlingQ", ("true".equals(record.attributes().get("crawlingQ"))) ? "1" : "0");
                 showedCrawl++;
-                if (showedCrawl > 20) break;
+                if (showedCrawl > 20) {
+                    break;
+                }
             }
         }
         prop.put("otherCrawlStartInProgress", showedCrawl);
@@ -74,17 +79,20 @@ public class CrawlMonitorRemoteStart {
         showedCrawl = 0;
         while (recordIterator.hasNext()) {
             record = recordIterator.next();
-            if (record == null) continue;
+            if (record == null) {
+                continue;
+            }
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                 peer = sb.peers.get(record.originator());
-                if (peer == null) peername = record.originator(); else peername = peer.getName();
+                peername = (peer == null) ? record.originator() : peer.getName();
+
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_dark", dark ? "1" : "0");
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_cre", record.created().toString());
                 prop.putHTML("otherCrawlStartFinished_" + showedCrawl + "_peername", peername);
                 prop.putHTML("otherCrawlStartFinished_" + showedCrawl + "_startURL", record.attributes().get("startURL").toString());
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_intention", record.attributes().get("intention").toString());
                 prop.put("otherCrawlStartFinished_" + showedCrawl + "_generalDepth", record.attributes().get("generalDepth"));
-                prop.put("otherCrawlStartFinished_" + showedCrawl + "_crawlingQ", (record.attributes().get("crawlingQ").equals("true")) ? "1" : "0");
+                prop.put("otherCrawlStartFinished_" + showedCrawl + "_crawlingQ", ("true".equals(record.attributes().get("crawlingQ"))) ? "1" : "0");
                 showedCrawl++;
                 if (showedCrawl > 20) break;
             }

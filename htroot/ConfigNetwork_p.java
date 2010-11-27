@@ -26,7 +26,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
-import java.util.HashSet;
+import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
@@ -49,8 +49,7 @@ public class ConfigNetwork_p {
         
         // load all options for network definitions
         final File networkBootstrapLocationsFile = new File(new File(sb.getAppPath(), "defaults"), "yacy.networks");
-        final HashSet<String> networkBootstrapLocations = FileUtils.loadList(networkBootstrapLocationsFile);
-        
+        final Set<String> networkBootstrapLocations = FileUtils.loadList(networkBootstrapLocationsFile);
         
         if (post != null) {
             
@@ -76,9 +75,9 @@ public class ConfigNetwork_p {
             if (post.containsKey("save")) {
                 
                 // DHT control
-                boolean indexDistribute = post.get("indexDistribute", "").equals("on");
-                boolean indexReceive = post.get("indexReceive", "").equals("on");
-                final boolean robinsonmode = post.get("network", "").equals("robinson");
+                boolean indexDistribute = "on".equals(post.get("indexDistribute", ""));
+                boolean indexReceive = "on".equals(post.get("indexReceive", ""));
+                final boolean robinsonmode = "robinson".equals(post.get("network", ""));
                 if (robinsonmode) {
                     indexDistribute = false;
                     indexReceive = false;
@@ -90,7 +89,9 @@ public class ConfigNetwork_p {
                     } else if (indexDistribute && indexReceive) {
                         commit = 1;
                     } else {
-                        if (!indexReceive) prop.put("commitDHTNoGlobalSearch", "1");
+                        if (!indexReceive) {
+                            prop.put("commitDHTNoGlobalSearch", "1");
+                        }
                         commit = 1;
                     }
                 }
@@ -101,13 +102,13 @@ public class ConfigNetwork_p {
                     sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
                 }
     
-                if (post.get("indexDistributeWhileCrawling","").equals("on")) {
+                if ("on".equals(post.get("indexDistributeWhileCrawling",""))) {
                     sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true);
                 } else {
                     sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, false);
                 }
     
-                if (post.get("indexDistributeWhileIndexing","").equals("on")) {
+                if ("on".equals(post.get("indexDistributeWhileIndexing",""))) {
                     sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true);
                 } else {
                     sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, false);
@@ -122,7 +123,7 @@ public class ConfigNetwork_p {
                     sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
                 }
     
-                if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {
+                if ("on".equals(post.get("indexReceiveBlockBlacklist", ""))) {
                     sb.setConfig("indexReceiveBlockBlacklist", true);
                 } else {
                     sb.setConfig("indexReceiveBlockBlacklist", false);
@@ -153,16 +154,16 @@ public class ConfigNetwork_p {
         final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
         
-        final boolean indexDistribute = sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "true").equals("true");
-        final boolean indexReceive = sb.getConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, "true").equals("true");
+        final boolean indexDistribute = "true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "true"));
+        final boolean indexReceive = "true".equals(sb.getConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, "true"));
         prop.put("indexDistributeChecked", (indexDistribute) ? "1" : "0");
-        prop.put("indexDistributeWhileCrawling.on", (sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "1" : "0");
-        prop.put("indexDistributeWhileCrawling.off", (sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true").equals("true")) ? "0" : "1");
-        prop.put("indexDistributeWhileIndexing.on", (sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? "1" : "0");
-        prop.put("indexDistributeWhileIndexing.off", (sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "true").equals("true")) ? "0" : "1");
+        prop.put("indexDistributeWhileCrawling.on", ("true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true"))) ? "1" : "0");
+        prop.put("indexDistributeWhileCrawling.off", ("true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true"))) ? "0" : "1");
+        prop.put("indexDistributeWhileIndexing.on", ("true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "true"))) ? "1" : "0");
+        prop.put("indexDistributeWhileIndexing.off", ("true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "true"))) ? "0" : "1");
         prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
-        prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "1" : "0");
-        prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "0" : "1");
+        prop.put("indexReceiveBlockBlacklistChecked.on", ("true".equals(sb.getConfig("indexReceiveBlockBlacklist", "true"))) ? "1" : "0");
+        prop.put("indexReceiveBlockBlacklistChecked.off", ("true".equals(sb.getConfig("indexReceiveBlockBlacklist", "true"))) ? "0" : "1");
         prop.putHTML("peertags", MapTools.set2string(sb.peers.mySeed().getPeerTags(), ",", false));
 
         // set seed information directly
@@ -174,16 +175,21 @@ public class ConfigNetwork_p {
         prop.put("robinson.checked", (indexDistribute || indexReceive) ? "0" : "1");
         prop.putHTML("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
         prop.putHTML("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
-        String hashes = "";
-        for (byte[] h:sb.clusterhashes.keySet()) hashes += ", " + new String(h);
-        if (hashes.length() > 2) hashes = hashes.substring(2);
-        prop.put("cluster.peers.yacydomain.hashes", hashes);
+        StringBuilder hashes = new StringBuilder();
+        for (final byte[] h : sb.clusterhashes.keySet()) {
+            hashes.append(", ").append(new String(h));
+        }
+        if (hashes.length() > 2) {
+            hashes = hashes.delete(0, 2);
+        }
+        
+        prop.put("cluster.peers.yacydomain.hashes", hashes.toString());
         
         // set p2p mode flags
-        prop.put("privatepeerChecked", (sb.getConfig("cluster.mode", "").equals("privatepeer")) ? "1" : "0");
-        prop.put("privateclusterChecked", (sb.getConfig("cluster.mode", "").equals("privatecluster")) ? "1" : "0");
-        prop.put("publicclusterChecked", (sb.getConfig("cluster.mode", "").equals("publiccluster")) ? "1" : "0");
-        prop.put("publicpeerChecked", (sb.getConfig("cluster.mode", "").equals("publicpeer")) ? "1" : "0");
+        prop.put("privatepeerChecked", ("privatepeer".equals(sb.getConfig("cluster.mode", ""))) ? "1" : "0");
+        prop.put("privateclusterChecked", ("privatecluster".equals(sb.getConfig("cluster.mode", ""))) ? "1" : "0");
+        prop.put("publicclusterChecked", ("publiccluster".equals(sb.getConfig("cluster.mode", ""))) ? "1" : "0");
+        prop.put("publicpeerChecked", ("publicpeer".equals(sb.getConfig("cluster.mode", ""))) ? "1" : "0");
         
         // set network configuration
         prop.putHTML("network.unit.definition", sb.getConfig("network.unit.definition", ""));
@@ -193,7 +199,9 @@ public class ConfigNetwork_p {
         prop.putHTML("network.unit.dht", sb.getConfig("network.unit.dht", ""));
         networkBootstrapLocations.remove(sb.getConfig("network.unit.definition", ""));
         int c = 0;
-        for (final String s: networkBootstrapLocations) prop.put("networks_" + c++ + "_network", s);
+        for (final String s: networkBootstrapLocations) {
+            prop.put("networks_" + c++ + "_network", s);
+        }
         prop.put("networks", c);
         
         return prop;
@@ -203,31 +211,42 @@ public class ConfigNetwork_p {
         input = input.replace(' ', ',');
         input = input.replace(' ', ';');
         input = input.replaceAll(",,", ",");
-        if (input.length() > 0 && input.charAt(0) == ',') input = input.substring(1);
-        if (input.endsWith(",")) input = input.substring(0, input.length() - 1);
+        if (input.length() > 0 && input.charAt(0) == ',') {
+            input = input.substring(1);
+        }
+        if (input.endsWith(",")) {
+            input = input.substring(0, input.length() - 1);
+        }
         return input;
     }
     
-    private static String checkYaCyDomainList(String input) {
-        input = normalizedList(input);
-        final String[] s = input.split(",");
-        input = "";
-        for (int i = 0; i < s.length; i++) {
-            if ((s[i].endsWith(".yacyh")) || (s[i].endsWith(".yacy")) ||
-                (s[i].indexOf(".yacyh=") > 0) || (s[i].indexOf(".yacy=") > 0)) input += "," + s[i];
+    private static String checkYaCyDomainList(final String input) {
+        final String[] array = normalizedList(input).split(",");
+        final StringBuilder output = new StringBuilder();
+        for (final String element : array) {
+            if ((element.endsWith(".yacyh")) || (element.endsWith(".yacy")) ||
+                (element.indexOf(".yacyh=") > 0) || (element.indexOf(".yacy=") > 0)) {
+                output.append(",").append(element);
+            }
         }
-        if (input.length() == 0) return input;
-        return input.substring(1);
+        
+        if (output.length() == 0) {
+            return input;
+        }
+        return output.delete(0, 1).toString();
     }
     
-    private static String checkIPPortList(String input) {
-        input = normalizedList(input);
-        final String[] s = input.split(",");
-        input = "";
-        for (int i = 0; i < s.length; i++) {
-            if (s[i].indexOf(':') >= 9) input += "," + s[i];
+    private static String checkIPPortList(final String input) {
+        final String[] array = normalizedList(input).split(",");
+        StringBuilder output = new StringBuilder();
+        for (final String element :array) {
+            if (element.indexOf(':') >= 9) {
+                output.append(",").append(element);
+            }
         }
-        if (input.length() == 0) return input;
-        return input.substring(1);
+        if (input.length() == 0) {
+            return input;
+        }
+        return output.delete(0, 1).toString();
     }
 }

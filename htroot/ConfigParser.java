@@ -52,9 +52,9 @@ public class ConfigParser {
             if (post.containsKey("parserSettings")) {
                 post.remove("parserSettings");
                 
-                for (Parser parser: TextParser.parsers()) {
-                    for (String mimeType: parser.supportedMimeTypes()) {
-                        TextParser.grantMime(mimeType, post.get("mimename_" + mimeType, "").equals("on"));
+                for (final Parser parser: TextParser.parsers()) {
+                    for (final String mimeType: parser.supportedMimeTypes()) {
+                        TextParser.grantMime(mimeType, "on".equals(post.get("mimename_" + mimeType, "")));
                     }
                 }
                 env.setConfig(SwitchboardConstants.PARSER_MIME_DENY, TextParser.getDenyMime());
@@ -62,11 +62,11 @@ public class ConfigParser {
         }
         
         int i = 0;        
-        for (Parser parser: TextParser.parsers()) {
+        for (final Parser parser: TextParser.parsers()) {
             prop.put("parser_" + i + "_name", parser.getName());
             
             int mimeIdx = 0;
-            for (String mimeType: parser.supportedMimeTypes()) {
+            for (final String mimeType: parser.supportedMimeTypes()) {
                 prop.put("parser_" + i + "_mime_" + mimeIdx + "_mimetype", mimeType);
                 prop.put("parser_" + i + "_mime_" + mimeIdx + "_status", (TextParser.supportsMime(mimeType) == null) ? 1 : 0);
                 mimeIdx++;

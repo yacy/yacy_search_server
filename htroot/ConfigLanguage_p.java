@@ -65,18 +65,18 @@ public class ConfigLanguage_p {
         prop.put("status", "0");//nothing
 
         List<String> langFiles = FileUtils.getDirListing(langPath, LANG_FILENAME_FILTER);
-        if(langFiles == null){
+        if (langFiles == null) {
             return prop;
         }
 
-        if (post != null){
-            String selectedLanguage = post.get("language");
+        if (post != null) {
+            final String selectedLanguage = post.get("language");
 
             // store this call as api call
             ((Switchboard) env).tables.recordAPICall(post, "ConfigLanguage_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "language settings: " + selectedLanguage);
             
             //change language
-            if(post.containsKey("use_button") && selectedLanguage != null){
+            if (post.containsKey("use_button") && selectedLanguage != null){
                 /* Only change language if filename is contained in list of filesnames
                  * read from the language directory. This is very important to prevent
                  * directory traversal attacks!
@@ -86,7 +86,7 @@ public class ConfigLanguage_p {
                 }
 
                 //delete language file
-            }else if(post.containsKey("delete")){
+            } else if (post.containsKey("delete")) {
 
                 /* Only delete file if filename is contained in list of filesnames
                  * read from the language directory. This is very important to prevent
@@ -101,15 +101,15 @@ public class ConfigLanguage_p {
             } else if (post.containsKey("url")){
                 final String url = post.get("url");
                 Iterator<String> it;
-                try{
+                try {
                     final DigestURI u = new DigestURI(url);
                     it = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
-                }catch(final IOException e){
+                } catch(final IOException e) {
                     prop.put("status", "1");//unable to get url
                     prop.put("status_url", url);
                     return prop;
                 }
-                try{
+                try {
                     final File langFile = new File(langPath, url.substring(url.lastIndexOf('/'), url.length()));
                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(langFile)));
 
@@ -117,21 +117,20 @@ public class ConfigLanguage_p {
                         bw.write(it.next() + "\n");
                     }
                     bw.close();
-                }catch(final IOException e){
+                } catch(final IOException e) {
                     prop.put("status", "2");//error saving the language file
                     return prop;
                 }
-                if(post.containsKey("use_lang") && (post.get("use_lang")).equals("on")){
+                if (post.containsKey("use_lang") && "on".equals(post.get("use_lang"))) {
                     Translator.changeLang(env, langPath, url.substring(url.lastIndexOf('/'), url.length()));
                 }
             }
         }
 
-        //reread language files
+        //re-read language files
         langFiles = FileUtils.getDirListing(langPath, LANG_FILENAME_FILTER);
         Collections.sort(langFiles);
         final Map<String, String> langNames = Translator.langMap(env);
-        String langKey, langName;
 
         //virtual entry
         prop.put("langlist_0_file", "default");
@@ -139,12 +138,13 @@ public class ConfigLanguage_p {
         prop.put("langlist_0_selected", "selected=\"selected\"");
 
         int count = 0;
-        for(final String langFile : langFiles){
+        for (final String langFile : langFiles) {
             //+1 because of the virtual entry "default" at top
-            langKey = langFile.substring(0, langFile.length() -4);
-            langName = langNames.get(langKey);
+            final String langKey = langFile.substring(0, langFile.length() -4);
+            final String langName = langNames.get(langKey);
             prop.put("langlist_" + (count + 1) + "_file", langFile);
             prop.put("langlist_" + (count + 1) + "_name", ((langName == null) ? langKey : langName));
+            
             if(env.getConfig("locale.language", "default").equals(langKey)) {
                 prop.put("langlist_" + (count + 1) + "_selected", "selected=\"selected\"");
                 prop.put("langlist_0_selected", " "); // reset Default

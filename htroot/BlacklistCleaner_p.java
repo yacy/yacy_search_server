@@ -153,7 +153,7 @@ public class BlacklistCleaner_p {
                 prop.put("disabled", "0");
                 prop.put(DISABLED + "blacklists", lists.size());
                 int count = 0;
-                for (String list : lists) {
+                for (final String list : lists) {
                     prop.putHTML(DISABLED + BLACKLISTS + count + "_name", list);
                     prop.put(DISABLED + BLACKLISTS + count + "_selected", (list.equals(selected)) ? "1" : "0");
                     count++;
@@ -214,13 +214,13 @@ public class BlacklistCleaner_p {
         }
 
         if (useKeys) {
-            for (String entry : post.keySet()) {
+            for (final String entry : post.keySet()) {
                 if (entry.indexOf(prefix) == 0) {
                     r.add(entry.substring(prefix.length()));
                 }
             }
         } else {
-            for (Map.Entry<String, String> entry : post.entrySet()) {
+            for (final Map.Entry<String, String> entry : post.entrySet()) {
                 if (entry.getKey().indexOf(prefix) == 0) {
                     r.add(entry.getValue());
                 }
@@ -295,8 +295,7 @@ public class BlacklistCleaner_p {
                 }
            
                 if (list.contains(s)) {
-                    list.remove(s);
-                    listChanged = true;
+                    listChanged = list.remove(s);
                 }
             }
             

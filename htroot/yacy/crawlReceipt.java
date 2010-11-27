@@ -53,8 +53,9 @@ public final class crawlReceipt {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        if ((post == null) || (env == null)) return prop;
-        if (!yacyNetwork.authentifyRequest(post, env)) return prop;
+        if ((post == null) || (env == null) || !yacyNetwork.authentifyRequest(post, env)) {
+            return prop;
+        }
         
         final Log log = sb.getLog();
 
@@ -137,7 +138,7 @@ public final class crawlReceipt {
             return prop;
         }
         
-        if (result.equals("fill")) try {
+        if ("fill".equals(result)) try {
             // put new entry into database
             sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
             sb.crawlResults.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
