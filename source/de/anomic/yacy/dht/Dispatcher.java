@@ -44,6 +44,7 @@ import net.yacy.kelondro.workflow.WorkflowProcessor;
 import de.anomic.search.Segment;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
+import java.util.List;
 
 public class Dispatcher {
 
@@ -53,8 +54,8 @@ public class Dispatcher {
      * Before a RWI is sent, the following process is applied:
      * - (1) a number of RWIs are selected and accumulated.
      *       When they are selected, they are removed from the index
-     * - (2) the RWI collection is splitted into a number of partitions according to the vertical DHT.
-     * - (3) the splitted RWIs are enqueued as Entry object in the entry 'cloud' of the dispatcher
+     * - (2) the RWI collection is split into a number of partitions according to the vertical DHT.
+     * - (3) the split RWIs are enqueued as Entry object in the entry 'cloud' of the dispatcher
      * - (4) more entries may be enqueued to the dispatcher and entries with the same primary target
      *       are accumulated.
      * - (5) the largest entries are selected from the dispatcher cloud and enqueued to the 'next' array
@@ -114,8 +115,6 @@ public class Dispatcher {
             seeds,
             gzipBody,
             timeout);
-        //this.selectedContainerCache = null;
-        //this.splittedContainerCache = null;
         
         int concurrentSender = Math.min(25, Math.max(10, WorkflowProcessor.useCPU * 2 + 1));
         indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
@@ -229,11 +228,11 @@ public class Dispatcher {
      * @throws RowSpaceExceededException 
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<ReferenceContainer<WordReference>>[] splitContainers(ArrayList<ReferenceContainer<WordReference>> containers) throws RowSpaceExceededException {
+    private List<ReferenceContainer<WordReference>>[] splitContainers(List<ReferenceContainer<WordReference>> containers) throws RowSpaceExceededException {
         
         // init the result vector
         int partitionCount = this.seeds.scheme.verticalPartitions();
-        ArrayList<ReferenceContainer<WordReference>>[] partitions = (ArrayList<ReferenceContainer<WordReference>>[]) new ArrayList[partitionCount];
+        List<ReferenceContainer<WordReference>>[] partitions = (ArrayList<ReferenceContainer<WordReference>>[]) new ArrayList[partitionCount];
         for (int i = 0; i < partitions.length; i++) partitions[i] = new ArrayList<ReferenceContainer<WordReference>>();
         
         // check all entries and split them to the partitions
@@ -271,7 +270,7 @@ public class Dispatcher {
      * stored in a cache of the Entry for later transmission to the targets, which means that
      * then no additional IO is necessary.
      */
-    private void enqueueContainersToCloud(final ArrayList<ReferenceContainer<WordReference>>[] containers) {
+    private void enqueueContainersToCloud(final List<ReferenceContainer<WordReference>>[] containers) {
         if (transmissionCloud == null) return;
         ReferenceContainer<WordReference> lastContainer;
         byte[] primaryTarget;
@@ -286,7 +285,7 @@ public class Dispatcher {
             
             // get or make a entry object
             entry = this.transmissionCloud.get(pTArray); // if this is not null, the entry is extended here
-            ArrayList<yacySeed> targets = PeerSelection.getAcceptRemoteIndexSeedsList(
+            List<yacySeed> targets = PeerSelection.getAcceptRemoteIndexSeedsList(
                     seeds,
                     primaryTarget,
                     seeds.redundancy() * 3,
@@ -327,7 +326,7 @@ public class Dispatcher {
             final int maxtime) {
         if (this.transmissionCloud == null) return false;
 
-    	ArrayList<ReferenceContainer<WordReference>> selectedContainerCache;
+    	List<ReferenceContainer<WordReference>> selectedContainerCache;
         try {
             selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
         } catch (IOException e) {
@@ -341,25 +340,25 @@ public class Dispatcher {
         	return false;
         }
 
-        ArrayList<ReferenceContainer<WordReference>>[] splittedContainerCache;
+        List<ReferenceContainer<WordReference>>[] splitContainerCache;
         try {
-            splittedContainerCache = splitContainers(selectedContainerCache);
+            splitContainerCache = splitContainers(selectedContainerCache);
         } catch (RowSpaceExceededException e) {
             this.log.logSevere("selectContainersEnqueueToCloud: splitContainers failed because of too low RAM", e);
             return false;
         }
         selectedContainerCache = null;
-        if (splittedContainerCache == null) {
-        	this.log.logInfo("selectContainersEnqueueToCloud: splittedContainerCache is empty, cannot do anything here.");
+        if (splitContainerCache == null) {
+        	this.log.logInfo("selectContainersEnqueueToCloud: splitContainerCache is empty, cannot do anything here.");
         	return false;
         }
-        this.log.logInfo("splitContainersFromCache: splittedContainerCache filled with " + splittedContainerCache.length + " partitions, deleting selectedContainerCache");
-        if (splittedContainerCache.length != this.seeds.scheme.verticalPartitions()) {
-        	this.log.logWarning("selectContainersEnqueueToCloud: splittedContainerCache has wrong length.");
+        this.log.logInfo("splitContainersFromCache: splitContainerCache filled with " + splitContainerCache.length + " partitions, deleting selectedContainerCache");
+        if (splitContainerCache.length != this.seeds.scheme.verticalPartitions()) {
+        	this.log.logWarning("selectContainersEnqueueToCloud: splitContainerCache has wrong length.");
         	return false;
         }
-        enqueueContainersToCloud(splittedContainerCache);
-        splittedContainerCache = null;
+        enqueueContainersToCloud(splitContainerCache);
+        splitContainerCache = null;
     	this.log.logInfo("selectContainersEnqueueToCloud: splittedContainerCache enqueued to cloud array which has now " + this.transmissionCloud.size() + " entries.");
         return true;
     }

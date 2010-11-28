@@ -33,7 +33,8 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,11 +69,11 @@ public final class RankingProcess extends Thread {
     private static final int maxDoubleDomAll = 1000, maxDoubleDomSpecial = 10000;
     
     private final QueryParams query;
-    private final TreeSet<byte[]> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private final SortedSet<byte[]> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
-    private final TreeSet<byte[]> misses; // contains url-hashes that could not been found in the LURL-DB
+    private final SortedSet<byte[]> misses; // contains url-hashes that could not been found in the LURL-DB
     //private final int[] domZones;
-    private TreeMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
+    private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     
     private int remote_resourceSize, remote_indexCount, remote_peerCount;
     private int local_resourceSize, local_indexCount;
@@ -126,6 +127,7 @@ public final class RankingProcess extends Thread {
         return this.order;
     }
     
+    @Override
     public void run() {
         // do a search
         
@@ -176,76 +178,74 @@ public final class RankingProcess extends Thread {
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
 
         // apply all constraints
         try {
             WordReferenceVars iEntry;
             while (true) {
-			    iEntry = decodedEntries.poll(1, TimeUnit.SECONDS);
-			    if (iEntry == null || iEntry == WordReferenceVars.poison) break;
-			    assert (iEntry.metadataHash().length == index.row().primaryKeyLength);
-			    //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
+                iEntry = decodedEntries.poll(1, TimeUnit.SECONDS);
+                if (iEntry == null || iEntry == WordReferenceVars.poison) break;
+                assert (iEntry.metadataHash().length == index.row().primaryKeyLength);
+                //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
-			    // increase flag counts
-			    for (int j = 0; j < 32; j++) {
-			        if (iEntry.flags().get(j)) {flagcount[j]++;}
-			    }
-			    
-			    // check constraints
-			    if (!testFlags(iEntry)) {
-			        continue;
-			    }
-			    
-			    // check document domain
-			    if (query.contentdom != ContentDomain.TEXT) {
-			        if ((query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
-			        if ((query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
-			        if ((query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
-			        if ((query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
-			    }
+                // increase flag counts
+                for (int j = 0; j < 32; j++) {
+                    if (iEntry.flags().get(j)) {flagcount[j]++;}
+                }
 
-			    // check tld domain
-			    /*
-			    if ((DigestURI.domDomain(iEntry.metadataHash()) & this.query.zonecode) == 0) {
-			        // filter out all tld that do not match with wanted tld domain
-			        continue;
-			    }
-			    */
+                // check constraints
+                if (!testFlags(iEntry)) {
+                    continue;
+                }
+
+                // check document domain
+                if (query.contentdom != ContentDomain.TEXT) {
+                    if ((query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
+                    if ((query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
+                    if ((query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
+                    if ((query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
+                }
+
+                // check tld domain
+                /*
+                if ((DigestURI.domDomain(iEntry.metadataHash()) & this.query.zonecode) == 0) {
+                    // filter out all tld that do not match with wanted tld domain
+                    continue;
+                }
+                */
 			    
                 // count domZones
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
                 
-			    // check site constraints
-			    domhash = new String(iEntry.metadataHash(), 6, 6);
-			    if (query.sitehash == null) {
-			        // no site constraint there; maybe collect host navigation information
-			        if (nav_hosts && query.urlMask_isCatchall) {
-	                    this.hostNavigator.inc(domhash);
-	                    this.hostResolver.put(domhash, new String(iEntry.metadataHash()));
-	                }
-			    } else {
-			        if (!domhash.equals(query.sitehash)) {
-			            // filter out all domains that do not match with the site constraint
-			            continue;
-			        }
-			    }
+                // check site constraints
+                String domhash = new String(iEntry.metadataHash(), 6, 6);
+                if (query.sitehash == null) {
+                    // no site constraint there; maybe collect host navigation information
+                    if (nav_hosts && query.urlMask_isCatchall) {
+                        this.hostNavigator.inc(domhash);
+                        this.hostResolver.put(domhash, new String(iEntry.metadataHash()));
+                    }
+                } else {
+                    if (!domhash.equals(query.sitehash)) {
+                        // filter out all domains that do not match with the site constraint
+                        continue;
+                    }
+                }
 			    
-			    // finally make a double-check and insert result to stack
+                // finally make a double-check and insert result to stack
                 if (urlhashes.add(iEntry.metadataHash())) {
                     stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
-                    //System.out.println("stack.put: feeders = " + this.feeders + ", stack.sizeQueue = " + stack.sizeQueue());
                     
                     // increase counter for statistics
                     if (local) this.local_indexCount++; else this.remote_indexCount++;
                 }
-			}
+            }
 
         } catch (InterruptedException e) {}
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-		EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
     }
     
     /**
@@ -261,7 +261,6 @@ public final class RankingProcess extends Thread {
     }
     
     public boolean feedingIsFinished() {
-        //System.out.println("feedingIsFinished: this.feeders == " + this.feeders);
     	return System.currentTimeMillis() - this.startTime > 50 && this.feeders == 0;
     }
     
@@ -288,7 +287,7 @@ public final class RankingProcess extends Thread {
         return localSearchInclusion;
     }
     
-    private WeakPriorityBlockingQueue.Element<WordReferenceVars> takeRWI(final boolean skipDoubleDom, long waitingtime) {
+    private WeakPriorityBlockingQueue.Element<WordReferenceVars> takeRWI(final boolean skipDoubleDom, final long waitingtime) {
         
         // returns from the current RWI list the best entry and removes this entry from the list
         WeakPriorityBlockingQueue<WordReferenceVars> m;
@@ -348,7 +347,7 @@ public final class RankingProcess extends Thread {
                 }
             }
         } catch (InterruptedException e1) {}
-        if (this.doubleDomCache.size() == 0) return null;
+        if (this.doubleDomCache.isEmpty()) return null;
         
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
@@ -395,7 +394,7 @@ public final class RankingProcess extends Thread {
      */
     public URIMetadataRow takeURL(final boolean skipDoubleDom, final long waitingtime) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
-    	long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
+    	final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
     	int p = -1;
     	byte[] urlhash;
     	long timeleft;
@@ -470,8 +469,7 @@ public final class RankingProcess extends Thread {
             if (pageauthor != null && pageauthor.length() > 0) {
             	// add author to the author navigator
                 String authorhash = new String(Word.word2hash(pageauthor));
-                //System.out.println("*** DEBUG authorhash = " + authorhash + ", query.authorhash = " + this.query.authorhash + ", author = " + author);
-                
+
                 // check if we already are filtering for authors
             	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
             		continue;
@@ -581,7 +579,7 @@ public final class RankingProcess extends Thread {
         ScoreCluster<String> result = new ScoreCluster<String>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return result;
         
-        Iterator<String> domhashs = this.hostNavigator.keys(false);
+        final Iterator<String> domhashs = this.hostNavigator.keys(false);
         URIMetadataRow row;
         String domhash, urlhash, hostname;
         while (domhashs.hasNext() && result.size() < 30) {
@@ -606,11 +604,11 @@ public final class RankingProcess extends Thread {
     public StaticScore<String> getTopicNavigator(int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        ScoreCluster<String> result = new ScoreCluster<String>();
+        final ScoreCluster<String> result = new ScoreCluster<String>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return result;
         if (this.ref.size() < 2) this.ref.clear(); // navigators with one entry are not useful
-        Map<String, Double> counts = new HashMap<String, Double>();
-        Iterator<String> i = this.ref.keys(false);
+        final Map<String, Double> counts = new HashMap<String, Double>();
+        final Iterator<String> i = this.ref.keys(false);
         String word;
         byte[] termHash;
         int c;
@@ -635,8 +633,8 @@ public final class RankingProcess extends Thread {
     
     public void addTopic(final String[] words) {
         String word;
-        for (int i = 0; i < words.length; i++) {
-            word = words[i].toLowerCase();
+        for (final String w : words) {
+            word = w.toLowerCase();
             if (word.length() > 2 &&
                 "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off".indexOf(word) < 0 &&
                 !query.queryHashes.has(Word.word2hash(word)) &&
@@ -712,11 +710,9 @@ public final class RankingProcess extends Thread {
         final int m = Math.min(maxYBR, ybrTables.length);
         for (int i = 0; i < m; i++) {
             if ((ybrTables[i] != null) && (ybrTables[i].contains(domhash))) {
-                //System.out.println("YBR FOUND: " + urlHash + " (" + i + ")");
                 return i;
             }
         }
-        //System.out.println("NOT FOUND: " + urlHash);
         return 15;
     }
 

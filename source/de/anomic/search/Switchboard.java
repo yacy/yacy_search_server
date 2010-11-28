@@ -62,6 +62,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -173,9 +175,9 @@ public final class Switchboard extends serverSwitch {
     private        int  dhtMaxReferenceCount = 1000;
     
     // colored list management
-    public static TreeSet<String> badwords       = new TreeSet<String>(NaturalOrder.naturalComparator);
-    public static TreeSet<String> stopwords      = new TreeSet<String>(NaturalOrder.naturalComparator);    
-    public static TreeSet<String> blueList       = null;
+    public static SortedSet<String> badwords       = new TreeSet<String>(NaturalOrder.naturalComparator);
+    public static SortedSet<String> stopwords      = new TreeSet<String>(NaturalOrder.naturalComparator);
+    public static SortedSet<String> blueList       = null;
     public static HandleSet badwordHashes  = null;
     public static HandleSet blueListHashes = null;
     public static HandleSet stopwordHashes = null;    
@@ -224,7 +226,7 @@ public final class Switchboard extends serverSwitch {
     public  int                            searchQueriesRobinsonFromLocal = 0; // absolute counter of all local queries submitted on this peer from a local or autheticated used
     public  int                            searchQueriesRobinsonFromRemote = 0; // absolute counter of all local queries submitted on this peer from a remote IP without authentication
     public  double                         searchQueriesGlobal = 0d; // partial counter of remote queries (1/number-of-requested-peers)
-    public  TreeMap<byte[], String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
+    public  SortedMap<byte[], String>      clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  URLLicense                     licensedURLs;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
     public  FilterEngine                   domainList;
@@ -232,7 +234,7 @@ public final class Switchboard extends serverSwitch {
     public  LinkedBlockingQueue<String>    trail;
     public  yacySeedDB                     peers;
     public  WorkTables                     tables;
-    public  TreeMap<byte[], DigestURI>     intranetURLs = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
+    public  SortedMap<byte[], DigestURI>     intranetURLs = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
     
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -256,7 +258,7 @@ public final class Switchboard extends serverSwitch {
     public Switchboard(final File dataPath, final File appPath, final String initPath, final String configPath) throws IOException {
         super(dataPath, appPath, initPath, configPath);
         MemoryTracker.startSystemProfiling();
-        sb=this;
+        sb = this;
         
         // set loglevel and log
         setLog(new Log("PLASMA"));
@@ -751,7 +753,7 @@ public final class Switchboard extends serverSwitch {
                 netdef = netdef.trim();
                 try {
                     netdefmap = Switchboard.loadFileAsMap(new DigestURI(netdef));
-                    if (netdefmap == null || netdefmap.size() == 0) continue netload;
+                    if (netdefmap == null || netdefmap.isEmpty()) continue netload;
                     setConfig(netdefmap);
                     break netload;
                 } catch (final Exception e) {
@@ -1891,7 +1893,7 @@ public final class Switchboard extends serverSwitch {
             doclist.add(document);
         }
         
-        if (doclist.size() == 0)  return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+        if (doclist.isEmpty())  return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
         in.documents = doclist.toArray(new Document[doclist.size()]);
         Condenser[] condenser = new Condenser[in.documents.length];
         if (this.log.isFine()) log.logFine("Condensing for '" + in.queueEntry.url().toNormalform(false, true) + "'");
@@ -1981,8 +1983,8 @@ public final class Switchboard extends serverSwitch {
         }
         
         // store rss feeds in document into rss table
-        for (Map.Entry<MultiProtocolURI, String> rssEntry : document.getRSS().entrySet()) {
-            Tables.Data rssRow = new Tables.Data();
+        for (final Map.Entry<MultiProtocolURI, String> rssEntry : document.getRSS().entrySet()) {
+            final Tables.Data rssRow = new Tables.Data();
             rssRow.put("referrer", queueEntry.url().hash());
             rssRow.put("url", rssEntry.getKey().toNormalform(true, false).getBytes());
             rssRow.put("title", rssEntry.getValue().getBytes());
@@ -2036,14 +2038,14 @@ public final class Switchboard extends serverSwitch {
         Map<MultiProtocolURI, String> matcher = searchEvent.getQuery().separateMatches(links);
         
         // take the matcher and load them all
-        for (Map.Entry<MultiProtocolURI, String> entry: matcher.entrySet()) {
+        for (final Map.Entry<MultiProtocolURI, String> entry: matcher.entrySet()) {
             try {
                 this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
             } catch (IOException e) {} catch (Parser.Failure e) {}
         }
         
         // take then the no-matcher and load them also
-        for (Map.Entry<MultiProtocolURI, String> entry: links.entrySet()) {
+        for (final Map.Entry<MultiProtocolURI, String> entry: links.entrySet()) {
             try {
                 this.addToIndex(new DigestURI(entry.getKey(), (byte[]) null), searchEvent, heuristicName);
             } catch (IOException e) {} catch (Parser.Failure e) {}
@@ -2069,32 +2071,35 @@ public final class Switchboard extends serverSwitch {
             log.logWarning("addToIndex: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);
             return;
         }
-        new Thread() {public void run() {
-            try {
-                Response response = loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE);
-                if (response == null) throw new IOException("response == null");
-                if (response.getContent() == null) throw new IOException("content == null");
-                if (response.getResponseHeader() == null) throw new IOException("header == null");
-                Document[] documents = response.parse();
-                if (documents != null) for (Document document: documents) {
-                    if (document.indexingDenied()) throw new Parser.Failure("indexing is denied", url);
-                    Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib);
-                    ResultImages.registerImages(url, document, true);
-                    webStructure.generateCitationReference(url, document, condenser, response.lastModified());
-                    storeDocumentIndex(process, response, document, condenser, searchEvent, "heuristic:" + heuristicName);
-                    log.logInfo("addToIndex fill of url " + url.toNormalform(true, true) + " finished");
+        new Thread() {
+            @Override
+            public void run() {
+                try {
+                    final Response response = loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE);
+                    if (response == null) throw new IOException("response == null");
+                    if (response.getContent() == null) throw new IOException("content == null");
+                    if (response.getResponseHeader() == null) throw new IOException("header == null");
+                    final Document[] documents = response.parse();
+                    if (documents != null) for (final Document document: documents) {
+                        if (document.indexingDenied()) throw new Parser.Failure("indexing is denied", url);
+                        final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib);
+                        ResultImages.registerImages(url, document, true);
+                        webStructure.generateCitationReference(url, document, condenser, response.lastModified());
+                        storeDocumentIndex(process, response, document, condenser, searchEvent, "heuristic:" + heuristicName);
+                        log.logInfo("addToIndex fill of url " + url.toNormalform(true, true) + " finished");
+                    }
+                } catch (IOException e) {
+                    log.logWarning("addToIndex: failed loading " + url.toNormalform(false, false) + ": " + e.getMessage());
+                } catch (Parser.Failure e) {
+                    log.logWarning("addToIndex: failed parsing " + url.toNormalform(false, false) + ": " + e.getMessage());
                 }
-            } catch (IOException e) {
-                log.logWarning("addToIndex: failed loading " + url.toNormalform(false, false) + ": " + e.getMessage());
-            } catch (Parser.Failure e) {
-                log.logWarning("addToIndex: failed parsing " + url.toNormalform(false, false) + ": " + e.getMessage());
             }
-        }}.start();
+        }.start();
     }
     
     public class receiptSending implements Runnable {
-        yacySeed initiatorPeer;
-        URIMetadataRow reference;
+        private yacySeed initiatorPeer;
+        private URIMetadataRow reference;
         
         public receiptSending(final yacySeed initiatorPeer, final URIMetadataRow reference) {
             this.initiatorPeer = initiatorPeer;
@@ -2124,7 +2129,7 @@ public final class Switchboard extends serverSwitch {
     public int adminAuthenticated(final RequestHeader requestHeader) {
         
         // authorization for localhost, only if flag is set to grant localhost access as admin
-        boolean accessFromLocalhost = accessFromLocalhost(requestHeader);
+        final boolean accessFromLocalhost = accessFromLocalhost(requestHeader);
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
         
         // get the authorization string from the header
@@ -2187,16 +2192,16 @@ public final class Switchboard extends serverSwitch {
         }        
     }
     
-    public static int accessFrequency(final HashMap<String, TreeSet<Long>> tracker, final String host) {
+    public static int accessFrequency(final Map<String, SortedSet<Long>> tracker, final String host) {
         // returns the access frequency in queries per hour for a given host and a specific tracker
         final long timeInterval = 1000 * 60 * 60;
-        final TreeSet<Long> accessSet = tracker.get(host);
+        final SortedSet<Long> accessSet = tracker.get(host);
         if (accessSet == null) return 0;
         return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
     }
     
     public String dhtShallTransfer(final String segment) {
-        String cautionCause = onlineCaution();
+        final String cautionCause = onlineCaution();
         if (cautionCause != null) {
             return "online caution for " + cautionCause + ", dht transmission";
         }
@@ -2218,7 +2223,7 @@ public final class Switchboard extends serverSwitch {
         if (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
             return "no DHT distribution: not enabled (per setting)";
         }
-        Segment indexSegment = this.indexSegments.segment(segment);
+        final Segment indexSegment = this.indexSegments.segment(segment);
         if (indexSegment.urlMetadata().size() < 10) {
             return "no DHT distribution: loadedURL.size() = " + indexSegment.urlMetadata().size();
         }
@@ -2322,71 +2327,73 @@ public final class Switchboard extends serverSwitch {
     }
     
     public final void heuristicSite(final SearchEvent searchEvent, final String host) {
-        new Thread() {public void run() {
-            String r = host;
-            if (r.indexOf("//") < 0) r = "http://" + r;
-            
-            // get the links for a specific site
-            DigestURI url;
-            try {
-                url = new DigestURI(r);
-            } catch (MalformedURLException e) {
-                Log.logException(e);
-                return;
+        new Thread() {
+            @Override
+            public void run() {
+                String r = host;
+                if (r.indexOf("//") < 0) r = "http://" + r;
+
+                // get the links for a specific site
+                DigestURI url;
+                try {
+                    url = new DigestURI(r);
+                } catch (MalformedURLException e) {
+                    Log.logException(e);
+                    return;
+                }
+
+                final Map<MultiProtocolURI, String> links;
+                try {
+                    links = loader.loadLinks(url, CrawlProfile.CacheStrategy.NOCACHE);
+                } catch (IOException e) {
+                    Log.logException(e);
+                    return;
+                }
+                final Iterator<MultiProtocolURI> i = links.keySet().iterator();
+                while (i.hasNext()) {
+                    if (!i.next().getHost().endsWith(host)) i.remove();
+                }
+
+                // add all pages to the index
+                addAllToIndex(url, links, searchEvent, "site");
             }
-    
-            Map<MultiProtocolURI, String> links = null;
-            try {
-                links = loader.loadLinks(url, CrawlProfile.CacheStrategy.NOCACHE);
-            } catch (IOException e) {
-                Log.logException(e);
-                return;
-            }
-            Iterator<MultiProtocolURI> i = links.keySet().iterator();
-            MultiProtocolURI u;
-            while (i.hasNext()) {
-                u = i.next();
-                if (!u.getHost().endsWith(host)) i.remove();
-            }
-            
-            // add all pages to the index
-            addAllToIndex(url, links, searchEvent, "site");
-        }}.start();
+        }.start();
     }
     
     public final void heuristicScroogle(final SearchEvent searchEvent) {
-        new Thread() {public void run() {
-            String query = searchEvent.getQuery().queryString(true);
-            int meta = query.indexOf("heuristic:");
-            if (meta >= 0) {
-                int q = query.indexOf(' ', meta);
-                if (q >= 0) query = query.substring(0, meta) + query.substring(q + 1); else query = query.substring(0, meta);
+        new Thread() {
+            @Override
+            public void run() {
+                String query = searchEvent.getQuery().queryString(true);
+                int meta = query.indexOf("heuristic:");
+                if (meta >= 0) {
+                    final int q = query.indexOf(' ', meta);
+                    if (q >= 0) query = query.substring(0, meta) + query.substring(q + 1); else query = query.substring(0, meta);
+                }
+                final String urlString = "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=" + query.trim().replaceAll(" ", "+") + "&n=2";
+                final DigestURI url;
+                try {
+                    url = new DigestURI(MultiProtocolURI.unescape(urlString));
+                } catch (MalformedURLException e1) {
+                    return;
+                }
+
+                Map<MultiProtocolURI, String> links = null;
+                try {
+                    links = loader.loadLinks(url, CrawlProfile.CacheStrategy.NOCACHE);
+                } catch (IOException e) {
+                    Log.logException(e);
+                    return;
+                }
+                Iterator<MultiProtocolURI> i = links.keySet().iterator();
+                while (i.hasNext()) {
+                    if (i.next().toNormalform(false, false).indexOf("scroogle") >= 0) i.remove();
+                }
+                log.logInfo("Heuristic: adding " + links.size() + " links from scroogle");
+                // add all pages to the index
+                addAllToIndex(null, links, searchEvent, "scroogle");
             }
-            final String urlString = "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=" + query.trim().replaceAll(" ", "+") + "&n=2";
-            DigestURI url;
-            try {
-                url = new DigestURI(MultiProtocolURI.unescape(urlString));
-            } catch (MalformedURLException e1) {
-                return;
-            }
-    
-            Map<MultiProtocolURI, String> links = null;
-            try {
-                links = loader.loadLinks(url, CrawlProfile.CacheStrategy.NOCACHE);
-            } catch (IOException e) {
-                Log.logException(e);
-                return;
-            }
-            Iterator<MultiProtocolURI> i = links.keySet().iterator();
-            MultiProtocolURI u;
-            while (i.hasNext()) {
-                u = i.next();
-                if (u.toNormalform(false, false).indexOf("scroogle") >= 0) i.remove();
-            }
-            log.logInfo("Heuristic: adding " + links.size() + " links from scroogle");
-            // add all pages to the index
-            addAllToIndex(null, links, searchEvent, "scroogle");
-        }}.start();
+        }.start();
     }
     
     public int currentPPM() {
@@ -2542,14 +2549,11 @@ public final class Switchboard extends serverSwitch {
             port = 3128;
         }
         // create new config
-        ProxySettings.use  = true;
         ProxySettings.use4ssl = true;
         ProxySettings.use4YaCy = true;
         ProxySettings.port = port;
         ProxySettings.host = host;
-        if ((ProxySettings.host == null) || (ProxySettings.host.length() == 0)) {
-            ProxySettings.use = false;
-        }
+        ProxySettings.use  = ((ProxySettings.host != null) && (ProxySettings.host.length() > 0));
         
         // determining if remote proxy usage is enabled
         ProxySettings.use = getConfigBool("remoteProxyUse", false);

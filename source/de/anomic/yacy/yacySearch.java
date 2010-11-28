@@ -27,8 +27,9 @@ package de.anomic.yacy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.SortedMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.DynamicScore;
@@ -112,6 +113,7 @@ public class yacySearch extends Thread {
         this.constraint = constraint;
     }
 
+    @Override
     public void run() {
         try {
             this.urls = yacyClient.search(
@@ -137,10 +139,10 @@ public class yacySearch extends Thread {
     }
     
     public static String set2string(final HandleSet hashes) {
-        String wh = "";
+        StringBuilder wh = new StringBuilder();
         final Iterator<byte[]> iter = hashes.iterator();
-        while (iter.hasNext()) { wh = wh + new String(iter.next()); }
-        return wh;
+        while (iter.hasNext()) { wh.append(new String(iter.next())); }
+        return wh.toString();
     }
 
     public int links() {
@@ -155,25 +157,25 @@ public class yacySearch extends Thread {
         return targetPeer;
     }
 
-    private static yacySeed[] selectClusterPeers(final yacySeedDB seedDB, final TreeMap<byte[], String> peerhashes) {
+    private static yacySeed[] selectClusterPeers(final yacySeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
     	final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
-    	final ArrayList<yacySeed> l = new ArrayList<yacySeed>();
+    	final List<yacySeed> l = new ArrayList<yacySeed>();
     	Map.Entry<byte[], String> entry;
     	yacySeed s;
     	while (i.hasNext()) {
-    		entry = i.next();
-    		s = seedDB.get(new String(entry.getKey())); // should be getConnected; get only during testing time
-    		if (s != null) {
-    			s.setAlternativeAddress(entry.getValue());
-    			l.add(s);
-    		}
+            entry = i.next();
+            s = seedDB.get(new String(entry.getKey())); // should be getConnected; get only during testing time
+            if (s != null) {
+                s.setAlternativeAddress(entry.getValue());
+                l.add(s);
+            }
     	}
-    	final yacySeed[] result = new yacySeed[l.size()];
-    	for (int j = 0; j < l.size(); j++) {
-    		result[j] = l.get(j);
-    	}
-    	return result;
-    	//return (yacySeed[]) l.toArray();
+//    	final yacySeed[] result = new yacySeed[l.size()];
+//    	for (int j = 0; j < l.size(); j++) {
+//    		result[j] = l.get(j);
+//    	}
+//    	return result;
+    	return l.toArray(new yacySeed[0]);
     }
     
     private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final HandleSet wordhashes, int seedcount, int redundancy) {
@@ -187,8 +189,8 @@ public class yacySearch extends Thread {
         
         // put in seeds according to dht
         final DynamicScore<String> ranking = new ScoreCluster<String>();
-        final HashMap<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>();
-        final HashMap<String, yacySeed> matchingSeeds = new HashMap<String, yacySeed>();
+        final Map<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>();
+        final Map<String, yacySeed> matchingSeeds = new HashMap<String, yacySeed>();
         yacySeed seed;
         Iterator<yacySeed> dhtEnum;         
         Iterator<byte[]> iter = wordhashes.iterator();
@@ -235,7 +237,7 @@ public class yacySearch extends Thread {
         seedcount = Math.min(ranking.size(), seedcount);
         final yacySeed[] result = new yacySeed[seedcount + matchingSeeds.size()];
         c = 0;
-        Iterator<String> iters = ranking.keys(false); // higher are better
+        final Iterator<String> iters = ranking.keys(false); // higher are better
         while (iters.hasNext() && c < seedcount) {
             seed = regularSeeds.get(iters.next());
             seed.selectscore = c;
@@ -267,7 +269,7 @@ public class yacySearch extends Thread {
             final Blacklist blacklist,
             final RankingProfile rankingProfile,
             final Bitfield constraint,
-            final TreeMap<byte[], String> clusterselection) {
+            final SortedMap<byte[], String> clusterselection) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
@@ -310,7 +312,7 @@ public class yacySearch extends Thread {
             final RankingProcess containerCache,
             final String targethash, final Blacklist blacklist,
             final RankingProfile rankingProfile,
-            final Bitfield constraint, final TreeMap<byte[], String> clusterselection) {
+            final Bitfield constraint, final SortedMap<byte[], String> clusterselection) {
     	assert wordhashes.length() >= 12 : "wordhashes = " + wordhashes;
     	
         // check own peer status
@@ -332,23 +334,25 @@ public class yacySearch extends Thread {
     public static int remainingWaiting(final yacySearch[] searchThreads) {
         if (searchThreads == null) return 0;
         int alive = 0;
-        for (int i = 0; i < searchThreads.length; i++) {
-            if (searchThreads[i].isAlive()) alive++;
+        for (final yacySearch searchThread : searchThreads) {
+            if (searchThread.isAlive()) alive++;
         }
         return alive;
     }
     
     public static int collectedLinks(final yacySearch[] searchThreads) {
         int links = 0;
-        for (int i = 0; i < searchThreads.length; i++) {
-            if (!(searchThreads[i].isAlive()) && searchThreads[i].urls > 0) links += searchThreads[i].urls;
+        for (final yacySearch searchThread : searchThreads) {
+            if (!(searchThread.isAlive()) && searchThread.urls > 0) {
+                links += searchThread.urls;
+            }
         }
         return links;
     }
     
     public static void interruptAlive(final yacySearch[] searchThreads) {
-        for (int i = 0; i < searchThreads.length; i++) {
-            if (searchThreads[i].isAlive()) searchThreads[i].interrupt();
+        for (final yacySearch searchThread : searchThreads) {
+            if (searchThread.isAlive()) searchThread.interrupt();
         }
     }
     

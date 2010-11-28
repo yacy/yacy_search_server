@@ -79,6 +79,8 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCore.Session;
+import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -105,13 +107,13 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     private static AlternativeDomainNames alternativeResolver = null;
     
     /**
-     * A hashset containing extensions that indicate content that should not be transported
+     * A Set containing extensions that indicate content that should not be transported
      * using zipped content encoding
      * @see #shallTransportZipped(String)
      */
      
      //TODO: Load this from a file
-    private static final HashSet<String> disallowZippedContentEncoding = new HashSet<String>(Arrays.asList(new String[]{
+    private static final Set<String> disallowZippedContentEncoding = new HashSet<String>(Arrays.asList(new String[]{
             ".gz", ".tgz", ".jpg", ".jpeg", ".png", ".mp3", ".mov", ".avi", ".gif", ".zip", ".rar", ".bz2", ".lha", ".jar", ".rpm", ".arc", ".arj", ".wmv", ".ico", ".bmp"
     }));    
     
@@ -120,13 +122,13 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public static final String copyright = "[ HTTP SERVER: AnomicHTTPD v" + vDATE + " by Michael Christen / www.anomic.de ]";
     public static final String hline = "-------------------------------------------------------------------------------";
     
-    public static final Map<String, String> reverseMappingCache = new ConcurrentHashMap<String, String>();
+    public static final ConcurrentMap<String, String> reverseMappingCache = new ConcurrentHashMap<String, String>();
     private static volatile Switchboard switchboard = null;
     private static String virtualHost = null;
     
     public static boolean keepAliveSupport = false;
-    private static Map<String, Long> YaCyHopAccessRequester = new ConcurrentHashMap<String, Long>();
-    private static Map<String, Long> YaCyHopAccessTargets = new ConcurrentHashMap<String, Long>();
+    private static ConcurrentMap<String, Long> YaCyHopAccessRequester = new ConcurrentHashMap<String, Long>();
+    private static ConcurrentMap<String, Long> YaCyHopAccessTargets = new ConcurrentHashMap<String, Long>();
     
     // for authentication
     private boolean use_proxyAccounts = false;

@@ -44,6 +44,9 @@ import de.anomic.search.Segment;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
 
 public class Transmission {
 
@@ -68,11 +71,11 @@ public class Transmission {
 
     public Chunk newChunk(
                 byte[] primaryTarget,
-                final ArrayList<yacySeed> targets,
+                final List<yacySeed> targets,
                 final Row payloadrow) {
         return new Chunk(primaryTarget, targets, payloadrow);
     }
-    
+
     public class Chunk extends WorkflowJob implements Iterable<ReferenceContainer<WordReference>> {
         /**
          * a dispatcher entry contains
@@ -86,9 +89,9 @@ public class Transmission {
          */
         private final byte[]                          primaryTarget;
         private final ReferenceContainerCache<WordReference> containers;
-        private final TreeMap<byte[], URIMetadataRow> references;
+        private final SortedMap<byte[], URIMetadataRow> references;
         private final HandleSet                       badReferences;
-        private final ArrayList<yacySeed>             targets;
+        private final List<yacySeed>             targets;
         private int                             hit, miss;
         
         /**
@@ -101,7 +104,7 @@ public class Transmission {
          */
         public Chunk(
                 byte[] primaryTarget,
-                final ArrayList<yacySeed> targets,
+                final List<yacySeed> targets,
                 final Row payloadrow) {
             super();
             this.primaryTarget = primaryTarget;
@@ -122,7 +125,7 @@ public class Transmission {
         public void add(ReferenceContainer<WordReference> container) throws RowSpaceExceededException {
             // iterate through the entries in the container and check if the reference is in the repository
             Iterator<WordReference>  i = container.entries();
-            ArrayList<byte[]> notFoundx = new ArrayList<byte[]>();
+            List<byte[]> notFoundx = new ArrayList<byte[]>();
             while (i.hasNext()) {
                 WordReference e = i.next();
                 if (references.containsKey(e.metadataHash())) continue;
@@ -139,7 +142,7 @@ public class Transmission {
                 }
             }
             // now delete all references that were not found
-            for (byte[] b : notFoundx) container.removeReference(b);
+            for (final byte[] b : notFoundx) container.removeReference(b);
             // finally add the remaining container to the cache
             containers.add(container);
         }

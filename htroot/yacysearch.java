@@ -30,6 +30,8 @@
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.RSSMessage;
@@ -412,7 +414,7 @@ public class yacysearch {
             int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final TreeSet<String> filtered = SetTools.joinConstructive(query[0], Switchboard.stopwords);
+            final SortedSet<String> filtered = SetTools.joinConstructive(query[0], Switchboard.stopwords);
             if (!filtered.isEmpty()) {
                 SetTools.excludeDestructive(query[0], Switchboard.stopwords);
             }
@@ -576,7 +578,7 @@ public class yacysearch {
             }
             
             // find geographic info
-            TreeSet<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
+            SortedSet<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
             if (coordinates == null || coordinates.isEmpty() || offset > 0) {
                 prop.put("geoinfo", "0");
             } else {

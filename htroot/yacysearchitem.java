@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 
 import net.yacy.cora.protocol.HeaderFramework;
@@ -209,11 +209,11 @@ public class yacysearchitem {
             if (result == null) return prop; // no content
             
             prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
-            final ArrayList<MediaSnippet> media = result.mediaSnippets();
+            final List<MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;
             if (media != null) {
                 int c = 0;
-                for (MediaSnippet ms : media) {
+                for (final MediaSnippet ms : media) {
                     prop.putHTML("content_items_" + c + "_href", ms.href.toNormalform(true, false));
                     prop.putHTML("content_items_" + c + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), urllength));
                     prop.putHTML("content_items_" + c + "_name", shorten(ms.name, namelength));

@@ -28,8 +28,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import de.anomic.crawler.CrawlProfile;
@@ -96,10 +98,12 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return ByteArray.hashCode(href.hash());
     }
     
+    @Override
     public String toString() {
         return new String(href.hash());
     }
     
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -116,7 +120,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return o1.compareTo(o2);
     }
     
-    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final ContentDomain mediatype, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
+    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final ContentDomain mediatype, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
@@ -142,7 +146,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return a;
     }
     
-    public static ArrayList<MediaSnippet> computeMediaSnippets(final DigestURI source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
+    public static List<MediaSnippet> computeMediaSnippets(final DigestURI source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<MultiProtocolURI, String> media = null;
@@ -155,7 +159,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         Map.Entry<MultiProtocolURI, String> entry;
         DigestURI url;
         String desc;
-        final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
+        final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             entry = i.next();
             url = new DigestURI(entry.getKey());
@@ -169,9 +173,9 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return result;
     }
     
-    public static ArrayList<MediaSnippet> computeImageSnippets(final DigestURI source, final Document document, final HandleSet queryhashes) {
+    public static List<MediaSnippet> computeImageSnippets(final DigestURI source, final Document document, final HandleSet queryhashes) {
         
-        final TreeSet<ImageEntry> images = new TreeSet<ImageEntry>();
+        final SortedSet<ImageEntry> images = new TreeSet<ImageEntry>();
         images.addAll(document.getImages().values()); // iterates images in descending size order!
         // a measurement for the size of the images can be retrieved using the htmlFilterImageEntry.hashCode()
         
@@ -179,7 +183,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         ImageEntry ientry;
         DigestURI url;
         String desc;
-        final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
+        final List<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             ientry = i.next();
             url = new DigestURI(ientry.url());
@@ -206,7 +210,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     private static HandleSet removeAppearanceHashes(final String sentence, final HandleSet queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;
-        final TreeMap<byte[], Integer> hs = Condenser.hashSentence(sentence, null);
+        final SortedMap<byte[], Integer> hs = Condenser.hashSentence(sentence, null);
         final Iterator<byte[]> j = queryhashes.iterator();
         byte[] hash;
         Integer pos;

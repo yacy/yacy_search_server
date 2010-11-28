@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 
@@ -35,7 +36,7 @@ import org.apache.http.entity.mime.content.ContentBody;
  */
 public class HTTPConnector {
     
-    private static final Map<String, HTTPConnector> cons = new ConcurrentHashMap<String, HTTPConnector>();
+    private static final ConcurrentMap<String, HTTPConnector> cons = new ConcurrentHashMap<String, HTTPConnector>();
     private String userAgent;
     
     private HTTPConnector(String userAgent) {
@@ -59,7 +60,7 @@ public class HTTPConnector {
      * @return response body
      * @throws IOException
      */
-    public byte[] post(final MultiProtocolURI url, final int timeout, final String vhost, LinkedHashMap<String, ContentBody> post) throws IOException {
+    public byte[] post(final MultiProtocolURI url, final int timeout, final String vhost, final Map<String, ContentBody> post) throws IOException {
 		return post(url, timeout, vhost, post, false);
 	}
     
@@ -74,7 +75,7 @@ public class HTTPConnector {
      * @return response body
      * @throws IOException
      */
-    public byte[] post(final MultiProtocolURI url, final int timeout, final String vhost, LinkedHashMap<String, ContentBody> post, final boolean usegzip) throws IOException {
+    public byte[] post(final MultiProtocolURI url, final int timeout, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
 		final HTTPClient client = new HTTPClient();
 		client.setTimout(timeout);
 		client.setUserAgent(this.userAgent);

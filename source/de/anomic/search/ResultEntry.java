@@ -27,9 +27,9 @@
 package de.anomic.search;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
@@ -54,7 +54,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private String alternative_urlstring;
     private String alternative_urlname;
     private final TextSnippet textSnippet;
-    private final ArrayList<MediaSnippet> mediaSnippets;
+    private final List<MediaSnippet> mediaSnippets;
     
     // statistic objects
     public long dbRetrievalTime, snippetComputationTime;
@@ -63,7 +63,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                        final Segment indexSegment,
                        yacySeedDB peers,
                        final TextSnippet textSnippet,
-                       final ArrayList<MediaSnippet> mediaSnippets,
+                       final List<MediaSnippet> mediaSnippets,
                        final long dbRetrievalTime, final long snippetComputationTime) {
         this.urlentry = urlentry;
         this.urlcomps = urlentry.metadata();
@@ -102,9 +102,11 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
             if ((p = alternative_urlname.indexOf('?')) > 0) alternative_urlname = alternative_urlname.substring(0, p);
         }
     }
+    @Override
     public int hashCode() {
         return ByteArray.hashCode(urlentry.hash());
     }
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -145,7 +147,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public TextSnippet textSnippet() {
         return this.textSnippet;
     }
-    public ArrayList<MediaSnippet> mediaSnippets() {
+    public List<MediaSnippet> mediaSnippets() {
         return this.mediaSnippets;
     }
     public Date modified() {

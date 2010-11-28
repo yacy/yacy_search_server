@@ -1,4 +1,4 @@
-// plasmaSearchQuery.java 
+// QueryParams.java 
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -31,6 +31,7 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -331,21 +332,21 @@ public final class QueryParams {
             String s;
             int l;
             // the string is clean now, but we must generate a set out of it
-            final String[] a = querystring.split(" ");
-            for (int i = 0; i < a.length; i++) {
-                if (a[i].startsWith("-")) {
-                    exclude.add(a[i].substring(1));
+            final String[] queries = querystring.split(" ");
+            for (int i = 0; i < queries.length; i++) {
+                if (queries[i].startsWith("-")) {
+                    exclude.add(queries[i].substring(1));
                 } else {
-                    while ((c = a[i].indexOf('-')) >= 0) {
-                        s = a[i].substring(0, c);
+                    while ((c = queries[i].indexOf('-')) >= 0) {
+                        s = queries[i].substring(0, c);
                         l = s.length();
                         if (l >= Condenser.wordminsize) {query.add(s);}
                         if (l > 0) {fullquery.add(s);}
-                        a[i] = a[i].substring(c + 1);
+                        queries[i] = queries[i].substring(c + 1);
                     }
-                    l = a[i].length();
-                    if (l >= Condenser.wordminsize) {query.add(a[i]);}
-                    if (l > 0) {fullquery.add(a[i]);}
+                    l = queries[i].length();
+                    if (l >= Condenser.wordminsize) {query.add(queries[i]);}
+                    if (l > 0) {fullquery.add(queries[i]);}
                 }
             }
         }
@@ -364,18 +365,18 @@ public final class QueryParams {
     
     public String queryStringForUrl() {
     	try {
-			return URLEncoder.encode(this.queryString, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return this.queryString;
-		}
+            return URLEncoder.encode(this.queryString, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return this.queryString;
+        }
     }
     
     public TreeSet<String>[] queryWords() {
         return cleanQuery(this.queryString);
     }
     
-    public void filterOut(final TreeSet<String> blueList) {
+    public void filterOut(final SortedSet<String> blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
     	final HandleSet blues = Word.words2hashesHandles(blueList);

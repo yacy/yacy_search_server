@@ -36,11 +36,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import de.anomic.data.DidYouMeanLibrary;
 
@@ -233,8 +236,8 @@ public final class Condenser {
             final int phrase,
             final int flagpos,
             final Bitfield flagstemplate,
-            boolean useForLanguageIdentification,
-            DidYouMeanLibrary meaningLib) {
+            final boolean useForLanguageIdentification,
+            final DidYouMeanLibrary meaningLib) {
         String word;
         Word wprop;
         sievedWordsEnum wordenum;
@@ -259,14 +262,14 @@ public final class Condenser {
         }
     }
 
-    public Condenser(final InputStream text, DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
+    public Condenser(final InputStream text, final DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         words = new TreeMap<String, Word>();
         createCondensement(text, meaningLib);
     }
     
-    public int excludeWords(final TreeSet<String> stopwords) {
+    public int excludeWords(final SortedSet<String> stopwords) {
         // subtracts the given stopwords from the word list
         // the word list shrinkes. This returns the number of shrinked words
         final int oldsize = words.size();
@@ -283,8 +286,8 @@ public final class Condenser {
         return this.languageIdentificator.getLanguage();
     }
 
-    private void createCondensement(final InputStream is, DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
-        final HashSet<String> currsentwords = new HashSet<String>();
+    private void createCondensement(final InputStream is, final DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
+        final Set<String> currsentwords = new HashSet<String>();
         StringBuilder sentence = new StringBuilder(100);
         String word = "";
         String k;
@@ -299,7 +302,7 @@ public final class Condenser {
         int idx;
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
-        final HashMap<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
+        final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
         
         // read source
         final sievedWordsEnum wordenum = new sievedWordsEnum(is, meaningLib);
@@ -458,17 +461,13 @@ public final class Condenser {
 
     public final static boolean invisible(final char c) {
     	final int type = Character.getType(c);
-    	if (
-			   type == Character.LOWERCASE_LETTER
-			|| type == Character.DECIMAL_DIGIT_NUMBER
-			|| type == Character.UPPERCASE_LETTER
-			|| type == Character.MODIFIER_LETTER
-			|| type == Character.OTHER_LETTER
-			|| type == Character.TITLECASE_LETTER
-			|| ContentScraper.punctuation(c)) {
-    		return false;
-    	}
-    	return true;
+    	return !(type == Character.LOWERCASE_LETTER
+                || type == Character.DECIMAL_DIGIT_NUMBER
+                || type == Character.UPPERCASE_LETTER
+                || type == Character.MODIFIER_LETTER
+                || type == Character.OTHER_LETTER
+                || type == Character.TITLECASE_LETTER
+                || ContentScraper.punctuation(c));
     }
 
     /**
@@ -476,8 +475,8 @@ public final class Condenser {
      * @param sentence the sentence to be tokenized
      * @return a ordered map containing word hashes as key and positions as value. The map is orderd by the hash ordering
      */
-    public static TreeMap<byte[], Integer> hashSentence(final String sentence, DidYouMeanLibrary meaningLib) {
-        final TreeMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
+    public static SortedMap<byte[], Integer> hashSentence(final String sentence, final DidYouMeanLibrary meaningLib) {
+        final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         final Enumeration<String> words = wordTokenizer(sentence, "UTF-8", meaningLib);
         int pos = 0;
         String word;
@@ -489,14 +488,16 @@ public final class Condenser {
             
             // don't overwrite old values, that leads to too far word distances
             oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
-            if (oldpos != null) map.put(hash, oldpos);
+            if (oldpos != null) {
+                map.put(hash, oldpos);
+            }
             
             pos += word.length() + 1;
         }
         return map;
     }
     
-    public static Enumeration<String> wordTokenizer(final String s, final String charset, DidYouMeanLibrary meaningLib) {
+    public static Enumeration<String> wordTokenizer(final String s, final String charset, final DidYouMeanLibrary meaningLib) {
         try {
             return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes(charset)), meaningLib);
         } catch (final Exception e) {
@@ -507,11 +508,11 @@ public final class Condenser {
     public static class sievedWordsEnum implements Enumeration<String> {
         // this enumeration removes all words that contain either wrong characters or are too short
         
-        StringBuilder buffer = null;
-        unsievedWordsEnum e;
-        DidYouMeanLibrary meaningLib;
+        private StringBuilder buffer = null;
+        private unsievedWordsEnum e;
+        private DidYouMeanLibrary meaningLib;
 
-        public sievedWordsEnum(final InputStream is, DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
+        public sievedWordsEnum(final InputStream is, final DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
             this.e = new unsievedWordsEnum(is);
             this.buffer = nextElement0();
             this.meaningLib = meaningLib;
@@ -550,10 +551,10 @@ public final class Condenser {
     
     private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
         // returns an enumeration of StringBuilder Objects
-        StringBuilder buffer = null;
-        sentencesFromInputStreamEnum e;
-        ArrayList<StringBuilder> s;
-        int sIndex;
+        private StringBuilder buffer = null;
+        private sentencesFromInputStreamEnum e;
+        private List<StringBuilder> s;
+        private int sIndex;
 
         public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
             e = new sentencesFromInputStreamEnum(is);
@@ -616,11 +617,19 @@ public final class Condenser {
     
     static StringBuilder trim(StringBuilder sb) {
         int i = 0;
-        while (i < sb.length() && sb.charAt(i) <= ' ') i++;
-        if (i > 0) sb.delete(0, i);
+        while (i < sb.length() && sb.charAt(i) <= ' ') {
+            i++;
+        }
+        if (i > 0) {
+            sb.delete(0, i);
+        }
         i = sb.length() - 1;
-        while (i >= 0 && i < sb.length() && sb.charAt(i) <= ' ') i--;
-        if (i > 0) sb.delete(i + 1, sb.length());
+        while (i >= 0 && i < sb.length() && sb.charAt(i) <= ' ') {
+            i--;
+        }
+        if (i > 0) {
+            sb.delete(i + 1, sb.length());
+        }
         return sb;
     }
     
@@ -636,10 +645,10 @@ public final class Condenser {
         // read sentences from a given input stream
         // this enumerates StringBuilder objects
         
-        StringBuilder buffer = null;
-        BufferedReader raf;
-        int counter = 0;
-        boolean pre = false;
+        private StringBuilder buffer;
+        private BufferedReader raf;
+        private int counter = 0;
+        private boolean pre = false;
 
         public sentencesFromInputStreamEnum(final InputStream is) throws UnsupportedEncodingException {
             raf = new BufferedReader(new InputStreamReader(is, "UTF-8"));
@@ -723,7 +732,7 @@ public final class Condenser {
         return s;
     }
 
-    public static Map<String, Word> getWords(final String text, DidYouMeanLibrary meaningLib) {
+    public static Map<String, Word> getWords(final String text, final DidYouMeanLibrary meaningLib) {
         // returns a word/indexWord relation map
         if (text == null) return null;
         ByteArrayInputStream buffer;

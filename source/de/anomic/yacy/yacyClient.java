@@ -53,6 +53,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
@@ -97,10 +98,10 @@ import de.anomic.tools.crypt;
 public final class yacyClient {
 
 
-	private static byte[] postToFile(final yacySeed target, final String filename, final LinkedHashMap<String,ContentBody> parts, final int timeout) throws IOException {
+    private static byte[] postToFile(final yacySeed target, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
         return HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/" + filename), timeout, target.getHexHash() + ".yacyh", parts);
     }
-    private static byte[] postToFile(final yacySeedDB seedDB, final String targetHash, final String filename, final LinkedHashMap<String,ContentBody> parts, final int timeout) throws IOException {
+    private static byte[] postToFile(final yacySeedDB seedDB, final String targetHash, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
         return HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename), timeout, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", parts);
     }
     
@@ -132,7 +133,7 @@ public final class yacyClient {
         final String salt = crypt.randomSalt();
         try {
             // generate request
-        	final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+        	final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
             parts.put("count", new StringBody("20"));
             parts.put("seed", new StringBody(mySeed.genSeedStr(salt)));
             // send request
@@ -256,7 +257,7 @@ public final class yacyClient {
             
         // send request
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", new StringBody("seed"));
             parts.put("env", new StringBody(seedHash));
             final byte[] content = postToFile(target, "query.html", parts, 10000);
@@ -277,7 +278,7 @@ public final class yacyClient {
             
         // send request
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", new StringBody("rwicount"));
             parts.put("ttl", new StringBody("0"));
             parts.put("env", new StringBody(wordHash));
@@ -300,7 +301,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", new StringBody("lurlcount"));
             parts.put("ttl", new StringBody("0"));
             parts.put("env", new StringBody(""));
@@ -337,7 +338,7 @@ public final class yacyClient {
         // send request
         try {
             /* a long time-out is needed */
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("call", new StringBody("remotecrawl"));
             parts.put("count", new StringBody(Integer.toString(maxCount)));
             parts.put("time", new StringBody(Long.toString(maxTime)));
@@ -585,7 +586,7 @@ public final class yacyClient {
         public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
         
         public SearchResult(
-                LinkedHashMap<String,ContentBody> parts,
+                Map<String,ContentBody> parts,
                 final yacySeed mySeed,
                 final String wordhashes,
                 final String excludehashes,
@@ -695,7 +696,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
             parts.put("process", new StringBody("permission"));
             final byte[] content = postToFile(seedDB, targetHash, "message.html", parts, 5000);
             final Map<String, String> result = FileUtils.table(content);
@@ -715,7 +716,7 @@ public final class yacyClient {
 
         // send request
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
             parts.put("process", new StringBody("post"));
             parts.put("myseed", new StringBody(seedDB.mySeed().genSeedStr(salt)));
             parts.put("subject", new StringBody(subject));
@@ -754,7 +755,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
             parts.put("process", new StringBody("permission"));
             parts.put("purpose", new StringBody("crcon"));
             parts.put("filename", new StringBody(filename));
@@ -777,7 +778,7 @@ public final class yacyClient {
         
         // send request
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
             parts.put("process", new StringBody("store"));
             parts.put("purpose", new StringBody("crcon"));
             parts.put("filesize", new StringBody(Long.toString(file.length)));
@@ -853,7 +854,7 @@ public final class yacyClient {
         // send request
         try {
             // prepare request
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("process", new StringBody(process));
             parts.put("urlhash", new StringBody(((entry == null) ? "" : new String(entry.hash()))));
             parts.put("result", new StringBody(result));
@@ -883,7 +884,7 @@ public final class yacyClient {
     public static String transferIndex(
             final yacySeed targetSeed,
             final ReferenceContainerCache<WordReference> indexes,
-            final TreeMap<byte[], URIMetadataRow> urlCache,
+            final SortedMap<byte[], URIMetadataRow> urlCache,
             final boolean gzipBody,
             final int timeout) {
         
@@ -1006,13 +1007,13 @@ public final class yacyClient {
 
         if (indexcount == 0) {
             // nothing to do but everything ok
-            final HashMap<String, String> result = new HashMap<String, String>(2);
+            final Map<String, String> result = new HashMap<String, String>(2);
             result.put("result", "ok");
             result.put("unknownURL", "");
             return result;
         }
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
             parts.put("wordc", new StringBody(Integer.toString(indexes.size())));
             parts.put("entryc", new StringBody(Integer.toString(indexcount)));
             parts.put("indexes", new StringBody(entrypost.toString()));
@@ -1037,7 +1038,7 @@ public final class yacyClient {
 
         // prepare post values
         final String salt = crypt.randomSalt();
-        final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+        final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
         
         // enabling gzip compression for post request body
         if (gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED)) {
@@ -1081,7 +1082,7 @@ public final class yacyClient {
         String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8080"; }
         try {
-            final LinkedHashMap<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
             final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), 5000, targetSeed.getHexHash() + ".yacyh", parts);
             return FileUtils.table(content);
         } catch (final Exception e) {
@@ -1112,7 +1113,7 @@ public final class yacyClient {
                 } else {
                     searchlines.add(args[2]);
                 }
-                for (String line: searchlines) {
+                for (final String line: searchlines) {
                     final byte[] wordhashe = QueryParams.hashSet2hashString(Word.words2hashesHandles(QueryParams.cleanQuery(line)[0])).getBytes();
                     long time = System.currentTimeMillis();
                     SearchResult result;
@@ -1164,7 +1165,7 @@ public final class yacyClient {
             final String vhost = url.getHost();
             final int timeout = 10000;
             // new data
-            final LinkedHashMap<String,ContentBody> newpost = new LinkedHashMap<String,ContentBody>();
+            final Map<String,ContentBody> newpost = new LinkedHashMap<String,ContentBody>();
             try {
 				newpost.put("process", new StringBody("permission"));
 				newpost.put("purpose", new StringBody("crcon"));

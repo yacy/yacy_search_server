@@ -30,7 +30,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.SortedMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.util.MemoryControl;
@@ -41,7 +42,7 @@ import de.anomic.yacy.yacySeedDB;
 
 public class SearchEventCache {
 
-    private static ConcurrentHashMap<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
+    private static ConcurrentMap<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
     public static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
     public static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
@@ -82,6 +83,7 @@ public class SearchEventCache {
          * in case of failed words 
          */
         new Thread(){
+            @Override
             public void run() {
                 for (SearchEvent k: delete) {
                     k.cleanup();
@@ -100,7 +102,7 @@ public class SearchEventCache {
             final QueryParams query,
             final yacySeedDB peers,
             final ResultURLs crawlResults,
-            final TreeMap<byte[], String> preselectedPeerHashes,
+            final SortedMap<byte[], String> preselectedPeerHashes,
             final boolean generateAbstracts,
             final LoaderDispatcher loader) {
         

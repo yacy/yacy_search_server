@@ -22,6 +22,8 @@ package net.yacy.document;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -37,7 +39,7 @@ public class SnippetExtractor {
     public SnippetExtractor(final Collection<StringBuilder> sentences, final HandleSet queryhashes, int maxLength) throws UnsupportedOperationException {
         if (sentences == null) throw new UnsupportedOperationException("sentence == null");
         if (queryhashes == null || queryhashes.isEmpty()) throw new UnsupportedOperationException("queryhashes == null");
-        TreeMap<byte[], Integer> hs;
+        SortedMap<byte[], Integer> hs;
         final TreeMap<Long, StringBuilder> order = new TreeMap<Long, StringBuilder>();
         long uniqCounter = 999L;
         Integer pos;
@@ -124,7 +126,7 @@ public class SnippetExtractor {
             byte[] hash;
             
             // find all hashes that appear in the sentence
-            final TreeMap<byte[], Integer> hs = Condenser.hashSentence(sentence, null);
+            final Map<byte[], Integer> hs = Condenser.hashSentence(sentence, null);
             final Iterator<byte[]> j = queryhashes.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;

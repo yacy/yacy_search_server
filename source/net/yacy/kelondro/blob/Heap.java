@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -43,7 +44,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 
 public final class Heap extends HeapModifier implements BLOB {
     
-    private TreeMap<byte[], byte[]> buffer;     // a write buffer to limit IO to the file
+    private SortedMap<byte[], byte[]> buffer;     // a write buffer to limit IO to the file
     private int                     buffersize; // bytes that are buffered in buffer
     private final int               buffermax;  // maximum size of the buffer
     
@@ -65,7 +66,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * 
      * If a record is removed, it becomes a free record.
      * New records are either appended to the end of the file or filled into a free record.
-     * A free record must either fit exactly to the size of the new record, or an old record is splitted
+     * A free record must either fit exactly to the size of the new record, or an old record is split
      * into a filled and a new, smaller empty record.
      */
 
@@ -191,7 +192,7 @@ public final class Heap extends HeapModifier implements BLOB {
         posBuffer = 0;
         byte[] ba = new byte[l + (4 + this.keylength) * this.buffer.size()];
         byte[] b;
-        TreeMap<byte[], byte[]> nextBuffer = new TreeMap<byte[], byte[]>(ordering);
+        SortedMap<byte[], byte[]> nextBuffer = new TreeMap<byte[], byte[]>(ordering);
         flush: while (i.hasNext()) {
             entry = i.next();
             key = normalizeKey(entry.getKey());

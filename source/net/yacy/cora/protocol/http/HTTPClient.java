@@ -34,6 +34,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -337,11 +338,11 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException 
      */
-	public byte[] POSTbytes(final String uri, final LinkedHashMap<String, ContentBody> parts, final boolean usegzip) throws IOException {
+    public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip) throws IOException {
     	final HttpPost httpPost = new HttpPost(uri);
 
     	final MultipartEntity multipartEntity = new MultipartEntity();
-    	for (Entry<String,ContentBody> part : parts.entrySet())
+    	for (final Entry<String,ContentBody> part : parts.entrySet())
     		multipartEntity.addPart(part.getKey(), part.getValue());
     	// statistics
     	upbytes = multipartEntity.getContentLength();
@@ -371,100 +372,100 @@ public class HTTPClient {
 	    return httpResponse.getStatusLine().getStatusCode();
 	}
 	
-	/**
-	 * This method gets direct access to the content-stream
-	 * Since this way is uncontrolled by the Client think of using 'writeTo' instead!
+    /**
+     * This method gets direct access to the content-stream
+     * Since this way is uncontrolled by the Client think of using 'writeTo' instead!
      * Please take care to call finish()!
-	 * 
-	 * @return the content as InputStream
-	 * @throws IOException
-	 */
-	public InputStream getContentstream() throws IOException {
-		if (httpResponse != null && currentRequest != null) {
-			final HttpEntity httpEntity = httpResponse.getEntity();
-			if (httpEntity != null) try {
-				return httpEntity.getContent();
-			} catch (final IOException e) {
-	    		ConnectionInfo.removeConnection(currentRequest.hashCode());
-	    		currentRequest.abort();
-				currentRequest = null;
-	    		throw e;
-	    	}
-		}
-		return null;
-	}
+     *
+     * @return the content as InputStream
+     * @throws IOException
+     */
+    public InputStream getContentstream() throws IOException {
+        if (httpResponse != null && currentRequest != null) {
+            final HttpEntity httpEntity = httpResponse.getEntity();
+            if (httpEntity != null) try {
+                    return httpEntity.getContent();
+            } catch (final IOException e) {
+                ConnectionInfo.removeConnection(currentRequest.hashCode());
+                currentRequest.abort();
+                currentRequest = null;
+                throw e;
+            }
+        }
+        return null;
+    }
 	
-	/**
-	 * This method streams the content to the outputStream
+    /**
+     * This method streams the content to the outputStream
      * Please take care to call finish()!
-	 * 
-	 * @param outputStream
-	 * @throws IOException
-	 */
-	public void writeTo(final OutputStream outputStream) throws IOException {
-		if (httpResponse != null && currentRequest != null) {
-			final HttpEntity httpEntity = httpResponse.getEntity();
-	    	if (httpEntity != null) try {
-	    		httpEntity.writeTo(outputStream);
-	    		outputStream.flush();
-	    		// TODO: The name of this method is misnomer.
-	    		// It will be renamed to #finish() in the next major release of httpcore
-	    		httpEntity.consumeContent();
-				ConnectionInfo.removeConnection(currentRequest.hashCode());
-				currentRequest = null;
-	    	} catch (final IOException e) {
-	    		ConnectionInfo.removeConnection(currentRequest.hashCode());
-	    		currentRequest.abort();
-				currentRequest = null;
-	    		throw e;
-	    	}
-		}
-	}
+     *
+     * @param outputStream
+     * @throws IOException
+     */
+    public void writeTo(final OutputStream outputStream) throws IOException {
+        if (httpResponse != null && currentRequest != null) {
+            final HttpEntity httpEntity = httpResponse.getEntity();
+            if (httpEntity != null) try {
+                httpEntity.writeTo(outputStream);
+                outputStream.flush();
+                // TODO: The name of this method is misnomer.
+                // It will be renamed to #finish() in the next major release of httpcore
+                httpEntity.consumeContent();
+                ConnectionInfo.removeConnection(currentRequest.hashCode());
+                currentRequest = null;
+            } catch (final IOException e) {
+                ConnectionInfo.removeConnection(currentRequest.hashCode());
+                currentRequest.abort();
+                currentRequest = null;
+                throw e;
+            }
+        }
+    }
 	
-	/**
-	 * This method ensures correct finish of client-connections
-	 * This method should be used after every use of GET or POST and writeTo or getContentstream!
-	 * 
-	 * @throws IOException
-	 */
-	public void finish() throws IOException {
-		if (httpResponse != null) {
-			final HttpEntity httpEntity = httpResponse.getEntity();
-	    	if (httpEntity != null && httpEntity.isStreaming()) {
-	    		// TODO: The name of this method is misnomer.
-	    		// It will be renamed to #finish() in the next major release of httpcore
-	    		httpEntity.consumeContent();
-	    	}
-		}
-		if (currentRequest != null) {
-			ConnectionInfo.removeConnection(currentRequest.hashCode());
-			currentRequest.abort();
-			currentRequest = null;
-		}
-	}
+    /**
+     * This method ensures correct finish of client-connections
+     * This method should be used after every use of GET or POST and writeTo or getContentstream!
+     *
+     * @throws IOException
+     */
+    public void finish() throws IOException {
+        if (httpResponse != null) {
+                final HttpEntity httpEntity = httpResponse.getEntity();
+        if (httpEntity != null && httpEntity.isStreaming()) {
+                // TODO: The name of this method is misnomer.
+                // It will be renamed to #finish() in the next major release of httpcore
+                httpEntity.consumeContent();
+        }
+        }
+        if (currentRequest != null) {
+                ConnectionInfo.removeConnection(currentRequest.hashCode());
+                currentRequest.abort();
+                currentRequest = null;
+        }
+    }
     
     private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final long maxBytes) throws IOException {
     	byte[] content = null;
     	try {
-    		execute(httpUriRequest);
-    		if (httpResponse == null) return null;
-        	// get the response body
-        	final HttpEntity httpEntity = httpResponse.getEntity();
-        	if (httpEntity != null) {
-        		if (getStatusCode() == 200 && httpEntity.getContentLength()  < maxBytes) {
-        			content = EntityUtils.toByteArray(httpEntity);
-        		}
-        		// TODO: The name of this method is misnomer.
-        		// It will be renamed to #finish() in the next major release of httpcore
-        		httpEntity.consumeContent();
-        	}
-		} catch (final IOException e) {
-			ConnectionInfo.removeConnection(httpUriRequest.hashCode());
-			httpUriRequest.abort();
-			throw e;
-		}
-		ConnectionInfo.removeConnection(httpUriRequest.hashCode());
-		return content;
+            execute(httpUriRequest);
+            if (httpResponse == null) return null;
+            // get the response body
+            final HttpEntity httpEntity = httpResponse.getEntity();
+            if (httpEntity != null) {
+                if (getStatusCode() == 200 && httpEntity.getContentLength()  < maxBytes) {
+                        content = EntityUtils.toByteArray(httpEntity);
+                }
+                // TODO: The name of this method is misnomer.
+                // It will be renamed to #finish() in the next major release of httpcore
+                httpEntity.consumeContent();
+            }
+        } catch (final IOException e) {
+                ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+                httpUriRequest.abort();
+                throw e;
+        }
+        ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+        return content;
     }
     
     private void execute(final HttpUriRequest httpUriRequest) throws IOException {
@@ -485,19 +486,19 @@ public class HTTPClient {
     	        assert !hrequest.expectContinue();
     	    }
 			httpResponse = httpClient.execute(httpUriRequest, httpContext);
-		} catch (Exception e) {
-		    //e.printStackTrace();
-			ConnectionInfo.removeConnection(httpUriRequest.hashCode());
-			httpUriRequest.abort();
-			throw new IOException("Client can't execute: " + e.getMessage());
-		}
+        } catch (Exception e) {
+            //e.printStackTrace();
+                ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+                httpUriRequest.abort();
+                throw new IOException("Client can't execute: " + e.getMessage());
+        }
     }
     
     private void setHeaders(final HttpUriRequest httpUriRequest) {
     	if (headers != null) {
-    		for (Header header : headers) {
-    			httpUriRequest.addHeader(header);
-    		}
+            for (final Header header : headers) {
+                    httpUriRequest.addHeader(header);
+            }
     	}
         if (realm != null)
             httpUriRequest.setHeader("Authorization", "realm=" + realm);
@@ -535,92 +536,92 @@ public class HTTPClient {
     
     private static SSLSocketFactory getSSLSocketFactory() {
     	final TrustManager trustManager = new X509TrustManager() {
-			public void checkClientTrusted(X509Certificate[] chain, String authType)
-					throws CertificateException {
-			}
+            public void checkClientTrusted(X509Certificate[] chain, String authType)
+                            throws CertificateException {
+            }
 
-			public void checkServerTrusted(X509Certificate[] chain, String authType)
-					throws CertificateException {
-			}
+            public void checkServerTrusted(X509Certificate[] chain, String authType)
+                            throws CertificateException {
+            }
 
-			public X509Certificate[] getAcceptedIssuers() {
-				return null;
-			}
+            public X509Certificate[] getAcceptedIssuers() {
+                    return null;
+            }
     	};
     	SSLContext sslContext = null;
     	try {
-    		sslContext = SSLContext.getInstance("TLS");
-    		sslContext.init(null, new TrustManager[] { trustManager }, null);
-		} catch (NoSuchAlgorithmException e) {
-			// should not happen
-			// e.printStackTrace();
-		} catch (KeyManagementException e) {
-			// should not happen
-			// e.printStackTrace();
-		}
+            sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(null, new TrustManager[] { trustManager }, null);
+        } catch (NoSuchAlgorithmException e) {
+            // should not happen
+            // e.printStackTrace();
+        } catch (KeyManagementException e) {
+            // should not happen
+            // e.printStackTrace();
+        }
 
-		final SSLSocketFactory sslSF = new SSLSocketFactory(sslContext);
-		sslSF.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        final SSLSocketFactory sslSF = new SSLSocketFactory(sslContext);
+        sslSF.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
     	return sslSF;
     }
 
-	/**
-	 * testing
-	 * 
-	 * @param args urls to test
-	 */
-	public static void main(final String[] args) {
-		String url = null;
-		// prepare Parts
-		final LinkedHashMap<String,ContentBody> newparts = new LinkedHashMap<String,ContentBody>();
-		try {
-			newparts.put("foo", new StringBody("FooBar"));
-			newparts.put("bar", new StringBody("BarFoo"));
-		} catch (UnsupportedEncodingException e) {
-			System.out.println(e.getStackTrace());
-		}
-		HTTPClient client = new HTTPClient();
-		client.setUserAgent("foobar");
-		client.setRedirecting(false);
-		// Get some
-		for (int i = 0; i < args.length; i++) {
-			url = args[i];
-			if (!url.toUpperCase().startsWith("HTTP://")) {
-				url = "http://" + url;
-			}
-			try {
-				System.out.println(new String(client.GETbytes(url)));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		// Head some
+    /**
+     * testing
+     *
+     * @param args urls to test
+     */
+    public static void main(final String[] args) {
+        String url = null;
+        // prepare Parts
+        final Map<String,ContentBody> newparts = new LinkedHashMap<String,ContentBody>();
+        try {
+            newparts.put("foo", new StringBody("FooBar"));
+            newparts.put("bar", new StringBody("BarFoo"));
+        } catch (UnsupportedEncodingException e) {
+            System.out.println(e.getStackTrace());
+        }
+        HTTPClient client = new HTTPClient();
+        client.setUserAgent("foobar");
+        client.setRedirecting(false);
+        // Get some
+        for (final String arg : args) {
+            url = arg;
+            if (!url.toUpperCase().startsWith("HTTP://")) {
+                    url = "http://" + url;
+            }
+            try {
+                System.out.println(new String(client.GETbytes(url)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        // Head some
 //		try {
 //			client.HEADResponse(url);
 //		} catch (IOException e) {
 //			e.printStackTrace();
 //		}
-		for (Header header: client.getHttpResponse().getAllHeaders()) {
-			System.out.println("Header " + header.getName() + " : " + header.getValue());
+        for (final Header header: client.getHttpResponse().getAllHeaders()) {
+            System.out.println("Header " + header.getName() + " : " + header.getValue());
 //			for (HeaderElement element: header.getElements())
 //				System.out.println("Element " + element.getName() + " : " + element.getValue());
-		}
-		System.out.println(client.getHttpResponse().getLocale());
-		System.out.println(client.getHttpResponse().getProtocolVersion());
-		System.out.println(client.getHttpResponse().getStatusLine());
-		// Post some
+        }
+        System.out.println(client.getHttpResponse().getLocale());
+        System.out.println(client.getHttpResponse().getProtocolVersion());
+        System.out.println(client.getHttpResponse().getStatusLine());
+        // Post some
 //		try {
 //			System.out.println(new String(client.POSTbytes(url, newparts)));
 //		} catch (IOException e1) {
 //			e1.printStackTrace();
 //		}
-		// Close out connection manager
-		try {
-			HTTPClient.closeConnectionManager();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+        // Close out connection manager
+        try {
+                HTTPClient.closeConnectionManager();
+        } catch (InterruptedException e) {
+                e.printStackTrace();
+        }
+    }
 	
 	
 	/**

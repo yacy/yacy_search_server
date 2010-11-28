@@ -28,6 +28,8 @@ package de.anomic.search;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.storage.StaticScore;
@@ -43,7 +45,6 @@ import net.yacy.kelondro.util.EventTracker;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.search.MediaSnippet;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.graphics.ProfilingGraph;
 
@@ -153,6 +154,7 @@ public class ResultFetcher {
             this.neededResults = neededResults;
         }
 
+        @Override
         public void run() {
 
             // start fetching urls and snippets
@@ -163,18 +165,18 @@ public class ResultFetcher {
                 //System.out.println("DEPLOYED WORKER " + id + " FOR " + this.neededResults + " RESULTS, timeoutd = " + (this.timeout - System.currentTimeMillis()));
                 int loops = 0;
                 while (System.currentTimeMillis() < this.timeout) {
-                	this.lastLifeSign = System.currentTimeMillis();
-                    
+                    this.lastLifeSign = System.currentTimeMillis();
+
                     // check if we have enough
-                	if (result.sizeAvailable() >= this.neededResults) {
+                        if (result.sizeAvailable() >= this.neededResults) {
                         //System.out.println("result.sizeAvailable() >= this.neededResults");
                         break;
                     }
-                	
-                	// check if we can succeed if we try to take another url
-                	if (rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0) {
-                	    break;
-                	}
+
+                    // check if we can succeed if we try to take another url
+                    if (rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0) {
+                        break;
+                    }
     
                     // get next entry
                     page = rankingProcess.takeURL(true, this.timeout - System.currentTimeMillis());
@@ -266,7 +268,7 @@ public class ResultFetcher {
         } else {
             // attach media information
             startTime = System.currentTimeMillis();
-            final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, cacheStrategy, 6000, !query.isLocal());
+            final List<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, cacheStrategy, 6000, !query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
             
@@ -369,9 +371,9 @@ public class ResultFetcher {
         int c = 0;
         if (result == null) return c;
         // iterate over all images in the result
-        final ArrayList<MediaSnippet> imagemedia = result.mediaSnippets();
+        final List<MediaSnippet> imagemedia = result.mediaSnippets();
         if (imagemedia != null) {
-            for (MediaSnippet ms: imagemedia) {
+            for (final MediaSnippet ms: imagemedia) {
                 images.put(new ReverseElement<MediaSnippet>(ms, ms.ranking)); // remove smallest in case of overflow
                 c++;
                 //System.out.println("*** image " + new String(ms.href.hash()) + " images.size = " + images.size() + "/" + images.size());

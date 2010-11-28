@@ -63,7 +63,7 @@ public class Word {
     public  int      posInText;   // unique handle, is initialized with word position (excluding double occurring words)
     public  int      posInPhrase; // position of word in phrase
     public  int      numOfPhrase; // number of phrase. 'normal' phrases begin with number 100
-    HashSet<Integer> phrases;     // a set of handles to all phrases where this word appears
+    Set<Integer> phrases;         // a set of handles to all phrases where this word appears
     public  Bitfield flags;       // the flag bits for each word
 
     public Word(final int handle, final int pip, final int nop) {
@@ -92,6 +92,7 @@ public class Word {
         return phrases.iterator();
     }
     
+    @Override
     public String toString() {
         // this is here for debugging
         return "{count=" + count + ", posInText=" + posInText + ", posInPhrase=" + posInPhrase + ", numOfPhrase=" + numOfPhrase + "}";
@@ -99,6 +100,9 @@ public class Word {
     
     
     // static methods
+    public static byte[] word2hash(final StringBuilder word) {
+        return word2hash(word.toString());
+    }
 
     // create a word hash
     public static final byte[] word2hash(final String word) {
@@ -114,7 +118,7 @@ public class Word {
     
     public static final HandleSet words2hashesHandles(final Set<String> words) {
         final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.size());
-        for (String word: words)
+        for (final String word: words)
             try {
                 hashes.put(word2hash(word));
             } catch (RowSpaceExceededException e) {
@@ -126,7 +130,7 @@ public class Word {
     
     public static final HandleSet words2hashesHandles(final String[] words) {
         final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.length);
-        for (String word: words)
+        for (final String word: words)
             try {
                 hashes.put(word2hash(word));
             } catch (RowSpaceExceededException e) {

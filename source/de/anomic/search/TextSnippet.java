@@ -24,11 +24,11 @@
 
 package de.anomic.search;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.TreeMap;
+import java.util.List;
+import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -95,7 +95,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
         public void put(final String wordhashes, final String urlhash, final String snippet) {
             // generate key
-            String key = urlhash + wordhashes;
+            final String key = urlhash + wordhashes;
 
             // do nothing if snippet is known
             if (cache.containsKey(key)) return;
@@ -139,10 +139,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         int source = SOURCE_CACHE;
         final String wordhashes = yacySearch.set2string(queryhashes);
         final String urls = new String(url.hash());
-        String line = snippetsCache.get(wordhashes, urls);
-        if (line != null) {
+        String snippetLine = snippetsCache.get(wordhashes, urls);
+        if (snippetLine != null) {
             // found the snippet
-            init(url.hash(), line, source, null);
+            init(url.hash(), snippetLine, source, null);
             return;
         }
         
@@ -151,7 +151,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
          * LOAD RESOURCE DATA
          * =========================================================================== */
         // if the snippet is not in the cache, we can try to get it from the htcache
-        Response response;
+        final Response response;
         try {
             // first try to get the snippet from metadata
             String loc;
@@ -245,24 +245,24 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         //String hrefline = computeMediaSnippet(document.getAnchors(), queryhashes);
         //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
         
-        line = "";
+        snippetLine = "";
         //if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
         //if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
         //if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
         //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
-        if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
+        if (textline  != null) snippetLine += (snippetLine.length() == 0) ? textline  : "<br />" + textline;
         
-        if (line == null || !remainingHashes.isEmpty()) {
+        if (snippetLine == null || !remainingHashes.isEmpty()) {
             init(url.hash(), null, ERROR_NO_MATCH, "no matching snippet found");
             return;
         }
-        if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
+        if (snippetLine.length() > snippetMaxLength) snippetLine = snippetLine.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
-        snippetsCache.put(wordhashes, urls, line);
+        snippetsCache.put(wordhashes, urls, snippetLine);
         
         document.close();
-        init(url.hash(), line, source, null);
+        init(url.hash(), snippetLine, source, null);
     }
     
     private void init(final byte[] urlhash, final String line, final int errorCode, final String errortext) {
@@ -294,24 +294,24 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         if (line.endsWith(".")) line = line.substring(0, line.length() - 1);
         final Iterator<byte[]> i = queryHashes.iterator();
         byte[] h;
-        final String[] w = line.split(" ");
+        final String[] words = line.split(" ");
         while (i.hasNext()) {
             h = i.next();
-            for (int j = 0; j < w.length; j++) {
-                final ArrayList<String> al = markedWordArrayList(w[j]); // mark special character separated words correctly if more than 1 word has to be marked
-                w[j] = "";
+            for (int j = 0; j < words.length; j++) {
+                final List<String> al = markedWordArrayList(words[j]); // mark special character separated words correctly if more than 1 word has to be marked
+                words[j] = "";
                 for (int k = 0; k < al.size(); k++) {
                     if(k % 2 == 0){ // word has not been marked
-                        w[j] += getWordMarked(al.get(k), h);
+                        words[j] += getWordMarked(al.get(k), h);
                     } else { // word has been marked, do not encode again
-                        w[j] += al.get(k);
+                        words[j] += al.get(k);
                     }
                 }
             }
         }
         final StringBuilder l = new StringBuilder(line.length() + queryHashes.size() * 8);
-        for (int j = 0; j < w.length; j++) {
-            l.append(w[j]);
+        for (int j = 0; j < words.length; j++) {
+            l.append(words[j]);
             l.append(' ');
         }
         return l.toString().trim();
@@ -325,6 +325,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return o1.compareTo(o2);
     }
     
+    @Override
     public int hashCode() {
         return ByteArray.hashCode(this.urlhash);
     }
@@ -341,59 +342,67 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * @return the marked word if hash matches, else the unmarked word
      * @see #getLineMarked(Set)
      */
-    private static String getWordMarked(String word, byte[] h){
+    private static String getWordMarked(final String word, final byte[] h){
         //ignore punctuation marks (contrib [MN])
         //note to myself:
         //For details on regex see "Mastering regular expressions" by J.E.F. Friedl
         //especially p. 123 and p. 390/391 (in the German version of the 2nd edition)
 
-        String prefix = "";
-        String postfix = "";
+        StringBuilder theWord = new StringBuilder(word);
+        StringBuilder prefix = new StringBuilder();
+        StringBuilder postfix = new StringBuilder();
         int len = 0;
 
         // cut off prefix if it contains of non-characters or non-numbers
-        while(p1.matcher(word).find()) {
-            prefix = prefix + word.substring(0,1);
-            word = word.substring(1);
+        while(p1.matcher(theWord).find()) {
+            prefix.append(theWord.substring(0,1));
+            theWord = theWord.delete(0, 1);
         }
 
         // cut off postfix if it contains of non-characters or non-numbers
-        while(p2.matcher(word).find()) {
-            len = word.length();
-            postfix = word.substring(len-1,len) + postfix;
-            word = word.substring(0,len-1);
+        while(p2.matcher(theWord).find()) {
+            len = theWord.length();
+            postfix.insert(0, theWord.substring(len-1,len));
+            theWord = theWord.delete(len - 1, len);
         }
 
         //special treatment if there is a special character in the word
-        if(p3.matcher(word).find()) {
-            String out = "";
+        if(p3.matcher(theWord).find()) {
+            StringBuilder out = null;
             String temp = "";
-            for(int k=0; k < word.length(); k++) {
+            for(int k=0; k < theWord.length(); k++) {
+                out = new StringBuilder();
                 //is character a special character?
-                if(p4.matcher(word.substring(k,k+1)).find()) {
+                if(p4.matcher(theWord.substring(k,k+1)).find()) {
                     if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";
-                    out = out + temp + CharacterCoding.unicode2html(word.substring(k,k+1), false);
+                    out.append(temp);
+                    out.append(CharacterCoding.unicode2html(theWord.substring(k,k+1), false));
                     temp = "";
                 }
                 //last character
-                else if(k == (word.length()-1)) {
-                    temp = temp + word.substring(k,k+1);
+                else if(k == (theWord.length()-1)) {
+                    temp = temp + theWord.substring(k,k+1);
                     if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";
-                    out = out + temp;
+                    out.append(temp);
                     temp = "";
                 }
-                else temp = temp + word.substring(k,k+1);
+                else {
+                    temp = temp + theWord.substring(k,k+1);
+                }
             }
-            word = out;
+            theWord = out;
         }
 
         //end contrib [MN]
-        else if (new String(Word.word2hash(word)).equals(new String(h))) word = "<b>" + CharacterCoding.unicode2html(word, false) + "</b>";
+        else if (new String(Word.word2hash(theWord)).equals(new String(h))) {
+            theWord.replace(0, theWord.length(), CharacterCoding.unicode2html(theWord.toString(), false));
+            theWord.insert(0, "<b>");
+            theWord.append("</b>");
+        }
 
-        word = CharacterCoding.unicode2html(prefix, false)
-            + word
-            + CharacterCoding.unicode2html(postfix, false);
-        return word;
+        theWord.insert(0, CharacterCoding.unicode2html(prefix.toString(), false));
+        theWord.append(CharacterCoding.unicode2html(postfix.toString(), false));
+        return theWord.toString();
     }
     
     /**
@@ -403,8 +412,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * @return words that already has and has not yet been marked
      * @author [DW], 08.11.2008
      */
-    private static ArrayList<String> markedWordArrayList(String string){
-        ArrayList<String> al = new java.util.ArrayList<String>(1);
+    private static List<String> markedWordArrayList(String string){
+        List<String> al = new java.util.ArrayList<String>(1);
         Matcher m = p01.matcher(string);
         while (m.find()) {
             al.add(m.group(1));
@@ -417,8 +426,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
     
     private static boolean containsAllHashes(final String sentence, final HandleSet queryhashes) {
-        final TreeMap<byte[], Integer> m = Condenser.hashSentence(sentence, null);
-        for (byte[] b: queryhashes) {
+        final SortedMap<byte[], Integer> m = Condenser.hashSentence(sentence, null);
+        for (final byte[] b: queryhashes) {
             if (!(m.containsKey(b))) return false;
         }
         return true;
