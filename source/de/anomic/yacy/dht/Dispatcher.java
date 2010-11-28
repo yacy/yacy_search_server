@@ -359,7 +359,7 @@ public class Dispatcher {
         }
         enqueueContainersToCloud(splitContainerCache);
         splitContainerCache = null;
-    	this.log.logInfo("selectContainersEnqueueToCloud: splittedContainerCache enqueued to cloud array which has now " + this.transmissionCloud.size() + " entries.");
+    	this.log.logInfo("selectContainersEnqueueToCloud: splitContainerCache enqueued to cloud array which has now " + this.transmissionCloud.size() + " entries.");
         return true;
     }
     
