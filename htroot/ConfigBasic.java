@@ -83,7 +83,7 @@ public class ConfigBasic {
         }
         
         // language settings
-        if (post != null && !lang.equals(post.get("language", "default")) &&
+        if (post != null && post.containsKey("language")  && !lang.equals(post.get("language", "default")) &&
                 (Translator.changeLang(env, langPath, post.get("language", "default") + ".lng"))) {
             prop.put("changedLanguage", "1");
         }
