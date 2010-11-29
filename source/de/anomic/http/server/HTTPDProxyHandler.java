@@ -69,7 +69,6 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
@@ -445,10 +444,6 @@ public final class HTTPDProxyHandler {
     }
     
     private static void fulfillRequestFromWeb(final Properties conProp, final DigestURI url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond) {
-        
-        final GZIPOutputStream gzippedOut = null; 
-       
-//        ResponseContainer res = null;                
         try {
             final int reqID = requestHeader.hashCode();
 
@@ -547,7 +542,7 @@ public final class HTTPDProxyHandler {
 
                 if (hasBody(client.getHttpResponse().getStatusLine().getStatusCode())) {
 
-                    final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
+                    final OutputStream outStream = chunkedOut != null ? chunkedOut : respond;
                     final Response response = new Response(
                             request,
                             requestHeader,
@@ -626,9 +621,6 @@ public final class HTTPDProxyHandler {
                         conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                     }
 
-                    if (gzippedOut != null) {
-                        gzippedOut.finish();
-                    }
                     if (chunkedOut != null) {
                         chunkedOut.finish();
                         chunkedOut.flush();
@@ -683,9 +675,6 @@ public final class HTTPDProxyHandler {
         
         final String httpVer = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER);
         
-        final ChunkedOutputStream chunkedOut = null;
-        final GZIPOutputStream gzippedOut = null;
-        
         // we respond on the request by using the cache, the cache is fresh        
         try {
             prepareResponseHeader(cachedResponseHeader, httpVer);               
@@ -718,14 +707,9 @@ public final class HTTPDProxyHandler {
                 HTTPDemon.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
                 
-                final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
-
                 // send also the complete body now from the cache
                 // simply read the file and transfer to out socket
-                FileUtils.copy(cacheEntry, outStream);
-                
-                if (gzippedOut != null) gzippedOut.finish();
-                if (chunkedOut != null) chunkedOut.finish();
+                FileUtils.copy(cacheEntry, respond);
             }
             // that's it!
         } catch (final Exception e) {

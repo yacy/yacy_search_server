@@ -278,7 +278,7 @@ public class ConnectFour {
         ContextFactory<Coin, Move, Board> blueFactroy = new ContextFactory<Coin, Move, Board>(new Strategy(), 50, false, false);
         strategies.put(Coin.red, redFactroy);
         strategies.put(Coin.blue, blueFactroy);
-        Battle<Coin, Move, Board> battle = new Battle<Coin, Move, Board>(new Board(Coin.red), strategies, 2000);
+        /*Battle<Coin, Move, Board> battle =*/ new Battle<Coin, Move, Board>(new Board(Coin.red), strategies, 2000);
     }
     
     public static void main(String[] args) {

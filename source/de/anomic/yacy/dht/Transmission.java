@@ -45,7 +45,6 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 
 public class Transmission {

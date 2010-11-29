@@ -53,12 +53,7 @@ public final class Connections_p {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-         
-        
-        // get the virtualHost string
-        final String virtualHost = sb.getConfig("fileHost", "localhost");
-        
-        
+
         // server sessions
         // get the serverCore thread
         final WorkflowThread httpd = sb.getThread("10_httpd");
@@ -98,13 +93,7 @@ public final class Connections_p {
                 continue;
             }
             
-            String dest = null;
             String prot = "http"; // only httpd sessions listed
-
-            // What is the purpose of the following lines? Condition can never be true anyway. [MN wonders...]
-            if ((dest != null) && (dest.equals(virtualHost))) {
-                dest = sb.peers.mySeed().getName() + ".yacy";
-            }
             
             // determining if the source is a yacy host
             yacySeed seed = null;
@@ -134,7 +123,7 @@ public final class Connections_p {
                 prop.putNum("list_" + idx + "_ms_duration", sessionTime);
             }
             prop.putHTML("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
-            prop.putHTML("list_" + idx + "_dest",(dest==null)?"-":dest);
+            prop.putHTML("list_" + idx + "_dest", "-");
             if (blockingRequest) {
                 prop.put("list_" + idx + "_running", "0");
                 prop.putNum("list_" + idx + "_running_reqNr", commandCount+1);

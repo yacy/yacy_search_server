@@ -413,7 +413,7 @@ public class YMarkTables {
 		}
 	}
 	
-	public static EnumMap<METADATA, String> getMetadata(final byte[] urlHash, final Segment indexSegment) throws MalformedURLException {
+	public static EnumMap<METADATA, String> getMetadata(final byte[] urlHash, final Segment indexSegment) {
         final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
         final URIMetadataRow urlEntry = indexSegment.urlMetadata().load(urlHash, null, 0);
         if (urlEntry != null) {
