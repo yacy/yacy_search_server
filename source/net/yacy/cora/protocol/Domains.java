@@ -642,13 +642,22 @@ public class Domains {
                 (a.getHostAddress().indexOf(":") < 0))
                 return a;
         }
-        // there is only a local address, we filter out the possibly
-        // returned loopback address 127.0.0.1 and all addresses without a name
+        // there is only a local address
+        // return that one that is returned with InetAddress.getLocalHost()
+        // if appropriate
+        try {
+            InetAddress localHostAddress = InetAddress.getLocalHost();
+            if (localHostAddress != null &&
+                (0Xff & localHostAddress.getAddress()[0]) != 127 &&
+                localHostAddress.getHostAddress().indexOf(":") < 0) return localHostAddress;
+        } catch (UnknownHostException e) {
+        }
+        // we filter out the loopback address 127.0.0.1 and all addresses without a name
         for (InetAddress a: localHostAddresses) {
             if ((0Xff & a.getAddress()[0]) != 127 &&
                 a.getHostAddress().indexOf(":") < 0 &&
                 a.getHostName() != null &&
-                a.getCanonicalHostName().length() > 0) return a;
+                a.getHostName().length() > 0) return a;
         }
         // if no address has a name, then take any other than the loopback
         for (InetAddress a: localHostAddresses) {
@@ -669,12 +678,9 @@ public class Domains {
      */
     public static List<InetAddress> myIntranetIPs() {
         // list all local addresses
-        if (localHostAddresses.size() < 2) try {Thread.sleep(1000);} catch (InterruptedException e) {}
+        if (localHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (InterruptedException e) {}
         ArrayList<InetAddress> list = new ArrayList<InetAddress>(localHostAddresses.size());
-        if (localHostAddresses.size() == 0) {
-            // give up
-            return list;
-        }
+        if (localHostAddresses.size() == 0) return list; // give up
         for (InetAddress a: localHostAddresses) {
             if ((0Xff & a.getAddress()[0]) == 127) continue;
             if (!matchesList(a.getHostAddress(), localhostPatterns)) continue;
@@ -690,9 +696,7 @@ public class Domains {
         try {
             final InetAddress clientAddress = Domains.dnsResolve(hostName);
             if (clientAddress == null) return false;
-            
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-            
             for (InetAddress a: localHostAddresses) {
                 if (a.equals(clientAddress)) {
                     isThisHostIP = true;
@@ -779,7 +783,7 @@ public class Domains {
             System.err.println(e);
         }
         */
-        
+        try { Thread.sleep(1000);} catch (InterruptedException e) {} // get time for class init
         System.out.println("myPublicLocalIP: " + myPublicLocalIP());
         for (InetAddress a : myIntranetIPs()) {
             System.out.println("Intranet IP: " + a);
