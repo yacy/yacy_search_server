@@ -147,10 +147,6 @@ public class yacySeed implements Cloneable {
     public static final String SCOUNT    = "SCount";
     /** the number of clients that the peer connects (connects/hour as double) */
     public static final String CCOUNT    = "CCount";
-    /** Citation Rank (Own) - Count */
-    public static final String CRWCNT    = "CRWCnt";
-    /** Citation Rank (Other) - Count */
-    public static final String CRTCNT    = "CRTCnt";
     public static final String IP        = "IP";
     public static final String PORT      = "Port";
     public static final String SEEDLISTURL = "seedURL";
@@ -215,9 +211,6 @@ public class yacySeed implements Cloneable {
         // settings that can only be computed by visiting peer
         this.dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
-
-        this.dna.put(yacySeed.CRWCNT, yacySeed.ZERO);
-        this.dna.put(yacySeed.CRTCNT, yacySeed.ZERO);
 
         // settings that are needed to organize the seed round-trip
         this.dna.put(yacySeed.FLAGS, yacySeed.FLAGSZERO);

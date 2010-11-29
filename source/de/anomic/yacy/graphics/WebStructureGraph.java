@@ -42,8 +42,6 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
@@ -56,19 +54,13 @@ public class WebStructureGraph {
     public static int maxref = 300; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
     public static int maxhosts = 20000; // maximum number of hosts in web structure map
     
-    private StringBuilder crg;     // global citation references
     private final Log    log;
-    private final File         rankingPath, structureFile;
-    private final String       crlFile, crgFile;
+    private final File         structureFile;
     TreeMap<String, String> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     TreeMap<String, String> structure_new;
     
-    public WebStructureGraph(final Log log, final File rankingPath, final String crlFile, final String crgFile, final File structureFile) {
+    public WebStructureGraph(final Log log, final File structureFile) {
         this.log = log;
-        this.rankingPath = rankingPath;
-        this.crlFile = crlFile;
-        this.crgFile = crgFile;
-        this.crg = new StringBuilder(maxCRGDump);
         this.structure_old = new TreeMap<String, String>();
         this.structure_new = new TreeMap<String, String>();
         this.structureFile = structureFile;
@@ -126,61 +118,10 @@ public class WebStructureGraph {
             }
         }
         
-        // append this reference to buffer
-        // generate header info
-        final String head = new String(url.hash()) + "=" +
-        MicroDate.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
-        MicroDate.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
-        Base64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources
-        Base64Order.enhancedCoder.encodeLongSmart(GCount, 2) +  // count of links to global resources
-        Base64Order.enhancedCoder.encodeLongSmart(document.getImages().size(), 2) + // count of Images in document
-        Base64Order.enhancedCoder.encodeLongSmart(0, 2) +       // count of links to other documents
-        Base64Order.enhancedCoder.encodeLongSmart(document.getTextLength(), 3) +   // length of plain text in bytes
-        Base64Order.enhancedCoder.encodeLongSmart((condenser == null) ? 0 : condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
-        Base64Order.enhancedCoder.encodeLongSmart((condenser == null) ? 0 : condenser.words().size(), 3) + // count of all unique words
-        Base64Order.enhancedCoder.encodeLongSmart(0, 1); // Flags (update, popularity, attention, vote)
-        
-        //crl.append(head); crl.append ('|'); crl.append(cpl); crl.append((char) 13); crl.append((char) 10);
-        crg.append(head); crg.append('|'); crg.append(cpg); crg.append((char) 13); crg.append((char) 10);
-
         assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
         learn(url, cpg);
         
-        // if buffer is full, flush it.
-        /*
-        if (crl.length() > maxCRLDump) {
-            flushCitationReference(crl, "crl");
-            crl = new StringBuilder(maxCRLDump);
-        }
-         **/
-        if (crg.length() > maxCRGDump) {
-            flushCitationReference("crg");
-            crg = new StringBuilder(maxCRGDump);
-        }
-        
         return new Integer[] {Integer.valueOf(LCount), Integer.valueOf(GCount)};
-    }
-    
-    public void flushCitationReference(final String type) {
-        if (crg.length() < 12) return;
-        final String filename = type.toUpperCase() + "-A-" + DateFormatter.formatShortMilliSecond(new Date()) + "." + crg.substring(0, 12) + ".cr.gz";
-        final File path = new File(rankingPath, (type.equals("crl")) ? crlFile : crgFile);
-        path.mkdirs();
-        final File file = new File(path, filename);
-        
-        // generate header
-        final StringBuilder header = new StringBuilder(200);
-        header.append("# Name=YaCy " + ((type.equals("crl")) ? "Local" : "Global") + " Citation Reference Ticket"); header.append((char) 13); header.append((char) 10);
-        header.append("# Created=" + System.currentTimeMillis()); header.append((char) 13); header.append((char) 10);
-        header.append("# Structure=<Referee-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>,'|',*<Anchor-" + ((type.equals("crl")) ? "6" : "12") + ">"); header.append((char) 13); header.append((char) 10);
-        header.append("# ---"); header.append((char) 13); header.append((char) 10);
-        crg.insert(0, header.toString());
-        try {
-            FileUtils.writeAndGZip(crg.toString().getBytes(), file);
-            if (this.log.isFine()) log.logFine("wrote citation reference dump " + file.toString());
-        } catch (final IOException e) {
-            Log.logException(e);
-        }
     }
     
     private static int refstr2count(final String refs) {

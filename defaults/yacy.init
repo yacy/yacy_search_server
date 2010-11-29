@@ -276,13 +276,6 @@ promoteSearchPageGreeting.smallImage = /env/grafics/YaCyLogo_60ppi.png
 # when the secondary path should be equal to the primary, it must be declared empty
 indexPrimaryPath=DATA/INDEX
 
-# the commons are words that appear in the index more than 64k times in references.
-# Since indexes with such size cannot be handled efficiently, they are sorted in such a way that references with high ranking
-# are stored back into the index, and references with bad ranking are sorted out. Such sorted-out references can be stored
-# for later use (but there is no at this time). If the sorted-out references should be stored, the following property should be
-# set to true. If set to false, they are abandoned (deleted), and previously stored commons are removed.
-index.storeCommons=false
-
 # the path to the LISTS files. Most lists are used to filter web content
 listsPath=DATA/LISTS
 
@@ -749,23 +742,6 @@ indexDistribution.maxChunkSize = 1000
 indexDistribution.startChunkSize = 200
 indexDistribution.maxChunkFails = 1
 
-# Distribution of Citation-Reference (CR-) files
-# The distribution is done in two steps:
-# first step to anonymize the records
-# second step to forward to a collecting peer
-# to anonymize the data even against the intermediate peer
-# a specific precentage is also sent again to other peers.
-# for key-numbers please see de.anomic.plasma.plasmaRankingDistribution
-CRDistOn       = true
-CRDist0Path    = GLOBAL/010_owncr
-CRDist0Method  = 1
-CRDist0Percent = 0
-CRDist0Target  = 
-CRDist1Path    = GLOBAL/014_othercr
-CRDist1Method  = 9
-CRDist1Percent = 30
-CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000
-
 # Search sequence settings
 # collection:
 # time = time to get a RWI out of RAM cache, assortments and WORDS files
@@ -833,9 +809,6 @@ searchProcessRemoteCount_s = 10
 # timeout_text is for text-snippets, timeout_media for media, e.g. images
 timeout_text = 10000
 timeout_media = 15000
-
-# path to ranking directory containing ranking reference files
-rankingPath = DATA/RANKING
 
 # a list of domain name patterns that should not be cached by the httpc dns cache
 httpc.nameCacheNoCachingPatterns = .*.ath.cx,.*.blogdns.*,.*.boldlygoingnowhere.org,.*.dnsalias.*,.*.dnsdojo.*,.*.dvrdns.org,.*.dyn-o-saur.com,.*.dynalias.*,.*.dyndns.*,.*.ftpaccess.cc,.*.game-host.org,.*.game-server.cc,.*.getmyip.com,.*.gotdns.*,.*.ham-radio-op.net,.*.hobby-site.com,.*.homedns.org,.*.homeftp.*,.*.homeip.net,.*.homelinux.*,.*.homeunix.*,.*.is-a-chef.*,.*.is-a-geek.*,.*.kicks-ass.*,.*.merseine.nu,.*.mine.nu,.*.myphotos.cc,.*.podzone.*,.*.scrapping.cc,.*.selfip.*,.*.servebbs.*,.*.serveftp.*,.*.servegame.org,.*.shacknet.nu

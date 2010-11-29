@@ -357,10 +357,6 @@ public class yacyCore {
                 log.logSevere("publishMySeed: problem with news encoding", e);
             }
             sb.peers.mySeed().setUnusedFlags();
-
-            // include current citation-rank file count
-            sb.peers.mySeed().put(yacySeed.CRWCNT, Integer.toString(sb.rankingOwnDistribution.size()));
-            sb.peers.mySeed().put(yacySeed.CRTCNT, Integer.toString(sb.rankingOtherDistribution.size()));
             int newSeeds = -1;
             //if (seeds.length > 1) {
             // holding a reference to all started threads

@@ -234,15 +234,6 @@ public final class SwitchboardConstants {
     public static final String INDEX_DIST_ALLOW_WHILE_INDEXING  = "allowDistributeIndexWhileIndexing";
     public static final String INDEX_TRANSFER_TIMEOUT           = "indexTransfer.timeout";
     public static final String INDEX_TRANSFER_GZIP_BODY         = "indexTransfer.gzipBody";
-    public static final String RANKING_DIST_ON                  = "CRDistOn";
-    public static final String RANKING_DIST_0_PATH              = "CRDist0Path";
-    public static final String RANKING_DIST_0_METHOD            = "CRDist0Method";
-    public static final String RANKING_DIST_0_PERCENT           = "CRDist0Percent";
-    public static final String RANKING_DIST_0_TARGET            = "CRDist0Target";
-    public static final String RANKING_DIST_1_PATH              = "CRDist1Path";
-    public static final String RANKING_DIST_1_METHOD            = "CRDist1Method";
-    public static final String RANKING_DIST_1_PERCENT           = "CRDist1Percent";
-    public static final String RANKING_DIST_1_TARGET            = "CRDist1Target";
     public static final String PARSER_MIME_DENY                 = "parser.mime.deny";
     /**
      * <p><code>public static final String <strong>PROXY_ONLINE_CAUTION_DELAY</strong> = "onlineCautionDelay"</code></p>
@@ -359,16 +350,6 @@ public final class SwitchboardConstants {
      */
     public static final String LISTS_PATH               = "listsPath";
     public static final String LISTS_PATH_DEFAULT       = "DATA/LISTS";
-    /**
-     * <p><code>public static final String <strong>RANKING_PATH</strong> = "rankingPath"</code></p>
-     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
-     * ranking files are stored, self-generated as well as received ranking files</p>
-     * 
-     * @see Switchboard#RANKING_DIST_0_PATH
-     * @see Switchboard#RANKING_DIST_1_PATH
-     */
-    public static final String RANKING_PATH             = "rankingPath";
-    public static final String RANKING_PATH_DEFAULT     = "DATA/RANKING";
     /**
      * <p><code>public static final String <strong>WORK_PATH</strong> = "wordPath"</code></p>
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all

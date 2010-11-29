@@ -61,7 +61,6 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
-import net.yacy.cora.protocol.ByteArrayBody;
 import net.yacy.cora.protocol.http.HTTPConnector;
 import net.yacy.cora.services.Search;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -71,7 +70,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
@@ -746,77 +744,6 @@ public final class yacyClient {
         }
         if (address == null) address = "localhost:8080";
         return address;
-    }
-    
-    public static Map<String, String> transferPermission(final String targetAddress, final long filesize, final String filename) {
-
-        // prepare request
-        final String salt = crypt.randomSalt();
-        
-        // send request
-        try {
-            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
-            parts.put("process", new StringBody("permission"));
-            parts.put("purpose", new StringBody("crcon"));
-            parts.put("filename", new StringBody(filename));
-            parts.put("filesize", new StringBody(Long.toString(filesize)));
-            parts.put("can-send-protocol", new StringBody("http"));
-            final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + targetAddress + "/yacy/transfer.html"), 10000, targetAddress, parts);
-            final Map<String, String> result = FileUtils.table(content);
-            return result;
-        } catch (final Exception e) {
-            // most probably a network time-out exception
-            yacyCore.log.logSevere("yacyClient.permissionTransfer error:" + e.getMessage());
-            return null;
-        }
-    }
-
-    public static Map<String, String> transferStore(final String targetAddress, final String access, final String filename, final byte[] file) {
-        
-        // prepare request
-        final String salt = crypt.randomSalt();
-        
-        // send request
-        try {
-            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
-            parts.put("process", new StringBody("store"));
-            parts.put("purpose", new StringBody("crcon"));
-            parts.put("filesize", new StringBody(Long.toString(file.length)));
-            parts.put("md5", new StringBody(Digest.encodeMD5Hex(file)));
-            parts.put("access", new StringBody(access));
-            parts.put("filename", new ByteArrayBody(file, filename));
-            final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + targetAddress + "/yacy/transfer.html"), 20000, targetAddress, parts);
-            final Map<String, String> result = FileUtils.table(content);
-            return result;
-        } catch (final Exception e) {
-            yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
-            return null;
-        }
-    }
-    
-    public static String transfer(final String targetAddress, final String filename, final byte[] file) {
-        final Map<String, String> phase1 = transferPermission(targetAddress, file.length, filename);
-        if (phase1 == null) return "no connection to remote address " + targetAddress + "; phase 1";
-        final String access = phase1.get("access");
-        final String nextaddress = phase1.get("address");
-        final String protocol = phase1.get("protocol");
-        //String path = (String) phase1.get("path");
-        //String maxsize = (String) phase1.get("maxsize");
-        String response = phase1.get("response");
-        if ((response == null) || (protocol == null) || (access == null)) return "wrong return values from other peer; phase 1";
-        if (!(response.equals("ok"))) return "remote peer rejected transfer: " + response;
-        final String accesscode = Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(access));
-        if (protocol.equals("http")) {
-            final Map<String, String> phase2 = transferStore(nextaddress, accesscode, filename, file);
-            if (phase2 == null) return "no connection to remote address " + targetAddress + "; phase 2";
-            response = phase2.get("response");
-            if (response == null) return "wrong return values from other peer; phase 2";
-            if (!(response.equals("ok"))) {
-                return "remote peer failed with transfer: " + response;
-            } 
-            return null;
-        }
-        return "wrong protocol: " + protocol;
     }
 
     public static Map<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final URIMetadataRow entry, final String wordhashes) {

@@ -665,6 +665,13 @@ public final class RankingProcess extends Thread {
         return this.authorNavigator;
     }
     
+    /**
+     * load YaCy Block Rank tables
+     * These tables have a very simple structure: every file is a sequence of Domain hashes, ordered by b64.
+     * Each Domain hash has a length of 6 bytes and there is no separation character between the hashes
+     * @param rankingPath
+     * @param count
+     */
     public static void loadYBR(final File rankingPath, final int count) {
         // load ranking tables
         if (rankingPath.exists()) {

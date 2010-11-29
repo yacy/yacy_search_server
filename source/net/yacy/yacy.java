@@ -81,7 +81,6 @@ import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.tools.enumerateFiles;
-import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacyBuildProperties;
@@ -797,20 +796,6 @@ public final class yacy {
         // finished
         Log.logConfig("CLEAN-WORDLIST", "FINISHED");
     }
-
-    private static void transferCR(final String targetaddress, final String crfile) {
-        final File f = new File(crfile);
-        try {
-            final byte[] b = FileUtils.read(f);
-            final String result = yacyClient.transfer(targetaddress, f.getName(), b);
-            if (result == null)
-                Log.logInfo("TRANSFER-CR", "transmitted file " + crfile + " to " + targetaddress + " successfully");
-            else
-                Log.logInfo("TRANSFER-CR", "error transmitting file " + crfile + " to " + targetaddress + ": " + result);
-        } catch (final IOException e) {
-            Log.logInfo("TRANSFER-CR", "could not read file " + crfile);
-        }
-    }
     
     private static String[] shift(final String[] args, final int pos, final int count) {
         final String[] newargs = new String[args.length - count];
@@ -1017,11 +1002,6 @@ public final class yacy {
             final int minlength = Integer.parseInt(args[2]);
             final int maxlength = Integer.parseInt(args[3]);
             cleanwordlist(args[1], minlength, maxlength);
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-transfercr"))) {
-            // transfer a single cr file to a remote peer
-            final String targetaddress = args[1];
-            final String crfile = args[2];
-            transferCR(targetaddress, crfile);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
             // generate a url list and save it in a file
             if (args.length == 2) applicationRoot= new File(args[1]);

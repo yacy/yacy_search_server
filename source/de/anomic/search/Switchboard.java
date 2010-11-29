@@ -147,7 +147,6 @@ import de.anomic.http.client.Cache;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.RobotsTxtConfig;
 import de.anomic.net.UPnP;
-import de.anomic.search.blockrank.CRDistribution;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCore;
 import de.anomic.tools.crypt;
@@ -190,14 +189,12 @@ public final class Switchboard extends serverSwitch {
     public  File                           dictionariesPath;
     public  File                           listsPath;
     public  File                           htDocsPath;
-    public  File                           rankingPath;
     public  File                           workPath;
     public  File                           releasePath;
     public  File                           networkRoot;
     public  File                           queuesRoot;
     public  File                           surrogatesInPath;
     public  File                           surrogatesOutPath;
-    public  Map<String, String>            rankingPermissions;
     public  Segments                       indexSegments;
     public  LoaderDispatcher               loader;
     public  CrawlSwitchboard               crawler;
@@ -209,9 +206,6 @@ public final class Switchboard extends serverSwitch {
     public  BlogBoard                      blogDB;
     public  BlogBoardComments              blogCommentDB;
     public  RobotsTxt                      robots;
-    public  boolean                        rankingOn;
-    public  CRDistribution                 rankingOwnDistribution;
-    public  CRDistribution                 rankingOtherDistribution;
     public  Map<String, Object[]>          outgoingCookies, incomingCookies;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
@@ -286,9 +280,6 @@ public final class Switchboard extends serverSwitch {
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
         this.htDocsPath   = getDataPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
         this.log.logConfig("HTDOCS Path:    " + this.htDocsPath.toString());
-        this.rankingPath   = getDataPath(SwitchboardConstants.RANKING_PATH, SwitchboardConstants.RANKING_PATH_DEFAULT);
-        this.log.logConfig("Ranking Path:    " + this.rankingPath.toString());
-        this.rankingPermissions = new HashMap<String, String>(); // mapping of permission - to filename.
         this.workPath   = getDataPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         this.dictionariesPath = getDataPath(SwitchboardConstants.DICTIONARY_SOURCE_PATH, SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
@@ -391,7 +382,7 @@ public final class Switchboard extends serverSwitch {
         this.proxyLastAccess = System.currentTimeMillis() - 10000;
         this.localSearchLastAccess = System.currentTimeMillis() - 10000;
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
-        this.webStructure = new WebStructureGraph(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", CRDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));
+        this.webStructure = new WebStructureGraph(log, new File(queuesRoot, "webStructure.map"));
         
         // configuring list path
         if (!(listsPath.exists())) listsPath.mkdirs();
@@ -538,22 +529,6 @@ public final class Switchboard extends serverSwitch {
         } catch (final IOException e) {
         }
         
-        // init ranking transmission
-        /*
-        CRDistOn       = true/false
-        CRDist0Path    = GLOBAL/010_owncr
-        CRDist0Method  = 1
-        CRDist0Percent = 0
-        CRDist0Target  =
-        CRDist1Path    = GLOBAL/014_othercr/1
-        CRDist1Method  = 9
-        CRDist1Percent = 30
-        CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
-         **/
-        rankingOn = getConfig(SwitchboardConstants.RANKING_DIST_ON, "true").equals("true") && networkName.equals("freeworld");
-        rankingOwnDistribution = new CRDistribution(log, peers, new File(rankingPath, getConfig(SwitchboardConstants.RANKING_DIST_0_PATH, CRDistribution.CR_OWN)), (int) getConfigLong(SwitchboardConstants.RANKING_DIST_0_METHOD, CRDistribution.METHOD_ANYSENIOR), (int) getConfigLong(SwitchboardConstants.RANKING_DIST_0_METHOD, 0), getConfig(SwitchboardConstants.RANKING_DIST_0_TARGET, ""));
-        rankingOtherDistribution = new CRDistribution(log, peers, new File(rankingPath, getConfig(SwitchboardConstants.RANKING_DIST_1_PATH, CRDistribution.CR_OTHER)), (int) getConfigLong(SwitchboardConstants.RANKING_DIST_1_METHOD, CRDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(SwitchboardConstants.RANKING_DIST_1_METHOD, 30), getConfig(SwitchboardConstants.RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000"));
-
         // init nameCacheNoCachingList
         Domains.setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,""));
         
@@ -926,7 +901,7 @@ public final class Switchboard extends serverSwitch {
                     10000);
 
             // create new web structure
-            this.webStructure = new WebStructureGraph(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", CRDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));
+            this.webStructure = new WebStructureGraph(log, new File(queuesRoot, "webStructure.map"));
             
             
             // load domainList
@@ -1224,7 +1199,6 @@ public final class Switchboard extends serverSwitch {
         userDB.close();
         bookmarksDB.close();
         messageDB.close();
-        webStructure.flushCitationReference("crg");
         webStructure.close();
         crawlQueues.close();
         crawler.close();
@@ -1586,20 +1560,7 @@ public final class Switchboard extends serverSwitch {
             }
             
             // close unused connections
-//            de.anomic.http.client.Client.cleanup();
             ConnectionInfo.cleanUp();
-            
-            // do transmission of CR-files
-            /*
-            checkInterruption();
-            int count = rankingOwnDistribution.size() / 100;
-            if (count == 0) count = 1;
-            if (count > 5) count = 5;
-            if (rankingOn && !isRobinsonMode()) {
-                rankingOwnDistribution.transferRanking(count);
-                rankingOtherDistribution.transferRanking(1);
-            }
-            */
             
             // clean up delegated stack
             checkInterruption();
