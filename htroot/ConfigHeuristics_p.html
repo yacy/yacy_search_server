@@ -43,15 +43,29 @@
       </p>
     </fieldset>
     </form>
+    
     <form id="HeuristicFormScroogle" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset>
       <legend>
         <input type="checkbox" name="scroogle_check" id="scroogle" onclick="window.location.href='ConfigHeuristics_p.html?#(scroogle.checked)#scroogle_on=::scroogle_off=#(/scroogle.checked)#'" value="scroogle"#(scroogle.checked)#:: checked="checked"#(/scroogle.checked)# />
-        <label for="scroogle">scroogle: load external search result list</label>
+        <label for="scroogle">scroogle: load external search result list from <a href="http://scroogle.org">scroogle</a></label>
       </legend>
       <p>
       When using this heuristic, then every search request line is used for a call to scroogle.
       20 results are taken from scroogle and loaded simultanously, parsed and indexed immediately.
+      </p>
+    </fieldset>
+    </form>
+    
+    <form id="HeuristicFormBlekko" method="post" action="ConfigHeuristics_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    <fieldset>
+      <legend>
+        <input type="checkbox" name="blekko_check" id="scroogle" onclick="window.location.href='ConfigHeuristics_p.html?#(blekko.checked)#blekko_on=::blekko_off=#(/blekko.checked)#'" value="blekko"#(blekko.checked)#:: checked="checked"#(/blekko.checked)# />
+        <label for="blekko">blekko: load external search result list from <a href="http://blekko.com">blekko</a></label>
+      </legend>
+      <p>
+      When using this heuristic, then every search request line is used for a call to blekko.
+      20 results are taken from blekko and loaded simultanously, parsed and indexed immediately.
       </p>
     </fieldset>
     </form>

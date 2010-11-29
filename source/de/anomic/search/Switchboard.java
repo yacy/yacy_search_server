@@ -76,7 +76,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -865,6 +867,7 @@ public final class Switchboard extends serverSwitch {
             // remove heuristics
             setConfig("heuristic.site", false);
             setConfig("heuristic.scroogle", false);
+            setConfig("heuristic.blekko", false);
             
             // relocate
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
@@ -2320,7 +2323,7 @@ public final class Switchboard extends serverSwitch {
             }
         }.start();
     }
-    
+
     public final void heuristicScroogle(final SearchEvent searchEvent) {
         new Thread() {
             @Override
@@ -2336,6 +2339,7 @@ public final class Switchboard extends serverSwitch {
                 try {
                     url = new DigestURI(MultiProtocolURI.unescape(urlString));
                 } catch (MalformedURLException e1) {
+                    Log.logWarning("heuristicScroogle", "url not well-formed: '" + urlString + "'");
                     return;
                 }
 
@@ -2353,6 +2357,59 @@ public final class Switchboard extends serverSwitch {
                 log.logInfo("Heuristic: adding " + links.size() + " links from scroogle");
                 // add all pages to the index
                 addAllToIndex(null, links, searchEvent, "scroogle");
+            }
+        }.start();
+    }
+    
+    // blekko pattern: http://blekko.com/ws/$+/rss
+    public final void heuristicRSS(final String urlpattern, final SearchEvent searchEvent, final String feedName) {
+        final int p = urlpattern.indexOf('$');
+        if (p < 0) return;
+        new Thread() {
+            @Override
+            public void run() {
+                String query = searchEvent.getQuery().queryString(true);
+                int meta = query.indexOf("heuristic:");
+                if (meta >= 0) {
+                    final int q = query.indexOf(' ', meta);
+                    if (q >= 0) query = query.substring(0, meta) + query.substring(q + 1); else query = query.substring(0, meta);
+                }
+
+                final String urlString = urlpattern.substring(0, p) + query.trim().replaceAll(" ", "+") + urlpattern.substring(p + 1);
+                final DigestURI url;
+                try {
+                    url = new DigestURI(MultiProtocolURI.unescape(urlString));
+                } catch (MalformedURLException e1) {
+                    Log.logWarning("heuristicRSS", "url not well-formed: '" + urlString + "'");
+                    return;
+                }
+
+                // if we have an url then try to load the rss
+                RSSReader rss = null;
+                try {
+                    Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+                    byte[] resource = response == null ? null : response.getContent();
+                    //System.out.println("BLEKKO: " + new String(resource));
+                    rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
+                if (rss == null) {
+                    Log.logInfo("heuristicRSS", "rss result not parsed from " + feedName);
+                    return;
+                }
+                
+                final Map<MultiProtocolURI, String> links = new TreeMap<MultiProtocolURI, String>();
+                MultiProtocolURI uri;
+                for (RSSMessage message: rss.getFeed()) try {
+                    uri = new MultiProtocolURI(message.getLink());
+                    links.put(uri, message.getTitle());
+                } catch (MalformedURLException e) {
+                }
+                
+                Log.logInfo("heuristicRSS", "Heuristic: adding " + links.size() + " links from '" + feedName + "' rss feed");
+                // add all pages to the index
+                addAllToIndex(null, links, searchEvent, feedName);
             }
         }.start();
     }

@@ -287,20 +287,20 @@ public class yacysearch {
             
             final RankingProfile ranking = sb.getRanking();
 
-            if (querystring.indexOf("NEAR") >= 0) {
-            	querystring = querystring.replace("NEAR", "");
+            if (querystring.indexOf("/near") >= 0) {
+            	querystring = querystring.replace("/near", "");
             	ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
             }
-            if (querystring.indexOf("RECENT") >= 0) {
-            	querystring = querystring.replace("RECENT", "");
+            if (querystring.indexOf("/date") >= 0) {
+            	querystring = querystring.replace("/date", "");
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
             }
-            int lrp = querystring.indexOf("LANGUAGE:");
+            int lrp = querystring.indexOf("/language/");
             String lr = "";
             if (lrp >= 0) {
                 if (querystring.length() >= (lrp + 11))
                 	lr = querystring.substring(lrp + 9, lrp + 11);
-                querystring = querystring.replace("LANGUAGE:" + lr, "");
+                querystring = querystring.replace("/language/" + lr, "");
                 lr = lr.toLowerCase();
             }
             int inurl = querystring.indexOf("inurl:");
@@ -347,9 +347,14 @@ public class yacysearch {
                 sitehash = DigestURI.domhash(sitehost);
             }
             
-            int heuristic = querystring.indexOf("heuristic:scroogle");
-            if (heuristic >= 0) {
+            int heuristicScroogle = querystring.indexOf("heuristic:scroogle");
+            if (heuristicScroogle >= 0) {
                 querystring = querystring.replace("heuristic:scroogle", "");
+            }
+            
+            int heuristicBlekko = querystring.indexOf("heuristic:blekko");
+            if (heuristicBlekko >= 0) {
+                querystring = querystring.replace("heuristic:blekko", "");
             }
             
             int authori = querystring.indexOf("author:");
@@ -525,8 +530,11 @@ public class yacysearch {
             final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader);
             try {Thread.sleep(global ? 100 : 10);} catch (InterruptedException e1) {} // wait a little time to get first results in the search
             
-            if (sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated) sb.heuristicSite(theSearch, sitehost);
-            if ((heuristic >= 0  || sb.getConfigBool("heuristic.scroogle", false)) && authenticated) sb.heuristicScroogle(theSearch);
+            if (offset == 0) {
+                if (sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated) sb.heuristicSite(theSearch, sitehost);
+                if ((heuristicScroogle >= 0  || sb.getConfigBool("heuristic.scroogle", false)) && authenticated) sb.heuristicScroogle(theSearch);
+                if ((heuristicBlekko >= 0  || sb.getConfigBool("heuristic.blekko", false)) && authenticated) sb.heuristicRSS("http://blekko.com/ws/$+/rss", theSearch, "blekko");
+            }
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");

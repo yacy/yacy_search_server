@@ -616,6 +616,7 @@ public final class RankingProcess extends Thread {
         int ic = count;
         while (ic-- > 0 && i.hasNext()) {
             word = i.next();
+            if (word == null) continue;
             termHash = Word.word2hash(word);
             c = this.query.getSegment().termIndex().count(termHash);
             if (c > 0) {

@@ -94,7 +94,7 @@ public class RSSReader extends DefaultHandler {
         if (a.length < 100) {
             throw new IOException("response=" + new String(a));
         }
-        if (!equals(a, "<?xml".getBytes())) {
+        if (!equals(a, "<?xml".getBytes()) && !equals(a, "<rss".getBytes())) {
             throw new IOException("response does not contain valid xml");
         }
         final String end = new String(a, a.length - 80, 80);
