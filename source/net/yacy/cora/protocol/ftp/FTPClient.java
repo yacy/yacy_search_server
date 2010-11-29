@@ -1347,23 +1347,22 @@ public class FTPClient {
         // read file system data
         String line;
         final ArrayList<String> files = new ArrayList<String>();
-        while ((line = ClientStream.readLine()) != null) {
-            if (!line.startsWith("total ")) {
-                files.add(line);
+        try {
+            while ((line = ClientStream.readLine()) != null) {
+                if (!line.startsWith("total ")) {
+                    files.add(line);
+                }
             }
+            // after stream is empty we should get control completion echo
+            /*reply =*/ receive();
+
+            // boolean success = !isNotPositiveCompletion(reply);
+
+            // shutdown connection
+            ClientStream.close(); // Closing the returned InputStream will
+            closeDataSocket(); // close the associated socket.
+        } catch (IOException e) {
         }
-
-        // after stream is empty we should get control completion echo
-        /*reply =*/ receive();
-
-        // boolean success = !isNotPositiveCompletion(reply);
-
-        // shutdown connection
-        ClientStream.close(); // Closing the returned InputStream will
-        closeDataSocket(); // close the associated socket.
-
-        // if (!success) throw new IOException(reply);
-
         files.trimToSize();
         return files;
     }
@@ -2518,45 +2517,32 @@ public class FTPClient {
         }
     }
 
-    public StringBuilder dirhtml(String remotePath) {
+    public StringBuilder dirhtml(String remotePath) throws IOException {
         // returns a directory listing using an existing connection
-        try {
             if (isFolder(remotePath) && '/' != remotePath.charAt(remotePath.length()-1)) {
                 remotePath += '/';
             }
+            String pwd = pwd();
             final List<String> list = list(remotePath, true);
-            if (remotesystem == null) {
-                sys();
-            }
+            if (remotesystem == null) try {sys();} catch (IOException e) {}
             final String base = "ftp://" + ((account.equals("anonymous")) ? "" : (account + ":" + password + "@"))
-                    + host + ((port == 21) ? "" : (":" + port)) + ((remotePath.length() > 0 && remotePath.charAt(0) == '/') ? "" : pwd() + "/")
+                    + host + ((port == 21) ? "" : (":" + port)) + ((remotePath.length() > 0 && remotePath.charAt(0) == '/') ? "" : pwd + "/")
                     + remotePath;
 
             return dirhtml(base, remotemessage, remotegreeting, remotesystem, list, true);
-        } catch (final java.security.AccessControlException e) {
-            return null;
-        } catch (final IOException e) {
-            return null;
-        }
     }
 
     public static StringBuilder dirhtml(
             final String host, final int port, final String remotePath,
-            final String account, final String password) {
+            final String account, final String password) throws IOException {
         // opens a new connection and returns a directory listing as html
-        try {
-            final FTPClient c = new FTPClient();
-            c.open(host, port);
-            c.login(account, password);
-            c.sys();
-            final StringBuilder page = c.dirhtml(remotePath);
-            c.quit();
-            return page;
-        } catch (final java.security.AccessControlException e) {
-            return null;
-        } catch (final IOException e) {
-            return null;
-        }
+        final FTPClient c = new FTPClient();
+        c.open(host, port);
+        c.login(account, password);
+        c.sys();
+        final StringBuilder page = c.dirhtml(remotePath);
+        c.quit();
+        return page;
     }
 
     public static StringBuilder dirhtml(
@@ -2619,12 +2605,11 @@ public class FTPClient {
         dir(host, remotePath, "anonymous", "anomic");
     }
 
-    public static void dirAnonymousHtml(final String host, final int port, final String remotePath,
-            final String htmloutfile) {
-        final StringBuilder page = dirhtml(host, port, remotePath, "anonymous", "anomic");
-        final File file = new File(htmloutfile);
-        FileOutputStream fos;
+    public static void dirAnonymousHtml(final String host, final int port, final String remotePath, final String htmloutfile) {
         try {
+            final StringBuilder page = dirhtml(host, port, remotePath, "anonymous", "anomic");
+            final File file = new File(htmloutfile);
+            FileOutputStream fos;
             fos = new FileOutputStream(file);
             fos.write(page.toString().getBytes());
             fos.close();
