@@ -570,7 +570,7 @@ public class Domains {
          if (nameCacheMiss.size() > maxNameCacheMissSize) nameCacheMiss.clear();
     }
 
-    private static final String localHostName = "127.0.0.1"; 
+    private static String localHostName = "127.0.0.1"; 
     private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>();
     static {
         try {
@@ -604,15 +604,14 @@ public class Domains {
                 }
                 
                 // now look up the host name
-                String lhn = localHostName;
                 try {
-                    lhn = getHostName(InetAddress.getLocalHost());
+                    localHostName = getHostName(InetAddress.getLocalHost());
                 } catch (UnknownHostException e) {}
 
                 // after the host name was resolved, we try to look up more local addresses
                 // using the host name:
                 try {
-                    InetAddress[] moreAddresses = InetAddress.getAllByName(lhn);
+                    InetAddress[] moreAddresses = InetAddress.getAllByName(localHostName);
                     if (moreAddresses != null) for (InetAddress a: moreAddresses) localHostAddresses.add(a);
                 } catch (UnknownHostException e) {
                     Log.logException(e);
@@ -644,14 +643,23 @@ public class Domains {
                 return a;
         }
         // there is only a local address, we filter out the possibly
-        // returned loopback address 127.0.0.1
+        // returned loopback address 127.0.0.1 and all addresses without a name
         for (InetAddress a: localHostAddresses) {
-            if ((0Xff & a.getAddress()[0]) != 127 && a.getHostAddress().indexOf(":") < 0) return a;
+            if ((0Xff & a.getAddress()[0]) != 127 &&
+                a.getHostAddress().indexOf(":") < 0 &&
+                a.getHostName() != null &&
+                a.getCanonicalHostName().length() > 0) return a;
+        }
+        // if no address has a name, then take any other than the loopback
+        for (InetAddress a: localHostAddresses) {
+            if ((0Xff & a.getAddress()[0]) != 127 &&
+                a.getHostAddress().indexOf(":") < 0) return a;
         }
         // if all fails, give back whatever we have
         for (InetAddress a: localHostAddresses) {
             if (a.getHostAddress().indexOf(":") < 0) return a;
         }
+        // finally, just get any
         return localHostAddresses.iterator().next();
     }
     
@@ -756,6 +764,22 @@ public class Domains {
     }
     
     public static void main(String[] args) {
+        /*
+        try {
+            Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+            while (nis.hasMoreElements()) {
+                NetworkInterface ni = nis.nextElement();
+                Enumeration<InetAddress> addrs = ni.getInetAddresses();
+                while (addrs.hasMoreElements()) {
+                    InetAddress addr = addrs.nextElement();
+                    System.out.println(addr);
+                }
+            }
+        } catch(SocketException e) {
+            System.err.println(e);
+        }
+        */
+        
         System.out.println("myPublicLocalIP: " + myPublicLocalIP());
         for (InetAddress a : myIntranetIPs()) {
             System.out.println("Intranet IP: " + a);
