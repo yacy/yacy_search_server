@@ -1350,43 +1350,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return (seedInetAddress.equals(hostInetAddress));        
     }
     
-    public static boolean isThisHostIP(final String hostName) {
-        if ((hostName == null) || (hostName.length() == 0)) return false;
-        
-        boolean isThisHostIP = false;
-        try {
-            final InetAddress clientAddress = Domains.dnsResolve(hostName);
-            if (clientAddress == null) return false;
-            
-            if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-            
-            for (int i = 0; i < Domains.localHostAddresses.length; i++) {
-                if (Domains.localHostAddresses[i].equals(clientAddress)) {
-                    isThisHostIP = true;
-                    break;
-                }
-            }  
-        } catch (final Exception e) {}   
-        return isThisHostIP;
-    }    
-    
-    public static boolean isThisHostIP(final InetAddress clientAddress) {
-        if (clientAddress == null) return false;
-        
-        boolean isThisHostIP = false;
-        try {
-            if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-            
-            for (int i = 0; i < Domains.localHostAddresses.length; i++) {
-                if (Domains.localHostAddresses[i].equals(clientAddress)) {
-                    isThisHostIP = true;
-                    break;
-                }
-            }  
-        } catch (final Exception e) {}   
-        return isThisHostIP;
-    }  
-    
     public static boolean isThisHostName(final String hostName) {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
@@ -1408,7 +1371,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     dstPort.equals(Integer.valueOf(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
                     (
                             // check if the destination host is our local IP address
-                            isThisHostIP(dstHost) ||
+                            Domains.isThisHostIP(dstHost) ||
                             // check if the destination host is our seed ip address
                             isThisSeedIP(dstHost)
                     )

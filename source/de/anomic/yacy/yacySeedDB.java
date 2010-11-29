@@ -649,7 +649,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         yacySeed seed = null;        
         
         // local peer?
-        if (HTTPDemon.isThisHostIP(peerIP)) {
+        if (Domains.isThisHostIP(peerIP)) {
             if (this.mySeed == null) initMySeed();
             return mySeed;
         }
