@@ -95,7 +95,6 @@ public class FTPLoader {
 
         // create new ftp client
         final FTPClient ftpClient = new FTPClient();
-        ftpClient.setDataTimeoutByMaxFilesize(maxFileSize);
         
         // get a connection
         if (openConnection(ftpClient, entryUrl)) {
@@ -250,9 +249,6 @@ public class FTPLoader {
                     url.toNormalform(true, true).getBytes());
             return response;
         }
-
-        // timeout for download
-        ftpClient.setDataTimeoutByMaxFilesize(size);
         
         // download the remote file
         byte[] b = ftpClient.get(path);

@@ -35,12 +35,16 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
   <div class="yacylogo">
     <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch"/></a>
   </div>
-  <fieldset class="yacys"><input name="query" type="text" value="#[query]#" size="50" maxlength="80" /></fieldset>
+  <fieldset class="yacys"><input id="query" name="query" type="text" value="#[query]#" size="50" maxlength="80" /></fieldset>
 
 <!--<pre>Raw JSON String: <div id="raw"></div></pre>-->
 </form>
 <div id="searchresults"></div>
-
+<script type="text/javascript">
+//<![CDATA[
+document.getElementById("query").focus();
+//]]>
+</script>
 #%env/templates/footer.template%#
 </body>
 </html>

@@ -185,7 +185,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         String infoString = ii.info.toString();
         images.put(ii.location, new ImageEntry(location, "", ii.width, ii.height, -1));
         
-        if (title == null) title = location.toNormalform(true, true);
+        if (title == null || title.length() == 0) title = location.getFileName();
         
         return new Document[]{new Document(
              location,

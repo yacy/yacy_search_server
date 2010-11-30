@@ -73,7 +73,7 @@ public class yacysearchtrailer {
             while (i < 10 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = namespaceNavigator.get(name);
-                prop.put("nav-namespace_element_" + i + "_name", name);
+                prop.putJSON("nav-namespace_element_" + i + "_name", name);
                 prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators));
                 prop.put("nav-namespace_element_" + i + "_count", count);
@@ -97,7 +97,7 @@ public class yacysearchtrailer {
             while (i < 20 && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = hostNavigator.get(name);
-                prop.put("nav-domains_element_" + i + "_name", name);
+                prop.putJSON("nav-domains_element_" + i + "_name", name);
                 prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + name, theQuery.urlMask.toString(), theQuery.navigators));
                 prop.put("nav-domains_element_" + i + "_count", count);
@@ -120,10 +120,10 @@ public class yacysearchtrailer {
             int i = 0;
             String anav;
             while (i < 20 && navigatorIterator.hasNext()) {
-                name = navigatorIterator.next();
+                name = navigatorIterator.next().trim();
                 count = authorNavigator.get(name);
                 anav = (name.indexOf(' ') < 0) ? "author:" + name : "author:'" + name.replace(" ", "+") + "'";
-                prop.put("nav-authors_element_" + i + "_name", name);
+                prop.putJSON("nav-authors_element_" + i + "_name", name);
                 prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
                 prop.putJSON("nav-authors_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators));
                 prop.put("nav-authors_element_" + i + "_count", count);
@@ -149,7 +149,7 @@ public class yacysearchtrailer {
                 count = topicNavigator.get(name);
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
                 if (name != null) {
-                    prop.putHTML("nav-topics_element_" + i + "_name", name);
+                    prop.putJSON("nav-topics_element_" + i + "_name", name);
                     prop.put("nav-topics_element_" + i + "_url",
                             "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + "</a>");
                             //+"<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+-" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">-</a>")*/;

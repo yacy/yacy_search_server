@@ -38,6 +38,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.bzipParser;
 import net.yacy.document.parser.csvParser;
 import net.yacy.document.parser.docParser;
+import net.yacy.document.parser.genericParser;
 import net.yacy.document.parser.gzipParser;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.odtParser;
@@ -64,6 +65,7 @@ public final class TextParser {
     private static final Log log = new Log("PARSER");
     private static final Object v = new Object();
 
+    private static final Parser genericIdiom = new genericParser();
     private static final Map<String, Parser> mime2parser = new ConcurrentHashMap<String, Parser>();
     private static final Map<String, Parser> ext2parser = new ConcurrentHashMap<String, Parser>();
     private static final Map<String, String> ext2mime = new ConcurrentHashMap<String, String>();
@@ -196,11 +198,13 @@ public final class TextParser {
         
         // in case that we know more parsers we first transform the content into a byte[] and use that as base
         // for a number of different parse attempts.
+        byte[] b = null;
         try {
-            return parseSource(location, mimeType, idioms, charset, FileUtils.read(sourceStream, (int) contentLength));
+            b = FileUtils.read(sourceStream, (int) contentLength);
         } catch (IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
+        return parseSource(location, mimeType, idioms, charset, b);
     }
 
     private static Document[] parseSource(
@@ -325,8 +329,9 @@ public final class TextParser {
         idiom = mime2parser.get(mimeType2);
         if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
         
-        // finall check if we found any parser
-        if (idioms.isEmpty()) throw new Parser.Failure("no parser found for extension '" + ext + "' and mime type '" + mimeType1 + "'", url);
+        // always add the generic parser
+        idioms.add(genericIdiom);
+        //if (idioms.isEmpty()) throw new Parser.Failure("no parser found for extension '" + ext + "' and mime type '" + mimeType1 + "'", url);
         
         return idioms;
     }

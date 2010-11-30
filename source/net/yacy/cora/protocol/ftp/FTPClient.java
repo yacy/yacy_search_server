@@ -86,7 +86,7 @@ public class FTPClient {
     private Socket ControlSocket = null;
 
     // socket timeout
-    private static final int ControlSocketTimeout = 1000;
+    private static final int ControlSocketTimeout = 10000;
 
     // data socket timeout
     private int DataSocketTimeout = 0; // in seconds (default infinite)
@@ -2448,22 +2448,6 @@ public class FTPClient {
      */
     public int getTimeout() {
         return ControlSocketTimeout;
-    }
-
-    /**
-     * set timeout for data connections calculated for a minimum data rate
-     * 
-     * @param maxFilesize
-     * @return timeout in seconds
-     */
-    public void setDataTimeoutByMaxFilesize(final int maxFilesize) {
-        int timeout = 1;
-        if (DataSocketRate > 0) {
-            // calculate by minDataRate and MaxFTPFileSize
-            timeout = maxFilesize / DataSocketRate;
-        }
-
-        setDataSocketTimeout(timeout);
     }
 
     /**

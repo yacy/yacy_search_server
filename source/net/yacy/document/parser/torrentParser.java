@@ -67,7 +67,7 @@ public class torrentParser extends AbstractParser implements Parser {
         //Date creation = new Date(map.get("creation date").getInteger());
         BObject infoo = map.get("info");
         StringBuilder filenames = new StringBuilder();
-        String name = "";
+        String title = "";
         if (infoo != null) {
             Map<String, BObject> info = infoo.getMap();
             BObject fileso = info.get("files");
@@ -82,8 +82,9 @@ public class torrentParser extends AbstractParser implements Parser {
                 }
             }
             BObject nameo = info.get("name");
-            if (nameo != null) name = new String(nameo.getString());
+            if (nameo != null) title = new String(nameo.getString());
         }
+        if (title == null || title.length() == 0) title = location.getFileName();
         try {
             return new Document[]{new Document(
                     location,
@@ -91,7 +92,7 @@ public class torrentParser extends AbstractParser implements Parser {
                     charset,
                     null,
                     null,
-                    name, // title
+                    title, // title
                     comment, // author 
                     location.getHost(),
                     null,

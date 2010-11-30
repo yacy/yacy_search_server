@@ -232,7 +232,7 @@ dc_rights
 
     public InputStream getText() {
         try {
-            if (this.text == null) return null;
+            if (this.text == null) return new ByteArrayInputStream("".getBytes());
 
             if (this.text instanceof File) {
                 this.textStream = new BufferedInputStream(new FileInputStream((File)this.text));
@@ -245,7 +245,7 @@ dc_rights
         } catch (final Exception e) {
             Log.logException(e);
         }
-        return null; 
+        return new ByteArrayInputStream("".getBytes());
     }
     
     public byte[] getTextBytes() {

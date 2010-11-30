@@ -132,7 +132,7 @@ public final class Condenser {
         
         Map.Entry<MultiProtocolURI, String> entry;
         if (indexText) {
-            createCondensement(document.getText(), meaningLib);        
+            createCondensement(document.getText(), meaningLib);
             // the phrase counter:
             // phrase   0 are words taken from the URL
             // phrase   1 is the MainTitle
