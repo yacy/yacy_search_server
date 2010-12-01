@@ -287,6 +287,7 @@ public final class Condenser {
     }
 
     private void createCondensement(final InputStream is, final DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
+        assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
         StringBuilder sentence = new StringBuilder(100);
         String word = "";
@@ -513,6 +514,7 @@ public final class Condenser {
         private DidYouMeanLibrary meaningLib;
 
         public sievedWordsEnum(final InputStream is, final DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
+            assert is != null;
             this.e = new unsievedWordsEnum(is);
             this.buffer = nextElement0();
             this.meaningLib = meaningLib;
@@ -557,6 +559,7 @@ public final class Condenser {
         private int sIndex;
 
         public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
+            assert is != null;
             e = new sentencesFromInputStreamEnum(is);
             s = new ArrayList<StringBuilder>();
             sIndex = 0;
@@ -634,6 +637,7 @@ public final class Condenser {
     }
     
     public static sentencesFromInputStreamEnum sentencesFromInputStream(final InputStream is) {
+        assert is != null;
         try {
             return new sentencesFromInputStreamEnum(is);
         } catch (final UnsupportedEncodingException e) {
@@ -651,6 +655,7 @@ public final class Condenser {
         private boolean pre = false;
 
         public sentencesFromInputStreamEnum(final InputStream is) throws UnsupportedEncodingException {
+            assert is != null;
             raf = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             buffer = nextElement0();
             counter = 0;

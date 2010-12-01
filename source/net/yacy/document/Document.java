@@ -112,12 +112,7 @@ public class Document {
         this.outboundLinks = -1;
         this.languages = languages;
         this.indexingDenied = indexingDenied;
-        
-        if (text == null)
-            this.text = new ByteArrayOutputStream();
-        else {
-            this.text = text;
-        }
+        this.text = text == null ? new ByteArrayOutputStream() : text;
     }
     
     public void setInboundLinks(int il) {

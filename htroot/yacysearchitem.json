@@ -2,6 +2,7 @@
     {
       "title": "#[title-json]#",
       "link": "#[link]#",
+      "code": "#[code]#",
       "description": "#[description-json]#",
       "pubDate": "#[date822]#",
       "size": "#[size]#",

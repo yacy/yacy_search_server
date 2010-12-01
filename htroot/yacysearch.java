@@ -318,7 +318,7 @@ public class yacysearch {
                 String ft = querystring.substring(filetype + 9, ftb);
                 querystring = querystring.replace("filetype:" + ft, "");
                 while (ft.length() > 0 && ft.charAt(0) == '.') ft = ft.substring(1);
-                if(ft.length() > 0) {
+                if (ft.length() > 0) {
                     if (urlmask == null) {
                         urlmask = ".*\\." + ft;
                     } else {

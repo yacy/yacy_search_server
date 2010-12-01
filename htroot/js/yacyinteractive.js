@@ -11,6 +11,8 @@ var totalResults = 0;
 var filetypes;
 var topics;
 var script = "";
+var modifier = "";
+var modifiertype = "";
 
 function search(search) {
   query = search;
@@ -49,14 +51,23 @@ function preparepage(str) {
   topics = navget(firstChannel.navigation, "topics");
   filetypes = {};
   script = "";
-  
-  document.getElementById("searchresults").innerHTML = resultList();
+  if (query.length >= 13 && query.substring(query.length - 13, query.length - 3) == " filetype:") {
+    modifier = query.substring(query.length - 12);
+  }
+  if (modifier != "") modifiertype = modifier.substring(modifier.length - 3)
+
+
+  if (modifiertype == "png" || modifiertype == "gif" || modifiertype == "jpg") {
+    document.getElementById("searchresults").innerHTML = resultImages();
+  } else {
+    document.getElementById("searchresults").innerHTML = resultList();
+  }
   document.getElementById("searchnavigation").innerHTML = resultStart();
   hideDownloadScript();
 }
 
 function makeDownloadScript() {
-  document.getElementById("downloadscript").innerHTML = "<div style=\"float:left\"><pre>" + script + "</pre></div>";
+  document.getElementById("downloadscript").innerHTML = "<div style=\"float:left\"><pre>" + script + "</pre><br/></div>";
   document.getElementById("downloadbutton").innerHTML = "<input id=\"downloadbutton\" type=\"button\" value=\"hide the download script\" onClick=\"hideDownloadScript();\"/>";
 }
 
@@ -91,8 +102,8 @@ function resultStart() {
 	  html += "<span style=\"display:block\">apply a <b>filter</b> by filetype:&nbsp;&nbsp;&nbsp;&nbsp;" + extnav + "</span>";
   } else {
       // check if there is a filetype constraint and offer a removal
-      if (query.length >= 13 && query.substring(query.length - 13, query.length - 3) == " filetype:") {
-        html += "<span style=\"display:block\"><a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query.substring(0, query.length - 12) + "\">remote the filter '" + query.substring(query.length - 12) + "'</a></span>";
+      if (modifier != "") {
+        html += "<span style=\"display:block\"><a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=" + query.substring(0, query.length - 12) + "\">remove the filter '" + modifier + "'</a></span>";
       }
   }
 
@@ -113,27 +124,22 @@ function resultStart() {
 function resultList() {
   var html = "";
   if (searchresult.length > 0) {
-    var item;
     html += "<table class=\"sortable\" id=\"sortable\" border=\"0\" cellpadding=\"0\" cellspacing=\"1\" width=\"99%\">";
-    html += "<tr class=\"TableHeader\" valign=\"bottom\">";
-    html += "<td width=\"40\">Protocol</td>";
-    html += "<td width=\"60\">Host</td>";
-    html += "<td width=\"260\">Path</td>";
-    html += "<td width=\"360\">Name</td>";
-    html += "<td width=\"60\">Size</td>";
-    //html += "<td>Description</td>";
-    html += "<td width=\"70\">Date</td></tr>";
-    for (var i = 0; i < searchresult.length; i++) {
-      var item = searchresult[i];
-      html += resultLine(item);
-    }
+    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"70\">Date</td></tr>";
+    for (var i = 0; i < searchresult.length; i++) { html += resultLine("row", searchresult[i]); }
     html += "</table>";
   }
   return html;
 }
 
-function resultLine(item) {
+function resultImages() {
   var html = "";
+  for (var i = 0; i < searchresult.length; i++) { html += resultLine("image", searchresult[i]); }
+  return html;
+}
+
+function resultLine(type, item) {
+  // evaluate item
   p = item.link.indexOf("//");
   protocol = "";
   host = "";
@@ -145,23 +151,14 @@ function resultLine(item) {
     path = item.link.substring(q + 1);
   }
   if (path.length >= 40) path = path.substring(0, 18) + "..." + path.substring(path.length - 19);
-  html += "<tr class=\"TableCellLight\">";
-  html += "<td align=\"left\">" + protocol + "</td>";
-  html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";
-  html += "<td align=\"left\"><a href=\"" + item.link + "\">" + path + "</a></td>";
   title = item.title;
   if (title == "") title = path;
   if (title.length >= 60) title = title.substring(0, 28) + "..." + title.substring(title.length - 29);
-  html += "<td align=\"left\"><a href=\"" + item.link + "\">" + title + "</a></td>";
-  html += "<td align=\"right\">" + item.sizename + "</td>";
-  //html += "<td>" + item.description + "</td>";
   pd = item.pubDate;
   if (pd.substring(pd.length - 6) == " +0000") pd = pd.substring(0, pd.length - 6);
   if (pd.substring(pd.length - 9) == " 00:00:00") pd = pd.substring(0, pd.length - 9);
   if (pd.substring(pd.length - 5) == " 2010") pd = pd.substring(0, pd.length - 5);
-  html += "<td align=\"right\">" + pd + "</td>";
-  html += "</tr>";
-  
+    
   // update navigation
   if (item.link && item.link.length > 4) {
     ext = item.link.substring(item.link.length - 4);
@@ -178,6 +175,30 @@ function resultLine(item) {
   // update download script
   script += "curl -OL \"" + item.link + "\"\n";
   
-  // return table row
+  // make table row
+  var html = "";
+  if (type == "row") {
+    html += "<tr class=\"TableCellLight\">";
+    html += "<td align=\"left\">" + protocol + "</td>";
+    html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";
+    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + path + "</a></td>";
+    html += "<td align=\"left\"><a href=\"" + item.link + "\">" + title + "</a></td>";
+    html += "<td align=\"right\">" + item.sizename + "</td>";
+    //html += "<td>" + item.description + "</td>";
+    html += "<td align=\"right\">" + pd + "</td>";
+    html += "</tr>";
+  }
+  if (type == "image") {
+    html += "<div style=\"float:left\">";
+    html += "<a href=\"" + item.link + "\" class=\"thumblink\" onclick=\"return hs.expand(this)\">";
+    html += "<img src=\"/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=" + item.code + "\" alt=\"" + title + "\" />";
+    html += "</a>";
+    var name = title;
+    while ((p = name.indexOf("/")) >= 0) { name = name.substring(p + 1); }
+    html += "<div class=\"highslide-caption\"><a href=\"" + item.link + "\">" + name + "</a><br /><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></div>";
+    html += "</div>";
+  }
+    
+  // return entry
   return html;
 }

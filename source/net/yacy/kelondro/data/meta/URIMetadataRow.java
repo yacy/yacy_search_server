@@ -555,8 +555,8 @@ public class URIMetadataRow implements URIMetadata {
             this.dc_publisher = publisher;
         }
         public boolean matches(Pattern matcher) {
-            if (this.urlRaw != null) return matcher.matcher(this.urlRaw).matches();
-            if (this.url != null) return matcher.matcher(this.url.toNormalform(true, true)).matches();
+            if (this.urlRaw != null) return matcher.matcher(this.urlRaw.toLowerCase()).matches();
+            if (this.url != null) return matcher.matcher(this.url.toNormalform(true, true).toLowerCase()).matches();
             return false;
         }
         public DigestURI url() {

@@ -185,7 +185,7 @@ public final class QueryParams {
         this.contentdom = contentdom;
         this.itemsPerPage = Math.min((specialRights) ? 1000 : 100, itemsPerPage);
         this.offset = Math.min((specialRights) ? 10000 : 1000, offset);
-        this.urlMask = Pattern.compile(urlMask);
+        this.urlMask = Pattern.compile(urlMask.toLowerCase());
         this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
         this.prefer = Pattern.compile(prefer);
         this.prefer_isMatchnothing = this.prefer.toString().equals(matchnothing_pattern.toString());

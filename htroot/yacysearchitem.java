@@ -104,18 +104,17 @@ public class yacysearchitem {
             final ResultEntry result = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
             if (result == null) return prop; // no content
 
-            
-            final int port=result.url().getPort();
+            DigestURI resultURL = result.url();
+            final int port = resultURL.getPort();
             DigestURI faviconURL = null;
-            if (isHtml && !sb.isIntranetMode() && !result.url().isLocal()) try {
-                faviconURL = new DigestURI(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
+            if (isHtml && !sb.isIntranetMode() && !resultURL.isLocal()) try {
+                faviconURL = new DigestURI(resultURL.getProtocol() + "://" + resultURL.getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
             } catch (final MalformedURLException e1) {
                 Log.logException(e1);
                 faviconURL = null;
             }
             
             prop.put("content", 1); // switch on specific content
-            
             prop.put("content_authorized", authenticated ? "1" : "0");
             prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
             prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + new String(result.hash()) + "&urlmaskfilter=.*");
@@ -138,9 +137,9 @@ public class yacysearchitem {
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
-            prop.putHTML("content_host", result.url().getHost() == null ? "" : result.url().getHost());
-            prop.putHTML("content_file", result.url().getFile());
-            prop.putHTML("content_path", result.url().getPath());
+            prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
+            prop.putHTML("content_file", resultURL.getFile());
+            prop.putHTML("content_path", resultURL.getPath());
             prop.put("content_nl", (item == 0) ? 0 : 1);
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author
@@ -167,9 +166,17 @@ public class yacysearchitem {
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.FINALIZATION, "" + item, 0, 0), false);
+            String ext = resultURL.getFileExtension().toLowerCase();
+            if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
+                String license = sb.licensedURLs.aquireLicense(resultURL);
+                prop.put("content_code", license);
+            } else {
+                prop.put("content_code", "");
+            }
             
             return prop;
         }
+        
         
         if (theQuery.contentdom == ContentDomain.IMAGE) {
             // image search; shows thumbnails
@@ -179,10 +186,11 @@ public class yacysearchitem {
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
+                String license = sb.licensedURLs.aquireLicense(ms.href);
                 sb.loader.loadIfNotExistBackground(ms.href.toNormalform(true, false), 1024 * 1024 * 10);
                 prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
                 prop.putHTML("content_item_href", ms.href.toNormalform(true, false));
-                prop.put("content_item_code", sb.licensedURLs.aquireLicense(ms.href));
+                prop.put("content_item_code", license);
                 prop.putHTML("content_item_name", shorten(ms.name, namelength));
                 prop.put("content_item_mimetype", ms.mime);
                 prop.put("content_item_fileSize", ms.fileSize);
