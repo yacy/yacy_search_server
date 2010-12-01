@@ -29,17 +29,18 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     ::
 	#%env/templates/embeddedheader.template%#
 #(/display)#
-
-<form class="search small" id="searchform" action="yacyinteractive.html" method="get" onkeyup="xmlhttpPost(); return false;">
+<div style="float:left">
+<div style="float:left"><form class="search small" id="searchform" action="yacyinteractive.html" method="get" onkeyup="xmlhttpPost(); return false;">
   <h2>#[promoteSearchPageGreeting]#</h2>
   <div class="yacylogo">
     <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch"/></a>
   </div>
   <fieldset class="yacys"><input id="query" name="query" type="text" value="#[query]#" size="50" maxlength="80" /></fieldset>
-
 <!--<pre>Raw JSON String: <div id="raw"></div></pre>-->
 </form>
-<div id="searchresults"></div>
+<div id="searchnavigation" style="float:left"></div>
+<div id="downloadscript" style="float:left"></div>
+<div id="searchresults" style="float:left"></div>
 <script type="text/javascript">
 //<![CDATA[
 document.getElementById("query").focus();
