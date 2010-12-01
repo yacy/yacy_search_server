@@ -592,6 +592,7 @@ public class Balancer {
             try {
                 return (entry == null) ? null : new Request(entry);
             } catch (final IOException e) {
+                Log.logException(e);
                 rowIterator = null;
                 return null;
             }

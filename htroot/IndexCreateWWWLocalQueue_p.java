@@ -31,9 +31,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -114,6 +114,7 @@ public class IndexCreateWWWLocalQueue_p {
                             // iterating through the list of URLs
                             final Iterator<Request> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.STACK_TYPE_CORE);
                             Request entry;
+                            List<byte[]> removehashes = new ArrayList<byte[]>();
                             while (iter.hasNext()) {
                                 if ((entry = iter.next()) == null) continue;
                                 String value = null;
@@ -129,12 +130,11 @@ public class IndexCreateWWWLocalQueue_p {
                                     default: value = null; break location;
                                 }
                                 
-                                if (value != null) {
-                                    final Matcher matcher = compiledPattern.matcher(value);
-                                    if (matcher.find()) {
-                                        sb.crawlQueues.noticeURL.removeByURLHash(entry.url().hash());
-                                    }                                    
-                                }
+                                if (value != null && compiledPattern.matcher(value).find()) removehashes.add(entry.url().hash());
+                            }
+                            Log.logInfo("IndexCreateWWWLocalQueue", "created a remove list with " + removehashes.size() + " entries for pattern '" + pattern + "'");
+                            for (byte[] b: removehashes) {
+                                sb.crawlQueues.noticeURL.removeByURLHash(b);
                             }
                         }
                     } catch (final PatternSyntaxException e) {

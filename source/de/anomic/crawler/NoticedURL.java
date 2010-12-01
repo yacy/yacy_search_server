@@ -193,6 +193,7 @@ public class NoticedURL {
             try {return remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
             return false;
         } catch (RowSpaceExceededException e) {
+            Log.logException(e);
             return false;
         }
     }
