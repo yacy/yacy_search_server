@@ -80,14 +80,13 @@ public class tarParser extends AbstractParser implements Parser {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
                     FileUtils.copy(tis, tmp, entry.getSize());
                     subDocs = TextParser.parseSource(MultiProtocolURI.newURL(url,"#" + name), mime, null, tmp);
+                    if (subDocs == null) continue;
+                    for (Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {
                     log.logWarning("tar parser entry " + name + ": " + e.getMessage());
                 } finally {
                     if (tmp != null) FileUtils.deletedelete(tmp);
                 }
-                if (subDocs == null) continue;
-                
-                for (Document d: subDocs) docacc.add(d);
             } catch (IOException e) {
                 log.logWarning("tar parser:" + e.getMessage());
                 break;

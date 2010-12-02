@@ -140,6 +140,7 @@ public class FTPLoader {
                     response = getFile(ftpClient, request, acceptOnlyParseable);
                 } catch (final Exception e) {
                     // add message to errorLog
+                    e.printStackTrace();
                     (new PrintStream(berr)).print(e.getMessage());
                 }
             }
@@ -149,9 +150,9 @@ public class FTPLoader {
         // pass the downloaded resource to the cache manager
         if (berr.size() > 0 || response == null) {
             // some error logging
-            final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
-            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "server download" + detail);
-            throw new IOException("FTPLoader: Unable to download URL " + request.url().toString() + detail);
+            final String detail = (berr.size() > 0) ? "Errorlog: " + berr.toString() : "";
+            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, " ftp server download, " + detail);
+            throw new IOException("FTPLoader: Unable to download URL '" + request.url().toString() + "': " + detail);
         }
         
         Latency.update(request.url(), System.currentTimeMillis() - start);
@@ -207,7 +208,7 @@ public class FTPLoader {
         return true;
     }
 
-    private Response getFile(final FTPClient ftpClient, final Request request, boolean acceptOnlyParseable) throws Exception {
+    private Response getFile(final FTPClient ftpClient, final Request request, boolean acceptOnlyParseable) throws IOException {
         // determine the mimetype of the resource
         final DigestURI url = request.url();
         final String mime = TextParser.mimeOf(url);
@@ -218,7 +219,10 @@ public class FTPLoader {
         
         // create response header
         RequestHeader requestHeader = new RequestHeader();
-        if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash()).toNormalform(true, false));
+        if (request.referrerhash() != null) {
+            DigestURI refurl = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+            if (refurl != null) requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true, false));
+        }
         ResponseHeader responseHeader = new ResponseHeader();
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(fileDate));
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);

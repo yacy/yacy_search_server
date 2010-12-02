@@ -40,7 +40,7 @@ public class genericParser extends AbstractParser implements Parser {
     
     public Document[] parse(MultiProtocolURI location, String mimeType, String charset, InputStream source1) throws Parser.Failure, InterruptedException {
 
-        return new Document[]{new Document(
+        Document[] docs = new Document[]{new Document(
                 location,
                 mimeType,
                 charset,
@@ -56,5 +56,7 @@ public class genericParser extends AbstractParser implements Parser {
                 null,
                 null,
                 false)};
+        for (Document d: docs) { assert d.getText() != null : "mimeType = " + mimeType; } // verify docs
+        return docs;
     }
 }

@@ -77,7 +77,6 @@ public class Document {
     private Map<String, String> emaillinks;
     private MultiProtocolURI favicon;
     private boolean resorted;
-    private InputStream textStream;
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     private Set<String> languages;
     private boolean indexingDenied;
@@ -228,15 +227,19 @@ dc_rights
     public InputStream getText() {
         try {
             if (this.text == null) return new ByteArrayInputStream("".getBytes());
-
-            if (this.text instanceof File) {
-                this.textStream = new BufferedInputStream(new FileInputStream((File)this.text));
+            if (this.text instanceof String) {
+                return new ByteArrayInputStream(((String) this.text).getBytes("UTF-8"));
+            } else if (this.text instanceof InputStream) {
+                return (InputStream) this.text;
+            } else if (this.text instanceof File) {
+                return new BufferedInputStream(new FileInputStream((File)this.text));
             } else if (this.text instanceof byte[]) {
-                this.textStream =  new ByteArrayInputStream((byte[]) this.text);
+                return new ByteArrayInputStream((byte[]) this.text);
             } else if (this.text instanceof ByteArrayOutputStream) {
-                this.textStream =  new ByteArrayInputStream(((ByteArrayOutputStream) this.text).toByteArray());
+                return new ByteArrayInputStream(((ByteArrayOutputStream) this.text).toByteArray());
             }
-            return this.textStream;
+            assert false : this.text.getClass().toString();
+            return null;
         } catch (final Exception e) {
             Log.logException(e);
         }
@@ -246,28 +249,44 @@ dc_rights
     public byte[] getTextBytes() {
         try {
             if (this.text == null) return new byte[0];
-
-            if (this.text instanceof File) {
-                return FileUtils.read((File)this.text);
+            if (this.text instanceof String) {
+                return ((String) this.text).getBytes("UTF-8");
+            } else if (this.text instanceof InputStream) {
+                return FileUtils.read((InputStream) this.text);
+            } else if (this.text instanceof File) {
+                return FileUtils.read((File) this.text);
             } else if (this.text instanceof byte[]) {
-                return (byte[])this.text;
+                return (byte[]) this.text;
             } else if (this.text instanceof ByteArrayOutputStream) {
                 return ((ByteArrayOutputStream) this.text).toByteArray();
             }
+            assert false : this.text.getClass().toString();
+            return null;
         } catch (final Exception e) {
             Log.logException(e);
         }
-        return new byte[0];             
+        return new byte[0];
     }
     
     public long getTextLength() {
-        if (this.text == null) return 0;
-        if (this.text instanceof File) return ((File) this.text).length();
-        else if (this.text instanceof byte[]) return ((byte[]) this.text).length;
-        else if (this.text instanceof ByteArrayOutputStream) {
-            return ((ByteArrayOutputStream)this.text).size();
+        try {
+            if (this.text == null) return -1;
+            if (this.text instanceof String) {
+                return ((String) this.text).length();
+            } else if (this.text instanceof InputStream) {
+                return ((InputStream) this.text).available();
+            } else if (this.text instanceof File) {
+                return ((File) this.text).length();
+            } else if (this.text instanceof byte[]) {
+                return ((byte[]) this.text).length;
+            } else if (this.text instanceof ByteArrayOutputStream) {
+                return ((ByteArrayOutputStream) this.text).size();
+            }
+            assert false : this.text.getClass().toString();
+            return -1;
+        } catch (final Exception e) {
+            Log.logException(e);
         }
-        
         return -1; 
     }
     
@@ -590,27 +609,21 @@ dc_rights
     }
     
     public void close() {
+        if (this.text == null) return;
+        
         // try close the output stream
-        if (this.textStream != null) {
-            try {
-                this.textStream.close();
-            } catch (final Exception e) { 
-                /* ignore this */
-            } finally {
-                this.textStream = null;
-            }
+        if (this.text instanceof InputStream) try {
+            ((InputStream) this.text).close();
+        } catch (final Exception e) {} finally {
+            this.text = null;
         }
         
         // delete the temp file
-        if ((this.text != null) && (this.text instanceof File)) {
-            try { 
-                FileUtils.deletedelete((File) this.text); 
-            } catch (final Exception e) {
-                /* ignore this */
-            } finally {
-                this.text = null;
-            }
-        }        
+        if (this.text instanceof File) try { 
+            FileUtils.deletedelete((File) this.text); 
+        } catch (final Exception e) {} finally {
+            this.text = null;
+        }
     }
     
     /**

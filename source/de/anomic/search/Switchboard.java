@@ -1779,7 +1779,7 @@ public final class Switchboard extends serverSwitch {
                 return null;
             }
         }
-        
+        assert b != null;
         try {
             // parse the document
             documents = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), b);

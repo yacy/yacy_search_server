@@ -140,6 +140,7 @@ public final class TextParser {
         ) throws InterruptedException, Parser.Failure {
 
         BufferedInputStream sourceStream = null;
+        Document[] docs = null;
         try {
             if (log.isFine()) log.logFine("Parsing '" + location + "' from file");
             if (!sourceFile.exists() || !sourceFile.canRead() || sourceFile.length() == 0) {
@@ -148,17 +149,17 @@ public final class TextParser {
                 throw new Parser.Failure(errorMsg, location);
             }
             sourceStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            return parseSource(location, mimeType, charset, sourceFile.length(), sourceStream);
+            docs = parseSource(location, mimeType, charset, sourceFile.length(), sourceStream);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             log.logSevere("Unexpected exception in parseSource from File: " + e.getMessage(), e);
             throw new Parser.Failure("Unexpected exception: " + e.getMessage(), location);
         } finally {
-            if (sourceStream != null)try {
-                sourceStream.close();
-            } catch (final Exception ex) {}
+            if (sourceStream != null) try { sourceStream.close(); } catch (final Exception ex) {}
         }
+        for (Document d: docs) { assert d.getText() != null; } // verify docs
+        return docs;
     }
     
     public static Document[] parseSource(
@@ -193,7 +194,9 @@ public final class TextParser {
         // then we use only one stream-oriented parser.
         if (idioms.size() == 1 || contentLength > Integer.MAX_VALUE) {
             // use a specific stream-oriented parser
-            return parseSource(location, mimeType, idioms.get(0), charset, contentLength, sourceStream);
+            Document[] docs = parseSource(location, mimeType, idioms.get(0), charset, contentLength, sourceStream);
+            for (Document d: docs) { assert d.getText() != null; } // verify docs
+            return docs;
         }
         
         // in case that we know more parsers we first transform the content into a byte[] and use that as base
@@ -204,7 +207,9 @@ public final class TextParser {
         } catch (IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
-        return parseSource(location, mimeType, idioms, charset, b);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, b);
+        for (Document d: docs) { assert d.getText() != null; } // verify docs
+        return docs;
     }
 
     private static Document[] parseSource(
@@ -222,7 +227,9 @@ public final class TextParser {
 
         if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         try {
-            return parser.parse(location, mimeType, documentCharset, sourceStream);
+            Document[] docs = parser.parse(location, mimeType, documentCharset, sourceStream);
+            for (Document d: docs) { assert d.getText() != null; } // verify docs
+            return docs;
         } catch (Exception e) {
             throw new Parser.Failure("parser failed: " + parser.getName(), location);
         }
@@ -240,11 +247,11 @@ public final class TextParser {
         final String documentCharset = htmlParser.patchCharsetEncoding(charset);
         assert !parsers.isEmpty();
 
-        Document[] doc = null;
+        Document[] docs = null;
         HashMap<Parser, Parser.Failure> failedParser = new HashMap<Parser, Parser.Failure>();
         for (Parser parser: parsers) {
             try {
-                doc = parser.parse(location, mimeType, documentCharset, new ByteArrayInputStream(sourceArray));
+                docs = parser.parse(location, mimeType, documentCharset, new ByteArrayInputStream(sourceArray));
             } catch (Parser.Failure e) {
                 failedParser.put(parser, e);
                 //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
@@ -252,10 +259,10 @@ public final class TextParser {
                 failedParser.put(parser, new Parser.Failure(e.getMessage(), location));
                 //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
             }
-            if (doc != null) break;
+            if (docs != null) break;
         }
         
-        if (doc == null) {
+        if (docs == null) {
             if (failedParser.size() == 0) {
                 final String errorMsg = "Parsing content with file extension '" + location.getFileExtension() + "' and mimetype '" + mimeType + "' failed.";
                 //log.logWarning("Unable to parse '" + location + "'. " + errorMsg);
@@ -269,7 +276,8 @@ public final class TextParser {
                 throw new Parser.Failure("All parser failed: " + failedParsers, location);
             }
         }
-        return doc;
+        for (Document d: docs) { assert d.getText() != null : "mimeType = " + mimeType; } // verify docs
+        return docs;
     }
     
     /**
@@ -335,7 +343,6 @@ public final class TextParser {
         
         return idioms;
     }
-    
     public static String supportsMime(String mimeType) {
         if (mimeType == null) return null;
         mimeType = normalizeMimeType(mimeType);
@@ -343,7 +350,7 @@ public final class TextParser {
         if (mime2parser.get(mimeType) == null) return "no parser for mime '" + mimeType + "' available";
         return null;
     }
-    
+
     public static String supportsExtension(final MultiProtocolURI url) {
         String ext = url.getFileExtension().toLowerCase();
         if (ext == null || ext.length() == 0) return null;

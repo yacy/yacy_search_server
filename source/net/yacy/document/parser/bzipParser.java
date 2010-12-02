@@ -58,6 +58,7 @@ public class bzipParser extends AbstractParser implements Parser {
     public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
         
         File tempFile = null;
+        Document[] docs;
         try {           
             /*
              * First we have to consume the first two char from the stream. Otherwise
@@ -90,7 +91,7 @@ public class bzipParser extends AbstractParser implements Parser {
             out.close();
             
             // creating a new parser class to parse the unzipped content
-            return TextParser.parseSource(location, null, null, tempFile);
+            docs = TextParser.parseSource(location, null, null, tempFile);
         } catch (final Exception e) {  
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -99,5 +100,6 @@ public class bzipParser extends AbstractParser implements Parser {
         } finally {
             if (tempFile != null) FileUtils.deletedelete(tempFile);
         }
+        return docs;
     }
 }

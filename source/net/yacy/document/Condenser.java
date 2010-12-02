@@ -132,6 +132,7 @@ public final class Condenser {
         
         Map.Entry<MultiProtocolURI, String> entry;
         if (indexText) {
+            assert document.getText() != null : document.dc_identifier();
             createCondensement(document.getText(), meaningLib);
             // the phrase counter:
             // phrase   0 are words taken from the URL

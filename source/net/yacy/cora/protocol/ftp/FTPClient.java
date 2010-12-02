@@ -2294,7 +2294,7 @@ public class FTPClient {
                 // boolean success = !isNotPositiveCompletion(reply);
             } finally {
                 // shutdown connection
-                if(ClientStream != null) {
+                if (ClientStream != null) {
                     ClientStream.close();
                 }
                 closeDataSocket();
