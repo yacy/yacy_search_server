@@ -60,6 +60,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -90,9 +92,6 @@ public class FTPClient {
 
     // data socket timeout
     private int DataSocketTimeout = 0; // in seconds (default infinite)
-
-    // minimal data rate (to calculate timeout with max. filesize)
-    private static final int DataSocketRate = 100;// Byte/s
 
     // socket for data transactions
     private ServerSocket DataSocketActive = null;
@@ -1031,7 +1030,9 @@ public class FTPClient {
     private boolean isNotPositiveCompletion(final String reply) {
         return getStatus(reply) != 2;
     }
-
+    
+    private final static Pattern lsStyle = Pattern.compile("^([-\\w]{10}).\\s*\\d+\\s+[-\\w]+\\s+[-\\w]+\\s+(\\d+)\\s+(\\w{3})\\s+(\\d+)\\s+(\\d+:?\\d*)\\s+(.*)$");
+    
     /**
      * parses output of LIST from ftp-server currently UNIX ls-style only, ie:
      * -rw-r--r-- 1 root other 531 Jan 29 03:26 README dr-xr-xr-x 2 root 512 Apr
@@ -1041,10 +1042,7 @@ public class FTPClient {
      * @return null if not parseable
      */
     private static entryInfo parseListData(final String line) {
-        final Pattern lsStyle = Pattern
-                .compile("^([-\\w]{10}).\\s*\\d+\\s+[-\\w]+\\s+[-\\w]+\\s+(\\d+)\\s+(\\w{3})\\s+(\\d+)\\s+(\\d+:?\\d*)\\s+(.*)$");
-        // groups: 1: rights, 2: size, 3: month, 4: day, 5: time or year, 6:
-        // name
+        // groups: 1: rights, 2: size, 3: month, 4: day, 5: time or year, 6: name
         final Matcher tokens = lsStyle.matcher(line);
         if (tokens.matches()) {
             final boolean isDir = tokens.group(1).startsWith("d");
@@ -1083,13 +1081,16 @@ public class FTPClient {
         return null;
     }
 
+    
+    public static final entryInfo POISON_entryInfo = new entryInfo();
+    
     /**
      * parameter class
      * 
      * @author danielr
      * @since 2008-03-13 r4558
      */
-    private static class entryInfo {
+    public static class entryInfo {
         /**
          * is this a directory?
          */
@@ -1105,8 +1106,15 @@ public class FTPClient {
         /**
          * name of entry
          */
-        public final String name;
+        public String name;
 
+        public entryInfo() {
+            this.isDir = false;
+            this.size = -1;
+            this.date = null;
+            this.name = null;
+        }
+        
         /**
          * constructor
          * 
@@ -2488,7 +2496,7 @@ public class FTPClient {
         }
     }
 
-    public static void dir(final String host, final String remotePath, final String account, final String password) {
+    private static void dir(final String host, final String remotePath, final String account, final String password) {
         try {
             final FTPClient c = new FTPClient();
             c.exec("open " + host, false);
@@ -2501,6 +2509,51 @@ public class FTPClient {
         }
     }
 
+    /**
+     * generate a list of all files on a ftp server using the anonymous account
+     * @param host
+     * @return a list of entryInfo from all files of the ftp server
+     * @throws IOException 
+     */
+    public static BlockingQueue<entryInfo> sitelist(final String host, final int port) throws IOException {
+        final FTPClient c = new FTPClient();
+        c.open(host, port);
+        c.login("anonymous", "anomic@");
+        final LinkedBlockingQueue<entryInfo> queue = new LinkedBlockingQueue<entryInfo>();
+        new Thread() {
+            public void run() {
+                try {
+                    sitelist(c, "/", queue);
+                    c.quit();
+                } catch (Exception e) {} finally {
+                    queue.add(POISON_entryInfo);
+                }
+            }
+        }.start();
+        return queue;
+    }
+    private static void sitelist(final FTPClient c, String path, LinkedBlockingQueue<entryInfo> queue) {
+        List<String> list;
+        try {
+            list = c.list(path, true);
+        } catch (IOException e) {
+            return;
+        }
+        if (!path.endsWith("/")) path += "/";
+        entryInfo info;
+        for (final String line : list) {
+            info = parseListData(line);
+            if (info != null) {
+                if (info.isDir) {
+                    sitelist(c, path + info.name, queue);
+                } else {
+                    if (!info.name.startsWith("/")) info.name = path + info.name;
+                    queue.add(info);
+                }
+            }
+        }
+    }
+    
     public StringBuilder dirhtml(String remotePath) throws IOException {
         // returns a directory listing using an existing connection
             if (isFolder(remotePath) && '/' != remotePath.charAt(remotePath.length()-1)) {
@@ -2516,7 +2569,7 @@ public class FTPClient {
             return dirhtml(base, remotemessage, remotegreeting, remotesystem, list, true);
     }
 
-    public static StringBuilder dirhtml(
+    private static StringBuilder dirhtml(
             final String host, final int port, final String remotePath,
             final String account, final String password) throws IOException {
         // opens a new connection and returns a directory listing as html
@@ -2583,25 +2636,6 @@ public class FTPClient {
         page.append("</body></html>\n");
 
         return page;
-    }
-
-    public static void dirAnonymous(final String host, final String remotePath) {
-        dir(host, remotePath, "anonymous", "anomic");
-    }
-
-    public static void dirAnonymousHtml(final String host, final int port, final String remotePath, final String htmloutfile) {
-        try {
-            final StringBuilder page = dirhtml(host, port, remotePath, "anonymous", "anomic");
-            final File file = new File(htmloutfile);
-            FileOutputStream fos;
-            fos = new FileOutputStream(file);
-            fos.write(page.toString().getBytes());
-            fos.close();
-        } catch (final FileNotFoundException e) {
-            log.error(e);
-        } catch (final IOException e) {
-            log.error(e);
-        }
     }
 
     public static String put(final String host, File localFile, String remotePath, final String remoteName,
@@ -2734,9 +2768,20 @@ public class FTPClient {
             printHelp();
         } else if (args.length == 3) {
             if (args[0].equals("-dir")) {
-                dirAnonymous(args[1], args[2]);
+                dir(args[1], args[2], "anonymous", "anomic@");
             } else if (args[0].equals("-htmldir")) {
-                dirAnonymousHtml(args[1], 21, args[2], "dirindex.html");
+                try {
+                    final StringBuilder page = dirhtml(args[1], 21, args[2], "anonymous", "anomic@");
+                    final File file = new File("dirindex.html");
+                    FileOutputStream fos;
+                    fos = new FileOutputStream(file);
+                    fos.write(page.toString().getBytes());
+                    fos.close();
+                } catch (final FileNotFoundException e) {
+                    log.error(e);
+                } catch (final IOException e) {
+                    log.error(e);
+                }
             } else {
                 printHelp();
             }
