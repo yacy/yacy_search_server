@@ -294,12 +294,12 @@ public final class search {
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, abstracts.length() > 0, sb.loader);
             
             // set statistic details of search result and find best result index set
-            joincount = theSearch.getRankingResult().getLocalIndexCount();
+            joincount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount();
             prop.put("joincount", Integer.toString(joincount));
             if (joincount != 0) {
                 accu = theSearch.result().completeResults(3000);
             }
-            if (theSearch.getRankingResult().getLocalIndexCount() == 0 || abstracts.length() == 0) {
+            if (joincount <= 0 || abstracts.length() == 0) {
                 prop.put("indexcount", "");
                 prop.put("joincount", "0");
             } else {
@@ -394,7 +394,7 @@ public final class search {
 
         // prepare search statistics
         theQuery.remotepeer = client == null ? null : sb.peers.lookupByIP(Domains.dnsResolve(client), true, false, false);
-        theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalIndexCount() + theSearch.getRankingResult().getRemoteResourceSize();
+        theQuery.resultcount = (theSearch == null) ? 0 : joincount;
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();
         theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.result().getSnippetComputationTime();

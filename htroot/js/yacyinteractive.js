@@ -84,7 +84,13 @@ function resultStart() {
       html += "<div id=\"downloadbutton\" style=\"float:left\"></div></form>";
   } else {
       if (query == "") {
-         html += "please enter some search words";
+         html += "please enter some search words<br\>or use the following predefined search queries:<br\>";
+         html += "find images: ";
+         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=png+filetype:png\">png</a>),";
+         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=gif+filetype:gif\">gif</a>),";
+         html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=jpg+filetype:jpg\">jpg</a>)<br>";
+         html += "list: ";
+         html += "<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=pdf+/date+filetype:pdf\">recent pdf</a>,";
       } else {
          html += "no results";
       }
@@ -125,7 +131,7 @@ function resultList() {
   var html = "";
   if (searchresult.length > 0) {
     html += "<table class=\"sortable\" id=\"sortable\" border=\"0\" cellpadding=\"0\" cellspacing=\"1\" width=\"99%\">";
-    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"70\">Date</td></tr>";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"75\">Date</td></tr>";
     for (var i = 0; i < searchresult.length; i++) { html += resultLine("row", searchresult[i]); }
     html += "</table>";
   }

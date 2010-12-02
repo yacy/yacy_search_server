@@ -197,7 +197,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, peers, 300);
+            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, peers, 500);
         }
          
         // clean up events

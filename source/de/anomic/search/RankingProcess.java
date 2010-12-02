@@ -569,6 +569,10 @@ public final class RankingProcess extends Thread {
         return this.misses.iterator();
     }
     
+    public int getMissCount() {
+        return this.misses.size();
+    }
+    
     public StaticScore<String> getNamespaceNavigator() {
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ScoreCluster<String>();
         if (this.namespaceNavigator.size() < 2) this.namespaceNavigator.clear(); // navigators with one entry are not useful

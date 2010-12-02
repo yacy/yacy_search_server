@@ -176,7 +176,7 @@ public class yacysearch {
         // collect search attributes
         boolean newsearch = post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
         
-        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 10 : 100), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
+        int itemsPerPage = Math.min((authenticated) ? (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 100 : 1000) : (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ? 20 : 500), post.getInt("maximumRecords", post.getInt("count", 10))); // SRU syntax with old property as alternative
         int offset = (newsearch) ? 0 : post.getInt("startRecord", post.getInt("offset", 0));
         
         int newcount;
@@ -545,11 +545,13 @@ public class yacysearch {
 
             // log
             Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
-                    (theSearch.getRankingResult().getLocalIndexCount() + theSearch.getRankingResult().getRemoteResourceSize()) + " links found, " +
+                    "local-unfiltered(" + theSearch.getRankingResult().getLocalIndexCount() + "), " +
+                    "-local_miss(" + theSearch.getRankingResult().getMissCount() + "), " +
+                    "remote(" + theSearch.getRankingResult().getRemoteResourceSize() + ") links found, " +
                     (System.currentTimeMillis() - timestamp) + " ms");
 
             // prepare search statistics
-            theQuery.resultcount = theSearch.getRankingResult().getLocalIndexCount() + theSearch.getRankingResult().getRemoteResourceSize();
+            theQuery.resultcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteResourceSize();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
             theQuery.urlretrievaltime = theSearch.result().getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.result().getSnippetComputationTime();
@@ -613,12 +615,14 @@ public class yacysearch {
                 Log.logException(e);
             }
             
+            int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", Formatter.number(0, true));
             prop.put("num-results_itemsPerPage", itemsPerPage);
-            prop.put("num-results_totalcount", Formatter.number(theSearch.getRankingResult().getLocalIndexCount() + theSearch.getRankingResult().getRemoteResourceSize(), true));
+            prop.put("num-results_totalcount", Formatter.number(indexcount, true));
             prop.put("num-results_globalresults", (globalsearch) ? "1" : "0");
             prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
+            prop.put("num-results_globalresults_localMissCount", Formatter.number(theSearch.getRankingResult().getMissCount(), true));
             prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
@@ -633,7 +637,7 @@ public class yacysearch {
                 resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, null, originalUrlMask, navigation));
             	resnav.append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
-            final int numberofpages = Math.min(10, Math.max(1 + thispage, 1 + ((theSearch.getRankingResult().getLocalIndexCount() < 11) ? Math.max(30, theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize()) : theSearch.getRankingResult().getLocalIndexCount()) / theQuery.displayResults()));
+            final int numberofpages = Math.min(10,indexcount / theQuery.displayResults());
             for (int i = 0; i < numberofpages; i++) {
                 if (i == thispage) {
                     resnav.append("<img src=\"env/grafics/navs");
@@ -660,7 +664,7 @@ public class yacysearch {
             }
             String resnavs = resnav.toString();
             prop.put("num-results_resnav", resnavs);
-            prop.put("pageNavBottom", (theSearch.getRankingResult().getLocalIndexCount() - offset > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
+            prop.put("pageNavBottom", (indexcount - offset > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
             prop.put("pageNavBottom_resnav", resnavs);
         
             // generate the search result lines; the content will be produced by another servlet
