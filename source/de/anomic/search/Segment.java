@@ -250,7 +250,7 @@ public class Segment {
                 } catch (RowSpaceExceededException e) {
                     continue;
                 }
-                rankingProcess.add(container, false, sourceName, -1);
+                rankingProcess.add(container, true, sourceName, -1);
             }
         }
         if (rankingProcess != null) rankingProcess.oneFeederTerminated();

@@ -551,7 +551,7 @@ public class yacysearch {
                     (System.currentTimeMillis() - timestamp) + " ms");
 
             // prepare search statistics
-            theQuery.resultcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteResourceSize();
+            theQuery.resultcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteIndexCount();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
             theQuery.urlretrievaltime = theSearch.result().getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.result().getSnippetComputationTime();
@@ -615,7 +615,7 @@ public class yacysearch {
                 Log.logException(e);
             }
             
-            int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteResourceSize();
+            int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteIndexCount();
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", Formatter.number(0, true));
             prop.put("num-results_itemsPerPage", itemsPerPage);
@@ -637,7 +637,8 @@ public class yacysearch {
                 resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, null, originalUrlMask, navigation));
             	resnav.append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
-            final int numberofpages = Math.min(10,indexcount / theQuery.displayResults());
+            final int numberofpages = Math.min(10, 1 + ((indexcount - 1) / theQuery.displayResults()));
+            
             for (int i = 0; i < numberofpages; i++) {
                 if (i == thispage) {
                     resnav.append("<img src=\"env/grafics/navs");

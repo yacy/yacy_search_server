@@ -93,7 +93,7 @@ public final class search {
         final String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        final int     count  = Math.min(100, post.getInt("count", 0)); // maximum number of wanted results
+        final int     count  = Math.min(100, post.getInt("count", 10)); // maximum number of wanted results
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
@@ -301,7 +301,6 @@ public final class search {
             }
             if (joincount <= 0 || abstracts.length() == 0) {
                 prop.put("indexcount", "");
-                prop.put("joincount", "0");
             } else {
                 // attach information about index abstracts
                 final StringBuilder indexcount = new StringBuilder(6000);

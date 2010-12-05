@@ -166,6 +166,7 @@ public final class RankingProcess extends Thread {
         if (local) {
             this.local_resourceSize += index.size();
         } else {
+            assert fullResource >= 0;
             this.remote_resourceSize += fullResource;
             this.remote_peerCount++;
         }
@@ -292,26 +293,6 @@ public final class RankingProcess extends Thread {
         // returns from the current RWI list the best entry and removes this entry from the list
         WeakPriorityBlockingQueue<WordReferenceVars> m;
         WeakPriorityBlockingQueue.Element<WordReferenceVars> rwi = null;
-
-        // check if the doubleDomCache is filled
-        /*
-        boolean doubleDomCacheFilled = false;
-        synchronized (this.doubleDomCache) {
-            final Iterator<WeakPriorityBlockingQueue<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
-            while (i.hasNext()) {
-                try {
-                    m = i.next();
-                } catch (ConcurrentModificationException e) {
-                    Log.logException(e);
-                    break; // not the best solution...
-                }
-                if (m == null) continue;
-                if (m.isEmpty()) continue;
-                doubleDomCacheFilled = true;
-                break;
-            }
-        }
-        */
         
         // take one entry from the stack if there are entries on that stack or the feeding is not yet finished
         if (!feedingIsFinished() || stack.sizeQueue() > 0) try {
@@ -493,13 +474,6 @@ public final class RankingProcess extends Thread {
             }
             
             // accept url
-            /*
-            try {
-                this.handover.put(page.hash()); // remember that we handed over this url
-            } catch (RowSpaceExceededException e) {
-                Log.logException(e);
-            }
-            */
             return page;
         }
         return null;
@@ -543,11 +517,6 @@ public final class RankingProcess extends Thread {
     public int getLocalIndexCount() {
         // the number of results in the local peer after filtering
         return this.local_indexCount;
-    }
-    
-    public int getLocalResourceSize() {
-        // the number of hits in the local peer (index size, size of the collection in the own index)
-        return this.local_resourceSize;
     }
     
     public int getRemoteIndexCount() {

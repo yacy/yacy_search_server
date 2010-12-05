@@ -17,6 +17,9 @@ var modifiertype = "";
 function search(search) {
   query = search;
   start = new Date();
+  if (query == null || query == "") {
+    return;
+  }
   var self = this;
   if (window.XMLHttpRequest) { // Mozilla/Safari
     self.xmlHttpReq = new XMLHttpRequest(); 
@@ -42,7 +45,7 @@ function navget(list, name) {
 function preparepage(str) {
   var raw = document.getElementById("raw");
   if (raw != null) raw.innerHTML = str;
-  var rsp = eval("("+str+")");
+  var rsp = eval("(" + str + ")");
   var firstChannel = rsp.channels[0];
   searchresult = firstChannel.items;
   totalResults = firstChannel.totalResults.replace(/[,.]/,"");
@@ -78,10 +81,10 @@ function hideDownloadScript() {
 }
 
 function resultStart() {
-  var html = "<span style=\"display:block\">";
+  var html = "";
   if (totalResults > 0) {
-      html += "<form><div style=\"float:left\">" + searchresult.length + " results from a total of " + totalResults + " docs in index; search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds. </div>";
-      html += "<div id=\"downloadbutton\" style=\"float:left\"></div></form>";
+      html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index; search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";
+      html += "<div id=\"downloadbutton\" style=\"inline\"></div></div>";
   } else {
       if (query == "") {
          html += "please enter some search words<br\>or use the following predefined search queries:<br\>";
@@ -90,12 +93,13 @@ function resultStart() {
          html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=gif+filetype:gif\">gif</a>),";
          html += "(<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=jpg+filetype:jpg\">jpg</a>)<br>";
          html += "list: ";
-         html += "<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=pdf+/date+filetype:pdf\">recent pdf</a>,";
+         html += "<a style=\"text-decoration:underline\" href=\"/yacyinteractive.html?query=pdf+/date+filetype:pdf\">recent pdf</a><br>";
+         //html += "<iframe src=\"rssTerminal.html?set=LOCALINDEXING&amp;width=600px&amp;height=180px&amp;maxlines=20&amp;maxwidth=120\" ";
+         //html += "style=\"width:600px;height:180px;margin:0px;\" scrolling=\"no\" name=\"newsframe\"></iframe>";
       } else {
          html += "no results";
       }
   }
-  html += "</span>";
 
   // add extension navigation
   var extnav = "";
@@ -105,7 +109,7 @@ function resultStart() {
       }
   }
   if (extnav.length > 0) {
-	  html += "<span style=\"display:block\">apply a <b>filter</b> by filetype:&nbsp;&nbsp;&nbsp;&nbsp;" + extnav + "</span>";
+	  html += "<div style=\"display:block\">apply a <b>filter</b> by filetype:&nbsp;&nbsp;&nbsp;&nbsp;" + extnav + "</div>";
   } else {
       // check if there is a filetype constraint and offer a removal
       if (modifier != "") {
@@ -131,8 +135,8 @@ function resultList() {
   var html = "";
   if (searchresult.length > 0) {
     html += "<table class=\"sortable\" id=\"sortable\" border=\"0\" cellpadding=\"0\" cellspacing=\"1\" width=\"99%\">";
-    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"75\">Date</td></tr>";
-    for (var i = 0; i < searchresult.length; i++) { html += resultLine("row", searchresult[i]); }
+    html += "<tr class=\"TableHeader\" valign=\"bottom\"><td width=\"10\">count</td><td width=\"40\">Protocol</td><td width=\"60\">Host</td><td width=\"260\">Path</td><td width=\"360\">Name</td><td width=\"60\">Size</td><td width=\"75\">Date</td></tr>";
+    for (var i = 0; i < searchresult.length; i++) { html += resultLine("row", searchresult[i], i + 1); }
     html += "</table>";
   }
   return html;
@@ -144,7 +148,7 @@ function resultImages() {
   return html;
 }
 
-function resultLine(type, item) {
+function resultLine(type, item, linenumber) {
   // evaluate item
   p = item.link.indexOf("//");
   protocol = "";
@@ -185,6 +189,7 @@ function resultLine(type, item) {
   var html = "";
   if (type == "row") {
     html += "<tr class=\"TableCellLight\">";
+    html += "<td align=\"left\">" + linenumber + "</td>";
     html += "<td align=\"left\">" + protocol + "</td>";
     html += "<td align=\"left\"><a href=\"" + protocol + "://" + host + "/" + "\">" + host + "</a></td>";
     html += "<td align=\"left\"><a href=\"" + item.link + "\">" + path + "</a></td>";
