@@ -338,6 +338,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return cache.remove(new ByteArray(termHash));
     }
 
+    public void removeDelayed(final byte[] termHash, final byte[] urlHashBytes) {
+        remove(termHash, urlHashBytes);
+    }
     public boolean remove(final byte[] termHash, final byte[] urlHashBytes) {
         assert this.cache != null;
         ByteArray tha = new ByteArray(termHash);
@@ -355,7 +358,11 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         return false;
     }
- 
+
+    public void removeDelayed(final byte[] termHash, final HandleSet urlHashes) {
+        remove(termHash, urlHashes);
+    }
+
     public int remove(final byte[] termHash, final HandleSet urlHashes) {
         assert this.cache != null;
         if (urlHashes.isEmpty()) return 0;
@@ -375,6 +382,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         return 0;
     }
+
+    public void removeDelayed() {}
 
     public void add(final ReferenceContainer<ReferenceType> container) throws RowSpaceExceededException {
         // this puts the entries into the cache

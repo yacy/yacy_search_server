@@ -26,7 +26,6 @@
 
 package de.anomic.search;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
@@ -39,8 +38,6 @@ import java.util.concurrent.TimeUnit;
 import net.yacy.cora.storage.StaticScore;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -50,6 +47,7 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.ResultURLs;
+import de.anomic.data.WorkTables;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
@@ -68,6 +66,7 @@ public final class SearchEvent {
     private long eventTime;
     private QueryParams query;
     private final yacySeedDB peers;
+    private final WorkTables workTables;
     private RankingProcess rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
     private ResultFetcher resultFetcher;
     
@@ -86,12 +85,14 @@ public final class SearchEvent {
     
     public SearchEvent(final QueryParams query,
                              final yacySeedDB peers,
+                             final WorkTables workTables,
                              final ResultURLs crawlResults,
                              final SortedMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts,
                              final LoaderDispatcher loader) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
+        this.workTables = workTables;
         this.crawlResults = crawlResults;
         this.query = query;
         this.secondarySearchSuperviser = (query.queryHashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
@@ -153,7 +154,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, peers, 3000);
+            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, this.peers, this.workTables, 3000);
         } else {
             // do a local search
             this.rankingProcess = new RankingProcess(this.query, this.order, max_results_preparation);
@@ -197,7 +198,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, peers, 500);
+            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, this.peers, this.workTables, 500);
         }
          
         // clean up events
@@ -253,28 +254,6 @@ public final class SearchEvent {
        if (this.IACount != null) this.IACount.clear();
        if (this.IAResults != null) this.IAResults.clear();
        if (this.heuristics != null) this.heuristics.clear();
-       
-       // execute deletion of failed words
-       int rw = this.resultFetcher.failedURLs.size();
-       if (rw > 0) {
-           long start = System.currentTimeMillis();
-           final HandleSet removeWords = query.queryHashes;
-           try {
-               removeWords.putAll(query.excludeHashes);
-           } catch (RowSpaceExceededException e1) {
-               Log.logException(e1);
-           }
-           try {
-               final Iterator<byte[]> j = removeWords.iterator();
-               // remove the same url hashes for multiple words
-               while (j.hasNext()) {
-                   this.query.getSegment().termIndex().remove(j.next(), this.resultFetcher.failedURLs);
-               }                    
-           } catch (IOException e) {
-               Log.logException(e);
-           }
-           Log.logInfo("SearchEvents", "cleaning up event " + query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words in " + (System.currentTimeMillis() - start) + " milliseconds");
-       }
    }
    
    public Iterator<Map.Entry<byte[], String>> abstractsString() {

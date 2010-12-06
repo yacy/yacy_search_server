@@ -45,6 +45,7 @@ import net.yacy.kelondro.util.EventTracker;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.data.WorkTables;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.graphics.ProfilingGraph;
 
@@ -54,13 +55,13 @@ public class ResultFetcher {
     final RankingProcess  rankingProcess; // ordered search results, grows dynamically as all the query threads enrich this container
     QueryParams     query;
     private final yacySeedDB      peers;
+    private final WorkTables workTables;
     
     // result values
     protected final LoaderDispatcher        loader;
     protected       Worker[]                workerThreads;
     protected final WeakPriorityBlockingQueue<ResultEntry>  result;
     protected final WeakPriorityBlockingQueue<MediaSnippet> images; // container to sort images by size
-    protected final HandleSet               failedURLs; // a set of urlhashes that could not been verified during search
     protected final HandleSet               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
@@ -71,19 +72,20 @@ public class ResultFetcher {
             RankingProcess rankedCache,
             final QueryParams query,
             final yacySeedDB peers,
+            final WorkTables workTables,
             final int taketimeout) {
     	assert query != null;
         this.loader = loader;
     	this.rankingProcess = rankedCache;
     	this.query = query;
         this.peers = peers;
+        this.workTables = workTables;
         this.taketimeout = taketimeout;
         
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
         this.result = new WeakPriorityBlockingQueue<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
         this.images = new WeakPriorityBlockingQueue<MediaSnippet>(-1);
-        this.failedURLs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search
@@ -331,7 +333,7 @@ public class ResultFetcher {
                         System.out.println("page == null");
                         break; // no more available
                     }
-                    if (failedURLs.has(page.hash())) continue;
+                    if (workTables.failURLsContains(page.hash())) continue;
 
                     loops++;
                     final ResultEntry resultEntry = fetchSnippet(page, cacheStrategy); // does not fetch snippets if snippetMode == 0
@@ -408,7 +410,9 @@ public class ResultFetcher {
                 return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
-                registerFailure(page.hash(), "no text snippet for URL " + metadata.url() + "; errorCode = " + snippet.getErrorCode());
+                String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
+                this.workTables.failURLsRegisterMissingWord(query.getSegment().termIndex(), metadata.url(), query.queryHashes, reason);
+                Log.logInfo("SEARCH", "sorted out url " + metadata.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
         } else {
@@ -425,19 +429,12 @@ public class ResultFetcher {
                 return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
-                registerFailure(page.hash(), "no media snippet for URL " + metadata.url());
+                String reason = "no media snippet";
+                this.workTables.failURLsRegisterMissingWord(query.getSegment().termIndex(), metadata.url(), query.queryHashes, reason);
+                Log.logInfo("SEARCH", "sorted out url " + metadata.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
         }
         // finished, no more actions possible here
-    }
-    
-    private void registerFailure(final byte[] urlhash, final String reason) {
-        try {
-            this.failedURLs.put(urlhash);
-        } catch (RowSpaceExceededException e) {
-            Log.logException(e);
-        }
-        Log.logInfo("SEARCH", "sorted out urlhash " + new String(urlhash) + " during search: " + reason);
     }
 }

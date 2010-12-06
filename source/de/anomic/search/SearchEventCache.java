@@ -38,6 +38,7 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.ResultURLs;
+import de.anomic.data.WorkTables;
 import de.anomic.yacy.yacySeedDB;
 
 public class SearchEventCache {
@@ -101,6 +102,7 @@ public class SearchEventCache {
     public static SearchEvent getEvent(
             final QueryParams query,
             final yacySeedDB peers,
+            final WorkTables workTables,
             final ResultURLs crawlResults,
             final SortedMap<byte[], String> preselectedPeerHashes,
             final boolean generateAbstracts,
@@ -126,7 +128,7 @@ public class SearchEventCache {
         }
         if (event == null) {
             // start a new event
-            event = new SearchEvent(query, peers, crawlResults, preselectedPeerHashes, generateAbstracts, loader);
+            event = new SearchEvent(query, peers, workTables, crawlResults, preselectedPeerHashes, generateAbstracts, loader);
         }
     
         return event;

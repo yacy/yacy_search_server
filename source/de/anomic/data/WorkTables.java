@@ -36,8 +36,12 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.server.serverObjects;
 
@@ -64,6 +68,12 @@ public class WorkTables extends Tables {
     
     public final static String TABLE_ACTIVECRAWLS_NAME = "crawljobsActive";
     public final static String TABLE_PASSIVECRAWLS_NAME = "crawljobsPassive";
+
+    public final static String TABLE_SEARCH_FAILURE_NAME = "searchfl";
+    public final static String TABLE_SEARCH_FAILURE_COL_URL = "url";
+    public final static String TABLE_SEARCH_FAILURE_COL_DATE = "date";
+    public final static String TABLE_SEARCH_FAILURE_COL_WORDS = "words";
+    public final static String TABLE_SEARCH_FAILURE_COL_COMMENT = "comment";
     
     public YMarkTables bookmarks;
     
@@ -282,5 +292,36 @@ public class WorkTables extends Tables {
         if (d < System.currentTimeMillis()) d = System.currentTimeMillis() + 600000L;
         d -= d % 60000; // remove seconds
         row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
+    }
+    
+    public void failURLsRegisterMissingWord(IndexCell<WordReference> indexCell, final DigestURI url, HandleSet queryHashes, final String reason) {
+
+        // remove words from index
+        for (byte[] word: queryHashes) {
+            indexCell.removeDelayed(word, url.hash());
+        }
+        
+        // insert information about changed url into database
+        try {
+            // create and insert new entry
+            Data data = new Data();
+            byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
+            data.put(TABLE_SEARCH_FAILURE_COL_URL, url.toNormalform(true, false));
+            data.put(TABLE_SEARCH_FAILURE_COL_DATE, date);
+            data.put(TABLE_SEARCH_FAILURE_COL_WORDS, queryHashes.export());
+            data.put(TABLE_SEARCH_FAILURE_COL_COMMENT, reason.getBytes());
+            super.insert(TABLE_SEARCH_FAILURE_NAME, url.hash(),  data);
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+    }
+    
+    public boolean failURLsContains(byte[] urlhash) {
+        try {
+            return super.has(TABLE_SEARCH_FAILURE_NAME, urlhash);
+        } catch (IOException e) {
+            Log.logException(e);
+            return false;
+        }
     }
 }

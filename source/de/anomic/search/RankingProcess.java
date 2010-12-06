@@ -83,8 +83,8 @@ public final class RankingProcess extends Thread {
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
     
     private final DynamicScore<String> ref;  // reference score computation for the commonSense heuristic
-    private final DynamicScore<String> hostNavigator;
-    private final Map<String, String> hostResolver;
+    private final DynamicScore<String> hostNavigator; // a counter for the appearance of the host hash
+    private final Map<String, String> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
     private final DynamicScore<String> authorNavigator;
     private final DynamicScore<String> namespaceNavigator;
     private final ReferenceOrder order;
@@ -406,10 +406,10 @@ public final class RankingProcess extends Thread {
                 
                 // in case that we do not have e catchall filter for urls
                 // we must also construct the domain navigator here
-                if (query.sitehash == null) {
-                    this.hostNavigator.inc(new String(urlhash, 6, 6));
-                    this.hostResolver.put(new String(urlhash, 6, 6), new String(urlhash));
-                }
+                //if (query.sitehash == null) {
+                //    this.hostNavigator.inc(new String(urlhash, 6, 6));
+                //    this.hostResolver.put(new String(urlhash, 6, 6), new String(urlhash));
+                //}
             }
             
             // check for more errors
@@ -433,7 +433,9 @@ public final class RankingProcess extends Thread {
                 (query.constraint.get(Condenser.flag_cat_indexof)) &&
                 (!(pagetitle.startsWith("index of")))) {
                 final Iterator<byte[]> wi = query.queryHashes.iterator();
-                while (wi.hasNext()) try { this.query.getSegment().termIndex().remove(wi.next(), page.hash()); } catch (IOException e) {}
+                while (wi.hasNext()) {
+                    this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
+                }
                 continue;
             }
             
@@ -526,7 +528,7 @@ public final class RankingProcess extends Thread {
     
     public int getRemoteResourceSize() {
         // the number of all hits in all the remote peers
-        return this.remote_resourceSize;
+        return Math.max(this.remote_resourceSize, this.remote_indexCount);
     }
     
     public int getRemotePeerCount() {
@@ -560,7 +562,9 @@ public final class RankingProcess extends Thread {
             urlhash = this.hostResolver.get(domhash);
             row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(urlhash.getBytes(), null, 0);
             hostname = row == null ? null : row.metadata().url().getHost();
-            if (hostname != null) result.set(hostname, this.hostNavigator.get(domhash));
+            if (hostname != null) {
+                result.set(hostname, this.hostNavigator.get(domhash));
+            }
         }
         if (result.size() < 2) result.clear(); // navigators with one entry are not useful
         return result;

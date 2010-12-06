@@ -291,7 +291,7 @@ public final class search {
             yacyChannel.channels(yacyChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, abstracts.length() > 0, sb.loader);
+            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, sb.crawlResults, null, abstracts.length() > 0, sb.loader);
             
             // set statistic details of search result and find best result index set
             joincount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount();

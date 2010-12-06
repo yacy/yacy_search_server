@@ -46,6 +46,15 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         this.factory = factory;
     }
     
+    public void removeDelayed(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException {
+        // remove the same url hashes for multiple words
+        // this is mainly used when correcting a index after a search
+        final Iterator<byte[]> i = termHashes.iterator();
+        while (i.hasNext()) {
+            removeDelayed(i.next(), urlHashBytes);
+        }
+    }
+    
     public int remove(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search

@@ -64,8 +64,17 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         this.index = index;
     }
 
+    public HandleSet(Row rowdef, byte[] b) {
+        this.rowdef = rowdef;
+        this.index = RowSet.importRowSet(b, this.rowdef);
+    }
+
     public HandleSet clone() {
         return new HandleSet(this.rowdef, this.index.clone());
+    }
+    
+    public byte[] export() {
+        return index.exportCollection();
     }
     
     /**
