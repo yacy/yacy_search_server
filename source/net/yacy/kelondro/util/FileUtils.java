@@ -499,6 +499,11 @@ public final class FileUtils {
     }
 
 
+    public static Map<String, String> table(Reader r) {
+    	BufferedReader br = new BufferedReader(r);
+    	return table(new StringsIterator(br));
+	}
+    
     public static Map<String, String> table(Iterator<String> li) {
     	int pos;
     	String line;

@@ -693,7 +693,7 @@ public final class Switchboard extends serverSwitch {
             this.indexingStorageProcessor.queueSize();
     }
     
-    public void overwriteNetworkDefinition() {
+    public void overwriteNetworkDefinition() throws FileNotFoundException, IOException {
 
         // load network configuration into settings
         String networkUnitDefinition = getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
@@ -722,40 +722,15 @@ public final class Switchboard extends serverSwitch {
         // the network definition should be made either consistent for all peers,
         // or independently using a bootstrap URL
         Map<String, String> initProps;
-        if (networkUnitDefinition.startsWith("http://")) {
-            // multiple definitions may be given, split the definition line in multiple addresses
-            String[] netdefs = networkUnitDefinition.split(",");
-            Map<String, String> netdefmap;
-            netload: for (String netdef: netdefs) {
-                netdef = netdef.trim();
-                try {
-                    netdefmap = Switchboard.loadFileAsMap(new DigestURI(netdef));
-                    if (netdefmap == null || netdefmap.isEmpty()) continue netload;
-                    setConfig(netdefmap);
-                    break netload;
-                } catch (final Exception e) {
-                    continue netload;
-                }
-            }
-        } else {
-            final File networkUnitDefinitionFile = (networkUnitDefinition.length() > 0 && networkUnitDefinition.charAt(0) == '/') ? new File(networkUnitDefinition) : new File(getAppPath(), networkUnitDefinition);
-            if (networkUnitDefinitionFile.exists()) {
-                initProps = FileUtils.loadMap(networkUnitDefinitionFile);
-                setConfig(initProps);
-            }
-        }
-        if (networkGroupDefinition.startsWith("http://")) {
-            try {
-                setConfig(Switchboard.loadFileAsMap(new DigestURI(networkGroupDefinition)));
-            } catch (final MalformedURLException e) { }
-        } else {
-            final File networkGroupDefinitionFile = new File(getAppPath(), networkGroupDefinition);
-            if (networkGroupDefinitionFile.exists()) {
-                initProps = FileUtils.loadMap(networkGroupDefinitionFile);
-                setConfig(initProps);
-            }
-        }
-
+        Reader netDefReader = getConfigFileFromWebOrLocally(networkUnitDefinition, getAppPath().getAbsolutePath(), new File(workPath, "network.definition.backup"));
+        initProps = FileUtils.table(netDefReader);
+        setConfig(initProps);
+        
+        Map<String, String> initGroupProps;
+        Reader netGroupDefReader = getConfigFileFromWebOrLocally(networkGroupDefinition, getAppPath().getAbsolutePath(), new File(workPath, "network.group.backup"));
+        initGroupProps = FileUtils.table(netGroupDefReader);
+        setConfig(initGroupProps);
+        
         // set release locations
         int i = 0;
         CryptoLib cryptoLib;
@@ -820,7 +795,7 @@ public final class Switchboard extends serverSwitch {
 
     }
     
-    public void switchNetwork(final String networkDefinition) {
+    public void switchNetwork(final String networkDefinition) throws FileNotFoundException, IOException {
         log.logInfo("SWITCH NETWORK: switching to '" + networkDefinition + "'");
         // pause crawls
         final boolean lcp = crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);

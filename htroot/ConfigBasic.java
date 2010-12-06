@@ -29,6 +29,8 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.Domains;
@@ -56,7 +58,7 @@ public class ConfigBasic {
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
     
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws FileNotFoundException, IOException {
         
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;

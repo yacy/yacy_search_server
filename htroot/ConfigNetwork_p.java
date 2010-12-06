@@ -26,6 +26,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -41,7 +43,7 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigNetwork_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws FileNotFoundException, IOException {
         
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
