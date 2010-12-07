@@ -42,6 +42,14 @@ public class index {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
+        String forwardTarget = sb.getConfig(SwitchboardConstants.INDEX_FORWARD, "");
+        if (forwardTarget.length() > 0) {
+            // forward the page
+            prop.put("forward", 1);
+            prop.put("forward_target", forwardTarget);
+            return prop;
+        }
+        
         // access control
         boolean publicPage = sb.getConfigBool("publicSearchpage", true);
         final boolean authorizedAccess = sb.verifyAuthentication(header, false);

@@ -67,6 +67,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, post.get(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, post.get(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET, post.get("target", "_self"));
+                sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
             }
             if (post.containsKey("searchpage_default")) {
                 sb.setConfig(SwitchboardConstants.GREETING, "P2P Web Search");
@@ -74,6 +75,8 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, "/env/grafics/YaCyLogo_120ppi.png");
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, "/env/grafics/YaCyLogo_60ppi.png");
                 sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
+                sb.setConfig(SwitchboardConstants.INDEX_FORWARD, "");
+                sb.setConfig("indexForward", "Status.html");
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
             }            
         }
@@ -82,6 +85,7 @@ public class ConfigPortal {
         prop.putHTML(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.putHTML(SwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
 
         final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
         prop.put("popupFront", 0);

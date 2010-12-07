@@ -405,6 +405,11 @@ public final class SwitchboardConstants {
     public static final String BROWSER_POP_UP_APPLICATION = "browserPopUpApplication";
     public static final String BROWSER_POP_UP_PAGE        = "browserPopUpPage";
     
+    /**
+     * forwarder of the index page
+     */
+    public static final String INDEX_FORWARD        = "indexForward";
+    
     public static final String UPNP_ENABLED			= "upnp.enabled";
     public static final String UPNP_REMOTEHOST		= "upnp.remoteHost";
 
