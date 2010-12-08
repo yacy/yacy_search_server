@@ -84,17 +84,6 @@ public class yacysearch {
         
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final boolean localhostAccess = sb.accessFromLocalhost(header);
-        
-        int display = (post == null) ? 0 : post.getInt("display", 0);
-        if (!authenticated) display = 2;
-        // display == 0: shop top menu
-        // display == 1: show top and left menu
-        // display == 2: do not show any menu
-        final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
-        if (browserPopUpTrigger) {
-            final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
-            if (browserPopUpPage.startsWith("index") || browserPopUpPage.startsWith("yacysearch")) display = 2;
-        }
         String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
@@ -104,7 +93,8 @@ public class yacysearch {
         String querystring =  originalquerystring.replace('+', ' ');
         CrawlProfile.CacheStrategy snippetFetchStrategy = (post == null) ? null : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
         final servletProperties prop = new servletProperties();
-
+        prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+        
         // get segment
         Segment indexSegment = null;
         if (post != null && post.containsKey("segment")) {
@@ -124,7 +114,6 @@ public class yacysearch {
         if (post == null || indexSegment == null || env == null || !searchAllowed) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
-            prop.put("display", display);
             prop.put("former", "");
             prop.put("count", "10");
             prop.put("offset", "0");
@@ -574,7 +563,7 @@ public class yacysearch {
                 	suggestion = meanIt.next();
                 	prop.put("didYouMean_suggestions_"+meanCount+"_word", suggestion);
                 	prop.put("didYouMean_suggestions_"+meanCount+"_url",
-                	    QueryParams.navurl("html", 0, display, theQuery, suggestion, originalUrlMask.toString(), theQuery.navigators)
+                	    QueryParams.navurl("html", 0, theQuery, suggestion, originalUrlMask.toString(), theQuery.navigators)
     	             );
                 	prop.put("didYouMean_suggestions_"+meanCount+"_sep","|");
                 	meanCount++;
@@ -634,7 +623,7 @@ public class yacysearch {
             	resnav.append("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
             } else {
             	resnav.append("<a id=\"prevpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, null, originalUrlMask, navigation));
+                resnav.append(QueryParams.navurl("html", thispage - 1, theQuery, null, originalUrlMask, navigation));
             	resnav.append("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
             }
             final int numberofpages = Math.min(10, 1 + ((indexcount - 1) / theQuery.displayResults()));
@@ -648,7 +637,7 @@ public class yacysearch {
 					resnav.append("\" width=\"16\" height=\"16\" />&nbsp;");
                 } else {
                     resnav.append("<a href=\"");
-                    resnav.append(QueryParams.navurl("html", i, display, theQuery, null, originalUrlMask, navigation));
+                    resnav.append(QueryParams.navurl("html", i, theQuery, null, originalUrlMask, navigation));
                     resnav.append("\"><img src=\"env/grafics/navd");
                 	resnav.append(i + 1);
                 	resnav.append(".gif\" alt=\"page");
@@ -660,7 +649,7 @@ public class yacysearch {
             	resnav.append("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
             } else {
                 resnav.append("<a id=\"nextpage\" href=\"");
-                resnav.append(QueryParams.navurl("html", thispage + 1, display, theQuery, null, originalUrlMask, navigation));
+                resnav.append(QueryParams.navurl("html", thispage + 1, theQuery, null, originalUrlMask, navigation));
                 resnav.append("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
             }
             String resnavs = resnav.toString();
@@ -672,7 +661,6 @@ public class yacysearch {
             for (int i = 0; i < theQuery.displayResults(); i++) {
                 prop.put("results_" + i + "_item", offset + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
-                prop.put("results_" + i + "_display", display);
             }
             prop.put("results", theQuery.displayResults());
             prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO) ? 1 : 0);
@@ -707,7 +695,6 @@ public class yacysearch {
         }
         
         prop.put("searchagain", global ? "1" : "0");
-        prop.put("display", display);
         prop.putHTML("former", originalquerystring);
         prop.put("count", itemsPerPage);
         prop.put("offset", offset);
@@ -731,7 +718,6 @@ public class yacysearch {
         prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
 
         // copy properties for "more options" link
-        prop.put("searchdomswitches_display", prop.get("display"));
         prop.put("searchdomswitches_count", prop.get("count"));
         prop.put("searchdomswitches_urlmaskfilter", prop.get("urlmaskfilter"));
         prop.put("searchdomswitches_prefermaskfilter", prop.get("prefermaskfilter"));

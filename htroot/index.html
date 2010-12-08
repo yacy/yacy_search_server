@@ -34,17 +34,11 @@
       });
     </script>
     
-    #(display)#
-    #%env/templates/simpleheader.template%#
-    <div id="kiosk">
-    <a href="index.html?display=2"><img src="env/grafics/close.gif" width="16" height="16" alt="close" /></a>
-    <span>kiosk mode</span>
-    </div>
-    ::
-    #%env/templates/header.template%#
-    ::
+    #(topmenu)#
     #%env/templates/embeddedheader.template%#
-    #(/display)#
+    ::
+    #%env/templates/simpleheader.template%#
+    #(/topmenu)#
 
     <h2 class="yacy">
     <a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="yacy" style="margin: auto;"/></a><br /><br />
@@ -53,7 +47,6 @@
   
     <form class="search" action="yacysearch.html" method="get" id="searchform" accept-charset="UTF-8">
       <fieldset class="maininput">
-        <input type="hidden" name="display" value="#[display]#" />
         <input name="query" id="search" type="text" size="52" maxlength="80" value="#[former]#" />
         <input type="submit" name="Enter" value="Search" />
         <input type="hidden" name="verify" value="true" />
@@ -76,7 +69,7 @@
         <input type="hidden" name="indexof" value="off" />
         <input type="hidden" name="meanCount" value="5" />
       </fieldset>
-      <p><a href="/index.html?searchoptions=1&amp;display=#[display]#" onclick="this.href='/index.html?searchoptions=1&amp;display=#[display]#&amp;former='+document.getElementById('searchform').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom)">more options...</a></p>
+      <p><a href="/index.html?searchoptions=1" onclick="this.href='/index.html?searchoptions=1&amp;former='+document.getElementById('searchform').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom)">more options...</a></p>
       <p><a href="http://www.yacy-websuche.de/wiki/index.php/En:SearchParameters">advanced parameters</a></p>
       ::
       </fieldset>
@@ -159,13 +152,11 @@
      </p>
     </form>
     #(/searchoptions)#
-    #(display)#
-    #%env/templates/simplefooter.template%#
-    ::
-    #%env/templates/footer.template%#
-    ::
+    #(topmenu)#
     #%env/templates/embeddedfooter.template%#
-    #(/display)#
+    ::
+    #%env/templates/simplefooter.template%#
+    #(/topmenu)#
     <p>
     <img src="cytag.png?icon=invisible&amp;nick=yacyh_#[clientid]#&amp;tag=search" alt=""/>
     </p>

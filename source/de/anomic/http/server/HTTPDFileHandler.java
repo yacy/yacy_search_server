@@ -119,6 +119,7 @@ public final class HTTPDFileHandler {
     private static String[] defaultFiles   = null;
     private static File     htDefaultPath  = null;
     private static File     htLocalePath   = null;
+    public  static String   indexForward   = "";
     
     protected static final class TemplateCacheEntry {
         Date lastModified;
@@ -179,6 +180,8 @@ public final class HTTPDFileHandler {
         // create default files array
         defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
         if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
+        indexForward = switchboard.getConfig("indexForward", "");
+        if (indexForward.startsWith("/")) indexForward = indexForward.substring(1);
     }
     
     /** Returns a path to the localized or default file according to the locale.language (from he switchboard)
@@ -403,6 +406,7 @@ public final class HTTPDFileHandler {
 
             // locate the file
             if (path.length() > 0 && path.charAt(0) != '/' && path.charAt(0) != '\\') path = "/" + path; // attach leading slash
+            if (path.endsWith("index.html")) path = path.substring(0, path.length() - 10);
             
             // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the locale.language
             String localeSelection = switchboard.getConfig("locale.language","default");
@@ -420,14 +424,21 @@ public final class HTTPDFileHandler {
             targetClass = rewriteClassFile(new File(htDefaultPath, path));
             if (path.endsWith("/") || path.endsWith("\\")) {
                 String testpath;
-                // attach default file name
-                for (int i = 0; i < defaultFiles.length; i++) {
-                    testpath = path + defaultFiles[i];
-                    targetFile = getOverlayedFile(testpath);
+                // look for indexForward setting
+                if (indexForward.length() > 0 && (targetFile = getOverlayedFile(path + indexForward)).exists()) {
+                    testpath = path + indexForward;
                     targetClass = getOverlayedClass(testpath);
-                    if (targetFile.exists()) {
-                        path = testpath;
-                        break;
+                    path = testpath;
+                } else {
+                    // attach default file name(s)
+                    for (int i = 0; i < defaultFiles.length; i++) {
+                        testpath = path + defaultFiles[i];
+                        targetFile = getOverlayedFile(testpath);
+                        targetClass = getOverlayedClass(testpath);
+                        if (targetFile.exists()) {
+                            path = testpath;
+                            break;
+                        }
                     }
                 }
                 targetFile = getLocalizedFile(path, localeSelection);

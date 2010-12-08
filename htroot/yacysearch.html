@@ -62,10 +62,10 @@
         };
       });
     </script>
-    
-#(display)#
-	#%env/templates/simpleheader.template%#
-	::
+
+    #(topmenu)#
+    #%env/templates/embeddedheader.template%#
+    ::
 <div id="api">
 <script type="text/javascript">
 //<![CDATA[
@@ -78,11 +78,9 @@ The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</
 Click the API icon to see an example call to the search rss API.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
 </div>	
-	#%env/templates/header.template%#
-	::
-	#%env/templates/embeddedheader.template%#
-#(/display)#
-
+    #%env/templates/simpleheader.template%#
+    #(/topmenu)#
+    
 <script type="text/javascript">
 //<![CDATA[
 $(function() {
@@ -117,7 +115,7 @@ $(function() {
 	    #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# /><label for="video">Video</label>&nbsp;&nbsp;#(/searchvideo)#
 	    #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# /><label for="app">Applications</label>#(/searchapp)#
         &nbsp;
-        <a href="index.html?display=#[display]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#&amp;meanCount=#[meanCount]#">more options</a>
+        <a href="index.html?searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#&amp;meanCount=#[meanCount]#">more options</a>
     </div>
     #(/searchdomswitches)#
     <input type="hidden" name="former" value="#[former]#" />
@@ -130,7 +128,6 @@ $(function() {
     <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
     <input type="hidden" name="depth" value="#[depth]#" />
     <input type="hidden" name="cat" value="#[cat]#" />
-    <input type="hidden" name="display" value="#[display]#" />
     <input type="hidden" name="constraint" value="#[constraint]#" />
     <input type="hidden" name="meanCount" value="#[meanCount]#" />
   </fieldset>
@@ -197,7 +194,7 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>#(/resultTable)#
 #{results}#
-<!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#&display=#[display]#" -->
+<!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
 #{/results}#
 #(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->
@@ -205,7 +202,7 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 #(pageNavBottom)#::<div id="pageNavBottom" style="text-align:center">#[resnav]#</div>#(/pageNavBottom)#
 </div>
 <!-- div style="width=220px;" -->
-<!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#&amp;display=#[display]#" -->
+<!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#" -->
 <!-- /div -->
 </div>
 </body>

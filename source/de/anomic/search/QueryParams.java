@@ -455,24 +455,19 @@ public final class QueryParams {
     /**
      * make a query anchor tag
      * @param page
-     * @param display
      * @param theQuery
      * @param originalUrlMask
      * @param addToQuery
      * @return
      */
     public static String navurl(
-            final String ext, final int page, final int display, final QueryParams theQuery,
+            final String ext, final int page, final QueryParams theQuery,
             String newQueryString, final String originalUrlMask, final String nav) {
 
         final StringBuilder sb = new StringBuilder();
         sb.append("/yacysearch.");
         sb.append(ext);
-        sb.append("?display=");
-        sb.append(display);
-
-        sb.append(ampersand);
-        sb.append("query=");
+        sb.append("?query=");
         sb.append(newQueryString == null ? theQuery.queryStringForUrl() : newQueryString);
 
         sb.append(ampersand);

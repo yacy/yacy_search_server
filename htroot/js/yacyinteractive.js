@@ -1,5 +1,7 @@
 function xmlhttpPost() {
     var searchform = document.forms['searchform'];
+    var rsslink = document.getElementById("rsslink");
+    if (rsslink != null) rsslink.href="yacysearch.rss?query=" + searchform.query.value;
     search(searchform.query.value);
 }
 

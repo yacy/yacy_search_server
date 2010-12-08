@@ -831,6 +831,11 @@ currentSkin=pdblue
 publicSurftips = true
 publicSearchpage = true
 
+# flag to show if the top navigation bar shall be shown to all users
+# if this is disabled, then the user must navigate manually from the search page
+# to /Status.html to get the main memu bar back
+publicTopmenu = true
+
 # Wiki access rights
 # the built-in wiki system allows by default only that the administrator is allowed to make changes
 # this can be changed. There are three options:

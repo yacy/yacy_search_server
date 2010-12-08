@@ -27,6 +27,7 @@
 
 import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.data.WorkTables;
+import de.anomic.http.server.HTTPDFileHandler;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -68,6 +69,8 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, post.get(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET, post.get("target", "_self"));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
+                HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
+                sb.setConfig("publicTopmenu", post.get("publicTopmenu", "true"));
             }
             if (post.containsKey("searchpage_default")) {
                 sb.setConfig(SwitchboardConstants.GREETING, "P2P Web Search");
@@ -86,6 +89,7 @@ public class ConfigPortal {
         prop.putHTML(SwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
+        prop.put("publicTopmenu", sb.getConfig("publicTopmenu", "").equals("true") ? 1 : 0);
 
         final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
         prop.put("popupFront", 0);

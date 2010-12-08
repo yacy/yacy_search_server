@@ -63,14 +63,6 @@ public class index {
         }
         
         final boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
-        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        int display = (post == null) ? 0 : post.getInt("display", 0);
-        if ((display == 1) && (!authenticated)) display = 0;
-        final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
-        if (browserPopUpTrigger) {
-            final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
-            if (browserPopUpPage.startsWith("index") || browserPopUpPage.startsWith("yacysearch")) display = 2;
-        }
 
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final String former = (post == null) ? "" : post.get("former", "");
@@ -126,7 +118,7 @@ public class index {
         prop.putHTML("cat", cat);
         prop.put("type", type);
         prop.put("depth", "0");
-        prop.put("display", display);
+        prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
         prop.putHTML("constraint", constraint);
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
@@ -139,7 +131,6 @@ public class index {
         prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
         prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
         prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
-        prop.put("searchoptions_display", display);
         // online caution timing
         sb.localSearchLastAccess = System.currentTimeMillis();
         

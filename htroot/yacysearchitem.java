@@ -68,7 +68,6 @@ public class yacysearchitem {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
         final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
-        final int display = (post == null) ? 0 : post.getInt("display", 0);
         
         // default settings for blank item
         prop.put("content", "0");
@@ -127,7 +126,6 @@ public class yacysearchitem {
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_link", result.urlstring());
             prop.putHTML("content_target", sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self"));
-            prop.put("content_display", display);
             if (faviconURL != null && isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);

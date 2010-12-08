@@ -30,6 +30,12 @@
           <dt>URL of a Large Corporate Image</dt>
           <dd><input type="text" name="promoteSearchPageGreeting.largeImage" value="#[promoteSearchPageGreeting.largeImage]#" size="60" /></dd>
           
+          <dt>Show Navigation Bar on Search Page?</dt>
+          <dd>
+          <input type="radio" name="publicTopmenu" value="true" #(publicTopmenu)#::checked="checked"#(/publicTopmenu)# />Show Navigation Top-Menu&nbsp;
+          <input type="radio" name="publicTopmenu" value="false" #(publicTopmenu)#checked="checked"::#(/publicTopmenu)# />no link to YaCy Menu (admin must navigate to /Status.html manually)
+          </dd>
+          
           <dt>Default Pop-Up Page</dt>
           <dd>
           <input type="radio" name="popup" value="status" #(popupStatus)#::checked="checked"#(/popupStatus)# />Status Page&nbsp;
