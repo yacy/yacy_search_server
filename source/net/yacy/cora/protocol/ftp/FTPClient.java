@@ -617,7 +617,7 @@ public class FTPClient {
             // /// try to parse LIST output (1 command)
             final entryInfo info = fileInfo(path);
             if (info != null) {
-                return info.isDir;
+                return info.type == filetype.directory;
             }
 
             // /// try to change to folder (4 commands)
@@ -1045,7 +1045,9 @@ public class FTPClient {
         // groups: 1: rights, 2: size, 3: month, 4: day, 5: time or year, 6: name
         final Matcher tokens = lsStyle.matcher(line);
         if (tokens.matches()) {
-            final boolean isDir = tokens.group(1).startsWith("d");
+            filetype type = filetype.file;
+            if (tokens.group(1).startsWith("d")) type = filetype.directory;
+            if (tokens.group(1).startsWith("l")) type = filetype.link;
             int size = -1;
             try {
                 size = Integer.parseInt(tokens.group(2));
@@ -1076,13 +1078,17 @@ public class FTPClient {
                 log.warn("---- Error: not ls date-format '" + dateString, e);
                 date = new Date();
             }
-            return new entryInfo(isDir, size, date, tokens.group(6));
+            return new entryInfo(type, size, date, tokens.group(6));
         }
         return null;
     }
 
     
     public static final entryInfo POISON_entryInfo = new entryInfo();
+    
+    public static enum filetype {
+        file, link, directory;
+    }
     
     /**
      * parameter class
@@ -1092,9 +1098,9 @@ public class FTPClient {
      */
     public static class entryInfo {
         /**
-         * is this a directory?
+         * file type
          */
-        public final boolean isDir;
+        public final filetype type;
         /**
          * size in bytes
          */
@@ -1109,7 +1115,7 @@ public class FTPClient {
         public String name;
 
         public entryInfo() {
-            this.isDir = false;
+            this.type = filetype.file;
             this.size = -1;
             this.date = null;
             this.name = null;
@@ -1124,8 +1130,8 @@ public class FTPClient {
          * @param date
          * @param name
          */
-        public entryInfo(final boolean isDir, final int size, final Date date, final String name) {
-            this.isDir = isDir;
+        public entryInfo(final filetype type, final int size, final Date date, final String name) {
+            this.type = type;
             this.size = size;
             this.date = date;
             this.name = name;
@@ -1139,8 +1145,8 @@ public class FTPClient {
         public String toString() {
             final StringBuilder info = new StringBuilder(100);
             info.append(name);
-            info.append(" (isDir=");
-            info.append(isDir);
+            info.append(" (type=");
+            info.append(type.name());
             info.append(", size=");
             info.append(size);
             info.append(", ");
@@ -1349,28 +1355,32 @@ public class FTPClient {
         }
         
         // starting data transaction
-        final Socket data = getDataSocket();
-        final BufferedReader ClientStream = new BufferedReader(new InputStreamReader(data.getInputStream()));
+        final Socket dataSocket = getDataSocket();
+        final BufferedReader dataStream = new BufferedReader(new InputStreamReader(dataSocket.getInputStream()));
 
         // read file system data
         String line;
         final ArrayList<String> files = new ArrayList<String>();
         try {
-            while ((line = ClientStream.readLine()) != null) {
+            while ((line = dataStream.readLine()) != null) {
                 if (!line.startsWith("total ")) {
                     files.add(line);
                 }
             }
-            // after stream is empty we should get control completion echo
-            /*reply =*/ receive();
-
-            // boolean success = !isNotPositiveCompletion(reply);
-
-            // shutdown connection
-            ClientStream.close(); // Closing the returned InputStream will
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } finally {try {
+            // shutdown data connection
+            dataStream.close(); // Closing the returned InputStream will
             closeDataSocket(); // close the associated socket.
         } catch (IOException e) {
-        }
+            e.printStackTrace();
+        }}
+        // after stream is empty we should get control completion echo
+        reply = receive();
+        //System.out.println("reply of LIST: " + reply);
+        // boolean success = !isNotPositiveCompletion(reply);
+
         files.trimToSize();
         return files;
     }
@@ -1562,23 +1572,11 @@ public class FTPClient {
      */
     private void closeConnection() throws IOException {
         // cleanup
-        if (ControlSocket != null) {
-            clientOutput.close();
-            clientInput.close();
-            ControlSocket.close();
-            ControlSocket = null;
-        }
-
-        if (DataSocketActive != null) {
-            DataSocketActive.close();
-            DataSocketActive = null;
-        }
-        if (DataSocketPassive != null) {
-            DataSocketPassive.close();
-            DataSocketPassive = null; // "Once a socket has been closed, it is
-            // not available for further networking
-            // use"
-        }
+        if (clientOutput != null) clientOutput.close();
+        if (clientInput != null) clientInput.close();
+        if (ControlSocket != null) ControlSocket.close();
+        if (DataSocketActive != null) DataSocketActive.close();
+        if (DataSocketPassive != null) DataSocketPassive.close();
     }
 
     public boolean PROMPT() {
@@ -2516,15 +2514,15 @@ public class FTPClient {
      * @throws IOException 
      */
     public static BlockingQueue<entryInfo> sitelist(final String host, final int port) throws IOException {
-        final FTPClient c = new FTPClient();
-        c.open(host, port);
-        c.login("anonymous", "anomic@");
+        final FTPClient ftpClient = new FTPClient();
+        ftpClient.open(host, port);
+        ftpClient.login("anonymous", "anomic@");
         final LinkedBlockingQueue<entryInfo> queue = new LinkedBlockingQueue<entryInfo>();
         new Thread() {
             public void run() {
                 try {
-                    sitelist(c, "/", queue);
-                    c.quit();
+                    sitelist(ftpClient, "/", queue);
+                    ftpClient.quit();
                 } catch (Exception e) {} finally {
                     queue.add(POISON_entryInfo);
                 }
@@ -2532,24 +2530,27 @@ public class FTPClient {
         }.start();
         return queue;
     }
-    private static void sitelist(final FTPClient c, String path, LinkedBlockingQueue<entryInfo> queue) {
+    private static void sitelist(final FTPClient ftpClient, String path, LinkedBlockingQueue<entryInfo> queue) {
         List<String> list;
         try {
-            list = c.list(path, true);
+            list = ftpClient.list(path, true);
         } catch (IOException e) {
+            e.printStackTrace();
             return;
         }
         if (!path.endsWith("/")) path += "/";
         entryInfo info;
         for (final String line : list) {
             info = parseListData(line);
-            if (info != null) {
-                if (info.isDir) {
-                    sitelist(c, path + info.name, queue);
-                } else {
-                    if (!info.name.startsWith("/")) info.name = path + info.name;
-                    queue.add(info);
-                }
+            if (info != null && info.type == filetype.file) {
+                if (!info.name.startsWith("/")) info.name = path + info.name;
+                queue.add(info);
+            }
+        }
+        for (final String line : list) {
+            info = parseListData(line);
+            if (info != null && info.type == filetype.directory) {
+                sitelist(ftpClient, path + info.name, queue);
             }
         }
     }
@@ -2617,7 +2618,7 @@ public class FTPClient {
                 // with link
                 nameStart = line.indexOf(info.name);
                 page.append(line.substring(0, nameStart));
-                page.append("<a href=\"" + base + info.name + ((info.isDir) ? "/" : "") + "\">" + info.name + "</a>");
+                page.append("<a href=\"" + base + info.name + ((info.type == filetype.directory) ? "/" : "") + "\">" + info.name + "</a>");
                 nameEnd = nameStart + info.name.length();
                 if (line.length() > nameEnd) {
                     page.append(line.substring(nameEnd));
@@ -2782,6 +2783,20 @@ public class FTPClient {
                 } catch (final IOException e) {
                     log.error(e);
                 }
+            } else if (args[0].equals("-sitelist")) {
+                try {
+                    final BlockingQueue<entryInfo> q = sitelist(args[1], Integer.parseInt(args[2]));
+                    entryInfo entry;
+                    while ((entry = q.take()) != FTPClient.POISON_entryInfo) {
+                        System.out.println(entry.toString());
+                    }
+                } catch (final FileNotFoundException e) {
+                    log.error(e);
+                } catch (final IOException e) {
+                    log.error(e);
+                } catch (InterruptedException e) {
+                    log.error(e);
+                }
             } else {
                 printHelp();
             }
@@ -2814,5 +2829,5 @@ public class FTPClient {
             printHelp();
         }
     }
-
+    
 }

@@ -28,12 +28,17 @@
 
 package de.anomic.crawler;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
@@ -131,15 +136,7 @@ public final class CrawlStacker {
         // we just don't know anything about that host
         return false;
     }
-
-    /*
-    public boolean job() {
-        if (this.fastQueue.queueSize() > 0 && job(this.fastQueue)) return true;
-        if (this.slowQueue.queueSize() == 0) return false;
-        return job(this.slowQueue);
-    }
-    */
-
+    
     public Request job(Request entry) {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
@@ -180,6 +177,81 @@ public final class CrawlStacker {
         }
     }
 
+    public void queueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, String> hyperlinks, boolean replace) {
+        for (Map.Entry<MultiProtocolURI, String> e: hyperlinks.entrySet()) {
+            if (e.getKey() == null) continue;
+            
+            // delete old entry, if exists to force a re-load of the url (thats wanted here)
+            final DigestURI url = new DigestURI(e.getKey());
+            final byte[] urlhash = url.hash();
+            if (replace) {
+                indexSegment.urlMetadata().remove(urlhash);
+                this.nextQueue.noticeURL.removeByURLHash(urlhash);
+                this.nextQueue.errorURL.remove(urlhash);
+            }
+            
+            // put entry on crawl stack
+            enqueueEntry(new Request(
+                    initiator, 
+                    url, 
+                    null, 
+                    e.getValue(), 
+                    new Date(),
+                    profileHandle,
+                    0,
+                    0,
+                    0
+                    ));
+        }
+    }
+    
+    public void queueEntries(final byte[] initiator, final String profileHandle, final String protocol, final String host, final int port, final boolean replace) {
+        final CrawlQueues cq = this.nextQueue;
+        new Thread() {
+            public void run() {
+                BlockingQueue<FTPClient.entryInfo> queue;
+                try {
+                    queue = FTPClient.sitelist(host, port);
+                    FTPClient.entryInfo entry;
+                    while ((entry = queue.take()) != FTPClient.POISON_entryInfo) {
+                        
+                        // delete old entry, if exists to force a re-load of the url (thats wanted here)
+                        DigestURI url = null;
+                        try {
+                            if (protocol.equals("ftp")) url = new DigestURI("ftp://" + host + (port == 21 ? "" : ":" + port) + entry.name);
+                            else if (protocol.equals("smb")) url = new DigestURI("smb://" + host + entry.name);
+                            else if (protocol.equals("http")) url = new DigestURI("http://" + host + (port == 80 ? "" : ":" + port) + entry.name);
+                            else if (protocol.equals("https")) url = new DigestURI("https://" + host + (port == 443 ? "" : ":" + port) + entry.name);
+                        } catch (MalformedURLException e) {
+                            continue;
+                        }
+                        final byte[] urlhash = url.hash();
+                        if (replace) {
+                            indexSegment.urlMetadata().remove(urlhash);
+                            cq.noticeURL.removeByURLHash(urlhash);
+                            cq.errorURL.remove(urlhash);
+                        }
+                        
+                        // put entry on crawl stack
+                        enqueueEntry(new Request(
+                                initiator, 
+                                url, 
+                                null, 
+                                entry.name, 
+                                entry.date,
+                                profileHandle,
+                                0,
+                                0,
+                                0
+                                ));
+                    }
+                } catch (IOException e1) {
+                } catch (InterruptedException e) {
+                }
+            }
+        }.start();
+    }
+    
     public String stackCrawl(final Request entry) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful

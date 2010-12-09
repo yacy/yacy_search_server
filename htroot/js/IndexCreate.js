@@ -74,5 +74,6 @@ function loadInfos() {
 	document.getElementById("ajax").setAttribute("src",AJAX_ON);	
 	
 	url=document.getElementById("crawlingURL").value;
+	if (url.indexOf("ftp") == 0 || url.indexOf("smb") == 0) document.getElementById("crawlingQ").disabled=true; else document.getElementById("crawlingQ").disabled=false;
 	sndReq('/api/util/getpageinfo_p.xml?actions=title,robots&url='+url);
 }

@@ -127,7 +127,10 @@ public class Crawler_p {
                 String crawlingStart = post.get("crawlingURL","").trim(); // the crawljob start url
                 // add the prefix http:// if necessary
                 int pos = crawlingStart.indexOf("://");
-                if (pos == -1) crawlingStart = "http://" + crawlingStart;
+                if (pos == -1) {
+                    if (crawlingStart.startsWith("www")) crawlingStart = "http://" + crawlingStart;
+                    if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart;
+                }
 
                 // normalize URL
                 DigestURI crawlingStartURL = null;
@@ -148,6 +151,8 @@ public class Crawler_p {
                         newcrawlingMustMatch = "file://" + crawlingStartURL.getPath() + ".*";
                     } else if (crawlingStartURL.isSMB()) {
                         newcrawlingMustMatch = "smb://.*" + crawlingStartURL.getHost() + ".*" + crawlingStartURL.getPath() + ".*";
+                    } else if (crawlingStartURL.isFTP()) {
+                        newcrawlingMustMatch = "ftp://.*" + crawlingStartURL.getHost() + ".*" + crawlingStartURL.getPath() + ".*";
                     } else {
                         newcrawlingMustMatch = ".*" + crawlingStartURL.getHost() + ".*";
                     }
@@ -189,10 +194,10 @@ public class Crawler_p {
                 // store this call as api call
                 if (repeat_time > 0) {
                     // store as scheduled api call
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + crawlingStart, repeat_time, repeat_unit.substring(3));
+                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((crawlingStart == null) ? post.get("crawlingFile", "") : crawlingStart), repeat_time, repeat_unit.substring(3));
                 } else {
                     // store just a protocol
-                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + crawlingStart);
+                    sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((crawlingStart == null) ? post.get("crawlingFile", "") : crawlingStart));
                 }                    
                 
                 final boolean crawlingDomMaxCheck = "on".equals(post.get("crawlingDomMaxCheck", "off"));
@@ -225,7 +230,44 @@ public class Crawler_p {
                 env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
                 
                 final String crawlingMode = post.get("crawlingMode","url");
-                if ("url".equals(crawlingMode)) {
+                if (crawlingStart != null && crawlingStart.startsWith("ftp")) {
+                    try {
+                        // check if the crawl filter works correctly
+                        Pattern.compile(newcrawlingMustMatch);
+                        final CrawlProfile profile = new CrawlProfile(
+                                crawlingStart,
+                                crawlingStartURL,
+                                newcrawlingMustMatch,
+                                CrawlProfile.MATCH_NEVER,
+                                newcrawlingdepth,
+                                crawlingIfOlder,
+                                crawlingDomMaxPages,
+                                crawlingQ,
+                                indexText,
+                                indexMedia,
+                                storeHTCache,
+                                crawlOrder,
+                                xsstopw,
+                                xdstopw,
+                                xpstopw,
+                                cachePolicy);
+                        sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
+                        sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                        final DigestURI url = crawlingStartURL;
+                        sb.crawlStacker.queueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), "ftp", url.getHost(), url.getPort(), false);
+                    } catch (final PatternSyntaxException e) {
+                        prop.put("info", "4"); // crawlfilter does not match url
+                        prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
+                        prop.putHTML("info_error", e.getMessage());
+                    } catch (final Exception e) {
+                        // mist
+                        prop.put("info", "7"); // Error with file
+                        prop.putHTML("info_crawlingStart", crawlingStart);
+                        prop.putHTML("info_error", e.getMessage());
+                        Log.logException(e);
+                    }
+                    sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                } else if ("url".equals(crawlingMode)) {
                     
                     // check if pattern matches
                     if ((crawlingStart == null || crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
@@ -334,12 +376,12 @@ public class Crawler_p {
                                 reasonString);
                         }
                     } catch (final PatternSyntaxException e) {
-                        prop.put("info", "4"); //crawlfilter does not match url
+                        prop.put("info", "4"); // crawlfilter does not match url
                         prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
                         prop.putHTML("info_error", e.getMessage());
                     } catch (final Exception e) {
                         // mist
-                        prop.put("info", "6");//Error with url
+                        prop.put("info", "6"); // Error with url
                         prop.putHTML("info_crawlingStart", crawlingStart);
                         prop.putHTML("info_error", e.getMessage());
                         Log.logException(e);
@@ -378,32 +420,14 @@ public class Crawler_p {
                                     cachePolicy);
                             sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
                             sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                            final Iterator<Map.Entry<MultiProtocolURI, String>> linkiterator = hyperlinks.entrySet().iterator();
-                            DigestURI nexturl;
-                            while (linkiterator.hasNext()) {
-                                final Map.Entry<MultiProtocolURI, String> e = linkiterator.next();
-                                if (e.getKey() == null) continue;
-                                nexturl = new DigestURI(e.getKey());
-                                sb.crawlStacker.enqueueEntry(new Request(
-                                        sb.peers.mySeed().hash.getBytes(), 
-                                        nexturl, 
-                                        null, 
-                                        e.getValue(), 
-                                        new Date(),
-                                        profile.handle(),
-                                        0,
-                                        0,
-                                        0
-                                        ));
-                            }
-                           
+                            sb.crawlStacker.queueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
                         } catch (final PatternSyntaxException e) {
-                            prop.put("info", "4"); //crawlfilter does not match url
+                            prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
                             prop.putHTML("info_error", e.getMessage());
                         } catch (final Exception e) {
                             // mist
-                            prop.put("info", "7");//Error with file
+                            prop.put("info", "7"); // Error with file
                             prop.putHTML("info_crawlingStart", fileName);
                             prop.putHTML("info_error", e.getMessage());
                             Log.logException(e);

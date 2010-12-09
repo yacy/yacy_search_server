@@ -132,9 +132,31 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if ((b.length() != 0) && (!(punctuation(b.charAt(b.length() - 1))))) b = b + '.';
             //System.out.println("*** Appended dot: " + b.toString());
         }
+        // find http links inside text
+        int p, q, s = 0;
+        String u;
+        MultiProtocolURI url;
+        while (s < b.length()) {
+            p = Math.min(find(b, "smb://", s), Math.min(find(b, "ftp://", s), Math.min(find(b, "http://", s), find(b, "https://", s))));
+            if (p == Integer.MAX_VALUE) break;
+            q = b.indexOf(" ", p + 1);
+            u = b.substring(p, q < 0 ? b.length() : q);
+            s = p + 1;
+            try {
+                url = new MultiProtocolURI(u);
+                anchors.put(url, u);
+                continue;
+            } catch (MalformedURLException e) {}
+        }
+        // append string to content
         if (b.length() != 0) content.append(b).append(32);
     }
 
+    private static final int find(final String s, final String m, int start) {
+        int p = s.indexOf(m, start);
+        return (p < 0) ? Integer.MAX_VALUE : p;
+    }
+    
     private MultiProtocolURI absolutePath(final String relativePath) {
         try {
             return MultiProtocolURI.newURL(root, relativePath);
