@@ -97,6 +97,7 @@ public class SitemapImporter extends Thread {
                 this.crawlingProfile.handle(),
                 0,
                 0,
+                0,
                 0
                 ));
         logger.logInfo("New URL '" + entry.url() + "' added for loading.");

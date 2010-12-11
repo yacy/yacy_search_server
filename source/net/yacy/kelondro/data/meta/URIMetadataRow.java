@@ -519,6 +519,7 @@ public class URIMetadataRow implements URIMetadata {
                 null,
                 0, 
                 0, 
+                0,
                 0);
     }
     

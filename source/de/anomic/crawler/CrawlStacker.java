@@ -39,6 +39,7 @@ import java.util.concurrent.BlockingQueue;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
+import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
@@ -47,7 +48,10 @@ import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.FilterEngine;
 
+import de.anomic.crawler.retrieval.FTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
+import de.anomic.crawler.retrieval.SMBLoader;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacySeedDB;
@@ -177,7 +181,7 @@ public final class CrawlStacker {
         }
     }
 
-    public void queueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, String> hyperlinks, boolean replace) {
+    public void enqueueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, String> hyperlinks, boolean replace) {
         for (Map.Entry<MultiProtocolURI, String> e: hyperlinks.entrySet()) {
             if (e.getKey() == null) continue;
             
@@ -190,22 +194,28 @@ public final class CrawlStacker {
                 this.nextQueue.errorURL.remove(urlhash);
             }
             
-            // put entry on crawl stack
-            enqueueEntry(new Request(
-                    initiator, 
-                    url, 
-                    null, 
-                    e.getValue(), 
-                    new Date(),
-                    profileHandle,
-                    0,
-                    0,
-                    0
-                    ));
+            if (url.getProtocol().equals("ftp")) {
+                // put the whole ftp site on the crawl stack
+                enqueueEntries(initiator, profileHandle, "ftp", url.getHost(), url.getPort(), replace);
+            } else {
+                // put entry on crawl stack
+                enqueueEntry(new Request(
+                        initiator, 
+                        url, 
+                        null, 
+                        e.getValue(), 
+                        new Date(),
+                        profileHandle,
+                        0,
+                        0,
+                        0,
+                        0
+                        ));
+            }
         }
     }
     
-    public void queueEntries(final byte[] initiator, final String profileHandle, final String protocol, final String host, final int port, final boolean replace) {
+    public void enqueueEntries(final byte[] initiator, final String profileHandle, final String protocol, final String host, final int port, final boolean replace) {
         final CrawlQueues cq = this.nextQueue;
         new Thread() {
             public void run() {
@@ -242,7 +252,8 @@ public final class CrawlStacker {
                                 profileHandle,
                                 0,
                                 0,
-                                0
+                                0,
+                                entry.size
                                 ));
                     }
                 } catch (IOException e1) {
@@ -295,30 +306,46 @@ public final class CrawlStacker {
             return error;
         }
         
+        long maxFileSize = Long.MAX_VALUE;
+        if (entry.size() > 0) {
+            String protocol = entry.url().getProtocol();
+            if (protocol.equals("http") || protocol.equals("https")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+            if (protocol.equals("ftp")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.ftp.maxFileSize", FTPLoader.DEFAULT_MAXFILESIZE);
+            if (protocol.equals("smb")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.smb.maxFileSize", SMBLoader.DEFAULT_MAXFILESIZE);
+
+        }
+        // check availability of parser and maxfilesize
+        if (entry.size() > maxFileSize ||
+            (entry.url().getFileExtension().length() > 0 && TextParser.supports(entry.url(), null) != null)
+            ) {
+            nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
+            return null;
+        }
+        
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
-            nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_LIMIT, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
-            //this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT));
+            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
+            nextQueue.noticeURL.push(NoticedURL.StackType.LIMIT, entry);
+            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
+            //this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT));
         } else if (local) {
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
-            nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
-            //this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
+            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
+            nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
+            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
+            //this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE));
         } else if (proxy) {
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
-            nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
-            //this.log.logInfo("stacked/proxy: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
+            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
+            nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
+            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
+            //this.log.logInfo("stacked/proxy: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE));
         } else if (remote) {
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
-            nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_REMOTE, entry);
+            nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
             //this.log.logInfo("stacked/remote: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
         }

@@ -84,8 +84,8 @@ public class IndexCreateWWWLocalQueue_p {
                 final String pattern = post.get("pattern", ".*").trim();
                 final int option  = post.getInt("option", INVALID);
                 if (pattern.equals(".*")) {
-                    c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
-                    sb.crawlQueues.noticeURL.clear(NoticedURL.STACK_TYPE_CORE);
+                    c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.CORE);
+                    sb.crawlQueues.noticeURL.clear(NoticedURL.StackType.CORE);
                     try { sb.cleanProfiles(); } catch (final InterruptedException e) {/* ignore this */}
                 } else if (option > INVALID) {
                     Pattern compiledPattern = null;
@@ -112,7 +112,7 @@ public class IndexCreateWWWLocalQueue_p {
                             }
                         } else {
                             // iterating through the list of URLs
-                            final Iterator<Request> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.STACK_TYPE_CORE);
+                            final Iterator<Request> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.StackType.CORE);
                             Request entry;
                             List<byte[]> removehashes = new ArrayList<byte[]>();
                             while (iter.hasNext()) {
@@ -152,12 +152,12 @@ public class IndexCreateWWWLocalQueue_p {
             }
         }
 
-        int showNum = 0, stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
+        int showNum = 0, stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.CORE);
         if (stackSize == 0) {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            final ArrayList<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
+            final ArrayList<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.StackType.CORE, (int) (showLimit * 1.20));
 
             Request urle;
             boolean dark = true;

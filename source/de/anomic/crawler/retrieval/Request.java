@@ -47,16 +47,16 @@ public class Request extends WorkflowJob {
         "String urlstring-256, " +                            // the url as string
         "String refhash-" + Word.commonHashLength + ", " +    // the url's referrer hash
         "String urlname-80, " +                               // the name of the url, from anchor tag <a>name</a>
-        "Cardinal appdate-8 {b256}, " +                       // the time when the url was first time appeared
+        "Cardinal appdate-8 {b256}, " +                       // the date of the resource; either file date or first appearance
         "String profile-" + Word.commonHashLength + ", " +    // the name of the prefetch profile handle
         "Cardinal depth-2 {b256}, " +                         // the prefetch depth so far, starts at 0
         "Cardinal parentbr-3 {b256}, " +                      // number of anchors of the parent
         "Cardinal forkfactor-4 {b256}, " +                    // sum of anchors of all ancestors
         "byte[] flags-4, " +                                  // flags
-        "String handle-4, " +                                 // extra handle
-        "Cardinal loaddate-8 {b256}," +                       // NOT USED
-        "Cardinal lastmodified-8 {b256}," +                   // NOT USED
-        "Cardinal modifiedSince-8 {b256}",                    // time that was given to server as ifModifiedSince
+        "Cardinal handle-4 {b256}, " +                        // handle (NOT USED)
+        "Cardinal loaddate-8 {b256}, " +                      // NOT USED
+        "Cardinal lastmodified-8 {b256}, " +                  // NOT USED
+        "Cardinal size-8 {b256}",                             // size of resource in bytes (if known) or 0 if not known
         Base64Order.enhancedCoder
     );
     
@@ -65,14 +65,13 @@ public class Request extends WorkflowJob {
     private byte[]   refhash;       // the url's referrer hash
     private DigestURI url;          // the url as string
     private String   name;          // the name of the url, from anchor tag <a>name</a>     
-    private long     appdate;       // the time when the url was first time appeared. may be negative in case that the date is before epoch (1970)!
-    private long     imsdate;       // the time of a ifModifiedSince request
+    private long     appdate;       // the time when the url was first time appeared.
     private String   profileHandle; // the name of the fetch profile
     private int      depth;         // the prefetch depth so far, starts at 0
     private int      anchors;       // number of anchors of the parent
     private int      forkfactor;    // sum of anchors of all ancestors
-    private Bitfield flags;
-    private int      handle;
+    private Bitfield flags;  
+    private long     size;          // size of resource in bytes (if known) or 0 if not known
     private String   statusMessage;
     private int      initialHash;   // to provide a object hash that does not change even if the url changes because of redirection
     
@@ -82,7 +81,7 @@ public class Request extends WorkflowJob {
      * @param referrerhash
      */
     public Request(final DigestURI url, final byte[] referrerhash) {
-        this(null, url, referrerhash, null, null, null, 0, 0, 0);
+        this(null, url, referrerhash, null, null, null, 0, 0, 0, 0);
     }
     
     /**
@@ -108,7 +107,8 @@ public class Request extends WorkflowJob {
             final String profileHandle,
             final int depth, 
             final int anchors, 
-            final int forkfactor
+            final int forkfactor,
+            final long size
     ) {
         // create new entry and store it into database
         assert url != null;
@@ -124,11 +124,10 @@ public class Request extends WorkflowJob {
         this.anchors       = anchors;
         this.forkfactor    = forkfactor;
         this.flags         = new Bitfield(rowdef.width(10));
-        this.handle        = 0;
-        this.imsdate       = 0;
         this.statusMessage = "loaded(args)";
         this.initialHash   = url.hashCode();
         this.status        = WorkflowJob.STATUS_INITIATED;
+        this.size          = size;
     }
     
     public Request(final Row.Entry entry) throws IOException {
@@ -150,10 +149,9 @@ public class Request extends WorkflowJob {
         this.anchors = (int) entry.getColLong(8);
         this.forkfactor = (int) entry.getColLong(9);
         this.flags = new Bitfield(entry.getColBytes(10, true));
-        this.handle = Integer.parseInt(entry.getColString(11, null), 16);
         //this.loaddate = entry.getColLong(12);
         //this.lastmodified = entry.getColLong(13);
-        this.imsdate = entry.getColLong(14);
+        this.size = entry.getColLong(14);
         this.statusMessage        = "loaded(kelondroRow.Entry)";
         this.initialHash   = url.hashCode();
         return;
@@ -174,17 +172,11 @@ public class Request extends WorkflowJob {
         return this.statusMessage;
     }
     
-    private static String normalizeHandle(final int h) {
-        String d = Integer.toHexString(h);
-        while (d.length() < rowdef.width(11)) d = "0" + d;
-        return d;
-    }
-    
     public Row.Entry toRow() {
         final byte[] appdatestr = NaturalOrder.encodeLong(appdate, rowdef.width(5));
         final byte[] loaddatestr = NaturalOrder.encodeLong(0 /*loaddate*/, rowdef.width(12));
         final byte[] serverdatestr = NaturalOrder.encodeLong(0 /*lastmodified*/, rowdef.width(13));
-        final byte[] imsdatestr = NaturalOrder.encodeLong(imsdate, rowdef.width(14));
+        final byte[] sizestr = NaturalOrder.encodeLong(this.size, rowdef.width(14));
         // store the hash in the hash cache
         byte[] namebytes;
         try {
@@ -204,10 +196,10 @@ public class Request extends WorkflowJob {
                 NaturalOrder.encodeLong(this.anchors, rowdef.width(8)),
                 NaturalOrder.encodeLong(this.forkfactor, rowdef.width(9)),
                 this.flags.bytes(),
-                normalizeHandle(this.handle).getBytes(),
+                NaturalOrder.encodeLong(0, rowdef.width(11)),
                 loaddatestr,
                 serverdatestr,
-                imsdatestr};
+                sizestr};
         return rowdef.newEntry(entry);
     }
     
@@ -251,9 +243,9 @@ public class Request extends WorkflowJob {
         return new Date(this.lastmodified);
     }
     */
-    public Date imsdate() {
+    public long size() {
         // the date that the client (browser) send as ifModifiedSince in proxy mode
-        return new Date(this.imsdate);
+        return this.size;
     }
 
     public String name() {

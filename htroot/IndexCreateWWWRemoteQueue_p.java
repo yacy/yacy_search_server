@@ -62,13 +62,13 @@ public class IndexCreateWWWRemoteQueue_p {
             }  
             
             if (post.containsKey("clearcrawlqueue")) {
-                final int c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
-                sb.crawlQueues.noticeURL.clear(NoticedURL.STACK_TYPE_REMOTE);
+                final int c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.REMOTE);
+                sb.crawlQueues.noticeURL.clear(NoticedURL.StackType.REMOTE);
                 try { sb.cleanProfiles(); } catch (final InterruptedException e) { /* Ignore this */}
                 /*
                 int c = 0;
-                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.STACK_TYPE_LIMIT) > 0) {
-                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.STACK_TYPE_LIMIT).hash();
+                while (switchboard.urlPool.noticeURL.stackSize(plasmaCrawlNURL.StackType.LIMIT) > 0) {
+                    urlHash = switchboard.urlPool.noticeURL.pop(plasmaCrawlNURL.StackType.LIMIT).hash();
                     if (urlHash != null) { switchboard.urlPool.noticeURL.remove(urlHash); c++; }
                 }
                 */
@@ -82,12 +82,12 @@ public class IndexCreateWWWRemoteQueue_p {
             }
         }
 
-        int stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
+        int stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.REMOTE);
         if (stackSize == 0) {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            final ArrayList<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_REMOTE, showLimit);
+            final ArrayList<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.StackType.REMOTE, showLimit);
             
             Request urle;
             boolean dark = true;

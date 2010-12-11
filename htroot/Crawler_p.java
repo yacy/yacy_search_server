@@ -254,7 +254,7 @@ public class Crawler_p {
                         sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         final DigestURI url = crawlingStartURL;
-                        sb.crawlStacker.queueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), "ftp", url.getHost(), url.getPort(), false);
+                        sb.crawlStacker.enqueueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), "ftp", url.getHost(), url.getPort(), false);
                     } catch (final PatternSyntaxException e) {
                         prop.put("info", "4"); // crawlfilter does not match url
                         prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
@@ -316,6 +316,7 @@ public class Crawler_p {
                                 pe.handle(),
                                 0,
                                 0,
+                                0,
                                 0
                                 ));
                         
@@ -369,6 +370,7 @@ public class Crawler_p {
                                         pe.handle(),
                                         0,
                                         0,
+                                        0,
                                         0),
                                 sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
@@ -420,7 +422,7 @@ public class Crawler_p {
                                     cachePolicy);
                             sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
                             sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                            sb.crawlStacker.queueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
+                            sb.crawlStacker.enqueueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
@@ -520,6 +522,7 @@ public class Crawler_p {
                                     e.getValue(), 
                                     new Date(),
                                     profile.handle(),
+                                    0,
                                     0,
                                     0,
                                     0

@@ -81,7 +81,8 @@ public class rct_p {
                                     sb.crawler.defaultRemoteProfile.handle(),
                                     0,
                                     0,
-                                    0
+                                    0,
+                                    item.getSize()
                                     ));
                         } else {
                             env.getLog().logWarning("crawlOrder: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);

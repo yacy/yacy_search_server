@@ -56,14 +56,16 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class SMBLoader {
 
+    public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
+    
     private final Switchboard sb;
     private final Log log;
-    private final int maxFileSize;
+    private final long maxFileSize;
 
     public SMBLoader(final Switchboard sb, final Log log) {
         this.sb = sb;
         this.log = log;
-        maxFileSize = (int) sb.getConfigLong("crawler.smb.maxFileSize", -1l);
+        maxFileSize = sb.getConfigLong("crawler.smb.maxFileSize", -1l);
     }
     
     

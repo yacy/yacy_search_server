@@ -50,6 +50,8 @@ public interface Hit {
 
     public void setSubject(String[] tags);
     
+    public void setSize(long size);
+    
     public String getAuthor();
     
     public String getCopyright();
@@ -73,5 +75,7 @@ public interface Hit {
     public String getDocs();
 
     public String[] getSubject();
+    
+    public long getSize();
 
 }

@@ -47,7 +47,8 @@ public class RSSMessage implements Hit {
         language("language"),
         guid("guid"),
         ttl("ttl"),
-        docs("docs");
+        docs("docs"),
+        size("size,length");
         
         private Set<String> keys;
         
@@ -172,6 +173,11 @@ public class RSSMessage implements Hit {
         return Token.docs.valueFrom(this.map);
     }
     
+    public long getSize() {
+        String size = Token.size.valueFrom(this.map);
+        return (size == null) ? 0 : Long.parseLong(size);
+    }
+    
     public String getFulltext() {
         StringBuilder sb = new StringBuilder(300);
         for (String s: map.values()) sb.append(s).append(" ");
@@ -230,13 +236,7 @@ public class RSSMessage implements Hit {
     }
 
     public void setSize(long size) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    public void setSizename(String sizename) {
-        // TODO Auto-generated method stub
-        
+        setValue("size", Long.toString(size));
     }
 
     public void setTitle(String title) {

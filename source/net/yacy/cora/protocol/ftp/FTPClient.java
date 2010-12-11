@@ -1048,9 +1048,9 @@ public class FTPClient {
             filetype type = filetype.file;
             if (tokens.group(1).startsWith("d")) type = filetype.directory;
             if (tokens.group(1).startsWith("l")) type = filetype.link;
-            int size = -1;
+            long size = -1;
             try {
-                size = Integer.parseInt(tokens.group(2));
+                size = Long.parseLong(tokens.group(2));
             } catch (final NumberFormatException e) {
                 log.warn("not a number in list-entry: ", e);
                 return null;
@@ -1078,7 +1078,8 @@ public class FTPClient {
                 log.warn("---- Error: not ls date-format '" + dateString, e);
                 date = new Date();
             }
-            return new entryInfo(type, size, date, tokens.group(6));
+            String filename = tokens.group(6);
+            return new entryInfo(type, size, date, filename);
         }
         return null;
     }
@@ -1104,7 +1105,7 @@ public class FTPClient {
         /**
          * size in bytes
          */
-        public final int size;
+        public final long size;
         /**
          * date of file
          */
@@ -1130,7 +1131,7 @@ public class FTPClient {
          * @param date
          * @param name
          */
-        public entryInfo(final filetype type, final int size, final Date date, final String name) {
+        public entryInfo(final filetype type, final long size, final Date date, final String name) {
             this.type = type;
             this.size = size;
             this.date = date;
@@ -1680,8 +1681,8 @@ public class FTPClient {
      * @param path
      * @return size in bytes or -1 if size cannot be determinied
      */
-    public int fileSize(final String path) {
-        int size = -1;
+    public long fileSize(final String path) {
+        long size = -1;
         try {
             // extended FTP
             size = size(path);

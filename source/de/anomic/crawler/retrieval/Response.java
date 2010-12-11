@@ -144,7 +144,7 @@ public class Response {
     public static final int QUEUE_STATE_FINISHED          = 5;
     
     public Response(
-    		Request request,
+            final Request request,
             final RequestHeader requestHeader,
             final ResponseHeader responseHeader,
             final String responseStatus,
@@ -160,8 +160,19 @@ public class Response {
         this.content = content;
     }
     
+    public Response(final Request request, final CrawlProfile profile) {
+        this.request = request;
+        // request and response headers may be zero in case that we process surrogates
+        this.requestHeader = new RequestHeader();
+        this.responseHeader = new ResponseHeader();
+        this.responseStatus = "200";
+        this.profile = profile;
+        this.status = QUEUE_STATE_FRESH;
+        this.content = request.url().toNormalform(true, true).getBytes();
+    }
+    
     public Response(
-            Request request,
+            final Request request,
             final RequestHeader requestHeader,
             final ResponseHeader responseHeader,
             final String responseStatus,

@@ -59,7 +59,7 @@ public class urls {
         
         if (post.get("call", "").equals("remotecrawl")) {
             // perform a remote crawl url handover
-            final int stackType = NoticedURL.STACK_TYPE_LIMIT;
+            final NoticedURL.StackType stackType = NoticedURL.StackType.LIMIT;
             int maxCount = Math.min(100, post.getInt("count", 10));
             long maxTime = Math.min(20000, Math.max(1000, post.getInt("time", 10000)));
             long timeout = System.currentTimeMillis() + maxTime;

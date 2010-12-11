@@ -290,7 +290,7 @@ public final class TextParser {
         try {
             // try to get a parser. If this works, we don't need the parser itself, we just return null to show that everything is ok.
             List<Parser> idioms = parsers(url, mimeType);
-            return (idioms == null || idioms.isEmpty()) ? "no parser found" : null;
+            return (idioms == null || idioms.isEmpty() || (idioms.size() == 1 && idioms.get(0).getName().equals(genericIdiom.getName()))) ? "no parser found" : null;
         } catch (Parser.Failure e) {
             // in case that a parser is not available, return a error string describing the problem.
             return e.getMessage();
@@ -333,9 +333,7 @@ public final class TextParser {
         
         // check mime type computed from extension
         String mimeType2 = ext2mime.get(ext);
-        if (mimeType2 == null || denyMime.containsKey(mimeType2)) return idioms; // in this case we are a bit more lazy
-        idiom = mime2parser.get(mimeType2);
-        if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
+        if (mimeType2 != null && (idiom = mime2parser.get(mimeType2)) != null && !idioms.contains(idiom)) idioms.add(idiom);
         
         // always add the generic parser
         idioms.add(genericIdiom);

@@ -70,23 +70,23 @@ public class queues_p {
         //local crawl queue
         prop.putNum("localCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
         prop.put("localCrawlState", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
-        int stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
-        addNTable(sb, prop, "list-local", sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, Math.min(10, stackSize)));
+        int stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.CORE);
+        addNTable(sb, prop, "list-local", sb.crawlQueues.noticeURL.top(NoticedURL.StackType.CORE, Math.min(10, stackSize)));
 
         //global crawl queue
         prop.putNum("limitCrawlSize", sb.crawlQueues.limitCrawlJobSize());
         prop.put("limitCrawlState", STATE_RUNNING);
-        stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
+        stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
 
         //global crawl queue
         prop.putNum("remoteCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
         prop.put("remoteCrawlState", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
-        stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
+        stackSize = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
 
         if (stackSize == 0) {
             prop.put("list-remote", "0");
         } else {
-            addNTable(sb, prop, "list-remote", sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_LIMIT, Math.min(10, stackSize)));
+            addNTable(sb, prop, "list-remote", sb.crawlQueues.noticeURL.top(NoticedURL.StackType.LIMIT, Math.min(10, stackSize)));
         }
 
         // return rewrite properties

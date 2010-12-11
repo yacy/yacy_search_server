@@ -48,14 +48,16 @@ import de.anomic.search.Switchboard;
 
 public class FTPLoader {
 
+    public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
+    
     private final Switchboard sb;
     private final Log log;
-    private final int maxFileSize;
+    private final long maxFileSize;
 
     public FTPLoader(final Switchboard sb, final Log log) {
         this.sb = sb;
         this.log = log;
-        this.maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
+        this.maxFileSize = sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
     /**
@@ -228,7 +230,7 @@ public class FTPLoader {
         responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
         
         // if the mimetype and file extension is supported we start to download the file
-        final int size = ftpClient.fileSize(path);
+        final long size = ftpClient.fileSize(path);
         String parserError = null;
         if ((acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) ||
             (size > maxFileSize && maxFileSize >= 0)) {

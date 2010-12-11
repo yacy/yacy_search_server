@@ -1348,7 +1348,8 @@ public final class Switchboard extends serverSwitch {
                     this.crawler.defaultSurrogateProfile.handle(),
                     0, 
                     0, 
-                    0        
+                    0,
+                    0
             );
             response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
             indexingQueueEntry queueEntry = new indexingQueueEntry(Segments.Process.SURROGATES, response, new Document[]{document}, null);
@@ -1800,7 +1801,8 @@ public final class Switchboard extends serverSwitch {
                             response.profile().handle(),
                             response.depth() + 1,
                             0,
-                            0
+                            0,
+                            response.size() < 0 ? 0 : response.size()
                             ));
                 } catch (MalformedURLException e) {
                     Log.logException(e);
@@ -2261,6 +2263,7 @@ public final class Switchboard extends serverSwitch {
                 null,
                 0, 
                 0, 
+                0,
                 0);
         crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failreason);
     }
@@ -2433,7 +2436,7 @@ public final class Switchboard extends serverSwitch {
         peers.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         peers.mySeed().put(yacySeed.LCOUNT, Long.toString(indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
         peers.mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
-        peers.mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
+        peers.mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
         peers.mySeed().put(yacySeed.ICOUNT, Long.toString(indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         peers.mySeed().put(yacySeed.SCOUNT, Integer.toString(peers.sizeConnected())); // the number of seeds that the peer has stored
         peers.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((peers.sizeConnected() + peers.sizeDisconnected() + peers.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
