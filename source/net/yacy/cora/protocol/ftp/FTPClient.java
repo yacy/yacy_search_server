@@ -2218,10 +2218,6 @@ public class FTPClient {
                     outFile.write(block, 0, numRead);
                     length = length + numRead;
                 }
-    
-                // after stream is empty we should get control completion echo
-                /*reply =*/ receive();
-                // boolean success = !isNotPositiveCompletion(reply);
             } finally {
                 // shutdown connection
                 if(outFile != null) {
@@ -2233,6 +2229,9 @@ public class FTPClient {
                 closeDataSocket();
             }
 
+            // after stream is empty we should get control completion echo
+            /*reply =*/ receive();
+            // boolean success = !isNotPositiveCompletion(reply);
             // if (!success) throw new IOException(reply);
 
             // write statistics
@@ -2287,10 +2286,6 @@ public class FTPClient {
                     os.write(block, 0, numRead);
                     length = length + numRead;
                 }
-    
-                // after stream is empty we should get control completion echo
-                /*reply =*/ receive();
-                // boolean success = !isNotPositiveCompletion(reply);
             } finally {
                 // shutdown connection
                 if (ClientStream != null) {
@@ -2298,6 +2293,10 @@ public class FTPClient {
                 }
                 closeDataSocket();
             }
+            
+            // after stream is empty we should get control completion echo
+            /*reply =*/ receive();
+            // boolean success = !isNotPositiveCompletion(reply);
             return os.toByteArray();
         } else {
             throw new IOException(reply);
@@ -2342,12 +2341,12 @@ public class FTPClient {
             inFile.close();
             ClientStream.close();
 
+            // shutdown remote client connection
+            data.close();
+            
             // after stream is empty we should get control completion echo
             reply = receive();
             final boolean success = (getStatus(reply) == 2);
-
-            // shutdown remote client connection
-            data.close();
 
             if (!success) {
                 throw new IOException(reply);
@@ -2536,7 +2535,7 @@ public class FTPClient {
         try {
             list = ftpClient.list(path, true);
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return;
         }
         if (!path.endsWith("/")) path += "/";
