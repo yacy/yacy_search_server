@@ -53,7 +53,7 @@ public class CrawlStartIntranet_p {
         }
         
         // if there are no intranet addresses known, scan the net
-        if (sb.intranetURLs.size() == 0) {
+        if (Scanner.intranetURLs.size() == 0) {
             Scanner scanner = new Scanner(100, 10);
             scanner.addFTP(false);
             scanner.addHTTP(false);
@@ -64,7 +64,7 @@ public class CrawlStartIntranet_p {
             DigestURI url;
             for (MultiProtocolURI service: scanner.services()) {
                 url = new DigestURI(service);
-                sb.intranetURLs.put(url.hash(), url);
+                Scanner.intranetURLs.put(url.hash(), url);
             }
         }
         
@@ -73,7 +73,7 @@ public class CrawlStartIntranet_p {
             for (Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) {
                     byte [] pk = entry.getValue().substring(5).getBytes();
-                    DigestURI url = sb.intranetURLs.get(pk);
+                    DigestURI url = Scanner.intranetURLs.get(pk);
                     if (url != null) {
                         String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
                         path += "&crawlingURL=" + url.toNormalform(true, false);
@@ -87,7 +87,7 @@ public class CrawlStartIntranet_p {
         prop.put("servertable", 1);
         int i = 0;
         String urlString;
-        for (final DigestURI url: sb.intranetURLs.values()) {
+        for (final DigestURI url: Scanner.intranetURLs.values()) {
             urlString = url.toNormalform(true, false);
             prop.put("servertable_list_" + i + "_pk", new String(url.hash()));
             prop.put("servertable_list_" + i + "_count", i);

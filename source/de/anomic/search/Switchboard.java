@@ -230,7 +230,6 @@ public final class Switchboard extends serverSwitch {
     public  LinkedBlockingQueue<String>    trail;
     public  yacySeedDB                     peers;
     public  WorkTables                     tables;
-    public  SortedMap<byte[], DigestURI>   intranetURLs = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
     
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;

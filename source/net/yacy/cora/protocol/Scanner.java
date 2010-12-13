@@ -36,7 +36,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 
 /**
  * a protocol scanner
@@ -47,20 +49,37 @@ public class Scanner extends Thread {
     private static final MultiProtocolURI POISONURI = new MultiProtocolURI();
     private static final Object PRESENT = new Object();
     
+    public static Map<byte[], DigestURI> intranetURLs = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder); // deprecated
+    public static Collection<MultiProtocolURI> scancache = new ArrayList<MultiProtocolURI>(1);
+    
     private int runnerCount;
-    private List<InetAddress> a;
+    private List<InetAddress> scanrange;
     private BlockingQueue<MultiProtocolURI> scanqueue;
     private Map<MultiProtocolURI, String> services;
     private Map<Runner, Object> runner;
     private int timeout;
-    
-    public Scanner(int concurrentRunner, int timeout) {
+
+    public Scanner(InetAddress scanrange, int concurrentRunner, int timeout) {
         this.runnerCount = concurrentRunner;
-        this.a = Domains.myIntranetIPs();
+        this.scanrange = new ArrayList<InetAddress>();
+        this.scanrange.add(scanrange);
         this.scanqueue = new LinkedBlockingQueue<MultiProtocolURI>();
         this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, String>());
         this.runner = new ConcurrentHashMap<Runner, Object>();
         this.timeout = timeout;
+    }
+
+    public Scanner(List<InetAddress> scanrange, int concurrentRunner, int timeout) {
+        this.runnerCount = concurrentRunner;
+        this.scanrange = scanrange;
+        this.scanqueue = new LinkedBlockingQueue<MultiProtocolURI>();
+        this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, String>());
+        this.runner = new ConcurrentHashMap<Runner, Object>();
+        this.timeout = timeout;
+    }
+    
+    public Scanner(int concurrentRunner, int timeout) {
+        this(Domains.myIntranetIPs(), concurrentRunner, timeout);
     }
     
     public void run() {
@@ -79,53 +98,6 @@ public class Scanner extends Thread {
             }
         } catch (InterruptedException e) {
             Log.logException(e);
-        }
-    }
-    
-    private final List<InetAddress> genlist(boolean bigrange) {
-        ArrayList<InetAddress> c = new ArrayList<InetAddress>(10);
-        for (InetAddress i: a) {
-            for (int br = bigrange ? 1 : i.getAddress()[2]; br < (bigrange ? 255 : i.getAddress()[2] + 1); br++) {
-                for (int j = 1; j < 255; j++) {
-                    byte[] address = i.getAddress();
-                    address[2] = (byte) br;
-                    address[3] = (byte) j;
-                    try {
-                        c.add(InetAddress.getByAddress(address));
-                    } catch (UnknownHostException e) {
-                    }
-                }
-            }
-        }
-        return c;
-    }
-    
-    public void addHTTP(boolean bigrange) {
-        addProtocol("http", bigrange);
-    }
-
-    public void addHTTPS(boolean bigrange) {
-        addProtocol("https", bigrange);
-    }
-
-    public void addSMB(boolean bigrange) {
-        addProtocol("smb", bigrange);
-    }
-    
-    public void addFTP(boolean bigrange) {
-        addProtocol("ftp", bigrange);
-    }
-    
-    private void addProtocol(String protocol, boolean bigrange) {
-        for (InetAddress i: genlist(bigrange)) {
-            try {
-                
-                this.scanqueue.put(new MultiProtocolURI(protocol + "://" + i.getHostAddress() + "/"));
-            } catch (MalformedURLException e) {
-                Log.logException(e);
-            } catch (InterruptedException e) {
-                Log.logException(e);
-            }
         }
     }
 
@@ -178,6 +150,51 @@ public class Scanner extends Thread {
         }
     }
     
+    public void addHTTP(boolean bigrange) {
+        addProtocol("http", bigrange);
+    }
+
+    public void addHTTPS(boolean bigrange) {
+        addProtocol("https", bigrange);
+    }
+
+    public void addSMB(boolean bigrange) {
+        addProtocol("smb", bigrange);
+    }
+    
+    public void addFTP(boolean bigrange) {
+        addProtocol("ftp", bigrange);
+    }
+    
+    private void addProtocol(String protocol, boolean bigrange) {
+        for (InetAddress i: genlist(bigrange)) {
+            try {
+                this.scanqueue.put(new MultiProtocolURI(protocol + "://" + i.getHostAddress() + "/"));
+            } catch (MalformedURLException e) {
+                Log.logException(e);
+            } catch (InterruptedException e) {
+                Log.logException(e);
+            }
+        }
+    }
+    
+    private final List<InetAddress> genlist(boolean bigrange) {
+        ArrayList<InetAddress> c = new ArrayList<InetAddress>(10);
+        for (InetAddress i: scanrange) {
+            for (int br = bigrange ? 1 : i.getAddress()[2]; br < (bigrange ? 255 : i.getAddress()[2] + 1); br++) {
+                for (int j = 1; j < 255; j++) {
+                    byte[] address = i.getAddress();
+                    address[2] = (byte) br;
+                    address[3] = (byte) j;
+                    try {
+                        c.add(InetAddress.getByAddress(address));
+                    } catch (UnknownHostException e) {
+                    }
+                }
+            }
+        }
+        return c;
+    }
     
     public Collection<MultiProtocolURI> services() {
         return this.services.keySet();

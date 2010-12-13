@@ -1,0 +1,90 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Network Scanner</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript">
+    <!--
+    function setall(name) {
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        for (i = 0; i < count; i++) {
+            if (selectForm.elements["item_" + i] == null) continue;
+            selectForm.elements["item_" + i].checked = !selectForm.elements["item_" + i].checked;
+        }
+    }
+    -->
+    </script>
+    <script type="text/javascript" src="/js/sorttable.js"></script>
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Network Scanner</h2>
+
+    #(selectiprange)#::
+    <p>
+      YaCy can scan a network segment for available http, ftp and smb server.
+      You must first select a IP range and then, after this range is scanned,
+      it is possible to select servers that had been found for a full-site crawl.
+    </p>
+    #(/selectiprange)#
+	
+    #(noserverdetected)#::
+    <p>
+      No servers had been detected in the given IP range #[iprange]#. Please enter a different IP range for another scan.
+    </p>
+    #(/noserverdetected)#
+	
+    #(enterrange)#::
+    <p>
+    <form id="enterrange" name="enterrange" action="CrawlStartScanner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" ><fieldset>
+	  <legend><label for="servertable">Enter IP Range for Scanner</label></legend>
+      <input type="text" name="ip4-0" value="#[ip4-0]#" size="3" maxlength="3" />.
+      <input type="text" name="ip4-1" value="#[ip4-1]#" size="3" maxlength="3" />.
+      <input type="text" name="ip4-2" value="#[ip4-2]#" size="3" maxlength="3" />.[1-254]
+      <input type="submit" name="scanip" value="Scan this IP range for services" />
+    </fieldset></form>
+    <form id="enterrange" name="enterrange" action="CrawlStartScanner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" ><fieldset>
+	  <legend><label for="servertable">Enter Host Name for Scanner</label></legend>
+      <input type="text" name="host" value="#[host]#" size="28" maxlength="60" />
+      <input type="submit" name="scanhost" value="Scan this Host for services" />
+    </fieldset></form>
+    </p>
+    #(/enterrange)#
+
+	#(servertable)#::
+	<p>
+	  The following servers had been detected:
+	</p>
+	<form id="servertable" name="servertable" action="CrawlStartScanner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" ><fieldset>
+	  <legend><label for="servertable">Available server within the given IP range</label></legend>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name)" /></td>
+          <td>Protocol</td>
+          <td>IP</td>
+          <td>URL</td>
+          <td>Process</td>
+        </tr>
+        #{list}#
+        <tr class="TableCellLight">
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td>#[protocol]#</td>
+          <td><a href="#[url]#">#[ip]#</a></td>
+          <td><a href="#[url]#">#[url]#</a></td>
+          #(process)#<td class="error">not in index</td>::<td class="commit">indexed</td>#(/process)#
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="submit" name="crawl" value="Add Selected Servers to Crawler" />
+      </p>
+    </fieldset></form>
+	#(/servertable)#
+	
+
+    #%env/templates/footer.template%#
+  </body>
+</html>
