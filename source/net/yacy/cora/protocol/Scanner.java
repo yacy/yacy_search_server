@@ -20,11 +20,11 @@
 
 package net.yacy.cora.protocol;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -35,10 +35,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 
 /**
  * a protocol scanner
@@ -49,13 +48,14 @@ public class Scanner extends Thread {
     private static final MultiProtocolURI POISONURI = new MultiProtocolURI();
     private static final Object PRESENT = new Object();
     
-    public static Map<byte[], DigestURI> intranetURLs = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder); // deprecated
-    public static Collection<MultiProtocolURI> scancache = new ArrayList<MultiProtocolURI>(1);
+    public static enum Access {unknown, empty, granted, denied;}
+    
+    public static Map<MultiProtocolURI, Access> scancache = new TreeMap<MultiProtocolURI, Access>();
     
     private int runnerCount;
     private List<InetAddress> scanrange;
     private BlockingQueue<MultiProtocolURI> scanqueue;
-    private Map<MultiProtocolURI, String> services;
+    private Map<MultiProtocolURI, Access> services;
     private Map<Runner, Object> runner;
     private int timeout;
 
@@ -64,7 +64,7 @@ public class Scanner extends Thread {
         this.scanrange = new ArrayList<InetAddress>();
         this.scanrange.add(scanrange);
         this.scanqueue = new LinkedBlockingQueue<MultiProtocolURI>();
-        this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, String>());
+        this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, Access>());
         this.runner = new ConcurrentHashMap<Runner, Object>();
         this.timeout = timeout;
     }
@@ -73,7 +73,7 @@ public class Scanner extends Thread {
         this.runnerCount = concurrentRunner;
         this.scanrange = scanrange;
         this.scanqueue = new LinkedBlockingQueue<MultiProtocolURI>();
-        this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, String>());
+        this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, Access>());
         this.runner = new ConcurrentHashMap<Runner, Object>();
         this.timeout = timeout;
     }
@@ -127,7 +127,34 @@ public class Scanner extends Thread {
             try {
                 if (TimeoutRequest.ping(this.uri, timeout)) {
                     try {
-                        services.put(new MultiProtocolURI(this.uri.getProtocol() + "://" + Domains.getHostName(InetAddress.getByName(this.uri.getHost())) + "/"), "");
+                        MultiProtocolURI uri = new MultiProtocolURI(this.uri.getProtocol() + "://" + Domains.getHostName(InetAddress.getByName(this.uri.getHost())) + "/");
+                        String protocol = uri.getProtocol();
+                        Access access = protocol.equals("http") || protocol.equals("https") ? Access.granted : Access.unknown;
+                        services.put(uri, access);
+                        if (access == Access.unknown) {
+                            // ask the service if it lets us in
+                            if (protocol.equals("ftp")) {
+                                final FTPClient ftpClient = new FTPClient();
+                                try {
+                                    ftpClient.open(uri.getHost(), uri.getPort());
+                                    ftpClient.login("anonymous", "anomic@");
+                                    List<String> list = ftpClient.list("/", false);
+                                    ftpClient.CLOSE();
+                                    access = list == null || list.size() == 0 ? Access.empty : Access.granted;
+                                } catch (IOException e) {
+                                    access = Access.denied;
+                                }
+                            }
+                            if (protocol.equals("smb")) {
+                                try {
+                                    String[] list = uri.list();
+                                    access = list == null || list.length == 0 ? Access.empty : Access.granted;
+                                } catch (IOException e) {
+                                    access = Access.denied;
+                                }
+                            }
+                        }
+                        if (access != Access.unknown) services.put(uri, access);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                     } catch (UnknownHostException e) {
@@ -196,8 +223,8 @@ public class Scanner extends Thread {
         return c;
     }
     
-    public Collection<MultiProtocolURI> services() {
-        return this.services.keySet();
+    public Map<MultiProtocolURI, Access> services() {
+        return this.services;
     }
     
     public static void main(String[] args) {
@@ -209,7 +236,7 @@ public class Scanner extends Thread {
         scanner.addSMB(false);
         scanner.start();
         scanner.terminate();
-        for (MultiProtocolURI service: scanner.services()) {
+        for (MultiProtocolURI service: scanner.services().keySet()) {
             System.out.println(service.toNormalform(true, false));
         }
         try {

@@ -35,24 +35,32 @@
       No servers had been detected in the given IP range #[iprange]#. Please enter a different IP range for another scan.
     </p>
     #(/noserverdetected)#
-	
+    
     #(enterrange)#::
-    <p>
-    <form id="enterrange" name="enterrange" action="CrawlStartScanner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" ><fieldset>
-	  <legend><label for="servertable">Enter IP Range for Scanner</label></legend>
+    <div><table border="0"><tr valign="top">
+    <td width="270"><form onSubmit="document.getElementById('scanipinfo').innerHTML='Please wait...'" action="CrawlStartScanner_p.html" method="get">
+    <fieldset height="30">
+	  <legend><label for="servertable">Scan with given IP range</label></legend><br>
       <input type="text" name="ip4-0" value="#[ip4-0]#" size="3" maxlength="3" />.
       <input type="text" name="ip4-1" value="#[ip4-1]#" size="3" maxlength="3" />.
       <input type="text" name="ip4-2" value="#[ip4-2]#" size="3" maxlength="3" />.[1-254]
-      <input type="submit" name="scanip" value="Scan this IP range for services" />
-    </fieldset></form>
-    <form id="enterrange" name="enterrange" action="CrawlStartScanner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" ><fieldset>
-	  <legend><label for="servertable">Enter Host Name for Scanner</label></legend>
+      <input type="submit" name="scanip" value="Scan"/><br><br><div class="error" id="scanipinfo"></div>
+    </fieldset></form></td>
+    <td width="270"><form onSubmit="document.getElementById('scanhostinfo').innerHTML='Please wait...'" action="CrawlStartScanner_p.html" method="get">
+    <fieldset>
+	  <legend><label for="servertable">Scan range with given host name</label></legend><br>
       <input type="text" name="host" value="#[host]#" size="28" maxlength="60" />
-      <input type="submit" name="scanhost" value="Scan this Host for services" />
-    </fieldset></form>
-    </p>
+      <input type="submit" name="scanhost" value="Scan" /><br><br><div class="error" id="scanhostinfo"></div>
+    </fieldset></form></td>
+    <td><form onSubmit="document.getElementById('scanintranetinfo').innerHTML='Please wait...'" action="CrawlStartScanner_p.html" method="get">
+    <fieldset>
+	  <legend><label for="servertable">Full Intranet Scan</label></legend>
+	  #(intranetHint)#::<div class="warning">Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
+	  #[intranethosts]#&nbsp;<input type="submit" name="scanintranet" value="Scan" /><div class="error" id="scanintranetinfo"></div>
+    </fieldset></form></td>
+    </tr></table></div>
     #(/enterrange)#
-
+    
 	#(servertable)#::
 	<p>
 	  The following servers had been detected:
@@ -65,15 +73,20 @@
           <td>Protocol</td>
           <td>IP</td>
           <td>URL</td>
+          <td>Access</td>
           <td>Process</td>
         </tr>
         #{list}#
         <tr class="TableCellLight">
-          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" #(preselected)#::checked#(/preselected)#/></td>
           <td>#[protocol]#</td>
           <td><a href="#[url]#">#[ip]#</a></td>
           <td><a href="#[url]#">#[url]#</a></td>
-          #(process)#<td class="error">not in index</td>::<td class="commit">indexed</td>#(/process)#
+          #(accessUnknown)#::<td class="info">unknown</td>#(/accessUnknown)#
+          #(accessEmpty)#::<td class="info">empty</td>#(/accessEmpty)#
+          #(accessGranted)#::<td class="commit">granted</td>#(/accessGranted)#
+          #(accessDenied)#::<td class="error">denied</td>#(/accessDenied)#
+          #(process)#<td class="info">not in index</td>::<td class="commit">indexed</td>#(/process)#
         </tr>
         #{/list}#
       </table>

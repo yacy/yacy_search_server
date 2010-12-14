@@ -314,7 +314,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      *  checks for local/global IP range and local IP
      */
     public final boolean isLocal() {
-        if (this.isSMB() || this.isFile()) return true;
+        if (this.isFile()) return true;
         if (this.hash == null) synchronized (this) {
             // this is synchronized because another thread may also call the same method in between
             // that is the reason that this.hash is checked again

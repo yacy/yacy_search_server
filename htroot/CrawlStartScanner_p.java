@@ -22,6 +22,7 @@
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
+import net.yacy.cora.protocol.Scanner.Access;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -64,7 +66,6 @@ public class CrawlStartScanner_p {
         
         // case: an IP range was given; scan the range for services and display result
         if (post.containsKey("scanip") || post.containsKey("scanhost")) {
-            addSelectIPRange(sb, prop);
             InetAddress ia;
             try {
                 if (post.containsKey("scanip")) {
@@ -80,16 +81,28 @@ public class CrawlStartScanner_p {
                 scanner.addSMB(false);
                 scanner.start();
                 scanner.terminate();
-                Scanner.scancache = scanner.services();
+                enlargeScancache(sb, scanner);
                 addScantable(sb, prop);
             } catch (UnknownHostException e) {}
+        }
+        
+        if (post.containsKey("scanintranet")) {
+            Scanner scanner = new Scanner(Domains.myIntranetIPs(), 100, sb.isIntranetMode() ? 100 : 3000);
+            scanner.addFTP(false);
+            scanner.addHTTP(false);
+            scanner.addHTTPS(false);
+            scanner.addSMB(false);
+            scanner.start();
+            scanner.terminate();
+            enlargeScancache(sb, scanner);
+            addScantable(sb, prop);
         }
         
         // check crawl request
         if (post != null && post.containsKey("crawl")) {
             // make a pk/url mapping
             Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
-            for (MultiProtocolURI u: Scanner.scancache) {
+            for (MultiProtocolURI u: Scanner.scancache.keySet()) {
                 DigestURI uu = new DigestURI(u);
                 pkmap.put(uu.hash(), uu);
             }
@@ -112,8 +125,10 @@ public class CrawlStartScanner_p {
     
     private static void addSelectIPRange(Switchboard sb, serverObjects prop) {
         InetAddress ip;
+        List<InetAddress> ips = Domains.myIntranetIPs();
+        prop.put("enterrange_intranethosts", ips.toString());
+        prop.put("enterrange_intranetHint", 0);
         if (sb.isIntranetMode()) {
-            List<InetAddress> ips = Domains.myIntranetIPs();
             if (ips.size() > 0) ip = ips.get(0); else try {
                 ip = InetAddress.getByName("192.168.0.1");
             } catch (UnknownHostException e) {
@@ -121,6 +136,7 @@ public class CrawlStartScanner_p {
                 e.printStackTrace();
             }
         } else {
+            prop.put("enterrange_intranetHint", 1);
             ip = Domains.myPublicLocalIP();
         }
         addSelectIPRange(ip, prop);
@@ -139,23 +155,53 @@ public class CrawlStartScanner_p {
         if (Scanner.scancache.size() > 0) {
             // show scancache table
             prop.put("servertable", 1);
-            int i = 0;
             String urlString;
             DigestURI u;
-            for (final MultiProtocolURI url: Scanner.scancache) {
-                u = new DigestURI(url);
-                urlString = u.toNormalform(true, false);
-                prop.put("servertable_list_" + i + "_pk", new String(u.hash()));
-                prop.put("servertable_list_" + i + "_count", i);
-                prop.putHTML("servertable_list_" + i + "_protocol", u.getProtocol());
-                prop.putHTML("servertable_list_" + i + "_ip", Domains.dnsResolve(u.getHost()).getHostAddress());
-                prop.putHTML("servertable_list_" + i + "_url", urlString);
-                prop.put("servertable_list_" + i + "_process", inIndex(sb, urlString) == null ? 0 : 1);
-                i++;
+            table: while (true) {
+                try {
+                    int i = 0;
+                    for (final Map.Entry<MultiProtocolURI, Scanner.Access> host: Scanner.scancache.entrySet()) {
+                        u = new DigestURI(host.getKey());
+                        urlString = u.toNormalform(true, false);
+                        prop.put("servertable_list_" + i + "_pk", new String(u.hash()));
+                        prop.put("servertable_list_" + i + "_count", i);
+                        prop.putHTML("servertable_list_" + i + "_protocol", u.getProtocol());
+                        prop.putHTML("servertable_list_" + i + "_ip", Domains.dnsResolve(u.getHost()).getHostAddress());
+                        prop.putHTML("servertable_list_" + i + "_url", urlString);
+                        prop.put("servertable_list_" + i + "_accessUnknown", host.getValue() == Access.unknown ? 1 : 0);
+                        prop.put("servertable_list_" + i + "_accessEmpty", host.getValue() == Access.empty ? 1 : 0);
+                        prop.put("servertable_list_" + i + "_accessGranted", host.getValue() == Access.granted ? 1 : 0);
+                        prop.put("servertable_list_" + i + "_accessDenied", host.getValue() == Access.denied ? 1 : 0);
+                        prop.put("servertable_list_" + i + "_process", inIndex(sb, urlString) == null ? 0 : 1);
+                        prop.put("servertable_list_" + i + "_preselected", interesting(sb, u, host.getValue()) ? 1 : 0);
+                        i++;
+                    }
+                    prop.put("servertable_list", i);
+                    prop.put("servertable_num", i);
+                    break table;
+                } catch (ConcurrentModificationException e) {
+                    continue table;
+                }
             }
-            prop.put("servertable_list", i);
-            prop.put("servertable_num", i);
         }
+    }
+    
+    private static void enlargeScancache(Switchboard sb, Scanner scanner) {
+        if (Scanner.scancache == null) {
+            Scanner.scancache = scanner.services();
+            return;
+        }
+        Iterator<Map.Entry<MultiProtocolURI, Access>> i = Scanner.scancache.entrySet().iterator();
+        Map.Entry<MultiProtocolURI, Access> entry;
+        while (i.hasNext()) {
+            entry = i.next();
+            if (!interesting(sb, entry.getKey(), entry.getValue())) i.remove();
+        }
+        Scanner.scancache.putAll(scanner.services());
+    }
+    
+    private static boolean interesting(Switchboard sb, MultiProtocolURI uri, Access access) {
+        return inIndex(sb, uri.toNormalform(true, false)) == null && access == Access.granted && (uri.getProtocol().equals("smb") || uri.getProtocol().equals("ftp"));
     }
     
     private static byte[] inIndex(Switchboard sb, String url) {

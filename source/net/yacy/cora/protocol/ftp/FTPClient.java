@@ -1336,7 +1336,7 @@ public class FTPClient {
         log.info("---- ^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^---^");
     }
 
-    private List<String> list(final String path, final boolean extended) throws IOException {
+    public List<String> list(final String path, final boolean extended) throws IOException {
         createDataSocket();
 
         // send command to the control port
@@ -2364,7 +2364,7 @@ public class FTPClient {
      * @param password
      * @throws IOException
      */
-    private void login(final String account, final String password) throws IOException {
+    public void login(final String account, final String password) throws IOException {
         unsetLoginData();
 
         // send user name
