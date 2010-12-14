@@ -13,6 +13,11 @@
             selectForm.elements["item_" + i].checked = !selectForm.elements["item_" + i].checked;
         }
     }
+    function disableSubmit() {
+        document.getElementById('scanipSubmit').disabled=true;
+        document.getElementById('scanhostSubmit').disabled=true;
+        document.getElementById('scanintranetSubmit').disabled=true;
+    }
     -->
     </script>
     <script type="text/javascript" src="/js/sorttable.js"></script>
@@ -38,25 +43,27 @@
     
     #(enterrange)#::
     <div><table border="0"><tr valign="top">
-    <td width="270"><form onSubmit="document.getElementById('scanipinfo').innerHTML='Please wait...'" action="CrawlStartScanner_p.html" method="get">
+    <td width="270"><form onSubmit="document.getElementById('scanipinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
     <fieldset height="30">
 	  <legend><label for="servertable">Scan with given IP range</label></legend><br>
       <input type="text" name="ip4-0" value="#[ip4-0]#" size="3" maxlength="3" />.
       <input type="text" name="ip4-1" value="#[ip4-1]#" size="3" maxlength="3" />.
       <input type="text" name="ip4-2" value="#[ip4-2]#" size="3" maxlength="3" />.[1-254]
-      <input type="submit" name="scanip" value="Scan"/><br><br><div class="error" id="scanipinfo"></div>
+      <input type="hidden" name="scanip" value=""/>
+      <input type="submit" id="scanipSubmit" name="scanipSubmit" value="Scan"/><br><br><div class="info" id="scanipinfo" style="text-decoration: blink;"></div>
     </fieldset></form></td>
-    <td width="270"><form onSubmit="document.getElementById('scanhostinfo').innerHTML='Please wait...'" action="CrawlStartScanner_p.html" method="get">
+    <td width="270"><form onSubmit="document.getElementById('scanhostinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
     <fieldset>
 	  <legend><label for="servertable">Scan range with given host name</label></legend><br>
-      <input type="text" name="host" value="#[host]#" size="28" maxlength="60" />
-      <input type="submit" name="scanhost" value="Scan" /><br><br><div class="error" id="scanhostinfo"></div>
+      <input type="text" name="scanhost" value="#[host]#" size="28" maxlength="60" />
+      <input type="submit" id="scanhostSubmit" name="scanhostSubmit" value="Scan" /><br><br><div class="info" id="scanhostinfo" style="text-decoration: blink;"></div>
     </fieldset></form></td>
-    <td><form onSubmit="document.getElementById('scanintranetinfo').innerHTML='Please wait...'" action="CrawlStartScanner_p.html" method="get">
+    <td><form onSubmit="document.getElementById('scanintranetinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
     <fieldset>
 	  <legend><label for="servertable">Full Intranet Scan</label></legend>
-	  #(intranetHint)#::<div class="warning">Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
-	  #[intranethosts]#&nbsp;<input type="submit" name="scanintranet" value="Scan" /><div class="error" id="scanintranetinfo"></div>
+	  #(intranetHint)#::<div class="info">Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
+      <input type="hidden" name="scanintranet" value=""/>
+	  #[intranethosts]#&nbsp;<input type="submit" id="scanintranetSubmit" name="scanintranetSubmit" value="Scan" /><div class="info" id="scanintranetinfo" style="text-decoration: blink;"></div>
     </fieldset></form></td>
     </tr></table></div>
     #(/enterrange)#

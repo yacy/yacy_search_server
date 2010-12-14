@@ -172,10 +172,6 @@ div.ProgressBarFill {
 
 /* Copyright info */
 
-.info {
-  border-top:1px solid gray;
-}
-
 div#api {
   position:absolute;
   top:3px;

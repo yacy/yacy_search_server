@@ -54,9 +54,13 @@ public class CrawlStartScanner_p {
         prop.put("noserverdetected", 0);
         prop.put("enterrange", 0);
         prop.put("servertable", 0);
-
+        prop.put("enterrange_host", "");
+        
+        // make a comment cache
+        Map<byte[], String> apiCommentCache = commentCache(sb);
+        
         addSelectIPRange(sb, prop);
-        addScantable(sb, prop);
+        addScantable(apiCommentCache, prop);
         
         // case: no query part of the request; ask for input
         if (post == null) {
@@ -71,7 +75,15 @@ public class CrawlStartScanner_p {
                 if (post.containsKey("scanip")) {
                     ia = InetAddress.getByAddress(new byte[]{(byte) post.getInt("ip4-0", 0), (byte) post.getInt("ip4-1", 0), (byte) post.getInt("ip4-2", 0), (byte) post.getInt("ip4-3", 0)});
                 } else {
-                    ia = InetAddress.getByName(post.get("host", ""));
+                    String host = post.get("scanhost", "");
+                    if (host.startsWith("http://")) host = host.substring(7);
+                    if (host.startsWith("https://")) host = host.substring(8);
+                    if (host.startsWith("ftp://")) host = host.substring(6);
+                    if (host.startsWith("smb://")) host = host.substring(6);
+                    int p = host.indexOf('/');
+                    if (p >= 0) host = host.substring(0, p);
+                    ia = InetAddress.getByName(host);
+                    prop.put("enterrange_host", host);
                 }
                 addSelectIPRange(ia, prop);
                 Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 100 : 3000);
@@ -81,8 +93,8 @@ public class CrawlStartScanner_p {
                 scanner.addSMB(false);
                 scanner.start();
                 scanner.terminate();
-                enlargeScancache(sb, scanner);
-                addScantable(sb, prop);
+                enlargeScancache(apiCommentCache, scanner);
+                addScantable(apiCommentCache, prop);
             } catch (UnknownHostException e) {}
         }
         
@@ -94,8 +106,8 @@ public class CrawlStartScanner_p {
             scanner.addSMB(false);
             scanner.start();
             scanner.terminate();
-            enlargeScancache(sb, scanner);
-            addScantable(sb, prop);
+            enlargeScancache(apiCommentCache, scanner);
+            addScantable(apiCommentCache, prop);
         }
         
         // check crawl request
@@ -145,13 +157,12 @@ public class CrawlStartScanner_p {
     private static void addSelectIPRange(InetAddress ip, serverObjects prop) {
         prop.put("enterrange", 1);
         byte[] address = ip.getAddress();
-        prop.put("enterrange_host", "");
         prop.put("enterrange_ip4-0", 0xff & address[0]);
         prop.put("enterrange_ip4-1", 0xff & address[1]);
         prop.put("enterrange_ip4-2", 0xff & address[2]);
     }
     
-    private static void addScantable(Switchboard sb, serverObjects prop) {
+    private static void addScantable(Map<byte[], String> commentCache, serverObjects prop) {
         if (Scanner.scancache.size() > 0) {
             // show scancache table
             prop.put("servertable", 1);
@@ -172,8 +183,8 @@ public class CrawlStartScanner_p {
                         prop.put("servertable_list_" + i + "_accessEmpty", host.getValue() == Access.empty ? 1 : 0);
                         prop.put("servertable_list_" + i + "_accessGranted", host.getValue() == Access.granted ? 1 : 0);
                         prop.put("servertable_list_" + i + "_accessDenied", host.getValue() == Access.denied ? 1 : 0);
-                        prop.put("servertable_list_" + i + "_process", inIndex(sb, urlString) == null ? 0 : 1);
-                        prop.put("servertable_list_" + i + "_preselected", interesting(sb, u, host.getValue()) ? 1 : 0);
+                        prop.put("servertable_list_" + i + "_process", inIndex(commentCache, urlString) == null ? 0 : 1);
+                        prop.put("servertable_list_" + i + "_preselected", interesting(commentCache, u, host.getValue()) ? 1 : 0);
                         i++;
                     }
                     prop.put("servertable_list", i);
@@ -186,7 +197,7 @@ public class CrawlStartScanner_p {
         }
     }
     
-    private static void enlargeScancache(Switchboard sb, Scanner scanner) {
+    private static void enlargeScancache(Map<byte[], String> commentCache, Scanner scanner) {
         if (Scanner.scancache == null) {
             Scanner.scancache = scanner.services();
             return;
@@ -195,31 +206,36 @@ public class CrawlStartScanner_p {
         Map.Entry<MultiProtocolURI, Access> entry;
         while (i.hasNext()) {
             entry = i.next();
-            if (!interesting(sb, entry.getKey(), entry.getValue())) i.remove();
+            if (!interesting(commentCache, entry.getKey(), entry.getValue())) i.remove();
         }
         Scanner.scancache.putAll(scanner.services());
     }
     
-    private static boolean interesting(Switchboard sb, MultiProtocolURI uri, Access access) {
-        return inIndex(sb, uri.toNormalform(true, false)) == null && access == Access.granted && (uri.getProtocol().equals("smb") || uri.getProtocol().equals("ftp"));
+    private static boolean interesting(Map<byte[], String> commentCache, MultiProtocolURI uri, Access access) {
+        return inIndex(commentCache, uri.toNormalform(true, false)) == null && access == Access.granted && (uri.getProtocol().equals("smb") || uri.getProtocol().equals("ftp"));
     }
     
-    private static byte[] inIndex(Switchboard sb, String url) {
+    private static byte[] inIndex(Map<byte[], String> commentCache, String url) {
+        for (Map.Entry<byte[], String> comment: commentCache.entrySet()) {
+            if (comment.getValue().contains(url)) return comment.getKey();
+        }
+        return null;
+    }
+    
+    private static Map<byte[], String> commentCache(Switchboard sb) {
+        Map<byte[], String> comments = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
         Iterator<Tables.Row> i;
         try {
             i = sb.tables.iterator(WorkTables.TABLE_API_NAME);
             Tables.Row row;
-            String comment;
             while (i.hasNext()) {
                 row = i.next();
-                comment = new String(row.get(WorkTables.TABLE_API_COL_COMMENT));
-                if (comment.contains(url)) return row.getPK();
+                comments.put(row.getPK(), new String(row.get(WorkTables.TABLE_API_COL_COMMENT)));
             }
-            return null;
         } catch (IOException e) {
             Log.logException(e);
-            return null;
         }
+        return comments;
     }
     
 }
