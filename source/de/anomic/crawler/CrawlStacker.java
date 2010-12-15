@@ -312,8 +312,8 @@ public final class CrawlStacker {
             if (protocol.equals("http") || protocol.equals("https")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
             if (protocol.equals("ftp")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.ftp.maxFileSize", FTPLoader.DEFAULT_MAXFILESIZE);
             if (protocol.equals("smb")) maxFileSize = Switchboard.getSwitchboard().getConfigLong("crawler.smb.maxFileSize", SMBLoader.DEFAULT_MAXFILESIZE);
-
         }
+
         // check availability of parser and maxfilesize
         if (entry.size() > maxFileSize ||
             (entry.url().getFileExtension().length() > 0 && TextParser.supports(entry.url(), null) != null)

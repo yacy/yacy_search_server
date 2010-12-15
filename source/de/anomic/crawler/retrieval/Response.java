@@ -165,10 +165,11 @@ public class Response {
         // request and response headers may be zero in case that we process surrogates
         this.requestHeader = new RequestHeader();
         this.responseHeader = new ResponseHeader();
+        if (request.size() > 0) this.responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(request.size()));
         this.responseStatus = "200";
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
-        this.content = request.url().toNormalform(true, true).getBytes();
+        this.content = request.url().toTokens().getBytes();
     }
     
     public Response(

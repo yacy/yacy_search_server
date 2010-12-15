@@ -252,7 +252,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 final String f = url.getFile();
                 final int p = f.lastIndexOf('.');
                 final String type = (p < 0) ? "" : f.substring(p + 1);
-                if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg")) {
+                if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg") || type.equals("tiff") || type.equals("tif")) {
                     // special handling of such urls: put them to the image urls
                     final ImageEntry ie = new ImageEntry(url, recursiveParse(text), -1, -1, -1);
                     addImage(images, ie);

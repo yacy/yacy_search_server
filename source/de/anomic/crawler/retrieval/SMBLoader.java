@@ -154,7 +154,7 @@ public class SMBLoader {
                     responseHeader,
                     "200",
                     mp == null ? null : new CrawlProfile(mp),
-                    url.toNormalform(true, true).getBytes());
+                    url.toTokens().getBytes());
             return response;
         }
         

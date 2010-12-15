@@ -30,7 +30,9 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.text.Collator;
+import java.util.LinkedHashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -770,6 +772,80 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public String toString() {
         return toNormalform(false, true);
     }
+
+    public String toTokens() {
+        return toTokens(this.toNormalform(true, true));
+    }
+    
+    private final static String[] replacementStrings = {"%20", "%2B", "%2b"};
+    
+    /**
+     * create word tokens for parser. Find CamelCases and separate these words
+     * resulting words are not ordered by appearance, but all
+     * @return
+     */
+    public static String toTokens(String s) {
+        String t = new String(s);
+        
+        // remove all replacement strings
+        for (String r: replacementStrings) t = t.replaceAll(r, " ");
+
+        // remove all non-character & non-number
+        StringBuilder sb = new StringBuilder(t.length());
+        char c;
+        for (int i = 0; i < t.length(); i++) {
+            c = t.charAt(i);
+            if ((c >= '0' && c <='9') || (c >= 'a' && c <='z') || (c >= 'A' && c <='Z')) sb.append(c); else sb.append(' ');
+        }
+        t = sb.toString();
+        
+        // remove all double-spaces
+        int p;
+        while ((p = t.indexOf("  ")) >= 0) t = t.substring(0, p) + t.substring(p + 1);
+
+        // split the string into tokens and add all camel-case splitting
+        String[] u = t.split(" ");
+        Map<String, Object> token = new LinkedHashMap<String, Object>();
+        for (String r: u) {
+            token.putAll(parseCamelCase(r));
+        }
+        
+        // construct a String again
+        for (String v: token.keySet()) if (v.length() > 1) s += " " + v;
+        return s;
+    }
+    
+    public static enum CharType { low, high, number; }
+    
+    public static Map<String, Object> parseCamelCase(String s) {
+        Map<String, Object> token = new LinkedHashMap<String, Object>();
+        if (s.length() == 0) return token;
+        int p = 0;
+        CharType type = charType(s.charAt(0)), nct = type;
+        while (p < s.length()) {
+            // search for first appearance of an character that is a upper-case
+            while (p < s.length() && (nct = charType(s.charAt(p))) == type) p++;
+            if (p >= s.length()) { token.put(s, new Object()); break; }
+            if (nct == CharType.low) {
+                type = CharType.low;
+                p++; continue;
+            }
+            
+            // the char type has changed
+            token.put(s.substring(0, p), new Object());
+            s = s.substring(p);
+            p = 0;
+            type = nct;
+        }
+        token.put(s, new Object());
+        return token;
+    }
+    
+    private static CharType charType(char c) {
+        if (c >= 'a' && c <= 'z') return CharType.low;
+        if (c >= '0' && c <= '1') return CharType.number;
+        return CharType.high;
+    }
     
     public String toNormalform(final boolean excludeReference, final boolean stripAmp) {
         return toNormalform(excludeReference, stripAmp, false);
@@ -1106,6 +1182,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public static void main(final String[] args) {
+        for (String s: args) System.out.println(toTokens(s));
+    }
+
+    /*
+    public static void main(final String[] args) {
         final String[][] test = new String[][]{
           new String[]{null, "C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file://C:WINDOWS\\CMD0.EXE"},
@@ -1191,5 +1272,6 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             }
         }
     }
+    */
 
 }

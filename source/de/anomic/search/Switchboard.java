@@ -1833,7 +1833,7 @@ public final class Switchboard extends serverSwitch {
             doclist.add(document);
         }
         
-        if (doclist.isEmpty())  return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+        if (doclist.isEmpty()) return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
         in.documents = doclist.toArray(new Document[doclist.size()]);
         Condenser[] condenser = new Condenser[in.documents.length];
         if (this.log.isFine()) log.logFine("Condensing for '" + in.queueEntry.url().toNormalform(false, true) + "'");

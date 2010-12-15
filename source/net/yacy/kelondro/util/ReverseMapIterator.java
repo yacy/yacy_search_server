@@ -27,6 +27,7 @@
 package net.yacy.kelondro.util;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -36,9 +37,20 @@ public class ReverseMapIterator <E, F> implements Iterator<Map.Entry<E, F>> {
     E last;
 
     public ReverseMapIterator(Map<E, F> map) {
-        this.map = map;
-        this.a = new ArrayList<E>();
-        for (E e: map.keySet()) a.add(e);
+        synchronized (map) {
+            this.map = map;
+            this.a = new ArrayList<E>();
+            while (true) {
+                try {
+                    for (E e: map.keySet()) {
+                        a.add(e);
+                    }
+                    break;
+                } catch (ConcurrentModificationException e) {
+                    continue;
+                }
+            }
+        }
     }
     
     public boolean hasNext() {
