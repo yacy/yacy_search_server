@@ -551,7 +551,22 @@ public final class Switchboard extends serverSwitch {
                 isIntranetMode(),
                 isGlobalMode(),
                 this.domainList); // Intranet and Global mode may be both true!
-
+        
+        // check status of account configuration: when local url crawling is allowed, it is not allowed
+        // that an automatic authorization of localhost is done, because in this case crawls from local
+        // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
+        // addresses that can steer a YaCy peer
+        if ((crawlStacker.acceptLocalURLs()) && (getConfigBool("adminAccountForLocalhost", false))) {
+            setConfig("adminAccountForLocalhost", false);
+            if (getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
+                // the password was set automatically with a random value.
+                // We must remove that here to prevent that a user cannot log in any more
+                setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
+                // after this a message must be generated to alert the user to set a new password
+                log.logInfo("RANDOM PASSWORD REMOVED! User must set a new password");
+            }
+        }
+        
         // initializing dht chunk generation
         this.dhtMaxReferenceCount = (int) getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
         
