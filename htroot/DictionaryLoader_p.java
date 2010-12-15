@@ -63,7 +63,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geon0Load")) {
             // load from the net
             try {
-                Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+                Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEON0.url), false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, false);
                 byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEON0.file());
                 LibraryProvider.geoLoc.addLocalization(LibraryProvider.Dictionary.GEON0.nickname, new GeonamesLocalization(LibraryProvider.Dictionary.GEON0.file()));
@@ -103,7 +103,7 @@ public class DictionaryLoader_p {
         if (post.containsKey("geo1Load")) {
             // load from the net
             try {
-                Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+                Response response = sb.loader.load(sb.loader.request(new DigestURI(LibraryProvider.Dictionary.GEODB1.url), false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, false);
                 byte[] b = response.getContent();
                 FileUtils.copy(b, LibraryProvider.Dictionary.GEODB1.file());
                 LibraryProvider.geoLoc.removeLocalization(LibraryProvider.Dictionary.GEODB0.nickname);

@@ -92,7 +92,7 @@ public class import_ymark {
 		try {
 			if(!bmk.containsKey(YMarkTables.BOOKMARK.TAGS.key()) || bmk.get(YMarkTables.BOOKMARK.TAGS.key()).equals(YMarkTables.BOOKMARK.TAGS.deflt())) {
 	            final DigestURI u = new DigestURI(bmk.get(YMarkTables.BOOKMARK.URL.key()));
-	            Response response = sb.loader.load(sb.loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
+	            Response response = sb.loader.load(sb.loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
 				final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 				if(document != null) {
 					bmk.put(YMarkTables.BOOKMARK.TAGS.key(), sb.tables.bookmarks.autoTag(document, bmk_user, 3));

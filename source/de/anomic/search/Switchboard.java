@@ -2015,7 +2015,7 @@ public final class Switchboard extends serverSwitch {
             @Override
             public void run() {
                 try {
-                    final Response response = loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE);
+                    final Response response = loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE, true);
                     if (response == null) throw new IOException("response == null");
                     if (response.getContent() == null) throw new IOException("content == null");
                     if (response.getResponseHeader() == null) throw new IOException("header == null");
@@ -2364,7 +2364,7 @@ public final class Switchboard extends serverSwitch {
                 // if we have an url then try to load the rss
                 RSSReader rss = null;
                 try {
-                    Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+                    Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
                     byte[] resource = response == null ? null : response.getContent();
                     //System.out.println("BLEKKO: " + new String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);

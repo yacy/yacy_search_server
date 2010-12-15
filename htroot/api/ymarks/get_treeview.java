@@ -186,7 +186,7 @@ public class get_treeview {
 	        	try {
 	                final DigestURI u = new DigestURI(post.get(ROOT).substring(2));
 	                Response response = null;
-        			response = sb.loader.load(sb.loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE);
+        			response = sb.loader.load(sb.loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
         			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
         			if(document != null) {
     	        		if(isWordCount)  {

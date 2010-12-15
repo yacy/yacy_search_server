@@ -458,7 +458,7 @@ public final class HTTPDFileHandler {
                     for (int i = 0; i < list.length; i++) {
                         f = new File(targetFile, list[i]);
                         if (f.isDirectory()) {
-                            aBuffer.append("    <li><a href=\"" + path + list[i] + "/\">" + list[i] + "/</a><br></li>\n");
+                            aBuffer.append("    <li><a href=\"" + path + list[i] + "/\">" + list[i] + "/</a><br/></li>\n");
                         } else {
                             if (list[i].endsWith("html") || (list[i].endsWith("htm"))) {
                                 scraper = ContentScraper.parseResource(f);
@@ -485,12 +485,12 @@ public final class HTTPDFileHandler {
                                 size = (sz / 1024 / 1024) + " MB";
                             }
                             aBuffer.append("    <li>");
-                            if (headline != null && headline.length() > 0) aBuffer.append("<a href=\"" + list[i] + "\"><b>" + headline + "</b></a><br>");
-                            aBuffer.append("<a href=\"" + path + list[i] + "\">" + list[i] + "</a><br>");
-                            if (author != null && author.length() > 0) aBuffer.append("Author: " + author + "<br>");
-                            if (publisher != null && publisher.length() > 0) aBuffer.append("Publisher: " + publisher + "<br>");
-                            if (description != null && description.length() > 0) aBuffer.append("Description: " + description + "<br>");
-                            aBuffer.append(DateFormatter.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br></li>\n");
+                            if (headline != null && headline.length() > 0) aBuffer.append("<a href=\"" + list[i] + "\"><b>" + headline + "</b></a><br/>");
+                            aBuffer.append("<a href=\"" + path + list[i] + "\">" + list[i] + "</a><br/>");
+                            if (author != null && author.length() > 0) aBuffer.append("Author: " + author + "<br/>");
+                            if (publisher != null && publisher.length() > 0) aBuffer.append("Publisher: " + publisher + "<br/>");
+                            if (description != null && description.length() > 0) aBuffer.append("Description: " + description + "<br/>");
+                            aBuffer.append(DateFormatter.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br/></li>\n");
                         }
                     }
                     aBuffer.append("  </ul>\n</body>\n</html>\n");

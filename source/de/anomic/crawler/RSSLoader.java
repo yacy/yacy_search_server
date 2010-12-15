@@ -56,7 +56,7 @@ public class RSSLoader extends Thread {
     public void run() {
         RSSReader rss = null;
         try {
-            Response response = sb.loader.load(sb.loader.request(urlf, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE);
+            Response response = sb.loader.load(sb.loader.request(urlf, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
             byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (MalformedURLException e) {

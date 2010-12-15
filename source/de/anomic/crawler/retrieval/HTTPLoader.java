@@ -68,14 +68,14 @@ public final class HTTPLoader {
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 10000);
     }  
    
-    public Response load(final Request entry, long maxFileSize) throws IOException {
+    public Response load(final Request entry, long maxFileSize, boolean checkBlacklist) throws IOException {
         long start = System.currentTimeMillis();
-        Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize);
+        Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, checkBlacklist);
         Latency.update(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
     
-    private Response load(final Request request, final int retryCount, final long maxFileSize) throws IOException {
+    private Response load(final Request request, final int retryCount, final long maxFileSize, final boolean checkBlacklist) throws IOException {
 
         if (retryCount < 0) {
             sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection counter exceeded");
@@ -93,7 +93,7 @@ public final class HTTPLoader {
         
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
-        if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
+        if (checkBlacklist && Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
             sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "url in blacklist");
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
@@ -164,7 +164,7 @@ public final class HTTPLoader {
                     
                     // retry crawling with new url
                     request.redirectURL(redirectionUrl);
-                    return load(request, retryCount - 1, maxFileSize);
+                    return load(request, retryCount - 1, maxFileSize, checkBlacklist);
                 } else {
                 	// no redirection url provided
                     sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no redirection url provided");

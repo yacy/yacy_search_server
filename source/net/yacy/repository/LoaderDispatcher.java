@@ -135,7 +135,7 @@ public final class LoaderDispatcher {
 
     public void load(final DigestURI url, CrawlProfile.CacheStrategy cacheStratgy, long maxFileSize, File targetFile) throws IOException {
 
-        byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize).getContent();
+        byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize, false).getContent();
         if (b == null) throw new IOException("load == null");
         File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
         
@@ -146,7 +146,7 @@ public final class LoaderDispatcher {
         tmp.renameTo(targetFile);
     }
     
-    public Response load(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
+    public Response load(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize, boolean checkBlacklist) throws IOException {
         String url = request.url().toNormalform(true, false);
         Semaphore check = this.loaderSteering.get(url);
         if (check != null) {
@@ -158,7 +158,7 @@ public final class LoaderDispatcher {
         
         try {
             this.loaderSteering.put(url, new Semaphore(0));
-            Response response = loadInternal(request, cacheStrategy, maxFileSize);
+            Response response = loadInternal(request, cacheStrategy, maxFileSize, checkBlacklist);
             check = this.loaderSteering.remove(url);
             if (check != null) check.release(1000);
             return response;
@@ -177,7 +177,7 @@ public final class LoaderDispatcher {
      * @return the loaded entity in a Response object
      * @throws IOException
      */
-    private Response loadInternal(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize) throws IOException {
+    private Response loadInternal(final Request request, CrawlProfile.CacheStrategy cacheStrategy, long maxFileSize, boolean checkBlacklist) throws IOException {
         // get the protocol of the next URL
         final DigestURI url = request.url();
         if (url.isFile() || url.isSMB()) cacheStrategy = CrawlProfile.CacheStrategy.NOCACHE; // load just from the file system
@@ -261,7 +261,7 @@ public final class LoaderDispatcher {
         
         // load resource from the internet
         Response response = null;
-        if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, maxFileSize);
+        if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, maxFileSize, checkBlacklist);
         if (protocol.equals("ftp")) response = ftpLoader.load(request, true);
         if (protocol.equals("smb")) response = smbLoader.load(request, true);
         if (protocol.equals("file")) response = fileLoader.load(request, true);
@@ -300,7 +300,7 @@ public final class LoaderDispatcher {
     public byte[] loadContent(final Request request, CrawlProfile.CacheStrategy cacheStrategy) throws IOException {
         // try to download the resource using the loader
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-        final Response entry = load(request, cacheStrategy, maxFileSize);
+        final Response entry = load(request, cacheStrategy, maxFileSize, false);
         if (entry == null) return null; // not found in web
         
         // read resource body (if it is there)
@@ -310,7 +310,7 @@ public final class LoaderDispatcher {
     public Document[] loadDocuments(final Request request, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, long maxFileSize) throws IOException, Parser.Failure {
 
         // load resource
-        final Response response = load(request, cacheStrategy, maxFileSize);
+        final Response response = load(request, cacheStrategy, maxFileSize, false);
         final DigestURI url = request.url();
         if (response == null) throw new IOException("no Response for url " + url);
 
@@ -324,7 +324,7 @@ public final class LoaderDispatcher {
     public ContentScraper parseResource(final DigestURI location, CrawlProfile.CacheStrategy cachePolicy) throws IOException {
         // load page
         final long maxFileSize = this.sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-        Response r = this.load(request(location, true, false), cachePolicy, maxFileSize);
+        Response r = this.load(request(location, true, false), cachePolicy, maxFileSize, false);
         byte[] page = (r == null) ? null : r.getContent();
         if (page == null) throw new IOException("no response from url " + location.toString());
         
@@ -343,7 +343,7 @@ public final class LoaderDispatcher {
      * @throws IOException
      */
     public final Map<MultiProtocolURI, String> loadLinks(DigestURI url, CrawlProfile.CacheStrategy cacheStrategy) throws IOException {
-        Response response = load(request(url, true, false), cacheStrategy, Long.MAX_VALUE);
+        Response response = load(request(url, true, false), cacheStrategy, Long.MAX_VALUE, false);
         if (response == null) throw new IOException("response == null");
         ResponseHeader responseHeader = response.getResponseHeader();
         byte[] resource = response.getContent();
@@ -401,7 +401,7 @@ public final class LoaderDispatcher {
             if (this.cache != null && this.cache.exists()) return;
             try {
                 // load from the net
-                Response response = load(request(new DigestURI(this.url), false, true), this.cacheStrategy, this.maxFileSize);
+                Response response = load(request(new DigestURI(this.url), false, true), this.cacheStrategy, this.maxFileSize, true);
                 byte[] b = response.getContent();
                 if (this.cache != null) FileUtils.copy(b, this.cache);
             } catch (MalformedURLException e) {} catch (IOException e) {}

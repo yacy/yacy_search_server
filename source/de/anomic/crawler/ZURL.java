@@ -175,7 +175,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     public ZURL.Entry get(final byte[] urlhash) {
         try {
             if (urlIndex == null) return null;
-            //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " get " + urlhash);
+            // System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " get " + urlhash);
             final Row.Entry entry = urlIndex.get(urlhash);
             if (entry == null) return null;
             return new Entry(entry);
