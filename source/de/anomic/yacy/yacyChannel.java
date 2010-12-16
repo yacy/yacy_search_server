@@ -20,8 +20,10 @@
 
 package de.anomic.yacy;
 
-import java.util.HashSet;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -44,19 +46,14 @@ public enum yacyChannel {
      * the following private channels are declared to prevent that an access to the feed servlet
      * gets results from news channels that are not for the public
      */
-    public static final HashSet<yacyChannel> privateChannels = new HashSet<yacyChannel>();
-    static {
-        privateChannels.add(yacyChannel.LOCALSEARCH);
-        privateChannels.add(yacyChannel.LOCALINDEXING);
-    }
-    
+    public static final Set<yacyChannel> privateChannels = EnumSet.of(yacyChannel.LOCALSEARCH, yacyChannel.LOCALINDEXING);
 
     /**
      * the following static channels object is used to organize a storage array for RSS feeds
      */
-    private static final ConcurrentHashMap<yacyChannel, RSSFeed> channels = new ConcurrentHashMap<yacyChannel, RSSFeed>();
+    private static final ConcurrentMap<yacyChannel, RSSFeed> channels = new ConcurrentHashMap<yacyChannel, RSSFeed>();
     public static RSSFeed channels(final String channelName) {
-        for (yacyChannel channel: yacyChannel.values()) {
+        for (final yacyChannel channel : yacyChannel.values()) {
             if (channel.name().equals(channelName)) return channels(channel);
         }
         return null;

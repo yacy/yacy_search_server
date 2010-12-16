@@ -47,27 +47,31 @@ public class cytag {
     public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final Switchboard sb = (Switchboard)env;
-        MultiProtocolURI referer = header.referer();
+        final MultiProtocolURI referer = header.referer();
         
         // harvest request information
         StringBuilder connect = new StringBuilder();
         connect.append('{');
-        addJSON(connect, "time", DateFormatter.formatShortMilliSecond(new Date()));
-        addJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false, false));
-        addJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
-        addJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));
-        addJSON(connect, "icon",  (post == null) ? "" : post.get("icon", ""));
-        addJSON(connect, "ip",    header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
-        addJSON(connect, "agent", header.get("User-Agent", ""));
+        appendJSON(connect, "time", DateFormatter.formatShortMilliSecond(new Date()));
+        appendJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false, false));
+        appendJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
+        appendJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));
+        appendJSON(connect, "icon",  (post == null) ? "" : post.get("icon", ""));
+        appendJSON(connect, "ip",    header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
+        appendJSON(connect, "agent", header.get("User-Agent", ""));
         connect.append('}');
         
         if (sb.trail.size() >= 100) sb.trail.remove();
         sb.trail.add(connect.toString());
         //Log.logInfo("CYTAG", "catched trail - " + connect.toString());
         
-        String defaultimage = "redpillmini.png";
-        if (post != null && post.get("icon", "").equals("invisible")) defaultimage = "invisible.png";
-        File iconfile = new File(sb.getAppPath(), "/htroot/env/grafics/" + defaultimage);
+        final String defaultimage;
+        if (post != null && post.get("icon", "").equals("invisible")) {
+            defaultimage = "redpillmini.png";
+        } else {
+            defaultimage = "invisible.png";
+        }
+        final File iconfile = new File(sb.getAppPath(), "/htroot/env/grafics/" + defaultimage);
         
         byte[] imgb = null;
         try {
@@ -83,12 +87,12 @@ public class cytag {
         return image;
     }
     
-    private static final void addJSON(StringBuilder sb, String k, String v) {
+    private static final void appendJSON(final StringBuilder sb, final String key, final String value) {
         if (sb.length() > 2) sb.append(',');
         sb.append('\"');
-        sb.append(k);
+        sb.append(key);
         sb.append("\":\"");
-        sb.append(CharacterCoding.unicode2xml(v, true));
+        sb.append(CharacterCoding.unicode2xml(value, true));
         sb.append('\"');
     }
 }

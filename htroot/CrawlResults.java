@@ -101,52 +101,46 @@ public class CrawlResults {
         }
 
         if (post != null) {
-        // custom number of lines
-        if (post.containsKey("count")) {
-            lines = Integer.parseInt(post.get("count", "500"));
-        }
-
-        // do the commands
-        if (post.containsKey("clearlist")) sb.crawlResults.clearStack(tabletype);
-        
-        if (post.containsKey("deleteentry")) {
-            final String hash = post.get("hash", null);
-            if (hash != null) {
-                // delete from database
-                sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(hash.getBytes());
+            // custom number of lines
+            if (post.containsKey("count")) {
+                lines = Integer.parseInt(post.get("count", "500"));
             }
-        }
-        
-        if (post.containsKey("deletedomain")) {
-            final String hashpart = post.get("hashpart", null);
-            final String domain = post.get("domain", null);
-            if (hashpart != null) {
-                // delete all urls for this domain from database
-                try {
-                    sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).deleteDomain(hashpart);
-                    sb.crawlResults.deleteDomain(tabletype, domain, hashpart);
-                } catch (IOException e) {
-                    Log.logException(e);
+
+            // do the commands
+            if (post.containsKey("clearlist")) sb.crawlResults.clearStack(tabletype);
+
+            if (post.containsKey("deleteentry")) {
+                final String hash = post.get("hash", null);
+                if (hash != null) {
+                    // delete from database
+                    sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(hash.getBytes());
                 }
             }
-        }
-        
-        if (post.containsKey("moreIndexed")) {
-            lines = Integer.parseInt(post.get("showIndexed", "500"));
-        }
-        
-        if (post.get("si") != null)
-            if (post.get("si").equals("0")) showInit = false; else showInit = true;
-        if (post.get("se") != null)
-            if (post.get("se").equals("0")) showExec = false; else showExec = true;
-        if (post.get("sd") != null)
-            if (post.get("sd").equals("0")) showDate = false; else showDate = true;
-        if (post.get("sw") != null)
-            if (post.get("sw").equals("0")) showWords = false; else showWords = true;
-        if (post.get("st") != null)
-            if (post.get("st").equals("0")) showTitle = false; else showTitle = true;
-        if (post.get("su") != null)
-            if (post.get("su").equals("0")) showURL = false; else showURL = true;
+
+            if (post.containsKey("deletedomain")) {
+                final String hashpart = post.get("hashpart", null);
+                final String domain = post.get("domain", null);
+                if (hashpart != null) {
+                    // delete all urls for this domain from database
+                    try {
+                        sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).deleteDomain(hashpart);
+                        sb.crawlResults.deleteDomain(tabletype, domain, hashpart);
+                    } catch (IOException e) {
+                        Log.logException(e);
+                    }
+                }
+            }
+
+            if (post.containsKey("moreIndexed")) {
+                lines = Integer.parseInt(post.get("showIndexed", "500"));
+            }
+
+            if (post.get("si") != null) showInit = !("0".equals(post.get("si")));
+            if (post.get("se") != null) showExec = !("0".equals(post.get("se")));
+            if (post.get("sd") != null) showDate = !("0".equals(post.get("sd")));
+            if (post.get("sw") != null) showWords = !("0".equals(post.get("sw")));
+            if (post.get("st") != null) showTitle = !("0".equals(post.get("st")));
+            if (post.get("su") != null) showURL = !("0".equals(post.get("su")));
         } // end != null
 
         // create table
@@ -181,7 +175,7 @@ public class CrawlResults {
             URIMetadataRow.Components metadata;
 
             int cnt = 0;
-            Iterator<Map.Entry<String, InitExecEntry>> i = sb.crawlResults.results(tabletype);
+            final Iterator<Map.Entry<String, InitExecEntry>> i = sb.crawlResults.results(tabletype);
             Map.Entry<String, InitExecEntry> entry;
             while (i.hasNext()) {
                 entry = i.next();
@@ -266,7 +260,7 @@ public class CrawlResults {
             
             cnt = 0;
             dark = true;
-            Iterator<String> j = sb.crawlResults.domains(tabletype);
+            final Iterator<String> j = sb.crawlResults.domains(tabletype);
             String domain;
             while (j.hasNext() && cnt < 100) {
                 domain = j.next();

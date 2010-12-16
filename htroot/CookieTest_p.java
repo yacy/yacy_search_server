@@ -56,7 +56,7 @@ public class CookieTest_p {
             Map.Entry<String, String> e;
             while (it.hasNext()) {
                 e = it.next();
-                if (e.getKey().equals("Cookie")) {
+                if ("Cookie".equals(e.getKey())) {
                     final String cookies[] = e.getValue().split(";");
                     for(final String cookie : cookies)
                     {
@@ -70,7 +70,7 @@ public class CookieTest_p {
             prop.put("coockiesout", "0");
             //header.
          
-        } else if (post.containsKey("act") && post.get("act").equals("set_cookie")) {
+        } else if (post.containsKey("act") && "set_cookie".equals(post.get("act"))) {
             final String cookieName = post.get("cookie_name").trim();
             final String cookieValue = post.get("cookie_value").trim();
             final ResponseHeader outgoingHeader = new ResponseHeader();

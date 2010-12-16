@@ -32,13 +32,12 @@ public class feed {
 
         int messageCount = 0;
         int messageMaxCount = Math.min(post.getInt("count", 100), 1000);
-
-        RSSFeed feed;
-        channelIteration: for (String channel: channels) {
+ 
+        channelIteration: for (final String channel: channels) {
             // prevent that unauthorized access to this servlet get results from private data
             if ((!authorized) && (yacyChannel.privateChannels.contains(channel))) continue channelIteration; // allow only public channels if not authorized
 
-            if (channel.equals("TEST")) {
+            if ("TEST".equals(channel)) {
                 // for interface testing return at least one single result
                 prop.putXML("channel_title", "YaCy News Testchannel");
                 prop.putXML("channel_description", "");
@@ -54,7 +53,7 @@ public class feed {
             }
             
             // read the channel
-            feed = yacyChannel.channels(channel);
+            final RSSFeed feed = yacyChannel.channels(channel);
             if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();
