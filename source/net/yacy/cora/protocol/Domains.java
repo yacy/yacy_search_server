@@ -676,10 +676,10 @@ public class Domains {
      * generate a list of intranet InetAddresses without the loopback address 127.0.0.1
      * @return list of all intranet addresses
      */
-    public static List<InetAddress> myIntranetIPs() {
+    public static Set<InetAddress> myIntranetIPs() {
         // list all local addresses
         if (localHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (InterruptedException e) {}
-        ArrayList<InetAddress> list = new ArrayList<InetAddress>(localHostAddresses.size());
+        Set<InetAddress> list = new HashSet<InetAddress>();
         if (localHostAddresses.size() == 0) return list; // give up
         for (InetAddress a: localHostAddresses) {
             if ((0Xff & a.getAddress()[0]) == 127) continue;

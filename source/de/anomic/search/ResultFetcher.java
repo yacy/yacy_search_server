@@ -330,7 +330,7 @@ public class ResultFetcher {
                     page = rankingProcess.takeURL(true, this.timeout - System.currentTimeMillis());
                     //if (page == null) page = rankedCache.takeURL(false, this.timeout - System.currentTimeMillis());
                     if (page == null) {
-                        System.out.println("page == null");
+                        //System.out.println("page == null");
                         break; // no more available
                     }
                     if (workTables.failURLsContains(page.hash())) continue;

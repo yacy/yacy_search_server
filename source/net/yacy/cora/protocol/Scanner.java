@@ -26,8 +26,11 @@ import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,10 +53,71 @@ public class Scanner extends Thread {
     
     public static enum Access {unknown, empty, granted, denied;}
     
-    public static Map<MultiProtocolURI, Access> scancache = new TreeMap<MultiProtocolURI, Access>();
+    private final static Map<MultiProtocolURI, Access> scancache = new TreeMap<MultiProtocolURI, Access>();
+    private       static long scancacheUpdateTime = 0;
+    private       static long scancacheValidUntilTime = Long.MAX_VALUE;
+    private       static Set<InetAddress> scancacheScanrange = new HashSet<InetAddress>();
+
+    public static int scancacheSize() {
+        return scancache.size();
+    }
+    
+    public static void scancacheReplace(Scanner newScanner, long validTime) {
+        scancache.clear();
+        scancache.putAll(newScanner.services());
+        scancacheUpdateTime = System.currentTimeMillis();
+        scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
+        scancacheScanrange = newScanner.scanrange;
+    }
+    
+    public static void scancacheExtend(Scanner newScanner, long validTime) {
+        Iterator<Map.Entry<MultiProtocolURI, Access>> i = Scanner.scancache.entrySet().iterator();
+        Map.Entry<MultiProtocolURI, Access> entry;
+        while (i.hasNext()) {
+            entry = i.next();
+            if (entry.getValue() != Access.granted) i.remove();
+        }
+        scancache.putAll(newScanner.services());
+        scancacheUpdateTime = System.currentTimeMillis();
+        scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
+        scancacheScanrange = newScanner.scanrange;
+    }
+    
+    public static Iterator<Map.Entry<MultiProtocolURI, Scanner.Access>> scancacheEntries() {
+        return scancache.entrySet().iterator();
+    }
+    
+    public static boolean acceptURL(MultiProtocolURI url) {
+        if (scancacheScanrange == null || scancacheScanrange.size() == 0) return true;
+        
+        if (System.currentTimeMillis() > scancacheValidUntilTime) return true;
+        InetAddress a = Domains.dnsResolve(url.getHost());
+        if (a == null) return true;
+        InetAddress n = normalize(a);
+        if (!scancacheScanrange.contains(n)) return true;
+        MultiProtocolURI uri;
+        try {
+            uri = produceURI(url.getProtocol(), a);
+            return scancache.containsKey(uri);
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
+    private static InetAddress normalize(InetAddress a) {
+        if (a == null) return null;
+        byte[] b = a.getAddress();
+        if (b[3] == 1) return a;
+        b[3] = 1;
+        try {
+            return InetAddress.getByAddress(b);
+        } catch (UnknownHostException e) {
+            return a;
+        }
+    }
     
     private int runnerCount;
-    private List<InetAddress> scanrange;
+    private Set<InetAddress> scanrange;
     private BlockingQueue<MultiProtocolURI> scanqueue;
     private Map<MultiProtocolURI, Access> services;
     private Map<Runner, Object> runner;
@@ -61,17 +125,18 @@ public class Scanner extends Thread {
 
     public Scanner(InetAddress scanrange, int concurrentRunner, int timeout) {
         this.runnerCount = concurrentRunner;
-        this.scanrange = new ArrayList<InetAddress>();
-        this.scanrange.add(scanrange);
+        this.scanrange = new HashSet<InetAddress>();
+        this.scanrange.add(normalize(scanrange));
         this.scanqueue = new LinkedBlockingQueue<MultiProtocolURI>();
         this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, Access>());
         this.runner = new ConcurrentHashMap<Runner, Object>();
         this.timeout = timeout;
     }
 
-    public Scanner(List<InetAddress> scanrange, int concurrentRunner, int timeout) {
+    public Scanner(Set<InetAddress> scanrange, int concurrentRunner, int timeout) {
         this.runnerCount = concurrentRunner;
-        this.scanrange = scanrange;
+        this.scanrange = new HashSet<InetAddress>();
+        for (InetAddress a: scanrange) this.scanrange.add(normalize(a));
         this.scanqueue = new LinkedBlockingQueue<MultiProtocolURI>();
         this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, Access>());
         this.runner = new ConcurrentHashMap<Runner, Object>();
@@ -116,6 +181,10 @@ public class Scanner extends Thread {
         }
     }
     
+    private static MultiProtocolURI produceURI(String protocol, InetAddress a) throws MalformedURLException {
+        return new MultiProtocolURI(protocol + "://" + Domains.getHostName(a) + "/");
+    }
+    
     public class Runner extends Thread {
         private MultiProtocolURI uri;
         private long starttime;
@@ -127,7 +196,7 @@ public class Scanner extends Thread {
             try {
                 if (TimeoutRequest.ping(this.uri, timeout)) {
                     try {
-                        MultiProtocolURI uri = new MultiProtocolURI(this.uri.getProtocol() + "://" + Domains.getHostName(InetAddress.getByName(this.uri.getHost())) + "/");
+                        MultiProtocolURI uri = produceURI(this.uri.getProtocol(), Domains.dnsResolve(this.uri.getHost()));
                         String protocol = uri.getProtocol();
                         Access access = protocol.equals("http") || protocol.equals("https") ? Access.granted : Access.unknown;
                         services.put(uri, access);
@@ -156,8 +225,6 @@ public class Scanner extends Thread {
                         }
                         if (access != Access.unknown) services.put(uri, access);
                     } catch (MalformedURLException e) {
-                        e.printStackTrace();
-                    } catch (UnknownHostException e) {
                         e.printStackTrace();
                     }
                 }

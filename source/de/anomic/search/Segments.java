@@ -150,6 +150,7 @@ public class Segments implements Iterable<Segment> {
     }
     
     public long URLCount() {
+        if (this.segments == null) return 0;
         long c = 0;
         for (Segment s: this.segments.values()) c += (long) s.urlMetadata().size();
         return c;

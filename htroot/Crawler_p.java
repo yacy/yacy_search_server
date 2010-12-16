@@ -207,13 +207,13 @@ public class Crawler_p {
                 final boolean crawlingQ = "on".equals(post.get("crawlingQ", "off"));
                 env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
                 
-                final boolean indexText = "on".equals(post.get("indexText", "off"));
+                final boolean indexText = "on".equals(post.get("indexText", "on"));
                 env.setConfig("indexText", (indexText) ? "true" : "false");
                 
-                final boolean indexMedia = "on".equals(post.get("indexMedia", "off"));
+                final boolean indexMedia = "on".equals(post.get("indexMedia", "on"));
                 env.setConfig("indexMedia", (indexMedia) ? "true" : "false");
                 
-                boolean storeHTCache = "on".equals(post.get("storeHTCache", "off"));
+                boolean storeHTCache = "on".equals(post.get("storeHTCache", "on"));
                 if (crawlingStartURL!= null &&(crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                 env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
                 

@@ -21,12 +21,11 @@
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -58,18 +57,14 @@ public class CrawlStartScanner_p {
 
         // make a scanhosts entry
         String hosts = post == null ? "" : post.get("scanhosts", "");
-        List<InetAddress> ips = Domains.myIntranetIPs();
+        Set<InetAddress> ips = Domains.myIntranetIPs();
         prop.put("intranethosts", ips.toString());
         prop.put("intranetHint", sb.isIntranetMode() ? 0 : 1);
         if (hosts.length() == 0) {
             InetAddress ip;
             if (sb.isIntranetMode()) {
-                if (ips.size() > 0) ip = ips.get(0); else try {
-                    ip = InetAddress.getByName("192.168.0.1");
-                } catch (UnknownHostException e) {
-                    ip = null;
-                    e.printStackTrace();
-                }
+                if (ips.size() > 0) ip = ips.iterator().next();
+                else ip = Domains.dnsResolve("192.168.0.1");
             } else {
                 ip = Domains.myPublicLocalIP();
                 if (Domains.isThisHostIP(ip)) ip = sb.peers.mySeed().getInetAddress();
@@ -80,18 +75,31 @@ public class CrawlStartScanner_p {
         
         // parse post requests
         if (post != null) {
+            int repeat_time = 0;
+            String repeat_unit = "seldays";
+            long validTime = 0;
+
+            // check scheduler
+            if (post.get("rescan", "").equals("scheduler")) {
+                repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
+                repeat_unit = post.get("repeat_unit", "selminutes"); // selminutes, selhours, seldays
+                if (repeat_unit.equals("selminutes")) validTime = repeat_time * 60 * 1000;
+                if (repeat_unit.equals("selhours")) validTime = repeat_time * 60 * 60 * 1000;
+                if (repeat_unit.equals("seldays")) validTime = repeat_time * 24 * 60 * 60 * 1000;
+            }
+            
             // case: an IP range was given; scan the range for services and display result
             if (post.containsKey("scan") && post.get("source", "").equals("hosts")) {
-                List<InetAddress> ia = new ArrayList<InetAddress>();
-                for (String host: hosts.split(",")) try {
+                Set<InetAddress> ia = new HashSet<InetAddress>();
+                for (String host: hosts.split(",")) {
                     if (host.startsWith("http://")) host = host.substring(7);
                     if (host.startsWith("https://")) host = host.substring(8);
                     if (host.startsWith("ftp://")) host = host.substring(6);
                     if (host.startsWith("smb://")) host = host.substring(6);
                     int p = host.indexOf('/');
                     if (p >= 0) host = host.substring(0, p);
-                    ia.add(InetAddress.getByName(host));
-                } catch (UnknownHostException e) {}
+                    ia.add(Domains.dnsResolve(host));
+                }
                 Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 100 : 1000);
                 if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
                 if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
@@ -99,7 +107,7 @@ public class CrawlStartScanner_p {
                 if (post.get("scansmb", "").equals("on")) scanner.addSMB(false);
                 scanner.start();
                 scanner.terminate();
-                if (post.get("accumulatescancache", "").equals("on") && !post.get("rescan", "").equals("scheduler")) enlargeScancache(scanner.services()); else Scanner.scancache = scanner.services();
+                if (post.get("accumulatescancache", "").equals("on") && !post.get("rescan", "").equals("scheduler")) Scanner.scancacheExtend(scanner, validTime); else Scanner.scancacheReplace(scanner, validTime);
             }
             
             if (post.containsKey("scan") && post.get("source", "").equals("intranet")) {
@@ -110,14 +118,16 @@ public class CrawlStartScanner_p {
                 if (post.get("scansmb", "").equals("on")) scanner.addSMB(false);
                 scanner.start();
                 scanner.terminate();
-                if (post.get("accumulatescancache", "").equals("on") && !post.get("rescan", "").equals("scheduler")) enlargeScancache(scanner.services()); else Scanner.scancache = scanner.services();
+                if (post.get("accumulatescancache", "").equals("on") && !post.get("rescan", "").equals("scheduler")) Scanner.scancacheExtend(scanner, validTime); else Scanner.scancacheReplace(scanner, validTime);
             }
             
             // check crawl request
             if (post.containsKey("crawl")) {
                 // make a pk/url mapping
+                Iterator<Map.Entry<MultiProtocolURI, Scanner.Access>> se = Scanner.scancacheEntries();
                 Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
-                for (MultiProtocolURI u: Scanner.scancache.keySet()) {
+                while (se.hasNext()) {
+                    MultiProtocolURI u = se.next().getKey();
                     DigestURI uu = new DigestURI(u);
                     pkmap.put(uu.hash(), uu);
                 }
@@ -138,9 +148,6 @@ public class CrawlStartScanner_p {
             // check scheduler
             if (post.get("rescan", "").equals("scheduler")) {
                 
-                int repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
-                final String repeat_unit = post.get("repeat_unit", "selminutes"); // selminutes, selhours, seldays
-                
                 // store this call as api call
                 if (repeat_time > 0) {
                     // store as scheduled api call
@@ -148,7 +155,7 @@ public class CrawlStartScanner_p {
                 }
                 
                 // execute the scan results
-                if (Scanner.scancache.size() > 0) {
+                if (Scanner.scancacheSize() > 0) {
                     // make a comment cache
                     Map<byte[], String> apiCommentCache = commentCache(sb);
                     
@@ -156,7 +163,10 @@ public class CrawlStartScanner_p {
                     DigestURI u;
                     try {
                         int i = 0;
-                        for (final Map.Entry<MultiProtocolURI, Scanner.Access> host: Scanner.scancache.entrySet()) {
+                        Iterator<Map.Entry<MultiProtocolURI, Scanner.Access>> se = Scanner.scancacheEntries();
+                        Map.Entry<MultiProtocolURI, Scanner.Access> host;
+                        while (se.hasNext()) {
+                            host = se.next();
                             u = new DigestURI(host.getKey());
                             urlString = u.toNormalform(true, false);
                             if (host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null) {
@@ -173,7 +183,7 @@ public class CrawlStartScanner_p {
         }
         
         // write scan table
-        if (Scanner.scancache.size() > 0) {
+        if (Scanner.scancacheSize() > 0) {
             // make a comment cache
             Map<byte[], String> apiCommentCache = commentCache(sb);
             
@@ -184,7 +194,10 @@ public class CrawlStartScanner_p {
             table: while (true) {
                 try {
                     int i = 0;
-                    for (final Map.Entry<MultiProtocolURI, Scanner.Access> host: Scanner.scancache.entrySet()) {
+                    Iterator<Map.Entry<MultiProtocolURI, Scanner.Access>> se = Scanner.scancacheEntries();
+                    Map.Entry<MultiProtocolURI, Scanner.Access> host;
+                    while (se.hasNext()) {
+                        host = se.next();
                         u = new DigestURI(host.getKey());
                         urlString = u.toNormalform(true, false);
                         prop.put("servertable_list_" + i + "_pk", new String(u.hash()));
@@ -197,7 +210,7 @@ public class CrawlStartScanner_p {
                         prop.put("servertable_list_" + i + "_accessGranted", host.getValue() == Access.granted ? 1 : 0);
                         prop.put("servertable_list_" + i + "_accessDenied", host.getValue() == Access.denied ? 1 : 0);
                         prop.put("servertable_list_" + i + "_process", inIndex(apiCommentCache, urlString) == null ? 0 : 1);
-                        prop.put("servertable_list_" + i + "_preselected", interesting(apiCommentCache, u, host.getValue()) ? 1 : 0);
+                        prop.put("servertable_list_" + i + "_preselected", host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null ? 1 : 0);
                         i++;
                     }
                     prop.put("servertable_list", i);
@@ -211,23 +224,6 @@ public class CrawlStartScanner_p {
         return prop;
     }
     
-    private static void enlargeScancache(Map<MultiProtocolURI, Access> newCache) {
-        if (Scanner.scancache == null) {
-            Scanner.scancache = newCache;
-            return;
-        }
-        Iterator<Map.Entry<MultiProtocolURI, Access>> i = Scanner.scancache.entrySet().iterator();
-        Map.Entry<MultiProtocolURI, Access> entry;
-        while (i.hasNext()) {
-            entry = i.next();
-            if (entry.getValue() != Access.granted) i.remove();
-        }
-        Scanner.scancache.putAll(newCache);
-    }
-    
-    private static boolean interesting(Map<byte[], String> commentCache, MultiProtocolURI uri, Access access) {
-        return inIndex(commentCache, uri.toNormalform(true, false)) == null && access == Access.granted && (uri.getProtocol().equals("smb") || uri.getProtocol().equals("ftp"));
-    }
     
     private static byte[] inIndex(Map<byte[], String> commentCache, String url) {
         for (Map.Entry<byte[], String> comment: commentCache.entrySet()) {

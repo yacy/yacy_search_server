@@ -185,7 +185,7 @@ function resultLine(type, item, linenumber) {
   }
   
   // update download script
-  script += "curl -OL \"" + item.link + "\"\n";
+  if (item.link.indexOf("smb://") >= 0) script += "smbget -n -a -r \"" + item.link + "\"\n"; else script += "curl -OL \"" + item.link + "\"\n";
   
   // make table row
   var html = "";

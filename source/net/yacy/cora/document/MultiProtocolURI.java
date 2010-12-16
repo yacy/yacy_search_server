@@ -56,7 +56,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     
     private static final long serialVersionUID = -1173233022912141884L;
-    private static final long SMB_TIMEOUT = 500;
+    private static final long SMB_TIMEOUT = 1500;
     
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
@@ -1107,6 +1107,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         if (isFile()) return getFSFile().list();
         if (isSMB()) try {
             SmbFile sf = getSmbFile();
+            if (!sf.isDirectory()) return null;
             try {
                 return TimeoutRequest.list(sf, SMB_TIMEOUT);
             } catch (SmbException e) {
