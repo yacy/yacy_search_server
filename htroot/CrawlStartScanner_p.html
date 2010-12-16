@@ -13,11 +13,6 @@
             selectForm.elements["item_" + i].checked = !selectForm.elements["item_" + i].checked;
         }
     }
-    function disableSubmit() {
-        document.getElementById('scanipSubmit').disabled=true;
-        document.getElementById('scanhostSubmit').disabled=true;
-        document.getElementById('scanintranetSubmit').disabled=true;
-    }
     -->
     </script>
     <script type="text/javascript" src="/js/sorttable.js"></script>
@@ -27,13 +22,11 @@
     #%env/templates/submenuIndexCreate.template%#
     <h2>Network Scanner</h2>
 
-    #(selectiprange)#::
     <p>
       YaCy can scan a network segment for available http, ftp and smb server.
       You must first select a IP range and then, after this range is scanned,
       it is possible to select servers that had been found for a full-site crawl.
     </p>
-    #(/selectiprange)#
 	
     #(noserverdetected)#::
     <p>
@@ -41,32 +34,59 @@
     </p>
     #(/noserverdetected)#
     
-    #(enterrange)#::
-    <div><table border="0"><tr valign="top">
-    <td width="270"><form onSubmit="document.getElementById('scanipinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
-    <fieldset height="30">
-	  <legend><label for="servertable">Scan with given IP range</label></legend><br>
-      <input type="text" name="ip4-0" value="#[ip4-0]#" size="3" maxlength="3" />.
-      <input type="text" name="ip4-1" value="#[ip4-1]#" size="3" maxlength="3" />.
-      <input type="text" name="ip4-2" value="#[ip4-2]#" size="3" maxlength="3" />.[1-254]
-      <input type="hidden" name="scanip" value=""/>
-      <input type="submit" id="scanipSubmit" name="scanipSubmit" value="Scan"/><br><br><div class="info" id="scanipinfo" style="text-decoration: blink;"></div>
-    </fieldset></form></td>
-    <td width="270"><form onSubmit="document.getElementById('scanhostinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
+    <form onSubmit="document.getElementById('scanhostinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
     <fieldset>
-	  <legend><label for="servertable">Scan range with given host name</label></legend><br>
-      <input type="text" name="scanhost" value="#[host]#" size="28" maxlength="60" />
-      <input type="submit" id="scanhostSubmit" name="scanhostSubmit" value="Scan" /><br><br><div class="info" id="scanhostinfo" style="text-decoration: blink;"></div>
-    </fieldset></form></td>
-    <td><form onSubmit="document.getElementById('scanintranetinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
-    <fieldset>
-	  <legend><label for="servertable">Full Intranet Scan</label></legend>
-	  #(intranetHint)#::<div class="info">Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
-      <input type="hidden" name="scanintranet" value=""/>
-	  #[intranethosts]#&nbsp;<input type="submit" id="scanintranetSubmit" name="scanintranetSubmit" value="Scan" /><div class="info" id="scanintranetinfo" style="text-decoration: blink;"></div>
-    </fieldset></form></td>
-    </tr></table></div>
-    #(/enterrange)#
+      <legend>
+	    <label>Scan the network</label>
+	  </legend>
+    <dl>
+    <dt>Scan Range</dt>
+    <dd>
+        <input type="radio" name="source" id="source" value="hosts"#(intranet.checked)# checked="checked"::#(/intranet.checked)# />Scan sub-range with given host
+        <input type="text" name="scanhosts" value="#[scanhosts]#" size="60" maxlength="400" /><br/><br/>
+    
+        <input type="radio" name="source" id="source" value="intranet"#(intranet.checked)#:: checked="checked"#(/intranet.checked)# />Full Intranet Scan: #[intranethosts]#<br/>
+        #(intranetHint)#::<div class="info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
+    </dd>
+    <dt>Scan Cache</dt>
+    <dd>
+        <input type="checkbox" name="accumulatescancache" id="accumulatescancache" checked="checked">accumulate scan results with access type "granted" into scan cache (do not delete old scan result)
+    </dd>
+    <dt>Service Type</dt>
+    <dd>
+        <input type="checkbox" name="scanftp" checked="checked">ftp
+        <input type="checkbox" name="scansmb" checked="checked">smb
+        <input type="checkbox" name="scanhttp">http
+        <input type="checkbox" name="scanhttps">https
+    </dd>
+    
+    <dt>Scheduler</dt>
+    <dd>
+        <input type="radio" name="rescan" value="off" #(rescanCheck)#checked="checked"::#(/rescanCheck)#/>run only a scan<br/>
+		<input type="radio" name="rescan" value="scheduler" onclick="document.getElementById('accumulatescancache').checked = false" #(rescanCheck)#::checked="checked"#(/rescanCheck)#/>
+		scan and add all sites with granted access automatically. This disables the scan cache accumulation.
+		<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Look every
+		<select name="repeat_time">
+           <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+           <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+           <option value="7">7</option><option value="8">8</option>
+           <option value="9">9</option><option value="10" selected="selected">10</option>
+           <option value="12">12</option><option value="14">14</option><option value="15">15</option>
+           <option value="21">21</option><option value="28">28</option><option value="30">30</option>
+		</select>
+		<select name="repeat_unit">
+           <option value="selminutes" selected="selected">minutes</option>
+           <option value="selhours">hours</option>
+           <option value="seldays">days</option>
+        </select> again and add new sites automatically to indexer.<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sites that do not appear during a scheduled scan period will be excluded from search results.
+    </dd>
+    
+    <dt>&nbsp;</dt>
+    <dd><input type="submit" id="scan" name="scan" value="Scan" /><div class="info" id="scanhostinfo" style="text-decoration: blink;">&nbsp;</div></dd>
+    </dl>
+    </fieldset>
+    </form>
     
 	#(servertable)#::
 	<p>

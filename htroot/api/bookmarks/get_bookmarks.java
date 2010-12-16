@@ -24,10 +24,12 @@ public class get_bookmarks {
 
     private static int R = 1; // TODO: solve the recursion problem an remove global variable
 
+    /*
     private final static int SORT_ALPHA = 1;
     private final static int SORT_SIZE = 2;
     private final static int SHOW_ALL = -1;
-        
+    */
+    
     private final static int MAXRESULTS = 10000;
 
     // file types and display types

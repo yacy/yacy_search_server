@@ -51,7 +51,7 @@ public class genericParser extends AbstractParser implements Parser {
                 location.getHost(),
                 null,
                 null,
-                "",
+                location.toTokens(),
                 null,
                 null,
                 null,

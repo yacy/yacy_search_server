@@ -22,6 +22,7 @@
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
@@ -50,120 +51,132 @@ public class CrawlStartScanner_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
 
-        prop.put("selectiprange", 0);
         prop.put("noserverdetected", 0);
-        prop.put("enterrange", 0);
         prop.put("servertable", 0);
-        prop.put("enterrange_host", "");
-        
-        // make a comment cache
-        Map<byte[], String> apiCommentCache = commentCache(sb);
-        
-        addSelectIPRange(sb, prop);
-        addScantable(apiCommentCache, prop);
-        
-        // case: no query part of the request; ask for input
-        if (post == null) {
-            prop.put("selectiprange", 1);
-            return prop;
+        prop.put("hosts", "");
+        prop.put("intranet.checked", sb.isIntranetMode() ? 1 : 0);
+
+        // make a scanhosts entry
+        String hosts = post == null ? "" : post.get("scanhosts", "");
+        List<InetAddress> ips = Domains.myIntranetIPs();
+        prop.put("intranethosts", ips.toString());
+        prop.put("intranetHint", sb.isIntranetMode() ? 0 : 1);
+        if (hosts.length() == 0) {
+            InetAddress ip;
+            if (sb.isIntranetMode()) {
+                if (ips.size() > 0) ip = ips.get(0); else try {
+                    ip = InetAddress.getByName("192.168.0.1");
+                } catch (UnknownHostException e) {
+                    ip = null;
+                    e.printStackTrace();
+                }
+            } else {
+                ip = Domains.myPublicLocalIP();
+                if (Domains.isThisHostIP(ip)) ip = sb.peers.mySeed().getInetAddress();
+            }
+            if (ip != null) hosts = ip.getHostAddress();
         }
+        prop.put("scanhosts", hosts);
         
-        // case: an IP range was given; scan the range for services and display result
-        if (post.containsKey("scanip") || post.containsKey("scanhost")) {
-            InetAddress ia;
-            try {
-                if (post.containsKey("scanip")) {
-                    ia = InetAddress.getByAddress(new byte[]{(byte) post.getInt("ip4-0", 0), (byte) post.getInt("ip4-1", 0), (byte) post.getInt("ip4-2", 0), (byte) post.getInt("ip4-3", 0)});
-                } else {
-                    String host = post.get("scanhost", "");
+        // parse post requests
+        if (post != null) {
+            // case: an IP range was given; scan the range for services and display result
+            if (post.containsKey("scan") && post.get("source", "").equals("hosts")) {
+                List<InetAddress> ia = new ArrayList<InetAddress>();
+                for (String host: hosts.split(",")) try {
                     if (host.startsWith("http://")) host = host.substring(7);
                     if (host.startsWith("https://")) host = host.substring(8);
                     if (host.startsWith("ftp://")) host = host.substring(6);
                     if (host.startsWith("smb://")) host = host.substring(6);
                     int p = host.indexOf('/');
                     if (p >= 0) host = host.substring(0, p);
-                    ia = InetAddress.getByName(host);
-                    prop.put("enterrange_host", host);
-                }
-                addSelectIPRange(ia, prop);
-                Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 100 : 3000);
-                scanner.addFTP(false);
-                scanner.addHTTP(false);
-                scanner.addHTTPS(false);
-                scanner.addSMB(false);
+                    ia.add(InetAddress.getByName(host));
+                } catch (UnknownHostException e) {}
+                Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 100 : 1000);
+                if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
+                if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
+                if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(false);
+                if (post.get("scansmb", "").equals("on")) scanner.addSMB(false);
                 scanner.start();
                 scanner.terminate();
-                enlargeScancache(apiCommentCache, scanner);
-                addScantable(apiCommentCache, prop);
-            } catch (UnknownHostException e) {}
-        }
-        
-        if (post.containsKey("scanintranet")) {
-            Scanner scanner = new Scanner(Domains.myIntranetIPs(), 100, sb.isIntranetMode() ? 100 : 3000);
-            scanner.addFTP(false);
-            scanner.addHTTP(false);
-            scanner.addHTTPS(false);
-            scanner.addSMB(false);
-            scanner.start();
-            scanner.terminate();
-            enlargeScancache(apiCommentCache, scanner);
-            addScantable(apiCommentCache, prop);
-        }
-        
-        // check crawl request
-        if (post != null && post.containsKey("crawl")) {
-            // make a pk/url mapping
-            Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
-            for (MultiProtocolURI u: Scanner.scancache.keySet()) {
-                DigestURI uu = new DigestURI(u);
-                pkmap.put(uu.hash(), uu);
+                if (post.get("accumulatescancache", "").equals("on") && !post.get("rescan", "").equals("scheduler")) enlargeScancache(scanner.services()); else Scanner.scancache = scanner.services();
             }
-            // search for crawl start requests in this mapping
-            for (Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) {
-                    byte [] pk = entry.getValue().substring(5).getBytes();
-                    DigestURI url = pkmap.get(pk);
-                    if (url != null) {
-                        String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
-                        path += "&crawlingURL=" + url.toNormalform(true, false);
-                        WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), path, pk);
+            
+            if (post.containsKey("scan") && post.get("source", "").equals("intranet")) {
+                Scanner scanner = new Scanner(Domains.myIntranetIPs(), 100, sb.isIntranetMode() ? 100 : 3000);
+                if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
+                if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
+                if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(false);
+                if (post.get("scansmb", "").equals("on")) scanner.addSMB(false);
+                scanner.start();
+                scanner.terminate();
+                if (post.get("accumulatescancache", "").equals("on") && !post.get("rescan", "").equals("scheduler")) enlargeScancache(scanner.services()); else Scanner.scancache = scanner.services();
+            }
+            
+            // check crawl request
+            if (post.containsKey("crawl")) {
+                // make a pk/url mapping
+                Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
+                for (MultiProtocolURI u: Scanner.scancache.keySet()) {
+                    DigestURI uu = new DigestURI(u);
+                    pkmap.put(uu.hash(), uu);
+                }
+                // search for crawl start requests in this mapping
+                for (Map.Entry<String, String> entry: post.entrySet()) {
+                    if (entry.getValue().startsWith("mark_")) {
+                        byte [] pk = entry.getValue().substring(5).getBytes();
+                        DigestURI url = pkmap.get(pk);
+                        if (url != null) {
+                            String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
+                            path += "&crawlingURL=" + url.toNormalform(true, false);
+                            WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), path, pk);
+                        }
                     }
                 }
             }
+            
+            // check scheduler
+            if (post.get("rescan", "").equals("scheduler")) {
+                
+                int repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
+                final String repeat_unit = post.get("repeat_unit", "selminutes"); // selminutes, selhours, seldays
+                
+                // store this call as api call
+                if (repeat_time > 0) {
+                    // store as scheduled api call
+                    sb.tables.recordAPICall(post, "CrawlStartScanner_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "network scanner for hosts: " + hosts, repeat_time, repeat_unit.substring(3));
+                }
+                
+                // execute the scan results
+                if (Scanner.scancache.size() > 0) {
+                    // make a comment cache
+                    Map<byte[], String> apiCommentCache = commentCache(sb);
+                    
+                    String urlString;
+                    DigestURI u;
+                    try {
+                        int i = 0;
+                        for (final Map.Entry<MultiProtocolURI, Scanner.Access> host: Scanner.scancache.entrySet()) {
+                            u = new DigestURI(host.getKey());
+                            urlString = u.toNormalform(true, false);
+                            if (host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null) {
+                                String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
+                                path += "&crawlingURL=" + urlString;
+                                WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), path, u.hash());
+                            }
+                            i++;
+                        }
+                    } catch (ConcurrentModificationException e) {}
+                }
+                
+            }
         }
         
-        return prop;
-    }
-    
-    private static void addSelectIPRange(Switchboard sb, serverObjects prop) {
-        InetAddress ip;
-        List<InetAddress> ips = Domains.myIntranetIPs();
-        prop.put("enterrange_intranethosts", ips.toString());
-        prop.put("enterrange_intranetHint", 0);
-        if (sb.isIntranetMode()) {
-            if (ips.size() > 0) ip = ips.get(0); else try {
-                ip = InetAddress.getByName("192.168.0.1");
-            } catch (UnknownHostException e) {
-                ip = null;
-                e.printStackTrace();
-            }
-        } else {
-            prop.put("enterrange_intranetHint", 1);
-            ip = Domains.myPublicLocalIP();
-        }
-        addSelectIPRange(ip, prop);
-    }
-    
-    private static void addSelectIPRange(InetAddress ip, serverObjects prop) {
-        prop.put("enterrange", 1);
-        byte[] address = ip.getAddress();
-        prop.put("enterrange_ip4-0", 0xff & address[0]);
-        prop.put("enterrange_ip4-1", 0xff & address[1]);
-        prop.put("enterrange_ip4-2", 0xff & address[2]);
-    }
-    
-    private static void addScantable(Map<byte[], String> commentCache, serverObjects prop) {
+        // write scan table
         if (Scanner.scancache.size() > 0) {
+            // make a comment cache
+            Map<byte[], String> apiCommentCache = commentCache(sb);
+            
             // show scancache table
             prop.put("servertable", 1);
             String urlString;
@@ -183,8 +196,8 @@ public class CrawlStartScanner_p {
                         prop.put("servertable_list_" + i + "_accessEmpty", host.getValue() == Access.empty ? 1 : 0);
                         prop.put("servertable_list_" + i + "_accessGranted", host.getValue() == Access.granted ? 1 : 0);
                         prop.put("servertable_list_" + i + "_accessDenied", host.getValue() == Access.denied ? 1 : 0);
-                        prop.put("servertable_list_" + i + "_process", inIndex(commentCache, urlString) == null ? 0 : 1);
-                        prop.put("servertable_list_" + i + "_preselected", interesting(commentCache, u, host.getValue()) ? 1 : 0);
+                        prop.put("servertable_list_" + i + "_process", inIndex(apiCommentCache, urlString) == null ? 0 : 1);
+                        prop.put("servertable_list_" + i + "_preselected", interesting(apiCommentCache, u, host.getValue()) ? 1 : 0);
                         i++;
                     }
                     prop.put("servertable_list", i);
@@ -195,20 +208,21 @@ public class CrawlStartScanner_p {
                 }
             }
         }
+        return prop;
     }
     
-    private static void enlargeScancache(Map<byte[], String> commentCache, Scanner scanner) {
+    private static void enlargeScancache(Map<MultiProtocolURI, Access> newCache) {
         if (Scanner.scancache == null) {
-            Scanner.scancache = scanner.services();
+            Scanner.scancache = newCache;
             return;
         }
         Iterator<Map.Entry<MultiProtocolURI, Access>> i = Scanner.scancache.entrySet().iterator();
         Map.Entry<MultiProtocolURI, Access> entry;
         while (i.hasNext()) {
             entry = i.next();
-            if (!interesting(commentCache, entry.getKey(), entry.getValue())) i.remove();
+            if (entry.getValue() != Access.granted) i.remove();
         }
-        Scanner.scancache.putAll(scanner.services());
+        Scanner.scancache.putAll(newCache);
     }
     
     private static boolean interesting(Map<byte[], String> commentCache, MultiProtocolURI uri, Access access) {
