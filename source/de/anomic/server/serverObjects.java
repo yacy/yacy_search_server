@@ -237,7 +237,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @see #putNum(String, long)
      */
     public String putNum(final String key, final String value) {
-        return this.put(key, Formatter.number(value));
+        return this.put(key, value == null ? "" : Formatter.number(value));
     }
 
     
