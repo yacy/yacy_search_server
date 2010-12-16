@@ -843,7 +843,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     
     private static CharType charType(char c) {
         if (c >= 'a' && c <= 'z') return CharType.low;
-        if (c >= '0' && c <= '1') return CharType.number;
+        if (c >= '0' && c <= '9') return CharType.number;
         return CharType.high;
     }
     
