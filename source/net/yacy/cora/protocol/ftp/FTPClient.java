@@ -65,6 +65,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 
 import org.apache.log4j.Logger;
@@ -2589,7 +2590,7 @@ public class FTPClient {
             final boolean metaRobotNoindex) {
         // this creates the html output from collected strings
         final StringBuilder page = new StringBuilder(1024);
-        final String title = "Index of " + base;
+        final String title = "Index of " + MultiProtocolURI.unescape(base);
 
         page.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n");
         page.append("<html><head>\n");

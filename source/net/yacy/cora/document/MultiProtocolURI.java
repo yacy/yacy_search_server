@@ -777,18 +777,14 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         return toTokens(this.toNormalform(true, true));
     }
     
-    private final static String[] replacementStrings = {"%20", "%2B", "%2b"};
-    
     /**
      * create word tokens for parser. Find CamelCases and separate these words
      * resulting words are not ordered by appearance, but all
      * @return
      */
     public static String toTokens(String s) {
-        String t = new String(s);
-        
-        // remove all replacement strings
-        for (String r: replacementStrings) t = t.replaceAll(r, " ");
+        // unesape string
+        String t = unescape(s);
 
         // remove all non-character & non-number
         StringBuilder sb = new StringBuilder(t.length());

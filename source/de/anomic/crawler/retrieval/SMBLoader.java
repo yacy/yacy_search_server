@@ -45,6 +45,7 @@ import de.anomic.search.Switchboard;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.MimeTable;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -95,6 +96,7 @@ public class SMBLoader {
             List<String> list = new ArrayList<String>();
             for (String s: l) {
                 if (s.startsWith(".")) continue;
+                s = MultiProtocolURI.escape(s).toString();
                 if (!s.endsWith("/") && !s.endsWith("\\")) {
                     // check if this is a directory
                     SmbFile sf = new SmbFile(u + s);

@@ -118,7 +118,7 @@ public class pdfParser extends AbstractParser implements Parser {
             // info.getModificationDate();
         }
         
-        if (docTitle == null || docTitle.length() == 0) docTitle = location.getFileName();
+        if (docTitle == null || docTitle.length() == 0) docTitle = MultiProtocolURI.unescape(location.getFileName());
         CharBuffer writer = null;
         try {
             // create a writer for output

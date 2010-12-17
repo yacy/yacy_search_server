@@ -46,7 +46,7 @@ public class genericParser extends AbstractParser implements Parser {
                 charset,
                 null,
                 null,
-                location.getFileName(), // title
+                MultiProtocolURI.unescape(location.getFileName()), // title
                 "", // author 
                 location.getHost(),
                 null,
