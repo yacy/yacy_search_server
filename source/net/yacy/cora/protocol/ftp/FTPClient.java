@@ -1338,6 +1338,7 @@ public class FTPClient {
     }
 
     public List<String> list(final String path, final boolean extended) throws IOException {
+
         createDataSocket();
 
         // send command to the control port
@@ -2253,8 +2254,9 @@ public class FTPClient {
         }
     }
 
+    
     public byte[] get(final String fileName) throws IOException {
-
+        
         createDataSocket();
 
         // set type of the transfer
@@ -2541,17 +2543,28 @@ public class FTPClient {
         }
         if (!path.endsWith("/")) path += "/";
         entryInfo info;
+        // first find all files and add them to the crawl list
         for (final String line : list) {
             info = parseListData(line);
-            if (info != null && info.type == filetype.file) {
-                if (!info.name.startsWith("/")) info.name = path + info.name;
+            if (info != null && info.type == filetype.file && !info.name.endsWith(".") && !info.name.startsWith(".")) {
+                if (!info.name.startsWith("/")) info.name = path + MultiProtocolURI.escape(info.name);
                 queue.add(info);
             }
         }
+        // then find all directories and add them recursively
         for (final String line : list) {
             info = parseListData(line);
-            if (info != null && info.type == filetype.directory) {
-                sitelist(ftpClient, path + info.name, queue);
+            if (info != null && !info.name.endsWith(".") && !info.name.startsWith(".")) {
+                if (info.type == filetype.directory) {
+                    sitelist(ftpClient, path + MultiProtocolURI.escape(info.name), queue);
+                }
+                if (info.type == filetype.link) {
+                    int q = info.name.indexOf("->");
+                    if (q >= 0) {
+                        info.name = info.name.substring(0, q).trim();
+                        sitelist(ftpClient, path + MultiProtocolURI.escape(info.name), queue);
+                    }
+                }
             }
         }
     }

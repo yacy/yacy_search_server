@@ -56,7 +56,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
 
     
     private static final long serialVersionUID = -1173233022912141884L;
-    private static final long SMB_TIMEOUT = 1500;
+    private static final long SMB_TIMEOUT = 5000;
     
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
@@ -774,7 +774,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
 
     public String toTokens() {
-        return toTokens(this.toNormalform(true, true));
+        return toTokens(unescape(this.toNormalform(true, true)));
     }
     
     /**
@@ -782,9 +782,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      * resulting words are not ordered by appearance, but all
      * @return
      */
-    public static String toTokens(String s) {
+    private static String toTokens(String s) {
         // unesape string
-        String t = unescape(s);
+        String t = s;
 
         // remove all non-character & non-number
         StringBuilder sb = new StringBuilder(t.length());

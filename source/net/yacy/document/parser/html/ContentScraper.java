@@ -125,7 +125,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         String b = cleanLine(super.stripAll(newtext));
         if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
-            // this is bad for the text sematics, because it is not possible for the
+            // this is bad for the text semantics, because it is not possible for the
             // condenser to distinguish headlines from text beginnings.
             // to make it easier for the condenser, a dot ('.') is appended in case that
             // no punctuation is part of the newtext line
@@ -141,6 +141,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (p == Integer.MAX_VALUE) break;
             q = b.indexOf(" ", p + 1);
             u = b.substring(p, q < 0 ? b.length() : q);
+            if (u.endsWith(".")) u = u.substring(0, u.length() - 1); // remove the '.' that was appended above
             s = p + 1;
             try {
                 url = new MultiProtocolURI(u);
@@ -351,11 +352,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         s = getDescription();
         if (s.length() > 0) return s;
         
-        // extract headline from content
-        if (content.length() > 80) {
-            return cleanLine(new String(content.getChars(), 0, 80));
-        }
-        return cleanLine(content.trim().toString());
+        // extract headline from file name
+        return MultiProtocolURI.unescape(root.getFileName()); 
     }
     
     public String[] getHeadlines(final int i) {

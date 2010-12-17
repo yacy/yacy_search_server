@@ -41,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.storage.DynamicScore;
 import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.cora.storage.StaticScore;
@@ -473,6 +474,11 @@ public final class RankingProcess extends Thread {
                     pagepath = pagepath.substring(p + 1);
                     this.namespaceNavigator.inc(pagepath);
                 }
+            }
+            
+            // check Scanner
+            if (!Scanner.acceptURL(metadata.url())) {
+                continue;
             }
             
             // accept url

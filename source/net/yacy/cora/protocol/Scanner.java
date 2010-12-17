@@ -90,7 +90,7 @@ public class Scanner extends Thread {
     public static boolean acceptURL(MultiProtocolURI url) {
         if (scancacheScanrange == null || scancacheScanrange.size() == 0) return true;
         
-        if (System.currentTimeMillis() > scancacheValidUntilTime) return true;
+        //if (System.currentTimeMillis() > scancacheValidUntilTime) return true;
         InetAddress a = Domains.dnsResolve(url.getHost());
         if (a == null) return true;
         InetAddress n = normalize(a);

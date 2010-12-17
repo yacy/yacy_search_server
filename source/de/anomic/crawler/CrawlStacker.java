@@ -228,10 +228,10 @@ public final class CrawlStacker {
                         // delete old entry, if exists to force a re-load of the url (thats wanted here)
                         DigestURI url = null;
                         try {
-                            if (protocol.equals("ftp")) url = new DigestURI("ftp://" + host + (port == 21 ? "" : ":" + port) + entry.name);
-                            else if (protocol.equals("smb")) url = new DigestURI("smb://" + host + entry.name);
-                            else if (protocol.equals("http")) url = new DigestURI("http://" + host + (port == 80 ? "" : ":" + port) + entry.name);
-                            else if (protocol.equals("https")) url = new DigestURI("https://" + host + (port == 443 ? "" : ":" + port) + entry.name);
+                            if (protocol.equals("ftp")) url = new DigestURI("ftp://" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
+                            else if (protocol.equals("smb")) url = new DigestURI("smb://" + host + MultiProtocolURI.escape(entry.name));
+                            else if (protocol.equals("http")) url = new DigestURI("http://" + host + (port == 80 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
+                            else if (protocol.equals("https")) url = new DigestURI("https://" + host + (port == 443 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
                         } catch (MalformedURLException e) {
                             continue;
                         }
@@ -247,7 +247,7 @@ public final class CrawlStacker {
                                 initiator, 
                                 url, 
                                 null, 
-                                entry.name, 
+                                MultiProtocolURI.unescape(entry.name), 
                                 entry.date,
                                 profileHandle,
                                 0,
