@@ -1002,7 +1002,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
      */
     public SmbFile getSmbFile() throws MalformedURLException {
         if (!isSMB()) throw new UnsupportedOperationException();
-        String url = this.toNormalform(false, true);
+        String url = unescape(this.toNormalform(false, true));
         return new SmbFile(url);
     }
     

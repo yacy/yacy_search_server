@@ -94,6 +94,7 @@ public class SMBLoader {
             String u = url.toNormalform(true, true);
             List<String> list = new ArrayList<String>();
             for (String s: l) {
+                if (s.startsWith(".")) continue;
                 if (!s.endsWith("/") && !s.endsWith("\\")) {
                     // check if this is a directory
                     SmbFile sf = new SmbFile(u + s);

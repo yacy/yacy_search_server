@@ -175,12 +175,12 @@ public class RSSMessage implements Hit {
     
     public long getSize() {
         String size = Token.size.valueFrom(this.map);
-        return (size == null) ? 0 : Long.parseLong(size);
+        return (size == null || size.length() == 0) ? 0 : Long.parseLong(size);
     }
     
     public String getFulltext() {
         StringBuilder sb = new StringBuilder(300);
-        for (String s: map.values()) sb.append(s).append(" ");
+        for (String s: map.values()) sb.append(s).append(' ');
         return sb.toString();
     }
     
