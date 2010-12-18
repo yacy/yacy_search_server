@@ -278,7 +278,7 @@ public class FTPLoader {
      * @return
      */
     private String getPath(final MultiProtocolURI entryUrl) {
-        return entryUrl.getPath().replace("\"", "\"\"");
+        return MultiProtocolURI.unescape(entryUrl.getPath()).replace("\"", "\"\"");
     }
 
 }

@@ -2787,6 +2787,18 @@ public class FTPClient {
             if (args[0].equals("-h")) {
                 printHelp();
             }
+            if (args[0].equals("-test")) {
+                // test for file URL: ftp://192.168.1.90/Movie/ATest%20Ordner/Unterordner/test%20file.txt
+                final FTPClient ftpClient = new FTPClient();
+                try {
+                    ftpClient.open("192.168.1.90", 21);
+                    ftpClient.login("anonymous", "anomic@");
+                    byte[] b = ftpClient.get("/Movie/ATest Ordner/Unterordner/test file.txt");
+                    System.out.println(new String(b));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         } else if (args.length == 2) {
             printHelp();
         } else if (args.length == 3) {
