@@ -65,7 +65,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 
 import org.apache.log4j.Logger;
@@ -1045,7 +1044,7 @@ public class FTPClient {
     private static entryInfo parseListData(final String line) {
         // groups: 1: rights, 2: size, 3: month, 4: day, 5: time or year, 6: name
         final Matcher tokens = lsStyle.matcher(line);
-        if (tokens.matches()) {
+        if (tokens.matches() && tokens.groupCount() == 6) {
             filetype type = filetype.file;
             if (tokens.group(1).startsWith("d")) type = filetype.directory;
             if (tokens.group(1).startsWith("l")) type = filetype.link;
@@ -1341,18 +1340,26 @@ public class FTPClient {
 
         createDataSocket();
 
+        send("CWD " + path);
+        String reply = receive();
+        // get status code
+        int status = getStatus(reply);
+        if (status > 2) {
+            throw new IOException(reply);
+        }
+        
         // send command to the control port
         if (extended) {
-            send("LIST " + path);
+            send("LIST");
         } else {
-            send("NLST " + path);
+            send("NLST");
         }
 
         // read status of the command from the control port
-        String reply = receive();
+        reply = receive();
 
         // get status code
-        final int status = getStatus(reply);
+        status = getStatus(reply);
         if (status != 1) {
             throw new IOException(reply);
         }
@@ -1383,6 +1390,7 @@ public class FTPClient {
         reply = receive();
         //System.out.println("reply of LIST: " + reply);
         // boolean success = !isNotPositiveCompletion(reply);
+        //for (String s: files) System.out.println("FILES of '" + path + "': " + s);
 
         files.trimToSize();
         return files;
@@ -2547,7 +2555,7 @@ public class FTPClient {
         for (final String line : list) {
             info = parseListData(line);
             if (info != null && info.type == filetype.file && !info.name.endsWith(".") && !info.name.startsWith(".")) {
-                if (!info.name.startsWith("/")) info.name = path + MultiProtocolURI.escape(info.name);
+                if (!info.name.startsWith("/")) info.name = path + info.name;
                 queue.add(info);
             }
         }
@@ -2556,13 +2564,13 @@ public class FTPClient {
             info = parseListData(line);
             if (info != null && !info.name.endsWith(".") && !info.name.startsWith(".")) {
                 if (info.type == filetype.directory) {
-                    sitelist(ftpClient, path + MultiProtocolURI.escape(info.name), queue);
+                    sitelist(ftpClient, path + info.name, queue);
                 }
                 if (info.type == filetype.link) {
                     int q = info.name.indexOf("->");
                     if (q >= 0) {
                         info.name = info.name.substring(0, q).trim();
-                        sitelist(ftpClient, path + MultiProtocolURI.escape(info.name), queue);
+                        sitelist(ftpClient, path + info.name, queue);
                     }
                 }
             }
@@ -2603,7 +2611,7 @@ public class FTPClient {
             final boolean metaRobotNoindex) {
         // this creates the html output from collected strings
         final StringBuilder page = new StringBuilder(1024);
-        final String title = "Index of " + MultiProtocolURI.unescape(base);
+        final String title = "Index of " + base;
 
         page.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n");
         page.append("<html><head>\n");
