@@ -595,7 +595,7 @@ public final class RankingProcess extends Thread {
         String word;
         byte[] termHash;
         int c;
-        double q, min = Double.MAX_VALUE, max = Double.MIN_NORMAL;
+        double q, min = Double.MAX_VALUE, max = Double.MIN_VALUE;
         int ic = count;
         while (ic-- > 0 && i.hasNext()) {
             word = i.next();
