@@ -102,7 +102,8 @@ public class PerformanceMemory_p {
             map = Table.memoryStats(filename);
             prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.putNum("EcoList_" + c + "_tableSize", map.get("tableSize"));
-            
+
+            assert map.get("tableKeyMem") != null : map;
             mem = Long.parseLong(map.get("tableKeyMem"));
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(mem));

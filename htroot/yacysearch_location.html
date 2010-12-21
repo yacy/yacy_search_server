@@ -25,7 +25,7 @@
 					new OpenLayers.Control.Attribution()]
         });
         
-		layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
+		//layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
 		layerWMS = new OpenLayers.Layer.WMS( "OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
         layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
 		layerOsmarender = new OpenLayers.Layer.OSM.Osmarender("Osmarender");
@@ -33,7 +33,7 @@
 		map.addLayer(layerMapnik);
 	    map.addLayer(layerOsmarender);
 		map.addLayer(layerCycleMap);
-		map.addLayer(layerMaplint);
+		//map.addLayer(layerMaplint);
 		map.addLayer(layerWMS);
         map.addControl(new OpenLayers.Control.LayerSwitcher());
         map.setCenter(new OpenLayers.LonLat(15,30) // Center of the map
