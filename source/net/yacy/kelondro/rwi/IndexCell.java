@@ -302,13 +302,12 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         synchronized (failedURLs) {
             for (byte[] b: failedURLs.keySet()) try {words.put(b);} catch (RowSpaceExceededException e) {}
         }
-        
-        for (byte[] b: words) {
-            HandleSet urls;
-            synchronized (failedURLs) {
-                urls = failedURLs.remove(b);
+
+        synchronized (failedURLs) {
+            for (byte[] b: words) {
+                HandleSet urls = failedURLs.remove(b);
+                if (urls != null) remove(b, urls);
             }
-            remove(b, urls);
         }
         this.countCache.clear();
     }
