@@ -67,7 +67,7 @@ function preparepage(str) {
   } else {
     document.getElementById("searchresults").innerHTML = resultList();
   }
-  document.getElementById("searchnavigation").innerHTML = resultStart();
+  document.getElementById("searchnavigation").innerHTML = resultNavigation();
   hideDownloadScript();
 }
 
@@ -82,7 +82,7 @@ function hideDownloadScript() {
   if (dlb) dlb.innerHTML = "<input type=\"button\" value=\"create a download script\" onClick=\"makeDownloadScript();\"/>";
 }
 
-function resultStart() {
+function resultNavigation() {
   var html = "";
   if (totalResults > 0) {
       html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index; search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";

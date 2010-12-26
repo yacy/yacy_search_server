@@ -104,7 +104,7 @@ public class CrawlStartScanner_p {
                     if (p >= 0) host = host.substring(0, p);
                     ia.add(Domains.dnsResolve(host));
                 }
-                Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 100 : 1000);
+                Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 500 : 2000);
                 if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
                 if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
                 if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(false);
@@ -217,7 +217,7 @@ public class CrawlStartScanner_p {
                             prop.put("servertable_list_" + i + "_pk", new String(u.hash()));
                             prop.put("servertable_list_" + i + "_count", i);
                             prop.putHTML("servertable_list_" + i + "_protocol", u.getProtocol());
-                            prop.putHTML("servertable_list_" + i + "_ip", Domains.dnsResolve(u.getHost()).getHostAddress());
+                            prop.putHTML("servertable_list_" + i + "_ip", host.getKey().getInetAddress().getHostAddress());
                             prop.putHTML("servertable_list_" + i + "_url", urlString);
                             prop.put("servertable_list_" + i + "_accessUnknown", host.getValue() == Access.unknown ? 1 : 0);
                             prop.put("servertable_list_" + i + "_accessEmpty", host.getValue() == Access.empty ? 1 : 0);
