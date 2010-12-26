@@ -26,12 +26,12 @@ import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -48,14 +48,60 @@ import net.yacy.kelondro.logging.Log;
  */
 public class Scanner extends Thread {
 
-    private static final MultiProtocolURI POISONURI = new MultiProtocolURI();
+    private static final Service POISONSERVICE = new Service(Protocol.http, null);
     private static final Object PRESENT = new Object();
     
     public static enum Access {unknown, empty, granted, denied;}
+    public static enum Protocol {http(80), https(443), ftp(21), smb(445);
+        public int port;
+        private Protocol(int port) {this.port = port;}
+    }
+    public static class Service {
+        public Protocol protocol;
+        public InetAddress inetAddress;
+        private String hostname;
+        public Service(Protocol protocol, InetAddress inetAddress) {
+            this.protocol = protocol;
+            this.inetAddress = inetAddress;
+            this.hostname = null;
+        }
+        public Service(String protocol, InetAddress inetAddress) {
+            this.protocol = protocol.equals("http") ? Protocol.http : protocol.equals("https") ? Protocol.https : protocol.equals("ftp") ? Protocol.ftp : Protocol.smb;
+            this.inetAddress = inetAddress;
+            this.hostname = null;
+        }
+        public Protocol getProtocol() {
+            return this.protocol;
+        }
+        public InetAddress getInetAddress() {
+            return this.inetAddress;
+        }
+        public String getHostName() {
+            if (this.hostname != null) return this.hostname;
+            this.hostname = Domains.getHostName(this.inetAddress);
+            return this.hostname;
+        }
+        public MultiProtocolURI url() throws MalformedURLException {
+            return new MultiProtocolURI(this.protocol.name() + "://" + getHostName() + "/");
+        }
+        public String toString() {
+            try {
+                return new MultiProtocolURI(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + "/").toNormalform(true, false);
+            } catch (MalformedURLException e) {
+                return "";
+            }
+        }
+        public int hashCode() {
+            return this.inetAddress.hashCode();
+        }
+        public boolean equals(Object o) {
+            return (o instanceof Service) && ((Service) o).protocol == this.protocol && ((Service) o).inetAddress.equals(this.inetAddress);
+        }
+    }
     
-    private final static Map<MultiProtocolURI, Access> scancache = new TreeMap<MultiProtocolURI, Access>();
-    private       static long scancacheUpdateTime = 0;
-    private       static long scancacheValidUntilTime = Long.MAX_VALUE;
+    private final static Map<Service, Access> scancache = new HashMap<Service, Access>();
+    //private       static long scancacheUpdateTime = 0;
+    //private       static long scancacheValidUntilTime = Long.MAX_VALUE;
     private       static Set<InetAddress> scancacheScanrange = new HashSet<InetAddress>();
 
     public static int scancacheSize() {
@@ -65,43 +111,45 @@ public class Scanner extends Thread {
     public static void scancacheReplace(Scanner newScanner, long validTime) {
         scancache.clear();
         scancache.putAll(newScanner.services());
-        scancacheUpdateTime = System.currentTimeMillis();
-        scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
+        //scancacheUpdateTime = System.currentTimeMillis();
+        //scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
         scancacheScanrange = newScanner.scanrange;
     }
     
     public static void scancacheExtend(Scanner newScanner, long validTime) {
-        Iterator<Map.Entry<MultiProtocolURI, Access>> i = Scanner.scancache.entrySet().iterator();
-        Map.Entry<MultiProtocolURI, Access> entry;
+        Iterator<Map.Entry<Service, Access>> i = Scanner.scancache.entrySet().iterator();
+        Map.Entry<Service, Access> entry;
         while (i.hasNext()) {
             entry = i.next();
             if (entry.getValue() != Access.granted) i.remove();
         }
         scancache.putAll(newScanner.services());
-        scancacheUpdateTime = System.currentTimeMillis();
-        scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
+        //scancacheUpdateTime = System.currentTimeMillis();
+        //scancacheValidUntilTime = validTime == Long.MAX_VALUE ? Long.MAX_VALUE : scancacheUpdateTime + validTime;
         scancacheScanrange = newScanner.scanrange;
     }
     
-    public static Iterator<Map.Entry<MultiProtocolURI, Scanner.Access>> scancacheEntries() {
+    public static Iterator<Map.Entry<Service, Scanner.Access>> scancacheEntries() {
         return scancache.entrySet().iterator();
     }
     
+    /**
+     * check if the url can be accepted by the scanner. the scanner accepts the url if:
+     * - the host of the url is not supervised (it is not in the scan range), or
+     * - the host is supervised (it is in the scan range) and the host is in the scan cache
+     * @param url
+     * @return true if the url shall be part of a search result
+     */
     public static boolean acceptURL(MultiProtocolURI url) {
+        // if the scan range is empty, then all urls are accepted
         if (scancacheScanrange == null || scancacheScanrange.size() == 0) return true;
         
         //if (System.currentTimeMillis() > scancacheValidUntilTime) return true;
-        InetAddress a = Domains.dnsResolve(url.getHost());
+        InetAddress a = Domains.dnsResolve(url.getHost()); // try to avoid that!
         if (a == null) return true;
         InetAddress n = normalize(a);
         if (!scancacheScanrange.contains(n)) return true;
-        MultiProtocolURI uri;
-        try {
-            uri = produceURI(url.getProtocol(), a);
-            return scancache.containsKey(uri);
-        } catch (MalformedURLException e) {
-            return false;
-        }
+        return scancache.containsKey(new Service(url.getProtocol(), a));
     }
 
     private static InetAddress normalize(InetAddress a) {
@@ -118,27 +166,17 @@ public class Scanner extends Thread {
     
     private int runnerCount;
     private Set<InetAddress> scanrange;
-    private BlockingQueue<MultiProtocolURI> scanqueue;
-    private Map<MultiProtocolURI, Access> services;
+    private BlockingQueue<Service> scanqueue;
+    private Map<Service, Access> services;
     private Map<Runner, Object> runner;
     private int timeout;
-
-    public Scanner(InetAddress scanrange, int concurrentRunner, int timeout) {
-        this.runnerCount = concurrentRunner;
-        this.scanrange = new HashSet<InetAddress>();
-        this.scanrange.add(normalize(scanrange));
-        this.scanqueue = new LinkedBlockingQueue<MultiProtocolURI>();
-        this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, Access>());
-        this.runner = new ConcurrentHashMap<Runner, Object>();
-        this.timeout = timeout;
-    }
 
     public Scanner(Set<InetAddress> scanrange, int concurrentRunner, int timeout) {
         this.runnerCount = concurrentRunner;
         this.scanrange = new HashSet<InetAddress>();
         for (InetAddress a: scanrange) this.scanrange.add(normalize(a));
-        this.scanqueue = new LinkedBlockingQueue<MultiProtocolURI>();
-        this.services = Collections.synchronizedMap(new TreeMap<MultiProtocolURI, Access>());
+        this.scanqueue = new LinkedBlockingQueue<Service>();
+        this.services = Collections.synchronizedMap(new HashMap<Service, Access>());
         this.runner = new ConcurrentHashMap<Runner, Object>();
         this.timeout = timeout;
     }
@@ -148,9 +186,9 @@ public class Scanner extends Thread {
     }
     
     public void run() {
-        MultiProtocolURI uri;
+        Service uri;
         try {
-            while ((uri = scanqueue.take()) != POISONURI) {
+            while ((uri = scanqueue.take()) != POISONSERVICE) {
                 while (runner.size() >= this.runnerCount) {
                     /*for (Runner r: runner.keySet()) {
                         if (r.age() > 3000) synchronized(r) { r.interrupt(); }
@@ -172,7 +210,7 @@ public class Scanner extends Thread {
     
     public void terminate() {
         for (int i = 0; i < runnerCount; i++) try {
-            this.scanqueue.put(POISONURI);
+            this.scanqueue.put(POISONSERVICE);
         } catch (InterruptedException e) {
         }
         try {
@@ -181,52 +219,43 @@ public class Scanner extends Thread {
         }
     }
     
-    private static MultiProtocolURI produceURI(String protocol, InetAddress a) throws MalformedURLException {
-        return new MultiProtocolURI(protocol + "://" + Domains.getHostName(a) + "/");
-    }
-    
     public class Runner extends Thread {
-        private MultiProtocolURI uri;
+        private Service service;
         private long starttime;
-        public Runner(MultiProtocolURI uri) {
-            this.uri = uri;
+        public Runner(Service service) {
+            this.service = service;
             this.starttime = System.currentTimeMillis();
         }
         public void run() {
             try {
-                if (TimeoutRequest.ping(this.uri, timeout)) {
-                    try {
-                        MultiProtocolURI uri = produceURI(this.uri.getProtocol(), Domains.dnsResolve(this.uri.getHost()));
-                        String protocol = uri.getProtocol();
-                        Access access = protocol.equals("http") || protocol.equals("https") ? Access.granted : Access.unknown;
-                        services.put(uri, access);
-                        if (access == Access.unknown) {
-                            // ask the service if it lets us in
-                            if (protocol.equals("ftp")) {
-                                final FTPClient ftpClient = new FTPClient();
-                                try {
-                                    ftpClient.open(uri.getHost(), uri.getPort());
-                                    ftpClient.login("anonymous", "anomic@");
-                                    List<String> list = ftpClient.list("/", false);
-                                    ftpClient.CLOSE();
-                                    access = list == null || list.size() == 0 ? Access.empty : Access.granted;
-                                } catch (IOException e) {
-                                    access = Access.denied;
-                                }
-                            }
-                            if (protocol.equals("smb")) {
-                                try {
-                                    String[] list = uri.list();
-                                    access = list == null || list.length == 0 ? Access.empty : Access.granted;
-                                } catch (IOException e) {
-                                    access = Access.denied;
-                                }
+                if (TimeoutRequest.ping(this.service.getInetAddress().getHostAddress(), this.service.getProtocol().port, timeout)) {
+                    Access access = this.service.getProtocol() == Protocol.http || this.service.getProtocol() == Protocol.https ? Access.granted : Access.unknown;
+                    services.put(service, access);
+                    if (access == Access.unknown) {
+                        // ask the service if it lets us in
+                        if (this.service.getProtocol() == Protocol.ftp) {
+                            final FTPClient ftpClient = new FTPClient();
+                            try {
+                                ftpClient.open(this.service.getInetAddress().getHostAddress(), this.service.getProtocol().port);
+                                ftpClient.login("anonymous", "anomic@");
+                                List<String> list = ftpClient.list("/", false);
+                                ftpClient.CLOSE();
+                                access = list == null || list.size() == 0 ? Access.empty : Access.granted;
+                            } catch (IOException e) {
+                                access = Access.denied;
                             }
                         }
-                        if (access != Access.unknown) services.put(uri, access);
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
+                        if (this.service.getProtocol() == Protocol.smb) {
+                            try {
+                                MultiProtocolURI uri = new MultiProtocolURI(this.service.toString());
+                                String[] list = uri.list();
+                                access = list == null || list.length == 0 ? Access.empty : Access.granted;
+                            } catch (IOException e) {
+                                access = Access.denied;
+                            }
+                        }
                     }
+                    if (access != Access.unknown) services.put(this.service, access);
                 }
             } catch (ExecutionException e) {
             }
@@ -237,35 +266,33 @@ public class Scanner extends Thread {
             return System.currentTimeMillis() - this.starttime;
         }
         public boolean equals(Object o) {
-            return (o instanceof Runner) && this.uri.toNormalform(true, false).equals(((Runner) o).uri.toNormalform(true, false));
+            return (o instanceof Runner) && this.service.equals(((Runner) o).service);
         }
         public int hashCode() {
-            return this.uri.hashCode();
+            return this.service.hashCode();
         }
     }
     
     public void addHTTP(boolean bigrange) {
-        addProtocol("http", bigrange);
+        addProtocol(Protocol.http, bigrange);
     }
 
     public void addHTTPS(boolean bigrange) {
-        addProtocol("https", bigrange);
+        addProtocol(Protocol.https, bigrange);
     }
 
     public void addSMB(boolean bigrange) {
-        addProtocol("smb", bigrange);
+        addProtocol(Protocol.smb, bigrange);
     }
     
     public void addFTP(boolean bigrange) {
-        addProtocol("ftp", bigrange);
+        addProtocol(Protocol.ftp, bigrange);
     }
     
-    private void addProtocol(String protocol, boolean bigrange) {
+    private void addProtocol(Protocol protocol, boolean bigrange) {
         for (InetAddress i: genlist(bigrange)) {
             try {
-                this.scanqueue.put(new MultiProtocolURI(protocol + "://" + i.getHostAddress() + "/"));
-            } catch (MalformedURLException e) {
-                Log.logException(e);
+                this.scanqueue.put(new Service(protocol, i));
             } catch (InterruptedException e) {
                 Log.logException(e);
             }
@@ -290,7 +317,7 @@ public class Scanner extends Thread {
         return c;
     }
     
-    public Map<MultiProtocolURI, Access> services() {
+    public Map<Service, Access> services() {
         return this.services;
     }
     
@@ -303,8 +330,8 @@ public class Scanner extends Thread {
         scanner.addSMB(false);
         scanner.start();
         scanner.terminate();
-        for (MultiProtocolURI service: scanner.services().keySet()) {
-            System.out.println(service.toNormalform(true, false));
+        for (Service service: scanner.services().keySet()) {
+            System.out.println(service.toString());
         }
         try {
             HTTPClient.closeConnectionManager();

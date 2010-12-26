@@ -464,7 +464,9 @@ public class Domains {
     public static String getHostName(final InetAddress i) {
         Collection<String> hosts = nameCacheHit.getKeys(i);
         if (hosts.size() > 0) return hosts.iterator().next();
-        return i.getHostName();
+        String host = i.getHostName();
+        nameCacheHit.put(host, i);
+        return host;
         /*
         // call i.getHostName() using concurrency to interrupt execution in case of a time-out
         try {
@@ -572,6 +574,7 @@ public class Domains {
 
     private static String localHostName = "127.0.0.1"; 
     private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>();
+    private static Set<String> localHostNames = new HashSet<String>();
     static {
         try {
             InetAddress localHostAddress = InetAddress.getLocalHost();
@@ -615,6 +618,15 @@ public class Domains {
                     if (moreAddresses != null) for (InetAddress a: moreAddresses) localHostAddresses.add(a);
                 } catch (UnknownHostException e) {
                     Log.logException(e);
+                }
+                
+                // fill a cache of local host names
+                for (InetAddress a: localHostAddresses) {
+                    String hostname = getHostName(a);
+                    if (hostname != null) {
+                        localHostNames.add(hostname);
+                        localHostNames.add(a.getHostAddress());
+                    }
                 }
             }
         }.start();
@@ -746,14 +758,17 @@ public class Domains {
         if (matchesList(host, localhostPatterns)) return true;
         if (host.startsWith("0:0:0:0:0:0:0:1")) return true;
         
-        // finally check if there are other local IP addresses that are not in
+        // check if there are other local IP addresses that are not in
         // the standard IP range
+        if (localHostNames.contains(host)) return true;
+        /*
         for (InetAddress a: localHostAddresses) {
             String hostname = getHostName(a);
             if (hostname != null && hostname.equals(host)) return true;
             if (a.getHostAddress().equals(host)) return true;
         }
-
+        */
+        
         // check dns lookup: may be a local address even if the domain name looks global
         if (!recursive) return false;
         InetAddress a = dnsResolve(host);

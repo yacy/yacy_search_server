@@ -37,7 +37,6 @@ import java.util.concurrent.TimeoutException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.kelondro.logging.Log;
 
 /**
@@ -105,12 +104,12 @@ public class TimeoutRequest<E> {
      * @return true if the server exists and replies within the given time-out
      * @throws ExecutionException
      */
-    public static boolean ping(final MultiProtocolURI uri, final int timeout) throws ExecutionException {
+    public static boolean ping(final String host, final int port, final int timeout) throws ExecutionException {
         return new TimeoutRequest<Boolean>(new Callable<Boolean>() {
             public Boolean call() {
                 try {
                     Socket socket = new Socket();
-                    socket.connect(new InetSocketAddress(uri.getHost(), uri.getPort()), timeout);
+                    socket.connect(new InetSocketAddress(host, port), timeout);
                     if (socket.isConnected()) {
                         socket.close();
                         return Boolean.TRUE;

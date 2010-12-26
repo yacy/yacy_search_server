@@ -21,6 +21,7 @@
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -28,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
@@ -39,6 +39,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
 import de.anomic.data.WorkTables;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -50,6 +51,9 @@ public class CrawlStartScanner_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
 
+        // clean up all search events
+        SearchEventCache.cleanupEvents(true);
+        
         prop.put("noserverdetected", 0);
         prop.put("servertable", 0);
         prop.put("hosts", "");
@@ -124,12 +128,17 @@ public class CrawlStartScanner_p {
             // check crawl request
             if (post.containsKey("crawl")) {
                 // make a pk/url mapping
-                Iterator<Map.Entry<MultiProtocolURI, Scanner.Access>> se = Scanner.scancacheEntries();
+                Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
                 Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
                 while (se.hasNext()) {
-                    MultiProtocolURI u = se.next().getKey();
-                    DigestURI uu = new DigestURI(u);
-                    pkmap.put(uu.hash(), uu);
+                    Scanner.Service u = se.next().getKey();
+                    DigestURI uu;
+                    try {
+                        uu = new DigestURI(u.url());
+                        pkmap.put(uu.hash(), uu);
+                    } catch (MalformedURLException e) {
+                        Log.logException(e);
+                    }
                 }
                 // search for crawl start requests in this mapping
                 for (Map.Entry<String, String> entry: post.entrySet()) {
@@ -163,18 +172,22 @@ public class CrawlStartScanner_p {
                     DigestURI u;
                     try {
                         int i = 0;
-                        Iterator<Map.Entry<MultiProtocolURI, Scanner.Access>> se = Scanner.scancacheEntries();
-                        Map.Entry<MultiProtocolURI, Scanner.Access> host;
+                        Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
+                        Map.Entry<Scanner.Service, Scanner.Access> host;
                         while (se.hasNext()) {
                             host = se.next();
-                            u = new DigestURI(host.getKey());
-                            urlString = u.toNormalform(true, false);
-                            if (host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null) {
-                                String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
-                                path += "&crawlingURL=" + urlString;
-                                WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), path, u.hash());
+                            try {
+                                u = new DigestURI(host.getKey().url());
+                                urlString = u.toNormalform(true, false);
+                                if (host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null) {
+                                    String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
+                                    path += "&crawlingURL=" + urlString;
+                                    WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), path, u.hash());
+                                }
+                                i++;
+                            } catch (MalformedURLException e) {
+                                Log.logException(e);
                             }
-                            i++;
                         }
                     } catch (ConcurrentModificationException e) {}
                 }
@@ -194,24 +207,28 @@ public class CrawlStartScanner_p {
             table: while (true) {
                 try {
                     int i = 0;
-                    Iterator<Map.Entry<MultiProtocolURI, Scanner.Access>> se = Scanner.scancacheEntries();
-                    Map.Entry<MultiProtocolURI, Scanner.Access> host;
+                    Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
+                    Map.Entry<Scanner.Service, Scanner.Access> host;
                     while (se.hasNext()) {
                         host = se.next();
-                        u = new DigestURI(host.getKey());
-                        urlString = u.toNormalform(true, false);
-                        prop.put("servertable_list_" + i + "_pk", new String(u.hash()));
-                        prop.put("servertable_list_" + i + "_count", i);
-                        prop.putHTML("servertable_list_" + i + "_protocol", u.getProtocol());
-                        prop.putHTML("servertable_list_" + i + "_ip", Domains.dnsResolve(u.getHost()).getHostAddress());
-                        prop.putHTML("servertable_list_" + i + "_url", urlString);
-                        prop.put("servertable_list_" + i + "_accessUnknown", host.getValue() == Access.unknown ? 1 : 0);
-                        prop.put("servertable_list_" + i + "_accessEmpty", host.getValue() == Access.empty ? 1 : 0);
-                        prop.put("servertable_list_" + i + "_accessGranted", host.getValue() == Access.granted ? 1 : 0);
-                        prop.put("servertable_list_" + i + "_accessDenied", host.getValue() == Access.denied ? 1 : 0);
-                        prop.put("servertable_list_" + i + "_process", inIndex(apiCommentCache, urlString) == null ? 0 : 1);
-                        prop.put("servertable_list_" + i + "_preselected", host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null ? 1 : 0);
-                        i++;
+                        try {
+                            u = new DigestURI(host.getKey().url());
+                            urlString = u.toNormalform(true, false);
+                            prop.put("servertable_list_" + i + "_pk", new String(u.hash()));
+                            prop.put("servertable_list_" + i + "_count", i);
+                            prop.putHTML("servertable_list_" + i + "_protocol", u.getProtocol());
+                            prop.putHTML("servertable_list_" + i + "_ip", Domains.dnsResolve(u.getHost()).getHostAddress());
+                            prop.putHTML("servertable_list_" + i + "_url", urlString);
+                            prop.put("servertable_list_" + i + "_accessUnknown", host.getValue() == Access.unknown ? 1 : 0);
+                            prop.put("servertable_list_" + i + "_accessEmpty", host.getValue() == Access.empty ? 1 : 0);
+                            prop.put("servertable_list_" + i + "_accessGranted", host.getValue() == Access.granted ? 1 : 0);
+                            prop.put("servertable_list_" + i + "_accessDenied", host.getValue() == Access.denied ? 1 : 0);
+                            prop.put("servertable_list_" + i + "_process", inIndex(apiCommentCache, urlString) == null ? 0 : 1);
+                            prop.put("servertable_list_" + i + "_preselected", host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null ? 1 : 0);
+                            i++;
+                        } catch (MalformedURLException e) {
+                            Log.logException(e);
+                        }
                     }
                     prop.put("servertable_list", i);
                     prop.put("servertable_num", i);
