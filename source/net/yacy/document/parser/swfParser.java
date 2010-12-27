@@ -55,7 +55,10 @@ public class swfParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, 
+            final String charset, final InputStream source)
+            throws Parser.Failure, InterruptedException
+    {
 
         try {
             final SWF2HTML swf2html = new SWF2HTML();

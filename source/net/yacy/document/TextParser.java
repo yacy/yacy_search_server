@@ -57,6 +57,7 @@ import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
 import net.yacy.document.parser.images.genericImageParser;
+import net.yacy.document.parser.mmParser;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -79,6 +80,7 @@ public final class TextParser {
         initParser(new gzipParser());
         initParser(new htmlParser());
         initParser(new genericImageParser());
+        initParser(new mmParser());
         initParser(new odtParser());
         initParser(new ooxmlParser());
         initParser(new pdfParser());
@@ -263,7 +265,7 @@ public final class TextParser {
         }
         
         if (docs == null) {
-            if (failedParser.size() == 0) {
+            if (failedParser.isEmpty()) {
                 final String errorMsg = "Parsing content with file extension '" + location.getFileExtension() + "' and mimetype '" + mimeType + "' failed.";
                 //log.logWarning("Unable to parse '" + location + "'. " + errorMsg);
                 throw new Parser.Failure(errorMsg, location);

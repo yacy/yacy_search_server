@@ -32,11 +32,11 @@ import net.yacy.kelondro.logging.Log;
 
 public class Classification {
 
-    private static final HashSet<String> mediaExtSet = new HashSet<String>();
-    private static final HashSet<String> imageExtSet = new HashSet<String>();
-    private static final HashSet<String> audioExtSet = new HashSet<String>();
-    private static final HashSet<String> videoExtSet = new HashSet<String>();
-    private static final HashSet<String> appsExtSet = new HashSet<String>();
+    private static final Set<String> mediaExtSet = new HashSet<String>();
+    private static final Set<String> imageExtSet = new HashSet<String>();
+    private static final Set<String> audioExtSet = new HashSet<String>();
+    private static final Set<String> videoExtSet = new HashSet<String>();
+    private static final Set<String> appsExtSet = new HashSet<String>();
     
     private static final Properties ext2mime = new Properties();
     
