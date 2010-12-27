@@ -1,11 +1,13 @@
-//plasmaParserDocument.java 
+//Document.java 
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2005
 //
-//last major change: 24.04.2005
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -32,7 +34,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,7 +73,7 @@ public class Document {
     private Object text;                        // the clear text, all that is visible
     private final Map<MultiProtocolURI, String> anchors; // all links embedded as clickeable entities (anchor tags)
     private final Map<MultiProtocolURI, String> rss; // all embedded rss feeds
-    private final HashMap<MultiProtocolURI, ImageEntry> images; // all visible pictures in document
+    private final Map<MultiProtocolURI, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
@@ -87,7 +91,7 @@ public class Document {
                     final Object text,
                     final Map<MultiProtocolURI, String> anchors,
                     final Map<MultiProtocolURI, String> rss,
-                    final HashMap<MultiProtocolURI, ImageEntry> images,
+                    final Map<MultiProtocolURI, ImageEntry> images,
                     boolean indexingDenied) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
@@ -294,7 +298,7 @@ dc_rights
         if (this.text == null) return null;
         final Condenser.sentencesFromInputStreamEnum e = Condenser.sentencesFromInputStream(getText());
         e.pre(pre);
-        ArrayList<StringBuilder> sentences = new ArrayList<StringBuilder>();
+        List<StringBuilder> sentences = new ArrayList<StringBuilder>();
         while (e.hasNext()) {
             sentences.add(e.next());
         }
@@ -336,7 +340,7 @@ dc_rights
         return this.videolinks;
     }
     
-    public HashMap<MultiProtocolURI, ImageEntry> getImages() {
+    public Map<MultiProtocolURI, ImageEntry> getImages() {
         // returns all links enbedded as pictures (visible in document)
         // this resturns a htmlFilterImageEntry collection
         if (!resorted) resortLinks();
@@ -368,7 +372,7 @@ dc_rights
         audiolinks = new HashMap<MultiProtocolURI, String>();
         applinks   = new HashMap<MultiProtocolURI, String>();
         emaillinks = new HashMap<String, String>();
-        final HashMap<MultiProtocolURI, ImageEntry> collectedImages = new HashMap<MultiProtocolURI, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+        final Map<MultiProtocolURI, ImageEntry> collectedImages = new HashMap<MultiProtocolURI, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
         Map.Entry<MultiProtocolURI, String> entry;
         while (i.hasNext()) {
             entry = i.next();
@@ -425,7 +429,7 @@ dc_rights
     public static Map<MultiProtocolURI, String> allSubpaths(final Collection<?> links) {
         // links is either a Set of Strings (urls) or a Set of
         // htmlFilterImageEntries
-        final HashSet<String> h = new HashSet<String>();
+        final Set<String> h = new HashSet<String>();
         Iterator<?> i = links.iterator();
         Object o;
         MultiProtocolURI url;
@@ -457,7 +461,7 @@ dc_rights
             } catch (final MalformedURLException e) { }
         // now convert the strings to yacyURLs
         i = h.iterator();
-        final HashMap<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
+        final Map<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
         while (i.hasNext()) {
             u = (String) i.next();
             try {
@@ -473,7 +477,7 @@ dc_rights
         // links is either a Set of Strings (with urls) or
         // htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
-        final HashMap<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
+        final Map<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
         final Iterator<?> i = links.iterator();
         Object o;
         MultiProtocolURI url;
@@ -567,7 +571,7 @@ dc_rights
         return this.indexingDenied;
     }
     
-    public void writeXML(OutputStreamWriter os, Date date) throws IOException {
+    public void writeXML(final Writer os, final Date date) throws IOException {
         os.write("<record>\n");
         String title = this.dc_title();
         if (title != null && title.length() > 0) os.write("<dc:title><![CDATA[" + title + "]]></dc:title>\n");
@@ -593,11 +597,11 @@ dc_rights
         os.write("</record>\n");
     }
     
+    @Override
     public String toString() {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        OutputStreamWriter osw;
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            osw = new OutputStreamWriter(baos, "UTF-8");
+            final Writer osw = new OutputStreamWriter(baos, "UTF-8");
             writeXML(osw, new Date());
             osw.close();
             return new String(baos.toByteArray(), "UTF-8");
@@ -631,7 +635,9 @@ dc_rights
      * @param docs
      * @return
      */
-    public static Document mergeDocuments(final MultiProtocolURI location, final String globalMime, Document[] docs) {
+    public static Document mergeDocuments(final MultiProtocolURI location,
+            final String globalMime, final Document[] docs)
+    {
         if (docs == null || docs.length == 0) return null;
         if (docs.length == 1) return docs[0];
         
@@ -646,7 +652,7 @@ dc_rights
 
         final Map<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
         final Map<MultiProtocolURI, String> rss = new HashMap<MultiProtocolURI, String>();
-        final HashMap<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
+        final Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
         
         for (Document doc: docs) {
             
@@ -706,15 +712,17 @@ dc_rights
                 false);
     }
     
-    public static Map<MultiProtocolURI, String> getHyperlinks(Document[] documents) {
-        Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
-        for (Document d: documents) result.putAll(d.getHyperlinks());
+    public static Map<MultiProtocolURI, String> getHyperlinks(final Document[] documents) {
+        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+        for (final Document d: documents) {
+            result.putAll(d.getHyperlinks());
+        }
         return result;
     }
     
-    public static Map<MultiProtocolURI, String> getImagelinks(Document[] documents) {
-        Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
-        for (Document d: documents) {
+    public static Map<MultiProtocolURI, String> getImagelinks(final Document[] documents) {
+        final Map<MultiProtocolURI, String> result = new HashMap<MultiProtocolURI, String>();
+        for (final Document d: documents) {
             for (ImageEntry imageReference : d.getImages().values()) {
                 result.put(imageReference.url(), imageReference.alt());
             }

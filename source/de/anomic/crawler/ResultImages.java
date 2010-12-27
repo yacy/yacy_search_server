@@ -1,4 +1,4 @@
-// plasmaCrawlResultImages.java
+// ResultImages.java
 // (C) 2008 by by Detlef Reichl; detlef!reichl()gmx!org and Michael Peter Christen; mc@yacy.net
 // first published 13.04.2008 on http://yacy.net
 //
@@ -26,9 +26,10 @@
 
 package de.anomic.crawler;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
@@ -49,13 +50,13 @@ public class ResultImages {
     // we also check all links for a double-check so we don't get the same image more than once in any queue
     // image links may appear double here even if the pages where the image links are embedded already are checked for double-occurrence:
     // the same images may be linked from different pages
-    private static final ConcurrentHashMap<MultiProtocolURI, Long> doubleCheck = new ConcurrentHashMap<MultiProtocolURI, Long>(); // (url, time) when the url appeared first
+    private static final ConcurrentMap<MultiProtocolURI, Long> doubleCheck = new ConcurrentHashMap<MultiProtocolURI, Long>(); // (url, time) when the url appeared first
     
     public static void registerImages(final DigestURI source, final Document document, final boolean privateEntry) {
         if (document == null) return;
         if (source == null) return;
         
-        final HashMap<MultiProtocolURI, ImageEntry> images = document.getImages();
+        final Map<MultiProtocolURI, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
             if (doubleCheck.containsKey(image.url())) continue;
@@ -78,7 +79,7 @@ public class ResultImages {
                 } else {
                     ratio = (float) image.height() / (float) image.width();
                 }
-                if (ratio < 1.0f || ratio > 2.0f) good = false;
+                good = !(ratio < 1.0f || ratio > 2.0f);
             }
             if (good) {
                 if (privateEntry) {

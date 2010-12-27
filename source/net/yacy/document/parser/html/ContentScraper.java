@@ -4,8 +4,6 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
-// Contains contributions by Marc Nause [MN]
-//
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
@@ -41,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.swing.event.EventListenerList;
 
@@ -55,8 +54,8 @@ import net.yacy.kelondro.util.ISO639;
 public class ContentScraper extends AbstractScraper implements Scraper {
 
     // statics: for initialization of the HTMLFilterAbstractScraper
-    private static final HashSet<String> linkTags0 = new HashSet<String>(9,0.99f);
-    private static final HashSet<String> linkTags1 = new HashSet<String>(7,0.99f);
+    private static final Set<String> linkTags0 = new HashSet<String>(9,0.99f);
+    private static final Set<String> linkTags1 = new HashSet<String>(7,0.99f);
 
     // all these tags must be given in lowercase, because the tags from the files are compared in lowercase
     static {
@@ -79,10 +78,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     // class variables: collectors for links
-    private HashMap<MultiProtocolURI, String> rss;
-    private HashMap<MultiProtocolURI, String> anchors;
-    private HashMap<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
-    private final HashMap<String, String> metas;
+    private Map<MultiProtocolURI, String> rss;
+    private Map<MultiProtocolURI, String> anchors;
+    private Map<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
+    private final Map<String, String> metas;
     private String title;
     //private String headline;
     private List<String>[] headlines;
@@ -153,8 +152,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (b.length() != 0) content.append(b).append(32);
     }
 
-    private static final int find(final String s, final String m, int start) {
-        int p = s.indexOf(m, start);
+    private static final int find(final String s, final String m, final int start) {
+        final int p = s.indexOf(m, start);
         return (p < 0) ? Integer.MAX_VALUE : p;
     }
     
@@ -185,14 +184,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 //                    addImage(images, ie);
                 }
             } catch (final NumberFormatException e) {}
-        }
-        if (tagname.equalsIgnoreCase("base")) try {
-            root = new MultiProtocolURI(tagopts.getProperty("href", ""));
-        } catch (final MalformedURLException e) {}
-        if (tagname.equalsIgnoreCase("frame")) {
+        } else if(tagname.equalsIgnoreCase("base")) {
+            try {
+                root = new MultiProtocolURI(tagopts.getProperty("href", ""));
+            } catch (final MalformedURLException e) {}
+        } else if (tagname.equalsIgnoreCase("frame")) {
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
-        }
-        if (tagname.equalsIgnoreCase("meta")) {
+        } else if (tagname.equalsIgnoreCase("meta")) {
             String name = tagopts.getProperty("name", "");
             if (name.length() > 0) {
                 metas.put(name.toLowerCase(), CharacterCoding.html2unicode(tagopts.getProperty("content","")));
@@ -202,14 +200,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     metas.put(name.toLowerCase(), CharacterCoding.html2unicode(tagopts.getProperty("content","")));
                 }
             }
-        }
-        if (tagname.equalsIgnoreCase("area")) {
+        } else if (tagname.equalsIgnoreCase("area")) {
             final String areatitle = cleanLine(tagopts.getProperty("title",""));
             //String alt   = tagopts.getProperty("alt","");
             final String href  = tagopts.getProperty("href", "");
             if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
-        }
-        if (tagname.equalsIgnoreCase("link")) {
+        } else if (tagname.equalsIgnoreCase("link")) {
             final MultiProtocolURI newLink = absolutePath(tagopts.getProperty("href", ""));
 
             if (newLink != null) {
@@ -227,18 +223,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     anchors.put(newLink, linktitle);
                 }
             }
-        }
-        //start contrib [MN]
-        if (tagname.equalsIgnoreCase("embed")) {
+        } else if(tagname.equalsIgnoreCase("embed")) {
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
-        }
-        if (tagname.equalsIgnoreCase("param")) {
+        } else if(tagname.equalsIgnoreCase("param")) {
             final String name = tagopts.getProperty("name", "");
             if (name.equalsIgnoreCase("movie")) {
                 anchors.put(absolutePath(tagopts.getProperty("value", "")),name);
             }
         }
-        //end contrib [MN]
 
         // fire event
         fireScrapeTag0(tagname, tagopts);
@@ -262,24 +254,20 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 }
             }
         }
-        String h;
+        final String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) headlines[0].add(h);
-        }
-        if ((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
+        } else if((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) headlines[1].add(h);
-        }
-        if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
+        } else if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) headlines[2].add(h);
-        }
-        if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
+        } else if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) headlines[3].add(h);
-        }
-        if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
+        } else if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
             title = recursiveParse(text);
         }
 
@@ -287,7 +275,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         fireScrapeTag1(tagname, tagopts, text);
     }
 
-    private String recursiveParse(char[] inlineHtml) {
+    private String recursiveParse(final char[] inlineHtml) {
         if (inlineHtml.length < 14) return cleanLine(super.stripAll(inlineHtml));
         
         // start a new scraper to parse links inside this text
@@ -307,11 +295,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return cleanLine(super.stripAll(scraper.content.getChars()));
     }
     
-    private final static String cleanLine(String s) {
-        StringBuilder sb = new StringBuilder(s.length());
-        char c, l = ' ';
-        for (int i = 0; i < s.length(); i++) {
-            c = s.charAt(i);
+    private final static String cleanLine(final String s) {
+        final StringBuilder sb = new StringBuilder(s.length());
+        char l = ' ';
+        for (char c : s.toCharArray()) {
             if (c < ' ') c = ' ';
             if (c == ' ') {
                 if (l != ' ') sb.append(c);
@@ -358,9 +345,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public String[] getHeadlines(final int i) {
         assert ((i >= 1) && (i <= 4));
-        final String[] s = new String[headlines[i - 1].size()];
-        for (int j = 0; j < headlines[i - 1].size(); j++) s[j] = headlines[i - 1].get(j);
-        return s;
+        return headlines[i - 1].toArray(new String[headlines.length]);
     }
     
     public byte[] getText() {
@@ -389,7 +374,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * get all images
      * @return a map of <urlhash, ImageEntry>
      */
-    public HashMap<MultiProtocolURI, ImageEntry> getImages() {
+    public Map<MultiProtocolURI, ImageEntry> getImages() {
         // this resturns a String(absolute url)/htmlFilterImageEntry - relation
         return images;
     }
@@ -448,13 +433,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return s;
     }
     
-    public HashSet<String> getContentLanguages() {
+    public Set<String> getContentLanguages() {
         // i.e. <meta name="DC.language" content="en" scheme="DCTERMS.RFC3066">
         // or <meta http-equiv="content-language" content="en">
         String s = metas.get("content-language");
         if (s == null) s = metas.get("dc.language");
         if (s == null) return null;
-        HashSet<String> hs = new HashSet<String>();
+        Set<String> hs = new HashSet<String>();
         String[] cl = s.split(" |,");
         int p;
         for (int i = 0; i < cl.length; i++) {
@@ -579,7 +564,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return scraper;
     }
     
-    public static void addAllImages(final HashMap<MultiProtocolURI, ImageEntry> a, final HashMap<MultiProtocolURI, ImageEntry> b) {
+    public static void addAllImages(final Map<MultiProtocolURI, ImageEntry> a, final Map<MultiProtocolURI, ImageEntry> b) {
         final Iterator<Map.Entry<MultiProtocolURI, ImageEntry>> i = b.entrySet().iterator();
         Map.Entry<MultiProtocolURI, ImageEntry> ie;
         while (i.hasNext()) {
@@ -588,7 +573,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
     
-    public static void addImage(final HashMap<MultiProtocolURI, ImageEntry> a, final ImageEntry ie) {
+    public static void addImage(final Map<MultiProtocolURI, ImageEntry> a, final ImageEntry ie) {
         if (a.containsKey(ie.url())) {
             // in case of a collision, take that image that has the better image size tags
             if ((ie.height() > 0) && (ie.width() > 0)) a.put(ie.url(), ie);

@@ -29,8 +29,8 @@
 
 package net.yacy.document.parser.html;
 
-import java.util.HashSet;
 import java.util.Properties;
+import java.util.Set;
 
 public abstract class AbstractScraper implements Scraper {
 
@@ -38,15 +38,15 @@ public abstract class AbstractScraper implements Scraper {
     public static final char rb = '>';
     public static final char sl = '/';
  
-    private HashSet<String> tags0;
-    private HashSet<String> tags1;
+    private Set<String> tags0;
+    private Set<String> tags1;
 
     /**
      * create a scraper. the tag sets must contain tags in lowercase!
      * @param tags0
      * @param tags1
      */
-    public AbstractScraper(final HashSet<String> tags0, final HashSet<String> tags1) {
+    public AbstractScraper(final Set<String> tags0, final Set<String> tags1) {
         this.tags0  = tags0;
         this.tags1  = tags1;
     }
@@ -68,11 +68,9 @@ public abstract class AbstractScraper implements Scraper {
     public abstract void scrapeTag1(String tagname, Properties tagopts, char[] text);
 
     protected static String stripAllTags(final char[] s) {
-        StringBuilder r = new StringBuilder(s.length);
+        final StringBuilder r = new StringBuilder(s.length);
         int bc = 0;
-        char c;
-        for (int p = 0; p < s.length; p++) {
-            c = s[p];
+        for (final char c : s) {
             if (c == lb) {
                 bc++;
                 r.append(' ');

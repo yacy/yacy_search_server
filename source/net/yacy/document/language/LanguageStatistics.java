@@ -4,9 +4,9 @@
 // first published on http://www.yacy.net
 // Braunschweig, Germany, 2008
 //
-// $LastChangedDate: 2008-05-18 23:00:00 +0200 (Di, 18 Mai 2008) $
-// $LastChangedRevision: 4824 $
-// $LastChangedBy: low012 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

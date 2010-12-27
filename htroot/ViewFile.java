@@ -5,7 +5,9 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 
-//last major change: 12.07.2004
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -31,7 +33,6 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -84,7 +85,6 @@ public class ViewFile {
             prop.put("viewMode", VIEW_MODE_NO_TEXT);
             return prop;
         }
-        
         
         final int display = post.getInt("display", 1);
         
@@ -209,7 +209,7 @@ public class ViewFile {
             
         } else if (viewMode.equals("iframeCache")) {
             prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CACHE);
-            String ext = url.getFileExtension();
+            final String ext = url.getFileExtension();
             if ("jpg.jpeg.png.gif".indexOf(ext) >= 0) {
                 prop.put("viewMode_png", 1);
                 prop.put("viewMode_png_url", url.toNormalform(false, true));
@@ -259,7 +259,7 @@ public class ViewFile {
                 if (sentences != null) {
                     
                     // Search word highlighting
-                    for (StringBuilder s: sentences) {
+                    for (final StringBuilder s: sentences) {
                         sentence = s.toString();
                         if (sentence.trim().length() > 0) {
                             prop.put("viewMode_sentences_" + i + "_nr", i + 1);
@@ -282,9 +282,9 @@ public class ViewFile {
                 if (sentences != null) {
                     
                     // Search word highlighting
-                    for (StringBuilder s: sentences) {
+                    for (final StringBuilder s: sentences) {
                         sentence = s.toString();
-                        Enumeration<String> tokens = Condenser.wordTokenizer(sentence, "UTF-8", LibraryProvider.dymLib);
+                        final Enumeration<String> tokens = Condenser.wordTokenizer(sentence, "UTF-8", LibraryProvider.dymLib);
                         while (tokens.hasMoreElements()) {
                             token = tokens.nextElement();
                             if (token.length() > 0) {
@@ -307,7 +307,7 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
                 
-                final HashMap<MultiProtocolURI, ImageEntry> ts = document.getImages();
+                final Map<MultiProtocolURI, ImageEntry> ts = document.getImages();
                 final Iterator<ImageEntry> tsi = ts.values().iterator();
                 ImageEntry entry;
                 while (tsi.hasNext()) {
@@ -353,7 +353,7 @@ public class ViewFile {
             words = URLDecoder.decode(words, "UTF-8");
             if (words.indexOf(' ') >= 0) return words.split(" ");
             if (words.indexOf(',') >= 0) return words.split(",");
-            if (words.indexOf('+') >= 0) return words.split("+");
+            if (words.indexOf('+') >= 0) return words.split("\\+");
             w = new String[1];
             w[0] = words;
         } catch (final UnsupportedEncodingException e) {}
@@ -362,24 +362,23 @@ public class ViewFile {
     
     private static final String markup(final String[] wordArray, String message) {
         message = CharacterCoding.unicode2html(message, true);
-        if (wordArray != null)
-            for (int j = 0; j < wordArray.length; j++) {
-                final String currentWord = wordArray[j].trim();
+        if (wordArray != null) {
+            int j = 0;
+            for (String currentWord : wordArray) {
+                currentWord = currentWord.trim();
                 // TODO: replace upper-/lowercase words as well
                 message = message.replaceAll(currentWord,
-                                "<span class=\"" + HIGHLIGHT_CSS + ((j % MAX_HIGHLIGHTS) + 1) + "\">" +
+                                "<span class=\"" + HIGHLIGHT_CSS + ((j++ % MAX_HIGHLIGHTS) + 1) + "\">" +
                                 currentWord + 
                                 "</span>");
             }
+        }
         return message;
     }
     
     private static int putMediaInfo(final serverObjects prop, final String[] wordArray, int c, final Map<MultiProtocolURI, String> media, final String name, boolean dark) {
-        final Iterator<Map.Entry<MultiProtocolURI, String>> mi = media.entrySet().iterator();
-        Map.Entry<MultiProtocolURI, String> entry;
         int i = 0;
-        while (mi.hasNext()) {
-            entry = mi.next();
+        for (Map.Entry<MultiProtocolURI, String> entry : media.entrySet()) {
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", name);
