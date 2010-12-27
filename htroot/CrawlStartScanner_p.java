@@ -104,7 +104,7 @@ public class CrawlStartScanner_p {
                     if (p >= 0) host = host.substring(0, p);
                     ia.add(Domains.dnsResolve(host));
                 }
-                Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 500 : 2000);
+                Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 1000 : 5000);
                 if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
                 if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
                 if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(false);

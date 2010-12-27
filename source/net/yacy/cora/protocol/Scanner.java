@@ -149,7 +149,9 @@ public class Scanner extends Thread {
         if (a == null) return true;
         InetAddress n = normalize(a);
         if (!scancacheScanrange.contains(n)) return true;
-        return scancache.containsKey(new Service(url.getProtocol(), a));
+        Access access = scancache.get(new Service(url.getProtocol(), a));
+        if (access == null) return false;
+        return access == Access.granted;
     }
 
     private static InetAddress normalize(InetAddress a) {
