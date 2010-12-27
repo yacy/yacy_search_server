@@ -239,6 +239,7 @@ public final class Condenser {
             final Bitfield flagstemplate,
             final boolean useForLanguageIdentification,
             final DidYouMeanLibrary meaningLib) {
+        if (text == null) return;
         String word;
         Word wprop;
         sievedWordsEnum wordenum;
