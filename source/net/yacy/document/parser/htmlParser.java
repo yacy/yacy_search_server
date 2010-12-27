@@ -3,9 +3,9 @@
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 09.07.2009 at http://yacy.net
  *
-// $LastChangedDate  $
-// $LastChangedRevision $
-// $LastChangedBy $
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
