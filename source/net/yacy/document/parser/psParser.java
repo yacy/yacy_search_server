@@ -63,7 +63,7 @@ public class psParser extends AbstractParser implements Parser {
 		}
     }
 
-    public boolean testForPs2Ascii() {
+    private boolean testForPs2Ascii() {
         try {
             String procOutputLine = null;
             final StringBuilder procOutput = new StringBuilder();
@@ -83,7 +83,7 @@ public class psParser extends AbstractParser implements Parser {
     }
     
     
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final File sourceFile) throws Parser.Failure, InterruptedException {
         
     	File outputFile = null;
         try { 
@@ -128,7 +128,7 @@ public class psParser extends AbstractParser implements Parser {
         } 
     }    
     
-    public void parseUsingJava(final File inputFile, final File outputFile) throws Exception {
+    private void parseUsingJava(final File inputFile, final File outputFile) throws Exception {
         
         BufferedReader reader = null;
         BufferedWriter writer = null;
@@ -166,7 +166,7 @@ public class psParser extends AbstractParser implements Parser {
                     }
                 }
               
-            } else  if (version.length() > 0 && version.charAt(0) == '3') {
+            } else if (version.length() > 0 && version.charAt(0) == '3') {
                 final StringBuilder stmt = new StringBuilder();
                 boolean isBMP = false;
                 boolean isStore = false;
@@ -226,32 +226,34 @@ public class psParser extends AbstractParser implements Parser {
     	int execCode = 0;
     	StringBuilder procErr = null;
     	try {
-    		String procOutputLine = null;
-    		final StringBuilder procOut = new StringBuilder();
-    		procErr = new StringBuilder();
-    		
-    		final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", inputFile.getAbsolutePath(),outputFile.getAbsolutePath()});
-    		final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
-    		final BufferedReader stdErr = new BufferedReader(new InputStreamReader(ps2asciiProc.getErrorStream()));
-    		while ((procOutputLine = stdOut.readLine()) != null) {
-    			procOut.append(procOutputLine);
-    		}
-    		stdOut.close();
-    		while ((procOutputLine = stdErr.readLine()) != null) {
-    			procErr.append(procOutputLine);
-    		}
-    		stdErr.close();
-    		execCode = ps2asciiProc.waitFor();
+            String procOutputLine;
+            final StringBuilder procOut = new StringBuilder();
+            procErr = new StringBuilder();
+
+            final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", inputFile.getAbsolutePath(),outputFile.getAbsolutePath()});
+            final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));
+            final BufferedReader stdErr = new BufferedReader(new InputStreamReader(ps2asciiProc.getErrorStream()));
+            while ((procOutputLine = stdOut.readLine()) != null) {
+                procOut.append(procOutputLine);
+            }
+            stdOut.close();
+            while ((procOutputLine = stdErr.readLine()) != null) {
+                procErr.append(procOutputLine);
+            }
+            stdErr.close();
+            execCode = ps2asciiProc.waitFor();
     	} catch (final Exception e) {
-    		final String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();
-    		this.log.logSevere(errorMsg);
-    		throw new Exception(errorMsg);
+            final String errorMsg = "Unable to convert ps to ascii. " + e.getMessage();
+            this.log.logSevere(errorMsg);
+            throw new Exception(errorMsg);
     	}
     	
     	if (execCode != 0) throw new Exception("Unable to convert ps to ascii. ps2ascii returned statuscode " + execCode + "\n" + procErr.toString());
     }
 
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+            final String charset, final InputStream source)
+            throws Parser.Failure, InterruptedException {
         
         File tempFile = null;
         try {

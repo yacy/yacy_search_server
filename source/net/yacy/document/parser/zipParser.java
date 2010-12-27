@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 29.6.2010 at http://yacy.net
  *
+// $LastChangedDate  $
+// $LastChangedRevision $
+// $LastChangedBy $
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -54,9 +58,11 @@ public class zipParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("application/vnd.android.package-archive");
     }
     
-    public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI url, final String mimeType,
+            final String charset, final InputStream source)
+            throws Parser.Failure, InterruptedException {
         Document[] docs = null;
-        List<Document> docacc = new ArrayList<Document>();
+        final List<Document> docacc = new ArrayList<Document>();
         ZipEntry entry;
         final ZipInputStream zis = new ZipInputStream(source);                      
         File tmp = null;
@@ -76,7 +82,7 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zis, tmp, entry.getSize());  
                     docs = TextParser.parseSource(MultiProtocolURI.newURL(url, "#" + name), mime, null, tmp);
                     if (docs == null) continue;
-                    for (Document d: docs) docacc.add(d);
+                    for (final Document d: docs) docacc.add(d);
                 } catch (final Parser.Failure e) {
                     log.logWarning("ZIP parser entry " + name + ": " + e.getMessage());
                 } finally {
@@ -87,7 +93,7 @@ public class zipParser extends AbstractParser implements Parser {
                 break;
             }
         }
-        if (docacc.size() == 0) return null;
+        if (docacc.isEmpty()) return null;
         return docacc.toArray(new Document[docacc.size()]);
     }
 }

@@ -118,7 +118,9 @@ public class pdfParser extends AbstractParser implements Parser {
             // info.getModificationDate();
         }
         
-        if (docTitle == null || docTitle.length() == 0) docTitle = MultiProtocolURI.unescape(location.getFileName());
+        if (docTitle == null || docTitle.length() == 0) {
+            docTitle = MultiProtocolURI.unescape(location.getFileName());
+        }
         CharBuffer writer = null;
         try {
             // create a writer for output
@@ -139,8 +141,12 @@ public class pdfParser extends AbstractParser implements Parser {
         pdfDoc = null;
 
         String[] docKeywords = null;
-        if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
-        if (docTitle == null) docTitle = docSubject;
+        if (docKeywordStr != null) {
+            docKeywords = docKeywordStr.split(" |,");
+        }
+        if (docTitle == null) {
+            docTitle = docSubject;
+        }
     
         byte[] contentBytes;
         try {

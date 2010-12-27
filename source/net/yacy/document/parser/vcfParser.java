@@ -58,7 +58,8 @@ public class vcfParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("text/x-vcalendar");
     }
     
-    public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, final InputStream source)
+            throws Parser.Failure, InterruptedException {
 
         try {
             final StringBuilder parsedTitle = new StringBuilder();
@@ -223,26 +224,26 @@ public class vcfParser extends AbstractParser implements Parser {
         } 
     }
     
-    public static final String decodeQuotedPrintable(final String s) {
-		if (s == null) return null;
-		final byte[] b = s.getBytes();
-		final StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < b.length; i++) {
-			final int c = b[i];
-			if (c == '=') {
-				try {
-					final int u = Character.digit((char) b[++i], 16);
-					final int l = Character.digit((char) b[++i], 16);
-					if (u == -1 || l == -1) throw new RuntimeException("bad quoted-printable encoding");
-					sb.append((char) ((u << 4) + l));
-				} catch (final ArrayIndexOutOfBoundsException e) {
-					throw new RuntimeException("bad quoted-printable encoding");
-				}
-			} else {
-				sb.append((char) c);
-			}
-		}
-		return sb.toString();
-	}
+    private String decodeQuotedPrintable(final String s) {
+        if (s == null) return null;
+        final byte[] b = s.getBytes();
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < b.length; i++) {
+            final int c = b[i];
+            if (c == '=') {
+                try {
+                    final int u = Character.digit((char) b[++i], 16);
+                    final int l = Character.digit((char) b[++i], 16);
+                    if (u == -1 || l == -1) throw new RuntimeException("bad quoted-printable encoding");
+                    sb.append((char) ((u << 4) + l));
+                } catch (final ArrayIndexOutOfBoundsException e) {
+                    throw new RuntimeException("bad quoted-printable encoding");
+                }
+            } else {
+                sb.append((char) c);
+            }
+        }
+        return sb.toString();
+    }
     
 }

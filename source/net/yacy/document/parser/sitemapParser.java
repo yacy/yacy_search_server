@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 08.09.2010 at http://yacy.net
  *
+// $LastChangedDate  $
+// $LastChangedRevision $
+// $LastChangedBy $
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -64,7 +68,9 @@ public class sitemapParser extends AbstractParser implements Parser {
         //SUPPORTED_EXTENSIONS.add("xml");
     }
     
-    public Document[] parse(MultiProtocolURI url, String mimeType, String charset, InputStream source) throws Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI url, final String mimeType,
+            final String charset, final InputStream source)
+            throws Failure, InterruptedException {
         SitemapReader sitemap;
         try {
             sitemap = new SitemapReader(source);
@@ -72,10 +78,10 @@ public class sitemapParser extends AbstractParser implements Parser {
             throw new Parser.Failure("Load error:" + e.getMessage(), url);
         }
         
-        List<Document> docs = new ArrayList<Document>();
+        final List<Document> docs = new ArrayList<Document>();
         MultiProtocolURI uri;
         Document doc;
-        for (URLEntry item: sitemap) try {
+        for (final URLEntry item: sitemap) try {
             uri = new MultiProtocolURI(item.loc);
             doc = new Document(
                     uri,
@@ -134,7 +140,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         }
     }
     
-    public static SitemapReader parse(InputStream stream) throws IOException {
+    public static SitemapReader parse(final InputStream stream) throws IOException {
         return new SitemapReader(stream);
     }
 
@@ -145,46 +151,52 @@ public class sitemapParser extends AbstractParser implements Parser {
      */
     public static class SitemapReader extends ArrayList<URLEntry> {
         private static final long serialVersionUID = 1337L;
-        public SitemapReader(InputStream source) throws IOException {
+        public SitemapReader(final InputStream source) throws IOException {
             org.w3c.dom.Document doc;
             try { doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(source); }
             catch (ParserConfigurationException e) { throw new IOException (e); }
             catch (SAXParseException e) { throw new IOException (e); }
             catch (SAXException e) { throw new IOException (e); }
-            NodeList SitemapNodes = doc.getElementsByTagName("sitemap");
-            for (int i = 0; i < SitemapNodes.getLength(); i++) {
-                String url = new SitemapEntry((Element) SitemapNodes.item(i)).url();
+            NodeList sitemapNodes = doc.getElementsByTagName("sitemap");
+            for (int i = 0; i < sitemapNodes.getLength(); i++) {
+                String url = new SitemapEntry((Element) sitemapNodes.item(i)).url();
                 if (url != null && url.length() > 0) {
                     try {
-                        SitemapReader r = parse(new DigestURI(url));
-                        for (URLEntry ue: r) this.add(ue);
+                        final SitemapReader r = parse(new DigestURI(url));
+                        for (final URLEntry ue: r) this.add(ue);
                     } catch (IOException e) {}
                 }
             }
-            NodeList urlEntryNodes = doc.getElementsByTagName("url");
+            final NodeList urlEntryNodes = doc.getElementsByTagName("url");
             for (int i = 0; i < urlEntryNodes.getLength(); i++) {
                 this.add(new URLEntry((Element) urlEntryNodes.item(i)));
             }
         }
+        @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
-            for (URLEntry entry: this) sb.append(entry.toString());
+            final StringBuilder sb = new StringBuilder();
+            for (final URLEntry entry: this) {
+                sb.append(entry.toString());
+            }
             return sb.toString();
         }
     }
 
     public static class URLEntry {
         public String loc, lastmod, changefreq, priority;
-        public URLEntry(Element element) {
+
+        public URLEntry(final Element element) {
             loc = val(element, "loc", "");
             lastmod  = val(element, "lastmod", "");
             changefreq  = val(element, "changefreq", "");
             priority  = val(element, "priority", "");
         }
+
         public String url() {
             return this.loc;
         }
-        public Date lastmod(Date dflt) {
+
+        public Date lastmod(final Date dflt) {
             try {
                 return DateFormatter.parseISO8601(lastmod);
             } catch (final ParseException e) {
@@ -195,14 +207,17 @@ public class sitemapParser extends AbstractParser implements Parser {
     
     public static class SitemapEntry {
         public String loc, lastmod;
-        public SitemapEntry(Element element) {
+
+        public SitemapEntry(final Element element) {
             loc = val(element, "loc", "");
             lastmod  = val(element, "lastmod", "");
         }
+
         public String url() {
             return this.loc;
         }
-        public Date lastmod(Date dflt) {
+        
+        public Date lastmod(final Date dflt) {
             try {
                 return DateFormatter.parseISO8601(lastmod);
             } catch (final ParseException e) {
@@ -211,10 +226,10 @@ public class sitemapParser extends AbstractParser implements Parser {
         }
     }
 
-    private static String val(Element parent, String label, String dflt) {
-        Element e = (Element) parent.getElementsByTagName(label).item(0);
+    private static String val(final Element parent, final String label, final String dflt) {
+        final Element e = (Element) parent.getElementsByTagName(label).item(0);
         if (e == null) return dflt;
-        Node child = e.getFirstChild();
+        final Node child = e.getFirstChild();
         return (child instanceof CharacterData) ? ((CharacterData) child).getData() : dflt;
     }
 }

@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 20.08.2010 at http://yacy.net
  *
+// $LastChangedDate  $
+// $LastChangedRevision $
+// $LastChangedBy $
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -53,7 +57,9 @@ public class rssParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("application/atom+xml");
     }
     
-    public Document[] parse(MultiProtocolURI url, String mimeType, String charset, InputStream source) throws Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI url, final String mimeType,
+            final String charset, final InputStream source)
+            throws Failure, InterruptedException {
         RSSReader rssReader;
         try {
             rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source, RSSReader.Type.none);
@@ -61,14 +67,14 @@ public class rssParser extends AbstractParser implements Parser {
             throw new Parser.Failure("Load error:" + e.getMessage(), url, e);
         }
         
-        RSSFeed feed = rssReader.getFeed();
+        final RSSFeed feed = rssReader.getFeed();
         //RSSMessage channel = feed.getChannel();
-        List<Document> docs = new ArrayList<Document>();
+        final List<Document> docs = new ArrayList<Document>();
         MultiProtocolURI uri;
         Set<String> languages;
         Map<MultiProtocolURI, String> anchors;
         Document doc;
-        for (Hit item: feed) try {
+        for (final Hit item: feed) try {
             uri = new MultiProtocolURI(item.getLink());
             languages = new HashSet<String>();
             languages.add(item.getLanguage());
@@ -95,7 +101,7 @@ public class rssParser extends AbstractParser implements Parser {
             continue;
         }
         
-        Document[] da = new Document[docs.size()];
+        final Document[] da = new Document[docs.size()];
         docs.toArray(da);
         return da;
     }

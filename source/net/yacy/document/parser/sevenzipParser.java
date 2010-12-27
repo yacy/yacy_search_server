@@ -96,7 +96,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
 
      // wrapper class to redirect output of standard ArchiveExtractCallback to serverLog
      // and parse the extracted content
-     public static class SZParserExtractCallback extends ArchiveExtractCallback {
+     private static class SZParserExtractCallback extends ArchiveExtractCallback {
          
          private final Log log;
          private ByteArrayOutputStream cfos = null;

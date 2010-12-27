@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 30.11.2010 at http://yacy.net
  *
+// $LastChangedDate  $
+// $LastChangedRevision $
+// $LastChangedBy $
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -38,9 +42,11 @@ public class genericParser extends AbstractParser implements Parser {
         // this parser is used if no other fits. This parser fits all
     }
     
-    public Document[] parse(MultiProtocolURI location, String mimeType, String charset, InputStream source1) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+            final String charset, final InputStream source1)
+            throws Parser.Failure, InterruptedException {
 
-        Document[] docs = new Document[]{new Document(
+        final Document[] docs = new Document[]{new Document(
                 location,
                 mimeType,
                 charset,
@@ -56,7 +62,9 @@ public class genericParser extends AbstractParser implements Parser {
                 null,
                 null,
                 false)};
-        for (Document d: docs) { assert d.getText() != null : "mimeType = " + mimeType; } // verify docs
+        for (final Document d: docs) {
+            assert d.getText() != null : "mimeType = " + mimeType;
+        } // verify docs
         return docs;
     }
 }

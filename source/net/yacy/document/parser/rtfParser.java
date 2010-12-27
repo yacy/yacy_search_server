@@ -40,20 +40,21 @@ import net.yacy.document.Parser;
 
 public class rtfParser extends AbstractParser implements Parser {
 
-	public rtfParser() {
-		super("Rich Text Format Parser");
+    public rtfParser() {
+        super("Rich Text Format Parser");
         SUPPORTED_EXTENSIONS.add("rtf");
         SUPPORTED_MIME_TYPES.add("text/rtf");
         SUPPORTED_MIME_TYPES.add("text/richtext");
         SUPPORTED_MIME_TYPES.add("application/rtf");
         SUPPORTED_MIME_TYPES.add("application/x-rtf");
         SUPPORTED_MIME_TYPES.add("application/x-soffice");
-	}
+    }
 
-	public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+            final String charset, final InputStream source)
+            throws Parser.Failure, InterruptedException {
 
-        
-		try {	
+        try {	
             final DefaultStyledDocument doc = new DefaultStyledDocument();
             
             final RTFEditorKit theRtfEditorKit = new RTFEditorKit();               
@@ -81,13 +82,12 @@ public class rtfParser extends AbstractParser implements Parser {
                     null,
                     null,
                     false)};        
-		}
-		catch (final Exception e) {			
+        } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             
             throw new Parser.Failure("Unexpected error while parsing rtf resource." + e.getMessage(),location); 
-		}        
-	}
+        }
+    }
 
 }

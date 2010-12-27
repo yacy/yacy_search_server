@@ -55,7 +55,9 @@ public class bzipParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("application/x-stuffit");
     }
     
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+            final String charset, final InputStream source)
+            throws Parser.Failure, InterruptedException {
         
         File tempFile = null;
         Document[] docs;

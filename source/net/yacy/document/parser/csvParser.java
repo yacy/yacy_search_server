@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 02.10.2009 at http://yacy.net
  *
+// $LastChangedDate  $
+// $LastChangedRevision $
+// $LastChangedBy $
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -49,10 +53,12 @@ public class csvParser extends AbstractParser implements Parser {
         // construct a document using all cells of the document
         // the first row is used as headline
         // all lines are artificially terminated by a '.' to separate them as sentence for the condenser.
-        List<String[]> table = getTable(location, mimeType, charset, source);
+        final List<String[]> table = getTable(location, mimeType, charset, source);
         if (table.isEmpty()) throw new Parser.Failure("document has no lines", location);
-        StringBuilder sb = new StringBuilder();
-        for (String[] row: table) sb.append(concatRow(row)).append(' ');
+        final StringBuilder sb = new StringBuilder();
+        for (final String[] row: table) {
+            sb.append(concatRow(row)).append(' ');
+        }
         try {
             return new Document[]{new Document(
                     location,
@@ -75,18 +81,18 @@ public class csvParser extends AbstractParser implements Parser {
         }
     }
 
-    public String concatRow(String[] column) {
-        StringBuilder sb = new StringBuilder(80);
-        for (int i = 0; i < column.length; i++) {
-            if (i != 0) sb.append(' ');
-            sb.append(column[i]);
+    private String concatRow(String[] columns) {
+        final StringBuilder sb = new StringBuilder(80);
+        for (final String column : columns) {
+            if (sb.length() > 0) sb.append(' ');
+            sb.append(column);
         }
         sb.append('.');
         return sb.toString();
     }
     
-    public List<String[]> getTable(MultiProtocolURI location, String mimeType, String charset, InputStream source) {
-        ArrayList<String[]> rows = new ArrayList<String[]>();
+    private List<String[]> getTable(MultiProtocolURI location, String mimeType, String charset, InputStream source) {
+        final List<String[]> rows = new ArrayList<String[]>();
         BufferedReader reader;
         try {
             reader = new BufferedReader(new InputStreamReader(source, charset));
@@ -102,16 +108,16 @@ public class csvParser extends AbstractParser implements Parser {
                 if (row.length() == 0) continue;
                 if (separator == null) {
                     // try comma, semicolon and tab; take that one that results with more columns
-                    String[] colc = row.split(",");
-                    String[] cols = row.split(";");
-                    String[] colt = row.split("\t");
+                    final String[] colc = row.split(",");
+                    final String[] cols = row.split(";");
+                    final String[] colt = row.split("\t");
                     if (colc.length >= cols.length && colc.length >= colt.length) separator = ",";
                     if (cols.length >= colc.length && cols.length >= colt.length) separator = ";";
                     if (colt.length >= cols.length && colt.length >= colc.length) separator = "\t";
                 }
                 row = stripQuotes(row, '\"', separator.charAt(0), ' ');
                 row = stripQuotes(row, '\'', separator.charAt(0), ' ');
-                String[] cols = row.split(separator);
+                final String[] cols = row.split(separator);
                 if (columns == -1) columns = cols.length;
                 //if (cols.length != columns) continue; // skip lines that have the wrong number of columns
                 rows.add(cols);
@@ -130,19 +136,22 @@ public class csvParser extends AbstractParser implements Parser {
      * @param replacement
      * @return the line without the quotes
      */
-    public static String stripQuotes(String line, char quote, char separator, char replacement) {
+    private static String stripQuotes(final String line, final char quote,
+            final char separator, final char replacement) {
+        String ret = line;
+
         int p, q;
         // find left quote
-        while ((p = line.indexOf(quote)) >= 0) {
-            q = line.indexOf(quote, p + 1);
+        while ((p = ret.indexOf(quote)) >= 0) {
+            q = ret.indexOf(quote, p + 1);
             if (q < 0) {
                 // there is only a single quote but no 'right' quote.
                 // This data is not well-formed. Just remove the quote and give up.
-                return line.substring(0, p) + line.substring(p + 1);
+                return ret.substring(0, p) + ret.substring(p + 1);
             }
-            line = line.substring(0, p) + line.substring(p + 1, q).replace(separator, replacement) + line.substring(q + 1);
+            ret = ret.substring(0, p) + ret.substring(p + 1, q).replace(separator, replacement) + ret.substring(q + 1);
         }
-        return line;
+        return ret;
     }
 
 }

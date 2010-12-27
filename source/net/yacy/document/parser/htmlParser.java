@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 09.07.2009 at http://yacy.net
  *
+// $LastChangedDate  $
+// $LastChangedRevision $
+// $LastChangedBy $
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -159,7 +163,11 @@ public class htmlParser extends AbstractParser implements Parser {
     private static Document[] transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
         final String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
         int p = 0;
-        for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
+        for (int i = 1; i <= 4; i++) {
+            for (final String headline : scraper.getHeadlines(i)) {
+                sections[p++] = headline;
+            }
+        }
         final Document[] ppds = new Document[]{new Document(
                 location,
                 mimeType,
@@ -177,7 +185,9 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getImages(),
                 scraper.indexingDenied())};
         //scraper.close();            
-        for (Document ppd: ppds) ppd.setFavicon(scraper.getFavicon());
+        for (final Document ppd: ppds) {
+            ppd.setFavicon(scraper.getFavicon());
+        }
         return ppds;
     }
 
@@ -256,11 +266,7 @@ public class htmlParser extends AbstractParser implements Parser {
 
         return encoding;
     }
-    
-    public boolean indexingDenied() {
-        return false;
-    }
-    
+ 
     public static void main(String[] args) {
         // test parsing of a url
         MultiProtocolURI url;

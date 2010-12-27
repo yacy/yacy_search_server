@@ -38,8 +38,8 @@ import org.apache.poi.hwpf.extractor.WordExtractor;
 
 public class docParser extends AbstractParser implements Parser {
 
-	public docParser() {
-		super("Word Document Parser");
+    public docParser() {
+        super("Word Document Parser");
         SUPPORTED_EXTENSIONS.add("doc");
         SUPPORTED_MIME_TYPES.add("application/msword");
         SUPPORTED_MIME_TYPES.add("application/doc");
@@ -50,9 +50,11 @@ public class docParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("application/word");
         SUPPORTED_MIME_TYPES.add("application/x-msw6");
         SUPPORTED_MIME_TYPES.add("application/x-msword");
-	}
+    }
 
-	public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType,
+            final String charset, final InputStream source)
+            throws Parser.Failure, InterruptedException {
 
         final WordExtractor extractor;
 
@@ -62,7 +64,7 @@ public class docParser extends AbstractParser implements Parser {
             throw new Parser.Failure("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
         }
 
-		StringBuilder contents = new StringBuilder();
+        final StringBuilder contents = new StringBuilder();
         try {
             contents.append(extractor.getText().trim());
             contents.append(" ");
@@ -72,15 +74,15 @@ public class docParser extends AbstractParser implements Parser {
         } catch (Exception e) {
             throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
         }
-	    String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
+        String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
         title.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
-	    if (title.length() > 80) title = title.substring(0, 80);
-	    int l = title.length();
-	    while (true) {
-	        title = title.replaceAll("  ", " ");
-	        if (title.length() == l) break;
-	        l = title.length();
-	    }
+        if (title.length() > 80) title = title.substring(0, 80);
+        int l = title.length();
+        while (true) {
+            title = title.replaceAll("  ", " ");
+            if (title.length() == l) break;
+            l = title.length();
+        }
 
         Document[] docs;
         try {
@@ -105,6 +107,6 @@ public class docParser extends AbstractParser implements Parser {
         }
           
         return docs;
-	}
+    }
 
 }

@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 03.01.2010 at http://yacy.net
  *
+// $LastChangedDate  $
+// $LastChangedRevision $
+// $LastChangedBy $
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -50,38 +54,41 @@ public class torrentParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("application/x-bittorrent");
     }
     
-    public Document[] parse(MultiProtocolURI location, String mimeType, String charset, InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(MultiProtocolURI location, String mimeType, String charset, InputStream source)
+            throws Parser.Failure, InterruptedException {
         byte[] b = null;
         try {
             b = FileUtils.read(source);
         } catch (IOException e1) {
             throw new Parser.Failure(e1.toString(), location);
         }
-        BDecoder bd = new BDecoder(b);
-        BObject bo = bd.parse();
+        final BDecoder bd = new BDecoder(b);
+        final BObject bo = bd.parse();
         if (bo == null) throw new Parser.Failure("BDecoder.parse returned null", location);
         if (bo.getType() != BType.dictionary) throw new Parser.Failure("BDecoder object is not a dictionary", location);
-        Map<String, BObject> map = bo.getMap();
-        BObject commento = map.get("comment");
-        String comment = (commento == null) ? "" : new String(commento.getString());
+        final Map<String, BObject> map = bo.getMap();
+        final BObject commento = map.get("comment");
+        final String comment = (commento == null) ? "" : new String(commento.getString());
         //Date creation = new Date(map.get("creation date").getInteger());
-        BObject infoo = map.get("info");
-        StringBuilder filenames = new StringBuilder();
+        final BObject infoo = map.get("info");
+        final StringBuilder filenames = new StringBuilder();
         String title = "";
         if (infoo != null) {
-            Map<String, BObject> info = infoo.getMap();
-            BObject fileso = info.get("files");
+            final Map<String, BObject> info = infoo.getMap();
+            final BObject fileso = info.get("files");
             if (fileso != null) {
-                List<BObject> filelist = fileso.getList();
-                for (BObject fo: filelist) {
-                    BObject patho = fo.getMap().get("path");
+                final List<BObject> filelist = fileso.getList();
+                for (final BObject fo: filelist) {
+                    final BObject patho = fo.getMap().get("path");
                     if (patho != null) {
-                        List<BObject> l = patho.getList(); // one file may have several names
-                        for (BObject fl: l) filenames.append(fl.toString()).append(" ");
+                        final List<BObject> l = patho.getList(); // one file may have several names
+                        for (final BObject fl: l) {
+                            filenames.append(fl.toString()).append(" ");
+                        }
                     }
                 }
             }
-            BObject nameo = info.get("name");
+            final BObject nameo = info.get("name");
             if (nameo != null) title = new String(nameo.getString());
         }
         if (title == null || title.length() == 0) title = MultiProtocolURI.unescape(location.getFileName());

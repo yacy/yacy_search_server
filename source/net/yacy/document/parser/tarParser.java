@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 29.6.2010 at http://yacy.net
  *
+// $LastChangedDate  $
+// $LastChangedRevision $
+// $LastChangedBy $
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -52,7 +56,7 @@ public class tarParser extends AbstractParser implements Parser {
     
     public Document[] parse(final MultiProtocolURI url, final String mimeType, final String charset, InputStream source) throws Parser.Failure, InterruptedException {
         
-        List<Document> docacc = new ArrayList<Document>();
+        final List<Document> docacc = new ArrayList<Document>();
         Document[] subDocs = null;
         final String ext = url.getFileExtension().toLowerCase();
         if (ext.equals("gz") || ext.equals("tgz")) {
@@ -81,7 +85,7 @@ public class tarParser extends AbstractParser implements Parser {
                     FileUtils.copy(tis, tmp, entry.getSize());
                     subDocs = TextParser.parseSource(MultiProtocolURI.newURL(url,"#" + name), mime, null, tmp);
                     if (subDocs == null) continue;
-                    for (Document d: subDocs) docacc.add(d);
+                    for (final Document d: subDocs) docacc.add(d);
                 } catch (final Parser.Failure e) {
                     log.logWarning("tar parser entry " + name + ": " + e.getMessage());
                 } finally {

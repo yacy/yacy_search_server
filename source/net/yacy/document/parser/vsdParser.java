@@ -62,7 +62,8 @@ public class vsdParser extends AbstractParser implements Parser {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source) throws Parser.Failure, InterruptedException {
+    public Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final InputStream source)
+            throws Parser.Failure, InterruptedException {
 
     	Document theDoc = null;
     	
@@ -70,7 +71,7 @@ public class vsdParser extends AbstractParser implements Parser {
             String contents = "";
             SummaryInformation summary = null;
             try {
-                VisioTextExtractor extractor = new VisioTextExtractor(source);
+                final VisioTextExtractor extractor = new VisioTextExtractor(source);
             	contents = extractor.getText();
                 summary = extractor.getSummaryInformation();
             } catch (Exception e) {
@@ -89,7 +90,7 @@ public class vsdParser extends AbstractParser implements Parser {
             }
 
             String abstrct = null;
-            abstrct = ((contents.length() > 80)? contents.substring(0, 80):contents.trim()).
+            abstrct = ((contents.length() > 80)? contents.substring(0, 80) : contents.trim()).
                           replaceAll("\r\n"," ").
                           replaceAll("\n"," ").
                           replaceAll("\r"," ").
@@ -124,12 +125,12 @@ public class vsdParser extends AbstractParser implements Parser {
             this.log.logSevere(errorMsg);
             throw new Parser.Failure(errorMsg, location);
         } finally {
-        	if (theDoc == null) {
+            if (theDoc == null) {
                 // if an unexpected error occures just log the error and raise a new Parser.Failure
                 final String errorMsg = "Unable to parse the vsd document '" + location + "': possibly out of memory";
                 this.log.logSevere(errorMsg);
                 throw new Parser.Failure(errorMsg, location);
-        	}
+            }
         }
     }
 

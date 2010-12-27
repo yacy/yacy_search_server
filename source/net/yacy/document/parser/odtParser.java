@@ -84,7 +84,9 @@ public class odtParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.add("application/OOo-writer");
     }
     
-    private Document[] parse(final MultiProtocolURI location, final String mimeType, final String charset, final File dest) throws Parser.Failure, InterruptedException {
+    private Document[] parse(final MultiProtocolURI location, final String mimeType,
+            final String charset, final File dest)
+            throws Parser.Failure, InterruptedException {
         
         CharBuffer writer = null;
         try {          
@@ -138,7 +140,7 @@ public class odtParser extends AbstractParser implements Parser {
             }
             
             // make the languages set
-            Set<String> languages = new HashSet<String>(1);
+            final Set<String> languages = new HashSet<String>(1);
             if (docLanguage != null) languages.add(docLanguage);
             
             // if there is no title availabe we generate one

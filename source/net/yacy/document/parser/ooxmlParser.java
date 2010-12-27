@@ -126,15 +126,13 @@ public class ooxmlParser extends AbstractParser implements Parser {
             }
             
             // make the languages set
-            Set<String> languages = new HashSet<String>(1);
+            final Set<String> languages = new HashSet<String>(1);
             if (docLanguage != null && docLanguage.length() == 0)
         	languages.add(docLanguage);
             
             // if there is no title availabe we generate one
-            if (docLongTitle == null || docLongTitle.length() == 0) {
-                if (docShortTitle != null) {
+            if ((docLongTitle == null || docLongTitle.length() == 0) && (docShortTitle != null)) {
                     docLongTitle = docShortTitle;
-                } 
             }            
          
             // split the keywords
@@ -166,7 +164,9 @@ public class ooxmlParser extends AbstractParser implements Parser {
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
             
             // close the writer
-            if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
+            if (writer != null) try {
+                writer.close();
+            } catch (final Exception ex) {/* ignore this */}
 
             Log.logException(e);
             throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(),location); 
