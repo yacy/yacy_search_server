@@ -90,7 +90,7 @@ public class yacysearch {
         
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
-        String querystring =  originalquerystring.replace('+', ' ').replace('*', ' ');
+        String querystring =  originalquerystring.replace('+', ' ').replace('*', ' ').trim();
         CrawlProfile.CacheStrategy snippetFetchStrategy = (post == null) ? null : CrawlProfile.CacheStrategy.parse(post.get("verify", "cacheonly"));
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);

@@ -19,7 +19,6 @@
  */
 
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ConcurrentModificationException;
@@ -33,7 +32,6 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.protocol.Scanner.Access;
-import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -166,7 +164,7 @@ public class CrawlStartScanner_p {
                 // execute the scan results
                 if (Scanner.scancacheSize() > 0) {
                     // make a comment cache
-                    Map<byte[], String> apiCommentCache = commentCache(sb);
+                    Map<byte[], String> apiCommentCache = Scanner.commentCache(sb);
                     
                     String urlString;
                     DigestURI u;
@@ -179,7 +177,7 @@ public class CrawlStartScanner_p {
                             try {
                                 u = new DigestURI(host.getKey().url());
                                 urlString = u.toNormalform(true, false);
-                                if (host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null) {
+                                if (host.getValue() == Access.granted && Scanner.inIndex(apiCommentCache, urlString) == null) {
                                     String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
                                     path += "&crawlingURL=" + urlString;
                                     WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), path, u.hash());
@@ -198,7 +196,7 @@ public class CrawlStartScanner_p {
         // write scan table
         if (Scanner.scancacheSize() > 0) {
             // make a comment cache
-            Map<byte[], String> apiCommentCache = commentCache(sb);
+            Map<byte[], String> apiCommentCache = Scanner.commentCache(sb);
             
             // show scancache table
             prop.put("servertable", 1);
@@ -223,8 +221,8 @@ public class CrawlStartScanner_p {
                             prop.put("servertable_list_" + i + "_accessEmpty", host.getValue() == Access.empty ? 1 : 0);
                             prop.put("servertable_list_" + i + "_accessGranted", host.getValue() == Access.granted ? 1 : 0);
                             prop.put("servertable_list_" + i + "_accessDenied", host.getValue() == Access.denied ? 1 : 0);
-                            prop.put("servertable_list_" + i + "_process", inIndex(apiCommentCache, urlString) == null ? 0 : 1);
-                            prop.put("servertable_list_" + i + "_preselected", host.getValue() == Access.granted && inIndex(apiCommentCache, urlString) == null ? 1 : 0);
+                            prop.put("servertable_list_" + i + "_process", Scanner.inIndex(apiCommentCache, urlString) == null ? 0 : 1);
+                            prop.put("servertable_list_" + i + "_preselected", host.getValue() == Access.granted && Scanner.inIndex(apiCommentCache, urlString) == null ? 1 : 0);
                             i++;
                         } catch (MalformedURLException e) {
                             Log.logException(e);
@@ -239,30 +237,6 @@ public class CrawlStartScanner_p {
             }
         }
         return prop;
-    }
-    
-    
-    private static byte[] inIndex(Map<byte[], String> commentCache, String url) {
-        for (Map.Entry<byte[], String> comment: commentCache.entrySet()) {
-            if (comment.getValue().contains(url)) return comment.getKey();
-        }
-        return null;
-    }
-    
-    private static Map<byte[], String> commentCache(Switchboard sb) {
-        Map<byte[], String> comments = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
-        Iterator<Tables.Row> i;
-        try {
-            i = sb.tables.iterator(WorkTables.TABLE_API_NAME);
-            Tables.Row row;
-            while (i.hasNext()) {
-                row = i.next();
-                comments.put(row.getPK(), new String(row.get(WorkTables.TABLE_API_COL_COMMENT)));
-            }
-        } catch (IOException e) {
-            Log.logException(e);
-        }
-        return comments;
     }
     
 }

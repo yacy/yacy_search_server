@@ -198,10 +198,11 @@ public class yacyNewsQueue {
         }
         
         public boolean hasNext() {
-            return stackNodeIterator.hasNext();
+            return stackNodeIterator != null && stackNodeIterator.hasNext();
         }
 
         public yacyNewsDB.Record next() {
+            if (stackNodeIterator == null) return null;
             final Row.Entry row = stackNodeIterator.next();
             try {
                 return b2r(row);
@@ -211,7 +212,7 @@ public class yacyNewsQueue {
         }
 
         public void remove() {
-            stackNodeIterator.remove();
+            if (stackNodeIterator != null) stackNodeIterator.remove();
         }
         
     }

@@ -302,6 +302,7 @@ public class HeapReader {
      * @return the number of BLOBs in the heap
      */
     public int size() {
+        if (this.index == null) return 0;
         synchronized (index) {
             return (this.index == null) ? 0 : this.index.size();
         }
