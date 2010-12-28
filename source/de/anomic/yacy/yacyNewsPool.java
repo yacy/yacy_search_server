@@ -447,6 +447,18 @@ public class yacyNewsPool {
         }
         return null;
     }
+/*
+ * java.io.FileNotFoundException: /home/administrator/yacy/DATA/INDEX/webportal/NETWORK/newsOut.table (Too many open files)
+    at java.io.FileInputStream.open(Native Method)
+    at java.io.FileInputStream.<init>(FileInputStream.java:137)
+    at net.yacy.kelondro.table.ChunkIterator.<init>(ChunkIterator.java:63)
+    at net.yacy.kelondro.table.Table$rowIteratorNoOrder.<init>(Table.java:832)
+    at net.yacy.kelondro.table.Table.rows(Table.java:825)
+    at de.anomic.yacy.yacyNewsQueue$newsIterator.<init>(yacyNewsQueue.java:193)
+    at de.anomic.yacy.yacyNewsQueue.records(yacyNewsQueue.java:183)
+    at de.anomic.yacy.yacyNewsPool.getSpecific(yacyNewsPool.java:440)
+    at yacysearchitem.respond(yacysearchitem.java:119)
+ */
 
     public synchronized yacyNewsDB.Record getByOriginator(final int dbKey, final String category, final String originatorHash) {
         final yacyNewsQueue queue = switchQueue(dbKey);

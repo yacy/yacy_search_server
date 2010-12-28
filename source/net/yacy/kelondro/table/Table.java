@@ -75,7 +75,6 @@ public class Table implements Index, Iterable<Row.Entry> {
     private final long minmemremaining; // if less than this memory is remaininig, the memory copy of a table is abandoned
     private final int buffersize;
     private final Row rowdef;
-    private final File tablefile;
     private final Row taildef;
     private       HandleMap index;
     private       BufferedRecords file;
@@ -90,7 +89,6 @@ public class Table implements Index, Iterable<Row.Entry> {
     		final boolean exceed134217727) throws RowSpaceExceededException {
         useTailCache = true; // fixed for testing
         
-        this.tablefile = tablefile;
         this.rowdef = rowdef;
         this.buffersize = buffersize;
         this.minmemremaining = Math.max(20 * 1024 * 1024, MemoryControl.available() / 10);
@@ -826,10 +824,14 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     private class rowIteratorNoOrder implements CloneableIterator<Entry> {
-        private final Iterator<byte[]> ri;
+        Iterator<Row.Entry> i;
+        int idx;
+        byte[] key;
         
         public rowIteratorNoOrder() throws IOException {
-            ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
+            // don't use the ChunkIterator here because it may create too many open files during string load
+            //ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
+            i = index.iterator();
         }
         
         public CloneableIterator<Entry> clone(Object modifier) {
@@ -842,16 +844,31 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
         
         public boolean hasNext() {
-            return ri.hasNext();
+            return i.hasNext();
         }
         
         public Entry next() {
-            byte[] r = ri.next();
-            return rowdef.newEntry(r);
+            Row.Entry entry = i.next();
+            if (entry == null) return null;
+            key = entry.getPrimaryKeyBytes();
+            if (key == null) return null;
+            idx = (int) entry.getColLong(1);
+            try {
+                return get(key);
+            } catch (IOException e) {
+                return null;
+            }
         }
         
         public void remove() {
-            ri.remove();
+            if (key != null) {
+                try {
+                    removeInFile(idx);
+                } catch (IOException e) {
+                } catch (RowSpaceExceededException e) {
+                }
+                i.remove();
+            }
         }
         
     }
