@@ -231,6 +231,7 @@ public class FTPLoader {
         
         // if the mimetype and file extension is supported we start to download the file
         final long size = ftpClient.fileSize(path);
+        responseHeader.put(HeaderFramework.CONTENT_LENGTH, String.valueOf(size));
         String parserError = null;
         if ((acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) ||
             (size > maxFileSize && maxFileSize >= 0)) {
@@ -252,7 +253,7 @@ public class FTPLoader {
                     responseHeader,
                     "200",
                     mp == null ? null : new CrawlProfile(mp),
-                    url.toTokens().getBytes());
+                    null);
             return response;
         }
         
