@@ -101,7 +101,7 @@ public class mmParser extends AbstractParser implements Parser {
             false)};
     }
 
-    private static class FreeMindHandler extends DefaultHandler {
+    private class FreeMindHandler extends DefaultHandler {
 
         private List<String> nodeText = new ArrayList<String>();
 
