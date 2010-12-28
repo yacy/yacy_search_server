@@ -94,6 +94,7 @@ rss     = application/rss+xml
 rtf     = application/rtf
 sh      = text/plain
 shtml   = text/html
+sid     = audio/prs.sid
 stream  = audio/x-qt-stream
 svg     = image/svg+xml
 swf     = application/x-shockwave-flash

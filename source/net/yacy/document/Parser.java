@@ -73,16 +73,18 @@ public interface Parser {
      * @param o
      * @return
      */
+    @Override
     public boolean equals(Object o);
     
     /**
      * the hash code of a parser
      * @return the hash code of the parser name string
      */
+    @Override
     public int hashCode();
     
     /**
-     * a parser waring
+     * a parser warning
      * thrown as an exception
      */
     public class Failure extends Exception {

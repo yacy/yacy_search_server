@@ -84,7 +84,7 @@ public class Document {
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     private Set<String> languages;
     private boolean indexingDenied;
-    
+
     public Document(final MultiProtocolURI location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author, final String publisher,
                     final String[] sections, final String abstrct,

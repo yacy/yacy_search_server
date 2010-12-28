@@ -58,6 +58,7 @@ import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.document.parser.mmParser;
+import net.yacy.document.parser.sidAudioParser;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -89,6 +90,7 @@ public final class TextParser {
         initParser(new rssParser());
         initParser(new rtfParser());
         initParser(new sevenzipParser());
+        initParser(new sidAudioParser());
         initParser(new swfParser());
         initParser(new tarParser());
         initParser(new torrentParser());
