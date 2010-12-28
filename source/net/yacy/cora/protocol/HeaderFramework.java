@@ -443,6 +443,23 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     }
 
     /*
+     * provide method, which can handle big filelengths (for example from ftp)
+     * because we can't change the interface in apache httpclient
+     * 
+     * @see org.apache.commons.fileupload.RequestContext#getContentLength()
+     */
+    public long getContentLengthLong() {
+        if (containsKey(CONTENT_LENGTH)) {
+            try {
+                return Long.parseLong(get(CONTENT_LENGTH));
+            } catch (final NumberFormatException e) {
+                return -1;
+            }
+        }
+        return -1;
+    }
+
+    /*
      * (non-Javadoc)
      * 
      * @see org.apache.commons.fileupload.RequestContext#getContentType()

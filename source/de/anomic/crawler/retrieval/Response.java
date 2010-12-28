@@ -243,7 +243,7 @@ public class Response {
     public long size() {
         if (this.responseHeader != null) {
             // take the size from the response header
-            return this.responseHeader.getContentLength();
+            return this.responseHeader.getContentLengthLong();
         }
         if (this.content != null) return this.content.length;
         // the size is unknown
