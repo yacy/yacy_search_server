@@ -48,6 +48,7 @@ public class mmParser extends AbstractParser implements Parser {
         super("FreeMind Parser");
         SUPPORTED_EXTENSIONS.add("mm");
         SUPPORTED_MIME_TYPES.add("application/freemind");
+        SUPPORTED_MIME_TYPES.add("application/x-freemind");
     }
     
     public Document[] parse(final MultiProtocolURI location, final String mimeType,
@@ -100,17 +101,18 @@ public class mmParser extends AbstractParser implements Parser {
             false)};
     }
 
-    private class FreeMindHandler extends DefaultHandler {
+    private static class FreeMindHandler extends DefaultHandler {
 
         private List<String> nodeText = new ArrayList<String>();
 
         @Override
         public void startElement(final String uri, final String localName,
                 final String qName, final Attributes attributes) {
-
-            final String textValue = attributes.getValue("TEXT");
-            if (textValue != null) {
-                nodeText.add(textValue);
+            if (qName.equals("node")) {
+                final String textValue = attributes.getValue("TEXT");
+                if (textValue != null) {
+                    nodeText.add(textValue);
+                }
             }
         }
 

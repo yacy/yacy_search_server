@@ -46,7 +46,7 @@ import net.yacy.document.Parser;
 public class sidAudioParser extends AbstractParser implements Parser {
 
     public sidAudioParser() {
-        super("Commodore 64 SID audio file Parser");
+        super("Commodore 64 SID Audio File Parser");
         SUPPORTED_EXTENSIONS.add("sid");
         SUPPORTED_MIME_TYPES.add("audio/prs.sid");
         SUPPORTED_MIME_TYPES.add("audio/psid");
