@@ -215,8 +215,6 @@ public final class Switchboard extends serverSwitch {
     public  UserDB                         userDB;
     public  BookmarksDB                    bookmarksDB;
     public  WebStructureGraph              webStructure;
-    public  ArrayList<QueryParams>         localSearches; // array of search result properties as HashMaps
-    public  ArrayList<QueryParams>         remoteSearches; // array of search result properties as HashMaps
     public  ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                           indexedPages = 0;
     public  int                            searchQueriesRobinsonFromLocal = 0; // absolute counter of all local queries submitted on this peer from a local or autheticated used
@@ -519,8 +517,6 @@ public final class Switchboard extends serverSwitch {
         // init search history trackers
         this.localSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>(); // String:TreeSet - IP:set of Long(accessTime)
         this.remoteSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>();
-        this.localSearches = new ArrayList<QueryParams>(); // contains search result properties as HashMaps
-        this.remoteSearches = new ArrayList<QueryParams>();
         
         // init messages: clean up message symbol
         final File notifierSource = new File(getAppPath(), getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");

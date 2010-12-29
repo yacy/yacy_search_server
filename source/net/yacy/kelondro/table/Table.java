@@ -844,7 +844,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
         
         public boolean hasNext() {
-            return i.hasNext();
+            return i != null && i.hasNext();
         }
         
         public Entry next() {

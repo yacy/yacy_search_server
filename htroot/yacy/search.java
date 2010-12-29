@@ -51,6 +51,7 @@ import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.search.AccessTracker;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
@@ -397,11 +398,11 @@ public final class search {
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();
         theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.result().getSnippetComputationTime();
-        sb.remoteSearches.add(theQuery);
+        AccessTracker.add(AccessTracker.Location.remote, theQuery);
         
         // update the search tracker
         synchronized (trackerHandles) {
-            trackerHandles.add(theQuery.handle); // thats the time when the handle was created
+            trackerHandles.add(theQuery.time); // thats the time when the handle was created
             // we don't need too much entries in the list; remove superfluous
             while (trackerHandles.size() > 36) if (!trackerHandles.remove(trackerHandles.first())) break;
         }

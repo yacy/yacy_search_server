@@ -96,7 +96,7 @@ public final class QueryParams {
     public final String authorhash;
     public final String tenant; 
     public yacySeed remotepeer;
-    public final Long handle;
+    public final Long time;
     // values that are set after a search:
     public int resultcount; // number of found results
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
@@ -147,7 +147,7 @@ public final class QueryParams {
         this.sitehash = null;
         this.authorhash = null;
         this.remotepeer = null;
-        this.handle = Long.valueOf(System.currentTimeMillis());
+        this.time = Long.valueOf(System.currentTimeMillis());
         this.specialRights = false;
         this.navigators = "all";
         this.indexSegment = indexSegment;
@@ -202,7 +202,7 @@ public final class QueryParams {
         this.snippetCacheStrategy = snippetCacheStrategy;
         this.host = host;
         this.remotepeer = null;
-        this.handle = Long.valueOf(System.currentTimeMillis());
+        this.time = Long.valueOf(System.currentTimeMillis());
         this.specialRights = specialRights;
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;

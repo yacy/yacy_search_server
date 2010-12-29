@@ -57,6 +57,7 @@ import net.yacy.kelondro.util.ISO639;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.LibraryProvider;
+import de.anomic.search.AccessTracker;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
@@ -544,7 +545,7 @@ public class yacysearch {
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
             theQuery.urlretrievaltime = theSearch.result().getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.result().getSnippetComputationTime();
-            sb.localSearches.add(theQuery);
+            AccessTracker.add(AccessTracker.Location.local, theQuery);
                         
             // check suggestions
             int meanMax = 0;
@@ -595,7 +596,7 @@ public class yacysearch {
             // update the search tracker
             try {
                 synchronized (trackerHandles) {
-                	trackerHandles.add(theQuery.handle);
+                	trackerHandles.add(theQuery.time);
                 	while (trackerHandles.size() > 600) if (!trackerHandles.remove(trackerHandles.first())) break;
                 }
                 sb.localSearchTracker.put(client, trackerHandles);

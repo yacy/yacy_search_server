@@ -39,6 +39,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
+import de.anomic.search.AccessTracker;
 import de.anomic.search.QueryParams;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
@@ -46,7 +47,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverAccessTracker.Track;
 import de.anomic.yacy.yacySeed;
-import java.util.List;
 
 public class AccessTracker_p {
 	
@@ -140,9 +140,8 @@ public class AccessTracker_p {
             prop.put("page_list", entCount);
             prop.put("page_num", entCount);
         } else if ((page == 2) || (page == 4)) {
-            final List<QueryParams> array = (page == 2) ? sb.localSearches : sb.remoteSearches;
-            QueryParams searchProfile;
-            int m = Math.min(maxCount, array.size());
+            final Iterator<QueryParams> ai = (page == 2) ? AccessTracker.get(AccessTracker.Location.local) : AccessTracker.get(AccessTracker.Location.remote);
+            QueryParams query;
             long qcountSum = 0;
             long rcountSum = 0;
             long rcount = 0;
@@ -152,42 +151,47 @@ public class AccessTracker_p {
             long utimeSum1 = 0;
             long stimeSum1 = 0;
             long rtimeSum1 = 0;
+            int m = 0;
             
-            for (int entCount = 0; entCount < m; entCount++) {
-                searchProfile = array.get(array.size() - entCount - 1);
-            
+            while (ai.hasNext()) {
+                try {
+                    query = ai.next();
+                } catch (ConcurrentModificationException e) {
+                    break;
+                }
                 // put values in template
-                prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) );
+                prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) );
                 dark =! dark;
-                prop.putHTML("page_list_" + entCount + "_host", searchProfile.host);
-                prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(searchProfile.handle.longValue())));
-                prop.put("page_list_" + entCount + "_timestamp", searchProfile.handle.longValue());
+                prop.putHTML("page_list_" + m + "_host", query.host);
+                prop.put("page_list_" + m + "_date", SimpleFormatter.format(new Date(query.time.longValue())));
+                prop.put("page_list_" + m + "_timestamp", query.time.longValue());
                 if (page == 2) {
                     // local search
-                    prop.putNum("page_list_" + entCount + "_offset", searchProfile.offset);
-                    prop.putHTML("page_list_" + entCount + "_querystring", searchProfile.queryString);
+                    prop.putNum("page_list_" + m + "_offset", query.offset);
+                    prop.putHTML("page_list_" + m + "_querystring", query.queryString);
                 } else {
                     // remote search
-                    prop.putHTML("page_list_" + entCount + "_peername", (searchProfile.remotepeer == null) ? "<unknown>" : searchProfile.remotepeer.getName());
-                    prop.put("page_list_" + entCount + "_queryhashes", QueryParams.anonymizedQueryHashes(searchProfile.queryHashes));
+                    prop.putHTML("page_list_" + m + "_peername", (query.remotepeer == null) ? "<unknown>" : query.remotepeer.getName());
+                    prop.put("page_list_" + m + "_queryhashes", QueryParams.anonymizedQueryHashes(query.queryHashes));
                 }
-                prop.putNum("page_list_" + entCount + "_querycount", searchProfile.itemsPerPage);
-                prop.putNum("page_list_" + entCount + "_resultcount", searchProfile.resultcount);
-                prop.putNum("page_list_" + entCount + "_urltime", searchProfile.urlretrievaltime);
-                prop.putNum("page_list_" + entCount + "_snippettime", searchProfile.snippetcomputationtime);
-                prop.putNum("page_list_" + entCount + "_resulttime", searchProfile.searchtime);
-                prop.putHTML("page_list_" + entCount + "_userAgent", searchProfile.userAgent);
-                qcountSum += searchProfile.itemsPerPage;
-                rcountSum += searchProfile.resultcount;
-                utimeSum += searchProfile.urlretrievaltime;
-                stimeSum += searchProfile.snippetcomputationtime;
-                rtimeSum += searchProfile.searchtime;
-                if (searchProfile.resultcount > 0){
+                prop.putNum("page_list_" + m + "_querycount", query.itemsPerPage);
+                prop.putNum("page_list_" + m + "_resultcount", query.resultcount);
+                prop.putNum("page_list_" + m + "_urltime", query.urlretrievaltime);
+                prop.putNum("page_list_" + m + "_snippettime", query.snippetcomputationtime);
+                prop.putNum("page_list_" + m + "_resulttime", query.searchtime);
+                prop.putHTML("page_list_" + m + "_userAgent", query.userAgent);
+                qcountSum += query.itemsPerPage;
+                rcountSum += query.resultcount;
+                utimeSum += query.urlretrievaltime;
+                stimeSum += query.snippetcomputationtime;
+                rtimeSum += query.searchtime;
+                if (query.resultcount > 0){
                 	rcount++;
-                    utimeSum1 += searchProfile.urlretrievaltime;
-                    stimeSum1 += searchProfile.snippetcomputationtime;
-                    rtimeSum1 += searchProfile.searchtime;
+                    utimeSum1 += query.urlretrievaltime;
+                    stimeSum1 += query.snippetcomputationtime;
+                    rtimeSum1 += query.searchtime;
                 }
+                m++;
             }
             prop.put("page_list", m);
             prop.put("page_num", m);
@@ -228,16 +232,16 @@ public class AccessTracker_p {
             prop.putNum("page_urltime_avg1", (double) utimeSum1 / rcount);
             prop.putNum("page_snippettime_avg1", (double) stimeSum1 / rcount);
             prop.putNum("page_resulttime_avg1", (double) rtimeSum1 / rcount);
-            prop.putNum("page_total", (page == 2) ? sb.localSearches.size() : sb.remoteSearches.size());
+            prop.putNum("page_total", (page == 2) ? AccessTracker.size(AccessTracker.Location.local) : AccessTracker.size(AccessTracker.Location.remote));
         } else if ((page == 3) || (page == 5)) {
             final Iterator<Entry<String, TreeSet<Long>>> i = (page == 3) ? sb.localSearchTracker.entrySet().iterator() : sb.remoteSearchTracker.entrySet().iterator();
             String host;
             TreeSet<Long> handles;
-            int entCount = 0;
+            int m = 0;
             int qphSum = 0;
             Map.Entry<String, TreeSet<Long>> entry;
             try {
-            while ((entCount < maxCount) && (i.hasNext())) {
+            while ((m < maxCount) && (i.hasNext())) {
                 entry = i.next();
                 host = entry.getKey();
                 handles = entry.getValue();
@@ -246,29 +250,29 @@ public class AccessTracker_p {
                 final Iterator<Long> ii = handles.iterator();
                 while (ii.hasNext()) {
                     final Long timestamp = ii.next();
-                    prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", SimpleFormatter.format(new Date(timestamp.longValue())));
-                    prop.put("page_list_" + entCount + "_dates_" + dateCount + "_timestamp", timestamp.toString());
+                    prop.put("page_list_" + m + "_dates_" + dateCount + "_date", SimpleFormatter.format(new Date(timestamp.longValue())));
+                    prop.put("page_list_" + m + "_dates_" + dateCount + "_timestamp", timestamp.toString());
                     dateCount++;
                 }
-                prop.put("page_list_" + entCount + "_dates", dateCount);
+                prop.put("page_list_" + m + "_dates", dateCount);
                 final int qph = handles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size();
                 qphSum += qph;
-                prop.put("page_list_" + entCount + "_qph", qph);
+                prop.put("page_list_" + m + "_qph", qph);
                 
-                prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
-                prop.putHTML("page_list_" + entCount + "_host", host);
+                prop.put("page_list_" + m + "_dark", ((dark) ? 1 : 0) ); dark =! dark;
+                prop.putHTML("page_list_" + m + "_host", host);
                 if (page == 5) {
                     final yacySeed remotepeer = sb.peers.lookupByIP(Domains.dnsResolve(host), true, true, true);
-                    prop.putHTML("page_list_" + entCount + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
+                    prop.putHTML("page_list_" + m + "_peername", (remotepeer == null) ? "UNKNOWN" : remotepeer.getName());
                 }
-                prop.putNum("page_list_" + entCount + "_count", handles.size());
+                prop.putNum("page_list_" + m + "_count", handles.size());
 
                 // next
-                entCount++;
+                m++;
             }
             } catch (final ConcurrentModificationException e) {} // we dont want to synchronize this
             // return empty values to not break the table view if no results can be listed
-            if (entCount==0) {                
+            if (m==0) {                
                 prop.put("page_list", 1);
                 prop.put("page_list_0_dates_0_date", "&nbsp;");
                 prop.put("page_list_0_dates", 1);
@@ -278,10 +282,10 @@ public class AccessTracker_p {
                 prop.put("page_list_0_host", "&nbsp;");
                 prop.putNum("page_list_0_count", "");
             } else {
-                prop.put("page_list", entCount);
+                prop.put("page_list", m);
             }
-            prop.putNum("page_num", entCount);
-            prop.putNum("page_total", (page == 3) ? sb.localSearches.size() : sb.remoteSearches.size());
+            prop.putNum("page_num", m);
+            prop.putNum("page_total", (page == 3) ? AccessTracker.size(AccessTracker.Location.local) : AccessTracker.size(AccessTracker.Location.remote));
             prop.putNum("page_qph_sum", qphSum);
         }
         // return rewrite properties
