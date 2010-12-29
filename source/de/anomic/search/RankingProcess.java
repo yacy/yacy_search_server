@@ -563,8 +563,9 @@ public final class RankingProcess extends Thread {
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
         URIMetadataRow row;
         String domhash, urlhash, hostname;
-        while (domhashs.hasNext() && result.size() < 30) {
+        if (this.hostResolver != null) while (domhashs.hasNext() && result.size() < 30) {
             domhash = domhashs.next();
+            if (domhash == null) continue;
             urlhash = this.hostResolver.get(domhash);
             row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(urlhash.getBytes(), null, 0);
             hostname = row == null ? null : row.metadata().url().getHost();

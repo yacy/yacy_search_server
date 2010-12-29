@@ -85,7 +85,7 @@ function hideDownloadScript() {
 function resultNavigation() {
   var html = "";
   if (totalResults > 0) {
-      html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index; search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";
+      html += "<div>" + searchresult.length + " results from a total of " + totalResults + " docs in index (not showing offline resources); search time: " + ((new Date()).getTime() - start.getTime()) + " milliseconds.&nbsp;";
       html += "<div id=\"downloadbutton\" style=\"inline\"></div></div>";
   } else {
       if (query == "") {
