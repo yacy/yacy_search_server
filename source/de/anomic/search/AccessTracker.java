@@ -21,8 +21,18 @@
 
 package de.anomic.search;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+
+import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DateFormatter;
+
+import de.anomic.data.LibraryProvider;
 
 public class AccessTracker {
 
@@ -34,6 +44,7 @@ public class AccessTracker {
     
     private static LinkedList<QueryParams> localSearches = new LinkedList<QueryParams>();
     private static LinkedList<QueryParams> remoteSearches = new LinkedList<QueryParams>();
+    private static ArrayList<String> log = new ArrayList<String>();
     
     public static void add(Location location, QueryParams query) {
         if (location == Location.local) synchronized (localSearches) {add(localSearches, query);}
@@ -42,7 +53,9 @@ public class AccessTracker {
     
     private static void add(LinkedList<QueryParams> list, QueryParams query) {
         list.add(query);
-        while (list.size() > maxSize) list.removeFirst();
+        while (list.size() > maxSize) {
+            addToDump(list.removeFirst());
+        }
         if (list.size() <= minSize) {
             return;
         }
@@ -50,8 +63,10 @@ public class AccessTracker {
         while (list.size() > 0) {
             QueryParams q = list.getFirst();
             if (q.time.longValue() > timeout) break;
-            list.removeFirst();
+            addToDump(list.removeFirst());
         }
+        // learn that this word can be a word completion for the DidYouMeanLibrary
+        if (query.resultcount > 0 && query.queryString != null && query.queryString.length() > 0) LibraryProvider.dymLib.learn(query.queryString);
     }
     
     public static Iterator<QueryParams> get(Location location) {
@@ -64,5 +79,37 @@ public class AccessTracker {
         if (location == Location.local) synchronized (localSearches) {return localSearches.size();}
         if (location == Location.remote) synchronized (remoteSearches) {return remoteSearches.size();}
         return 0;
+    }
+    
+    private static void addToDump(QueryParams query) {
+        //if (query.resultcount == 0) return;
+        if (query.queryString == null || query.queryString.length() == 0) return;
+        StringBuilder sb = new StringBuilder(40);
+        sb.append(DateFormatter.formatShortSecond());
+        sb.append(' ');
+        sb.append(Integer.toString(query.resultcount));
+        sb.append(' ');
+        sb.append(query.queryString);
+        log.add(sb.toString());
+    }
+    
+    public static void dumpLog(File file) {
+        while (localSearches.size() > 0) {
+            addToDump(localSearches.removeFirst());
+        }
+        try {
+            RandomAccessFile raf = new RandomAccessFile(file, "rw");
+            raf.seek(raf.length());
+            for (String s: log) {
+                raf.write(s.getBytes("UTF-8"));
+                raf.writeByte(10);
+            }
+            log.clear();
+        } catch (FileNotFoundException e) {
+            Log.logException(e);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }

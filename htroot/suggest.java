@@ -23,6 +23,7 @@ import java.util.Iterator;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.kelondro.data.word.Word;
 
 import de.anomic.data.DidYouMean;
 import de.anomic.search.Segment;
@@ -56,6 +57,7 @@ public class suggest {
         final String ext = header.get("EXT", "");
         final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
+        final boolean more = post != null && post.containsKey("more");
         
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
@@ -75,19 +77,22 @@ public class suggest {
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
         
-        DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
-        Iterator<String> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
         int c = 0;
-        String suggestion;
-        //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
-        while (c < meanMax && meanIt.hasNext()) {
-            suggestion = meanIt.next();
-            if (json) prop.putJSON("suggestions_" + c + "_text", suggestion);
-            else if (xml) prop.putXML("suggestions_" + c + "_text", suggestion);
-            else prop.putHTML("suggestions_" + c + "_text", suggestion);
-            prop.put("suggestions_" + c + "_eol", 0);
-            c++;
+        if (more || !indexSegment.termIndex().has(Word.word2hash(querystring))) {
+            DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
+            Iterator<String> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
+            String suggestion;
+            //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
+            while (c < meanMax && meanIt.hasNext()) {
+                suggestion = meanIt.next();
+                if (json) prop.putJSON("suggestions_" + c + "_text", suggestion);
+                else if (xml) prop.putXML("suggestions_" + c + "_text", suggestion);
+                else prop.putHTML("suggestions_" + c + "_text", suggestion);
+                prop.put("suggestions_" + c + "_eol", 0);
+                c++;
+            }
         }
+        
         if (c > 0) prop.put("suggestions_" + (c - 1) + "_eol", 1);
         prop.put("suggestions", c);
         if (json) prop.putJSON("query", originalquerystring);

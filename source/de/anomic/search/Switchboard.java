@@ -1195,6 +1195,7 @@ public final class Switchboard extends serverSwitch {
         peers.close();
         Cache.close();
         tables.close();
+        AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
         UPnP.deletePortMapping();
         Tray.removeTray();
         try {

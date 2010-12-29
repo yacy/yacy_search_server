@@ -76,11 +76,11 @@ public class Crawler_p {
         prop.put("loaderSize", 0);        
         prop.put("loaderMax", 0);
         prop.put("list-loader", 0);
-        prop.put("localCrawlSize", 0);
+        prop.put("localCrawlSize", sb.crawlQueues.coreCrawlJobSize());
         prop.put("localCrawlState", "");
-        prop.put("limitCrawlSize", 0);
+        prop.put("limitCrawlSize", sb.crawlQueues.limitCrawlJobSize());
         prop.put("limitCrawlState", "");
-        prop.put("remoteCrawlSize", 0);
+        prop.put("remoteCrawlSize", sb.crawlQueues.limitCrawlJobSize());
         prop.put("remoteCrawlState", "");
         prop.put("list-remote", 0);
         prop.put("forwardToCrawlStart", "0");

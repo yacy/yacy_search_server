@@ -190,7 +190,7 @@ public class CrawlQueues {
     }
     
     public int coreCrawlJobSize() {
-        return noticeURL.stackSize(NoticedURL.StackType.CORE);
+        return noticeURL.stackSize(NoticedURL.StackType.CORE) + noticeURL.stackSize(NoticedURL.StackType.NOLOAD);
     }
     
     public boolean coreCrawlJob() {
