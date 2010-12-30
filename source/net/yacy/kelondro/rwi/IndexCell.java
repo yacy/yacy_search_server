@@ -493,9 +493,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                 } catch (Exception e) {
                     // catch all exceptions to prevent that no semaphore is released
                     Log.logException(e);
-                } finally {
-                    this.dumperSemaphore.release();
                 }
+                this.dumperSemaphore.release();
             } catch (InterruptedException e) {
                 Log.logException(e);
             }
