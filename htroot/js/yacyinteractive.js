@@ -72,7 +72,7 @@ function preparepage(str) {
 }
 
 function makeDownloadScript() {
-  document.getElementById("downloadscript").innerHTML = "<div style=\"float:left\"><pre>" + script + "</pre><br/></div>";
+  document.getElementById("downloadscript").innerHTML = "<div><pre>" + script + "</pre><br/></div>";
   document.getElementById("downloadbutton").innerHTML = "<input id=\"downloadbutton\" type=\"button\" value=\"hide the download script\" onClick=\"hideDownloadScript();\"/>";
 }
 
