@@ -162,8 +162,11 @@ function resultLine(type, item, linenumber) {
     host = item.link.substring(p + 2, q);
     path = item.link.substring(q + 1);
   }
-  if (path.length >= 40) path = path.substring(0, 18) + "..." + path.substring(path.length - 19);
   title = item.title;
+  q = path.lastIndexOf("/");
+  if (q > 0) path = path.substring(0, q);
+  path = unescape(path);
+  if (path.length >= 40) path = path.substring(0, 18) + "..." + path.substring(path.length - 19);
   if (title == "") title = path;
   if (title.length >= 60) title = title.substring(0, 28) + "..." + title.substring(title.length - 29);
   pd = item.pubDate;
