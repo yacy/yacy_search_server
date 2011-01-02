@@ -1671,6 +1671,9 @@ public final class Switchboard extends serverSwitch {
             // update the cluster set
             this.clusterhashes = this.peers.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
             
+            // check if we are reachable and try to map port again if not (e.g. when router rebooted)
+            if(getConfigBool(SwitchboardConstants.UPNP_ENABLED, false) && sb.peers.mySeed().isJunior())
+            	UPnP.addPortMapping();
             
             // after all clean up is done, check the resource usage
             observer.resourceObserverJob();
