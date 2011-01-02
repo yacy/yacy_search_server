@@ -102,7 +102,7 @@ public class PerformanceQueues_p {
             	sb.setConfig(SwitchboardConstants.DISK_FREE_HARDLIMIT, diskFreeHardlimit);
             }
             if(post.containsKey("memoryAcceptDHT")) {
-            	int memoryAcceptDHT = 50000; // default
+            	int memoryAcceptDHT = 50; // default
             	try { memoryAcceptDHT = Integer.parseInt(post.get("memoryAcceptDHT", Integer.toString(memoryAcceptDHT))); } catch (final NumberFormatException e){}
             	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, memoryAcceptDHT);
             }

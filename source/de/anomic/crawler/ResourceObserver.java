@@ -63,7 +63,7 @@ public class ResourceObserver {
      * checks the resources and pauses crawls if necessary
      */
     public void resourceObserverJob() {
-    	MemoryControl.setDHTkbytes(getMinFreeMemory());
+    	MemoryControl.setDHTMbyte(getMinFreeMemory());
 
     	normalizedDiskFree = getNormalizedDiskFree();
     	normalizedMemoryFree = getNormalizedMemoryFree();
@@ -157,7 +157,7 @@ public class ResourceObserver {
     }
     
     /**
-     * @return amount of space (KiB) that should at least be free
+     * @return amount of space (MiB) that should at least be free
      */
     public long getMinFreeMemory() {
     	return sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 0);

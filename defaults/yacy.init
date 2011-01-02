@@ -887,8 +887,8 @@ disk.free = 3000
 # minimum for DHT
 disk.free.hardlimit = 1000
 
-# minimum memory to accept dht-in (KB)
-memory.acceptDHT = 50000
+# minimum memory to accept dht-in (MiB)
+memory.acceptDHTabove = 50
 memory.disabledDHT = false
 
 # setting if execution of CGI files is allowed or not
