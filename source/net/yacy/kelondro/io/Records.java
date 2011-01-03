@@ -178,6 +178,7 @@ public final class Records {
      * write buffer to end of file 
      */
     protected final synchronized void flushBuffer() {
+        if (raf == null) return;
         try {
             raf.seek(raf.length());
             raf.write(this.buffer, 0, this.recordsize * this.buffercount);
@@ -188,10 +189,9 @@ public final class Records {
     }
     
     public final synchronized void close() {
-        flushBuffer();
-        
-        // then close the file
+        // close the file
         if (raf != null) try {
+            flushBuffer();
             raf.close();
         } catch (final IOException e) {
             Log.logException(e);

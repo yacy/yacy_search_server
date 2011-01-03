@@ -430,7 +430,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
     
     public void close() {
-        this.file.close();
+        if (this.file != null) this.file.close();
         this.file = null;
         if (this.table != null) this.table.close();
         this.table = null;
@@ -778,7 +778,8 @@ public class Table implements Index, Iterable<Row.Entry> {
 
     public synchronized void clear() throws IOException {
         final File f = file.filename();
-        file.close();
+        this.file.close();
+        this.file = null;
         FileUtils.deletedelete(f);
         
         // make new file

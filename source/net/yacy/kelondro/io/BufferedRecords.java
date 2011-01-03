@@ -59,7 +59,7 @@ public final class BufferedRecords {
      */
     public synchronized void flushBuffer() throws IOException {
         this.flushBuffer0();
-        efs.flushBuffer();
+        if (efs != null) efs.flushBuffer();
     }
     
     private final void flushBuffer0() throws IOException {
