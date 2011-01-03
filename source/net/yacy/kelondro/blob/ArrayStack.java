@@ -47,6 +47,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -58,7 +59,6 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.ReferenceIterator;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
@@ -161,7 +161,7 @@ public class ArrayStack implements BLOB {
                    f.delete();
                    deletions = true;
                } else try {
-                   d = DateFormatter.parseShortSecond(files[i].substring(0, 14));
+                   d = GenericFormatter.SHORT_SECOND_FORMATTER.parse(files[i].substring(0, 14));
                    f.renameTo(newBLOB(d));
                    deletions = true;
                } catch (ParseException e) {continue;}
@@ -177,7 +177,7 @@ public class ArrayStack implements BLOB {
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 22 && files[i].startsWith(prefix) && files[i].endsWith(".blob")) {
                try {
-                   d = DateFormatter.parseShortMilliSecond(files[i].substring(prefix.length() + 1, prefix.length() + 18));
+                   d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    time = d.getTime();
                    if (time > maxtime) maxtime = time;
                } catch (ParseException e) {continue;}
@@ -188,7 +188,7 @@ public class ArrayStack implements BLOB {
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 22 && files[i].startsWith(prefix) && files[i].endsWith(".blob")) {
                 try {
-                   d = DateFormatter.parseShortMilliSecond(files[i].substring(prefix.length() + 1, prefix.length() + 18));
+                   d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
                    if (time == maxtime && !trimall) {
@@ -231,7 +231,7 @@ public class ArrayStack implements BLOB {
     public synchronized void mountBLOB(File location, boolean full) throws IOException {
         Date d;
         try {
-            d = DateFormatter.parseShortMilliSecond(location.getName().substring(prefix.length() + 1, prefix.length() + 18));
+            d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(location.getName().substring(prefix.length() + 1, prefix.length() + 18));
         } catch (ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }
@@ -365,7 +365,7 @@ public class ArrayStack implements BLOB {
      */
     public synchronized File newBLOB(Date creation) {
         //return new File(heapLocation, DateFormatter.formatShortSecond(creation) + "." + blobSalt + ".blob");
-        return new File(heapLocation, prefix + "." + DateFormatter.formatShortMilliSecond(creation) + ".blob");
+        return new File(heapLocation, prefix + "." + GenericFormatter.SHORT_MILSEC_FORMATTER.format(creation) + ".blob");
     }
     
     public String name() {

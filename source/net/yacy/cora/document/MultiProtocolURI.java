@@ -54,6 +54,7 @@ import net.yacy.cora.protocol.http.HTTPClient;
  */
 public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolURI> {
 
+    public static final MultiProtocolURI POISON = new MultiProtocolURI(); // poison pill for concurrent link generators
     
     private static final long serialVersionUID = -1173233022912141884L;
     private static final long SMB_TIMEOUT = 5000;

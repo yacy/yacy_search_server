@@ -40,7 +40,6 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
 
 import de.anomic.http.server.HTTPDemon;
@@ -50,6 +49,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
+import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedUploader;
 
@@ -524,7 +524,7 @@ public class SettingsAck_p {
             }                        
             
             // everything is ok
-            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :DateFormatter.formatInterval(crawlerTimeout));
+            prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :yacyPeerActions.formatInterval(crawlerTimeout));
             prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":Formatter.bytesToString(maxHttpSize));
             prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxFtpSize));
             prop.put("info_crawler.smb.maxFileSize", (maxSmbSize==-1) ? "-1":Formatter.bytesToString(maxSmbSize));

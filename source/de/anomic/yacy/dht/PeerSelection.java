@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.storage.DynamicScore;
 import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.kelondro.data.word.Word;
@@ -38,7 +39,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.kelondroException;
 
 import de.anomic.yacy.yacyCore;
@@ -351,7 +351,7 @@ public class PeerSelection {
             while ((s.hasNext()) && (searchcount-- > 0)) {
                 ys = s.next();
                 if ((ys != null) && (ys.get(yacySeed.LASTSEEN, "").length() > 10)) try {
-                    absage = Math.abs(System.currentTimeMillis() + DateFormatter.dayMillis - ys.getLastSeenUTC()) / 1000 / 60;
+                    absage = Math.abs(System.currentTimeMillis() + AbstractFormatter.dayMillis - ys.getLastSeenUTC()) / 1000 / 60;
                     if (absage > Integer.MAX_VALUE) absage = Integer.MAX_VALUE;
                     seedScore.inc(ys.hash, (int) absage); // the higher absage, the older is the peer
                 } catch (final Exception e) {}

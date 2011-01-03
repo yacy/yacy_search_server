@@ -33,9 +33,8 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 //import java.util.List;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.order.Digest;
-import net.yacy.kelondro.util.DateFormatter;
-
 //import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
@@ -115,7 +114,7 @@ public class yacyNetwork {
                 if (targetHash != null) parts.put("youare", new StringBody(targetHash));
                 
                 // time information for synchronization
-                parts.put("mytime", new StringBody(DateFormatter.formatShortSecond(new Date())));
+                parts.put("mytime", new StringBody(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date())));
                 parts.put("myUTC", new StringBody(Long.toString(System.currentTimeMillis())));
 
                 // network identification

@@ -94,4 +94,8 @@ public class IntScore implements Comparable<IntScore>, Comparator<IntScore> {
     public int compare(IntScore o1, IntScore o2) {
         return o1.compareTo(o2);
     }
+    
+    public String toString() {
+        return Integer.toString(this.value);
+    }
 }

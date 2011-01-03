@@ -31,13 +31,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.WorkTables;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
@@ -119,7 +119,7 @@ public class RemoteCrawl_p {
                 prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
                 prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                 prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
-                prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", DateFormatter.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
+                prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
                 prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLinkCount());
                 prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getWordCount());
                 prop.putNum(STR_TABLE_LIST + conCount + "_RCount", rcount);

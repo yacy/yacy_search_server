@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.blob.Tables;
@@ -25,7 +26,6 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.search.Segment;
 
 public class YMarkTables {
@@ -202,7 +202,7 @@ public class YMarkTables {
     	if(date != null) {
         	final String s = new String(date);
         	if(s != null && s.length() > 0)
-        		return DateFormatter.formatISO8601(new Date(Long.parseLong(s)));	
+        		return ISO8601Formatter.FORMATTER.format(new Date(Long.parseLong(s)));	
     	}
     	return "";
     }
@@ -419,9 +419,9 @@ public class YMarkTables {
         if (urlEntry != null) {
         	metadata.put(METADATA.IN_URLDB, "true");
         	metadata.put(METADATA.SIZE, String.valueOf(urlEntry.size()));
-        	metadata.put(METADATA.FRESHDATE, DateFormatter.formatISO8601(urlEntry.freshdate()));
-        	metadata.put(METADATA.LOADDATE, DateFormatter.formatISO8601(urlEntry.loaddate()));
-        	metadata.put(METADATA.MODDATE, DateFormatter.formatISO8601(urlEntry.moddate()));
+        	metadata.put(METADATA.FRESHDATE, ISO8601Formatter.FORMATTER.format(urlEntry.freshdate()));
+        	metadata.put(METADATA.LOADDATE, ISO8601Formatter.FORMATTER.format(urlEntry.loaddate()));
+        	metadata.put(METADATA.MODDATE, ISO8601Formatter.FORMATTER.format(urlEntry.moddate()));
         	metadata.put(METADATA.SNIPPET, String.valueOf(urlEntry.snippet()));
         	metadata.put(METADATA.WORDCOUNT, String.valueOf(urlEntry.wordCount()));
         	metadata.put(METADATA.MIMETYPE, String.valueOf(urlEntry.doctype()));

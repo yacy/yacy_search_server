@@ -75,6 +75,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -104,7 +105,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -2457,7 +2457,7 @@ public final class Switchboard extends serverSwitch {
         peers.mySeed().put(yacySeed.VERSION, yacyBuildProperties.getLongVersion());
         peers.mySeed().setFlagDirectConnect(true);
         peers.mySeed().setLastSeenUTC();
-        peers.mySeed().put(yacySeed.UTC, DateFormatter.UTCDiffString());
+        peers.mySeed().put(yacySeed.UTC, GenericFormatter.UTCDiffString());
         peers.mySeed().setFlagAcceptRemoteCrawl(getConfig("crawlResponse", "").equals("true"));
         peers.mySeed().setFlagAcceptRemoteIndex(getConfig("allowReceiveIndex", "").equals("true"));
         //mySeed.setFlagAcceptRemoteIndex(true);

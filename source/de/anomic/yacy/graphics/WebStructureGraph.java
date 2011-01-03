@@ -37,12 +37,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
 
@@ -150,7 +150,7 @@ public class WebStructureGraph {
     
     private static String map2refstr(final Map<String, Integer> map) {
         final StringBuilder s = new StringBuilder(map.size() * 10);
-        s.append(DateFormatter.formatShortDay(new Date()));
+        s.append(GenericFormatter.SHORT_DAY_FORMATTER.format(new Date()));
         String h;
         for (final Map.Entry<String, Integer> entry : map.entrySet()) {
             s.append(entry.getKey());
@@ -229,7 +229,7 @@ public class WebStructureGraph {
         return new structureEntry(
                 domhash,
                 host,
-                DateFormatter.formatShortDay(new Date()),
+                GenericFormatter.SHORT_DAY_FORMATTER.format(new Date()),
                 domhashes);
     }
     

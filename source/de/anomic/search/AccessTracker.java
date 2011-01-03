@@ -26,12 +26,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.data.LibraryProvider;
 
 public class AccessTracker {
@@ -85,7 +85,7 @@ public class AccessTracker {
         //if (query.resultcount == 0) return;
         if (query.queryString == null || query.queryString.length() == 0) return;
         StringBuilder sb = new StringBuilder(40);
-        sb.append(DateFormatter.formatShortSecond());
+        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
         sb.append(' ');
         sb.append(Integer.toString(query.resultcount));
         sb.append(' ');

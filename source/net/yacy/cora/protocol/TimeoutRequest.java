@@ -37,8 +37,6 @@ import java.util.concurrent.TimeoutException;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
-import net.yacy.kelondro.logging.Log;
-
 /**
  * TimeoutRequest is a class that can apply a timeout on method calls that may block
  * for undefined time. Some network operations can only be accessed without a given
@@ -316,7 +314,7 @@ public class TimeoutRequest<E> {
                 public String[] call() { try {
                     return file.list();
                 } catch (SmbException e) {
-                    Log.logWarning("TimeoutRequest:list", file.toString() + " - no list", e);
+                    //Log.logWarning("TimeoutRequest:list", file.toString() + " - no list", e);
                     return null;
                 } }
             }).call(timeout);

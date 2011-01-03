@@ -33,9 +33,6 @@ import java.util.Date;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.io.ByteCount;
-//import net.yacy.kelondro.io.ByteCountInputStream;
-//import net.yacy.kelondro.io.ByteCountOutputStream;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
@@ -48,6 +45,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyBuildProperties;
+import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
 
 public class Status {
@@ -203,7 +201,7 @@ public class Status {
         } else {
             final long uptime = 60000 * Long.parseLong(sb.peers.mySeed().get(yacySeed.UPTIME, "0"));
             prop.put("peerStatistics", "1");
-            prop.put("peerStatistics_uptime", DateFormatter.formatInterval(uptime));
+            prop.put("peerStatistics_uptime", yacyPeerActions.formatInterval(uptime));
             prop.putNum("peerStatistics_pagesperminute", sb.peers.mySeed().getPPM());
             prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.peers.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", sb.peers.mySeed().getLinkCount());
@@ -262,7 +260,7 @@ public class Status {
                 prop.putHTML("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put("seedServer_lastUpload",
-                    DateFormatter.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
+                    yacyPeerActions.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }

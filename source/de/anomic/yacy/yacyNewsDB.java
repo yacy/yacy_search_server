@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -62,7 +63,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.Table;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.kelondro.util.MapTools;
@@ -76,7 +76,7 @@ public class yacyNewsDB {
     protected Index news;
 
     private  static final int categoryStringLength = 8;
-    public  static final int idLength = DateFormatter.PATTERN_SHORT_SECOND.length() + Word.commonHashLength;
+    public  static final int idLength = GenericFormatter.PATTERN_SHORT_SECOND.length() + Word.commonHashLength;
 
     public yacyNewsDB(
     		final File path,
@@ -87,12 +87,12 @@ public class yacyNewsDB {
         this.attributesMaxLength = maxNewsRecordLength
             - idLength
             - categoryStringLength
-            - DateFormatter.PATTERN_SHORT_SECOND.length()
+            - GenericFormatter.PATTERN_SHORT_SECOND.length()
             - 2;
         this.rowdef = new Row(
                 "String idx-" + idLength + " \"id = created + originator\"," +
                 "String cat-" + categoryStringLength + "," +
-                "String rec-" + DateFormatter.PATTERN_SHORT_SECOND.length() + "," +
+                "String rec-" + GenericFormatter.PATTERN_SHORT_SECOND.length() + "," +
                 "short  dis-2 {b64e}," +
                 "String att-" + attributesMaxLength,
                 NaturalOrder.naturalOrder
@@ -189,7 +189,7 @@ public class yacyNewsDB {
         return new yacyNewsDB.Record(
             b.getColString(0, null),
             b.getColString(1, "UTF-8"),
-            (b.empty(2)) ? null : DateFormatter.parseShortSecond(b.getColString(2, null), DateFormatter.UTCDiffString()),
+            (b.empty(2)) ? null : GenericFormatter.SHORT_SECOND_FORMATTER.parse(b.getColString(2, null), GenericFormatter.UTCDiffString()),
             (int) b.getColLong(3),
             MapTools.string2map(b.getColString(4, "UTF-8"), ",")
         );
@@ -206,7 +206,7 @@ public class yacyNewsDB {
             final Row.Entry entry = this.news.row().newEntry();
             entry.setCol(0, r.id().getBytes());
             entry.setCol(1, r.category().getBytes("UTF-8"));
-            entry.setCol(2, (r.received() == null) ? null : DateFormatter.formatShortSecond(r.received()).getBytes());
+            entry.setCol(2, (r.received() == null) ? null : GenericFormatter.SHORT_SECOND_FORMATTER.format(r.received()).getBytes());
             entry.setCol(3, Base64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes());
             entry.setCol(4, attributes.getBytes("UTF-8"));
             return entry;
@@ -265,8 +265,8 @@ public class yacyNewsDB {
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.category = (attributes.containsKey("cat")) ? attributes.get("cat") : "";
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
-            this.received = (attributes.containsKey("rec")) ? DateFormatter.parseShortSecond(attributes.get("rec"), DateFormatter.UTCDiffString()) : new Date();
-            this.created = (attributes.containsKey("cre")) ? DateFormatter.parseShortSecond(attributes.get("cre"), DateFormatter.UTCDiffString()) : new Date();
+            this.received = (attributes.containsKey("rec")) ? GenericFormatter.SHORT_SECOND_FORMATTER.parse(attributes.get("rec"), GenericFormatter.UTCDiffString()) : new Date();
+            this.created = (attributes.containsKey("cre")) ? GenericFormatter.SHORT_SECOND_FORMATTER.parse(attributes.get("cre"), GenericFormatter.UTCDiffString()) : new Date();
             this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt(attributes.get("dis")) : 0;
             this.originator = (attributes.containsKey("ori")) ? attributes.get("ori") : "";
             removeStandards();
@@ -289,10 +289,10 @@ public class yacyNewsDB {
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.attributes = attributes;
             this.received = received;
-            this.created = DateFormatter.parseShortSecond(id.substring(0, DateFormatter.PATTERN_SHORT_SECOND.length()), DateFormatter.UTCDiffString());
+            this.created = GenericFormatter.SHORT_SECOND_FORMATTER.parse(id.substring(0, GenericFormatter.PATTERN_SHORT_SECOND.length()), GenericFormatter.UTCDiffString());
             this.category = category;
             this.distributed = distributed;
-            this.originator = id.substring(DateFormatter.PATTERN_SHORT_SECOND.length());
+            this.originator = id.substring(GenericFormatter.PATTERN_SHORT_SECOND.length());
             removeStandards();
         }
 
@@ -309,8 +309,8 @@ public class yacyNewsDB {
             // attention: this has no additional encoding
             if (this.originator != null) attributes.put("ori", this.originator);
             if (this.category != null)   attributes.put("cat", this.category);
-            if (this.created != null)    attributes.put("cre", DateFormatter.formatShortSecond(this.created));
-            if (this.received != null)   attributes.put("rec", DateFormatter.formatShortSecond(this.received));
+            if (this.created != null)    attributes.put("cre", GenericFormatter.SHORT_SECOND_FORMATTER.format(this.created));
+            if (this.received != null)   attributes.put("rec", GenericFormatter.SHORT_SECOND_FORMATTER.format(this.received));
             attributes.put("dis", Integer.toString(this.distributed));
             final String theString = attributes.toString();
             removeStandards();
@@ -318,7 +318,7 @@ public class yacyNewsDB {
         }
 
         public String id() {
-            return DateFormatter.formatShortSecond(created) + originator;
+            return GenericFormatter.SHORT_SECOND_FORMATTER.format(created) + originator;
         }
 
         public String originator() {

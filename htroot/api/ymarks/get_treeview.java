@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
@@ -14,7 +15,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.UserDB;
@@ -147,7 +147,7 @@ public class get_treeview {
 			            	if(key.startsWith("date")) {
 				            	final String d = new String(bmk_row.get(key));
 				            	if(!d.isEmpty()) {
-				            		final String date = DateFormatter.formatISO8601(new Date(Long.parseLong(d)));
+				            		final String date = ISO8601Formatter.FORMATTER.format(new Date(Long.parseLong(d)));
 					            	prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> " + date + "</small>");
 			    					putProp(count, "date");
 			    					count++;

@@ -54,19 +54,6 @@ public class RSSReader extends DefaultHandler {
         type = Type.none;
     }
     
-    public RSSReader(int maxsize, final String path) throws IOException {
-        this(maxsize);
-        final SAXParserFactory factory = SAXParserFactory.newInstance();
-        try {
-            final SAXParser saxParser = factory.newSAXParser();
-            saxParser.parse(path, this);
-        } catch (SAXException e) {
-            throw new IOException (e.getMessage());
-        } catch (ParserConfigurationException e) {
-            throw new IOException (e.getMessage());
-        }
-    }
-    
     public RSSReader(int maxsize, final InputStream stream, Type type) throws IOException {
         this(maxsize);
         this.type = type;

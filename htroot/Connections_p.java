@@ -35,7 +35,6 @@ import java.util.Set;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
 //import de.anomic.http.client.ConnectionInfo;
@@ -45,6 +44,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCore.Session;
+import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
 
 public final class Connections_p {    
@@ -117,7 +117,7 @@ public final class Connections_p {
             prop.put("list_" + idx + "_proto", prot);
             if (sessionTime > 1000*60) {
                 prop.put("list_" + idx + "_ms", "0");
-                prop.put("list_" + idx + "_ms_duration",DateFormatter.formatInterval(sessionTime));
+                prop.put("list_" + idx + "_ms_duration",yacyPeerActions.formatInterval(sessionTime));
             } else {
                 prop.put("list_" + idx + "_ms", "1");
                 prop.putNum("list_" + idx + "_ms_duration", sessionTime);

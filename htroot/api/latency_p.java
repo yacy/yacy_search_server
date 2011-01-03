@@ -25,9 +25,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.crawler.Latency;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.Latency.Host;
@@ -49,7 +48,7 @@ public class latency_p {
             host = e.getValue();
             prop.putXML("domains_" + c + "_hosthash", e.getKey());
             prop.putXML("domains_" + c + "_host", host.host());
-            prop.putXML("domains_" + c + "_lastaccess", DateFormatter.formatShortSecond(new Date(host.lastacc())));
+            prop.putXML("domains_" + c + "_lastaccess", GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(host.lastacc())));
             prop.put("domains_" + c + "_count", host.count());
             prop.put("domains_" + c + "_average", host.average());
             prop.put("domains_" + c + "_robots", host.robotsDelay());

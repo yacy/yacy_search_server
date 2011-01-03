@@ -30,9 +30,6 @@ import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import net.yacy.kelondro.util.kelondroOutOfLimitsException;
-
-
 public final class ScoreCluster<E> implements DynamicScore<E> {
     
     protected final Map<E, Long> map; // a mapping from a reference to the cluster key
@@ -198,7 +195,7 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         if (obj == null) return;
         synchronized (this) {
             Long usk = map.remove(obj); // get unique score key, old entry is not needed any more
-            if (newScore < 0) throw new kelondroOutOfLimitsException(newScore);
+            if (newScore < 0) throw new OutOfLimitsException(newScore);
             
             if (usk == null) {
                 // set new value
@@ -235,7 +232,7 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
             
             if (usk == null) {
                 // set new value
-                if (incrementScore < 0) throw new kelondroOutOfLimitsException(incrementScore);
+                if (incrementScore < 0) throw new OutOfLimitsException(incrementScore);
                 usk = Long.valueOf(scoreKey(encnt++, incrementScore));
                 
                 // put new value into cluster
@@ -253,7 +250,7 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
                 
                 // set new value
                 final int newValue = oldScore + incrementScore;
-                if (newValue < 0) throw new kelondroOutOfLimitsException(newValue);
+                if (newValue < 0) throw new OutOfLimitsException(newValue);
                 usk = Long.valueOf(scoreKey(oldHandle, newValue)); // generates an unique key for a specific score
                 map.put(obj, usk);
                 pam.put(usk, obj);

@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Document;
@@ -44,7 +45,6 @@ import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.BookmarkHelper;
@@ -316,7 +316,7 @@ public class Bookmarks {
                         }
                         prop.putHTML("display_bookmarks_"+count+"_title", bookmark.getTitle());
                         prop.putHTML("display_bookmarks_"+count+"_description", bookmark.getDescription());
-                        prop.put("display_bookmarks_"+count+"_date", DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())));
+                        prop.put("display_bookmarks_"+count+"_date", ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())));
                         prop.put("display_bookmarks_"+count+"_rfc822date", HeaderFramework.formatRFC1123(new Date(bookmark.getTimeStamp())));
                         prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "1" : "0"));
 	            

@@ -49,12 +49,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.yacy.dht.PeerSelection;
@@ -256,14 +255,14 @@ public class yacyCore {
                             if (newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC()) {
                                 if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
-                                    DateFormatter.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "'");
+                                    GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "'");
                                 newSeed.setLastSeenUTC();
                                 sb.peers.peerActions.peerArrival(newSeed, true);
                             } else {
                                 if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
-                                    DateFormatter.formatShortSecond(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
-                                    DateFormatter.formatShortSecond(new Date(this.seed.getLastSeenUTC())) + "'");
+                                    GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
+                                    GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(this.seed.getLastSeenUTC())) + "'");
                                 this.seed.setLastSeenUTC();
                                 sb.peers.peerActions.peerArrival(this.seed, true);
                             }

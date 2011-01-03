@@ -79,6 +79,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -90,7 +91,6 @@ import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
@@ -490,7 +490,7 @@ public final class HTTPDFileHandler {
                             if (author != null && author.length() > 0) aBuffer.append("Author: " + author + "<br/>");
                             if (publisher != null && publisher.length() > 0) aBuffer.append("Publisher: " + publisher + "<br/>");
                             if (description != null && description.length() > 0) aBuffer.append("Description: " + description + "<br/>");
-                            aBuffer.append(DateFormatter.formatShortDay(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br/></li>\n");
+                            aBuffer.append(GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(f.lastModified())) + ", " + size + ((images > 0) ? ", " + images + " images" : "") + ((links > 0) ? ", " + links + " links" : "") + "<br/></li>\n");
                         }
                     }
                     aBuffer.append("  </ul>\n</body>\n</html>\n");
@@ -823,7 +823,7 @@ public final class HTTPDFileHandler {
                             templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((Switchboard) switchboard).peers.myID());
-                            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, DateFormatter.formatShortSecond());
+                            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
                             yacySeed myPeer = sb.peers.mySeed();
                             templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1); 
                             templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);

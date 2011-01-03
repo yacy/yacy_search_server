@@ -36,10 +36,10 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 
 
 public class DCEntry extends TreeMap<String, String> {
@@ -67,7 +67,7 @@ public class DCEntry extends TreeMap<String, String> {
             ) {
         super((Collator) insensitiveCollator.clone());
         this.put("dc:identifier", url.toNormalform(true, false));
-        this.put("dc:date", DateFormatter.formatISO8601(date));
+        this.put("dc:date", ISO8601Formatter.FORMATTER.format(date));
         this.put("dc:title", title);
         this.put("dc:creator", author);
         this.put("dc:description", body);
@@ -98,7 +98,7 @@ public class DCEntry extends TreeMap<String, String> {
         if (d == null) return null;
         if (d.length() == 0) return null;
         try {
-            return DateFormatter.parseISO8601(d);
+            return ISO8601Formatter.FORMATTER.parse(d);
         } catch (ParseException e) {
             Log.logException(e);
             return new Date();

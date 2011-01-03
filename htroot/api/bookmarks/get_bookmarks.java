@@ -3,10 +3,10 @@
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
@@ -160,7 +160,7 @@ public class get_bookmarks {
                 if (bookmark != null) {
                     prop.put("display_bookmarks_"+count+"_id",count);
                     prop.put("display_bookmarks_"+count+"_link",bookmark.getUrl());
-                    prop.put("display_bookmarks_"+count+"_date", DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())));
+                    prop.put("display_bookmarks_"+count+"_date", ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())));
                     prop.put("display_bookmarks_"+count+"_rfc822date", HeaderFramework.formatRFC1123(new Date(bookmark.getTimeStamp())));
                     prop.put("display_bookmarks_"+count+"_public", (bookmark.getPublic() ? "0" : "1"));
                     prop.put("display_bookmarks_"+count+"_hash", bookmark.getUrlHash());
@@ -253,7 +253,7 @@ public class get_bookmarks {
             date = new Date(bookmark.getTimeStamp());
             prop.put("display_xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
                 + "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
-                + "\" added=\"" + CharacterCoding.unicode2xml(DateFormatter.formatISO8601(date), true)+"\">");
+                + "\" added=\"" + CharacterCoding.unicode2xml(ISO8601Formatter.FORMATTER.format(date), true)+"\">");
             count++;
             prop.put("display_xbel_"+count+"_elements", "<title>");
             count++;

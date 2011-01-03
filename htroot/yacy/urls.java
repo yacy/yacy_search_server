@@ -27,11 +27,10 @@
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.Segments;
@@ -93,7 +92,7 @@ public class urls {
                 prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
                 prop.putXML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
-                prop.put("item_" + c + "_pubDate", DateFormatter.formatShortSecond(entry.appdate()));
+                prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.appdate()));
                 prop.put("item_" + c + "_guid", entry.url().hash());
                 c++;
                 maxCount--;
@@ -123,7 +122,7 @@ public class urls {
                 prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true, false));
                 prop.putXML("item_" + c + "_description", metadata.dc_title());
                 prop.put("item_" + c + "_author", metadata.dc_creator());
-                prop.put("item_" + c + "_pubDate", DateFormatter.formatShortSecond(entry.moddate()));
+                prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.moddate()));
                 prop.put("item_" + c + "_guid", new String(entry.hash()));
                 c++;
             }

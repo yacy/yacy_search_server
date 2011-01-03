@@ -32,21 +32,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import de.anomic.data.WorkTables;
-import de.anomic.search.Switchboard;
-
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 
 /**
  * a protocol scanner
@@ -208,7 +201,6 @@ public class Scanner extends Thread {
                 runner.start();
             }
         } catch (InterruptedException e) {
-            Log.logException(e);
         }
     }
 
@@ -302,7 +294,6 @@ public class Scanner extends Thread {
             try {
                 this.scanqueue.put(new Service(protocol, i));
             } catch (InterruptedException e) {
-                Log.logException(e);
             }
         }
     }
@@ -334,22 +325,6 @@ public class Scanner extends Thread {
             if (comment.getValue().contains(url)) return comment.getKey();
         }
         return null;
-    }
-    
-    public static Map<byte[], String> commentCache(Switchboard sb) {
-        Map<byte[], String> comments = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
-        Iterator<Tables.Row> i;
-        try {
-            i = sb.tables.iterator(WorkTables.TABLE_API_NAME);
-            Tables.Row row;
-            while (i.hasNext()) {
-                row = i.next();
-                comments.put(row.getPK(), new String(row.get(WorkTables.TABLE_API_COL_COMMENT)));
-            }
-        } catch (IOException e) {
-            Log.logException(e);
-        }
-        return comments;
     }
     
     public static void main(String[] args) {

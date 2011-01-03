@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-
+import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.kelondro.util.DateFormatter;
 
 public class RSSMessage implements Hit {
 
@@ -89,7 +89,7 @@ public class RSSMessage implements Hit {
         map.put("title", title);
         map.put("description", description);
         map.put("link", link);
-        map.put("pubDate", DateFormatter.formatShortSecond(new Date()));
+        map.put("pubDate", ISO8601Formatter.FORMATTER.format(new Date()));
         map.put("guid", artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
     
@@ -150,10 +150,10 @@ public class RSSMessage implements Hit {
         String dateString = Token.pubDate.valueFrom(this.map);
         Date date;
         try {
-            date = DateFormatter.parseShortSecond(dateString);
+            date = ISO8601Formatter.FORMATTER.parse(dateString);
         } catch (ParseException e) {
             try {
-                date = DateFormatter.parseISO8601(dateString);
+                date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(dateString);
             } catch (ParseException e1) {
                 date = HeaderFramework.parseHTTPDate(dateString);
             }
@@ -228,7 +228,7 @@ public class RSSMessage implements Hit {
     }
 
     public void setPubDate(Date pubdate) {
-        setValue("pubDate", DateFormatter.formatISO8601(new Date()));
+        setValue("pubDate", ISO8601Formatter.FORMATTER.format(pubdate));
     }
     
     public void setReferrer(String referrer) {

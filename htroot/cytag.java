@@ -30,12 +30,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.ImageParser;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.search.Switchboard;
@@ -52,7 +52,7 @@ public class cytag {
         // harvest request information
         StringBuilder connect = new StringBuilder();
         connect.append('{');
-        appendJSON(connect, "time", DateFormatter.formatShortMilliSecond(new Date()));
+        appendJSON(connect, "time", GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()));
         appendJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false, false));
         appendJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
         appendJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));

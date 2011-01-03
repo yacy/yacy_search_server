@@ -23,14 +23,14 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
+import java.util.Date;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.content.dao.Dao;
 import net.yacy.document.content.dao.ImportDump;
 import net.yacy.document.content.dao.PhpBB3Dao;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -107,7 +107,7 @@ public class ContentIntegrationPHPBB3_p {
                                             dbpw
                                             );
                     
-                    int files = db.writeSurrogates(db.query(0, -1, 100), sb.surrogatesInPath, "fullexport-" + DateFormatter.formatShortSecond(), ppf);
+                    int files = db.writeSurrogates(db.query(0, -1, 100), sb.surrogatesInPath, "fullexport-" + GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()), ppf);
                     prop.put("export", 1);
                     prop.put("export_files", files);
                     db.close();

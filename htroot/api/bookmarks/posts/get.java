@@ -4,10 +4,9 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Digest;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.data.BookmarksDB;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -24,12 +23,12 @@ public class get {
         //String url=""; //urlfilter not yet implemented
         
         if (post != null && post.containsKey("tag")) {
-            tag=post.get("tag");
+            tag = post.get("tag");
         }
         if (post != null && post.containsKey("date")) {
-            date=post.get("date");
+            date = post.get("date");
         } else {
-            date=DateFormatter.formatISO8601(new Date(System.currentTimeMillis()));
+            date = ISO8601Formatter.FORMATTER.format(new Date(System.currentTimeMillis()));
         }
         
         // if an extended xml should be used
@@ -39,7 +38,7 @@ public class get {
         
         Date parsedDate = null; 
         try {
-            parsedDate = DateFormatter.parseISO8601(date);
+            parsedDate = ISO8601Formatter.FORMATTER.parse(date);
         } catch (final ParseException e) {
             parsedDate = new Date();
         }
@@ -48,7 +47,7 @@ public class get {
         BookmarksDB.Bookmark bookmark = null;
         for (final String bookmark_hash : bookmark_hashes){
             bookmark=switchboard.bookmarksDB.getBookmark(bookmark_hash);
-            if(DateFormatter.formatISO8601(new Date(bookmark.getTimeStamp())).equals(date) &&
+            if (ISO8601Formatter.FORMATTER.format(new Date(bookmark.getTimeStamp())).equals(date) &&
                     tag==null || bookmark.getTags().contains(tag) &&
                     isAdmin || bookmark.getPublic()){
                 prop.putHTML("posts_"+count+"_url", bookmark.getUrl());

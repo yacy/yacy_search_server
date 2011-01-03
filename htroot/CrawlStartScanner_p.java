@@ -164,7 +164,7 @@ public class CrawlStartScanner_p {
                 // execute the scan results
                 if (Scanner.scancacheSize() > 0) {
                     // make a comment cache
-                    Map<byte[], String> apiCommentCache = Scanner.commentCache(sb);
+                    Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
                     
                     String urlString;
                     DigestURI u;
@@ -196,7 +196,7 @@ public class CrawlStartScanner_p {
         // write scan table
         if (Scanner.scancacheSize() > 0) {
             // make a comment cache
-            Map<byte[], String> apiCommentCache = Scanner.commentCache(sb);
+            Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
             
             // show scancache table
             prop.put("servertable", 1);

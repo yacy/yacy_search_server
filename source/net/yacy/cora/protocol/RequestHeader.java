@@ -23,13 +23,8 @@ package net.yacy.cora.protocol;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Map;
-import java.util.Properties;
-import java.util.regex.Pattern;
-
-import de.anomic.http.server.HTTPDemon;
 
 import net.yacy.cora.document.MultiProtocolURI;
-
 
 public class RequestHeader extends HeaderFramework {
 
@@ -59,16 +54,6 @@ public class RequestHeader extends HeaderFramework {
     
     private static final long serialVersionUID = 0L;
 
-    private static final Pattern P_20 = Pattern.compile(" ", Pattern.LITERAL);
-    private static final Pattern P_7B = Pattern.compile("{", Pattern.LITERAL);
-    private static final Pattern P_7D = Pattern.compile("}", Pattern.LITERAL);
-    private static final Pattern P_7C = Pattern.compile("|", Pattern.LITERAL);
-    private static final Pattern P_5C = Pattern.compile("\\", Pattern.LITERAL);
-    private static final Pattern P_5E = Pattern.compile("^", Pattern.LITERAL);
-    private static final Pattern P_5B = Pattern.compile("[", Pattern.LITERAL);
-    private static final Pattern P_5D = Pattern.compile("]", Pattern.LITERAL);
-    private static final Pattern P_60 = Pattern.compile("`", Pattern.LITERAL);
-    
     public RequestHeader() {
         super();
     }
@@ -120,116 +105,4 @@ public class RequestHeader extends HeaderFramework {
         return ((containsKey(ACCEPT_ENCODING)) &&
                 ((get(ACCEPT_ENCODING)).toUpperCase().indexOf("GZIP")) != -1);        
     }
-    
-    public static Properties parseRequestLine(final String cmd, String args, final String virtualHost) {
-        
-        final Properties prop = new Properties();
-        
-        // storing informations about the request
-        prop.setProperty(CONNECTION_PROP_METHOD, cmd);
-        prop.setProperty(CONNECTION_PROP_REQUESTLINE, cmd + " " + args);
-        
-        // this parses a whole URL
-        if (args.length() == 0) {
-            prop.setProperty(CONNECTION_PROP_HOST, virtualHost);
-            prop.setProperty(CONNECTION_PROP_PATH, "/");
-            prop.setProperty(CONNECTION_PROP_HTTP_VER, HTTP_VERSION_0_9);
-            prop.setProperty(CONNECTION_PROP_EXT, "");
-            return prop;
-        }
-        
-        // store the version propery "HTTP" and cut the query at both ends
-        int sep = args.lastIndexOf(' ');
-        if ((sep >= 0)&&(args.substring(sep + 1).toLowerCase().startsWith("http/"))) {
-            // HTTP version is given
-            prop.setProperty(CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
-            args = args.substring(0, sep).trim(); // cut off HTTP version mark
-        } else {
-            // HTTP version is not given, it will be treated as ver 0.9
-            prop.setProperty(CONNECTION_PROP_HTTP_VER, HTTP_VERSION_0_9);
-        }
-        
-        // replacing spaces in the url string correctly
-        args = P_20.matcher(args).replaceAll("%20");
-        // replace unwise characters (see RFC 2396, 2.4.3), which may not be escaped
-        args = P_7B.matcher(args).replaceAll("%7B");
-        args = P_7D.matcher(args).replaceAll("%7D");
-        args = P_7C.matcher(args).replaceAll("%7C");
-        args = P_5C.matcher(args).replaceAll("%5C");
-        args = P_5E.matcher(args).replaceAll("%5E");
-        args = P_5B.matcher(args).replaceAll("%5B");
-        args = P_5D.matcher(args).replaceAll("%5D");
-        args = P_60.matcher(args).replaceAll("%60");
-        
-        // properties of the query are stored with the prefix "&"
-        // additionally, the values URL and ARGC are computed
-        
-        String argsString = "";
-        sep = args.indexOf('?');
-        if (sep >= 0) {
-            // there are values attached to the query string
-            argsString = args.substring(sep + 1); // cut head from tail of query
-            args = args.substring(0, sep);
-        }
-        prop.setProperty(CONNECTION_PROP_URL, args); // store URL
-        //System.out.println("HTTPD: ARGS=" + argsString);
-        if (argsString.length() != 0) prop.setProperty(CONNECTION_PROP_ARGS, argsString); // store arguments in original form
-        
-        // finally find host string
-        String path;
-        if (args.toUpperCase().startsWith("HTTP://")) {
-            // a host was given. extract it and set path
-            args = args.substring(7);
-            sep = args.indexOf('/');
-            if (sep < 0) {
-                // this is a malformed url, something like
-                // http://index.html
-                // we are lazy and guess that it means
-                // /index.html
-                // which is a localhost access to the file servlet
-                prop.setProperty(CONNECTION_PROP_HOST, args);
-                path = "/";
-            } else {
-                // THIS IS THE "GOOD" CASE
-                // a perfect formulated url
-                final String dstHostSocket = args.substring(0, sep);
-                prop.setProperty(CONNECTION_PROP_HOST, (HTTPDemon.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
-                path = args.substring(sep); // yes, including beginning "/"
-            }
-        } else {
-            // no host in url. set path
-            if (args.length() > 0 && args.charAt(0) == '/') {
-                // thats also fine, its a perfect localhost access
-                // in this case, we simulate a
-                // http://localhost/s
-                // access by setting a virtual host
-                prop.setProperty(CONNECTION_PROP_HOST, virtualHost);
-                path = args;
-            } else {
-                // the client 'forgot' to set a leading '/'
-                // this is the same case as above, with some lazyness
-                prop.setProperty(CONNECTION_PROP_HOST, virtualHost);
-                path = "/" + args;
-            }
-        }
-        prop.setProperty(CONNECTION_PROP_PATH, path);
-
-        // find out file extension (we already stripped ?-parameters from args)
-        String ext = "";  // default when no file extension
-        sep = path.lastIndexOf('.');
-        if (sep >= 0) {
-            final int ancpos = path.indexOf("#", sep + 1);
-            if (ancpos  >= sep) {
-                // ex: /foo/bar.html#xy => html
-                ext = path.substring(sep + 1, ancpos).toLowerCase();
-            } else {
-                // ex: /foo/bar.php => php
-                ext = path.substring(sep + 1).toLowerCase();
-            }
-        }
-        prop.setProperty(CONNECTION_PROP_EXT, ext);
-        
-        return prop;
-    }
-    
 }

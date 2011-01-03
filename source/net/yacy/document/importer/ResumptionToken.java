@@ -39,9 +39,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 
 public class ResumptionToken extends TreeMap<String, String> {
     
@@ -142,7 +142,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         // can be detected with given expiration date
         Date expiration = getExpirationDate();
         if (expiration != null) {
-            if (expiration.before(new Date())) throw new IOException("the resumption is expired at " + DateFormatter.formatISO8601(expiration) + " (now: " + DateFormatter.formatISO8601(new Date()));
+            if (expiration.before(new Date())) throw new IOException("the resumption is expired at " + ISO8601Formatter.FORMATTER.format(expiration) + " (now: " + ISO8601Formatter.FORMATTER.format(new Date()));
             // the resumption token is still fresh
         }
         String u = url + "verb=ListRecords&resumptionToken=" + escape(token);
@@ -191,7 +191,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         String d = this.get("expirationDate");
         if (d == null) return null;
         try {
-            return DateFormatter.parseISO8601(d);
+            return ISO8601Formatter.FORMATTER.parse(d);
         } catch (ParseException e) {
             Log.logException(e);
             return new Date();
@@ -241,7 +241,7 @@ public class ResumptionToken extends TreeMap<String, String> {
     }
     
     public String toString() {
-        return "source = " +  this.source + ", expirationDate=" + DateFormatter.formatISO8601(this.getExpirationDate()) + ", completeListSize=" + getCompleteListSize() +
+        return "source = " +  this.source + ", expirationDate=" + ISO8601Formatter.FORMATTER.format(this.getExpirationDate()) + ", completeListSize=" + getCompleteListSize() +
         ", cursor=" + this.getCursor() + ", token=" + this.getToken();
     }
     

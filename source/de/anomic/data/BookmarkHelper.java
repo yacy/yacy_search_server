@@ -52,13 +52,13 @@ import org.xml.sax.SAXException;
 
 import de.anomic.data.BookmarksDB.Bookmark;
 import de.anomic.data.BookmarksDB.Tag;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
 public class BookmarkHelper {
@@ -229,7 +229,7 @@ public class BookmarkHelper {
                 
                 Date parsedDate = null;
                 try {
-                    parsedDate = DateFormatter.parseISO8601(time);
+                    parsedDate = ISO8601Formatter.FORMATTER.parse(time);
                 } catch (final ParseException e) {
                     parsedDate = new Date();
                 }               

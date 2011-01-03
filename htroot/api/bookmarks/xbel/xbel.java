@@ -3,10 +3,9 @@
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.BookmarksDB;
 import de.anomic.search.Switchboard;
@@ -111,7 +110,7 @@ public class xbel {
 			date=new Date(bookmark.getTimeStamp());
 			prop.put("xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
 					+ "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
-					+ "\" added=\"" + CharacterCoding.unicode2xml(DateFormatter.formatISO8601(date), true)+"\">");
+					+ "\" added=\"" + CharacterCoding.unicode2xml(ISO8601Formatter.FORMATTER.format(date), true)+"\">");
     		count++; 
     		prop.put("xbel_"+count+"_elements", "<title>");
     		count++;

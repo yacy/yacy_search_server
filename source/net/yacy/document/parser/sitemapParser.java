@@ -45,6 +45,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -57,7 +58,6 @@ import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.ByteCountInputStream;
-import net.yacy.kelondro.util.DateFormatter;
 
 public class sitemapParser extends AbstractParser implements Parser {
 
@@ -198,7 +198,7 @@ public class sitemapParser extends AbstractParser implements Parser {
 
         public Date lastmod(final Date dflt) {
             try {
-                return DateFormatter.parseISO8601(lastmod);
+                return ISO8601Formatter.FORMATTER.parse(lastmod);
             } catch (final ParseException e) {
                 return dflt;
             }
@@ -219,7 +219,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         
         public Date lastmod(final Date dflt) {
             try {
-                return DateFormatter.parseISO8601(lastmod);
+                return ISO8601Formatter.FORMATTER.parse(lastmod);
             } catch (final ParseException e) {
                 return dflt;
             }

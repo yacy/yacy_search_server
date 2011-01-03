@@ -20,11 +20,14 @@
 
 package net.yacy.cora.document;
 
+import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class RSSFeed implements Iterable<RSSMessage> {
 
@@ -56,6 +59,14 @@ public class RSSFeed implements Iterable<RSSMessage> {
 
     public String getImage() {
         return this.imageURL;
+    }
+    
+    public Set<MultiProtocolURI> getLinks() {
+        Set<MultiProtocolURI> links = new HashSet<MultiProtocolURI>();
+        for (RSSMessage message: messages.values()) {
+            try {links.add(new MultiProtocolURI(message.getLink()));} catch (MalformedURLException e) {}
+        }
+        return links;
     }
     
     public void addMessage(final RSSMessage item) {

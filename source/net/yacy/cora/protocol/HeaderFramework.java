@@ -39,8 +39,6 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.http.server.HTTPDemon;
-
 import net.yacy.cora.document.MultiProtocolURI;
 
 
@@ -563,23 +561,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         final MultiProtocolURI url = new MultiProtocolURI("http", host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
-
-    public static void handleTransparentProxySupport(final RequestHeader header, final Properties prop, final String virtualHost, final boolean isTransparentProxy) {   
-        // transparent proxy support is only available for http 1.0 and above connections
-        if (prop.getProperty(CONNECTION_PROP_HTTP_VER, "HTTP/0.9").equals("HTTP/0.9")) return;
-        
-        // if the transparent proxy support was disabled, we have nothing todo here ...
-        if (!(isTransparentProxy && header.containsKey(HOST))) return;
-        
-        // we only need to do the transparent proxy support if the request URL didn't contain the hostname
-        // and therefor was set to virtualHost by function parseQuery()
-        if (!prop.getProperty(CONNECTION_PROP_HOST).equals(virtualHost)) return;
-        
-        // TODO: we could have problems with connections from extern here ...
-        final String dstHostSocket = header.get(HeaderFramework.HOST);
-        prop.setProperty(CONNECTION_PROP_HOST,(HTTPDemon.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
-    }
-    
 
     /**
      * Reading http headers from a reader class and building up a httpHeader object

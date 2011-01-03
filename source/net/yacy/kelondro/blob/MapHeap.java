@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -40,6 +41,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -48,7 +50,6 @@ import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
@@ -139,7 +140,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         assert key.length > 0;
         assert newMap != null;
         key = normalizeKey(key);
-        String s = map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ");
+        String s = map2string(newMap, "W" + GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()) + " ");
         assert s != null;
         byte[] sb = s.getBytes();
         synchronized (this) {

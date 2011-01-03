@@ -54,8 +54,8 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
 //import de.anomic.http.client.Client;
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.AlternativeDomainNames;
+import de.anomic.http.server.HTTPDemon;
 //import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
@@ -849,26 +849,6 @@ public final class yacySeedDB implements AlternativeDomainNames {
         reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
         reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
         
-        // init http-client
-//        final Client client = new Client(10000, reqHeader);
-//        byte[] content = null;
-//        ResponseContainer res = null;
-//        try {
-//            // send request
-//            res = client.GET(seedURL.toString());
-//            
-//            // check response code
-//            if (res.getStatusCode() != 200) {
-//            	throw new IOException("Server returned status: " + res.getStatusLine());
-//            }
-//            
-//            // read byte array
-//                content = res.getData();
-//        } finally {
-//            if(res != null) {
-//                res.closeStream();
-//            }
-//        }
         final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
         byte[] content = null;

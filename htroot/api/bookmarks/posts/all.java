@@ -2,9 +2,9 @@
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.order.Digest;
-import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.BookmarksDB;
 import de.anomic.search.Switchboard;
@@ -37,8 +37,8 @@ public class all {
             prop.putXML("posts_"+count+"_title", bookmark.getTitle());
             prop.putXML("posts_"+count+"_description", bookmark.getDescription());
             prop.putXML("posts_"+count+"_md5", Digest.encodeMD5Hex(bookmark.getUrl()));
-            date=new Date(bookmark.getTimeStamp());
-            prop.putXML("posts_"+count+"_time", DateFormatter.formatISO8601(date));
+            date = new Date(bookmark.getTimeStamp());
+            prop.putXML("posts_"+count+"_time", ISO8601Formatter.FORMATTER.format(date));
             prop.putXML("posts_"+count+"_tags", bookmark.getTagsString().replaceAll(","," "));
             
             // additional XML tags

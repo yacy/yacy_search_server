@@ -828,19 +828,14 @@ public class Table implements Index, Iterable<Row.Entry> {
         int idx;
         byte[] key;
         
-        public rowIteratorNoOrder() throws IOException {
+        public rowIteratorNoOrder() {
             // don't use the ChunkIterator here because it may create too many open files during string load
             //ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
             i = index.iterator();
         }
         
         public CloneableIterator<Entry> clone(Object modifier) {
-            try {
-                return new rowIteratorNoOrder();
-            } catch (IOException e) {
-                Log.logSevere("Table", "", e);
-                return null;
-            }
+            return new rowIteratorNoOrder();
         }
         
         public boolean hasNext() {

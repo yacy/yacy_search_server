@@ -50,13 +50,13 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.Table;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -68,7 +68,7 @@ public class yacyNewsQueue {
     
     public static final Row rowdef = new Row(new Column[]{
             new Column("newsid", Column.celltype_string, Column.encoder_bytes, yacyNewsDB.idLength, "id = created + originator"),
-            new Column("last touched", Column.celltype_string, Column.encoder_bytes, DateFormatter.PATTERN_SHORT_SECOND.length(), "")
+            new Column("last touched", Column.celltype_string, Column.encoder_bytes, GenericFormatter.PATTERN_SHORT_SECOND.length(), "")
         },
         NaturalOrder.naturalOrder
     );
@@ -173,7 +173,7 @@ public class yacyNewsQueue {
         }
         final Row.Entry b = queueStack.row().newEntry(new byte[][]{
                 r.id().getBytes(),
-                DateFormatter.formatShortSecond(new Date()).getBytes()});
+                GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()).getBytes()});
         return b;
     }
     

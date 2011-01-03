@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -36,7 +37,6 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.search.QueryParams;
@@ -108,7 +108,7 @@ public final class timeline {
         while (i.hasNext() && c < count) {
             entry = i.next();
             lm = new Date(entry.lastModified());
-            lms = DateFormatter.formatANSIC(lm);
+            lms = GenericFormatter.ANSIC_FORMATTER.format(lm);
             prop.put("event_" + c + "_start", lms); // like "Wed May 01 1963 00:00:00 GMT-0600"
             prop.put("event_" + c + "_end", lms); // like "Sat Jun 01 1963 00:00:00 GMT-0600"
             prop.put("event_" + c + "_isDuration", 0); // 0 (only a point) or 1 (period of time)

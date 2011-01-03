@@ -46,6 +46,7 @@ import java.util.concurrent.Semaphore;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -63,7 +64,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
@@ -192,7 +192,7 @@ public final class yacy {
             Log.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
             Log.logConfig("STARTUP", "Application root-path: " + appHome);
             Log.logConfig("STARTUP", "Data root-path: " + dataHome);
-            Log.logConfig("STARTUP", "Time zone: UTC" + DateFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
+            Log.logConfig("STARTUP", "Time zone: UTC" + GenericFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             Log.logConfig("STARTUP", "Maximum file system path length: " + OS.maxPathLength);
             
             f = new File(dataHome, "DATA/yacy.running");

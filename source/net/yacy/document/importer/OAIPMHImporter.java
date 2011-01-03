@@ -32,9 +32,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.search.Switchboard;
@@ -202,7 +202,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         for (String s: surrogates.list()) {
             if (s.startsWith(filenamePrefix) && s.endsWith(".xml") && s.charAt(s.length() - 22) == filenameSeparationChar) {
                 try {
-                    Date fd = DateFormatter.parseShortMilliSecond(s.substring(s.length() - 21, s.length() - 4));
+                    Date fd = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(s.substring(s.length() - 21, s.length() - 4));
                     String hostID = s.substring(7, s.length() - 22);
                     Date md = map.get(hostID);
                     if (md == null || fd.after(md)) map.put(hostID, fd);
@@ -242,6 +242,6 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     public static final String filename4Source(DigestURI source) {
         return filenamePrefix + OAIPMHImporter.filenameSeparationChar +
                OAIPMHImporter.hostID(source) + OAIPMHImporter.filenameSeparationChar +
-               DateFormatter.formatShortMilliSecond(new Date()) + ".xml";
+               GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()) + ".xml";
     }
 }

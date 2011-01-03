@@ -20,6 +20,7 @@
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.RSSMessage;
@@ -91,7 +92,8 @@ public class yacysearch_location {
             if (search_title || search_publisher || search_creator || search_subject) try {
                 // get a queue of search results
                 String rssSearchServiceURL = "http://localhost:" + sb.getConfig("port", "8080") + "/yacysearch.rss";
-                BlockingQueue<RSSMessage> results = Search.search(rssSearchServiceURL, query, false, false, maximumTime, Integer.MAX_VALUE);
+                BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
+                Search.searchSRURSS(rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, false, false, results);
                 
                 // take the results and compute some locations
                 RSSMessage message;

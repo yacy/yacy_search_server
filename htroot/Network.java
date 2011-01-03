@@ -39,7 +39,6 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.MapTools;
 
 //import de.anomic.http.client.Client;
@@ -50,6 +49,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyNewsDB;
 import de.anomic.yacy.yacyNewsPool;
+import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
@@ -131,7 +131,7 @@ public class Network {
                 myqph = 60d * sb.averageQPM();
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
-                prop.put("table_my-uptime", DateFormatter.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
+                prop.put("table_my-uptime", yacyPeerActions.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
                 prop.putNum("table_my-LCount", LCount);
                 prop.putNum("table_my-ICount", ICount);
                 prop.putNum("table_my-RCount", RCount);
@@ -437,7 +437,7 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
                             prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", DateFormatter.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
                             prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLinkCount());
                             prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getWordCount());
                             prop.putNum(STR_TABLE_LIST + conCount + "_RCount", seed.getLong(yacySeed.RCOUNT, 0));

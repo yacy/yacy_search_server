@@ -38,7 +38,6 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
-import net.yacy.kelondro.logging.Log;
 
 public class Domains {
 
@@ -603,7 +602,6 @@ public class Domains {
                         }
                     }
                 } catch (SocketException e) {
-                    Log.logException(e);
                 }
                 
                 // now look up the host name
@@ -617,7 +615,6 @@ public class Domains {
                     InetAddress[] moreAddresses = InetAddress.getAllByName(localHostName);
                     if (moreAddresses != null) for (InetAddress a: moreAddresses) localHostAddresses.add(a);
                 } catch (UnknownHostException e) {
-                    Log.logException(e);
                 }
                 
                 // fill a cache of local host names

@@ -68,25 +68,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 </div>
 <div id="downloadscript" style="clear:both;"></div>
 <div id="searchresults" style="clear:both;">
-<h3>DECENTRALIZE - run this search portal yourself (if you like). Just follow these steps:</h3>
-<ul>
-<li>download the software from yacy.net and run it. (you need OpenJDK6). A http server is started and serves the administration pages.</li>
-<li>open http://localhost:8080/ConfigBasic.html and select 'Search portal for your own web pages' ('Intranet Indexing' if you wanto to do this for your / other network) -> Set Configuration</li>
-<li>click on 'System Update' and use 'Automatic Update' to get the latest features which are needed for this. The Peer re-starts automatically. Wait and open http://localhost:8080 again.</li>
-<li>click 'Index Creation' -> 'Network Scanner' ( http://localhost:8080/CrawlStartScanner_p.html )</li>
-<li>in 'Scan Range' enter some IPs (comma-separated) that shall be used as prototype for a 255.255.255.0 subrange. I use '81.163.150.96,81.163.2.42,81.163.18.81,81.163.62.38,81.163.22.118, 81.163.112.96' (without quotes)</li>
-<li>at 'Scheduler' select 'scan and add all sites with granted access automatically' -> Scan. Wait. This makes a portscan and ftp/smb access test on the given range. Wait at least one minute. Keep calm.</li>
-<li>You should now see a list of hosts that are crawled. Your CPU load should increase. All IPs are scanned every 10 minutes, but crawls are done only for new visible servers.</li>
-<li>You can monitor the crawler at 'Crawler Monitor' ( http://localhost:8080/Crawler_p.html ).</li>
-<li>You may want to increase the memory at 'Admin Console' -> 'Performance' ( http://localhost:8080/Performance_p.html ) (you must restart then but wait until the FTP site-listing is done it is lost otherwards :-(</li>
-<li>Please set a very low download limit at 'Advanced Settings' -> 'Crawler Settings' ( http://localhost:8080/Settings_p.html?page=crawler )  .. if documents are not loaded, just their document name is indexed.</li>
-<li>Ready - search at 'Interactive local search' ( http://localhost:8080/yacyinteractive.html )</li>
-<li>You may want to set a peer password at http://localhost:8080/ConfigAccounts_p.html</li>
-<li>Get the right look at http://localhost:8080/ConfigAppearance_p.html and select the 27c3 Skin</li>
-<li>Set search page descriptions and images at http://localhost:8080/ConfigPortal.html</li>
-<li>Visit our <a href="http://forum.yacy-websuche.de/viewtopic.php?p=21332#p21332">forum</a> if there are any questions.</li>
-</ul>
-<div><img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/></div>
+<!-- <div><img src="PerformanceGraph.png" id="graph" alt="PerformanceGraph" width="660" height="240"/></div> -->
 </div>
 <script type="text/javascript">
 //<![CDATA[

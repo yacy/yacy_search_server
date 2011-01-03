@@ -50,12 +50,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -593,7 +593,7 @@ dc_rights
         }
         String language = this.dc_language();
         if (language != null && language.length() > 0) os.write("<dc:language>" + this.dc_language() + "</dc:language>\n");
-        os.write("<dc:date>" + DateFormatter.formatISO8601(date) + "</dc:date>\n");
+        os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(date) + "</dc:date>\n");
         os.write("</record>\n");
     }
     

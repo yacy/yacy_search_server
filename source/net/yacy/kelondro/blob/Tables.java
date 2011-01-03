@@ -41,11 +41,11 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
 
@@ -408,7 +408,7 @@ public class Tables {
         }
         
         public void put(String colname, Date value) {
-            super.put(colname, DateFormatter.formatShortMilliSecond(value).getBytes());
+            super.put(colname, GenericFormatter.SHORT_MILSEC_FORMATTER.format(value).getBytes());
         }
         
         public byte[] get(String colname, byte[] dflt) {
@@ -447,7 +447,7 @@ public class Tables {
             byte[] r = this.get(colname);
             if (r == null) return dflt;
             try {
-                return DateFormatter.parseShortMilliSecond(new String(r));
+                return GenericFormatter.SHORT_MILSEC_FORMATTER.parse(new String(r));
             } catch (ParseException e) {
                 return dflt;
             }

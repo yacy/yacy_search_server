@@ -41,6 +41,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.HandleSet;
@@ -54,7 +55,6 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.order.StackIterator;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
@@ -136,7 +136,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     }
 
     private String newFilename() {
-        return prefix + "." + DateFormatter.formatShortMilliSecond(new Date()) + ".table";
+        return prefix + "." + GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()) + ".table";
     }
     
     private void init() throws RowSpaceExceededException {
@@ -172,7 +172,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
                 (tablefile[i].length() == prefix.length() + 24)) {
                 f = new File(path, tablefile[i]);
                 try {
-                    d = DateFormatter.parseShortMilliSecond(tablefile[i].substring(prefix.length() + 1, prefix.length() + 18));
+                    d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(tablefile[i].substring(prefix.length() + 1, prefix.length() + 18));
                 } catch (ParseException e) {
                     Log.logSevere("SplitTable", "", e);
                     continue;
@@ -331,7 +331,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         String name = new File(table.filename()).getName();
         long d;
         try {
-            d = DateFormatter.parseShortMilliSecond(name.substring(prefix.length() + 1, prefix.length() + 18)).getTime();
+            d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(name.substring(prefix.length() + 1, prefix.length() + 18)).getTime();
         } catch (ParseException e) {
             Log.logSevere("SplitTable", "", e);
             d = 0;

@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
@@ -44,7 +45,6 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.kelondro.util.MapTools;
 
@@ -228,17 +228,17 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher));
         try {
-            encodeDate(col_mod, DateFormatter.parseShortDay(prop.getProperty("mod", "20000101")));
+            encodeDate(col_mod, GenericFormatter.SHORT_DAY_FORMATTER.parse(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
-            encodeDate(col_load, DateFormatter.parseShortDay(prop.getProperty("load", "20000101")));
+            encodeDate(col_load, GenericFormatter.SHORT_DAY_FORMATTER.parse(prop.getProperty("load", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
-            encodeDate(col_fresh, DateFormatter.parseShortDay(prop.getProperty("fresh", "20000101")));
+            encodeDate(col_fresh, GenericFormatter.SHORT_DAY_FORMATTER.parse(prop.getProperty("fresh", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
@@ -305,11 +305,11 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",publisher=").append(crypt.simpleEncode(metadata.dc_publisher()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",mod=").append(DateFormatter.formatShortDay(moddate()));
+            s.append(",mod=").append(GenericFormatter.SHORT_DAY_FORMATTER.format(moddate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",load=").append(DateFormatter.formatShortDay(loaddate()));
+            s.append(",load=").append(GenericFormatter.SHORT_DAY_FORMATTER.format(loaddate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",fresh=").append(DateFormatter.formatShortDay(freshdate()));
+            s.append(",fresh=").append(GenericFormatter.SHORT_DAY_FORMATTER.format(freshdate()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",referrer=").append(referrerHash() == null ? "" : new String(referrerHash()));
             assert (s.toString().indexOf(0) < 0);

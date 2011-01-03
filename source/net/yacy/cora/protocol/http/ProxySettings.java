@@ -23,8 +23,6 @@ package net.yacy.cora.protocol.http;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-//import org.apache.commons.httpclient.HostConfiguration;
-//import org.apache.commons.httpclient.HttpClient;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;

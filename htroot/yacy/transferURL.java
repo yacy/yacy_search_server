@@ -29,11 +29,11 @@
 import java.io.IOException;
 import java.text.ParseException;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.retrieval.EventOrigin;
@@ -52,7 +52,7 @@ public final class transferURL {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
         final long start = System.currentTimeMillis();
         long freshdate = 0;
-        try {freshdate = DateFormatter.parseShortDay("20061101").getTime();} catch (final ParseException e1) {}
+        try {freshdate = GenericFormatter.SHORT_DAY_FORMATTER.parse("20061101").getTime();} catch (final ParseException e1) {}
         
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;

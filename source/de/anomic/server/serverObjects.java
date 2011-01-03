@@ -56,7 +56,6 @@ import java.util.regex.Pattern;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
 
 import de.anomic.search.Switchboard;
@@ -157,10 +156,6 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public String put(final String key, final java.util.Date value) {
-        return this.put(key, value.toString());
-    }
-    
-    public String put(final String key, final DateFormatter value) {
         return this.put(key, value.toString());
     }
     

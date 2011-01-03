@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.MapTools;
 
 
@@ -107,7 +106,7 @@ public class yacyPeerActions {
         }
         if (Math.abs(nowUTC0Time - ctimeUTC0) / 1000 / 60 > 60 * 6 ) {
             // the new connection is out-of-age, we reject the connection
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + DateFormatter.formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: rejecting out-dated peer '" + seed.getName() + "' from " + seed.getPublicAddress() + "; nowUTC0=" + nowUTC0Time + ", seedUTC0=" + ctimeUTC0 + ", TimeDiff=" + formatInterval(Math.abs(nowUTC0Time - ctimeUTC0)));
             return false;
         }
 
@@ -254,4 +253,31 @@ public class yacyPeerActions {
         return (userAgent == null) ? "" : userAgent;
     }
 
+    /**
+     * Format a time inteval in milliseconds into a String of the form
+     * X 'day'['s'] HH':'mm
+     */
+    public static String formatInterval(final long millis) {
+        try {
+            final long mins = millis / 60000;
+            
+            final StringBuilder uptime = new StringBuilder();
+            
+            final int uptimeDays  = (int) (Math.floor(mins/1440.0));
+            final int uptimeHours = (int) (Math.floor(mins/60.0)%24);
+            final int uptimeMins  = (int) mins%60;
+            
+            uptime.append(uptimeDays)
+                  .append(((uptimeDays == 1)?" day ":" days "))
+                  .append((uptimeHours < 10)?"0":"")
+                  .append(uptimeHours)
+                  .append(":")
+                  .append((uptimeMins < 10)?"0":"")
+                  .append(uptimeMins);            
+            
+            return uptime.toString();       
+        } catch (final Exception e) {
+            return "unknown";
+        }
+    }
 }

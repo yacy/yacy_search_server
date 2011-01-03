@@ -46,12 +46,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.kelondroException;
 
 import org.w3c.dom.Document;
@@ -209,7 +209,7 @@ public class BlogBoard {
             }
     		
             try {
-                date = DateFormatter.parseShortSecond(StrDate);
+                date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(StrDate);
             } catch (final ParseException e1) {
                 date = new Date();
             }
@@ -414,7 +414,7 @@ public class BlogBoard {
                     }
                     return new Date();
                 }
-                return DateFormatter.parseShortSecond(date);
+                return GenericFormatter.SHORT_SECOND_FORMATTER.parse(date);
             } catch (final ParseException ex) {
                 return new Date();
             }
@@ -425,7 +425,7 @@ public class BlogBoard {
             if (ret == null) {
                 ret = new Date();
             }
-            record.put("date", DateFormatter.formatShortSecond(ret));
+            record.put("date", GenericFormatter.SHORT_SECOND_FORMATTER.format(ret));
         }
         
         public String getTimestamp() {
@@ -434,7 +434,7 @@ public class BlogBoard {
                 if (Log.isFinest("Blog")) {
                     Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
                 }
-                return DateFormatter.formatShortSecond();
+                return GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date());
             }
             return timestamp;
         }

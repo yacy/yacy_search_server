@@ -31,9 +31,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -41,8 +44,9 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.IndexCell;
-import net.yacy.kelondro.util.DateFormatter;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 
 public class WorkTables extends Tables {
@@ -120,7 +124,7 @@ public class WorkTables extends Tables {
                 Data data = new Data();
                 data.put(TABLE_API_COL_TYPE, type.getBytes());
                 data.put(TABLE_API_COL_COMMENT, comment.getBytes());
-                byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
+                byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()).getBytes();
                 data.put(TABLE_API_COL_DATE_RECORDING, date);
                 data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
                 data.put(TABLE_API_COL_URL, apiurl.getBytes());
@@ -132,7 +136,7 @@ public class WorkTables extends Tables {
                 // modify and update existing entry
 
                 // modify date attributes and patch old values
-                row.put(TABLE_API_COL_DATE_LAST_EXEC, DateFormatter.formatShortMilliSecond(new Date()).getBytes());
+                row.put(TABLE_API_COL_DATE_LAST_EXEC, GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()).getBytes());
                 if (!row.containsKey(TABLE_API_COL_DATE_RECORDING)) row.put(TABLE_API_COL_DATE_RECORDING, row.get(TABLE_API_COL_DATE));
                 row.remove(TABLE_API_COL_DATE);
                 
@@ -181,7 +185,7 @@ public class WorkTables extends Tables {
             Data data = new Data();
             data.put(TABLE_API_COL_TYPE, type.getBytes());
             data.put(TABLE_API_COL_COMMENT, comment.getBytes());
-            byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
+            byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()).getBytes();
             data.put(TABLE_API_COL_DATE_RECORDING, date);
             data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
             data.put(TABLE_API_COL_URL, apiurl.getBytes());
@@ -305,7 +309,7 @@ public class WorkTables extends Tables {
         try {
             // create and insert new entry
             Data data = new Data();
-            byte[] date = DateFormatter.formatShortMilliSecond(new Date()).getBytes();
+            byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()).getBytes();
             data.put(TABLE_SEARCH_FAILURE_COL_URL, url.toNormalform(true, false));
             data.put(TABLE_SEARCH_FAILURE_COL_DATE, date);
             data.put(TABLE_SEARCH_FAILURE_COL_WORDS, queryHashes.export());
@@ -323,5 +327,21 @@ public class WorkTables extends Tables {
             Log.logException(e);
             return false;
         }
+    }
+    
+    public static Map<byte[], String> commentCache(Switchboard sb) {
+        Map<byte[], String> comments = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
+        Iterator<Tables.Row> i;
+        try {
+            i = sb.tables.iterator(WorkTables.TABLE_API_NAME);
+            Tables.Row row;
+            while (i.hasNext()) {
+                row = i.next();
+                comments.put(row.getPK(), new String(row.get(WorkTables.TABLE_API_COL_COMMENT)));
+            }
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+        return comments;
     }
 }

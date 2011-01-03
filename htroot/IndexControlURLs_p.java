@@ -28,8 +28,10 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -37,8 +39,6 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.RotateIterator;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.MetadataRepository;
 import de.anomic.search.Segment;
@@ -102,7 +102,7 @@ public class IndexControlURLs_p {
             prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
-            prop.put("lurlexport_exportfile", sb.getDataPath() + "/DATA/EXPORT/" + DateFormatter.formatShortSecond());
+            prop.put("lurlexport_exportfile", sb.getDataPath() + "/DATA/EXPORT/" + GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
             if (export == null) {
                 // there has never been an export
                 prop.put("lurlexportfinished", 0);

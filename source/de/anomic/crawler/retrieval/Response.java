@@ -29,6 +29,7 @@ package de.anomic.crawler.retrieval;
 import java.io.ByteArrayInputStream;
 import java.util.Date;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -37,8 +38,6 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.util.DateFormatter;
-
 import de.anomic.crawler.CrawlProfile;
 
 public class Response {
@@ -217,7 +216,7 @@ public class Response {
             if (docDate == null) docDate = responseHeader.date();
         }
         if (docDate == null && request != null) docDate = request.appdate();
-        if (docDate == null) docDate = new Date(DateFormatter.correctedUTCTime());   
+        if (docDate == null) docDate = new Date(GenericFormatter.correctedUTCTime());   
         
         return docDate;
     }
@@ -332,7 +331,7 @@ public class Response {
                     if (date == null) return "stale_no_date_given_in_response";
                     try {
                         final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if (DateFormatter.correctedUTCTime() - date.getTime() > ttl) {
+                        if (GenericFormatter.correctedUTCTime() - date.getTime() > ttl) {
                             //System.out.println("***not indexed because cache-control");
                             return "stale_expired";
                         }
@@ -419,8 +418,8 @@ public class Response {
                 if (!responseHeader.containsKey(HeaderFramework.LAST_MODIFIED)) { return false; }
                 // parse date
                 Date d1, d2;
-                d2 = responseHeader.lastModified(); if (d2 == null) { d2 = new Date(DateFormatter.correctedUTCTime()); }
-                d1 = requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(DateFormatter.correctedUTCTime()); }
+                d2 = responseHeader.lastModified(); if (d2 == null) { d2 = new Date(GenericFormatter.correctedUTCTime()); }
+                d1 = requestHeader.ifModifiedSince(); if (d1 == null) { d1 = new Date(GenericFormatter.correctedUTCTime()); }
                 // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                 if (d2.after(d1)) { return false; }
             }
@@ -461,7 +460,7 @@ public class Response {
             final Date expires = responseHeader.expires();
             if (expires != null) {
     //          System.out.println("EXPIRES-TEST: expires=" + expires + ", NOW=" + serverDate.correctedGMTDate() + ", url=" + url);
-                if (expires.before(new Date(DateFormatter.correctedUTCTime()))) { return false; }
+                if (expires.before(new Date(GenericFormatter.correctedUTCTime()))) { return false; }
             }
             final Date lastModified = responseHeader.lastModified();
             cacheControl = responseHeader.get(HeaderFramework.CACHE_CONTROL);
@@ -475,13 +474,13 @@ public class Response {
             // file may only be treated as fresh for one more month, not more.
             Date date = responseHeader.date();
             if (lastModified != null) {
-                if (date == null) { date = new Date(DateFormatter.correctedUTCTime()); }
+                if (date == null) { date = new Date(GenericFormatter.correctedUTCTime()); }
                 final long age = date.getTime() - lastModified.getTime();
                 if (age < 0) { return false; }
                 // TTL (Time-To-Live) is age/10 = (d2.getTime() - d1.getTime()) / 10
                 // the actual living-time is serverDate.correctedGMTDate().getTime() - d2.getTime()
                 // therefore the cache is stale, if serverDate.correctedGMTDate().getTime() - d2.getTime() > age/10
-                if (DateFormatter.correctedUTCTime() - date.getTime() > age / 10) { return false; }
+                if (GenericFormatter.correctedUTCTime() - date.getTime() > age / 10) { return false; }
             }
     
             // -cache-control in cached response
@@ -500,7 +499,7 @@ public class Response {
                     if (date == null) { return false; }
                     try {
                         final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if (DateFormatter.correctedUTCTime() - date.getTime() > ttl) {
+                        if (GenericFormatter.correctedUTCTime() - date.getTime() > ttl) {
                             return false;
                         }
                     } catch (final Exception e) {
@@ -588,7 +587,7 @@ public class Response {
                 // parse date
                 Date d = responseHeader.lastModified();
                 if (d == null) {
-                    d = new Date(DateFormatter.correctedUTCTime());
+                    d = new Date(GenericFormatter.correctedUTCTime());
                 }
                 // finally, we shall treat the cache as stale if the modification time is after the if-.. time
                 if (d.after(ifModifiedSince)) {
@@ -613,7 +612,7 @@ public class Response {
             // sometimes, the expires date is set to the past to prevent that a page is cached
             // we use that information to see if we should index it
             final Date expires = responseHeader.expires();
-            if (expires != null && expires.before(new Date(DateFormatter.correctedUTCTime()))) {
+            if (expires != null && expires.before(new Date(GenericFormatter.correctedUTCTime()))) {
                 return "Stale_(Expired)";
             }
 
@@ -646,7 +645,7 @@ public class Response {
                     }
                     try {
                         final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
-                        if (DateFormatter.correctedUTCTime() - date.getTime() > ttl) {
+                        if (GenericFormatter.correctedUTCTime() - date.getTime() > ttl) {
                             //System.out.println("***not indexed because cache-control");
                             return "Stale_(expired_by_cache-control)";
                         }
