@@ -100,6 +100,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      */
     public void dump(final File heapFile, int writeBuffer, boolean destructive) {
         assert this.cache != null;
+        if (this.cache == null) return;
         Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
         File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".prt");
@@ -335,6 +336,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public ReferenceContainer<ReferenceType> delete(final byte[] termHash) {
         // returns the index that had been deleted
         assert this.cache != null;
+        if (this.cache == null) return null;
         return cache.remove(new ByteArray(termHash));
     }
 
@@ -343,6 +345,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     }
     public boolean remove(final byte[] termHash, final byte[] urlHashBytes) {
         assert this.cache != null;
+        if (this.cache == null) return false;
         ByteArray tha = new ByteArray(termHash);
         synchronized (cache) {
 	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
@@ -365,6 +368,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
     public int remove(final byte[] termHash, final HandleSet urlHashes) {
         assert this.cache != null;
+        if (this.cache == null) return  0;
         if (urlHashes.isEmpty()) return 0;
         ByteArray tha = new ByteArray(termHash);
         int count;
@@ -411,6 +415,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
     public void add(final byte[] termHash, final ReferenceType newEntry) throws RowSpaceExceededException {
         assert this.cache != null;
+        if (this.cache == null) return;
         ByteArray tha = new ByteArray(termHash);
         
         // first access the cache without synchronization
