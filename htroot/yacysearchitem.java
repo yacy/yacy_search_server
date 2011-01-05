@@ -243,8 +243,9 @@ public class yacysearchitem {
         final int p = s.lastIndexOf('.');
         if (p < 0) return s.substring(0, length - 3) + "...";
         assert p >= 0;
-        assert length - (s.length() - p) - 3 >= 0: "length = " + length + ", s.length() = " + s.length() + ", p = " + p;
-        return s.substring(0, length - (s.length() - p) - 3) + "..." + s.substring(p); // TODO check oob
+        String ext = s.substring(p + 1);
+        if (ext.length() > 4) return s.substring(0, length / 2 - 2) + "..." + s.substring(s.length() - (length / 2 - 2));
+        return s.substring(0, length - ext.length() - 3) + "..." + ext;
     }
     
     private static String sizename(int size) {
