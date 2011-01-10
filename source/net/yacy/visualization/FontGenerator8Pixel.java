@@ -1,4 +1,4 @@
-// ymage8BitFontGenerator.java
+// FontGenerator8Pixel.java
 // ---------------------------
 // by Marc Nause
 // created: 05.04.2007
@@ -29,7 +29,7 @@ package net.yacy.visualization;
 
 public class FontGenerator8Pixel { 
 
-//A valid ymage font has 96 characters:
+//A valid font has 96 characters:
 
 /*
 0x20: !"#$%&'

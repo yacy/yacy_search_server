@@ -40,9 +40,6 @@ public class Captcha extends RasterPlotter {
     private void create(final String code){
 
         final Random random = new Random();
-
-        final int width = this.getWidth();
-        final int height = this.getHeight();
         final int chars = code.length();
 
         int x;

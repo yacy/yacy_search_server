@@ -1,4 +1,4 @@
-// ymageToolCircle.java
+// CircleTool.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 22.05.2007 on http://yacy.net
 //
@@ -28,6 +28,8 @@ package net.yacy.visualization;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 public class CircleTool {    
@@ -39,7 +41,7 @@ public class CircleTool {
         if ((radius - 1) < circles.length) return circles[radius - 1];
         
         // read some lines from known circles
-        HashSet<String> crds = new HashSet<String>();
+        Set<String> crds = new HashSet<String>();
         crds.add("0|0");
         String co;
         for (int i = Math.max(0, circles.length - 5); i < circles.length; i++) {
@@ -55,7 +57,7 @@ public class CircleTool {
         
         // compute more lines in new circles
         int x, y;
-        ArrayList<int[]> crc;
+        List<int[]> crc;
         for (int r = circles.length; r < newCircles.length; r++) {
             crc = new ArrayList<int[]>();
             for (int a = 0; a <= 2 * (r + 1); a++) {

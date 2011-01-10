@@ -1,4 +1,4 @@
-// ymageChart.java 
+// ChartPlotter.java 
 // ---------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -37,18 +37,16 @@ public class ChartPlotter extends RasterPlotter {
     public static final int DIMENSION_ANOT0  = 4;
     public static final int DIMENSION_ANOT1  = 5;
     
-    int leftborder;
-    int rightborder;
-    int topborder;
-    int bottomborder;
-    int[] scales = new int[]{0,0,0,0,0,0};
-    int[] pixels = new int[]{0,0,0,0,0,0};
-    int[] offsets = new int[]{0,0,0,0,0,0};
-    String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
-    String[] colscale = new String[]{null,null,null,null,null,null};
-    String[] tablenames = new String[]{"","","","","",""};
-    //String name;
-    //String backgroundColor, foregroundColor;
+    private int leftborder;
+    private int rightborder;
+    private int topborder;
+    private int bottomborder;
+    private int[] scales = new int[]{0,0,0,0,0,0};
+    private int[] pixels = new int[]{0,0,0,0,0,0};
+    private int[] offsets = new int[]{0,0,0,0,0,0};
+    private String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
+    private String[] colscale = new String[]{null,null,null,null,null,null};
+    private String[] tablenames = new String[]{"","","","","",""};
     
     public ChartPlotter(final int width, final int height, final String backgroundColor, final String foregroundColor, final String lightColor,
                       final int leftborder, final int rightborder, final int topborder, final int bottomborder,

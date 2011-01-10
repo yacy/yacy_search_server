@@ -1,12 +1,10 @@
-// plasmaGrafics.java
+// NetworkGraph.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
 // Created 08.10.2005
-//
-// Contributions by Marc Nause [MN]
 //
 // $LastChangedDate$
 // $LastChangedRevision$
@@ -111,9 +109,9 @@ public class NetworkGraph {
     private static BufferedImage peerloadPicture = null;
     private static long          peerloadPictureDate = 0;
 
-    private static RasterPlotter bannerPicture = null;      // [MN]
-    private static BufferedImage logo = null;               // [MN]
-    private static long          bannerPictureDate = 0;     // [MN]
+    private static RasterPlotter bannerPicture = null;
+    private static BufferedImage logo = null;
+    private static long          bannerPictureDate = 0;
 
     public static RasterPlotter getSearchEventPicture(final yacySeedDB seedDB, final String eventID, final int coronaangle) {
         final SearchEvent event = SearchEventCache.getEvent(eventID);
@@ -395,7 +393,6 @@ public class NetworkGraph {
     	g.drawChars(caption.toCharArray(), 0, caption.length(), x+LEGEND_BOX_SIZE+5,y);
     }
 
-    //[MN]
     public static RasterPlotter getBannerPicture(final long maxAge, final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
             drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, peers, nlinks, nwords, nqph, nppm, logo);
@@ -403,7 +400,6 @@ public class NetworkGraph {
         return bannerPicture;
     }    
     
-    //[MN]
     public static RasterPlotter getBannerPicture(final long maxAge, final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm, final BufferedImage newLogo) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
             drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, peers, nlinks, nwords, nqph, nppm, newLogo);
@@ -411,7 +407,6 @@ public class NetworkGraph {
         return bannerPicture;
     }
 
-    //[MN]
     private static void drawBannerPicture(final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm, final BufferedImage newLogo) {
 
         final int exprlength = 19;
@@ -457,19 +452,16 @@ public class NetworkGraph {
         return true;
     }
 
-    //[MN]
     private static String addBlanksAndDots(final long input, final int length) {
         return addBlanksAndDots(Long.toString(input), length);
     }
 
-    //[MN]
     private static String addBlanksAndDots(String input, final int length) {
         input = addDots(input);
         input = addTrailingBlanks(input,length);
         return input;
     }
 
-    //[MN]
     private static String addDots(String word) {
         String tmp = "";
         int len = word.length();
@@ -488,7 +480,6 @@ public class NetworkGraph {
         return word;
     }
 
-    //[MN]
     private static String addTrailingBlanks(String word, int length) {
         if (length > word.length()) {
             String blanks = "";

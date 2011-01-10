@@ -1,4 +1,4 @@
-// ymageICOParser.java
+// icoParser.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 15.07.2007 on http://yacy.net
 //
@@ -42,8 +42,8 @@ public class icoParser {
     public static final int ICONDIRENTRY_size = 16;
     
     private final int idCount;
-    bmpParser.INFOHEADER[] infoheaders;
-    bmpParser.IMAGEMAP[] imagemaps;
+    private bmpParser.INFOHEADER[] infoheaders;
+    private bmpParser.IMAGEMAP[] imagemaps;
     
     public static final boolean isICO(final byte[] source) {
         // check the file magic

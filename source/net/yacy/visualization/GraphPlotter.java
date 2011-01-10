@@ -1,4 +1,4 @@
-// ymageGraph.java
+// GraphPlotter.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 22.05.2007 on http://yacy.net
 //
@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 
 /* this class is a container for graph coordinates and it can draw such coordinates into a graph
@@ -44,9 +45,9 @@ public class GraphPlotter {
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
     
-    HashMap<String, coordinate> points;
-    HashSet<String> borders;
-    double leftmost, rightmost, topmost, bottommost;
+    private Map<String, coordinate> points;
+    private Set<String> borders;
+    private double leftmost, rightmost, topmost, bottommost;
     
     public GraphPlotter() {
         points = new HashMap<String, coordinate>();

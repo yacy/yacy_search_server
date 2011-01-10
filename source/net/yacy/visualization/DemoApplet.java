@@ -14,17 +14,18 @@ public class DemoApplet extends Applet implements Runnable {
     
     private static final long serialVersionUID = -8230253094143014406L;
 
-    int delay;
-    Thread animator;
-    Dimension offDimension;
-    RasterPlotter offGraphics;
+    private int delay;
+    private Thread animator;
+    private RasterPlotter offGraphics;
 
+    @Override
     public void init() {
         final String str = getParameter("fps");
         final int fps = (str != null) ? Integer.parseInt(str) : 10;
         delay = (fps > 0) ? (1000 / fps) : 100;
     }
 
+    @Override
     public void start() {
         animator = new Thread(this);
         animator.start();
@@ -42,10 +43,12 @@ public class DemoApplet extends Applet implements Runnable {
         }
     }
 
+    @Override
     public void stop() {
         animator = null;
     }
 
+    @Override
     public void update(final Graphics g) {
         final Dimension d = getSize();
         offGraphics = new RasterPlotter(d.width, d.height, RasterPlotter.DrawMode.MODE_REPLACE, "FFFFFF");
@@ -53,6 +56,7 @@ public class DemoApplet extends Applet implements Runnable {
         g.drawImage(offGraphics.getImage(), 0, 0, null);
     }
     
+    @Override
     public void paint(final Graphics g) {
         if (offGraphics != null) {
             g.drawImage(offGraphics.getImage(), 0, 0, null);

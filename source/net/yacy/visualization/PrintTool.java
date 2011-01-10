@@ -1,4 +1,4 @@
-// ymageToolPrint.java
+// PrintTool.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 22.05.2007 on http://yacy.net
 //
