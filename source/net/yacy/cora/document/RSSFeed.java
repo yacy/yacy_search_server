@@ -45,6 +45,24 @@ public class RSSFeed implements Iterable<RSSMessage> {
         this.maxsize = maxsize;
     }
 
+    /**
+     * make a RSS feed using a set of urls
+     * the source string is assigned to all messages as author to mark the messages' origin
+     * @param links
+     * @param source
+     */
+    public RSSFeed(Set<MultiProtocolURI> links, String source) {
+        this(Integer.MAX_VALUE);
+        String u;
+        RSSMessage message;
+        for (MultiProtocolURI uri: links) {
+            u = uri.toNormalform(true, false);
+            message = new RSSMessage(u, "", u);
+            message.setAuthor(source);
+            this.addMessage(message);
+        }
+    }
+    
     public void setChannel(final RSSMessage channelItem) {
         this.channel = channelItem;
     }

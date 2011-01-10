@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.services.Search;
+import net.yacy.cora.services.SearchSRURSS;
 import net.yacy.document.geolocalization.Location;
 import de.anomic.data.LibraryProvider;
 import de.anomic.search.Switchboard;
@@ -93,7 +93,7 @@ public class yacysearch_location {
                 // get a queue of search results
                 String rssSearchServiceURL = "http://localhost:" + sb.getConfig("port", "8080") + "/yacysearch.rss";
                 BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
-                Search.searchSRURSS(rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, false, false, results);
+                SearchSRURSS.searchSRURSS(results, rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, false, false);
                 
                 // take the results and compute some locations
                 RSSMessage message;

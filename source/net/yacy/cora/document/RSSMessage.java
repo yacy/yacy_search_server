@@ -21,6 +21,7 @@
 package net.yacy.cora.document;
 
 import java.text.ParseException;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -31,7 +32,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.protocol.HeaderFramework;
 
-public class RSSMessage implements Hit {
+public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMessage> {
 
     public static enum Token {
 
@@ -58,13 +59,13 @@ public class RSSMessage implements Hit {
             for (String s: k) this.keys.add(s);
         }
         
-        public String valueFrom(Map<String, String> map) {
+        public String valueFrom(Map<String, String> map, String dflt) {
             String value;
             for (String key: this.keys) {
                 value = map.get(key);
                 if (value != null) return value;
             }
-            return "";
+            return dflt;
         }
         
         public Set<String> keys() {
@@ -107,31 +108,50 @@ public class RSSMessage implements Hit {
     }
     
     public String getTitle() {
-        return Token.title.valueFrom(this.map);
+        return Token.title.valueFrom(this.map, "");
     }
     
     public String getLink() {
-        return Token.link.valueFrom(this.map);
+        return Token.link.valueFrom(this.map, "");
+    }
+    
+    public boolean equals(Object o) {
+        return (o instanceof RSSMessage) && ((RSSMessage) o).getLink().equals(this.getLink());
+    }
+    
+    public int hashCode() {
+        return getLink().hashCode();
+    }
+
+    @Override
+    public int compareTo(RSSMessage o) {
+        if (!(o instanceof RSSMessage)) return 1;
+        return this.getLink().compareTo(o.getLink());
+    }
+
+    @Override
+    public int compare(RSSMessage o1, RSSMessage o2) {
+        return o1.compareTo(o2);
     }
     
     public String getDescription() {
-        return Token.description.valueFrom(this.map);
+        return Token.description.valueFrom(this.map, "");
     }
     
     public String getAuthor() {
-        return Token.author.valueFrom(this.map);
+        return Token.author.valueFrom(this.map, "");
     }
     
     public String getCopyright() {
-        return Token.copyright.valueFrom(this.map);
+        return Token.copyright.valueFrom(this.map, "");
     }
     
     public String getCategory() {
-        return Token.category.valueFrom(this.map);
+        return Token.category.valueFrom(this.map, "");
     }
     
     public String[] getSubject() {
-        String subject = Token.subject.valueFrom(this.map);
+        String subject = Token.subject.valueFrom(this.map, "");
         if (subject.indexOf(',') >= 0) return subject.split(",");
         if (subject.indexOf(';') >= 0) return subject.split(";");
         if (subject.indexOf('|') >= 0) return subject.split("|");
@@ -139,15 +159,15 @@ public class RSSMessage implements Hit {
     }
     
     public String getReferrer() {
-        return Token.referrer.valueFrom(this.map);
+        return Token.referrer.valueFrom(this.map, "");
     }
     
     public String getLanguage() {
-        return Token.language.valueFrom(this.map);
+        return Token.language.valueFrom(this.map, "");
     }
     
     public Date getPubDate() {
-        String dateString = Token.pubDate.valueFrom(this.map);
+        String dateString = Token.pubDate.valueFrom(this.map, "");
         Date date;
         try {
             date = ISO8601Formatter.FORMATTER.parse(dateString);
@@ -162,20 +182,20 @@ public class RSSMessage implements Hit {
     }
     
     public String getGuid() {
-        return Token.guid.valueFrom(this.map);
+        return Token.guid.valueFrom(this.map, "");
     }
     
     public String getTTL() {
-        return Token.ttl.valueFrom(this.map);
+        return Token.ttl.valueFrom(this.map, "");
     }
     
     public String getDocs() {
-        return Token.docs.valueFrom(this.map);
+        return Token.docs.valueFrom(this.map, "");
     }
     
     public long getSize() {
-        String size = Token.size.valueFrom(this.map);
-        return (size == null || size.length() == 0) ? 0 : Long.parseLong(size);
+        String size = Token.size.valueFrom(this.map, "-1");
+        return (size == null || size.length() == 0) ? -1 : Long.parseLong(size);
     }
     
     public String getFulltext() {
