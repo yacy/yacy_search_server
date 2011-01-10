@@ -145,6 +145,11 @@ change_mem_settings()
     read INPUT
 
     case $INPUT in
+      *[^0-9]*)
+            echo
+            echo 'Please enter a number or just hit enter to abort.'
+            change_mem_settings
+            ;;
       [0-9]*)
             replace_parameter 'javastart_Xmx' "Xmx$INPUT"'m'
             replace_parameter 'javastart_Xms' "Xms$INPUT"'m'
@@ -152,11 +157,6 @@ change_mem_settings()
             ;;
       '')
             STATUS="$NOCHANGESTEXT"
-            ;;
-      *)
-            echo
-            echo 'Please enter a number or just hit enter to abort.'
-            change_mem_settings
             ;;
     esac
 }
