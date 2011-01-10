@@ -27,9 +27,11 @@
 // if the shell's current path is HTROOT
 
 import java.io.File;
+import java.io.IOException;
 
 import net.yacy.cora.protocol.RequestHeader;
 
+import de.anomic.data.WorkTables;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -38,7 +40,7 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigHTCache_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -69,6 +71,9 @@ public class ConfigHTCache_p {
             }
             if ("on".equals(post.get("deleteRobots", ""))) {
                 sb.robots.clear();
+            }
+            if ("on".equals(post.get("deleteSearchFl", ""))) {
+            	sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
             }
         }
 

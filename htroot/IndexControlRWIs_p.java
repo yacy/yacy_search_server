@@ -55,6 +55,7 @@ import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.ListManager;
+import de.anomic.data.WorkTables;
 import de.anomic.http.client.Cache;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
@@ -71,7 +72,7 @@ import de.anomic.yacy.dht.PeerSelection;
 
 public class IndexControlRWIs_p {
     
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -159,6 +160,9 @@ public class IndexControlRWIs_p {
                 }
                 if (post.get("deleteRobots", "").equals("on")) {
                     sb.robots.clear();
+                }
+                if (post.get("deleteSearchFl", "").equals("on")) {
+                	sb.tables.clear(WorkTables.TABLE_SEARCH_FAILURE_NAME);
                 }
                 post.remove("deletecomplete");
             }
