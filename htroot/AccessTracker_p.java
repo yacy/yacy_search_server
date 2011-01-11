@@ -144,6 +144,7 @@ public class AccessTracker_p {
             QueryParams query;
             long qcountSum = 0;
             long rcountSum = 0;
+            long tcountSum = 0;
             long rcount = 0;
             long utimeSum = 0;
             long stimeSum = 0;
@@ -175,6 +176,7 @@ public class AccessTracker_p {
                     prop.put("page_list_" + m + "_queryhashes", QueryParams.anonymizedQueryHashes(query.queryHashes));
                 }
                 prop.putNum("page_list_" + m + "_querycount", query.itemsPerPage);
+                prop.putNum("page_list_" + m + "_transmitcount", query.transmitcount);
                 prop.putNum("page_list_" + m + "_resultcount", query.resultcount);
                 prop.putNum("page_list_" + m + "_urltime", query.urlretrievaltime);
                 prop.putNum("page_list_" + m + "_snippettime", query.snippetcomputationtime);
@@ -182,6 +184,7 @@ public class AccessTracker_p {
                 prop.putHTML("page_list_" + m + "_userAgent", query.userAgent);
                 qcountSum += query.itemsPerPage;
                 rcountSum += query.resultcount;
+                tcountSum += query.transmitcount;
                 utimeSum += query.urlretrievaltime;
                 stimeSum += query.snippetcomputationtime;
                 rtimeSum += query.searchtime;
@@ -203,24 +206,25 @@ public class AccessTracker_p {
                 // return empty values to not break the table view
                 prop.put("page_list", 1);
                 prop.put("page_list_0_dark", 1 );
-                prop.put("page_list_0_host", "&nbsp;");
-                prop.put("page_list_0_date", "&nbsp;");
-                prop.put("page_list_0_timestamp", "&nbsp;");
+                prop.put("page_list_0_host", "");
+                prop.put("page_list_0_date", "");
+                prop.put("page_list_0_timestamp", "");
                 if (page == 2) {
                     // local search
                     prop.putNum("page_list_0_offset", "");
                     prop.put("page_list_0_querystring", "");
                 } else {
                     // remote search
-                    prop.put("page_list_0_peername", "&nbsp;");
-                    prop.put("page_list_0_queryhashes", "&nbsp;");
+                    prop.put("page_list_0_peername", "");
+                    prop.put("page_list_0_queryhashes", "");
                 }
                 prop.putNum("page_list_0_querycount", "");
+                prop.putNum("page_list_0_transmitcount", "");
                 prop.putNum("page_list_0_resultcount", "");
                 prop.putNum("page_list_0_urltime", "");
                 prop.putNum("page_list_0_snippettime", "");
                 prop.putNum("page_list_0_resulttime", "");
-                prop.put("page_list_0_userAgent", "&nbsp;");
+                prop.put("page_list_0_userAgent", "");
             }
             if (rcount == 0) rcount = -1;
             prop.putNum("page_querycount_avg", (double) qcountSum / m);
@@ -228,6 +232,7 @@ public class AccessTracker_p {
             prop.putNum("page_urltime_avg", (double) utimeSum / m);
             prop.putNum("page_snippettime_avg", (double) stimeSum / m);
             prop.putNum("page_resulttime_avg", (double) rtimeSum / m);
+            prop.putNum("page_transmitcount_avg", (double) tcountSum / rcount);
             prop.putNum("page_resultcount_avg1", (double) rcountSum / rcount);
             prop.putNum("page_urltime_avg1", (double) utimeSum1 / rcount);
             prop.putNum("page_snippettime_avg1", (double) stimeSum1 / rcount);
@@ -274,12 +279,12 @@ public class AccessTracker_p {
             // return empty values to not break the table view if no results can be listed
             if (m==0) {                
                 prop.put("page_list", 1);
-                prop.put("page_list_0_dates_0_date", "&nbsp;");
+                prop.put("page_list_0_dates_0_date", "");
                 prop.put("page_list_0_dates", 1);
                 prop.putNum("page_list_0_qph", "");
                 prop.put("page_list_0_dark", 1 );
-                prop.put("page_list_0_peername", "&nbsp;");
-                prop.put("page_list_0_host", "&nbsp;");
+                prop.put("page_list_0_peername", "");
+                prop.put("page_list_0_host", "");
                 prop.putNum("page_list_0_count", "");
             } else {
                 prop.put("page_list", m);

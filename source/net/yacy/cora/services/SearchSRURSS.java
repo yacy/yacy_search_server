@@ -50,6 +50,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
     final boolean verify;
     final boolean global;
     final Map<RSSMessage, List<Integer>> result;
+    final String userAgent;
 
     private final BlockingQueue<RSSMessage> results;
     
@@ -60,7 +61,8 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             final String urlBase,
             final int maximumRecordsInit,
             final boolean verify,
-            final boolean global) {
+            final boolean global,
+            final String userAgent) {
         this.results = new LinkedBlockingQueue<RSSMessage>();
         this.result = result;
         this.query = query;
@@ -69,6 +71,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
         this.maximumRecordsInit = maximumRecordsInit;
         this.verify = verify;
         this.global = global;
+        this.userAgent = userAgent;
     }
     
     public SearchSRURSS(
@@ -76,7 +79,8 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             final String urlBase,
             final int maximumRecordsInit,
             final boolean verify,
-            final boolean global) {
+            final boolean global,
+            final String userAgent) {
         this.results = new LinkedBlockingQueue<RSSMessage>();
         this.result = search.getAccumulation();
         this.query = search.getQuery();
@@ -85,10 +89,11 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
         this.maximumRecordsInit = maximumRecordsInit;
         this.verify = verify;
         this.global = global;
+        this.userAgent = userAgent;
     }
     
     public void run() {
-        searchSRURSS(results, urlBase, query, timeoutInit, maximumRecordsInit, verify, global);
+        searchSRURSS(results, urlBase, query, timeoutInit, maximumRecordsInit, verify, global, userAgent);
         int p = 1;
         RSSMessage message;
         try {
@@ -111,7 +116,8 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             final long timeoutInit,
             final int maximumRecordsInit,
             final boolean verify,
-            final boolean global) {
+            final boolean global,
+            final String userAgent) {
         Thread job = new Thread() {
             public void run() {
                 int startRecord = 0;
@@ -122,8 +128,9 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
                     long st = System.currentTimeMillis();
                     RSSFeed feed;
                     try {
-                        feed = loadSRURSS(urlBase, query, timeout, startRecord, recordsPerSession, verify, global);
+                        feed = loadSRURSS(urlBase, query, timeout, startRecord, recordsPerSession, verify, global, userAgent);
                     } catch (IOException e1) {
+                        e1.printStackTrace();
                         break mainloop;
                     }
                     if (feed == null || feed.isEmpty()) break mainloop;
@@ -134,13 +141,14 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
                         try {
                             queue.put(message);
                         } catch (InterruptedException e) {
+                            e.printStackTrace(); 
                             break innerloop;
                         }
                     }
                     startRecord += recordsPerSession;
                     timeout -= System.currentTimeMillis() - st;
                 }
-                try { queue.put(RSSMessage.POISON); } catch (InterruptedException e) {}
+                try { queue.put(RSSMessage.POISON); } catch (InterruptedException e) { e.printStackTrace(); }
             }
         };
         job.start();
@@ -165,7 +173,8 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             int startRecord,
             int maximumRecords,
             boolean verify,
-            boolean global) throws IOException {
+            boolean global,
+            String userAgent) throws IOException {
         MultiProtocolURI uri = null;
         try {
             uri = new MultiProtocolURI(rssSearchServiceURL);
@@ -181,8 +190,9 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             parts.put("maximumRecords", new StringBody(Long.toString(maximumRecords)));
             parts.put("verify", new StringBody(verify ? "true" : "false"));
             parts.put("resource", new StringBody(global ? "global" : "local"));
-            final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
-            //String debug = new String(result); System.out.println("*** DEBUG: " + debug);
+            parts.put("nav", new StringBody("none"));
+            final byte[] result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
+            String debug = new String(result); System.out.println("*** DEBUG: " + debug);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {
                 throw new IOException("cora.Search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (1), reader == null");

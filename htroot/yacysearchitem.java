@@ -172,7 +172,7 @@ public class yacysearchitem {
             } else {
                 prop.put("content_code", "");
             }
-            
+            theQuery.transmitcount = item + 1;
             return prop;
         }
         
@@ -203,6 +203,7 @@ public class yacysearchitem {
                 prop.put("content_item_nl", (item == 0) ? 0 : 1);
                 prop.put("content_item", 1);
             }
+            theQuery.transmitcount = item + 1;
             return prop;
         }
         
@@ -232,6 +233,7 @@ public class yacysearchitem {
             } else {
                 prop.put("content_items", "0");
             }
+            theQuery.transmitcount = item + 1;
             return prop;
         }
         

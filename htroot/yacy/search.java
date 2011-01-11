@@ -382,6 +382,7 @@ public final class search {
                     links.append("resource").append(i).append('=').append(resource).append(serverCore.CRLF_STRING);
                 }
             }
+            theQuery.transmitcount = accu.size() + 1;
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.RESULTLIST, "", accu.size(), System.currentTimeMillis() - timer), false);

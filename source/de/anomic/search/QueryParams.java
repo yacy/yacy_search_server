@@ -99,6 +99,7 @@ public final class QueryParams {
     public final Long time;
     // values that are set after a search:
     public int resultcount; // number of found results
+    public int transmitcount; // number of results that had been shown to the user
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     public final String userAgent;
@@ -152,6 +153,7 @@ public final class QueryParams {
         this.navigators = "all";
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
+        this.transmitcount = 0;
     }
     
     public QueryParams(
@@ -206,6 +208,7 @@ public final class QueryParams {
         this.specialRights = specialRights;
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
+        this.transmitcount = 0;
     }
     
     public Segment getSegment() {

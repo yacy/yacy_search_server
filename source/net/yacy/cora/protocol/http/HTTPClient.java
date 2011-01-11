@@ -114,7 +114,7 @@ public class HTTPClient {
     	HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
     }
     
-    private static HttpClient initConnectionManager() {
+    public static HttpClient initConnectionManager() {
 		// Create and initialize HTTP parameters
 		final HttpParams httpParams = new BasicHttpParams();
 		/**

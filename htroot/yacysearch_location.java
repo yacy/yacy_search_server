@@ -93,7 +93,7 @@ public class yacysearch_location {
                 // get a queue of search results
                 String rssSearchServiceURL = "http://localhost:" + sb.getConfig("port", "8080") + "/yacysearch.rss";
                 BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
-                SearchSRURSS.searchSRURSS(results, rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, false, false);
+                SearchSRURSS.searchSRURSS(results, rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, false, false, null);
                 
                 // take the results and compute some locations
                 RSSMessage message;

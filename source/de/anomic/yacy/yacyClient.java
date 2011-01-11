@@ -372,7 +372,7 @@ public final class yacyClient {
     public static RSSFeed search(final yacySeed targetSeed, String query, boolean verify, boolean global, long timeout, int startRecord, int maximumRecords) throws IOException {
         String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8080") : targetSeed.getClusterAddress();
         String urlBase = "http://" + address + "/yacysearch.rss";
-        return SearchSRURSS.loadSRURSS(urlBase, query, timeout, startRecord, maximumRecords, verify, global);
+        return SearchSRURSS.loadSRURSS(urlBase, query, timeout, startRecord, maximumRecords, verify, global, null);
     }
 
     @SuppressWarnings("unchecked")

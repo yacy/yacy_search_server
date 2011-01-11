@@ -33,10 +33,13 @@ import net.yacy.cora.storage.ScoreMap;
 public class SearchHub {
 
     private static final String[] SRURSSServicesList = {
+        //"http://192.168.1.51:8000/yacysearch.rss"//,
+        "http://localhost:8008/yacysearch.rss"//,
+        /*
         "http://yacy.dyndns.org:8000/yacysearch.rss",
         "http://yacy.caloulinux.net:8085/yacysearch.rss",
         "http://algire.dyndns.org:8085/yacysearch.rss",
-        "http://breyvogel.dyndns.org:8002/yacysearch.rss"
+        "http://breyvogel.dyndns.org:8002/yacysearch.rss"*/
     };
 
     public final static SearchHub EMPTY = new SearchHub("", 0);
@@ -136,20 +139,23 @@ public class SearchHub {
      * @param verify
      * @param global
      */
-    public static void addSRURSSServices(SearchHub search, String[] rssServices, int count, boolean verify, boolean global) {
+    public static void addSRURSSServices(SearchHub search, String[] rssServices, int count, boolean verify, boolean global, String userAgent) {
         for (String service: rssServices) {
-            SearchSRURSS accumulator = new SearchSRURSS(search, service, count, verify, global);
+            SearchSRURSS accumulator = new SearchSRURSS(search, service, count, verify, global, userAgent);
             accumulator.start();
             search.addAccumulator(accumulator);
         }
     }
     
     public static void main(String[] args) {
+        HTTPClient.setDefaultUserAgent("searchhub");
+        HTTPClient.initConnectionManager();
+        
         StringBuilder sb = new StringBuilder();
         for (String s: args) sb.append(s).append(' ');
         String query = sb.toString().trim();
         SearchHub search = new SearchHub(query, 10000);
-        addSRURSSServices(search, SRURSSServicesList, 100, false, false);
+        addSRURSSServices(search, SRURSSServicesList, 100, false, false, "searchhub");
         try {Thread.sleep(100);} catch (InterruptedException e1) {}
         search.waitTermination();
         ScoreMap<String> result = search.getResults();
@@ -159,6 +165,6 @@ public class SearchHub {
             u = i.next();
             System.out.println("[" + result.get(u) + "] " + u);
         }
-        try {HTTPClient.closeConnectionManager();} catch (InterruptedException e) {}
+        try {HTTPClient.closeConnectionManager();} catch (InterruptedException e) { e.printStackTrace(); }
     }
 }
