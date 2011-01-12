@@ -10,16 +10,16 @@
 // $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General private License as published by
+// it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General private License for more details.
+// GNU General Public License for more details.
 //
-// You should have received a copy of the GNU General private License
+// You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
@@ -46,10 +46,12 @@ package de.anomic.yacy;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -251,11 +253,13 @@ public class yacyNewsPool {
     	CATEGORY_BLOG_ADD,
     	CATEGORY_BLOG_DEL
     };
-    private static final HashSet<String> categories = new HashSet<String>();
+    private static final Set<String> categories = new HashSet<String>();
     static {
-        for (int i = 0; i < category.length; i++) categories.add(category[i]);
+        categories.addAll(Arrays.asList(category));
     }
-    
+
+    private final static long MILLISECONDS_PER_DAY = 1000 * 60 * 60 * 24;
+
     private final yacyNewsDB newsDB;
     private final yacyNewsQueue outgoingNews, publishedNews, incomingNews, processedNews;
     private final int maxDistribution;
@@ -286,7 +290,7 @@ public class yacyNewsPool {
         return queue.records(up);
     }
     
-    public yacyNewsDB.Record parseExternal(String external) {
+    public yacyNewsDB.Record parseExternal(final String external) {
         return newsDB.newRecord(external);
     }
     
@@ -370,7 +374,7 @@ public class yacyNewsPool {
         int pc = 0;
         synchronized (this.incomingNews) {
             final Iterator<yacyNewsDB.Record> i = incomingNews.records(true);
-            HashSet<String> removeIDs = new HashSet<String>();
+            Set<String> removeIDs = new HashSet<String>();
             while (i.hasNext()) {
                 // check for interruption
                 if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress");
@@ -383,33 +387,32 @@ public class yacyNewsPool {
                     pc++;
                 }
             }
-            for (String id: removeIDs) incomingNews.remove(id);
+            for (final String id: removeIDs) incomingNews.remove(id);
         }
         return pc;
     }
     
-    long day = 1000 * 60 * 60 * 24;
     private boolean automaticProcessP(final yacySeedDB seedDB, final yacyNewsDB.Record record) {
         if (record == null) return false;
         if (record.category() == null) return true;
-        if ((System.currentTimeMillis() - record.created().getTime()) > (14 * day)) {
+        if ((System.currentTimeMillis() - record.created().getTime()) > (14 * MILLISECONDS_PER_DAY)) {
             // remove everything after 1 week
             return true;
         }
         if ((record.category().equals(CATEGORY_WIKI_UPDATE)) &&
-                ((System.currentTimeMillis() - record.created().getTime()) > (3 * day))) {
+                ((System.currentTimeMillis() - record.created().getTime()) > (3 * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_BLOG_ADD)) &&
-                ((System.currentTimeMillis() - record.created().getTime()) > (3 * day))) {
+                ((System.currentTimeMillis() - record.created().getTime()) > (3 * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_PROFILE_UPDATE)) &&
-                ((System.currentTimeMillis() - record.created().getTime()) > (7 * day))) {
+                ((System.currentTimeMillis() - record.created().getTime()) > (7 * MILLISECONDS_PER_DAY))) {
                 return true;
             }
         if ((record.category().equals(CATEGORY_CRAWL_START)) &&
-            ((System.currentTimeMillis() - record.created().getTime()) > (2 * day))) {
+            ((System.currentTimeMillis() - record.created().getTime()) > (2 * MILLISECONDS_PER_DAY))) {
             final yacySeed seed = seedDB.get(record.originator());
             if (seed == null) return false;
             try {
