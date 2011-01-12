@@ -639,9 +639,17 @@ public class HeapReader {
                     // so far we have read this.keylen - 1 + 1 = this.keylen bytes.
                     // there must be a remaining number of len - this.keylen bytes left for the BLOB
                     if (len < this.keylen) return null;    // a strange case that can only happen in case of corrupted data
-                    payload = new byte[len - this.keylen]; // the remaining record entries
-                    if (is.read(payload) < payload.length) return null;
-                    return new entry(key, payload);
+                    try {
+                        payload = new byte[len - this.keylen]; // the remaining record entries
+                        if (is.read(payload) < payload.length) return null;
+                        return new entry(key, payload);
+                    } catch (OutOfMemoryError e) {
+                        // the allocation of memory for the payload may fail
+                        // this is bad because we must interrupt the iteration here but the
+                        // process that uses the iteration may think that the iteraton has just been completed
+                        Log.logSevere("HeapReader", "out of memory in LookAheadIterator.next0", e);
+                        return null;
+                    }
                 }
             } catch (final IOException e) {
                 return null;
