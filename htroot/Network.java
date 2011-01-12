@@ -124,7 +124,6 @@ public class Network {
                 }
                 prop.put("table_my-acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0);
                 prop.put("table_my-dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);
-                prop.put("table_my-rankingreceive", seed.getFlagAcceptCitationReference() ? 1 : 0);
 
 
                 myppm = sb.currentPPM();
@@ -408,7 +407,6 @@ public class Network {
                             if (page == 1) {
                                 prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", seed.getFlagAcceptRemoteCrawl() ? 1 : 0); // green=on or red=off 
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", seed.getFlagAcceptRemoteIndex() ? 1 : 0);  // green=on or red=off
-                                prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", (seed.getVersion() >= yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION) ? 1 : 0);
                             } else { // Passive, Potential Peers
                                 if (seed.getFlagAcceptRemoteCrawl()) {
                                     prop.put(STR_TABLE_LIST + conCount + "_acceptcrawl", 2); // red/green: offline, was on
@@ -419,13 +417,6 @@ public class Network {
                                     prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 2);  // red/green: offline, was on
                                 } else {
                                     prop.put(STR_TABLE_LIST + conCount + "_dhtreceive", 0);  // red/red; offline was off
-                                }
-                                
-                                if (seed.getVersion() >= yacyVersion.YACY_ACCEPTS_RANKING_TRANSMISSION &&
-                                    seed.getFlagAcceptCitationReference()) {
-                                    prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", 1);
-                                } else {
-                                    prop.put(STR_TABLE_LIST + conCount + "_rankingreceive", 0);
                                 }
                             }
                             if (seed.getFlagAcceptRemoteIndex()) {

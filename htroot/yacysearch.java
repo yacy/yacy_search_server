@@ -425,11 +425,13 @@ public class yacysearch {
                 indexSegment.termIndex().remove(Word.words2hashesHandles(query[0]), delHash.getBytes());
 
                 // make new news message with negative voting
-                final HashMap<String, String> map = new HashMap<String, String>();
-                map.put("urlhash", delHash);
-                map.put("vote", "negative");
-                map.put("refid", "");
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                if (!sb.isRobinsonMode()) {
+                    final HashMap<String, String> map = new HashMap<String, String>();
+                    map.put("urlhash", delHash);
+                    map.put("vote", "negative");
+                    map.put("refid", "");
+                    sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                }
             } catch (IOException e) {
                 Log.logException(e);
             }

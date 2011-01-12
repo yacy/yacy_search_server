@@ -10,16 +10,16 @@
 // $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
+// it under the terms of the GNU General private License as published by
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU General private License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU General private License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
@@ -72,11 +72,11 @@ public class yacyNewsDB {
 
     private final File path;
     private final Row rowdef;
-    protected final int attributesMaxLength;
-    protected Index news;
+    private final int attributesMaxLength;
+    private Index news;
 
     private  static final int categoryStringLength = 8;
-    public  static final int idLength = GenericFormatter.PATTERN_SHORT_SECOND.length() + Word.commonHashLength;
+    public   static final int idLength = GenericFormatter.PATTERN_SHORT_SECOND.length() + Word.commonHashLength;
 
     public yacyNewsDB(
     		final File path,
@@ -148,33 +148,6 @@ public class yacyNewsDB {
         }
     }
 
-    public synchronized Iterator<Record> news() throws IOException {
-        // the iteration iterates yacyNewsRecord - type objects
-        return new recordIterator();
-    }
-
-    public class recordIterator implements Iterator<Record> {
-
-        Iterator<Row.Entry> rowIterator;
-
-        public recordIterator() throws IOException {
-            rowIterator = news.rows();
-        }
-
-        public boolean hasNext() {
-            return rowIterator.hasNext();
-        }
-
-        public Record next() {
-            return b2r(rowIterator.next());
-        }
-
-        public void remove() {
-            rowIterator.remove();
-        }
-
-    }
-
     public synchronized Record get(final String id) throws IOException {
         try {
             return b2r(news.get(id.getBytes()));
@@ -184,7 +157,7 @@ public class yacyNewsDB {
         }
     }
 
-    protected Record b2r(final Row.Entry b) {
+    private Record b2r(final Row.Entry b) {
         if (b == null) return null;
         return new yacyNewsDB.Record(
             b.getColString(0, null),
@@ -195,7 +168,7 @@ public class yacyNewsDB {
         );
     }
 
-    protected final Row.Entry r2b(final Record r) {
+    private final Row.Entry r2b(final Record r) {
         if (r == null) return null;
         try {
             String attributes = r.attributes().toString();
@@ -260,7 +233,7 @@ public class yacyNewsDB {
         private final Map<String, String> attributes;  // elements of the news for a special category
 
         
-        protected Record(final String newsString) {
+        private Record(final String newsString) {
             this.attributes = MapTools.string2map(newsString, ",");
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.category = (attributes.containsKey("cat")) ? attributes.get("cat") : "";
@@ -272,7 +245,7 @@ public class yacyNewsDB {
             removeStandards();
         }
 
-        protected Record(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
+        private Record(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.attributes = attributes;
@@ -284,7 +257,7 @@ public class yacyNewsDB {
             removeStandards();
         }
 
-        protected Record(final String id, final String category, final Date received, final int distributed, final Map<String, String> attributes) {
+        private Record(final String id, final String category, final Date received, final int distributed, final Map<String, String> attributes) {
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.attributes = attributes;

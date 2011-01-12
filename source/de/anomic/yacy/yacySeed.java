@@ -157,7 +157,6 @@ public class yacySeed implements Cloneable {
     private static final int FLAG_DIRECT_CONNECT            = 0;
     private static final int FLAG_ACCEPT_REMOTE_CRAWL       = 1;
     private static final int FLAG_ACCEPT_REMOTE_INDEX       = 2;
-    private static final int FLAG_ACCEPT_CITATION_REFERENCE = 3;
     
     public static final String DFLT_NETWORK_UNIT = "freeworld";
     public static final String DFLT_NETWORK_GROUP = "";
@@ -218,7 +217,6 @@ public class yacySeed implements Cloneable {
         setFlagDirectConnect(false);
         setFlagAcceptRemoteCrawl(true);
         setFlagAcceptRemoteIndex(true);
-        setFlagAcceptCitationReference(true);
         setUnusedFlags();
 
         // index transfer
@@ -473,22 +471,6 @@ public class yacySeed implements Cloneable {
         return Integer.parseInt(port);
     }
     
-    /**
-     * To synchronize peer pings the local time differential must be included in calculations.
-     * @return the difference to UTC (universal time coordinated) in milliseconds of this yacySeed,
-     * the difference to <code>+0130</code> if not present or <code>0</code> if an error occured during conversion
-     */
-    /*
-    public final long getUTCDiff() {
-        String utc = this.dna.get(yacySeed.UTC);
-        if (utc == null) { utc = "+0130"; }
-        try {
-            return DateFormatter.UTCDiff(utc);
-        } catch (final IllegalArgumentException e) {
-            return 0;
-        }
-    }
-     */
     /** puts the current time into the lastseen field and cares about the time differential to UTC */
     public final void setLastSeenUTC() {
         // because java thinks it must apply the UTC offset to the current time,
@@ -607,7 +589,6 @@ public class yacySeed implements Cloneable {
     public final void setFlagDirectConnect(final boolean value) { setFlag(FLAG_DIRECT_CONNECT, value); }
     public final void setFlagAcceptRemoteCrawl(final boolean value) { setFlag(FLAG_ACCEPT_REMOTE_CRAWL, value); }
     public final void setFlagAcceptRemoteIndex(final boolean value) { setFlag(FLAG_ACCEPT_REMOTE_INDEX, value); }
-    public final void setFlagAcceptCitationReference(final boolean value) { setFlag(FLAG_ACCEPT_CITATION_REFERENCE, value); }
     public final boolean getFlagDirectConnect() { return getFlag(0); }
     public final boolean getFlagAcceptRemoteCrawl() {
         //if (getVersion() < 0.300) return false;
@@ -617,9 +598,6 @@ public class yacySeed implements Cloneable {
     public final boolean getFlagAcceptRemoteIndex() {
         //if (getVersion() < 0.335) return false;
         return getFlag(2);
-    }
-    public final boolean getFlagAcceptCitationReference() {
-        return getFlag(3);
     }
     public final void setUnusedFlags() {
         for (int i = 4; i < 24; i++) { setFlag(i, true); }

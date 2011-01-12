@@ -170,11 +170,13 @@ public class Blog {
             sb.blogDB.writeBlogEntry(sb.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
 
             // create a news message
-            final Map<String, String> map = new HashMap<String, String>();
-            map.put("page", pagename);
-            map.put("subject", StrSubject.replace(',', ' '));
-            map.put("author", StrAuthor.replace(',', ' '));
-            sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map);
+            if (!sb.isRobinsonMode()) {
+                final Map<String, String> map = new HashMap<String, String>();
+                map.put("page", pagename);
+                map.put("subject", StrSubject.replace(',', ' '));
+                map.put("author", StrAuthor.replace(',', ' '));
+                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map);
+            }
         }
 
         page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"

@@ -339,7 +339,7 @@ public class Crawler_p {
                             prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
                             
                             // generate a YaCyNews if the global flag was set
-                            if (crawlOrder) {
+                            if (!sb.isRobinsonMode() && crawlOrder) {
                                 final Map<String, String> m = new HashMap<String, String>(pe); // must be cloned
                                 m.remove("specificDepth");
                                 m.remove("indexText");

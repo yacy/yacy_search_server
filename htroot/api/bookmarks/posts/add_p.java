@@ -79,6 +79,7 @@ public class add_p {
     }
     private static void publishNews(final String url, final String title, final String description, final String tagsString) {
     	// create a news message
+        if (sb.isRobinsonMode()) return;
     	final Map<String, String> map = new HashMap<String, String>(8);
     	map.put("url", url.replace(',', '|'));
     	map.put("title", title.replace(',', ' '));

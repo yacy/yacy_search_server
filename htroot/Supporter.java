@@ -76,11 +76,13 @@ public class Supporter {
                     return prop;
                 }
                 // make new news message with voting
-                final HashMap<String, String> map = new HashMap<String, String>();
-                map.put("urlhash", hash);
-                map.put("vote", "negative");
-                map.put("refid", post.get("refid", ""));
-                sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                if (!sb.isRobinsonMode()) {
+                    final HashMap<String, String> map = new HashMap<String, String>();
+                    map.put("urlhash", hash);
+                    map.put("vote", "negative");
+                    map.put("refid", post.get("refid", ""));
+                    sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map);
+                }
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header, false)) {

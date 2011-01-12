@@ -10,16 +10,16 @@
 // $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
+// it under the terms of the GNU General private License as published by
 // the Free Software Foundation; either version 2 of the License, or
 // (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU General private License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU General private License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
@@ -71,7 +71,6 @@ public class yacyNewsPool {
     /* ------------------------------------------------------------------------
      * PROFILE related CATEGORIES
      * ------------------------------------------------------------------------ */
-    public static final String CATEGORY_PROFILE = "prfl";
     /**
      * a profile entry was updated (implemented)
      */
@@ -84,71 +83,67 @@ public class yacyNewsPool {
      * a peer has done something good (i.e. served good search results)
      * and gets a positive vote so it can rise on the supporter page
      */
-    public static final String CATEGORY_PROFILE_VOTE_GOOD = "prflegvt";
+    private static final String CATEGORY_PROFILE_VOTE_GOOD = "prflegvt";
     /**
      * a peer has done something bad (i.e. spammed) and gets a negative vote
      */
-    public static final String CATEGORY_PROFILE_VOTE_BAD = "prflebvt";
+    private static final String CATEGORY_PROFILE_VOTE_BAD = "prflebvt";
     
     /* ------------------------------------------------------------------------
      * CRAWLING related CATEGORIES
      * ------------------------------------------------------------------------ */    
-    public static final String CATEGORY_CRAWL = "crwl";
     /**
-     * a crawl with remote indexing was startet
+     * a crawl with remote indexing was started
      */
     public static final String CATEGORY_CRAWL_START = "crwlstrt";
     /**
      * a crawl with remote indexing was stopped
      */
-    public static final String CATEGORY_CRAWL_STOP = "crwlstop";
+    private static final String CATEGORY_CRAWL_STOP = "crwlstop";
     /**
      * a comment on a crawl with remote indexing
      */
-    public static final String CATEGORY_CRAWL_COMMENT = "crwlcomm";
+    private static final String CATEGORY_CRAWL_COMMENT = "crwlcomm";
     
     /* ------------------------------------------------------------------------
      * BLACKLIST related CATEGORIES
      * ------------------------------------------------------------------------ */  
-    public static final String CATEGORY_BLACKLIST = "blckl";
     /**
-     * a public blacklist entry was added
+     * a private blacklist entry was added
      */
-    public static final String CATEGORY_BLACKLIST_ADD = "blckladd";
+    private static final String CATEGORY_BLACKLIST_ADD = "blckladd";
     /**
-     * a vote and comment on a public blacklist add
+     * a vote and comment on a private blacklist add
      */
-    public static final String CATEGORY_BLACKLIST_VOTE_ADD = "blcklavt";
+    private static final String CATEGORY_BLACKLIST_VOTE_ADD = "blcklavt";
     /**
-     * a public blacklist entry was deleted
+     * a private blacklist entry was deleted
      */
-    public static final String CATEGORY_BLACKLIST_DELETE = "blckldel";
+    private static final String CATEGORY_BLACKLIST_DELETE = "blckldel";
     /**
-     * a vote and comment on a public blacklist delete
+     * a vote and comment on a private blacklist delete
      */
-    public static final String CATEGORY_BLACKLIST_VOTE_DEL = "blckldvt";
+    private static final String CATEGORY_BLACKLIST_VOTE_DEL = "blckldvt";
     
     /* ------------------------------------------------------------------------
      * FLIE-SHARE related CATEGORIES
      * ------------------------------------------------------------------------ */    
-    public static final String CATEGORY_FILESHARE = "flshr";
     /**
      * a file was added to the file share
      */
-    public static final String CATEGORY_FILESHARE_ADD = "flshradd";
+    private static final String CATEGORY_FILESHARE_ADD = "flshradd";
     /**
      * a file was added to the file share
      */
-    public static final String CATEGORY_FILESHARE_DEL = "flshrdel";
+    private static final String CATEGORY_FILESHARE_DEL = "flshrdel";
     /**
      * a comment to a file share entry
      */
-    public static final String CATEGORY_FILESHARE_COMMENT = "flshrcom";
+    private static final String CATEGORY_FILESHARE_COMMENT = "flshrcom";
     
     /* ------------------------------------------------------------------------
      * BOOKMARK related CATEGORIES
-     * ------------------------------------------------------------------------ */       
-    public static final String CATEGORY_BOOKMARK = "bkmrk";
+     * ------------------------------------------------------------------------ */     
     /**
      * a bookmark was added/created
      */
@@ -156,41 +151,39 @@ public class yacyNewsPool {
     /**
      * a vote and comment on a bookmark add
      */
-    public static final String CATEGORY_BOOKMARK_VOTE_ADD = "bkmrkavt";
+    private static final String CATEGORY_BOOKMARK_VOTE_ADD = "bkmrkavt";
     /**
      * a bookmark was moved
      */
-    public static final String CATEGORY_BOOKMARK_MOVE = "bkmrkmov";
+    private static final String CATEGORY_BOOKMARK_MOVE = "bkmrkmov";
     /**
      * a vote and comment on a bookmark move
      */
-    public static final String CATEGORY_BOOKMARK_VOTE_MOVE = "bkmrkmvt";
+    private static final String CATEGORY_BOOKMARK_VOTE_MOVE = "bkmrkmvt";
     /**
      * a bookmark was deleted
      */
-    public static final String CATEGORY_BOOKMARK_DEL = "bkmrkdel";
+    private static final String CATEGORY_BOOKMARK_DEL = "bkmrkdel";
     /**
      * a vote and comment on a bookmark delete
      */
-    public static final String CATEGORY_BOOKMARK_VOTE_DEL = "bkmrkdvt";
+    private static final String CATEGORY_BOOKMARK_VOTE_DEL = "bkmrkdvt";
     
     /* ------------------------------------------------------------------------
      * SURFTIPP related CATEGORIES
      * ------------------------------------------------------------------------ */ 
-    public static final String CATEGORY_SURFTIPP = "stipp";
     /** 
      * a surf tipp was added
      */
-	public static final String CATEGORY_SURFTIPP_ADD = "stippadd";	 
+    public static final String CATEGORY_SURFTIPP_ADD = "stippadd";	 
 	/**
 	 * a vote and comment on a surf tipp
 	 */
-	public static final String CATEGORY_SURFTIPP_VOTE_ADD = "stippavt";
+    public static final String CATEGORY_SURFTIPP_VOTE_ADD = "stippavt";
 	
     /* ------------------------------------------------------------------------
      * WIKI related CATEGORIES
      * ------------------------------------------------------------------------ */ 	
-	public static final String CATEGORY_WIKI = "wiki";
 	/**
 	 * a wiki page was updated
 	 */
@@ -198,12 +191,11 @@ public class yacyNewsPool {
 	/** 
 	 * a wiki page das deleted
 	 */
-	public static final String CATEGORY_WIKI_DEL = "wiki_del";
+	private static final String CATEGORY_WIKI_DEL = "wiki_del";
 	
     /* ------------------------------------------------------------------------
      * BLOG related CATEGORIES
-     * ------------------------------------------------------------------------ */ 	
-	public static final String CATEGORY_BLOG = "blog";
+     * ------------------------------------------------------------------------ */
 	/**
 	 * a blog entry was added
 	 */
@@ -211,12 +203,12 @@ public class yacyNewsPool {
 	/**
 	 * a blog page das deleted
 	 */
-	public static final String CATEGORY_BLOG_DEL = "blog_del";
+	private static final String CATEGORY_BLOG_DEL = "blog_del";
     
     /* ========================================================================
      * ARRAY of valid CATEGORIES
      * ======================================================================== */	
-    public static final String[] category = {
+    private static final String[] category = {
     	// PROFILE related CATEGORIES
     	CATEGORY_PROFILE_UPDATE,
         CATEGORY_PROFILE_BROADCAST,
@@ -259,7 +251,7 @@ public class yacyNewsPool {
     	CATEGORY_BLOG_ADD,
     	CATEGORY_BLOG_DEL
     };
-    public static final HashSet<String> categories = new HashSet<String>();
+    private static final HashSet<String> categories = new HashSet<String>();
     static {
         for (int i = 0; i < category.length; i++) categories.add(category[i]);
     }
@@ -288,10 +280,6 @@ public class yacyNewsPool {
         processedNews.close();
     }
     
-    public int dbSize() {
-        return newsDB.size();
-    }
-    
     public Iterator<yacyNewsDB.Record> recordIterator(final int dbKey, final boolean up) {
         // returns an iterator of yacyNewsRecord-type objects
         final yacyNewsQueue queue = switchQueue(dbKey);
@@ -310,7 +298,7 @@ public class yacyNewsPool {
         publishMyNews(newsDB.newRecord(mySeed, category, attributes));
     }
     
-    public void publishMyNews(final yacyNewsDB.Record record) {
+    private void publishMyNews(final yacyNewsDB.Record record) {
         // this shall be called if our peer generated a new news record and wants to publish it
         if (record == null) return;
         try {
@@ -447,18 +435,6 @@ public class yacyNewsPool {
         }
         return null;
     }
-/*
- * java.io.FileNotFoundException: /home/administrator/yacy/DATA/INDEX/webportal/NETWORK/newsOut.table (Too many open files)
-    at java.io.FileInputStream.open(Native Method)
-    at java.io.FileInputStream.<init>(FileInputStream.java:137)
-    at net.yacy.kelondro.table.ChunkIterator.<init>(ChunkIterator.java:63)
-    at net.yacy.kelondro.table.Table$rowIteratorNoOrder.<init>(Table.java:832)
-    at net.yacy.kelondro.table.Table.rows(Table.java:825)
-    at de.anomic.yacy.yacyNewsQueue$newsIterator.<init>(yacyNewsQueue.java:193)
-    at de.anomic.yacy.yacyNewsQueue.records(yacyNewsQueue.java:183)
-    at de.anomic.yacy.yacyNewsPool.getSpecific(yacyNewsPool.java:440)
-    at yacysearchitem.respond(yacysearchitem.java:119)
- */
 
     public synchronized yacyNewsDB.Record getByOriginator(final int dbKey, final String category, final String originatorHash) {
         final yacyNewsQueue queue = switchQueue(dbKey);

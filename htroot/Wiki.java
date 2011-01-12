@@ -124,7 +124,7 @@ public class Wiki {
             final Map<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
-            if (post.get("content", "").trim().length() > 0 && !new String(page.page()).equals(new String(content))) {
+            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !new String(page.page()).equals(new String(content))) {
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;

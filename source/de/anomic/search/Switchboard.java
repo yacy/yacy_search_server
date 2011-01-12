@@ -1017,7 +1017,7 @@ public final class Switchboard extends serverSwitch {
         // we are in robinson mode, if we do not exchange index by dht distribution
         // we need to take care that search requests and remote indexing requests go only
         // to the peers in the same cluster, if we run a robinson cluster.
-        return !getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, false) && !getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+        return (this.peers != null && this.peers.sizeConnected() == 0) || (!getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, false) && !getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false));
     }
 
     public boolean isPublicRobinson() {
@@ -1649,7 +1649,7 @@ public final class Switchboard extends serverSwitch {
             }
             
             // initiate broadcast about peer startup to spread supporter url
-            if (this.peers.newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {
+            if (!this.isRobinsonMode() && this.peers.newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {
                 // read profile
                 final Properties profile = new Properties();
                 FileInputStream fileIn = null;
