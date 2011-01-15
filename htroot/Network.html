@@ -357,6 +357,20 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         </tr>
       </table>
     </form>
+    
+    <p>&nbsp;</p>
+    
+    Contacting current peer from another:
+      <table>
+        <tr>
+          <td>ip:port</td>
+          <td><input id="otherPeerAddress" type="text" size="32" maxlength="128" value=":8080" /></td>
+        </tr>
+        <tr>
+          <td>&nbsp;</td>
+          <td><input type="button" value="contact current peer from this peer" onclick="top.location.href='http://' + document.getElementById('otherPeerAddress').value + '/Network.html?peerHash=#[my-hash]#&peerIP=#[my-ip]#&peerPort=#[my-port]#&page=4&addPeer=add+Peer'"/></td>
+        </tr>
+      </table>
     #(/table)#
     #%env/templates/footer.template%#
   </body>

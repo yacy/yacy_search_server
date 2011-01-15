@@ -182,7 +182,13 @@ public class Network {
             prop.put("page", 0);
         } else if (post != null && Integer.parseInt(post.get("page", "1")) == 4) {
             prop.put("table", 4); // triggers overview
-            prop.put("page", 4);          
+            prop.put("page", 4);
+            
+            if (sb.peers.mySeed() != null) {
+	            prop.put("table_my-hash", sb.peers.mySeed().hash );
+	            prop.put("table_my-ip", sb.peers.mySeed().getIP() );
+	            prop.put("table_my-port", sb.peers.mySeed().getPort() );
+            }
 
             if (post.containsKey("addPeer")) {
 
