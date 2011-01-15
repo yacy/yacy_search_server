@@ -52,16 +52,25 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
 
     public static final GenericFormatter SHORT_DAY_FORMATTER     = new GenericFormatter(FORMAT_SHORT_DAY);
     public static final GenericFormatter SHORT_SECOND_FORMATTER  = new GenericFormatter(FORMAT_SHORT_SECOND);
-    public static final GenericFormatter SHORT_MILSEC_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MILSEC);
+    public static final GenericFormatter SHORT_MILSEC_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MILSEC, 1);
     public static final GenericFormatter ANSIC_FORMATTER         = new GenericFormatter(FORMAT_ANSIC);
     public static final GenericFormatter RFC1123_SHORT_FORMATTER = new GenericFormatter(FORMAT_RFC1123_SHORT);
     
     private SimpleDateFormat dateFormat;
+    private long maxCacheDiff;
     
     public GenericFormatter(SimpleDateFormat dateFormat) {
         this.dateFormat = dateFormat;
         this.last_time = 0;
         this.last_format = "";
+        this.maxCacheDiff = 1000;
+    }
+
+    public GenericFormatter(SimpleDateFormat dateFormat, long maxCacheDiff) {
+        this.dateFormat = dateFormat;
+        this.last_time = 0;
+        this.last_format = "";
+        this.maxCacheDiff = maxCacheDiff;
     }
 
     /**
@@ -75,7 +84,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     @Override
     public String format(final Date date) {
         if (date == null) return "";
-        if (Math.abs(date.getTime() - last_time) < 1000) return last_format;
+        if (Math.abs(date.getTime() - last_time) < maxCacheDiff) return last_format;
         synchronized (this.dateFormat) {
             last_format = this.dateFormat.format(date);
             last_time = date.getTime();
