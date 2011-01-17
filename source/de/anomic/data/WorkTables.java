@@ -329,6 +329,27 @@ public class WorkTables extends Tables {
         }
     }
     
+    /**
+     * cleanup cached failed searchs older then timeout
+     */
+    public void cleanFailURLS(long timeout) {
+    	if (timeout >= 0) {
+    		try {
+				Iterator<Row> iter = this.iterator(WorkTables.TABLE_SEARCH_FAILURE_NAME);
+				while (iter.hasNext()) {
+					Row row = iter.next();
+					Date date = new Date();
+					date = row.get(TABLE_SEARCH_FAILURE_COL_DATE, date);
+					if(date.before(new Date(System.currentTimeMillis() - timeout))) {
+						this.delete(TABLE_SEARCH_FAILURE_NAME, row.getPK());
+					}
+				}
+			} catch (IOException e) {
+	            Log.logException(e);
+			}
+    	}
+    }
+    
     public static Map<byte[], String> commentCache(Switchboard sb) {
         Map<byte[], String> comments = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
         Iterator<Tables.Row> i;

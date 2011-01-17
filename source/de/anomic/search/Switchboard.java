@@ -1662,6 +1662,9 @@ public final class Switchboard extends serverSwitch {
             // after all clean up is done, check the resource usage
             observer.resourceObserverJob();
             
+            // cleanup cached search failures
+            this.tables.cleanFailURLS(this.getConfigLong("cleanup.failedSearchURLtimeout", -1));
+            
             return true;
         } catch (final InterruptedException e) {
             this.log.logInfo("cleanupJob: Shutdown detected");
