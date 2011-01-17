@@ -68,21 +68,15 @@ public class ConfigAccounts_p {
             }
             
             if (localhostAccess) {
-                if (sb.crawlStacker.acceptLocalURLs()) {
-                    // in this case it is not allowed to use a localhostAccess option
-                    prop.put("commitIntranetWarning", 1);
-                    localhostAccess = false;
-                    sb.setConfig("adminAccountForLocalhost", false);
-                } else {
-                    sb.setConfig("adminAccountForLocalhost", true);
-                    // if an localhost access is configured, check if a local password is given
-                    // if not, set a random password
-                    if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
-                        // make a 'random' password
-                        env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "0000" + Digest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
-                        env.setConfig("adminAccount", "");
-                    }
-                }
+
+            	sb.setConfig("adminAccountForLocalhost", true);
+            	// if an localhost access is configured, check if a local password is given
+            	// if not, set a random password
+            	if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+            		// make a 'random' password
+            		env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
+            		env.setConfig("adminAccount", "");
+            	}
             } else {
                 sb.setConfig("adminAccountForLocalhost", false);
                 if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {

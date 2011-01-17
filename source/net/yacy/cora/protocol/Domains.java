@@ -742,6 +742,13 @@ public class Domains {
         if (i == null) return TLD_Generic_ID;
         return i.intValue();
     }
+    
+    public static boolean isLocalhost(final String host) {
+        if (host.equals("127.0.0.1")) return true;
+        if (host.equals("localhost")) return true;
+        if (host.startsWith("0:0:0:0:0:0:0:1")) return true;
+        return false;
+    }
      
     public static boolean isLocal(final String host) {
         return isLocal(host, true);

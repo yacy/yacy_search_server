@@ -35,7 +35,6 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
 
 import de.anomic.data.WorkTables;
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -67,10 +66,6 @@ public class ConfigNetwork_p {
                     // shut down old network and index, start up new network and index
                     commit = 1;
                     sb.switchNetwork(networkDefinition);
-                    // check if the password is given
-                    if (sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
-                        prop.put("commitPasswordWarning", "1");
-                    }
                 }
             }
             

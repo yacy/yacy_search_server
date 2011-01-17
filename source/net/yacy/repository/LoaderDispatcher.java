@@ -184,10 +184,6 @@ public final class LoaderDispatcher {
         final String protocol = url.getProtocol();
         final String host = url.getHost();
         
-        // check if this loads a page from localhost, which must be prevented to protect the server
-        // against attacks to the administration interface when localhost access is granted
-        if (url.isLocal() && sb.getConfigBool("adminAccountForLocalhost", false)) throw new IOException("access to localhost not granted for url " + url);
-        
         // check if we have the page in the cache
         final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
         CrawlProfile crawlProfile = mp == null ? null : new CrawlProfile(mp);

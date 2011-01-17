@@ -103,7 +103,6 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
@@ -552,8 +551,7 @@ public final class Switchboard extends serverSwitch {
         // that an automatic authorization of localhost is done, because in this case crawls from local
         // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
         // addresses that can steer a YaCy peer
-        if ((crawlStacker.acceptLocalURLs()) && (getConfigBool("adminAccountForLocalhost", false))) {
-            setConfig("adminAccountForLocalhost", false);
+        if ((getConfigBool("adminAccountForLocalhost", false))) {
             if (getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
                 // the password was set automatically with a random value.
                 // We must remove that here to prevent that a user cannot log in any more
@@ -921,20 +919,6 @@ public final class Switchboard extends serverSwitch {
         continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         log.logInfo("SWITCH NETWORK: FINISHED START UP, new network is now '" + networkDefinition + "'.");
         
-        // check status of account configuration: when local url crawling is allowed, it is not allowed
-        // that an automatic authorization of localhost is done, because in this case crawls from local
-        // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
-        // addresses that can steer a YaCy peer
-        if ((crawlStacker.acceptLocalURLs()) && (getConfigBool("adminAccountForLocalhost", false))) {
-            setConfig("adminAccountForLocalhost", false);
-            if (getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
-                // the password was set automatically with a random value.
-                // We must remove that here to prevent that a user cannot log in any more
-                setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
-                // after this a message must be generated to alert the user to set a new password
-                log.logInfo("RANDOM PASSWORD REMOVED! User must set a new password");
-            }
-        }
         // set the network-specific remote crawl ppm
         setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
     }
@@ -1461,9 +1445,9 @@ public final class Switchboard extends serverSwitch {
             }
             
             // set a random password if no password is configured
-            if (!crawlStacker.acceptLocalURLs() && getConfigBool("adminAccountForLocalhost", false) && getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+            if (getConfigBool("adminAccountForLocalhost", false) && getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                 // make a 'random' password
-                setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "0000" + Digest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+                setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "0000" + this.genRandomPassword());
                 setConfig("adminAccount", "");
             }
             
@@ -2076,9 +2060,9 @@ public final class Switchboard extends serverSwitch {
         
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final String clientIP = requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "");
-        if (!Domains.isLocal(clientIP)) return false;
+        if (!Domains.isLocalhost(clientIP)) return false;
         final String refererHost = requestHeader.refererHost();
-        return refererHost == null || refererHost.length() == 0 || Domains.isLocal(refererHost);
+        return refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost);
     }
     
     public int adminAuthenticated(final RequestHeader requestHeader) {
@@ -2091,7 +2075,7 @@ public final class Switchboard extends serverSwitch {
         final String authorization = (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
         
         // security check against too long authorization strings
-        if (authorization.length() > 256) return 0; 
+        if (authorization.length() > 256) return 0;
         
         // authorization by encoded password, only for localhost access
         final String adminAccountBase64MD5 = getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");

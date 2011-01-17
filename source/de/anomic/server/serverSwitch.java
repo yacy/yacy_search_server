@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -44,6 +45,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
@@ -609,6 +611,20 @@ public class serverSwitch {
             	throw new FileNotFoundException();
             }
     	}
+    }
+    
+    private static Random pwGenerator = new Random();
+    
+    /**
+     * generates a random password
+     */
+    public String genRandomPassword() {
+    	return genRandomPassword(20);
+    }
+    public String genRandomPassword(int length) {
+    	byte[] bytes = new byte[length];
+    	pwGenerator.nextBytes(bytes);
+    	return Digest.encodeMD5Hex(bytes);
     }
     
 }
