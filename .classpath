@@ -43,5 +43,10 @@
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-http-7.0.2.v20100331.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-7.0.2.v20100331.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-7.0.2.v20100331.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-io-7.0.2.v20100331.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-continuation-7.0.2.v20100331.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

@@ -196,6 +196,11 @@
         <pathelement location="${lib}/icu4j-core.jar" />
         <pathelement location="${lib}/J7Zip-modified.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
+        <pathelement location="${lib}/jetty-continuation-7.0.2.v20100331.jar" />
+	<pathelement location="${lib}/jetty-server-7.0.2.v20100331.jar" />
+	<pathelement location="${lib}/jetty-http-7.0.2.v20100331.jar" />
+	<pathelement location="${lib}/jetty-util-7.0.2.v20100331.jar" />
+	<pathelement location="${lib}/jetty-io-7.0.2.v20100331.jar" />
     	<pathelement location="${lib}/jcifs-1.3.14.jar" />
     	<pathelement location="${lib}/jsch-0.1.42.jar" />
     	<pathelement location="${lib}/log4j-1.2.16.jar" />
