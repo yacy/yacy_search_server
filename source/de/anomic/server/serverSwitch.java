@@ -576,7 +576,7 @@ public class serverSwitch {
      * @param file file to use when remote fetching fails (null if unused)
      */
     public Reader getConfigFileFromWebOrLocally(String uri, String rootPath, File file) throws IOException, FileNotFoundException {
-    	if(uri.startsWith("http://") || uri.startsWith("https://")) {
+    	if (uri.startsWith("http://") || uri.startsWith("https://")) {
             String[] uris = uri.split(",");
             for (String netdef: uris) {
                 netdef = netdef.trim();
@@ -608,7 +608,7 @@ public class serverSwitch {
             if (f.exists()) {
             	return new FileReader(f);
             } else {
-            	throw new FileNotFoundException();
+            	throw new FileNotFoundException(f.toString());
             }
     	}
     }
