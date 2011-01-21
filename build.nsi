@@ -241,6 +241,9 @@ Function GetJRE
 FunctionEnd
 
 Function DetectJRE
+	${If} ${RunningX64}
+		SetRegView 64
+	${EndIf}
 	ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
 	StrCmp $2 ${JRE_VERSION6} doneDetectJRE
 	Call GetJRE
