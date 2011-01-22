@@ -32,7 +32,7 @@
     </p>::#(/inline)#
     #(showtable)#::
     <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="apilist">
-   
+      <fieldset>
       <legend><label for="apilist">Recorded Actions</label></legend>
       <p><span id="resCounter" style="display: inline;">
       #(navigation)#
@@ -40,18 +40,22 @@
       #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
       #[startRecord]#-#[to]# of #[of]#
       #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
-      <img src="env/grafics/nave.gif" alt="" />#(/navigation)#
+      <img src="env/grafics/nave.gif" alt="" />
+      #(/navigation)#
+      <div>
       <input type="hidden" name="startRecord" value="#[startRecord]#" />
       <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
       <input type="hidden" name="inline" value="#(inline)#false::true#(/inline)#" />
       <input type="hidden" name="filter" value="#[filter]#" />
-      <input type="text" name="query" value="#[query]#" style="border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;" />
+      <input type="text" name="query" value="#[query]#" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;" />
+      </div>
       </span><br/></p>
+      <p style="clear:both;">
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
           <th class="sorttable_nosort"><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);" /></th>
           <th>Type</th>
-          <th>Comment</th>
+          <th width="100">Comment</th>
           <th>Call<br/>Count</th>
           <th>Recording<br/>Date</th>
           <th>Last&nbsp;Exec<br/>Date</th>
@@ -104,7 +108,9 @@
           #(inline)#<td>#[url]#</td>::#(/inline)#
         </tr>
         #{/list}#
+        </fieldset>
       </table>
+      </p>
       <p>
       <input type="hidden" name="num" value="#[num]#" />
       <input type="submit" name="execrows" value="Execute Selected Actions" />

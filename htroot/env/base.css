@@ -654,6 +654,10 @@ form.search table {
 <fieldset>
 */
 
+fieldset {
+  text-align:left;
+}
+
 fieldset.yacysearch {
   text-align:left;
   padding-top:10px;
