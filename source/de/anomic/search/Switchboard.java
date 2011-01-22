@@ -705,7 +705,6 @@ public final class Switchboard extends serverSwitch {
 
         // load network configuration into settings
         String networkUnitDefinition = getConfig("network.unit.definition", "defaults/yacy.network.freeworld.unit");
-        final String networkGroupDefinition = getConfig("network.group.definition", "yacy.network.group");
 
         // patch old values
         if (networkUnitDefinition.equals("yacy.network.unit")) {
@@ -733,11 +732,6 @@ public final class Switchboard extends serverSwitch {
         Reader netDefReader = getConfigFileFromWebOrLocally(networkUnitDefinition, getAppPath().getAbsolutePath(), new File(workPath, "network.definition.backup"));
         initProps = FileUtils.table(netDefReader);
         setConfig(initProps);
-        
-        Map<String, String> initGroupProps;
-        Reader netGroupDefReader = getConfigFileFromWebOrLocally(networkGroupDefinition, getAppPath().getAbsolutePath(), new File(workPath, "network.group.backup"));
-        initGroupProps = FileUtils.table(netGroupDefReader);
-        setConfig(initGroupProps);
         
         // set release locations
         int i = 0;

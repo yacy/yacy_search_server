@@ -90,7 +90,6 @@ filesize.max.other = 8589934591
 # to the members of the separated network peers.
 network.unit.definition = defaults/yacy.network.freeworld.unit
 #network.unit.definition = defaults/yacy.network.intranet.unit
-network.group.definition = defaults/yacy.network.group
 
 # Update process properties
 # The update server location is given in the network.unit.definition,
