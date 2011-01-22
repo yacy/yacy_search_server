@@ -389,6 +389,8 @@ public final class SwitchboardConstants {
     public static final String NETWORK_WHITELIST = "network.unit.access.whitelist";
     public static final String NETWORK_BLACKLIST = "network.unit.access.blacklist";
     
+    public static final String NETWORK_SEARCHVERIFY = "network.unit.inspection.searchverify";
+    
     /**
      * appearance
      */

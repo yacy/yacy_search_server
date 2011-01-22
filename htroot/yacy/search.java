@@ -232,7 +232,8 @@ public final class search {
                     false,
                     indexSegment,
                     rankingProfile,
-                    header.get(RequestHeader.USER_AGENT, "")
+                    header.get(RequestHeader.USER_AGENT, ""),
+                    false
                     );
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
@@ -286,7 +287,8 @@ public final class search {
                     false,
                     sb.indexSegments.segment(Segments.Process.PUBLIC),
                     rankingProfile,
-                    header.get(RequestHeader.USER_AGENT, "")
+                    header.get(RequestHeader.USER_AGENT, ""),
+                    false
                     );
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             yacyChannel.channels(yacyChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));

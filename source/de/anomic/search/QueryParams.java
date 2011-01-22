@@ -103,6 +103,7 @@ public final class QueryParams {
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     public final String userAgent;
+    public boolean filterfailurls;
     
     public QueryParams(final String queryString,
             final int itemsPerPage,
@@ -154,6 +155,7 @@ public final class QueryParams {
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
         this.transmitcount = 0;
+        this.filterfailurls = false;
     }
     
     public QueryParams(
@@ -175,7 +177,8 @@ public final class QueryParams {
         final boolean specialRights,
         final Segment indexSegment,
         final RankingProfile ranking,
-        final String userAgent) {
+        final String userAgent,
+        final boolean filterfailurls) {
 
         this.queryString = queryString;
         this.queryHashes = queryHashes;
@@ -209,6 +212,7 @@ public final class QueryParams {
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
         this.transmitcount = 0;
+        this.filterfailurls = filterfailurls;
     }
     
     public Segment getSegment() {

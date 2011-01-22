@@ -11,6 +11,7 @@ network.unit.dht = false
 network.unit.dhtredundancy.junior = 1
 network.unit.dhtredundancy.senior = 1
 network.unit.dht.partitionExponent = 0
+network.unit.inspection.searchverify = false
 network.unit.remotecrawl.speed = 1
 
 # each network may use different yacy distributions.

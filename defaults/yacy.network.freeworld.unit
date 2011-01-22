@@ -15,6 +15,7 @@ network.unit.dht = true
 network.unit.dhtredundancy.junior = 1
 network.unit.dhtredundancy.senior = 3
 network.unit.dht.partitionExponent = 4
+network.unit.inspection.searchverify = true
 network.unit.remotecrawl.speed = 300
 network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt

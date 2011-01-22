@@ -499,7 +499,8 @@ public class yacysearch {
                     authenticated,
                     indexSegment,
                     ranking,
-                    header.get(RequestHeader.USER_AGENT, ""));
+                    header.get(RequestHeader.USER_AGENT, ""),
+                    sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false) && sb.peers.mySeed().getFlagAcceptRemoteIndex());
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.INITIALIZATION, "", 0, 0), false);
             

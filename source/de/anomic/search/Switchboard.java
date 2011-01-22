@@ -1656,14 +1656,16 @@ public final class Switchboard extends serverSwitch {
             this.clusterhashes = this.peers.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
             
             // check if we are reachable and try to map port again if not (e.g. when router rebooted)
-            if(getConfigBool(SwitchboardConstants.UPNP_ENABLED, false) && sb.peers.mySeed().isJunior())
+            if (getConfigBool(SwitchboardConstants.UPNP_ENABLED, false) && sb.peers.mySeed().isJunior())
             	UPnP.addPortMapping();
             
             // after all clean up is done, check the resource usage
             observer.resourceObserverJob();
             
             // cleanup cached search failures
-            this.tables.cleanFailURLS(this.getConfigLong("cleanup.failedSearchURLtimeout", -1));
+            if (getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false) && peers.mySeed().getFlagAcceptRemoteIndex()) {
+                this.tables.cleanFailURLS(this.getConfigLong("cleanup.failedSearchURLtimeout", -1));
+            }
             
             return true;
         } catch (final InterruptedException e) {

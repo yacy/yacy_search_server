@@ -333,7 +333,7 @@ public class ResultFetcher {
                         //System.out.println("page == null");
                         break; // no more available
                     }
-                    if (workTables.failURLsContains(page.hash())) continue;
+                    if (query.filterfailurls && workTables.failURLsContains(page.hash())) continue;
 
                     loops++;
                     final ResultEntry resultEntry = fetchSnippet(page, cacheStrategy); // does not fetch snippets if snippetMode == 0
