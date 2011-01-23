@@ -1,17 +1,17 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
   <head>
     <title>YaCy '#[clientname]#': Network Scanner</title>
     #%env/templates/metas.template%#
-    <script type="text/javascript">
+	<script type="text/javascript">
     <!--
-    function setall(name) {
-        var selectForm = document.forms.namedItem(name);
-        var count = selectForm.elements["num"].value;
-        for (i = 0; i < count; i++) {
-            if (selectForm.elements["item_" + i] == null) continue;
-            selectForm.elements["item_" + i].checked = !selectForm.elements["item_" + i].checked;
-        }
+	// The chrome browser is getting the wrong value if we try to get the value inside the script "var checkStatus=inputs.elements[0].checked;" - so now the value is a parameter
+	function checkAll (formToCheckAll, checkStatus) {
+	var inputs=document.getElementById(formToCheckAll);	
+	//var checkStatus=inputs.elements[0].checked;
+	for (var i =0; i < inputs.elements.length; i++) {
+			inputs.elements[i].checked = checkStatus;
+		}
     }
     -->
     </script>
@@ -34,7 +34,7 @@
     </p>
     #(/noserverdetected)#
     
-    <form onSubmit="document.getElementById('scanhostinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
+    <form onsubmit="document.getElementById('scanhostinfo').innerHTML='Please wait...'; disableSubmit();" action="CrawlStartScanner_p.html" method="get">
     <fieldset>
       <legend>
 	    <label>Scan the network</label>
@@ -42,30 +42,30 @@
     <dl>
     <dt>Scan Range</dt>
     <dd>
-        <input type="radio" name="source" id="source" value="hosts"#(intranet.checked)# checked="checked"::#(/intranet.checked)# />Scan sub-range with given host
+        <input type="radio" name="source" id="sourcehost" value="hosts"#(intranet.checked)# checked="checked"::#(/intranet.checked)# />Scan sub-range with given host
         <input type="text" name="scanhosts" value="#[scanhosts]#" size="60" maxlength="400" /><br/><br/>
     
-        <input type="radio" name="source" id="source" value="intranet"#(intranet.checked)#:: checked="checked"#(/intranet.checked)# />Full Intranet Scan: #[intranethosts]#<br/>
+        <input type="radio" name="source" id="sourcenet" value="intranet"#(intranet.checked)#:: checked="checked"#(/intranet.checked)# />Full Intranet Scan: #[intranethosts]#<br/>
         #(intranetHint)#::<div class="info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
     </dd>
     <dt>Scan Cache</dt>
     <dd>
-        <input type="checkbox" name="accumulatescancache" id="accumulatescancache" checked="checked">accumulate scan results with access type "granted" into scan cache (do not delete old scan result)
+        <input type="checkbox" name="accumulatescancache" id="accumulatescancache" checked="checked" />accumulate scan results with access type "granted" into scan cache (do not delete old scan result)
     </dd>
     <dt>Service Type</dt>
     <dd>
-        <input type="checkbox" name="scanftp" checked="checked">ftp
-        <input type="checkbox" name="scansmb" checked="checked">smb
-        <input type="checkbox" name="scanhttp">http
-        <input type="checkbox" name="scanhttps">https
+        <input type="checkbox" name="scanftp" checked="checked" />ftp
+        <input type="checkbox" name="scansmb" checked="checked" />smb
+        <input type="checkbox" name="scanhttp" />http
+        <input type="checkbox" name="scanhttps" />https
     </dd>
     
     <dt>Scheduler</dt>
     <dd>
         <input type="radio" name="rescan" value="off" #(rescanCheck)#checked="checked"::#(/rescanCheck)#/>run only a scan<br/>
-		<input type="radio" name="rescan" value="scheduler" onclick="document.getElementById('accumulatescancache').checked = false" #(rescanCheck)#::checked="checked"#(/rescanCheck)#/>
+		<input type="radio" name="rescan" value="scheduler" onclick="document.getElementById('accumulatescancache').checked = false" #(rescanCheck)#::checked="checked"#(/rescanCheck)# />
 		scan and add all sites with granted access automatically. This disables the scan cache accumulation.
-		<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Look every
+		<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Look every
 		<select name="repeat_time">
            <option value="1">1</option><option value="2">2</option><option value="3">3</option>
            <option value="4">4</option><option value="5">5</option><option value="6">6</option>
@@ -78,7 +78,7 @@
            <option value="selminutes" selected="selected">minutes</option>
            <option value="selhours">hours</option>
            <option value="seldays">days</option>
-        </select> again and add new sites automatically to indexer.<br>
+        </select> again and add new sites automatically to indexer.<br />
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Sites that do not appear during a scheduled scan period will be excluded from search results.
     </dd>
     
@@ -92,20 +92,20 @@
 	<p>
 	  The following servers had been detected:
 	</p>
-	<form id="servertable" name="servertable" action="CrawlStartScanner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" ><fieldset>
+	<form id="servertable" action="CrawlStartScanner_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" ><fieldset>
 	  <legend><label for="servertable">Available server within the given IP range</label></legend>
       <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
-          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name)" /></td>
-          <td>Protocol</td>
-          <td>IP</td>
-          <td>URL</td>
-          <td>Access</td>
-          <td>Process</td>
+          <th class="sorttable_nosort"><input type="checkbox" name="allswitch" onclick="checkAll(this.form.id, this.checked);" /></th>
+          <th>Protocol</th>
+          <th>IP</th>
+          <th>URL</th>
+          <th>Access</th>
+          <th>Process</th>
         </tr>
         #{list}#
         <tr class="TableCellLight">
-          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" #(preselected)#::checked#(/preselected)#/></td>
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" #(preselected)#::checked="checked"#(/preselected)# /></td>
           <td>#[protocol]#</td>
           <td><a href="#[url]#">#[ip]#</a></td>
           <td><a href="#[url]#">#[url]#</a></td>

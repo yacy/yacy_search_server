@@ -316,7 +316,6 @@ User changed:==Benutzer geändert:
 Generic error.==Genereller Fehler.
 Passwords do not match.==Passwörter stimmen nicht überein.
 Username too short. Username must be \>\= 4 Characters.==Benutzername zu kurz. Benutzername muss länger als vier Zeichen sein.
-With an intranet indexing configuration it is not allowed to authentify automatically from localhost!==Die Intranet Indexier Konfiguration erlaubt keine automatische Authentifikation von localhost!
 No password is set for the administration account.==Für den Administrator Zugang ist kein Passwort gesetzt.
 Please define a password for the admin account.==Bitte setzen Sie ein Passwort für das admin Konto.
 Admin Account==Admin Konto
@@ -540,8 +539,8 @@ For Robinson Mode, index distribution and receive is switched off==Im Robinson-M
 #This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
 #This Robinson Mode does not allow any remote indexing \(neither requests remote indexing, nor accepts it\)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
 Network and Domain Specification==Netzwerk und Domain Spezifikation
-With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
-Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
+# With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
+# Please open the <a href=\"ConfigAccounts_p.html\">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
 YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Sie können an einem verteiltem Netz aus YaCy Peers mitwirken oder einen eigenständigen Peer betreiben.
 To control that all participants within a web indexing domain have access to the same domain,==Um zu kontrollieren, dass alle Teilnehmer innerhalb einer Indexierungs Domain Zugriff zu der selben Domain haben, 
 this network definition must be equal to all members of the same YaCy network.==müssen diese Netzwerkdefinitionen bei allen Mitgliedern des YaCy Netzwerkes gleich sein.
@@ -684,8 +683,8 @@ Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long
 #Skype==Skype
 Comment==Kommentar
 "Save"=="Speichern"
-You can use==Sie können
-here.==im Profil benutzen.
+You can use <==Sie können <
+> here.==> hier im Profil benutzen.
 #-----------------------------
 
 #File: ConfigProperties_p.html
@@ -723,7 +722,7 @@ Integration of a Search Box==Integration einer Suchbox
 We give information how to integrate a search box on any web page that==Hier finden Sie Informationen dazu wie man eine Suchbox auf jeder Webseite einsetzen kann das
 calls the normal YaCy search window.==ein normales YaCy Suchfenster aufruft.
 Simply use the following code:==Verwenden Sie einfach den folgenden Code:
-MySearch==Meine Suche
+  MySearch==  Meine Suche
 "Search"=="Suchen"
 This would look like:==Das sieht dann so aus:
 This does not use a style sheet file to make the integration into another web page with a different style sheet easier.==Da hier keine Stylesheet Datei verwendet wird, gestaltet sich die Integration in andere Webseiten mit einem anderen Stylesheet einfacher.
@@ -1067,6 +1066,53 @@ Available Intranet Server==Verfügbare Intranet Server
 "Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawler hinzu"
 #-----------------------------
 
+#File: CrawlStartScanner_p.html
+#---------------------------
+Network Scanner==Netzwerk Scanner
+YaCy can scan a network segment for available http, ftp and smb server.==YaCy kann ein Netzwerksegment auf verfügbare HTTP, FTP und SMB Server hin absuchen.
+You must first select a IP range and then, after this range is scanned,==Sie müssen zuerst einen IP Bereich festlegen  und dann, nachdem dieser Bereich gescannt wurde,
+it is possible to select servers that had been found for a full-site crawl.==ist es möglich einen gefunden Server für eine volle Seiten Suche crawlen zu lassen.
+No servers had been detected in the given IP range \#\[iprange\]\#. 
+Please enter a different IP range for another scan.==Bitte geben Sie einen anderen IP Bereich ein für einen weiteren Scan.
+Please wait...==Bitte warten...
+>Scan the network<==>Das Netzwerk Scannen<
+Scan Range==Scan Bereich
+Scan sub-range with given host==Scanne Unterbereich von angegebenen Host aus
+Full Intranet Scan:==Voller Intranet Scan:
+Do not use intranet scan results, you are not in an intranet environment!==Verwenden Sie nicht die Intranet Scan Resultate, da sie sich nicht in einer Intranet Umgebung befinden!
+>Scan Cache<==>Scan Cache<
+accumulate scan results with access type \"granted\" into scan cache \(do not delete old scan result\)==Sammle Scan Ergebnisse mit dem Zugriffstyp "granted" im Scan Cache (Lösche keine alten Scan Ergebnisse)
+>Service Type<==>Service Typ<
+#>ftp==>FTP
+#>smb==>SMB
+#>http==>HTTP
+#>https==>HTTPS
+>Scheduler<==>Scan Planung<
+run only a scan==Nur einmalig Scannen
+scan and add all sites with granted access automatically. This disables the scan cache accumulation.==Scannen und alle Webseiten mit erlaubtem Zugriff automatisch hinzufügen. Diese Einstellungen deaktiviert die Scan Cache Ansammlung.
+Look every==Überprüfe alle
+>minutes<==>Minuten<
+>hours<==>Stunden<
+>days<==>Tage<
+again and add new sites automatically to indexer.==wieder und füge neue Seiten automatisch zum Indexer hinzu.
+Sites that do not appear during a scheduled scan period will be excluded from search results.==Seiten die nicht im Laufe eines geplanten Scans auftauchen werden von den Suchergebnissen ausgeschlossen.
+"Scan"=="Scannen"
+The following servers had been detected:==Die folgenden Server wurden entdeckt:
+Available server within the given IP range==Verfügbare Server innerhalb des angegebenen IP Bereichs
+>Protocol<==>Protokoll<
+#>IP<==>IP<
+#>URL<==>URL<
+>Access<==>Zugriff<
+>Process<==>Prozess<
+>unknown<==>unbekannt<
+>empty<==>leer<
+>granted<==>erlaubt<
+>denied<==>verweigert<
+>not in index<==>nicht im Index<
+>indexed<==>indexiert<
+"Add Selected Servers to Crawler"=="Füge ausgewählte Server zum Crawlen hinzu"
+#-----------------------------
+
 #File: CrawlStartSite_p.html
 #---------------------------
 >Site Crawling<==>Seiten Crawlen<
@@ -1186,7 +1232,7 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 #File: index.html
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
-kiosk mode==Kiosk Modus
+#kiosk mode==Kiosk Modus
 "Search"=="Suchen"
 #Text==Text
 Images==Bilder
@@ -1840,7 +1886,7 @@ Action==Aktion
 From:==Von:
 To:==An:
 Date:==Datum:
-Subject:==Betreff:
+#Subject:==Betreff:
 >view==>anzeigen
 reply==antworten
 >delete==>löschen
@@ -1910,10 +1956,10 @@ Send message to peer==Sende Nachricht an Peer
 View profile of peer==Zeige Profil des Peers
 Read and edit wiki on peer==Lese und ändere Wiki des Peers
 Browse blog of peer==Durchsuche den Blog von Peer
-"Ranking Receive: no"=="Ranking Empfang: nein"
-"no ranking receive"=="kein Ranking Empfang"
-"Ranking Receive: yes"=="Ranking Empfang: ja"
-"Ranking receive enabled"=="Ranking Empfang aktiv"
+#"Ranking Receive: no"=="Ranking Empfang: nein"
+#"no ranking receive"=="kein Ranking Empfang"
+#"Ranking Receive: yes"=="Ranking Empfang: ja"
+#"Ranking receive enabled"=="Ranking Empfang aktiv"
 "DHT Receive: yes"=="DHT Empfang: ja"
 "DHT receive enabled"=="DHT Empfang aktiv"
 "DHT Receive: no; \#\[peertags\]\#"=="DHT Empfang: nein; #[peertags]#"
@@ -1967,7 +2013,7 @@ Received<br/>URLs==Empfangene<br/>URLs
 Known<br/>Seeds==Bekannte<br/>Seeds
 Connects<br/>per hour==Verbindungen<br/>pro Stunde
 #Version==Version
-Own/Other==Eigene/Andere
+#Own/Other==Eigene/Andere
 >dark green font<==>dunkelgrüne Schrift<
 senior/principal peers==Senior/Principal Peers
 >light green font<==>hellgrüne Schrift<
@@ -2034,7 +2080,7 @@ Memory reserved for JVM==Für JVM reservierter Speicher
 Resource Observer==Ressourcen Beobachter
 DHT-Trigger==DHT-Umschalter
 not triggered:==nicht ausgelöst:
-triggered==ausgelöst
+>triggered==>ausgelöst
 reset state==Status zurücksetzen
 HDD==Festplattenspeicher
 disable crawls below==Deaktivere Crawls unter
@@ -2141,7 +2187,6 @@ Queue Size==Warteschl.-<br />länge
 #Block Time==
 #Sleep Time==
 #Exec Time==
->Cycles==>Durchl.
 <td>Idle==<td>untät.
 >Busy==>beschäft.
 Short Mem<br />Cycles==Durchl.<br />ohne ausr. Speicher
@@ -2287,7 +2332,6 @@ Page.==Seite ansehen.
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Schnell-Crawl-Link
 Quick Crawl Link==Schnell Crawl Link
 Quickly adding Bookmarks:==Schnell Crawl Lesezeichen:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==Ziehen Sie einfach den unten stehenden Link auf Ihre Browser Toolbar/Linkbar.
@@ -2393,9 +2437,11 @@ Message Forwarding \(optional\)==Nachrichten Weiterleitung (optional)
 Generic Crawler Settings==Allgemeine Crawler Einstellungen
 Connection timeout in ms==Verbindungs-Timeout in ms
 means unlimited==schaltet die Begrenzung ab
-Crawler Settings==Crawler Einstellungen
+HTTP Crawler Settings:==HTTP Crawler Einstellungen:
 Maximum Filesize==Maximale Dateigröße
-Local File==Lokale Datei
+FTP Crawler Settings==FTP Crawler Einstellungen
+SMB Crawler Settings==SMB Crawler Einstellungen
+Local File Crawler Settings==Lokales Dateisystem Crawler Einstellungen
 Maximum allowed file size in bytes that should be downloaded==Maximale Größe der herunterzuladenden Datei in Byte
 Larger files will be skipped==Größere Dateien werden übersprungen
 Please note that if the crawler uses content compression, this limit is used to check the compressed content size==Beachten Sie, dass beim Herunterladen der Dateien mittels "Content-Compression" die komprimierte Dateigröße maßgeblich ist
@@ -2942,7 +2988,7 @@ You are not logged in.<br />==Sie sind nicht angemeldet.<br />
 Username:==Benutzername:
 Password: <input==Passwort: <input
 "login"=="anmelden"
-You are currently logged in as==Sie sind nun angemeldet als
+You are currently logged in as \#\[username\]\#.==Sie sind nun angemeldet als #[username]#.
 You have used==Sie haben bereits
 minutes of your onlinetime limit of==Minuten Ihres Online-Zeitlimits von
 minutes per day.==Minuten pro Tag verbraucht.
@@ -3001,7 +3047,6 @@ reversed order==umgekehrte Reihenfolge
 #---------------------------
 Local Peer Profile:==Lokales Peer Profil:
 Remote Peer Profile==Remote Peer Profil
-Remote Peer Profile:==Remote Peer Profil:
 Wrong access of this page==Falscher Zugriff auf diese Seite
 The requested peer is unknown or a potential peer.==Der gewünschte Peer ist nicht bekannt oder ein potenzieller Peer.
 The profile can't be fetched.==Das Profil kann nicht geladen werden.
@@ -3157,7 +3202,7 @@ Text will be displayed <span class=\"strike\">stricken through</span>.==Text wir
 Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Der Text erscheint eingerückt. Dieser Tag eignet sich, um Zitate zu markieren, wird aber auch zum Designen benutzt.
 point==Punkt
 These tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
-something==etwas
+something<==etwas<
 another thing==was anderes
 and yet another==und wieder was anderes
 something else==irgendwas
@@ -3184,11 +3229,10 @@ alt text==alt Beschreibung
 #File: yacyinteractive.html
 #---------------------------
 YaCy Interactive Search==YaCy interaktive Suche
-This page uses the JSON search API to display search results as you type.==Diese Seite verwendet die JSON Such API, um die Suchergebnisse beim Tippen anzuzeigen.
-Click the API icon to see an example call to the native API.==Klicken Sie auf die API Sprechblase, um einen Beispielaufruf der nativen API zu sehen.
+This search result can also be retrieved as RSS/<a href=\"http://www.opensearch.org\">opensearch</a> output.==Das Suchergebnis kann auch als RSS/<a href="http://www.opensearch.org">opensearch</a> Ausgabe abgerufen werden.
+The query format is similar to <a href=\"http://www.loc.gov/standards/sru/\">SRU</a>.==Das Abfrageformat ist ähnlich dem <a href="http://www.loc.gov/standards/sru/">SRU</a>.
+Click the API icon to see an example call to the search rss API.==Klicken Sie auf das API Symbol, um einen Beispielaufruf der RSS Such API zu sehen.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
-kiosk mode==Kiosk Modus
-#>Link==>Link
 #-----------------------------
 
 #File: yacysearch.html
@@ -3435,6 +3479,7 @@ Index Creation==Indexerzeugung
 Full Site Crawl==Vollständiger Seiten Crawl
 Sitemap Loader==Sitemap Lader
 Crawl Start<br/>\(Expert\)==Crawl Start<br/>(Experte)
+Network<br/>Scanner==Netzwerk<br/>Scanner
 #>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
 Crawling of==Crawlen von
 #Media Wikis==Media Wikis
