@@ -174,14 +174,14 @@ public class NetworkGraph {
 
         RasterPlotter networkPicture = new RasterPlotter(width, height, (bgcolor.equals("000000")) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB, bgcolor);
         if (seedDB == null) return networkPicture; // no other peers known
-        
-        final int innerradius = Math.min(width, height) / 5;
-        int outerradius = innerradius + innerradius * seedDB.sizeConnected() / 100;
-        if (outerradius > innerradius * 2) outerradius = innerradius * 2;
+
+        final int maxradius = Math.min(width, height) / 2;
+        final int innerradius = maxradius * 4 / 10;
+        int outerradius = maxradius - 20;
 
         // draw network circle
         networkPicture.setColor(COL_DHTCIRCLE);
-        networkPicture.arc(width / 2, height / 2 + 20, innerradius - 20, innerradius + 20, 0, 360);
+        networkPicture.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 0, 360);
 
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
@@ -200,7 +200,7 @@ public class NetworkGraph {
                 continue;
             }
             //Log.logInfo("NetworkGraph", "drawing peer " + seed.getName());
-            drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, coronaangle);
+            drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_ACTIVE_DOT, COL_ACTIVE_LINE, COL_ACTIVE_TEXT, coronaangle);
             count++;
         }
         totalCount += count;
@@ -218,7 +218,7 @@ public class NetworkGraph {
             if (lastseen > passiveLimit) {
                 break; // we have enough, this list is sorted so we don't miss anything
             }
-            drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, coronaangle);
+            drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_PASSIVE_DOT, COL_PASSIVE_LINE, COL_PASSIVE_TEXT, coronaangle);
             count++;
         }
         totalCount += count;
@@ -236,13 +236,13 @@ public class NetworkGraph {
             if (lastseen > potentialLimit) {
                 break; // we have enough, this list is sorted so we don't miss anything
             }
-            drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, coronaangle);
+            drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seed, COL_POTENTIAL_DOT, COL_POTENTIAL_LINE, COL_POTENTIAL_TEXT, coronaangle);
             count++;
         }
         totalCount += count;
 
         // draw my own peer
-        drawNetworkPicturePeer(networkPicture, width / 2, height / 2 + 20, innerradius, outerradius, seedDB.mySeed(), COL_MYPEER_DOT, COL_MYPEER_LINE, COL_MYPEER_TEXT, coronaangle);
+        drawNetworkPicturePeer(networkPicture, width / 2, height / 2, innerradius, outerradius, seedDB.mySeed(), COL_MYPEER_DOT, COL_MYPEER_LINE, COL_MYPEER_TEXT, coronaangle);
 
         // draw DHT activity
         if (communicationTimeout >= 0) {
@@ -253,14 +253,14 @@ public class NetworkGraph {
                 if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTRECEIVE: " + event.getLink());
-                    drawNetworkPictureConnection(networkPicture, width / 2, height / 2 + 20, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTIN);
+                    drawNetworkPictureConnection(networkPicture, width / 2, height / 2, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTIN);
                 }
             }
             for (Hit event: yacyChannel.channels(yacyChannel.DHTSEND)) {
                 if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTSEND: " + event.getLink());
-                    drawNetworkPictureConnection(networkPicture, width / 2, height / 2 + 20, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTOUT);
+                    drawNetworkPictureConnection(networkPicture, width / 2, height / 2, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTOUT);
                 }
             }
         }        

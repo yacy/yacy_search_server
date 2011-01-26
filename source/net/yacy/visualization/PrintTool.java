@@ -58,7 +58,7 @@ public class PrintTool {
                 for (int j = 0; j < 5; j++) {
                 	c = row & 3L;
                     if (c == 3) matrix.plot(x + 5 - j, y, 100);
-                    if (c == 2) matrix.plot(x + 5 - j, y, 36);
+                    else if (c == 2) matrix.plot(x + 5 - j, y, 36);
                     row = row >> 2;
                 }
                 y--;
@@ -67,7 +67,7 @@ public class PrintTool {
                 for (int j = 0; j < 5; j++) {
                 	c = row & 3L;
                     if (c == 3) matrix.plot(x, y - 5 + j, 100);
-                    if (c == 2) matrix.plot(x, y - 5 + j, 36);
+                    else if (c == 2) matrix.plot(x, y - 5 + j, 36);
                     row = row >> 2;
                 }
                 x--;
@@ -76,7 +76,7 @@ public class PrintTool {
                 for (int j = 0; j < 5; j++) {
                     c = row & 3L;
                     if (c == 3) { matrix.plot(x + 5 - j, y + 5 - j, 100); matrix.plot(x + 6 - j, y + 5 - j, 50); matrix.plot(x + 5 - j, y + 6 - j, 50); }
-                    if (c == 2) { matrix.plot(x + 5 - j, y + 5 - j, 36);  matrix.plot(x + 6 - j, y + 5 - j, 18); matrix.plot(x + 5 - j, y + 6 - j, 18); }
+                    else if (c == 2) { matrix.plot(x + 5 - j, y + 5 - j, 36);  matrix.plot(x + 6 - j, y + 5 - j, 18); matrix.plot(x + 5 - j, y + 6 - j, 18); }
                     row = row >> 2;
                 }
                 x++;

@@ -62,10 +62,10 @@ public class NetworkPicture {
             return buffer;
         }
         
-        int width = 768;
+        int width = 1024; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
         int height = 576;
-        int passiveLimit = 720; // 12 hours
-        int potentialLimit = 720;
+        int passiveLimit = 10080; // minutes; 1440 = 1 day; 720 = 12 hours; 10080 = 1 week;
+        int potentialLimit = 10080;
         int maxCount = 1000;
         String bgcolor = NetworkGraph.COL_BACKGROUND;
         boolean corona = true;
@@ -73,11 +73,11 @@ public class NetworkPicture {
         long communicationTimeout = -1;
         
         if (post != null) {
-            width = post.getInt("width", 768);
-            height = post.getInt("height", 576);
-            passiveLimit = post.getInt("pal", 1440);
-            potentialLimit = post.getInt("pol", 1440);
-            maxCount = post.getInt("max", 1000);
+            width = post.getInt("width", width);
+            height = post.getInt("height", height);
+            passiveLimit = post.getInt("pal", passiveLimit);
+            potentialLimit = post.getInt("pol", potentialLimit);
+            maxCount = post.getInt("max", maxCount);
             corona = post.get("corona", "true").equals("true");
             coronaangle = (corona) ? post.getInt("coronaangle", 0) : -1;
             communicationTimeout = post.getLong("ct", -1);
@@ -88,7 +88,7 @@ public class NetworkPicture {
         if (width < 320 ) width = 320;
         if (width > 1920) width = 1920;
         if (height < 240) height = 240;
-        if (height > 1920) height = 1920;
+        if (height > 1080) height = 1080;
         if (!authorized) {
             width = Math.min(768, width);
             height = Math.min(576, height);
