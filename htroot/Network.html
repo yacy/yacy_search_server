@@ -60,8 +60,13 @@ document.getElementById('apilink').setAttribute('href', 'Network.xml?' + window.
 Click the API icon to see the XML.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
 </div>
-
-    #%env/templates/header.template%#
+    
+    #(menu)#
+    #%env/templates/embeddedheader.template%#
+    ::
+    #%env/templates/simpleheader.template%#
+    ::
+    #%env/templates/header.template%#    
     <div class="SubMenu">
       <h3>YaCy Network</h3>
       <ul class="SubMenu">
@@ -71,6 +76,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <li><a href="/Network.html?page=3" class="MenuItemLink">Potential&nbsp;Peers</a></li>
       </ul>
     </div>
+    #(/menu)#
+    
     #(page)#
     <h2>Overview of '#[networkName]#' Network</h2>
     ::
