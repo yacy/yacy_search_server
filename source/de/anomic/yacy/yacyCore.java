@@ -639,7 +639,7 @@ public class yacyCore {
                 if (log.isFine()) log.logFine("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
                             "\n\tPrevious peerType is '" + sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR) + "'.");
 
-                logt = sb.peers.uploadCache(uploader, sb, sb.peers, seedURL);
+                logt = sb.peers.uploadSeedList(uploader, sb, sb.peers, seedURL);
                 if (logt != null) {
                     if (logt.indexOf("Error") >= 0) {
                         sb.peers.mySeed().put(yacySeed.PEERTYPE, prevStatus);

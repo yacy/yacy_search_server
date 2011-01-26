@@ -25,7 +25,7 @@
 
 /*
  * This file was imported from apache http client 3.1 library and modified
- * to work for the YaCy http server when htto client library use was migrated
+ * to work for the YaCy http server when http client library use was migrated
  * to apache http components 4.0
  * by Michael Christen, 20.09.2010
  */
@@ -139,15 +139,11 @@ public class ChunkedInputStream extends InputStream {
      * @see java.io.InputStream#read(byte[], int, int)
      * @throws IOException if an IO problem occurs.
      */
-    public int read (byte[] b, int off, int len) throws IOException {
+    public int read(byte[] b, int off, int len) throws IOException {
 
-        if (closed) {
-            throw new IOException("Attempted read from closed stream.");
-        }
-
-        if (eof) { 
-            return -1;
-        }
+        if (closed) throw new IOException("Attempted read from closed stream.");
+        if (eof) return -1;
+        
         if (pos >= chunkSize) {
             nextChunk();
             if (eof) { 
@@ -168,7 +164,7 @@ public class ChunkedInputStream extends InputStream {
      * @see java.io.InputStream#read(byte[])
      * @throws IOException if an IO problem occurs.
      */
-    public int read (byte[] b) throws IOException {
+    public int read(byte[] b) throws IOException {
         return read(b, 0, b.length);
     }
 
@@ -178,11 +174,9 @@ public class ChunkedInputStream extends InputStream {
      */
     private void readCRLF() throws IOException {
         int cr = in.read();
+        if (cr != '\r') throw new IOException("CRLF expected at end of chunk: cr != " + cr);
         int lf = in.read();
-        if ((cr != '\r') || (lf != '\n')) { 
-            throw new IOException(
-                "CRLF expected at end of chunk: " + cr + "/" + lf);
-        }
+        if (lf != '\n') throw new IOException("CRLF expected at end of chunk: lf != " + lf);
     }
 
 
@@ -191,9 +185,7 @@ public class ChunkedInputStream extends InputStream {
      * @throws IOException If an IO error occurs.
      */
     private void nextChunk() throws IOException {
-        if (!bof) {
-            readCRLF();
-        }
+        if (!bof) readCRLF();
         chunkSize = getChunkSizeFromInputStream(in);
         bof = false;
         pos = 0;

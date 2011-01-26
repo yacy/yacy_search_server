@@ -30,14 +30,13 @@ import java.io.File;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacySeedUploader;
 
 public class yacySeedUploadFile implements yacySeedUploader {
     
     public static final String CONFIG_FILE_PATH = "seedFilePath";
 
-    public String uploadSeedFile(final serverSwitch sb, final yacySeedDB seedDB, final File seedFile) throws Exception {
+    public String uploadSeedFile(final serverSwitch sb, final File seedFile) throws Exception {
         
         String seedFilePath = "";
         try {

@@ -500,15 +500,6 @@ public class yacySeed implements Cloneable {
             return System.currentTimeMillis() - AbstractFormatter.dayMillis;
         }
     }
-    
-    /**
-     * @see #getLastSeenUTC()
-     * @return the last seen value as string representation in the following format: YearMonthDayHoursMinutesSeconds
-     * or <code>20040101000000</code> if not present
-     */
-    public final String getLastSeenString() {
-        return get(yacySeed.LASTSEEN, "20040101000000");
-    }
 
     /** @return the age of the seed in number of days */
     public final int getAge() {

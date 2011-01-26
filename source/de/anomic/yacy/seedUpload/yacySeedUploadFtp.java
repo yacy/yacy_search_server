@@ -30,7 +30,6 @@ import java.io.File;
 import net.yacy.cora.protocol.ftp.FTPClient;
 
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacySeedUploader;
 
 public class yacySeedUploadFtp implements yacySeedUploader {
@@ -40,10 +39,9 @@ public class yacySeedUploadFtp implements yacySeedUploader {
     public static final String CONFIG_FTP_PASSWORD = "seedFTPPassword";
     public static final String CONFIG_FTP_PATH = "seedFTPPath";
     
-    public String uploadSeedFile (final serverSwitch sb, final yacySeedDB seedDB, final File seedFile) throws Exception {
+    public String uploadSeedFile (final serverSwitch sb, final File seedFile) throws Exception {
         try {        
             if (sb == null) throw new NullPointerException("Reference to serverSwitch must not be null.");
-            if (seedDB == null) throw new NullPointerException("Reference to seedDB must not be null.");
             if ((seedFile == null)||(!seedFile.exists())) throw new Exception("Seed file does not exist.");
             if (!seedFile.isFile()) throw new Exception("Seed file is not a file.");
             if (!seedFile.canRead()) throw new Exception("Seed file is not readable.");

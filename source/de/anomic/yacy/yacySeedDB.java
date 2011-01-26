@@ -764,14 +764,14 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return null;
     }
 
-    private ArrayList<String> storeCache(final File seedFile, final boolean addMySeed) throws IOException {
+    private ArrayList<String> storeSeedList(final File seedFile, final boolean addMySeed) throws IOException {
         PrintWriter pw = null;
         final ArrayList<String> v = new ArrayList<String>(seedActiveDB.size() + 1);
         try {
             
             pw = new PrintWriter(new BufferedWriter(new FileWriter(seedFile)));
             
-            // store own seed
+            // store own peer seed
             String line;
             if (this.mySeed == null) initMySeed();
             if (addMySeed) {
@@ -780,12 +780,25 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 pw.print(line + serverCore.CRLF_STRING);
             }
             
-            // store other seeds
+            // store active peer seeds
             yacySeed ys;
-            final Iterator<yacySeed> se = seedsConnected(true, false, null, (float) 0.0);
+            Iterator<yacySeed> se = seedsConnected(true, false, null, (float) 0.0);
             while (se.hasNext()) {
                 ys = se.next();
                 if (ys != null) {
+                    line = ys.genSeedStr(null);
+                    v.add(line);
+                    pw.print(line + serverCore.CRLF_STRING);
+                }
+            }
+            
+            // store some of the not-so-old passive peer seeds (limit: 1 day)
+            se = seedsDisconnected(true, false, null, (float) 0.0);
+            long timeout = System.currentTimeMillis() - (1000L * 60L * 60L * 24L);
+            while (se.hasNext()) {
+                ys = se.next();
+                if (ys != null) {
+                    if (ys.getLastSeenUTC() < timeout) continue; 
                     line = ys.genSeedStr(null);
                     v.add(line);
                     pw.print(line + serverCore.CRLF_STRING);
@@ -798,7 +811,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return v;
     }
 
-    protected String uploadCache(final yacySeedUploader uploader, 
+    protected String uploadSeedList(final yacySeedUploader uploader, 
             final serverSwitch sb,
             final yacySeedDB seedDB,
             final DigestURI seedURL) throws Exception {
@@ -813,11 +826,11 @@ public final class yacySeedDB implements AlternativeDomainNames {
             seedFile = File.createTempFile("seedFile",".txt", seedDB.myOwnSeedFile.getParentFile());
             seedFile.deleteOnExit();
             if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
-            final ArrayList<String> uv = storeCache(seedFile, true);            
+            final ArrayList<String> uv = storeSeedList(seedFile, true);            
             
             // uploading the seed file
             if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to upload seed-file, " + seedFile.length() + " bytes, " + uv.size() + " entries.");
-            log = uploader.uploadSeedFile(sb,seedDB,seedFile);
+            log = uploader.uploadSeedFile(sb, seedFile);
             
             // test download
             if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to download seed-file '" + seedURL + "'.");

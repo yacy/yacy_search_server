@@ -40,7 +40,6 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacySeedUploader;
 
 public class yacySeedUploadScp implements yacySeedUploader {
@@ -51,10 +50,9 @@ public class yacySeedUploadScp implements yacySeedUploader {
     public static final String CONFIG_SCP_PASSWORD = "seedScpPassword";
     public static final String CONFIG_SCP_PATH = "seedScpPath";
     
-    public String uploadSeedFile(final serverSwitch sb, final yacySeedDB seedDB, final File seedFile) throws Exception {
+    public String uploadSeedFile(final serverSwitch sb, final File seedFile) throws Exception {
         try {        
             if (sb == null) throw new NullPointerException("Reference to serverSwitch nut not be null.");
-            if (seedDB == null) throw new NullPointerException("Reference to seedDB must not be null.");
             if ((seedFile == null)||(!seedFile.exists())) throw new Exception("Seed file does not exist.");
             
             final String  seedScpServer   = sb.getConfig(CONFIG_SCP_SERVER,null);
