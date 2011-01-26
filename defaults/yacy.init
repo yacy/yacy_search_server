@@ -368,7 +368,7 @@ use_proxyAccounts=false
 # settings through the web interface
 # should be set to a secret. By default it is without a password
 # but you are encouraged to set it to another value on the page
-# http://localhost:8080/ConfigBasic.html
+# http://localhost:8080/ConfigAccounts_p.html
 #adminAccount=admin:mysecretpassword
 adminAccount=
 adminAccountBase64MD5=
@@ -377,7 +377,7 @@ adminAccountBase64MD5=
 # access from localhost may be granted with administration authority
 # if this flag is set. It is set to true by default to make usage of YaCy easy
 # if you use YaCy on a headless server, you should set this to false
-# or configure this on http://localhost:8080/ConfigBasic.html
+# or configure this on http://localhost:8080/ConfigAccounts_p.html
 # during the first 10 minutes of operation of YaCy;
 # if the admin account password is still empty after 10 minutes a random
 # password is generated an access is then ONLY from localhost, which will cause
@@ -446,7 +446,7 @@ staticIP=
 # pop-up here or set a different start page, like the search page
 # the browser type is optional and works only under certain conditions
 browserPopUpTrigger=true
-browserPopUpPage=ConfigBasic.html
+browserPopUpPage=index.html
 browserPopUpApplication=firefox
 
 # a forward page can be given for the index.html page
