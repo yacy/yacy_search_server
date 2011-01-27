@@ -514,6 +514,12 @@ public final class HTTPDFileHandler {
                     }
             }
             
+            // track all files that had been accessed so far
+            if (targetFile != null && targetFile.exists()) {
+                sb.setConfig("server.servlets.called", appendPath(sb.getConfig("server.servlets.called", ""), path));
+                if (args != null && args.size() > 0) sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), path));
+            }
+            
             //File targetClass = rewriteClassFile(targetFile);
             //We need tp here
             servletProperties templatePatterns = null;
@@ -1109,6 +1115,12 @@ public final class HTTPDFileHandler {
         } finally {
             try {out.flush();}catch (final Exception e) {}
         }
+    }
+    
+    private static final String appendPath(String proplist, String path) {
+        if (proplist.length() == 0) return path;
+        if (proplist.indexOf(path) >= 0) return proplist;
+        return proplist + "," + path;
     }
     
     public static final File getOverlayedClass(final String path) {

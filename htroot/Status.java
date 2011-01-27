@@ -58,7 +58,15 @@ public class Status {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        if (post != null) {
+        // check if the basic configuration was accessed before and forward
+        prop.put("forwardToConfigBasic", 0);
+        if ((post == null || !post.containsKey("noforward")) && sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic.html") < 0) {
+            // forward to ConfigBasic
+            prop.put("forwardToConfigBasic", 1);
+        }
+        if (post != null) post.remove("noforward");
+        
+        if (post != null && post.size() > 0) {
             if (sb.adminAuthenticated(header) < 2) {
                 prop.put("AUTHENTICATE","admin log-in");
                 return prop;
