@@ -206,7 +206,7 @@ public class Network {
                 yacySeed peer = new yacySeed(post.get("peerHash"), map);
 
                 sb.updateMySeed();
-                final int added = yacyClient.publishMySeed(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(), peer.hash);
+                final int added = yacyClient.hello(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(), peer.hash);
 
                 if (added <= 0) {
                     prop.put("table_comment",1);

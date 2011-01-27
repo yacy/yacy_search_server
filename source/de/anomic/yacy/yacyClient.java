@@ -125,7 +125,7 @@ public final class yacyClient {
      * 
      * @return the number of new seeds 
      */
-    public static int publishMySeed(final yacySeed mySeed, final yacyPeerActions peerActions, final String address, final String otherHash) {
+    public static int hello(final yacySeed mySeed, final yacyPeerActions peerActions, final String address, final String otherHash) {
         
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
@@ -137,20 +137,20 @@ public final class yacyClient {
             // send request
             final long start = System.currentTimeMillis();
             final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/hello.html"), 30000, yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts);
-            yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
+            yacyCore.log.logInfo("yacyClient.hello thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = FileUtils.table(content);
         } catch (final Exception e) {
             if (Thread.currentThread().isInterrupted()) {
-                yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
+                yacyCore.log.logInfo("yacyClient.hello thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return -1;
             }
-            yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "', peer " +  address + "; exception: " + e.getMessage());
+            yacyCore.log.logInfo("yacyClient.hello thread '" + Thread.currentThread().getName() + "', peer " +  address + "; exception: " + e.getMessage());
             // try again (go into loop)
             result = null;
         }
         
         if (result == null) {
-            yacyCore.log.logInfo("yacyClient.publishMySeed result error: " +
+            yacyCore.log.logInfo("yacyClient.hello result error: " +
             ((result == null) ? "result null" : ("result=" + result.toString())));
             return -1;
         }
@@ -167,11 +167,11 @@ public final class yacyClient {
             	try {
                     otherPeer = yacySeed.genRemoteSeed(seed, salt, false);
                     if (!otherPeer.hash.equals(otherHash)) {
-                        yacyCore.log.logInfo("yacyClient.publishMySeed: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + otherHash);
+                        yacyCore.log.logInfo("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + otherHash);
                         return -1; // no success
                     }
                 } catch (IOException e) {
-                    yacyCore.log.logInfo("yacyClient.publishMySeed: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
+                    yacyCore.log.logInfo("yacyClient.hello: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
                     return -1; // no success
                 }
             }
@@ -207,13 +207,13 @@ public final class yacyClient {
          * If this is true we try to reconnect the sch channel to the remote server now.
          */
         if (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_JUNIOR)) {
-            yacyCore.log.logInfo("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as junior.");
+            yacyCore.log.logInfo("yacyClient.hello: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as junior.");
         } else if ((mytype.equalsIgnoreCase(yacySeed.PEERTYPE_SENIOR)) ||
                    (mytype.equalsIgnoreCase(yacySeed.PEERTYPE_PRINCIPAL))) {
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", accepted other peer.");
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.hello: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", accepted other peer.");
         } else {
             // wrong type report
-            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.publishMySeed: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", rejecting other peer.");
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.hello: Peer '" + ((otherPeer==null)?"unknown":otherPeer.getName()) + "' reported us as " + mytype + ", rejecting other peer.");
             return -1;
         }
         if (mySeed.orVirgin().equals(yacySeed.PEERTYPE_VIRGIN))
@@ -221,7 +221,7 @@ public final class yacyClient {
 
         final String error = mySeed.isProper(true);
         if (error != null) {
-            yacyCore.log.logSevere("yacyClient.publishMySeed mySeed error - not proper: " + error);
+            yacyCore.log.logSevere("yacyClient.hello mySeed error - not proper: " + error);
             return -1;
         }
 

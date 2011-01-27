@@ -231,7 +231,7 @@ public class yacyCore {
 
         public final void run() {
             try {
-                this.added = yacyClient.publishMySeed(sb.peers.mySeed(), sb.peers.peerActions, seed.getClusterAddress(), seed.hash);
+                this.added = yacyClient.hello(sb.peers.mySeed(), sb.peers.peerActions, seed.getClusterAddress(), seed.hash);
                 if (this.added < 0) {
                     // no or wrong response, delete that address
                     final String cause = "peer ping to peer resulted in error response (added < 0)";

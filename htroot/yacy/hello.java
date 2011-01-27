@@ -77,13 +77,16 @@ public final class hello {
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (final NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate(post.get(MYTIME)); // read remote time
         final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        long time = System.currentTimeMillis();
         final InetAddress ias = Domains.dnsResolve(clientip);
+        long time_dnsResolve = System.currentTimeMillis() - time;
         if (ias == null) {
+            yacyCore.log.logInfo("hello/server: failed contacting seed; clientip not resolvable (clientip=" + clientip + ", time_dnsResolve=" + time_dnsResolve + ")");
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);
             return prop;
         }
         if (seed.length() > yacySeed.maxsize) {
-        	yacyCore.log.logInfo("hello/server: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
+        	yacyCore.log.logInfo("hello/server: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ", time_dnsResolve=" + time_dnsResolve + ")");
             prop.put("message", "your seed is too long (" + seed.length() + ")");
             return prop;
         }
@@ -91,13 +94,13 @@ public final class hello {
         try {
             remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
         } catch (IOException e) {
-            yacyCore.log.logInfo("hello/server: bad seed: " + e.getMessage());
+            yacyCore.log.logInfo("hello/server: bad seed: " + e.getMessage() + ", time_dnsResolve=" + time_dnsResolve);
             prop.put("message", "bad seed: " + e.getMessage());
             return prop;
         }
         
-//      System.out.println("YACYHELLO: REMOTESEED=" + ((remoteSeed == null) ? "NULL" : remoteSeed.toString()));
         if (remoteSeed == null || remoteSeed.hash == null) {
+            yacyCore.log.logInfo("hello/server: bad seed: null, time_dnsResolve=" + time_dnsResolve);
             prop.put("message", "cannot parse your seed");
             return prop;
         }
@@ -124,6 +127,9 @@ public final class hello {
         // if the remote client has reported its own IP address and the client supports
         // the port forwarding feature (if client version >= 0.383) then we try to 
         // connect to the reported IP address first
+        time = System.currentTimeMillis();
+        long time_backping = 0;
+        String backping_method = "none";
         if (reportedip.length() > 0 && !clientip.equals(reportedip) && clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {            
             serverCore.checkInterruption();
             
@@ -131,13 +137,15 @@ public final class hello {
             prop.put("yourip", reportedip);
             remoteSeed.setIP(reportedip);
             urls = yacyClient.queryUrlCount(remoteSeed);
+            time_backping = System.currentTimeMillis() - time;
+            backping_method = "reportedip=" + reportedip;
         } else {
             prop.put("yourip", ias.getHostAddress());
             remoteSeed.setIP(ias.getHostAddress());
         }
 
-        // if the previous attempt (using the reported ip address) was not successful, try the ip where 
-        // the request came from
+        // if the previous attempt (using the reported ip address) was not successful,
+        // then try the ip where the request came from
         if (urls < 0) {
         	boolean isNotLocal = true;
         	
@@ -151,6 +159,8 @@ public final class hello {
                 prop.put("yourip", clientip);
                 remoteSeed.setIP(clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
+                time_backping = System.currentTimeMillis() - time;
+                backping_method = "clientip=" + clientip;
         	}
         }
 
@@ -170,11 +180,12 @@ public final class hello {
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             }
             // connect the seed
+            yacyCore.log.logInfo("hello/server: responded remote senior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + urls);
             sb.peers.peerActions.peerArrival(remoteSeed, true);
         } else {
             prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
-            yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
+            yacyCore.log.logInfo("hello/server: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + urls);
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper(false) == null)) {
                 sb.peers.peerActions.peerPing(remoteSeed);
@@ -182,7 +193,7 @@ public final class hello {
         }
         sb.peers.peerActions.setUserAgent(clientip, userAgent);
         if (!(prop.get(yacySeed.YOURTYPE)).equals(reportedPeerType)) {
-            yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() +
+            yacyCore.log.logInfo("hello/server: changing remote peer '" + remoteSeed.getName() +
                                                            "' [" + reportedip +
                                              "] peerType from '" + reportedPeerType +
                                                         "' to '" + prop.get(yacySeed.YOURTYPE) + "'.");
@@ -229,7 +240,7 @@ public final class hello {
         prop.put("seedlist", seeds.toString());
         // return rewrite properties
         prop.put("message", "ok " + seed.length());
-        yacyCore.log.logInfo("hello: responded remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] in " + (System.currentTimeMillis() - start) + " milliseconds");
+        yacyCore.log.logInfo("hello/server: responded remote peer '" + remoteSeed.getName() + "' [" + reportedip + "] in " + (System.currentTimeMillis() - start) + " milliseconds");
         return prop;
     }
 

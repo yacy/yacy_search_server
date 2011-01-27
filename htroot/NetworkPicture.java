@@ -90,7 +90,7 @@ public class NetworkPicture {
         if (height < 240) height = 240;
         if (height > 1080) height = 1080;
         if (!authorized) {
-            width = Math.min(768, width);
+            width = Math.min(1024, width);
             height = Math.min(576, height);
         }
         if (passiveLimit > 1000000) passiveLimit = 1000000;
