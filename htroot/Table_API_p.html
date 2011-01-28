@@ -34,7 +34,8 @@
     <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="apilist">
       <fieldset>
       <legend><label for="apilist">Recorded Actions</label></legend>
-      <p><span id="resCounter" style="display: inline;">
+      <br />
+      <span id="resCounter" style="display: inline;">
       #(navigation)#
       ::
       #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
@@ -42,20 +43,21 @@
       #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
       <img src="env/grafics/nave.gif" alt="" />
       #(/navigation)#
-      <div>
+
       <input type="hidden" name="startRecord" value="#[startRecord]#" />
       <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
       <input type="hidden" name="inline" value="#(inline)#false::true#(/inline)#" />
       <input type="hidden" name="filter" value="#[filter]#" />
       <input type="text" name="query" value="#[query]#" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;" />
-      </div>
-      </span><br/></p>
-      <p style="clear:both;">
-      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+
+      </span>
+      <br/>
+      <div style="clear:both;">
+      <table class="sortable" style="border:0px; padding:2px; border-spacing:1px">
         <tr class="TableHeader" valign="bottom">
           <th class="sorttable_nosort"><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);" /></th>
           <th>Type</th>
-          <th width="100">Comment</th>
+          <th style="width: 100%;">Comment</th>
           <th>Call<br/>Count</th>
           <th>Recording<br/>Date</th>
           <th>Last&nbsp;Exec<br/>Date</th>
@@ -85,19 +87,21 @@
           </form>
           ::
          <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat">
-            <table><tr><td>
-            <select name="repeat_time" onchange='this.form.submit()'>
-            #{scale}#
-              <option value="#[time]#" #(selected)#::selected="selected"#(/selected)#>#[time]#</option>
-            #{/scale}#
-            </select>
-            </td><td>
-            <select name="repeat_unit" onchange='this.form.submit()'>
-              <option value="selminutes" #(selectedMinutes)#::selected="selected"#(/selectedMinutes)#>minutes</option>
-              <option value="selhours" #(selectedHours)#::selected="selected"#(/selectedHours)#>hours</option>
-              <option value="seldays" #(selectedDays)#::selected="selected"#(/selectedDays)#>days</option>
-            </select>
-            </td></tr></table>
+            <table>
+                <tr><td>
+                    <select name="repeat_time" onchange='this.form.submit()'>
+                    #{scale}#
+                      <option value="#[time]#" #(selected)#::selected="selected"#(/selected)#>#[time]#</option>
+                    #{/scale}#
+                    </select>
+                </td><td>
+                    <select name="repeat_unit" onchange='this.form.submit()'>
+                      <option value="selminutes" #(selectedMinutes)#::selected="selected"#(/selectedMinutes)#>minutes</option>
+                      <option value="selhours" #(selectedHours)#::selected="selected"#(/selectedHours)#>hours</option>
+                      <option value="seldays" #(selectedDays)#::selected="selected"#(/selectedDays)#>days</option>
+                    </select>
+                </td></tr>
+            </table>
             <input type="hidden" name="pk" value="#[pk]#" />
             <input type="hidden" name="inline" value="#[inline]#" />
             <input type="hidden" name="filter" value="#[filter]#" />
@@ -108,9 +112,9 @@
           #(inline)#<td>#[url]#</td>::#(/inline)#
         </tr>
         #{/list}#
-        </fieldset>
       </table>
-      </p>
+      </div>
+      </fieldset>
       <p>
       <input type="hidden" name="num" value="#[num]#" />
       <input type="submit" name="execrows" value="Execute Selected Actions" />
@@ -123,7 +127,7 @@
     <form action="#">
       <fieldset>
       <legend><label for="table">Result of API execution</label></legend>
-      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+      <table class="sortable" style="border:0px; padding:2px; border-spacing:1px">
         <tr class="TableHeader" valign="bottom">
           <td>Status</td>
           <td>URL</td>
@@ -137,6 +141,7 @@
       </table>
       </fieldset>
     </form>
+
     #(/showexec)#
     #(showschedulerhint)#::
     Scheduled actions are executed after the next execution date has arrived within a time frame of #[tfminutes]# minutes.
