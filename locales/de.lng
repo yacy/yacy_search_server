@@ -1925,6 +1925,7 @@ You cannot call this page directly. Instead, use a link on the <a href="Network.
 
 #File: Network.html
 #---------------------------
+YaCy Search Network==YaCy Suche Netzwerk
 YaCy Network<==YaCy Netzwerk<
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
@@ -1933,7 +1934,6 @@ Network Overview==Netzwerkübersicht
 Active&nbsp;Peers==Aktive Peers
 Passive&nbsp;Peers==Passive Peers
 Potential&nbsp;Peers==Potenzielle Peers
-Overview of \'\#\[networkName\]\#\' Network==Überblick des '#[networkName]#' Netzwerks
 Active Peers in \'\#\[networkName\]\#\' Network==Aktive Peers im '#[networkName]#' Netzwerk
 Passive Peers in \'\#\[networkName\]\#\' Network==Passive Peers im '#[networkName]#' Netzwerk
 Potential Peers in \'\#\[networkName\]\#\' Network==Potentielle Peers im '#[networkName]#' Netzwerk
@@ -1985,8 +1985,8 @@ Pages Per Minute \(PPM\)==Seiten pro Minute (PPM)
 Query Frequency:==Abfragegeschwindigkeit:
 Queries Per Hour \(QPH\)==Abfragen pro Stunde (QPH)
 >Today<==>Heute<
->Last Week<==>Letzte Woche<
->Last Month<==>Letzten Monat<
+>Last&nbsp;Week<==>Letzte&nbsp;Woche<
+>Last&nbsp;Month<==>Letzter&nbsp;Monat<
 >Now<==>Jetzt<
 >Active<==>Aktiv<
 >Passive<==>Passiv<
@@ -3358,13 +3358,11 @@ Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
 
 #File: env/templates/simpleheader.template
 #---------------------------
-#Peer Administration==Peer Administration
-Web Search==Web Suche
-Compare YaCy==Vergleiche YaCy
-Surftips</a>==Surftipps</a>
+#Administration<==Administration<
+>Web Search<==>Web Suche<
+>Search Network<==>Suche Netzwerk<
 Peer Owner Profile==Impressum dieses Peers
-Help / Wiki==Hilfe / Wiki
-Project Home==Projektseite
+Help / YaCy Wiki==Hilfe / YaCy Wiki
 #-----------------------------
 
 #File: env/templates/submenuAccessTracker.template
