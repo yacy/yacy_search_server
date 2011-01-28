@@ -431,12 +431,6 @@ seedScpAccount=
 seedScpPassword=
 seedScpPath=
 
-# every peer should have a name. inded, we try to give every peer an unique ID,
-# which is necessary for internal organization of the index sharing, but the
-# peer's name is purely informal. No function but information is applied.
-# please change this at your pleasure
-peerName=anomic
-
 # every peer periodically scans for other peers. you can set the time
 # of the period here (minutes)
 peerCycle=2

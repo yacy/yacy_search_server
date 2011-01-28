@@ -91,7 +91,7 @@ public class ConfigBasic {
         }
         
         // peer name settings
-        final String peerName = (post == null) ? env.getConfig("peerName","") : post.get("peername", "");
+        final String peerName = (post == null) ? sb.peers.mySeed().getName() : post.get("peername", "");
         
         // port settings
         final long port;
@@ -103,10 +103,10 @@ public class ConfigBasic {
 
         // check if peer name already exists
         final yacySeed oldSeed = sb.peers.lookupByName(peerName);
-        if (oldSeed == null && !env.getConfig("peerName", "").equals(peerName)) {
+        if (oldSeed == null && !sb.peers.mySeed().getName().equals(peerName)) {
             // the name is new
             if (Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
-                env.setConfig("peerName", peerName);
+                sb.peers.mySeed().setName(peerName);
             }
         }
         
@@ -219,7 +219,7 @@ public class ConfigBasic {
         
         // check if values are proper
         final boolean properPassword = (sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
-        final boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
+        final boolean properName = (sb.peers.mySeed().getName().length() >= 3) && (!(yacySeed.isDefaultPeerName(sb.peers.mySeed().getName())));
         final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
         
         if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
@@ -253,7 +253,7 @@ public class ConfigBasic {
         }
         
         // set default values       
-        prop.putHTML("defaultName", env.getConfig("peerName", ""));
+        prop.putHTML("defaultName", sb.peers.mySeed().getName());
         prop.putHTML("defaultPort", env.getConfig("port", "8080"));
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         if ("default".equals(lang)) {

@@ -60,7 +60,9 @@ public class Status {
 
         // check if the basic configuration was accessed before and forward
         prop.put("forwardToConfigBasic", 0);
-        if ((post == null || !post.containsKey("noforward")) && sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic.html") < 0) {
+        if ((post == null || !post.containsKey("noforward")) &&
+            sb.getConfig("server.servlets.submitted", "").indexOf("ConfigBasic.html") < 0 &&
+            yacySeed.isDefaultPeerName(sb.peers.mySeed().getName())) {
             // forward to ConfigBasic
             prop.put("forwardToConfigBasic", 1);
         }
@@ -201,7 +203,7 @@ public class Status {
 
         // peer information
         String thisHash = "";
-        final String thisName = sb.getConfig("peerName", "<nameless>");
+        final String thisName = sb.peers.mySeed().getName();
         if (sb.peers.mySeed() == null)  {
             thisHash = "not assigned";
             prop.put("peerAddress", "0");    // not assigned
@@ -223,7 +225,7 @@ public class Status {
             } else {
                 prop.put("peerAddress", "1"); // Address
                 prop.put("peerAddress_address", sb.peers.mySeed().getPublicAddress());
-                prop.putXML("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase());
+                prop.putXML("peerAddress_peername", sb.peers.mySeed().getName().toLowerCase());
             }
         }
         final String peerStatus = ((sb.peers.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));

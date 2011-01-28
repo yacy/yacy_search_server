@@ -50,8 +50,8 @@ public class welcome {
         // update seed info
         sb.updateMySeed();
 
-        prop.putHTML("peername", env.getConfig("peerName", "<nameless>"));
-        prop.putHTML("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
+        prop.putHTML("peername", sb.peers.mySeed().getName());
+        prop.putHTML("peerdomain", sb.peers.mySeed().getName().toLowerCase());
         prop.putHTML("peeraddress", sb.peers.mySeed().getPublicAddress());
         prop.put("hostname", env.myPublicIP());
         prop.put("hostip", Domains.dnsResolve(env.myPublicIP()).getHostAddress());       

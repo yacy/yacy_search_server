@@ -617,7 +617,7 @@ public final class HTTPDFileHandler {
                 // set environment variables
                 Map<String, String> env = pb.environment();
                 env.put("SERVER_SOFTWARE", getDefaultHeaders(path).get(HeaderFramework.SERVER));
-                env.put("SERVER_NAME", switchboard.getConfig("peerName", "<nameless>"));
+                env.put("SERVER_NAME", sb.peers.mySeed().getName());
                 env.put("GATEWAY_INTERFACE", "CGI/1.1");
                 if (httpVersion != null) {
                     env.put("SERVER_PROTOCOL", httpVersion);
@@ -827,7 +827,7 @@ public final class HTTPDFileHandler {
                             // add the application version, the uptime and the client name to every rewrite table
                             templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
                             templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
-                            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
+                            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((Switchboard) switchboard).peers.myID());
                             templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
                             yacySeed myPeer = sb.peers.mySeed();

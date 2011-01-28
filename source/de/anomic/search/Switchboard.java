@@ -2410,20 +2410,7 @@ public final class Switchboard extends serverSwitch {
         return (this.searchQueriesRobinsonFromRemote) * 60d / Math.max(uptime, 1d);
     }
     
-    public String makeDefaultPeerName() {
-        String name = myPublicIP() + "-" + yacyCore.speedKey  + "dpn" + OS.infoKey() + (System.currentTimeMillis() & 99);
-        name = name.replace('.', '-');
-        name = name.replace('_', '-');
-        name = name.replace(':', '-');
-        return name;
-    }
-    
     public void updateMySeed() {
-        if (getConfig("peerName", "anomic").equals("anomic")) {
-            // generate new peer name
-            setConfig("peerName", makeDefaultPeerName());
-        }
-        peers.mySeed().put(yacySeed.NAME, getConfig("peerName", "nameless"));
         peers.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8080"))));
         
         //the speed of indexing (pages/minute) of the peer
@@ -2498,7 +2485,6 @@ public final class Switchboard extends serverSwitch {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-//                        final byte[] content = Client.wget(url.toString(), reqHeader, (int) getConfigLong("bootstrapLoadTimeout", 20000));
                         final byte[] content = client.GETbytes(url.toString());
                         enu = FileUtils.strings(content);
                         lc = 0;
@@ -2508,9 +2494,6 @@ public final class Switchboard extends serverSwitch {
                                 if ((ys != null) &&
                                         ((!peers.mySeedIsDefined()) || !peers.mySeed().hash.equals(ys.hash))) {
                                         if (peers.peerActions.connectPeer(ys, false)) lc++;
-                                        //seedDB.writeMap(ys.hash, ys.getMap(), "init");
-                                        //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
-                                        //lc++;
                                     }
                             } catch (IOException e) {
                                 yacyCore.log.logInfo("BOOTSTRAP: bad seed: " + e.getMessage());

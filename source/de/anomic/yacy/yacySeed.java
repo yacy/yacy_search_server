@@ -65,6 +65,7 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.MapTools;
+import net.yacy.kelondro.util.OS;
 
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
@@ -187,7 +188,7 @@ public class yacySeed implements Cloneable {
         // settings that can only be computed by originating peer:
         // at first startup -
         this.hash = theHash; // the hash key of the peer - very important. should be static somehow, even after restart
-        this.dna.put(yacySeed.NAME, "&empty;");
+        this.dna.put(yacySeed.NAME, defaultPeerName());
         this.dna.put(yacySeed.BDATE, "&empty;");
         this.dna.put(yacySeed.UTC, "+0000");
         // later during operation -
@@ -238,6 +239,14 @@ public class yacySeed implements Cloneable {
         name = gtp.matcher(name).replaceAll("_");
         return name;
     }
+
+    /**
+     * generate a default peer name
+     * @return
+     */
+    private static String defaultPeerName() {
+        return "_anon" + OS.infoKey() + "-" + (System.currentTimeMillis() % 77777777L) + "-" + yacyCore.speedKey;
+    }
     
     /**
      * Checks for the static fragments of a generated default peer name, such as the string 'dpn'
@@ -246,11 +255,7 @@ public class yacySeed implements Cloneable {
      * @return whether the given peer name may be a default generated peer name
      */
     public static boolean isDefaultPeerName(final String name) {
-        return (name != null &&
-                name.length() > 10 &&
-                name.charAt(0) <= '9' &&
-                name.charAt(name.length() - 1) <= '9' &&
-                name.indexOf("dpn") > 0);
+        return name.startsWith("_anon");
     }
     
     /**
@@ -340,6 +345,12 @@ public class yacySeed implements Cloneable {
         return this.dna;
     }
 
+    public final void setName(String name) {
+        synchronized (this.dna) {
+            this.dna.put(yacySeed.NAME, checkPeerName(name));
+        }
+    }
+    
     public final String getName() {
         return checkPeerName(get(yacySeed.NAME, "&empty;"));
     }
@@ -431,8 +442,6 @@ public class yacySeed implements Cloneable {
     public final String getPublicAddress() {
         String ip = this.getIP();
         if (ip == null || ip.length() < 8) ip = "localhost";
-        // if (ip.equals(yacyCore.seedDB.mySeed.dna.get(yacySeed.IP))) ip = "127.0.0.1";
-        // if (this.hash.equals("xxxxxxxxxxxx")) return "192.168.100.1:3300";
         
         final String port = this.dna.get(yacySeed.PORT);
         if ((port == null) || (port.length() < 2)) return null;
@@ -708,7 +717,7 @@ public class yacySeed implements Cloneable {
         final yacySeed newSeed = new yacySeed(hashs);
 
         // now calculate other information about the host
-        newSeed.dna.put(yacySeed.NAME, (name) == null ? "anonymous" : name);
+        newSeed.dna.put(yacySeed.NAME, (name) == null ? defaultPeerName() : name);
         newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8080 : port));
         newSeed.dna.put(yacySeed.BDATE, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/)) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
