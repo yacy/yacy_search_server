@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 #(reload)#::<meta http-equiv="REFRESH" content="5; url=/IndexControlURLs_p.html">#(/reload)#
   <head>
-    <title>YaCy '#[clientname]#': Index Control</title>
+    <title>YaCy '#[clientname]#': URL References Administration</title>
     #%env/templates/metas.template%#
   <script type="text/javascript">
 //<![CDATA[
@@ -62,7 +62,7 @@ function updatepage(str) {
   <body id="IndexControl">
     #%env/templates/header.template%#
     #%env/templates/submenuIndexControl.template%#
-    <h2>Index Administration</h2>
+    <h2>URL References Administration</h2>
     <p>The local index currently contains #[ucount]# URL references</p>
     <form action="IndexControlURLs_p.html" id="searchform" method="post" enctype="multipart/form-data" onkeyup="xmlhttpPost(); return false;">
     <fieldset><legend>URL Retrieval</legend>
