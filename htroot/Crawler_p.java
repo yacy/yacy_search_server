@@ -30,6 +30,7 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -479,8 +480,12 @@ public class Crawler_p {
                         // get links and generate filter
                         final StringBuilder filter = new StringBuilder();
                         final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
-                        for (MultiProtocolURI uri: hyperlinks.keySet()) {
-                            filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
+                        final Set<String> filterSet = new HashSet<String>();
+                        for (final MultiProtocolURI uri: hyperlinks.keySet()) {
+                            filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*").toString());
+                        }
+                        for (final String element : filterSet) {
+                            filter.append('|').append(element);
                         }
                         newcrawlingMustMatch = filter.length() > 0 ? filter.substring(1) : "";
 
