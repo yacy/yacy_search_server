@@ -11,10 +11,10 @@
   You have four possibilities to specify the address:
 </p>
 <ul>
-  <li>defining a port only (<em>e.g. 8080</em>)</li>
-  <li>defining IP address and port (<em>e.g. 192.168.0.1:8080</em>)</li>
-  <li>defining host name and port (<em>e.g. home:8080</em>)</li>
-  <li>defining interface name and port (<em>e.g. #eth0:8080</em>)</li>
+  <li>defining a port only (<em>e.g. 8090</em>)</li>
+  <li>defining IP address and port (<em>e.g. 192.168.0.1:8090</em>)</li>
+  <li>defining host name and port (<em>e.g. home:8090</em>)</li>
+  <li>defining interface name and port (<em>e.g. #eth0:8090</em>)</li>
 </ul>
 <p><em>Hint: Dont forget to change your firewall configuration after you have changed the port.</em></p>
 <table border="0" cellspacing="5">

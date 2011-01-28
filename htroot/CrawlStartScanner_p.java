@@ -146,7 +146,7 @@ public class CrawlStartScanner_p {
                         if (url != null) {
                             String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
                             path += "&crawlingURL=" + url.toNormalform(true, false);
-                            WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), path, pk);
+                            WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8090), sb.getConfig("adminAccountBase64MD5", ""), path, pk);
                         }
                     }
                 }
@@ -180,7 +180,7 @@ public class CrawlStartScanner_p {
                                 if (host.getValue() == Access.granted && Scanner.inIndex(apiCommentCache, urlString) == null) {
                                     String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
                                     path += "&crawlingURL=" + urlString;
-                                    WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), path, u.hash());
+                                    WorkTables.execAPICall("localhost", (int) sb.getConfigLong("port", 8090), sb.getConfig("adminAccountBase64MD5", ""), path, u.hash());
                                 }
                                 i++;
                             } catch (MalformedURLException e) {

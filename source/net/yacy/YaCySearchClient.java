@@ -109,7 +109,7 @@ public class YaCySearchClient {
     public static void main(String[] args) {
         for (String query: args) try {
             long t = System.currentTimeMillis();
-            YaCySearchClient search = new YaCySearchClient("localhost", 8080, query);
+            YaCySearchClient search = new YaCySearchClient("localhost", 8090, query);
             System.out.println("Search result for '" + query + "':");
             System.out.print(search.next().toString()); // get 10 results; you may repeat this for next 10
             System.out.println("Search Time: " + (System.currentTimeMillis() - t) + " milliseconds\n");

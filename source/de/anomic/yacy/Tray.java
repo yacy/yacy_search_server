@@ -159,7 +159,7 @@ public final class Tray {
 	protected static void openBrowser(final String browserPopUpPage){
 		if(isIntegrated) return;
 		// no need for https, because we are on localhost
-		Browser.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);
+		Browser.openBrowser("http://localhost:" + sb.getConfig("port", "8090") + "/" + browserPopUpPage);
 	}
 	
 	public static void removeTray(){

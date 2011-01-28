@@ -64,7 +64,7 @@ public class yacysearch_location {
             boolean search_subject = search_mdall || post.get("dom", "").indexOf("subject") >= 0;
             long maximumTime = post.getLong("maximumTime", 3000);
             int maximumRecords = post.getInt("maximumRecords", 200);
-            //i.e. http://localhost:8080/yacysearch_location.kml?query=berlin&maximumTime=2000&maximumRecords=100
+            //i.e. http://localhost:8090/yacysearch_location.kml?query=berlin&maximumTime=2000&maximumRecords=100
             
             int placemarkCounter = 0;
             if (search_query) {
@@ -91,7 +91,7 @@ public class yacysearch_location {
             
             if (search_title || search_publisher || search_creator || search_subject) try {
                 // get a queue of search results
-                String rssSearchServiceURL = "http://localhost:" + sb.getConfig("port", "8080") + "/yacysearch.rss";
+                String rssSearchServiceURL = "http://localhost:" + sb.getConfig("port", "8090") + "/yacysearch.rss";
                 BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
                 SearchSRURSS.searchSRURSS(results, rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, false, false, null);
                 
@@ -137,7 +137,7 @@ public class yacysearch_location {
             String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
             if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
             String hostName = header.get("Host", "localhost");
-            if (hostName.indexOf(':') == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
+            if (hostName.indexOf(':') == -1) hostName += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
             final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
             final boolean global = post.get("kml_resource", "local").equals("global");
 

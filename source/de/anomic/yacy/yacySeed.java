@@ -718,7 +718,7 @@ public class yacySeed implements Cloneable {
 
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? defaultPeerName() : name);
-        newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8080 : port));
+        newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8090 : port));
         newSeed.dna.put(yacySeed.BDATE, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/)) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
         newSeed.dna.put(yacySeed.UTC, GenericFormatter.UTCDiffString());

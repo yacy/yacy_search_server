@@ -76,7 +76,7 @@ public final class Settings_p {
             prop.put("settingsTables", "");
         }
 
-        prop.put("port", env.getConfig("port", "8080"));               
+        prop.put("port", env.getConfig("port", "8090"));               
         
         prop.putHTML("peerName", sb.peers.mySeed().getName());
         prop.putHTML("staticIP", env.getConfig("staticIP", ""));

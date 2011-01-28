@@ -220,7 +220,7 @@ public final class yacy {
             sb.setConfig("memoryTotalAfterStartup", startupMemTotal);
             
             // start gui if wanted
-            if (gui) YaCyApp.start("localhost", (int) sb.getConfigLong("port", 8080));
+            if (gui) YaCyApp.start("localhost", (int) sb.getConfigLong("port", 8090));
             
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
@@ -294,7 +294,7 @@ public final class yacy {
             HTTPClient.setDefaultUserAgent(userAgent);
             
             // start main threads
-            final String port = sb.getConfig("port", "8080");
+            final String port = sb.getConfig("port", "8090");
             try {
                 final HTTPDemon protocolHandler = new HTTPDemon(sb);
                 final serverCore server = new serverCore(
@@ -529,7 +529,7 @@ public final class yacy {
         final Properties config = configuration("COMMAND-STEERING", homePath);
 
         // read port
-        final int port = serverCore.getPortNr(config.getProperty("port", "8080"));
+        final int port = serverCore.getPortNr(config.getProperty("port", "8090"));
 
         // read password
         String encodedPassword = (String) config.get(HTTPDemon.ADMIN_ACCOUNT_B64MD5);

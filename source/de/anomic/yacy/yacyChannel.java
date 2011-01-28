@@ -40,7 +40,7 @@ public enum yacyChannel {
     
     
     // test:
-    // http://localhost:8080/xml/feed.rss?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING
+    // http://localhost:8090/xml/feed.rss?set=PEERNEWS,REMOTESEARCH,LOCALSEARCH,REMOTEINDEXING,LOCALINDEXING
     
     /**
      * the following private channels are declared to prevent that an access to the feed servlet

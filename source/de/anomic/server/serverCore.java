@@ -215,7 +215,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         this.log.logInfo("Initializing serverCore ...");
         
         // read some config values
-        this.extendedPort = this.switchboard.getConfig("port", "8080").trim();
+        this.extendedPort = this.switchboard.getConfig("port", "8090").trim();
         this.bindPort = this.switchboard.getConfig("bindPort", "").trim();
         
         // Open a new server-socket channel

@@ -115,7 +115,7 @@ public class ConfigPortal {
                 
         String myaddress = sb.peers.mySeed().getPublicAddress();
         if (myaddress == null) {
-            myaddress = "localhost:" + sb.getConfig("port", "8080");
+            myaddress = "localhost:" + sb.getConfig("port", "8090");
         }
         prop.put("myaddress", myaddress);
         return prop;

@@ -1522,7 +1522,7 @@ public final class Switchboard extends serverSwitch {
                 Log.logException(e);
                 continue;
             }
-            Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) this.getConfigLong("port", 8080), this.getConfig("adminAccountBase64MD5", ""), pks);
+            Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) this.getConfigLong("port", 8090), this.getConfig("adminAccountBase64MD5", ""), pks);
             for (Map.Entry<String, Integer> call: callResult.entrySet()) {
                 log.logInfo("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
             }
@@ -2411,7 +2411,7 @@ public final class Switchboard extends serverSwitch {
     }
     
     public void updateMySeed() {
-        peers.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8080"))));
+        peers.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8090"))));
         
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;

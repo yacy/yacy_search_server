@@ -1082,13 +1082,13 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final InetAddress hostAddress = Domains.dnsResolve(clientIP);
             if (hostAddress == null) {
                 tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
+                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8090")));
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
                 tp.put("host", Domains.myPublicLocalIP().getHostAddress());
-                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
+                tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8090")));
             } else {
                 tp.put("host", switchboard.myPublicIP());
-                tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
+                tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8090"))));
             }
 
             tp.put("peerName", (getAlternativeResolver() == null) ? "" : getAlternativeResolver().myName());
@@ -1384,7 +1384,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
              */
             } else if (
                     // check if the destination port is equal to the port yacy is listening to
-                    dstPort.equals(Integer.valueOf(serverCore.getPortNr(switchboard.getConfig("port", "8080")))) &&
+                    dstPort.equals(Integer.valueOf(serverCore.getPortNr(switchboard.getConfig("port", "8090")))) &&
                     (
                             // check if the destination host is our local IP address
                             Domains.isThisHostIP(dstHost) ||

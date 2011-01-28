@@ -71,7 +71,7 @@ HOW DO I USE THIS SOFTWARE, WHERE IS THE ADMINISTRATION INTERFACE?
 YaCy is a server process that can be administrated and used
 with your web browser: open
 
-   http://localhost:8080
+   http://localhost:8090
 
 There you can see your personal search and administration interface.
 
@@ -79,12 +79,12 @@ There you can see your personal search and administration interface.
 ANY MORE CONFIGURATIONS?
 
 - after startup, you see the configuration page in your web browser.
-  just open http://localhost:8080
+  just open http://localhost:8090
   all you have to do (should do) is to enter a password for your peer
 
 - You can use YaCy as your web proxy.
   This is an option, you don't need to do that.
-  Simply configure your internet connection to use a proxy at port 8080.
+  Simply configure your internet connection to use a proxy at port 8090.
 
 
 

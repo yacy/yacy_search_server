@@ -950,7 +950,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             if (this.mySeed == null) initMySeed();
             if ((seed == mySeed) && (!(seed.isOnline()))) {
                 // take local ip instead of external
-                return Switchboard.getSwitchboard().myPublicIP() + ":8080" + ((subdom == null) ? "" : ("/" + subdom));
+                return Switchboard.getSwitchboard().myPublicIP() + ":" + Switchboard.getSwitchboard().getConfig("port", "8090") + ((subdom == null) ? "" : ("/" + subdom));
             }
             return seed.getPublicAddress() + ((subdom == null) ? "" : ("/" + subdom));
         } else {

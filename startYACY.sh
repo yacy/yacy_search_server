@@ -166,7 +166,7 @@ then
 #	done
 else
     JAVA_ARGS="-Xmx600m -Xms180m $JAVA_ARGS";
-    PORT="8080"
+    PORT="8090"
 fi
 
 #echo "JAVA_ARGS: $JAVA_ARGS"

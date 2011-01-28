@@ -144,7 +144,7 @@ public class Table_API_p {
             }
             
             // now call the api URLs and store the result status
-            Map<String, Integer> l = sb.tables.execAPICalls("localhost", (int) sb.getConfigLong("port", 8080), sb.getConfig("adminAccountBase64MD5", ""), pks);
+            Map<String, Integer> l = sb.tables.execAPICalls("localhost", (int) sb.getConfigLong("port", 8090), sb.getConfig("adminAccountBase64MD5", ""), pks);
             
             // construct result table
             prop.put("showexec", l.size() > 0 ? 1 : 0);
@@ -217,7 +217,7 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_repeatTime", time);
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
-                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8080") + new String(row.get(WorkTables.TABLE_API_COL_URL)));
+                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8090") + new String(row.get(WorkTables.TABLE_API_COL_URL)));
 
                 if (time == 0) {
                     prop.put("showtable_list_" + count + "_scheduler", 0);

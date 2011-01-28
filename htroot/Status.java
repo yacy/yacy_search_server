@@ -177,7 +177,7 @@ public class Status {
         }
         
         // hostname and port
-        final String extendedPortString = sb.getConfig("port", "8080");
+        final String extendedPortString = sb.getConfig("port", "8090");
         final int pos = extendedPortString.indexOf(":"); 
         prop.put("port",serverCore.getPortNr(extendedPortString));
         if (pos != -1) {

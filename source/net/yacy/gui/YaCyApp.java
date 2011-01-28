@@ -132,7 +132,7 @@ public class YaCyApp {
         log.info("Registering Shutdown Hook");
         Thread t = new Thread() {
             public void run() {
-                app = new Application("YaCy GUI", operation, menues, new InfoPage("localhost", 8080));
+                app = new Application("YaCy GUI", operation, menues, new InfoPage("localhost", 8090));
                 app.setLocationRelativeTo(null);
                 app.setVisible(true);
             }
@@ -144,7 +144,7 @@ public class YaCyApp {
     public static void main(String[] args) {
         
         if (args.length > 0) Switchboard.load(new File(args[0]));
-        start("localhost", 8080);
+        start("localhost", 8090);
         
     }
 

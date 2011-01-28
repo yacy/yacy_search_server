@@ -37,7 +37,7 @@ public class ConfigLiveSearch {
         final Switchboard sb = (Switchboard) env;
         
         prop.putHTML("ip", sb.peers.mySeed().getIP());
-        prop.putHTML("port", sb.getConfig("port", "8080"));
+        prop.putHTML("port", sb.getConfig("port", "8090"));
         return prop;
     }
 

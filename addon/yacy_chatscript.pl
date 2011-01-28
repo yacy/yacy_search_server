@@ -40,7 +40,7 @@ if ( defined(&Xchat::print) ) {
 sub setting_init() {
 	if ($prog eq "irssi") {
 		Irssi::settings_add_str("yacy_script.pl", "yacy_host", "localhost");
-		Irssi::settings_add_int("yacy_script.pl", "yacy_port", 8080);
+		Irssi::settings_add_int("yacy_script.pl", "yacy_port", 8090);
 		Irssi::settings_add_str("yacy_script.pl", "yacy_user", "admin");
 		Irssi::settings_add_str("yacy_script.pl", "yacy_pass", "");
 		Irssi::settings_add_int("yacy_script.pl", "yacy_statusbarupdate_interval", 60);
@@ -48,7 +48,7 @@ sub setting_init() {
 		if ( ! -e Xchat::get_info('xchatdir')."/yacy.xml" ) {
 			my $data = {
 				host => "localhost",
-				port => "8080",
+				port => "8090",
 				user => "admin",
 				pass => ""
 			};

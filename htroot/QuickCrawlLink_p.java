@@ -51,7 +51,7 @@ public class QuickCrawlLink_p {
     
     /**
      * Example Javascript to call this servlet:
-     * <code>javascript:w = window.open('http://user:pwd@localhost:8080/QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&xdstopw=on&title=' + escape(document.title) + '&url=' + location.href,'_blank','height=150,width=500,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no'); w.focus();</code>
+     * <code>javascript:w = window.open('http://user:pwd@localhost:8090/QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&xdstopw=on&title=' + escape(document.title) + '&url=' + location.href,'_blank','height=150,width=500,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no'); w.focus();</code>
      * @param header the complete HTTP header of the request
      * @param post any arguments for this servlet, the request carried with (GET as well as POST)
      * @param env the serverSwitch object holding all runtime-data

@@ -622,7 +622,7 @@ public final class HTTPDFileHandler {
                 if (httpVersion != null) {
                     env.put("SERVER_PROTOCOL", httpVersion);
                 }
-                env.put("SERVER_PORT", switchboard.getConfig("port", "8080"));
+                env.put("SERVER_PORT", switchboard.getConfig("port", "8090"));
                 env.put("REQUEST_METHOD", method);
 //                env.put("PATH_INFO", "");         // TODO: implement
 //                env.put("PATH_TRANSLATED", "");   // TODO: implement

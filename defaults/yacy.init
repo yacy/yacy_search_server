@@ -10,10 +10,7 @@
 # the HTTP service configurations
 
 # port number where the server should bind to
-# e.g. 8080
-#      #eth0:8080
-# 	   192.168.0.1:8080
-port = 8080
+port = 8090
 
 # use UPnP [true/false]
 upnp.enabled = true
@@ -22,8 +19,8 @@ upnp.remoteHost =
 
 #sometimes you may want yacy to bind to another port, than the one reachable from outside.
 #then set bindPort to the port yacy should bind on, and port to the port, visible from outside
-#to run yacy on port 8080, reachable from port 80, set bindPort=8080, port=80 and use
-#iptables -t nat -A PREROUTING -p tcp -s 192.168.24.0/16 --dport 80 -j DNAT --to 192.168.24.1:8080
+#to run yacy on port 8090, reachable from port 80, set bindPort=8090, port=80 and use
+#iptables -t nat -A PREROUTING -p tcp -s 192.168.24.0/16 --dport 80 -j DNAT --to 192.168.24.1:8090
 #(of course you need to customize the ips)
 bindPort = 
 
@@ -33,7 +30,7 @@ bindPort =
 #
 # English speaking user read below:
 #
-# With this you can access your peer using https://localhost:8080
+# With this you can access your peer using https://localhost:8090
 # 
 # There are two possibilities to specify which certificate should
 # be used by YaCy.
@@ -155,7 +152,7 @@ restart.time = 0
 # search request these tags appear
 cluster.mode=publicpeer
 cluster.peers.yacydomain=localpeer.yacy
-cluster.peers.ipport=localhost:8080
+cluster.peers.ipport=localhost:8090
 
 # bootstrapLoadTimeout
 # this is the time-out for loading of the seedlist files during bootstraping
@@ -193,7 +190,7 @@ htDefaultPath=htroot
 htDocsPath = DATA/HTDOCS
 
 # alternative path for the repository path of the web server: the URL
-# http://localhost:8080/repository
+# http://localhost:8090/repository
 # points to DATA/HTDOCS/repository, but can be altered with this repository path
 # hint: the repository path is the default path for intranet indexing. The easiest ways
 # to do a indexing of the local storage system is to set a path here for the repository
@@ -345,7 +342,7 @@ proxyBlueList=yacy.blue
 # by default, these settings are weak to simplify set-up and testing
 # every user/adiministrator shall be encouraged to change these settings
 # your can change them also online during run-time on
-# http://localhost:8080/
+# http://localhost:8090/
 
 # proxyClient: client-ip's that may connect the proxy for proxy service
 # if several ip's are allowed then they must be separated by a ','
@@ -376,7 +373,7 @@ use_proxyAccounts=false
 # settings through the web interface
 # should be set to a secret. By default it is without a password
 # but you are encouraged to set it to another value on the page
-# http://localhost:8080/ConfigAccounts_p.html
+# http://localhost:8090/ConfigAccounts_p.html
 #adminAccount=admin:mysecretpassword
 adminAccount=
 adminAccountBase64MD5=
@@ -385,7 +382,7 @@ adminAccountBase64MD5=
 # access from localhost may be granted with administration authority
 # if this flag is set. It is set to true by default to make usage of YaCy easy
 # if you use YaCy on a headless server, you should set this to false
-# or configure this on http://localhost:8080/ConfigAccounts_p.html
+# or configure this on http://localhost:8090/ConfigAccounts_p.html
 # during the first 10 minutes of operation of YaCy;
 # if the admin account password is still empty after 10 minutes a random
 # password is generated an access is then ONLY from localhost, which will cause
@@ -634,12 +631,12 @@ wordCacheMaxCount = 100000
 # before you can use yacy as transparent proxy. On linux this
 # can be done like this:
 #   iptables -t nat -A PREROUTING -p tcp -s 192.168.0.0/16 \
-#   --dport 80 -j DNAT --to 192.168.0.1:8080
+#   --dport 80 -j DNAT --to 192.168.0.1:8090
 #
 # With this iptables filter listed above all http traffic that
 # comes from your private network (in this case 192.168.0.0)
 # and goes to any webserver listening on port 80 will be forwarded
-# by the firewall to yacy running on port 8080 (192.168.0.1:8080)
+# by the firewall to yacy running on port 8090 (192.168.0.1:8090)
 isTransparentProxy=false
 
 # Specifies if yacy should use the http connection keep-alive feature

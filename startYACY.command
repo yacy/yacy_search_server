@@ -7,5 +7,5 @@ echo "**  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)             
 echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
 echo "**  GET HELP for YaCy: see http://wiki.yacy.net and http://forum.yacy.de     **"
 echo "*******************************************************************************"
-echo " >> YaCy started as daemon process. Administration at http://localhost:8080 <<"
+echo " >> YaCy started as daemon process. Administration at http://localhost:8090 <<"
 echo "    You can close this window now, this will NOT shut down your YaCy peer."

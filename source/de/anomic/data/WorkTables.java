@@ -105,7 +105,7 @@ public class WorkTables extends Tables {
         byte[] pk = pks == null ? null : pks.getBytes();
         
         // generate the apicall url - without the apicall attributes
-        final String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
+        final String apiurl = /*"http://localhost:" + getConfig("port", "8090") +*/ "/" + servletName + "?" + post.toString();
 
         // read old entry from the apicall table (if exists)
         Row row = null;
@@ -177,7 +177,7 @@ public class WorkTables extends Tables {
         }
         
         // generate the apicall url - without the apicall attributes
-        final String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
+        final String apiurl = /*"http://localhost:" + getConfig("port", "8090") +*/ "/" + servletName + "?" + post.toString();
         byte[] pk = null;
         // insert entry
         try {

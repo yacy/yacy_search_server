@@ -55,7 +55,7 @@ public class welcome {
         prop.putHTML("peeraddress", sb.peers.mySeed().getPublicAddress());
         prop.put("hostname", env.myPublicIP());
         prop.put("hostip", Domains.dnsResolve(env.myPublicIP()).getHostAddress());       
-        prop.put("port", serverCore.getPortNr(env.getConfig("port","8080")));
+        prop.put("port", serverCore.getPortNr(env.getConfig("port","8090")));
         prop.put("clientip", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
 
         final String peertype = (sb.peers.mySeed() == null) ? yacySeed.PEERTYPE_JUNIOR : sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

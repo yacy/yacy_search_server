@@ -43,7 +43,7 @@ import de.anomic.yacy.yacyNetwork;
 public final class query {
 
     // example:
-    // http://localhost:8080/yacy/query.html?youare=sCJ6Tq8T0N9x&object=lurlcount
+    // http://localhost:8090/yacy/query.html?youare=sCJ6Tq8T0N9x&object=lurlcount
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch ss) {
         if (post == null || ss == null) { return null; }

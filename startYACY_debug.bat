@@ -15,7 +15,7 @@ set jms=
 set javacmd=-Xmx600m -Xms180m
 set priolvl=10
 set priority=/BELOWNORMAL
-set port=8080
+set port=8090
 if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
 if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 

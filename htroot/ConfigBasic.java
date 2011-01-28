@@ -96,9 +96,9 @@ public class ConfigBasic {
         // port settings
         final long port;
         if (post != null && post.containsKey("port") && Integer.parseInt(post.get("port")) > 1023) {
-            port = post.getLong("port", 8080);
+            port = post.getLong("port", 8090);
         } else {
-            port = env.getConfigLong("port", 8080); //this allows a low port, but it will only get one, if the user edits the config himself.
+            port = env.getConfigLong("port", 8090); //this allows a low port, but it will only get one, if the user edits the config himself.
         }
 
         // check if peer name already exists
@@ -254,7 +254,7 @@ public class ConfigBasic {
         
         // set default values       
         prop.putHTML("defaultName", sb.peers.mySeed().getName());
-        prop.putHTML("defaultPort", env.getConfig("port", "8080"));
+        prop.putHTML("defaultPort", env.getConfig("port", "8090"));
         lang = env.getConfig("locale.language", "default"); // re-assign lang, may have changed
         if ("default".equals(lang)) {
             prop.put("langDeutsch", "0");

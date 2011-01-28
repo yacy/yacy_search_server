@@ -126,13 +126,13 @@ public final class search {
 //      Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME));        // read remote time
 
         // test:
-        // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Q (search for linux)
-        // http://localhost:8080/yacy/search.html?query=gh8DKIhGKXws (search for book)
-        // http://localhost:8080/yacy/search.html?query=UEhMGfGv2vOE (search for kernel)
-        // http://localhost:8080/yacy/search.html?query=ZX-LjaYo74PP (search for help)
-        // http://localhost:8080/yacy/search.html?query=uDqIalxDfM2a (search for mail)
-        // http://localhost:8080/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
-        // http://localhost:8080/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
+        // http://localhost:8090/yacy/search.html?query=4galTpdpDM5Q (search for linux)
+        // http://localhost:8090/yacy/search.html?query=gh8DKIhGKXws (search for book)
+        // http://localhost:8090/yacy/search.html?query=UEhMGfGv2vOE (search for kernel)
+        // http://localhost:8090/yacy/search.html?query=ZX-LjaYo74PP (search for help)
+        // http://localhost:8090/yacy/search.html?query=uDqIalxDfM2a (search for mail)
+        // http://localhost:8090/yacy/search.html?query=4galTpdpDM5Qgh8DKIhGKXws&abstracts=auto (search for linux and book, generate abstract automatically)
+        // http://localhost:8090/yacy/search.html?query=&abstracts=4galTpdpDM5Q (only abstracts for linux)
 
         if ((sb.isRobinsonMode()) &&
              	 (!((sb.isPublicRobinson()) ||

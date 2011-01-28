@@ -122,7 +122,7 @@ public class sharedBlacklist_p {
                     final yacySeed seed = sb.peers.getConnected(Hash); 
                     if (seed != null) {
                         final String IP = seed.getIP(); 
-                        final String Port = seed.get(yacySeed.PORT, "8080");
+                        final String Port = seed.get(yacySeed.PORT, "8090");
                         final String peerName = seed.get(yacySeed.NAME, "<" + IP + ":" + Port + ">");
                         prop.putHTML("page_source", peerName);
                         downloadURLOld = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";

@@ -10,7 +10,7 @@ import de.anomic.server.serverSwitch;
 
 public class test {
     
-    // http://localhost:8080/test.xml?count=10
+    // http://localhost:8090/test.xml?count=10
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();

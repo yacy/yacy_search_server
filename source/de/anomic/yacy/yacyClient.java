@@ -370,7 +370,7 @@ public final class yacyClient {
     }
     
     public static RSSFeed search(final yacySeed targetSeed, String query, boolean verify, boolean global, long timeout, int startRecord, int maximumRecords) throws IOException {
-        String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8080") : targetSeed.getClusterAddress();
+        String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8090") : targetSeed.getClusterAddress();
         String urlBase = "http://" + address + "/yacysearch.rss";
         return SearchSRURSS.loadSRURSS(urlBase, query, timeout, startRecord, maximumRecords, verify, global, null);
     }
@@ -742,7 +742,7 @@ public final class yacyClient {
             if (targetSeed == null) { return null; }
             address = targetSeed.getClusterAddress();
         }
-        if (address == null) address = "localhost:8080";
+        if (address == null) address = "localhost:8090";
         return address;
     }
 
@@ -1007,7 +1007,7 @@ public final class yacyClient {
         final String salt = crypt.randomSalt();
          
         String address = targetSeed.getClusterAddress();
-        if (address == null) { address = "localhost:8080"; }
+        if (address == null) { address = "localhost:8090"; }
         try {
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
             final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), 5000, targetSeed.getHexHash() + ".yacyh", parts);
@@ -1024,7 +1024,7 @@ public final class yacyClient {
             // first  arg: path to application home
             // second arg: address of target peer
             // third  arg: search word or file name with list of search words
-            // i.e. /Data/workspace1/yacy/ localhost:8080 /Data/workspace1/yacy/test/words/searchtest.words
+            // i.e. /Data/workspace1/yacy/ localhost:8090 /Data/workspace1/yacy/test/words/searchtest.words
             System.out.println("yacyClient Test");
                 File searchwordfile = new File(args[2]);
                 List<String> searchlines = new ArrayList<String>();

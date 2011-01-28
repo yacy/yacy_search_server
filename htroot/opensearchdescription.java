@@ -40,7 +40,7 @@ public class opensearchdescription {
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         
         String thisaddress = header.get("Host", "localhost");
-        if (thisaddress.indexOf(':') == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
+        if (thisaddress.indexOf(':') == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
 
         int compareyacy = 0;
         if (post != null && post.get("compare_yacy", "false").equals("true"))
