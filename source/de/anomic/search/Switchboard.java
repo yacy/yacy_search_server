@@ -480,7 +480,7 @@ public final class Switchboard extends serverSwitch {
         
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Type deny list");
-        TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, null));
+        TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");

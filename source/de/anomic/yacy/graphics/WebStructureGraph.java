@@ -77,7 +77,7 @@ public class WebStructureGraph {
         	for (final Map.Entry<String, String> entry : this.structure_old.entrySet()) {
         		key = entry.getKey();
         		value = entry.getValue();
-        		delset.add(value.substring(0, 8) + key);
+        		if (value.length() >= 8) delset.add(value.substring(0, 8) + key); 
         	}
         	int delcount = this.structure_old.size() - (maxhosts * 9 / 10);
         	final Iterator<String> j = delset.iterator();

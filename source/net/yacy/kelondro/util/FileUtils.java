@@ -412,10 +412,12 @@ public final class FileUtils {
         String key, value;
         for (final Map.Entry<String, String> entry: props.entrySet()) {
             key = entry.getKey();
+            if (key != null)
+            	key = key.replace("\\", "\\\\").replace("\n", "\\n").replace("=", "\\=");
             if (entry.getValue() == null) {
                 value = "";
             } else {
-                value = entry.getValue().replaceAll("\n", "\\\\n");
+                value = entry.getValue().replace("\\", "\\\\").replace("\n", "\\n");
             }
             pw.println(key + "=" + value);
         }
@@ -505,47 +507,27 @@ public final class FileUtils {
 	}
     
     public static Map<String, String> table(Iterator<String> li) {
-    	int pos;
     	String line;
     	final HashMap<String, String> props = new HashMap<String, String>();
     	while (li.hasNext()) {
-    		line = li.next();
-    		pos = line.indexOf('=');
-    		if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
+        	int pos = 0;
+    		line = li.next().trim();
+    		if (line.length() > 0 && line.charAt(0) == '#') continue; // exclude comments
+    		do {
+    			// search for unescaped =
+    			pos = line.indexOf('=', pos+1);
+    		} while ( pos > 0 && line.charAt(pos-1) == '\\');
+    		if (pos > 0) {
+    			String key = line.substring(0, pos).trim().replace("\\=", "=").replace("\\n", "\n").replace("\\", "\\");
+    			String value = line.substring(pos + 1).trim().replace("\\n", "\n").replace("\\\\", "\\");
+        		props.put(key, value);
+    		}
     	}
     	return props;
 	}
     
     public static Map<String, String> table(final byte[] a) {
         return table(strings(a));
-    }
-    
-    /**
-     * parse config files
-     * 
-     * splits the lines in list into pairs sperarated by =, lines beginning with # are ignored
-     * ie:
-     * abc=123
-     * # comment
-     * fg=dcf
-     * => Map{abc => 123, fg => dcf}
-     * @param list
-     * @return
-     */
-    public static Map<String, String> table(final ArrayList<String> list) {
-        if (list == null) return new HashMap<String, String>();
-        final Iterator<String> i = list.iterator();
-        int pos;
-        String line;
-        final HashMap<String, String> props = new HashMap<String, String>(list.size());
-        while (i.hasNext()) {
-            line = i.next().trim();
-            if (line.length() > 0 && line.charAt(0) == '#') continue; // exclude comments
-            //System.out.println("NXTOOLS_PROPS - LINE:" + line);
-            pos = line.indexOf('=');
-            if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
-        }
-        return props;
     }
 
     public static Iterator<String> strings(byte[] a) {
