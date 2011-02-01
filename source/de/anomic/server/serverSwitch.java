@@ -271,9 +271,9 @@ public class serverSwitch {
         }
     }
     
-    public double getConfigDouble(final String key, final double dflt) {
+    public double getConfigFloat(final String key, final float dflt) {
         try {
-            return Double.parseDouble(getConfig(key, Double.toString(dflt)));
+            return Float.parseFloat(getConfig(key, Float.toString(dflt)));
         } catch (final NumberFormatException e) {
             return dflt;
         }

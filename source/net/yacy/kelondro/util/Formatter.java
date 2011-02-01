@@ -100,7 +100,7 @@ public final class Formatter {
             if (s.indexOf('.') == -1) {
                 ret = number(Long.parseLong(s));
             } else {
-                ret = number(Double.parseDouble(s));
+                ret = number(Float.parseFloat(s));
             }
         } catch (final NumberFormatException e) { /* empty */ }
         

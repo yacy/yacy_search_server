@@ -112,7 +112,7 @@ public class GeonamesLocalization implements Localization {
                 locnames.add(fields[1]);
                 locnames.add(fields[2]);
                 for (String s: fields[3].split(",")) locnames.add(s);
-                Location c = new Location(Double.parseDouble(fields[5]), Double.parseDouble(fields[4]), fields[1]);
+                Location c = new Location(Float.parseFloat(fields[5]), Float.parseFloat(fields[4]), fields[1]);
                 c.setPopulation((int) Long.parseLong(fields[14]));
                 this.id2loc.put(id, c);
                 for (String name: locnames) {

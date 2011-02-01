@@ -145,7 +145,7 @@ public class Network {
                 prop.putNum("table_my-qph-publocal", Math.round(6000d * sb.averageQPMPublicLocal()) / 100d);
                 prop.putNum("table_my-qph-pubremote", Math.round(6000d * sb.averageQPMGlobal()) / 100d);
                 prop.putNum("table_my-seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
-                prop.putNum("table_my-connects", Double.parseDouble(seed.get(yacySeed.CCOUNT, "0")));
+                prop.putNum("table_my-connects", Float.parseFloat(seed.get(yacySeed.CCOUNT, "0")));
                 prop.put("table_my-url", seed.get(yacySeed.SEEDLISTURL, ""));
                 
                 // generating the location string
@@ -383,7 +383,7 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());
                                 prop.putNum(STR_TABLE_LIST + conCount + "_complete_seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
-                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", Double.parseDouble(seed.get(yacySeed.CCOUNT, "0")));
+                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", Float.parseFloat(seed.get(yacySeed.CCOUNT, "0")));
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_complete_userAgent", userAgent);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 0);

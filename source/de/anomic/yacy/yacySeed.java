@@ -549,11 +549,11 @@ public class yacySeed implements Cloneable {
         }
     }
 
-    public double getQPM() {
+    public float getQPM() {
         try {
-            return Double.parseDouble(get(yacySeed.RSPEED, yacySeed.ZERO));
+            return Float.parseFloat(get(yacySeed.RSPEED, yacySeed.ZERO));
         } catch (final NumberFormatException e) {
-            return 0d;
+            return 0f;
         }
     }
 

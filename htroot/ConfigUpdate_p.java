@@ -156,10 +156,10 @@ public class ConfigUpdate_p {
         final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
         prop.putHTML("candeploy_versionpp", versionstring);
         final boolean devenvironment = new File(sb.getAppPath(), ".svn").exists();
-        double thisVersion = Double.parseDouble(yacyBuildProperties.getVersion());
+        float thisVersion = Float.parseFloat(yacyBuildProperties.getVersion());
         // cut off the SVN Rev in the Version
         try {
-            thisVersion = Math.round(thisVersion*1000.0)/1000.0;
+            thisVersion = (float) (Math.round(thisVersion*1000.0)/1000.0);
         } catch (final NumberFormatException e) {}
 
             

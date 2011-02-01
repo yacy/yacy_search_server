@@ -108,11 +108,11 @@ public class OpenGeoDBLocalization implements Localization {
                     line = line.substring(18 + 7);v = line.split(",");
                     v = line.split(",");
                     if (lonlat) {
-                        lon = Double.parseDouble(v[2]);
-                        lat = Double.parseDouble(v[3]);
+                        lon = Float.parseFloat(v[2]);
+                        lat = Float.parseFloat(v[3]);
                     } else {
-                        lat = Double.parseDouble(v[2]);
-                        lon = Double.parseDouble(v[3]);
+                        lat = Float.parseFloat(v[2]);
+                        lon = Float.parseFloat(v[3]);
                     }
                     id2loc.put(Integer.parseInt(v[0]), new Location(lon, lat));
                 }

@@ -457,7 +457,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     public long countActiveURL() { return seedActiveDB.getLongAcc(yacySeed.LCOUNT); }
     public long countActiveRWI() { return seedActiveDB.getLongAcc(yacySeed.ICOUNT); }
     public long countActivePPM() { return seedActiveDB.getLongAcc(yacySeed.ISPEED); }
-    public double countActiveQPM() { return seedActiveDB.getDoubleAcc(yacySeed.RSPEED); }
+    public float countActiveQPM() { return seedActiveDB.getFloatAcc(yacySeed.RSPEED); }
     public long countPassiveURL() { return seedPassiveDB.getLongAcc(yacySeed.LCOUNT); }
     public long countPassiveRWI() { return seedPassiveDB.getLongAcc(yacySeed.ICOUNT); }
     public long countPotentialURL() { return seedPotentialDB.getLongAcc(yacySeed.LCOUNT); }

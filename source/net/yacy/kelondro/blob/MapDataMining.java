@@ -46,12 +46,12 @@ import net.yacy.kelondro.util.LookAheadIterator;
 public class MapDataMining extends MapHeap {
     
     private final static Long LONG0 = Long.valueOf(0);
-    private final static Double DOUBLE0 = Double.valueOf(0.0);
+    private final static Float FLOAT0 = Float.valueOf(0.0f);
 
-    private final String[] sortfields, longaccfields, doubleaccfields;
+    private final String[] sortfields, longaccfields, floataccfields;
     private Map<String, StaticScore<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
     private Map<String, Long>   accLong; // to store accumulations of Long cells
-    private Map<String, Double> accDouble; // to store accumulations of Double cells
+    private Map<String, Float> accFloat; // to store accumulations of Float cells
     
 	@SuppressWarnings("unchecked")
 	public MapDataMining(final File heapFile,
@@ -61,14 +61,14 @@ public class MapDataMining extends MapHeap {
             final int cachesize,
             final String[] sortfields,
             final String[] longaccfields,
-            final String[] doubleaccfields,
+            final String[] floataccfields,
             final Object externalHandler) throws IOException {
         super(heapFile, keylength, ordering, buffermax, cachesize, '_');
         
         // create fast ordering clusters and acc fields
         this.sortfields = sortfields;
         this.longaccfields = longaccfields;
-        this.doubleaccfields = doubleaccfields;
+        this.floataccfields = floataccfields;
 
         ScoreCluster<String>[] cluster = null;
         if (sortfields == null) sortClusterMap = null; else {
@@ -80,7 +80,7 @@ public class MapDataMining extends MapHeap {
         }
 
         Long[] longaccumulator = null;
-        Double[] doubleaccumulator = null;
+        Float[] floataccumulator = null;
         if (longaccfields == null) {
         	accLong = null;
         } else {
@@ -90,23 +90,23 @@ public class MapDataMining extends MapHeap {
                 longaccumulator[i] = LONG0;   
             }
         }
-        if (doubleaccfields == null) {
-            accDouble = null;
+        if (floataccfields == null) {
+            accFloat = null;
         } else {
-            accDouble = new ConcurrentHashMap<String, Double>();
-            doubleaccumulator = new Double[doubleaccfields.length];
-            for (int i = 0; i < doubleaccfields.length; i++) {
-                doubleaccumulator[i] = DOUBLE0;   
+            accFloat = new ConcurrentHashMap<String, Float>();
+            floataccumulator = new Float[floataccfields.length];
+            for (int i = 0; i < floataccfields.length; i++) {
+                floataccumulator[i] = FLOAT0;   
             }
         }
 
         // fill cluster and accumulator with values
-        if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
+        if ((sortfields != null) || (longaccfields != null) || (floataccfields != null)) try {
             final CloneableIterator<byte[]> it = super.keys(true, false);
             byte[] mapnameb;
             String cell;
             long valuel;
-            double valued;
+            float valued;
             Map<String, String> map;
             while (it.hasNext()) {
                 mapnameb = it.next();
@@ -132,12 +132,12 @@ public class MapDataMining extends MapHeap {
                     } catch (final NumberFormatException e) {}
                 }
                 
-                if (doubleaccfields != null && doubleaccumulator != null) for (int i = 0; i < doubleaccfields.length; i++) {
-                    cell = map.get(doubleaccfields[i]);
-                    valued = 0d;
+                if (floataccfields != null && floataccumulator != null) for (int i = 0; i < floataccfields.length; i++) {
+                    cell = map.get(floataccfields[i]);
+                    valued = 0f;
                     if (cell != null) try {
-                        valued = Double.parseDouble(cell);
-                        doubleaccumulator[i] = new Double(doubleaccumulator[i].doubleValue() + valued);
+                        valued = Float.parseFloat(cell);
+                        floataccumulator[i] = new Float(floataccumulator[i].floatValue() + valued);
                     } catch (final NumberFormatException e) {}
                 }
             }
@@ -148,7 +148,7 @@ public class MapDataMining extends MapHeap {
 
         // fill acc map
         if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) accLong.put(longaccfields[i], longaccumulator[i]);
-        if (doubleaccfields != null && doubleaccumulator != null) for (int i = 0; i < doubleaccfields.length; i++) accDouble.put(doubleaccfields[i], doubleaccumulator[i]);
+        if (floataccfields != null && floataccumulator != null) for (int i = 0; i < floataccfields.length; i++) accFloat.put(floataccfields[i], floataccumulator[i]);
     }
 
     @Override
@@ -169,12 +169,12 @@ public class MapDataMining extends MapHeap {
                 accLong.put(longaccfields[i], LONG0);
             }
         }
-        if (doubleaccfields == null) {
-            accDouble = null;
+        if (floataccfields == null) {
+            accFloat = null;
         } else {
-            accDouble = new HashMap<String, Double>();
-            for (int i = 0; i < doubleaccfields.length; i++) {
-                accDouble.put(doubleaccfields[i], DOUBLE0);
+            accFloat = new HashMap<String, Float>();
+            for (int i = 0; i < floataccfields.length; i++) {
+                accFloat.put(floataccfields[i], FLOAT0);
             }
         }
     }
@@ -186,7 +186,7 @@ public class MapDataMining extends MapHeap {
         assert (newMap != null);
 
         // update elementCount
-        if ((longaccfields != null) || (doubleaccfields != null)) {
+        if ((longaccfields != null) || (floataccfields != null)) {
             final Map<String, String> oldMap = super.get(key, false);
             if (oldMap != null) {
                 // element exists, update acc
@@ -206,9 +206,9 @@ public class MapDataMining extends MapHeap {
     private void updateAcc(final Map<String, String> map, final boolean add) {
         String value;
         long valuel;
-        double valued;
+        float valued;
         Long longaccumulator;
-        Double doubleaccumulator;
+        Float floataccumulator;
         if (longaccfields != null) for (int i = 0; i < longaccfields.length; i++) {
             value = map.get(longaccfields[i]);
             if (value != null) {
@@ -223,16 +223,16 @@ public class MapDataMining extends MapHeap {
                 } catch (final NumberFormatException e) {}
             }
         }
-        if (doubleaccfields != null) for (int i = 0; i < doubleaccfields.length; i++) {
-            value = map.get(doubleaccfields[i]);
+        if (floataccfields != null) for (int i = 0; i < floataccfields.length; i++) {
+            value = map.get(floataccfields[i]);
             if (value != null) {
                 try {
-                    valued = Double.parseDouble(value);
-                    doubleaccumulator = accDouble.get(doubleaccfields[i]);
+                    valued = Float.parseFloat(value);
+                    floataccumulator = accFloat.get(floataccfields[i]);
                     if (add) {
-                        accDouble.put(doubleaccfields[i], Double.valueOf(doubleaccumulator.doubleValue() + valued));
+                        accFloat.put(floataccfields[i], Float.valueOf(floataccumulator.floatValue() + valued));
                     } else {
-                        accDouble.put(doubleaccfields[i], Double.valueOf(doubleaccumulator.doubleValue() - valued));
+                        accFloat.put(floataccfields[i], Float.valueOf(floataccumulator.floatValue() - valued));
                     }
                 } catch (final NumberFormatException e) {}
             }
@@ -257,14 +257,14 @@ public class MapDataMining extends MapHeap {
         if (key == null) return;
         
         // update elementCount
-        if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) {
+        if ((sortfields != null) || (longaccfields != null) || (floataccfields != null)) {
             Map<String, String> map;
             try {
                 map = super.get(key);
                 if (map != null) {
 
                     // update accumulators (subtract)
-                    if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(map, false);
+                    if ((longaccfields != null) || (floataccfields != null)) updateAcc(map, false);
 
                     // remove from sortCluster
                     if (sortfields != null) deleteSortCluster(new String(key));
@@ -338,10 +338,10 @@ public class MapDataMining extends MapHeap {
         return accumulator.longValue();
     }
     
-    public synchronized double getDoubleAcc(final String field) {
-        final Double accumulator = accDouble.get(field);
+    public synchronized float getFloatAcc(final String field) {
+        final Float accumulator = accFloat.get(field);
         if (accumulator == null) return -1;
-        return accumulator.doubleValue();
+        return accumulator.floatValue();
     }
     
     @Override

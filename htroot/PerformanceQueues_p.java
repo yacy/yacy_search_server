@@ -139,7 +139,7 @@ public class PerformanceQueues_p {
         int c = 0;
         long idleCycles, busyCycles, memshortageCycles;
         // set profile?
-        final double multiplier = (post != null) && post.containsKey("profileSpeed") ? 100.0 / post.getDouble("profileSpeed", 100.0) : 1.0;
+        final double multiplier = (post != null) && post.containsKey("profileSpeed") ? 100.0 / post.getFloat("profileSpeed", 100.0f) : 1.0;
         final boolean setProfile = (post != null && post.containsKey("submitdefault"));
         final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
         // save used settings file to config

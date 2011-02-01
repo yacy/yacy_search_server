@@ -331,8 +331,8 @@ public final class LogParser {
             m = i8.matcher (logLine);
             
             if (m.find () && m.groupCount() >= 2) {
-                DHTSelectionWordsCount += Double.parseDouble(m.group(1));
-                DHTSelectionWordsTimeCount += Double.parseDouble(m.group(2));
+                DHTSelectionWordsCount += Float.parseFloat(m.group(1));
+                DHTSelectionWordsTimeCount += Float.parseFloat(m.group(2));
                 totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;

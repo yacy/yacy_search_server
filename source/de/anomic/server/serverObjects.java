@@ -290,11 +290,11 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         }
     }
 
-    public double getDouble(final String key, final double dflt) {
+    public float getFloat(final String key, final float dflt) {
         final String s = removeBOM(super.get(key));
         if (s == null) return dflt;
         try {
-            return Double.parseDouble(s);
+            return Float.parseFloat(s);
         } catch (final NumberFormatException e) {
             return dflt;
         }

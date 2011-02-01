@@ -142,7 +142,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
              return "dev/00000";
          }
          
-         final String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
+         final String mainversion = (Float.parseFloat(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
         String revision = matcher.group(2);
         for(int i=revision.length();i<5;++i) revision += "0";
         return mainversion+"/"+revision;
