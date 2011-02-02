@@ -393,7 +393,7 @@ public class Bookmarks {
                     }
                 } else {
                     // font-size is pseudo-rounded to 2 decimals
-                    prop.put("display_"+id+"_"+count+"_size", Math.round((1.1+Math.log(tag.size())/4)*100)/100.);
+                    prop.put("display_"+id+"_"+count+"_size", Math.round((1.1f+Math.log(tag.size())/4f)*100.0f)/100.0f);
                 }
                 count++;
             }

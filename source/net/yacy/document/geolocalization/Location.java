@@ -30,13 +30,13 @@ public class Location extends Coordinates implements Comparable<Location>, Compa
     private String name;
     private int population;
     
-    public Location(double lon, double lat) {
+    public Location(float lon, float lat) {
         super(lon, lat);
         this.name = null;
         this.population = 0;
     }
     
-    public Location(double lon, double lat, String name) {
+    public Location(float lon, float lat, String name) {
         super(lon, lat);
         this.name = name;
     }

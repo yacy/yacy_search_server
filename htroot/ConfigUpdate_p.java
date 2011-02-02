@@ -257,7 +257,7 @@ public class ConfigUpdate_p {
         
         prop.putASIS("hintVersionDownload_versionResMain", (yacyVersion.latestMainRelease == null) ? "-" : yacyVersion.latestMainRelease.toAnchor());
         prop.putASIS("hintVersionDownload_versionResDev", (yacyVersion.latestDevRelease == null) ? "-" : yacyVersion.latestDevRelease.toAnchor());
-        prop.put("hintVersionAvailable_latestVersion", Double.toString(yacyVersion.latestRelease));
+        prop.put("hintVersionAvailable_latestVersion", Float.toString(yacyVersion.latestRelease));
          */
         
         return prop;

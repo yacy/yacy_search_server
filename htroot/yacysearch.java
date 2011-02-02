@@ -586,8 +586,8 @@ public class yacysearch {
             } else {
                 int i = 0;
                 for (Location c: coordinates) {
-                    prop.put("geoinfo_loc_" + i + "_lon", Math.round(c.lon() * 10000.0) / 10000.0);
-                    prop.put("geoinfo_loc_" + i + "_lat", Math.round(c.lat() * 10000.0) / 10000.0);
+                    prop.put("geoinfo_loc_" + i + "_lon", Math.round(c.lon() * 10000.0f) / 10000.0f);
+                    prop.put("geoinfo_loc_" + i + "_lat", Math.round(c.lat() * 10000.0f) / 10000.0f);
                     prop.put("geoinfo_loc_" + i + "_name", c.getName());
                     i++;
                     if (i >= 10) break;

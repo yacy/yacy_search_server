@@ -127,7 +127,7 @@ public final class yacy {
     
     // static objects
     public static final String vString = yacyBuildProperties.getVersion();
-    public static double version = 0.1;
+    public static float version = 0.1f;
     
     public static final String vDATE   = yacyBuildProperties.getBuildDate();
     public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
@@ -233,11 +233,6 @@ public final class yacy {
     	    }
             int newRev = Integer.parseInt(yacyBuildProperties.getSVNRevision());
             sb.setConfig("svnRevision", yacyBuildProperties.getSVNRevision());
-
-            // TODO: remove!
-            //sb.setConfig("version", Double.toString(version));
-            //sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
-            //sb.setConfig("vdate", (vDATE.startsWith("@")) ? DateFormatter.formatShortDay() : vDATE);
             sb.setConfig("applicationRoot", appHome.toString());
             sb.setConfig("dataRoot", dataHome.toString());
             yacyVersion.latestRelease = version;
@@ -289,7 +284,7 @@ public final class yacy {
             yacyRelease.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
             
             // set user-agent
-            final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "
+            final String userAgent = "yacy/" + Float.toString(version) + " (www.yacy.net; "
                     + MultiProtocolURI.systemOST + ")";
             HTTPClient.setDefaultUserAgent(userAgent);
             

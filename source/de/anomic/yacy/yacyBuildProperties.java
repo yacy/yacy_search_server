@@ -35,7 +35,7 @@ public final class yacyBuildProperties {
 	 * returns the long version String (e. g. 0.9106712)
 	 */
 	public static String getLongVersion() {
-		return String.format(Locale.US, "%.3f%05d", Double.valueOf(getVersion()), Integer.valueOf(getSVNRevision()));
+		return String.format(Locale.US, "%.3f%05d", Float.valueOf(getVersion()), Integer.valueOf(getSVNRevision()));
 	}
 
 	/**

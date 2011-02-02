@@ -97,7 +97,7 @@ public class OpenGeoDBLocalization implements Localization {
             String[] v;
             Integer id;
             String h;
-            double lon, lat;
+            float lon, lat;
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (!line.startsWith("INSERT INTO ")) continue;

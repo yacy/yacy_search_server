@@ -137,9 +137,9 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @param value value as double/float.
      * @return value as it was added to the map or <code>NaN</code> if an error occured.
      */
-    public double put(final String key, final double value) {
-        if (null == this.put(key, Double.toString(value))) {
-            return Double.NaN;
+    public double put(final String key, final float value) {
+        if (null == this.put(key, Float.toString(value))) {
+            return Float.NaN;
         }
         return value;
     }

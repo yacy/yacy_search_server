@@ -24,20 +24,20 @@ package net.yacy.document.geolocalization;
 
 public class Coordinates {
 
-	private static final double tenmeter = 90.0 / 1.0e6;
+	private static final float tenmeter = 90.0f / 1.0e6f;
 	
-    private final double lon, lat;
+    private final float lon, lat;
     
-    public Coordinates(double lon, double lat) {
+    public Coordinates(float lon, float lat) {
         this.lon = lon;
         this.lat = lat;
     }
     
-    public double lon() {
+    public float lon() {
         return this.lon;
     }
     
-    public double lat() {
+    public float lat() {
         return this.lat;
     }
     

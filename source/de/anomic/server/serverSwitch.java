@@ -197,8 +197,8 @@ public class serverSwitch {
         setConfig(key, Long.toString(value));
     }
 
-    public void setConfig(final String key, final double value) {
-        setConfig(key, Double.toString(value));
+    public void setConfig(final String key, final float value) {
+        setConfig(key, Float.toString(value));
     }
 
     public void setConfig(final String key, final String value) {

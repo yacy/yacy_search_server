@@ -218,7 +218,7 @@ public final class Switchboard extends serverSwitch {
     public  long                           indexedPages = 0;
     public  int                            searchQueriesRobinsonFromLocal = 0; // absolute counter of all local queries submitted on this peer from a local or autheticated used
     public  int                            searchQueriesRobinsonFromRemote = 0; // absolute counter of all local queries submitted on this peer from a remote IP without authentication
-    public  double                         searchQueriesGlobal = 0d; // partial counter of remote queries (1/number-of-requested-peers)
+    public  float                          searchQueriesGlobal = 0f; // partial counter of remote queries (1/number-of-requested-peers)
     public  SortedMap<byte[], String>      clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  URLLicense                     licensedURLs;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
@@ -2393,21 +2393,21 @@ public final class Switchboard extends serverSwitch {
         return EventTracker.countEvents(EventTracker.EClass.INDEX, 20000) * 3;
     }
     
-    public double averageQPM() {
+    public float averageQPM() {
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        return (this.searchQueriesRobinsonFromRemote + this.searchQueriesGlobal) * 60d / Math.max(uptime, 1d);
+        return (this.searchQueriesRobinsonFromRemote + this.searchQueriesGlobal) * 60f / Math.max(uptime, 1f);
     }
-    public double averageQPMGlobal() {
+    public float averageQPMGlobal() {
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        return (this.searchQueriesGlobal) * 60d / Math.max(uptime, 1d);
+        return (this.searchQueriesGlobal) * 60f / Math.max(uptime, 1f);
     }
-    public double averageQPMPrivateLocal() {
+    public float averageQPMPrivateLocal() {
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        return (this.searchQueriesRobinsonFromLocal) * 60d / Math.max(uptime, 1d);
+        return (this.searchQueriesRobinsonFromLocal) * 60f / Math.max(uptime, 1f);
     }
-    public double averageQPMPublicLocal() {
+    public float averageQPMPublicLocal() {
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        return (this.searchQueriesRobinsonFromRemote) * 60d / Math.max(uptime, 1d);
+        return (this.searchQueriesRobinsonFromRemote) * 60f / Math.max(uptime, 1f);
     }
     
     public void updateMySeed() {
@@ -2416,14 +2416,14 @@ public final class Switchboard extends serverSwitch {
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
         peers.mySeed().put(yacySeed.ISPEED, Integer.toString(currentPPM()));
-        peers.mySeed().put(yacySeed.RSPEED, Double.toString(averageQPM()));
+        peers.mySeed().put(yacySeed.RSPEED, Float.toString(averageQPM()));
         peers.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         peers.mySeed().put(yacySeed.LCOUNT, Long.toString(indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
         peers.mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         peers.mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
         peers.mySeed().put(yacySeed.ICOUNT, Long.toString(indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         peers.mySeed().put(yacySeed.SCOUNT, Integer.toString(peers.sizeConnected())); // the number of seeds that the peer has stored
-        peers.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((peers.sizeConnected() + peers.sizeDisconnected() + peers.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
+        peers.mySeed().put(yacySeed.CCOUNT, Float.toString(((int) ((peers.sizeConnected() + peers.sizeDisconnected() + peers.sizePotential()) * 60.0f / (uptime + 1.01f)) * 100.0f) / 100.0f)); // the number of clients that the peer connects (as connects/hour)
         peers.mySeed().put(yacySeed.VERSION, yacyBuildProperties.getLongVersion());
         peers.mySeed().setFlagDirectConnect(true);
         peers.mySeed().setLastSeenUTC();

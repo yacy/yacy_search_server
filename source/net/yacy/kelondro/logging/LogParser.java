@@ -163,7 +163,7 @@ public final class LogParser {
     public static final String TOTAL_PARSER_RUNS        = "totalParserRuns";
     
     
-    private static final double parserVersion = 0.1;
+    private static final float parserVersion = 0.1f;
     private static final String parserType = "PLASMA";
 
     //RegExp for LogLevel I
@@ -435,7 +435,7 @@ public final class LogParser {
 
     public final Hashtable<String, Object> getResults() {
         final Hashtable<String, Object> results = new Hashtable<String, Object>();
-        results.put(PARSER_VERSION          , Double.valueOf(parserVersion));
+        results.put(PARSER_VERSION          , Float.valueOf(parserVersion));
         results.put(URLS_RECEIVED           , Integer.valueOf(urlSum));
         results.put(URLS_REQUESTED          , Integer.valueOf(urlReqSum));
         results.put(URLS_BLOCKED            , Integer.valueOf(blockedURLSum));

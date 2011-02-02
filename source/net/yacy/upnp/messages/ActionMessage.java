@@ -414,18 +414,6 @@ public class ActionMessage {
   }
   
   /**
-   * Set the value of an input parameter before a message service call
-   * @param parameterName the parameter name
-   * @param parameterValue the double parameter value
-   * @return the current ActionMessage object instance
-   * @throws IllegalArgumentException if the provided parameterName is not valid for this message
-   *         or if no input parameters are required for this message
-   */
-  public ActionMessage setInputParameter( String parameterName, double parameterValue ) throws IllegalArgumentException {
-    return setInputParameter( parameterName, Double.toString( parameterValue ) );
-  }
-  
-  /**
    * Input params class container
    */
   private class InputParamContainer {

@@ -216,19 +216,19 @@ public class JSONArray {
     }
 
     /**
-     * Get the double value associated with an index.
+     * Get the float value associated with an index.
      *
      * @param index The index must be between 0 and length() - 1.
      * @return      The value.
      * @throws   JSONException If the key is not found or if the value cannot
      *  be converted to a number.
      */
-    public double getDouble(int index) throws JSONException {
+    public double getFloat(int index) throws JSONException {
         Object o = get(index);
         try {
             return o instanceof Number ?
                 ((Number)o).doubleValue() :
-                Double.valueOf((String)o).doubleValue();
+                Float.valueOf((String)o).floatValue();
         } catch (Exception e) {
             throw new JSONException("JSONArray[" + index + "] is not a number.");
         }
@@ -246,7 +246,7 @@ public class JSONArray {
     public int getInt(int index) throws JSONException {
         Object o = get(index);
         return o instanceof Number ?
-                ((Number)o).intValue() : (int) getDouble(index);
+                ((Number)o).intValue() : (int) getFloat(index);
     }
     
     /**
@@ -260,7 +260,7 @@ public class JSONArray {
     public long getLong(int index) throws JSONException {
         Object o = get(index);
         return o instanceof Number ?
-                ((Number)o).longValue() : (long) getDouble(index);
+                ((Number)o).longValue() : (long) getFloat(index);
     }
 
 

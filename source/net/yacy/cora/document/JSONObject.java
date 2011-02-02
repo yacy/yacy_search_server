@@ -377,14 +377,14 @@ public class JSONObject {
      * @param  d A double.
      * @return A String.
      */
-    static public String doubleToString(double d) {
+    static public String floatToString(float d) {
         if (Double.isInfinite(d) || Double.isNaN(d)) {
             return "null";
         }
 
 // Shave off trailing zeros and decimal point, if possible.
 
-        String s = Double.toString(d);
+        String s = Float.toString(d);
         if (s.indexOf('.') > 0 && s.indexOf('e') < 0 && s.indexOf('E') < 0) {
             while (s.endsWith("0")) {
                 s = s.substring(0, s.length() - 1);
@@ -439,18 +439,18 @@ public class JSONObject {
 
 
     /**
-     * Get the double value associated with a key.
+     * Get the float value associated with a key.
      * @param key   A key string.
      * @return      The numeric value.
      * @throws JSONException if the key is not found or
      *  if the value is not a Number object and cannot be converted to a number.
      */
-    public double getDouble(String key) throws JSONException {
+    public float getFloat(String key) throws JSONException {
         Object o = get(key);
         try {
             return o instanceof Number ?
-                ((Number)o).doubleValue() :
-                Double.valueOf((String)o).doubleValue();
+                ((Number)o).floatValue() :
+                Float.valueOf((String)o).floatValue();
         } catch (Exception e) {
             throw new JSONException("JSONObject[" + quote(key) +
                 "] is not a number.");
@@ -1223,7 +1223,7 @@ public class JSONObject {
             try {
                 if (s.indexOf('.') > -1 || 
                 		s.indexOf('e') > -1 || s.indexOf('E') > -1) {
-                    return Double.valueOf(s);
+                    return Float.valueOf(s);
                 } else {
                     Long myLong = new Long(s);
                     if (myLong.longValue() == myLong.intValue()) {
