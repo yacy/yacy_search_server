@@ -97,6 +97,7 @@ public class yacysearchitem {
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
         
+        String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
         if (theQuery.contentdom == ContentDomain.TEXT) {
             // text search
 
@@ -125,7 +126,7 @@ public class yacysearchitem {
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_link", result.urlstring());
-            prop.putHTML("content_target", sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self"));
+            prop.putHTML("content_target", target);
             if (faviconURL != null && isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
@@ -224,6 +225,7 @@ public class yacysearchitem {
                 for (final MediaSnippet ms : media) {
                     prop.putHTML("content_items_" + c + "_href", ms.href.toNormalform(true, false));
                     prop.putHTML("content_items_" + c + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), urllength));
+                    prop.putHTML("content_items_" + c + "_target", target);
                     prop.putHTML("content_items_" + c + "_name", shorten(ms.name, namelength));
                     prop.put("content_items_" + c + "_col", (col) ? "0" : "1");
                     c++;
