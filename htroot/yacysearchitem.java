@@ -116,6 +116,11 @@ public class yacysearchitem {
             }
             
             prop.put("content", 1); // switch on specific content
+            prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) ? 1 : 0);
+            prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
+            prop.put("content_showMetadata", sb.getConfigBool("search.result.show.metadata", true) ? 1 : 0);
+            prop.put("content_showParser", sb.getConfigBool("search.result.show.parser", true) ? 1 : 0);
+            prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
             prop.put("content_authorized", authenticated ? "1" : "0");
             prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
             prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + new String(result.hash()) + "&urlmaskfilter=.*");
@@ -126,17 +131,21 @@ public class yacysearchitem {
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_link", result.urlstring());
+            prop.putHTML("content_showPictures_link", result.urlstring());
             prop.putHTML("content_target", target);
             if (faviconURL != null && isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
+            prop.put("content_showMetadata_urlhash", resulthashString);
+            prop.put("content_showParser_urlhash", resulthashString);
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(resulthashString));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
-            prop.put("content_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
+            prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
             prop.put("content_date822", HeaderFramework.formatRFC1123(result.modified()));
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
+            prop.putHTML("content_showSize_sizename", sizename(result.filesize()));
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
             prop.putHTML("content_file", resultURL.getFile());
             prop.putHTML("content_path", resultURL.getPath());
@@ -148,7 +157,9 @@ public class yacysearchitem {
             String s = ""; for (String t: query[0]) s += "+" + t;
             if (s.length() > 0) s = s.substring(1);
             prop.putHTML("content_words", s);
+            prop.putHTML("content_showParser_words", s);
             prop.putHTML("content_former", theQuery.queryString);
+            prop.putHTML("content_showPictures_former", theQuery.queryString);
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes);
             prop.put("content_description", desc);

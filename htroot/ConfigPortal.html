@@ -36,6 +36,21 @@
           <input type="radio" name="publicTopmenu" value="false" #(publicTopmenu)#checked="checked"::#(/publicTopmenu)# />no link to YaCy Menu (admin must navigate to /Status.html manually)
           </dd>
           
+          <dt>Show Advanced Search Options on Search Page?</dt>
+          <dd>
+          <input type="radio" name="search.options" value="true" #(search.options)#::checked="checked"#(/search.options)# />Show Advanced Search Options on index.html&nbsp;
+          <input type="radio" name="search.options" value="false" #(search.options)#checked="checked"::#(/search.options)# />do not show Advanced Search
+          </dd>
+          
+          <dt>Show Information Links for each Search Result Entry</dt>
+          <dd>
+          <input type="checkbox" name="search.result.show.date" value="true" #(search.result.show.date)#::checked="checked"#(/search.result.show.date)# />Date&nbsp;
+          <input type="checkbox" name="search.result.show.size" value="true" #(search.result.show.size)#::checked="checked"#(/search.result.show.size)# />Size&nbsp;
+          <input type="checkbox" name="search.result.show.metadata" value="true" #(search.result.show.metadata)#::checked="checked"#(/search.result.show.metadata)# />Metadata&nbsp;
+          <input type="checkbox" name="search.result.show.parser" value="true" #(search.result.show.parser)#::checked="checked"#(/search.result.show.parser)# />Parser&nbsp;
+          <input type="checkbox" name="search.result.show.pictures" value="true" #(search.result.show.pictures)#::checked="checked"#(/search.result.show.pictures)# />Pictures
+          </dd>
+          
           <dt>Default Pop-Up Page</dt>
           <dd>
           <input type="radio" name="popup" value="status" #(popupStatus)#::checked="checked"#(/popupStatus)# />Status Page&nbsp;

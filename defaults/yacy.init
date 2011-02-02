@@ -661,9 +661,9 @@ msgForwardingCmd=/usr/sbin/sendmail
 msgForwardingTo=root@localhost
 
 #crawlPause: delay time after specific functions before crawling is resumed
-crawlPause.proxy=100
-crawlPause.localsearch=1000
-crawlPause.remotesearch=500
+crawlPause.proxy=10
+crawlPause.localsearch=50
+crawlPause.remotesearch=10
 
 # Some configuration values for the crawler
 crawler.clientTimeout=9000
@@ -692,6 +692,9 @@ indexer.slots = 100
 # maximum size of stacker queue
 stacker.slots = 2000
 
+# search options: show advanced options on main search page
+search.options = true
+
 # search domains. If set to false then that search is not available
 search.text = true
 search.image = true
@@ -707,6 +710,14 @@ search.items = 10
 # "_blank" (new window), "_self" (same window), "_parent" (the parent frame of a frameset),
 # "_top" (top of all frames), "searchresult" (a default custom page name for search results)
 search.target = _self
+
+# search result lines may show additional information for each search hit
+# these information pieces may be switched on or off
+search.result.show.date = true
+search.result.show.size = true
+search.result.show.metadata = true
+search.result.show.parser = true
+search.result.show.pictures = true
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.

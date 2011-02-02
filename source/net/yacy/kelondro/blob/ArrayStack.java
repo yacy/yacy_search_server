@@ -269,11 +269,11 @@ public class ArrayStack implements BLOB {
         return f;
     }
     
-    public synchronized File[] unmountBestMatch(double maxq, long maxResultSize) {
+    public synchronized File[] unmountBestMatch(float maxq, long maxResultSize) {
     	if (this.blobs.size() < 2) return null;
         long l, r;
         File lf, rf;
-        double min = Double.MAX_VALUE;
+        float min = Float.MAX_VALUE;
         File[] bestMatch = new File[2];
         maxResultSize = maxResultSize >> 1;
     	int loopcount = 0;
@@ -285,13 +285,13 @@ public class ArrayStack implements BLOB {
                 l = 1 + (lf.length() >> 1);
                 r = 1 + (rf.length() >> 1);
                 if (l + r > maxResultSize) continue;
-                double q = Math.max((double) l, (double) r) / Math.min((double) l, (double) r);
+                float q = Math.max((float) l, (float) r) / Math.min((float) l, (float) r);
                 if (q < min) {
                     min = q;
                     bestMatch[0] = lf;
                     bestMatch[1] = rf;
                 }
-                if (loopcount > 1000 && min <= maxq && min != Double.MAX_VALUE) break mainloop;
+                if (loopcount > 1000 && min <= maxq && min != Float.MAX_VALUE) break mainloop;
             }
         }
         if (min > maxq) return null;

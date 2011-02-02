@@ -64,7 +64,8 @@ public class index {
         
         final boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
 
-        final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
+        int searchoptions = (post == null) ? 1 : post.getInt("searchoptions", 1);
+        if (!sb.getConfigBool("search.options", true)) searchoptions = 0;
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
         final int maximumRecords = Integer.parseInt((sb.getConfig(SwitchboardConstants.SEARCH_ITEMS, "10")));

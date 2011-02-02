@@ -299,6 +299,13 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
             return dflt;
         }
     }
+
+    public boolean getBoolean(final String key, final boolean dflt) {
+        String s = removeBOM(super.get(key));
+        if (s == null) return dflt;
+        s = s.toLowerCase();
+        return s.equals("true") || s.equals("on") || s.equals("1");
+    }
     
     public boolean hasValue(final String key) {
         final String s = super.get(key);

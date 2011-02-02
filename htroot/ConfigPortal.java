@@ -71,6 +71,12 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
                 HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
                 sb.setConfig("publicTopmenu", post.get("publicTopmenu", "true"));
+                sb.setConfig("search.options", post.getBoolean("search.options", false) ? "true" : "false");
+                sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date", false) ? "true" : "false");
+                sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size", false) ? "true" : "false");
+                sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false) ? "true" : "false");
+                sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false) ? "true" : "false");
+                sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false) ? "true" : "false");
             }
             if (post.containsKey("searchpage_default")) {
                 sb.setConfig(SwitchboardConstants.GREETING, "P2P Web Search");
@@ -89,7 +95,13 @@ public class ConfigPortal {
         prop.putHTML(SwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
-        prop.put("publicTopmenu", sb.getConfig("publicTopmenu", "").equals("true") ? 1 : 0);
+        prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
+        prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
+        prop.put("search.result.show.date", sb.getConfigBool("search.result.show.date", false) ? 1 : 0);
+        prop.put("search.result.show.size", sb.getConfigBool("search.result.show.size", false) ? 1 : 0);
+        prop.put("search.result.show.metadata", sb.getConfigBool("search.result.show.metadata", false) ? 1 : 0);
+        prop.put("search.result.show.parser", sb.getConfigBool("search.result.show.parser", false) ? 1 : 0);
+        prop.put("search.result.show.pictures", sb.getConfigBool("search.result.show.pictures", false) ? 1 : 0);
 
         final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
         prop.put("popupFront", 0);

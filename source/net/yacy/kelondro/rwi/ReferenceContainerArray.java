@@ -317,7 +317,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         
         // first try to merge small files that match
         while (this.merger.queueLength() < 3 || this.array.entries() >= 50) {
-            File[] ff = this.array.unmountBestMatch(2.0, targetFileSize);
+            File[] ff = this.array.unmountBestMatch(2.0f, targetFileSize);
             if (ff == null) break;
             Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
             merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
@@ -335,7 +335,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         
         // if there is no small file, then merge matching files up to limit
         while (this.merger.queueLength() < 1) {
-            File[] ff = this.array.unmountBestMatch(2.0, maxFileSize);
+            File[] ff = this.array.unmountBestMatch(2.0f, maxFileSize);
             if (ff == null) break;
             Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
             merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());

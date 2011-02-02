@@ -68,7 +68,7 @@
   <li class="menugroup" id="menugroupIntegration">
     <h3>Search Integration</h3>
     <ul class="menu">
-      <li><a href="/ConfigLiveSearch.html" class="MenuItemLink">Search Portals</a></li>
+      <li><a href="/ConfigPortal.html" class="MenuItemLink">Search Portals</a></li>
       <li><a href="/ConfigAppearance_p.html" class="MenuItemLink lock">Customization</a></li>
     </ul>
   </li>
