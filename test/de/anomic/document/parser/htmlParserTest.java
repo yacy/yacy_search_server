@@ -10,7 +10,7 @@ public class htmlParserTest extends TestCase {
 	
 	public void testGetRealCharsetEncoding() {
 		String[][] testStrings = new String[][] {
-	       new String[]{null,"UTF-8"},
+	       new String[]{null,null},
 	       new String[]{"windows1250","windows-1250"},
 	       new String[]{"windows_1250","windows-1250"},
 	       new String[]{"ISO-8859-1","ISO-8859-1"},
@@ -26,14 +26,15 @@ public class htmlParserTest extends TestCase {
 		
 		for (int i=0; i < testStrings.length; i++) {
 			// desired conversion result
-			String shouldBe = testStrings[i][1].toLowerCase();
+			String shouldBe = testStrings[i][1];
+			shouldBe = shouldBe!=null ? shouldBe.toLowerCase() : null;
 			
 			// conversion result
-			String charset = htmlParser.patchCharsetEncoding(testStrings[i][0]).toLowerCase();
+			String charset = htmlParser.patchCharsetEncoding(testStrings[i][0]);
 			
 			// test if equal
-			assertEquals(shouldBe, charset);
-			System.out.println("testGetRealCharsetEncoding: " + testStrings[i][0] + " -> " + charset + " | Supported: " + Charset.isSupported(charset));
+			assertEquals(shouldBe, charset!=null ? charset.toLowerCase() : null);
+			System.out.println("testGetRealCharsetEncoding: " + (testStrings[i][0]!=null?testStrings[i][0]:"null") + " -> " + (charset!=null?charset:"null") + " | Supported: " + (charset!=null?Charset.isSupported(charset):false));
 			
 		}
 		
