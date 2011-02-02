@@ -591,12 +591,12 @@ public final class RankingProcess extends Thread {
         final ScoreCluster<String> result = new ScoreCluster<String>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return result;
         if (this.ref.size() < 2) this.ref.clear(); // navigators with one entry are not useful
-        final Map<String, Double> counts = new HashMap<String, Double>();
+        final Map<String, Float> counts = new HashMap<String, Float>();
         final Iterator<String> i = this.ref.keys(false);
         String word;
         byte[] termHash;
         int c;
-        double q, min = Double.MAX_VALUE, max = Double.MIN_VALUE;
+        float q, min = Float.MAX_VALUE, max = Float.MIN_VALUE;
         int ic = count;
         while (ic-- > 0 && i.hasNext()) {
             word = i.next();
@@ -604,13 +604,13 @@ public final class RankingProcess extends Thread {
             termHash = Word.word2hash(word);
             c = this.query.getSegment().termIndex().count(termHash);
             if (c > 0) {
-                q = ((double) this.ref.get(word)) / ((double) c);
+                q = ((float) this.ref.get(word)) / ((float) c);
                 min = Math.min(min, q);
                 max = Math.max(max, q);
                 counts.put(word, q);
             }
         }
-        if (max > min) for (Map.Entry<String, Double> ce: counts.entrySet()) {
+        if (max > min) for (Map.Entry<String, Float> ce: counts.entrySet()) {
             result.set(ce.getKey(), (int) (((double) count) * (ce.getValue() - min) / (max - min)));
         }
         return this.ref;

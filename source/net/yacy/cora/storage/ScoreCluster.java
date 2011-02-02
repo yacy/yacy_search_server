@@ -114,6 +114,10 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
             if (l < Integer.MAX_VALUE) return (int) l;
             o = ((Long) o).toString();
         }
+        if (o instanceof Float) {
+            final double d = 1000f * ((Float) o).floatValue();
+            return (int) Math.round(d);
+        }
         if (o instanceof Double) {
             final double d = 1000d * ((Double) o).doubleValue();
             return (int) Math.round(d);

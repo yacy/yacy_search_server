@@ -378,7 +378,7 @@ public class JSONObject {
      * @return A String.
      */
     static public String floatToString(float d) {
-        if (Double.isInfinite(d) || Double.isNaN(d)) {
+        if (Float.isInfinite(d) || Float.isNaN(d)) {
             return "null";
         }
 
@@ -749,7 +749,7 @@ public class JSONObject {
 
 
     /**
-     * Get an optional double associated with a key,
+     * Get an optional float associated with a key,
      * or NaN if there is no such key or if its value is not a number.
      * If the value is a string, an attempt will be made to evaluate it as
      * a number.
@@ -757,13 +757,13 @@ public class JSONObject {
      * @param key   A string which is the key.
      * @return      An object which is the value.
      */
-    public double optDouble(String key) {
-        return optDouble(key, Double.NaN);
+    public float optFloat(String key) {
+        return optFloat(key, Float.NaN);
     }
 
 
     /**
-     * Get an optional double associated with a key, or the
+     * Get an optional float associated with a key, or the
      * defaultValue if there is no such key or if its value is not a number.
      * If the value is a string, an attempt will be made to evaluate it as
      * a number.
@@ -772,11 +772,11 @@ public class JSONObject {
      * @param defaultValue     The default.
      * @return      An object which is the value.
      */
-    public double optDouble(String key, double defaultValue) {
+    public float optFloat(String key, float defaultValue) {
         try {
             Object o = opt(key);
-            return o instanceof Number ? ((Number)o).doubleValue() :
-                new Double((String)o).doubleValue();
+            return o instanceof Number ? ((Number)o).floatValue() :
+                new Float((String)o).floatValue();
         } catch (Exception e) {
             return defaultValue;
         }
@@ -979,15 +979,15 @@ public class JSONObject {
 
 
     /**
-     * Put a key/double pair in the JSONObject.
+     * Put a key/float pair in the JSONObject.
      *
      * @param key   A key string.
-     * @param value A double which is the value.
+     * @param value A float which is the value.
      * @return this.
      * @throws JSONException If the key is null or if the number is invalid.
      */
-    public JSONObject put(String key, double value) throws JSONException {
-        put(key, new Double(value));
+    public JSONObject put(String key, float value) throws JSONException {
+        put(key, new Float(value));
         return this;
     }
 
