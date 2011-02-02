@@ -250,7 +250,8 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_md5, Digest.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
-        this.entry.setCol(col_dt, new byte[]{(byte) prop.getProperty("dt", "t").charAt(0)});
+        String dt = prop.getProperty("dt", "t");
+        this.entry.setCol(col_dt, dt.length() > 0 ? new byte[]{(byte) dt.charAt(0)} : new byte[]{(byte) 't'});
         final String flags = prop.getProperty("flags", "AAAAAA");
         this.entry.setCol(col_flags, (flags.length() > 6) ? QueryParams.empty_constraint.bytes() : (new Bitfield(4, flags)).bytes());
         try {
