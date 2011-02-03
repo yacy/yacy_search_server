@@ -180,7 +180,7 @@ public final class HTTPDFileHandler {
         // create default files array
         defaultFiles = switchboard.getConfig("defaultFiles","index.html").split(",");
         if (defaultFiles.length == 0) defaultFiles = new String[] {"index.html"};
-        indexForward = switchboard.getConfig("indexForward", "");
+        indexForward = switchboard.getConfig(SwitchboardConstants.INDEX_FORWARD, "");
         if (indexForward.startsWith("/")) indexForward = indexForward.substring(1);
     }
     

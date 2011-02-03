@@ -100,8 +100,8 @@ public class index {
         prop.put("excluded", "0");
         prop.put("combine", "0");
         prop.put("resultbottomline", "0");
+        prop.put("maximumRecords", maximumRecords);
         prop.put("searchoptions", searchoptions);
-        prop.put("searchoptions_maximumRecords", maximumRecords);
         prop.put("searchoptions_count-10", (count == 10) ? "1" : "0");
         prop.put("searchoptions_count-50", (count == 50) ? "1" : "0");
         prop.put("searchoptions_count-100", (count == 100) ? "1" : "0");

@@ -85,8 +85,15 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, "/env/grafics/YaCyLogo_60ppi.png");
                 sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, "");
-                sb.setConfig("indexForward", "Status.html");
+                HTTPDFileHandler.indexForward = "";
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
+                sb.setConfig("publicTopmenu", "true");
+                sb.setConfig("search.options", "true");
+                sb.setConfig("search.result.show.date", "true");
+                sb.setConfig("search.result.show.size", "true");
+                sb.setConfig("search.result.show.metadata", "true");
+                sb.setConfig("search.result.show.parser", "true");
+                sb.setConfig("search.result.show.pictures", "true");
             }            
         }
 
