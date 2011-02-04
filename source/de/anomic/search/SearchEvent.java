@@ -111,7 +111,7 @@ public final class SearchEvent {
         if (remote && peers.sizeConnected() == 0) remote = false;
         final long start = System.currentTimeMillis();
         if (remote) {
-        	final int fetchpeers = 12;
+        	final int fetchpeers = 32;
             
         	// initialize a ranking process that is the target for data
         	// that is generated concurrently from local and global search threads
