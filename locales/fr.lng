@@ -23,10 +23,10 @@
 
 #File: Blacklist_p.html
 #---------------------------
-Blacklist Manager==Gestionnaire des listes noires
+Blacklist Manager==Gestionnaire des listes noire
 Blacklist==Liste noire
 Used Blacklist engine:==Moteur de liste noire utilisé:
-This function provides an URL filter to the proxy; any blacklisted URL is blocked from being loaded.==Cette fonction fournis un filtre d'URL sur le serveur Proxy. Tout URL sur la liste noire ne pourra être chargé.
+This function provides an URL filter to the proxy; any blacklisted URL is blocked from being loaded.==Cette fonction fournis un filtre d'URL sur le serveur Proxy;. Toute URL provenant de la liste noire ne pourra être chargé.
 You can define several blacklists and activate them separately.==Vous pouvez définir de nombreuses listes noires et les activer séparément.
 You may also provide your blacklist to other peers by sharing them.==Vous pouvez aussi partager vos listes noires avec d'autres noeuds du réseau.
 in return you may collect blacklist entries from other peers.==En retour vous pourrez collectez celles des autres .
@@ -38,18 +38,18 @@ not shared::shared==non partagé::partagé
 New list:==Nouvelle liste:
 "create"=="créer"
 Settings for this list==Paramètres de cette liste
-Save==Sauver
+Save==Sauvegarder
 Share/don't share this list==Partager/ne pas partager cette liste
 Delete this list==Supprimer cette liste
 Edit this list==Éditer cette liste
-These are the domain name / path patterns in this blacklist:==Noms de domaine et adresses dans la liste noires:
-You can select them here for deletion==Vous pouvez les sélectionner ici pour la suppression
+These are the domain name / path patterns in this blacklist:==Les noms de domaines/ modèle de chemin dans la liste noire:
+You can select them here for deletion==Vous pouvez les sélectionner pour la suppression
 Delete URL pattern==Supprimer le modèle d'URL
 Add URL pattern==Ajouter un modèle d'URL
-Import blacklist items from...==Importer des listes noires depuis...
+Import blacklist items from...==Importer les données d'une liste noire depuis...
 other YaCy peers:==Autre noeud Yacy:
 file:==fichiers:
-"Load new blacklist items"=="Charger de nouvelles listes noires"
+"Load new blacklist items"=="Charger les nouvelles données de la liste noire"
 #URL:==URL:
 was removed from blacklist==a(ont) été supprimé(s) de la liste noire
 was added to the blacklist==a(ont) été ajouté(s) à la liste noire
@@ -58,7 +58,7 @@ Activate this list for==Activer cette liste pour
 
 #File: Blog.html
 #---------------------------
-by==de
+by==par
 >edit==>éditer
 >delete==>supprimer
 show more entries==montrer plus d'entrées
@@ -70,17 +70,17 @@ Author:==Auteur:
 Subject:==Titre:
 Text:==Texte:
 You can use==Vous pouvez utiliser
-Yacy-Wiki Code==le code YaCy-Wiki 
+Yacy-Wiki Code==le code YaCy-Wiki
 here.==ici.
 "Submit"=="Envoyer"
 "Preview"=="Aperçu"
-"Discard"=="Supprimer"
+"Discard"=="Annuler"
 >Preview==>Aperçu
-No changes have been submitted so far!==Aucun changement n'ont été pris en compte !
+No changes have been submitted so far!==Aucun changement n'a été soumis !
 Access denied==Accès refusé
 To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Pour éditer ou créer des entrées dans ce blog, vous devez être enregistré en tant qu'administrateur ou en tant qu'utilisateur avec des droits d'accès au blog.
-Are you sure==Êtes vous sûr 
-that you want to delete <strong>\#\[subject\]\#</strong> by \#\[author\]\#?==que vous souhaitez supprimer <strong>#[subject]#</strong> de #[author]# ?
+Are you sure==Êtes vous sûr
+that you want to delete <strong>\#\[subject\]\#</strong> by \#\[author\]\#?==ce que vous souhaitez supprimer <strong>#[subject]#</strong> de #[author]# ?
 Yes, delete it.==Oui, le supprimer.
 No, leave it.==Non, le laisser.
 Import was successful!==L'importation a réussi !
@@ -90,11 +90,11 @@ Please select the XML-file you want to import:==Sélectionnez le fichier XML que
 
 #File: Bookmarks.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Favoris
-<h2>Bookmarks==<h2> Favoris 
-Add Bookmark== Ajouter aux favoris
-Import XML Bookmarks==Importer des favoris à partir d'un fichier XML
-Edit Bookmark==Éditer les favoris
+YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy \'\#\[clientname\]\#\': Marque-pages
+<h2>Bookmarks==<h2> Marques-pages
+Add Bookmark== Ajouter aux marques-pages
+Import XML Bookmarks==Importer des marque-pages à partir d'un fichier XML
+Edit Bookmark==Éditer les marque-pages
 #URL:==URL:
 Title:==Titre:
 Description:==Description:
@@ -103,20 +103,20 @@ Public:==Publique:
 yes==oui
 no==non
 "create"=="créer"
-"edit"=="modifer"
+"edit"=="modifier"
 File:==Fichier:
-import as Public== importer en publique
+import as Public== importer en public
 "private bookmark"=="marque page privé"
-"public bookmark"=="marque page publique"
+"public bookmark"=="marque page public"
 Tagged with==Marqué par
 Edit==Éditer
 Delete==Supprimer
-Bookmark List==Liste des marques page
+Bookmark List==Liste des marque-pages
 previous page==page précédente
 next page==page suivante
 All==Tous
 Show==Montrer
-Bookmarks per page.==Marques page par site
+Bookmarks per page.==Marque-pages par page.
 #-----------------------------
 
 #File: CacheAdmin_p.html
@@ -130,15 +130,15 @@ The maximum cache size is==La taille maximale du cache est
 #File: ConfigAdvanced_p.html
 #---------------------------
 Advanced Config==Configuration avancée
-Here are all configuration options from YaCy.==toutes les options de configuration de YaCy sont ici.
+Here are all configuration options from YaCy.==Toutes les options de configuration de YaCy sont ici.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vous pouvez tout changer, mais certaines options nécessitent un redémarrage et certaines autres peuvent provoquer l'arrêt de YaCy si elles sont mal choisies.
-For explanation please look into defaults/yacy.init==Pour des explications, regardez dans le fichier « defaults/yacy.init » s'il vous plaît.
-"Save"=="Sauver"
+For explanation please look into defaults/yacy.init==Pour des explications, regardez dans le fichier « defaults/yacy.init ».
+"Save"=="Sauvegarder"
 #-----------------------------
 
 #File: ConfigBasic.html
 #---------------------------
-Select a language for the interface==Choisissez un langage pour l'interface
+Select a language for the interface==Choisissez une langue pour l'interface
 Basic Configuration==Configuration de base
 Your YaCy Peer needs some basic information to operate properly==Votre noeud YaCy a besoin de quelques informations de base pour fonctionner correctement
 Your peer name has not been customized==Le nom de votre noeud YaCy n'a pas été personnalisé
@@ -147,30 +147,30 @@ You have a nice peer name==Vous avez un joli nom de noeud
 Peer Name:==Nom de noeud:
 Please set a password for your peer to protect your settings==Choisissez s'il vous plaît un mot de passe pour protéger votre configuration
 > 3 characters==supérieur à 3 caractères
-if this is successful you will be asked to log in with these values immediately==Si le changement est opéré avec succès, il vous sera demander de vous identifier immédiatement avec ces valeurs.
+if this is successful you will be asked to log in with these values immediately==Si le changement est opéré avec succès, il vous sera demandé de vous identifier immédiatement avec ces valeurs.
 Password is set==Le mot de passe est activé
 Peer User:==Utilisateur du noeud:
 Peer Password:==Mot de passe du noeud :
 repeat same password==Répéter le même mot de passe
-Your peer cannot be reached from outside==Votre noeud ne peut pas être accéder de l'extérieur
+Your peer cannot be reached from outside==Votre noeud ne peut pas être accédé de l'extérieur
 what is not fatal, but would be good for the YaCy network==ce qui n'est pas trop grave, mais ce serait mieux pour le réseau YaCy
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==Veuillez configurez votre firewall pour ouvrir ce port et/ou mettez en place un serveur virtuel sur votre routeur pour autoriser les connexions à ce port
 Your peer can be reached by other peers==Votre noeud n'est pas joignable par les autres noeuds du réseau
 Peer Port:==Port logiciel du noeud:
 Configure your router for YaCy:==Configurez votre routeur pour YaCy:
-Set Configuration==Sauver la configuration
+Set Configuration==Modifier la configuration
 What you should do next:==Que devez-vous faire ensuite:
-Your basic configuration is complete! You can now \(for example\)==Votre configuration de base est complète! Vous pouvez maintenant (par exemple)
+Your basic configuration is complete! You can now \(for example\)==Votre configuration de base est complète! Vous pouvez maintenant \(par exemple\)
 just <==juste <
 start an uncensored search==commencer une recherche non censurée
 start your own crawl</a> and contribute to the global index, or create your own private web index==démarrer votre propre crawl</a> et contribuer à l'index global, ou construire votre propre index du web
-set a personal peer profile</a> \(optional settings\)==remplir un profil de pair personnel</a> (optionnel)
+set a personal peer profile</a> \(optional settings\)==remplir un profil de noeud personnel</a> (optionnel)
 monitor at the network page</a> what the other peers are doing==consulter la page réseau</a> et ce que font les autres pairs
 Your Peer name is a default name; please set another peer name.==Votre nom de pair est un nom par défaut; donnez en un autre s'il vous plait.
 If this does not work, the name is probably taken by someone else.==Si cela ne fonctionne pas, le nom est surement déjà utilisé.
 Please try to choose another one.==S'il vous plait, choisissez en un autre.
-You did not set a user name and/or a password.==Vous n'avez pas saisi de nom d'utilisateur ou de mot de passe.
-Some pages are protected by passwords.==Certaines pages sont protègées par mot de passe.
+You did not set a user name and/or a password.==Vous n'avez pas saisi de nom d'utilisateur et/ou de mot de passe.
+Some pages are protected by passwords.==Certaines pages sont protégées par mot de passe.
 You should set a password here to secure your YaCy peer.==Vous devez définir un mot de passe pour sécuriser votre pair.
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Vous n'avez pas ouvert de port sur votre pare-feu ou votre routeur ne fournit pas le port serveur à votre pair.
 This is needed if you want to fully participate in the YaCy network.==Cela est nécessaire pour participer pleinement au réseau YaCy.
@@ -181,7 +181,7 @@ You can also use your peer without opening it, but this is not recomended.==Vous
 #---------------------------
 Language selection==Sélection de la langue
 You can change the language of the YaCy-webinterface with translation files.==Vous pouvez changer de langue de l'interface web YaCy grace aux fichiers de traduction.
-Current language:==Langue courrante:
+Current language:==Langue actuelle:
 default\(english\)==Français
 Languagefile Author\(s\) \(chronological\)\:==Auteur(s) des fichiers de langues (chronologique):
 Send additions to maintainer:==Envoyez les ajouts à:
