@@ -188,7 +188,7 @@ public class Blacklist {
         List<String> paths;
         List<String> loadedPaths;
 
-        final String[] fileNames = blFile.getFileNamesUnified();
+        final Set<String> fileNames = blFile.getFileNamesUnified();
         for (final String fileName : fileNames) {
             // make sure all requested blacklist files exist
             final File file = new File(this.blacklistRootPath, fileName);
@@ -262,7 +262,7 @@ public class Blacklist {
 
         final String p = (path.length() > 0 && path.charAt(0) == '/') ? path.substring(1) : path;
 
-        final Map<String, List<String>> blacklistMap = getBlacklistMap(blacklistType, (isMatchable(host)) ? true : false);
+        final Map<String, List<String>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
         // avoid PatternSyntaxException e
         final String h =
@@ -294,7 +294,7 @@ public class Blacklist {
 
         if (blacklistType != null && host != null && path != null) {
             final Map<String, List<String>> blacklistMap =
-                    getBlacklistMap(blacklistType, (isMatchable(host)) ? true : false);
+                    getBlacklistMap(blacklistType, isMatchable(host));
 
             // avoid PatternSyntaxException e
             final String h =
@@ -380,13 +380,13 @@ public class Blacklist {
             if ((app = blacklistMapMatched.get(hostlow.substring(0, index + 1) + "*")) != null) {
                 for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= (("*".equals(pp)) || (path.matches(pp)));
+                    matched |= (("*".equals(pp)) || (p.matches(pp)));
                 }
             }
             if ((app = blacklistMapMatched.get(hostlow.substring(0, index))) != null) {
                 for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= (("*".equals(pp)) || (path.matches(pp)));
+                    matched |= (("*".equals(pp)) || (p.matches(pp)));
                 }
             }
         }
@@ -395,13 +395,13 @@ public class Blacklist {
             if ((app = blacklistMapMatched.get("*" + hostlow.substring(index, hostlow.length()))) != null) {
                 for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= (("*".equals(pp)) || (path.matches(pp)));
+                    matched |= (("*".equals(pp)) || (p.matches(pp)));
                 }
             }
             if ((app = blacklistMapMatched.get(hostlow.substring(index + 1, hostlow.length()))) != null) {
                 for (int i = app.size() - 1; !matched && i > -1; i--) {
                     pp = app.get(i);
-                    matched |= (("*".equals(pp)) || (path.matches(pp)));
+                    matched |= (("*".equals(pp)) || (p.matches(pp)));
                 }
             }
         }
@@ -417,7 +417,7 @@ public class Blacklist {
                     if (Pattern.matches(key, hostlow)) {
                         app = entry.getValue();
                         for (int i = 0; i < app.size(); i++) {
-                            if (Pattern.matches(app.get(i), path)) {
+                            if (Pattern.matches(app.get(i), p)) {
                                 return true;
                             }
                         }
@@ -432,13 +432,9 @@ public class Blacklist {
 
     public BlacklistError checkError(final String element, final Map<String, String> properties) {
 
-        boolean allowRegex = true;
+        final boolean allowRegex = (properties != null) && properties.get("allowRegex").equalsIgnoreCase("true");
         int slashPos;
         final String host, path;
-
-        if (properties != null) {
-            allowRegex = properties.get("allowRegex").equalsIgnoreCase("true") ? true : false;
-        }
 
         if ((slashPos = element.indexOf('/')) == -1) {
             host = element;

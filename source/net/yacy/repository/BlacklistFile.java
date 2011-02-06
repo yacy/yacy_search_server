@@ -28,6 +28,7 @@ package net.yacy.repository;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
 public class BlacklistFile {
     
@@ -48,10 +49,8 @@ public class BlacklistFile {
      * 
      * @return unified String array of file names
      */
-    public String[] getFileNamesUnified() {
-        final HashSet<String> hs = new HashSet<String>(Arrays.asList(this.filename.split(",")));
-        
-        return hs.toArray(new String[hs.size()]);
+    public Set<String> getFileNamesUnified() {
+        return new HashSet<String>(Arrays.asList(this.filename.split(",")));
     }
     
     public String getType() { return this.type; }

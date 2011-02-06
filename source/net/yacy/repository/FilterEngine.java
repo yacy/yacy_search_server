@@ -217,13 +217,9 @@ public class FilterEngine {
 
     public int checkError(String element, Map<String, String> properties) {
 
-        boolean allowRegex = true;
+        final boolean allowRegex = (properties != null) && properties.get("allowRegex").equalsIgnoreCase("true");
         int slashPos;
         String host, path;
-
-        if (properties != null) {
-            allowRegex = properties.get("allowRegex").equalsIgnoreCase("true") ? true : false;
-        }
 
         if ((slashPos = element.indexOf('/')) == -1) {
             host = element;
