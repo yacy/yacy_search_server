@@ -7,7 +7,7 @@
 # Frankfurt, Germany, 2005
 #
 # This file is maintained by gDupont
-# This file is written by gDupont, Marsupoil, Mikayé
+# This file is written by gDupont, Marsupoil, Mikayé, Moubai
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
@@ -198,8 +198,8 @@ Error saving the language file.==Erreur en sauvegardant le fichier de langue.
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Votre profil personnel
-You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Vous pouvez créer un profil personnel ici. Les autres utilisateurs de YaCy peuvent consulter ce profil depuis la page de réseau.
-You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Vous n'êtes pas obligés de fournir des informations personnelles, mais si vous voulez diffuser vos informations de contact ici, vous pouvez le faire ici.
+You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Vous pouvez créer un profil personnel ici. Les autres utilisateurs de YaCy peuvent consulter ce profil depuis un lien sur la page de réseau.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Vous n'êtes pas obligés de fournir des informations personnelles, mais si vous voulez diffuser vos informations de contact, vous pouvez le faire ici.
 Name==Nom
 Nick Name==Pseudo
 Homepage==Page d'accueil
@@ -217,16 +217,16 @@ here.==ici.
 #File: ConfigSkins_p.html
 #---------------------------
 Skin Selection==Choix de thème
-You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Vous pouvez changer l'apparence de YaCy avec des skins. Choisissez une des skins par défaut, téléchargez de nouvelles skins, ou créez votre propre skin.
-Current skin:==skin actuelle:
-Available Skins:==Skins disponibles:
+You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Vous pouvez changer l'apparence de YaCy avec des thèmes. Choisissez un des thèmes par défaut, téléchargez de nouveaux thème, ou créez votre propre thème.
+Current skin:==thème actuel:
+Available Skins:==Thème disponibles:
 "Use"=="Utiliser"
 "Delete"=="Supprimer"
-Install new skin from URL:==Installer une nouvelle skin depuis l'URL suivante:
-Use this skin==Utiliser cette skin
+Install new skin from URL:==Installer un nouveau thème depuis l'URL suivante:
+Use this skin==Utiliser ce thème
 "install"=="installer"
-Unable to get URL:==Impossible d'installer le fichier de cette URL:
-Error saving the skin.==Erreur en sauvegardant la skin.
+Unable to get URL:==Impossible d'obtenir l'url:
+Error saving the skin.==Erreur en sauvegardant le thème.
 #-----------------------------
 
 #File: Connections_p.html
@@ -240,7 +240,7 @@ Source IP\[:Port\]==Source-IP[:Port]
 Dest. IP\[:Port\]==Dest.-IP[:Port]
 Command==Commande
 Used==Utilisé
-Close==Close
+Close==Fermer
 Waiting for new request nr.==Attente de la nouvelle requête n°
 #-----------------------------
 
@@ -248,7 +248,7 @@ Waiting for new request nr.==Attente de la nouvelle requête n°
 #---------------------------
 Incoming Cookies Monitor==Surveillance des Cookies entrants
 Cookie Monitor: Incoming Cookies==Surveillance de Cookie: Cookies entrants
-This is a list of cookies that browsers using the YaCy proxy sent to webservers:==Liste des coockies que les browsers utilisant le proxy YaCy envoient aux serveurs Web:
+This is a list of cookies that browsers using the YaCy proxy sent to webservers:==Liste des coockies des explorateurs utilisant le proxy YaCy envoient aux serveurs web:
 Showing==Montrer
 entries from a total of==entrées sur un total de
 Cookies==Cookies
@@ -258,7 +258,7 @@ Cookies==Cookies
 #---------------------------
 Outgoing Cookies Monitor==Surveillance des Cookies sortants
 Cookie Monitor: Outgoing Cookies==Surveillance de Cookie: Cookies sortants
-This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Liste des Cockies que les browsers utilisant le proxy YaCy envoient aux serveurs Web:
+This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Liste des coockies des explorateurs utilisant le proxy YaCy envoient aux serveurs web:
 Showing==Montrer
 entries from a total of==entrées sur un total de
 Cookies==Cookies
@@ -274,44 +274,44 @@ YaCy homepage==page d'accueil YaCy
 Local and Global Search: Options and Functions==Recherche locale ou globale: options et fonctions
 The proxy provides a search interface that accesses your local index, created from web pages that passed the proxy.==Le proxy fournit une interface de recherche qui utilise votre index local créé par les pages visitées par le proxy.
 The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results==La recherche peut aussi être globale en interrogeant les autres pairs. Vous pouvez utiliser les options suivantes pour améliorer vos résultats
-Search Word List==Liste de mots de recherche
+Search Word List==recherche sur une liste de mots
 You can search for several words simultanous. Words must be separated by a single space.==Vous pouvez lancer un recherche pour plusieurs mots simultanément. Les mots doivent être séparés par un espace.
 The words are treated conjunctive, that means every must occur in the result, not any.==La recherche est conjonctive, c'est à dire que les résultats contiennent chacun tous les mots et pas seulement certain.
-If you do a global search \(see below\) you may get different results each time you do a search.==Si vous faites une recherche globale, vous pouvez obtenir des résultats différents à chaque recherche.
+If you do a global search \(see below\) you may get different results each time you do a search.==Si vous faites une recherche globale \(voir ci-dessous\), vous pouvez obtenir des résultats différents à chaque recherche.
 Maximum Number of Results==Nombre maximal de résultats
 
-You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Vous pouvez choisir le nombre maximal de lins. Nous ne supportons pas encore les pages de résultat multiples pour chaque lien possible.
+You can select the number of wanted maximum links. We do not yet support multiple result pages for virtually any possible link.==Vous pouvez choisir le nombre maximal de liens. Nous ne supportons pas encore les pages de résultat multiples pour chaque lien possible.
 Instead we encourage you to enhance the search result by submitting more search words.==A la place, nous vous conseillons d'élargir la recherche en soumettant des mots supplémentaire.
 Result Order Options==Ordre des résultats
-The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Le moteur de recherche fournit une évaluation experimentale de la 'Qualité' experimental. Contrairement aux autres moteurs nous fournissons aussi
+The search engine provides an experimental 'Quality' ranking. In contrast to other known search engines we provide also==Le moteur de recherche fournit une évaluation experimentale de la 'Qualité'. Contrairement aux autres moteurs nous fournissons aussi
 a result order by date. If you change the order to 'Date-Quality' the most recently updated page from the search results is listed first.==un classement par date. Si vous triez dans l'ordre 'Date-Qualité' les pages les plus fraîches sont affichées en tête.
 For pages that have the same date the second order, 'Quality' is applied.==Pour les pages qui ont la même date, le tri par 'Qualité' est appliqué.
-Resource Domain==Source de la recherche
+Resource Domain==Domaine de recherche
 This search engine is constructed to search the web pages that pass the proxy. But the search index is distributed to other peers as well,==Ce moteur de recherche est construit pour rechercher les pages qui passent par le proxy. Mais l'index est aussi partagé avec les autre pairs,
-so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==ainsi vous pouvez aussi chercher globalement: cette fonction est rudimentaire mais vous pouvez l'utiliser pour tester. Les nouvelles version
-automatically distribute index information <em>before</em> a search happends to form a performant distributed hash table -- a very fast global search.==distriburont automatiquement  les information d'index <em>avant</em> qu'une recherche survienne pour former une table de hâchage distribuée -- une recherche globale très rapide.
-Maximum Search Time==Temps de recherche maximale
+so you can search also globally: this function is currently only rudimentary, but can be choosen for test cases. Future releases will==ainsi vous pouvez aussi chercher globalement: cette fonction est rudimentaire mais vous pouvez l'utiliser pour tester. Les nouvelles versions
+automatically distribute index information <em>before</em> a search happends to form a performant distributed hash table -- a very fast global search.==distriburont automatiquement les information d'index <em>avant</em> qu'une recherche survienne pour former une table de hâchage distribuée -- une recherche globale très rapide.
+Maximum Search Time==Temps de recherche maximal
 Searching the local index is extremely fast, it happends within milliseconds, even for a large number \(millions\) of pages. But searching the==Une recherche sur l'index local est très rapide. Elle arrive dans la milliseconde même pour un grand nombre de pages (millions).
-global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Au contraire, une recherche globale nécessite plus de temps pour trouver les pairs qui contiennent les meilleurs résultats de recherche. C'est particulierement le cas lorsque l'index 
-distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==distribué est en phase de test. Les résultats de recherche deviennent meilleurs et plus long (une recherche répétée produit tout de suite plus de résultats) 
+global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Au contraire, une recherche globale nécessite plus de temps pour trouver les pairs qui contiennent les meilleurs résultats de recherche. C'est particulierement le cas lorsque l'index
+distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==distribué est en phase de test. Les résultats de recherche deviennent meilleurs et plus long (une recherche répétée produit tout de suite plus de résultats)
 the search time is.==le temps de recherche est.
-You may want to use accesskeys to navigate through the YaCy webinterface:==Vous pouvez utiliser des combinaisons de touches pur naviguer sur l'interface web de YaCy:    
-Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows et Internet Explorer: Alt + Touche + Enter
-Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows et Mozilla/Firefox/Netscape: Alt + Touche
+You may want to use accesskeys to navigate through the YaCy webinterface:==Vous pouvez utiliser des combinaisons de touches pur naviguer sur l'interface web de YaCy:
+Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows et Internet Explorer: Alt \+ Touche \+ Enter
+Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows et Mozilla/Firefox/Netscape: Alt \+ Touche
 Windows and Opera: Shift \+ Esc \+ Accesskey==Windows et Opera: Shift + Touche + Taste
-Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter==Macintosh et Internet Explorer: Str + Touche + Enter
-Macintosh and Safari: Strg \+ Accesskey==Macintosh et Safari: Strg + Touche
-Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh et Mozilla/Firefox/Netscape: Strg + Touche
-Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh et Opera: Shift + Esc + Touche
-Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake et Galeon/Mozilla: Alt + Touche
-All OS and Amaya: Strg \+ Accesskey==Toutes versions D'OS et Amaya: Strg + Touche
+Macintosh and Internet Explorer: Strg \+ Accesskey \+ Enter==Macintosh et Internet Explorer: Str \+ Touche \+ Enter
+Macintosh and Safari: Strg \+ Accesskey==Macintosh et Safari: Strg \+ Touche
+Macintosh and Mozilla/Firefox/Netscape: Strg \+ Accesskey==Macintosh et Mozilla/Firefox/Netscape: Strg \+ Touche
+Macintosh and Opera: Shift \+ Esc \+ Accesskey==Macintosh et Opera: Shift \+ Esc \+ Touche
+Linux Mandrake and Galeon/Mozilla: Alt \+ Accesskey==Linux Mandrake et Galeon/Mozilla: Alt \+ Touche
+All OS and Amaya: Strg \+ Accesskey==Toutes versions D'OS et Amaya: Strg \+ Touche
 Search Page==Page de recherche
 Network==Réseau
 Status==Etat
 
 YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy utilise des expressions régulières pour certaines fonctions comme la liste noire.
-There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Il y a des standards pour ces expressions, YaCy s'oriente vers celuide Perl 5.
-Here ist a short overview about the functions, which should fir for most cases\:<==Vous trouverez ici un bref aperçu des fonctions qui doivent couvrir la plupart des cas:<
+There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Il y a des standards pour ces expressions, YaCy s'oriente vers celui utilisé par Perl 5.
+Here ist a short overview about the functions, which should fir for most cases\:<==Vous trouverez ici un bref aperçu des fonctions qui doivent couvrir la plupart des cas\:<
 
 arbitrary character==caractère arbitraire
 character x==caractère x
@@ -328,10 +328,10 @@ exactly n appearances of x==exactement n occurrences de x
 at least n appearances of x==au moins n occurrence de x
 at least n, maximum m appearanches of x==au moins n, au plus m occurrences de x
 Modify priority of instructions==Modifie la priorité des instructions
-Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Caractère d'échappement, utilisé pour exprimer les caractères spéciaux ("[" ou "*" par exemple) en oubliant leur signification spéciale.
-Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==l'expression régulière traite par ordre de priorité décroissante: concaténation, opérateurs unaires (*,+,^,{}), opérateurs binaires (|). Cela peut être altérer par les crochets.  
+Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Caractère d'échappement, utilisé pour exprimer les caractères spéciaux \(par exemple "\[" or "\*"\), en oubliant leur signification spéciale.
+Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==l'expression régulière traite par ordre de priorité décroissante: concaténation, opérateurs unaires \(\*,\+,\^,\{\}\) opérateurs binaires \(\|\). Cela peut être altérer par les crochets.
 Example:==Exemple:
-This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Cela fait correspondre heise.de/ avec une chaîne devant, par exemple "http://www.",suivie par une chaîne arbitraire et un slash et un nombre. Le point dans "heise.de" n'est pas "échappé" par "\" car il représente n'importe quel caractère, donc y compris lui même. 
+This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Cela fait correspondre heise.de/ avec une chaîne devant, par exemple "http://www.",suivi par une chaîne arbitraire un slash et un nombre. Le point dans "heise.de" n'est pas "échappé" par "\\" car il représente n'importe quel caractère, donc y compris lui même.
 A possible URL which would match this regexp is\:==Une URL possible pouvant correspondre à cette espression est:
 An URL which would not match is:==Une URL qui ne correspond pas est:
 There is ".html" at the end, which is not included with the Regular Expression.==Il y a ".html" à la fin qui n'est pas inclus dans l'expression régulière.
@@ -339,12 +339,12 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 
 #File: index.html
 #---------------------------
-YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Page de recherche
-kiosk mode==Kiosque Mode
+YaCy \'\#\[clientname\]\#\': Search Page==YaCy \'\#\[clientname\]\#\': Page de recherche
+kiosk mode==Mode Kiosque
 "Search"=="Chercher"
 Text==Texte
 Images==Images
-#Audio==Audio
+#Audio==#Audio
 >Video==>Vidéo
 Applications==Applications
 more options...==plus d'options...
@@ -356,11 +356,11 @@ Date-YBR-Quality==Date-YBR-Qualité
 Quality-YBR-Date==Qualité-YBR-Date
 Date-Quality-YBR==Date-Qualité-YBR
 Quality-Date-YBR==Qualité-Date-YBR
-Resource:==Source:
+Resource:==resource:
 global==global
 local==local
 Max. search time==Durée de recherche Max.
-\(seconds\)==(secondes)
+\(seconds\)==\(secondes)
 URL mask:==Filtre-URL:
 restrict on==limité à
 show all==tout montrer
@@ -378,10 +378,10 @@ Index Cleaner==Nettoyeur d'index
 Total URLs searched:==URLs totales recherchées:
 Blacklisted URLs found:==URLS en liste noire trouvées:
 Percentage blacklisted:==Pourcentage en liste noire:
-last searched URL:==dernière URL recherchée: 
+last searched URL:==dernière URL recherchée:
 last blacklisted URL found:==dernière URL trouvée en liste noire:
 RWIs at Start:==RWIs au départ:
-RWIs now:==RWIs maintenant: 
+RWIs now:==RWIs maintenant:
 wordHash in Progress:==Mots-Hash en cours:
 last wordHash with deleted URLs:==dernier mot-hash avec URLs supprimées:
 Number of deleted URLs in on this Hash:==Nombre d'URLs supprimés sur ce hâchage:
@@ -396,15 +396,15 @@ RWIDbCleaner - Clean up the database by deletion of words with reference to blac
 #---------------------------
 Index Control==Contrôle d'index
 Index Administration==Administration d'index
-The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Pour l'instant, l'index local consiste en #[wcount]# mots et #[ucount]# URLs.
+The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Pour l'instant, l'index local consiste en \#\[wcount\]\# mots et #\#\[ucount\]\# URLs.
 "Show URL Entries for Word"=="Montrer les entrées URL pour les mots"
-"Generate List"=="Créer une liste"
+"Generate List"=="Générer une liste"
 "Show URL Entries for Word-Hash"=="Montrer les entrées URL pour les Word-Hash"
-"Transfer to other peer"=="Transférer à un autre pair" 
+"Transfer to other peer"=="Transférer à un autre pair"
 #URL:==URL:
 "Show Details for URL"=="Montrer les détails pour l'URL"
 #URL-Hash:==URL-Hash:
-"Show Details for URL-Hash"=="Montrer les détails pour l'URL"
+"Show Details for URL-Hash"=="Montrer les détails pour l'URL-hash"
 DHT Transmission control:==Contrôle de transmission DHT:
 The transmission is necessary for the functionality of global search on other peers.==Le partage est nécessaire, pour que la recherche globale fonctionne avec les autres noeuds.
 If you switch off distribution or receipt of RWIs you will be banned from global search.==Si vous désactivez la transmission ou la reception des RWIs, vous serez bannis de la recherche globale.
@@ -413,13 +413,13 @@ This enables automated, DHT-ruled Index Transmission to other peers.==Cela perme
 If checked, DHT-Transmission is enabled even during crawling.==Si activé, le partage des DHT est autorisé pendant les crawls.
 Index Receive:==Réception d'index:
 Accept remote Index Transmissions. This works only if you are a senior peer.==Accepte la transmission d'index distant. Cela ne fonctionne que si vous êtes un noeud senior.
-The DHT-rules do not work without this function.==Les règles DHT ne fonctionnent pas sans l'activation de cette fonction. 
+The DHT-rules do not work without this function.==Les règles DHT ne fonctionnent pas sans l'activation de cette fonction.
 If checked, your peer silently ignores transmitted URLs that match your blacklist==Si activé, votre noeud ignore silencieusement les URLs qui correspondent à votre blacklist.
 #Noeud Tags:==Noeud Tags:
-If your peer runs in \'Robinson Mode\' \(Distribution and Receive off\), you probably run YaCy as a search engine==Si votre noeud fonctionne en \'Robinson Mode'\ (émission et reception déactivées), alors vous l'utilisez peut-être comme moteur de recherche
-for your own search portal. Please describe your search portal with some keywords \(comma-separated\).==Pour votre propre portail de recherche. Prière de décrire votre portail par quelques mots-clés (séparés par des virgules).
-This will help to use your peer as search target even if you do not distribute your web index by==Cela aidera à utiliser votre noeud comme cible de recherche même si vous ne partagez pas votre index web  
-DHT distribution.==par distribution de DHT.
+If your peer runs in \'Robinson Mode\' \(Distribution and Receive off\), you probably run YaCy as a search engine==Si votre noeud fonctionne en \'Robinson Mode\' \(émission et reception désactivées), alors vous l'utilisez peut-être comme moteur de recherche
+for your own search portal. Please describe your search portal with some keywords \(comma-separated\).==Pour votre propre portail de recherche. Prière de décrire votre portail par quelques mots-clés \(séparés par des virgules\).
+This will help to use your peer as search target even if you do not distribute your web index by==Cela aidera à utiliser votre noeud comme cible de recherche même si vous ne partagez pas votre index web par
+DHT distribution.==distribution DHT.
 "set"=="Enregistrer"
 Changes will take effect immediately==Les changements prendrons effet immédiatement
 #Let this translation here to avoid errors.
@@ -431,10 +431,10 @@ Word-Hash:</td>==Mot-Hash:</td>
 #---------------------------
 Index Creation==Créer un index
 Start Crawling Job:==Tâche de démarrage du crawl:
-You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Vous pouvez  définir les URLs de départ et démarrer le crawl ici. Crawler signifie que YaCy téléchargera les sites de départ et extraira tous leurs liens ainsi que leur contenu. Cela sera répété jusqu'a ce que la "profondeur de crawl" soit atteinte.  
+You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Vous pouvez  définir les URLs de départ et démarrer le crawl ici. Crawler signifie que YaCy téléchargera les sites de départ et extraira tous leurs liens ainsi que leur contenu. Cela sera répété jusqu'a ce que la \"profondeur de crawl\" soit atteinte.
 #Attribut==Attribut
 Value==Valeur
-Description==Descriprion
+Description==Description
 Crawling Depth:==Profondeur de crawl:
 This defines how often the Crawler will follow links embedded in websites.==Cela définit combien de fois de suite le crawler suivra les liens des pages.
 A minimum of 1 is recommended and means that the page you enter under \"Starting Point\" will be added to the index, but no linked content is indexed. 2-4 is good for normal indexing.==Un minimum de 1 est recommandé et signifie que la page de départ sera ajoutée à l'index, mais qu'aucun de ses liens ne sera indexé. 2-4 est une bonne valeur pour une indexation normale.
@@ -442,30 +442,30 @@ Be careful with the depth. Consider a branching factor of average 20;==Soyer pru
 A prefetch-depth of 8 would index 25.600.000.000 pages, maybe this is the whole WWW.==Une profondeur de crawl de 8 indexera 25 milliards de pages, peut-être la totalité du web.
 Crawling Filter:==Filtre de crawl:
 This is an emacs-like regular expression that must match with the URLs which are used to be crawled.==C'est une expression régulière emacs qui doit correspondre avec les URLs parcourues par le crawleur.
-Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase==Utilisez la par exemple pour crawler un seul domaine. Si vous paramétrez ce filtre, cela a un sens 
+Use this i.e. to crawl a single domain. If you set this filter it makes sense to increase==Utilisez la par exemple pour crawler un seul domaine. Si vous paramétrez ce filtre, cela a un sens
 the crawling depth.==d'augmenter la profondeur de crawl.
 #Re-Crawl Option:==Re-Crawl Option:
 Use:==Utilisation:
 Interval:==intervalle:
-Year\(s\)==Année(s)
+Year\(s\)==Année\(s\)
 Month\(s\)==Mois
-Day\(s\)==Jour(s)
-Hour\(s\)==Heure(s)
-Minute\(s\)==Minute(s)
-If you use this option, web pages that are already existent in your database are crawled and indexed again.==Si vous utilisez cette option, les qui sont déja indexées seront parcourues et indexées ujne nouvelle fois/
-It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Cela dépend de l'age du dernier crawl, si il  a été fait ou non: si le dernier crawl est plus ancien que la date actuelle 
+Day\(s\)==Jour\(s\)
+Hour\(s\)==Heure\(s\)
+Minute\(s\)==Minute\(s\)
+If you use this option, web pages that are already existent in your database are crawled and indexed again.==Si vous utilisez cette option, les pas web qui sont déja indexées seront parcourues et indexées une nouvelle fois.
+It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Cela dépend de l'age du dernier crawl, si il  a été fait ou non: si le dernier crawl est plus ancien que la date actuelle
 date, the page is crawled again, otherwise it is treated as 'double' and not loaded or indexed again.==, la page est analysée une nouvelle fois, autrement elle est traitée comme un doublon et ne sera plus ni chargée ni indexée.
 Auto-Dom-Filter:==Filtre Auto-Dom:
 Depth:==Profondeur:
-This option will automatically create a domain-filter which limits the crawl on domains the crawler==Cette option créera automatiqueùent un filtre de domaine qui limite le crawl au domaines que le crawler
-will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==trouvera à la profondeur donnée. On peut par exemple utiliser cette option pour crawler une page avec des marques-pages 
+This option will automatically create a domain-filter which limits the crawl on domains the crawler==Cette option créera automatiquement un filtre de domaine qui limite le crawl au domaine du crawler
+will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==trouvera à la profondeur donnée. On peut par exemple utiliser cette option pour crawler une page avec des marques-pages
 restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==tout en limitant la recherche au domaines de cette page. La profondeur adequate
 for this example would be 1.==pour cet exemple sera 1.
-The default value 0 gives no restrictions.==La valeur par défaut 0 n'applique aucune limitations.
+The default value 0 gives no restrictions.==La valeur par défaut 0 n'applique aucune limitation.
 Maximum Pages per Domain:==Maximum de pages par domaine:
 Page-Count:==Nombre de page:
 You can limit the maxmimum number of pages that are fetched and indexed from a single domain with this option.==Par cette option, vous pouvez limiter le nombre maximal de pages par domaine qui seront recherchées et indexées.
-You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Vous pouvez combiner cette option avec le filtre auto-dom, ainsi la limite est appliquée à tous les domaines à une 
+You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==Vous pouvez combiner cette option avec le filtre auto-dom, ainsi la limite est appliquée à tous les domaines à une
 the given depth. Domains outside the given depth are then sorted-out anyway.==profondeur donnée. Les domaines au delà d'une certaine profondeur seront simplement exclus.
 Accept URLs with '\?' / dynamic URLs:==Accepte les URLs avec '\?' / URLs dynamiques:
 A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==Un point d'intérogation est habituellement le signe d'un page dynamique. Les URLs pointant un contenu dynamique ne doivent habituellement pas être explorés. Comme toujours, il existe parfois des pages statiques qui
@@ -480,20 +480,19 @@ index media:==Index Media:
 This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Cela active l'activation des pages web que le crawler téléchargera. Cela doit être activé par défaut, a moins que vous vouliez seulement crawler pour remplir
 Proxy Cache</a> without indexing.==le proxy-cache</a> sans indexer.
 Do Remote Indexing:==Indexation distante:
-Describe your intention to start this global crawl \(optional\):==Décrivez pourquoi vous avez lancé ce crawlglobal (optionel):
+Describe your intention to start this global crawl \(optional\):==Décrivez pourquoi vous avez lancé ce crawlglobal \(optionel\):
 This message will appear in the 'Other Noeud Crawl Start' table of other peers.==Ce message apparaitra dans la table 'Autre noeud crawl start' des autres noeuds.
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Si activé, le crawler contactera les autres noeuds et les utilisera comme indexeurs distants pour votre crawl.
 If you need your crawling results locally, you should switch this off.==Si vous avez besoin de vos résultats de crawl localement, vous devez désactiver cette fonction.
 Only senior and principal peers can initiate or receive remote crawls.==Seuls les noeuds senior et principal peuvent emettre ou recevoir des crawls distants.
-<strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>, so they can omit starting a crawl with the same start point.==
-<strong>Un message sera envoyé à YaCyNews, pour informer les autres noeuds de ces crawls globaux</strong>, ainsi ils peuvent éviter de lancer un crawl avec le même point de départ.
+<strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>, so they can omit starting a crawl with the same start point.==<strong>Un message sera envoyé à YaCyNews, pour informer les autres noeuds de ces crawls globaux</strong>, ainsi ils peuvent éviter de lancer un crawl avec le même point de départ.
 Exclude <em>static</em> Stop-Words==Exclure les mots-stops <em>statiques</em>
-This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Cela peut être utile, pour éviter que les mots très communs soient ajoutés à la base de données, par exemple "le", "la", "les", "et", "il", "elle", ... Pour exclure tous les mots donnés dans le fichier <tt>yacy.stopwords</tt> de l'indexation,
-check this box.==activez cette coche.
+This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Cela peut être utile, pour éviter que les mots très communs soient ajoutés à la base de données, par exemple \"le\", \"la\", \"les\", \"et\", \"il\", \"elle\", ... Pour exclure tous les mots donnés dans le fichier <tt>yacy.stopwords</tt> de l'indexation,
+check this box.==activez cette case.
 Starting Point:==Point de départ:
 From File:==Du fichier:
 From URL:==De l'URL:
-Existing start URLs are re-crawled.==Le URLs de départ existantes seront recrawlées. 
+Existing start URLs are re-crawled.==Le URLs de départ existantes seront recrawlées.
 Other already visited URLs are sorted out as \"double\".==Les autres URLs déjà visitées seront classées en doublons.
 A complete re-crawl will be available soon.==Un recrawl complet sera bientôt disponible.
 "Start New Crawl"=="Démarrer un nouvaux crawl"
@@ -502,44 +501,44 @@ Crawling and indexing can be done by remote peers.==Crawl et indexation peuvent 
 Your peer can search and index for other peers and they can search for you.==Votre noeud peut chercher et indexer pour d'autres noeuds et ceux-ci peuvent le faire pour vous.
 Accept remote crawling requests and perform crawl at maximum load==Accepter les demandes de crawl distants et les exécuter au niveau de charge maximal
 Accept remote crawling requests and perform crawl at maximum of==Accepter les demandes de crawl distants et les exécuter jusqu'a un maximum de
-Pages Per Minute \(minimum is 1, low system load usually at PPM ≥ 30\)==pages par minute (le minimum est 1, un système lent charge habituellement moins de 30 pages par minute)
+Pages Per Minute \(minimum is 1, low system load usually at PPM = 30\)==pages par minute \(le minimum est 1, un système lent charge habituellement moins de 30 pages par minute\)
 Do not accept remote crawling requests \(please set this only if you cannot accept to crawl only one page per minute; see option above\)==Ne pas accepter les demande de crawls distants (n'activez cela que si vous ne pas accepter de crawler seulement une page par minute; voir ci-dessus)
 "set"=="Enregistrer"
 Error:==Erreur:
 Application not yet initialized. Sorry. Please wait some seconds and repeat the request.==L'application n'est pas encore initialisée. Désolé. Attendez quelques secondes et répétez votre requète.
-Crawling of "\#\[crawlingURL\]\#" failed. Reason:==Crawl de "#[crawlingURL]#" failed. Raison:
+Crawling of "\#\[crawlingURL\]\#" failed. Reason:==Crawl de "\#\[crawlingURL\]\#" non réussi. Raison:
 Error with file input==Erreur de fichier en entrée
 Set new prefetch depth to==Paramètrer une nouvelle profondeur de crawl de
-Crawling of "\#\[crawlingURL\]\#" started.==Crawl de "#[crawlingURL]#" démarré.
+Crawling of "\#\[crawlingURL\]\#" started.==Crawl de "\#\[crawlingURL\]\#" démarré.
 You can monitor the crawling progress either by watching the URL queues==Vous pouvez surveiller l'avancement du crawl soit en regardant les URLs suivantes
-local queue</a>==queue locale</a>
-global queue</a>==queue globale</a>
-loader queue</a>==queue du chargeur</a>
-indexing queue</a>==queue d'indexation</a>
+local queue</a>==file locale</a>
+global queue</a>==file globale</a>
+loader queue</a>==file du chargeur</a>
+indexing queue</a>==file d'indexation</a>
 or see the fill/process count of all queues on the==soit en regardant le remplissage des files d'attente sur la
 >performance page</a>.==>page de performance</a>.
 Please wait some seconds, because the request is enqueued and delayed until the proxy/HTTP-server is idle for a certain time.==Attentez quelques secondes, la requête est en attente et retardée  jusqu'à ce que le proxy/serveur-http devienne inoccupé un instant.
 The indexing results are presented on the==Les résultats d'indexation sont présentés sur la
-Index Monitor</a>-page.==page de surveillance d'index</a>.
-It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.==Il se passera au moins 30 secondes avant que le premier résultat n'apparaisse ici. Soyez patient, le crawl se suspend chaque fois que vous utilisez le proxy ou le server web pour assurer une disponibilité maximal. 
+Index Monitor</a>-page.==l'index de surveillance</a>.
+It will take at least 30 seconds until the first result appears there. Please be patient, the crawling will pause each time you use the proxy or web server to ensure maximum availability.==Il se passera au moins 30 secondes avant que le premier résultat n'apparaisse ici. Soyez patient, le crawl se suspend chaque fois que vous utilisez le proxy ou le server web pour assurer une disponibilité maximal.
 If you crawl any un-wanted pages, you can delete them==Si vous crawler des pages non souhaitées, vous pouvez les supprimer
 here</a>.==ici</a>.
-Removed \#\[numEntries\]\# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==#[numEntries]# entrées supprimées du file d'attente de crawl. Cette file sera réalimentée si le file de chargement et d'indexation n'est pas vide.
-Crawling paused successfully.==Le crawl suspendu avec succés (pause).
+Removed \#\[numEntries\]\# entries from crawl queue. This queue may fill again if the loading and indexing queue is not empty==\#\[numEntries\]\#entrées supprimées de la file d'attente de crawl. Cette file sera réalimentée si le file de chargement et d'indexation n'est pas vide.
+Crawling paused successfully.==Le crawl suspendu avec succès (pause).
 Continue crawling.==Poursuivre le crawl.
 "refresh"=="actualiser"
-"continue crawling"=="Le crawl se poursuit"
+"continue crawling"=="Poursuivre le crawl"
 "pause crawling"=="suspendre le crawl"
 Crawl Profile List:==Liste de profils de crawl:
 Crawl Thread==Type de crawl
 Start URL==Start URL
 Depth</strong>==Profondeur</strong>
 Filter</strong>==Filtre</strong>
-MaxAge</strong>==Age Maxi.</strong>
+MaxAge</strong>==Age Max.</strong>
 Auto Filter Depth</strong>==Profondeur de filtrage auto</strong>
 Auto Filter Content</strong>==Contenu de filtrage auto</strong>
 Max Page Per Domain</strong>==Max. de pages par domain</strong>
-Accept \'?\' URLs</strong>==Accepter les URL avec "?"</strong>
+Accept \'?\' URLs</strong>==Accepter les URL avec \'?\'</strong>
 Fill Proxy Cache==Remplir le proxy cache
 Local Indexing</strong>==Indexation locale</strong>
 Remote Indexing</strong>==Indexation distante</strong>
@@ -552,15 +551,15 @@ Recently started remote crawls, finished:==Crawls distants récemments démarré
 Remote Crawling Noeuds:==Noeuds de crawl distants:
 No remote crawl peers availible.==Aucun noeud accessible aux crawls distants.
 peers available for remote crawling.==Noeuds accessible aux crawls distants.
-Idle Noeuds==Noeuds oisifs
+Idle Noeuds==Noeuds inactifs
 Busy Noeuds==Noeuds occupés
-\#\(withQuery\)\#no::yes\#\(/withQuery\)\#==#(withQuery)#non::oui#(/withQuery)#
-\#\(storeCache\)\#no::yes\#\(/storeCache\)\#==#(storeCache)#non::oui#(/storeCache)#
-\#\(localIndexing\)\#no::yes\#\(/localIndexing\)\#==#(localIndexing)#non::oui#(/localIndexing)#
-\#\(remoteIndexing\)\#no::yes\#\(/remoteIndexing\)\#==#(remoteIndexing)#non::oui#(/remoteIndexing)#
-\#\(crawlingQ\)\#no::yes\#\(/crawlingQ\)\#==#(crawlingQ)#non::oui#(/crawlingQ)#
-\#\{available\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)   \#\{/available\}\#==#{available}##[name]# (#[due]# secondes)   #{/available}#
-\#\{busy\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)  \#\{/busy\}\#==#{busy}##[name]# (#[due]# secondes)  #{/busy}#
+\#\(withQuery\)\#no::yes\#\(/withQuery\)\#==\#\(withQuery\)\#non::oui\#\(/withQuery\)\#
+\#\(storeCache\)\#no::yes\#\(/storeCache\)\#==\#\(storeCache\)\#non::oui\#\(/storeCache\)\#
+\#\(localIndexing\)\#no::yes\#\(/localIndexing\)\#==\#\(localIndexing\)\#non::oui\#\(/localIndexing\)\#
+\#\(remoteIndexing\)\#no::yes\#\(/remoteIndexing\)\#==\#\(remoteIndexing\)\#non::oui\#\(/remoteIndexing\)\#
+\#\(crawlingQ\)\#no::yes\#\(/crawlingQ\)\#==\#\(crawlingQ\)\#non::oui\#\(/crawlingQ\)\#
+\#\{available\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)   \#\{/available\}\#==\#\{available\}\#\#\[name\]\# \(\#\[due\]\# secondes \)   \#\{/available\}\#
+\#\{busy\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)  \#\{/busy\}\#==\#\{busy\}\#\#\[name\]\# \(\#\[due\]\# secondes due\)  \#\{/busy\}\#
 #-----------------------------
 
 #File: IndexCreateIndexingQueue_p.html
