@@ -36,17 +36,17 @@ import org.apache.http.entity.HttpEntityWrapper;
 public class GzipDecompressingEntity extends HttpEntityWrapper {
 	
 	private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
+	private GZIPInputStream gzipInputStream = null;
 
 	public GzipDecompressingEntity(final HttpEntity entity) {
 		super(entity);
 	}
 
 	public InputStream getContent() throws IOException, IllegalStateException {
-
-		// the wrapped entity's getContent() decides about repeatability
-		InputStream wrappedin = wrappedEntity.getContent();
-
-		return new GZIPInputStream(wrappedin);
+		if (gzipInputStream == null) {
+			gzipInputStream = new GZIPInputStream(wrappedEntity.getContent());
+		}
+		return gzipInputStream;
 	}
 	
 	public void writeTo(OutputStream outstream) throws IOException {
@@ -54,11 +54,15 @@ public class GzipDecompressingEntity extends HttpEntityWrapper {
             throw new IllegalArgumentException("Output stream may not be null");
         }
         InputStream instream = this.getContent();
-        int l;
-        byte[] tmp = new byte[DEFAULT_BUFFER_SIZE];
-        while ((l = instream.read(tmp)) != -1) {
-            outstream.write(tmp, 0, l);
-        }
+        try {
+			int l;
+			byte[] tmp = new byte[DEFAULT_BUFFER_SIZE];
+			while ((l = instream.read(tmp)) != -1) {
+			    outstream.write(tmp, 0, l);
+			}
+		} finally {
+			instream.close();
+		}
 	}
 	
 	public boolean isChunked() {

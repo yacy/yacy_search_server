@@ -59,8 +59,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.params.ConnManagerParams;
-import org.apache.http.conn.params.ConnPerRouteBean;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -115,23 +113,27 @@ public class HTTPClient {
     }
     
     public static HttpClient initConnectionManager() {
+    	// Create and initialize scheme registry
+		final SchemeRegistry schemeRegistry = new SchemeRegistry();
+		schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+		schemeRegistry.register(new Scheme("https", 443, getSSLSocketFactory()));
+
+		ThreadSafeClientConnManager clientConnectionManager = new ThreadSafeClientConnManager(schemeRegistry);
+
 		// Create and initialize HTTP parameters
 		final HttpParams httpParams = new BasicHttpParams();
 		/**
 		 * ConnectionManager settings
 		 */
-		// TODO: how much connections do we need? - default: 20
-		ConnManagerParams.setMaxTotalConnections(httpParams, maxcon);
+		// how much connections do we need? - default: 20
+		clientConnectionManager.setMaxTotal(maxcon);
 		// for statistics same value should also be set here
 		ConnectionInfo.setMaxcount(maxcon);
 		// connections per host (2 default)
-		final ConnPerRouteBean connPerRoute = new ConnPerRouteBean(2);
+		clientConnectionManager.setDefaultMaxPerRoute(2);
 		// Increase max connections for localhost
 		HttpHost localhost = new HttpHost("locahost");
-		connPerRoute.setMaxForRoute(new HttpRoute(localhost), maxcon);
-		ConnManagerParams.setMaxConnectionsPerRoute(httpParams, connPerRoute);
-		// how long to wait for getting a connection from manager in milliseconds
-		ConnManagerParams.setTimeout(httpParams, 9000L);
+		clientConnectionManager.setMaxForRoute(new HttpRoute(localhost), maxcon);
 		/**
 		 * HTTP protocol settings
 		 */
@@ -156,13 +158,6 @@ public class HTTPClient {
 		HttpConnectionParams.setTcpNoDelay(httpParams, false);
 		// TODO: testing noreuse - there will be HttpConnectionParams.setSoReuseaddr(HttpParams params, boolean reuseaddr) in core-4.1
 		
-		// Create and initialize scheme registry
-		final SchemeRegistry schemeRegistry = new SchemeRegistry();
-		schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-		schemeRegistry.register(new Scheme("https", getSSLSocketFactory(), 443));
-
-		ClientConnectionManager clientConnectionManager = new ThreadSafeClientConnManager(httpParams, schemeRegistry);
-
 		httpClient = new DefaultHttpClient(clientConnectionManager, httpParams);
 		// ask for gzip
 		((AbstractHttpClient) httpClient).addRequestInterceptor(new GzipRequestInterceptor());
@@ -408,9 +403,8 @@ public class HTTPClient {
             if (httpEntity != null) try {
                 httpEntity.writeTo(outputStream);
                 outputStream.flush();
-                // TODO: The name of this method is misnomer.
-                // It will be renamed to #finish() in the next major release of httpcore
-                httpEntity.consumeContent();
+                // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+                EntityUtils.consume(httpEntity);
                 ConnectionInfo.removeConnection(currentRequest.hashCode());
                 currentRequest = null;
             } catch (final IOException e) {
@@ -432,9 +426,8 @@ public class HTTPClient {
         if (httpResponse != null) {
                 final HttpEntity httpEntity = httpResponse.getEntity();
         if (httpEntity != null && httpEntity.isStreaming()) {
-                // TODO: The name of this method is misnomer.
-                // It will be renamed to #finish() in the next major release of httpcore
-                httpEntity.consumeContent();
+            // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+            EntityUtils.consume(httpEntity);
         }
         }
         if (currentRequest != null) {
@@ -454,10 +447,9 @@ public class HTTPClient {
             if (httpEntity != null) {
                 if (getStatusCode() == 200 && httpEntity.getContentLength()  < maxBytes) {
                         content = EntityUtils.toByteArray(httpEntity);
-                }
-                // TODO: The name of this method is misnomer.
-                // It will be renamed to #finish() in the next major release of httpcore
-                httpEntity.consumeContent();
+                } 
+                // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+            	EntityUtils.consume(httpEntity);
             }
         } catch (final IOException e) {
                 ConnectionInfo.removeConnection(httpUriRequest.hashCode());
@@ -560,8 +552,7 @@ public class HTTPClient {
             // e.printStackTrace();
         }
 
-        final SSLSocketFactory sslSF = new SSLSocketFactory(sslContext);
-        sslSF.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+        final SSLSocketFactory sslSF = new SSLSocketFactory(sslContext, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
     	return sslSF;
     }
 
