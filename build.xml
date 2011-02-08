@@ -770,4 +770,8 @@
     </java>
     <chmod file="${privateKeyFile}" perm="600"/>
   </target>
+
+  <target name="deleteData" description="start with a fresh yacy installation">
+    <delete dir="${data}"/>
+  </target>
 </project>
