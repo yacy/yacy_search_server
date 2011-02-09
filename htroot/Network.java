@@ -64,6 +64,7 @@ public class Network {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         prop.put("menu", post == null ? 2 : (post.get("menu", "").equals("embed")) ? 0 : (post.get("menu","").equals("simple")) ? 1 : 2);
+        if (sb.peers.mySeed() != null) prop.put("menu_newpeer_peerhash", sb.peers.mySeed().hash);
         
         prop.setLocalized(!(requestHeader.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml"));
         prop.putHTML("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
