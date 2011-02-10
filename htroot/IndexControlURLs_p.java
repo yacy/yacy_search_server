@@ -68,7 +68,7 @@ public class IndexControlURLs_p {
         }
         Segment segment = sb.indexSegments.segment(segmentName);
         prop.put("segments", i);
-        prop.put("ucount", Integer.toString(segment.urlMetadata().size()));
+        prop.putNum("ucount", segment.urlMetadata().size());
         prop.put("otherHosts", "");
         prop.put("genUrlProfile", 0);
         prop.put("statistics", 1);
