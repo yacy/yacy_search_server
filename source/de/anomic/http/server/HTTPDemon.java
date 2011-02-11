@@ -102,8 +102,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     
     public static final int ERRORCASE_MESSAGE = 4;
     public static final int ERRORCASE_FILE = 5;
-    private static File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
-    private static FileItemFactory diskFileItemFactory = new DiskFileItemFactory(5 * 1024 * 1024, TMPDIR);
+    private static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
+    private static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(5 * 1024 * 1024, TMPDIR);
     
     private static AlternativeDomainNames alternativeResolver = null;
     
@@ -124,8 +124,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public static final String hline = "-------------------------------------------------------------------------------";
     
     public static final ConcurrentMap<String, String> reverseMappingCache = new ConcurrentHashMap<String, String>();
-    private static volatile Switchboard switchboard = null;
-    private static String virtualHost = null;
+    private static volatile Switchboard switchboard;
+    private static String virtualHost;
     
     public static boolean keepAliveSupport = false;
     private static ConcurrentMap<String, Long> YaCyHopAccessRequester = new ConcurrentHashMap<String, Long>();
@@ -166,17 +166,17 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         this.keepAliveRequestCount = 0;
     }
     
-    private static boolean allowProxy(Session session) {
+    private static boolean allowProxy(final Session session) {
         final String proxyClient = switchboard.getConfig("proxyClient", "*");
         return (proxyClient.equals("*")) ? true : match(session.userAddress.getHostAddress(), proxyClient);
     }
     
-    private static boolean allowServer(Session session) {
+    private static boolean allowServer(final Session session) {
         final String serverClient = switchboard.getConfig("serverClient", "*");
         return (serverClient.equals("*")) ? true : match(session.userAddress.getHostAddress(), serverClient);
     }
     
-    private static boolean allowYaCyHop(Session session) {
+    private static boolean allowYaCyHop(final Session session) {
         return switchboard.getConfigBool("YaCyHop", false);
     }
     
@@ -221,9 +221,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     /**
      * This function is used to determine if a persistent connection was requested by the client.
      * @param header the received http-headers
+     * @param prop 
      * @return <code>true</code> if a persistent connection was requested or <code>false</code> otherwise
      */
-    private boolean handlePersistentConnection(final RequestHeader header, Properties prop) {
+    private boolean handlePersistentConnection(final RequestHeader header, final Properties prop) {
         
         if (!keepAliveSupport) {
             prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
@@ -315,45 +316,44 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
     private static long lastAccessDelta(final Map<String, Long> accessTable, final String domain) {
         final Long lastAccess = accessTable.get(domain);
-        if (lastAccess == null) return Long.MAX_VALUE; // never accessed
-        return System.currentTimeMillis() - lastAccess.longValue();
+        return (lastAccess == null) ? Long.MAX_VALUE : System.currentTimeMillis() - lastAccess.longValue();
     }
     
-    private boolean handleProxyAuthentication(final RequestHeader header, Properties prop, Session session) throws IOException {
+    private boolean handleProxyAuthentication(final RequestHeader header, final Properties prop, final Session session) throws IOException {
         // getting the http version that is used by the client
         final String httpVersion = prop.getProperty("HTTP", "HTTP/0.9");            
         
         // reading the authentication settings from switchboard
         if (!this.proxyAccounts_init) {
             this.use_proxyAccounts = switchboard.getConfigBool("use_proxyAccounts", false);
-			this.proxyAccounts_init = true; // is initialised
-		}
+            this.proxyAccounts_init = true; // is initialised
+        }
         
         if (this.use_proxyAccounts) {
             final String auth = header.get(RequestHeader.PROXY_AUTHORIZATION,"xxxxxx");    
-            UserDB.Entry entry=switchboard.userDB.ipAuth(session.userAddress.getHostAddress());
-			if(entry == null){
-				entry=switchboard.userDB.proxyAuth(auth, session.userAddress.getHostAddress());
-			}
-            if(entry != null){
+            UserDB.Entry entry = switchboard.userDB.ipAuth(session.userAddress.getHostAddress());
+            if (entry == null) {
+                entry = switchboard.userDB.proxyAuth(auth, session.userAddress.getHostAddress());
+            }
+            if (entry != null) {
                 final int returncode=entry.surfRight();
-			    if(returncode==UserDB.Entry.PROXY_ALLOK){
-				    return true;
-				}
-                final serverObjects tp=new serverObjects();
-                if(returncode==UserDB.Entry.PROXY_TIMELIMIT_REACHED){
+                if (returncode == UserDB.Entry.PROXY_ALLOK) {
+                    return true;
+                }
+                final serverObjects tp = new serverObjects();
+                if (returncode == UserDB.Entry.PROXY_TIMELIMIT_REACHED) {
                     tp.put("limit", "1");//time per day
                     tp.put("limit_timelimit", entry.getTimeLimit());
                     sendRespondError(prop, session.out, 403, "Internet-Timelimit reached", new File("proxymsg/proxylimits.inc"), tp, null);
-                }else if(returncode==UserDB.Entry.PROXY_NORIGHT){
+                } else if (returncode == UserDB.Entry.PROXY_NORIGHT){
                     tp.put("limit", "0");
                     sendRespondError(prop, session.out, 403, "Proxy use forbidden", new File("proxymsg/proxylimits.inc"), tp, null);
                 }
                 return false;
-			}
+            }
             // ask for authenticate
             session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.CRLF_STRING +
-                                    RequestHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING).getBytes());
+            RequestHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING).getBytes());
             session.out.write((HeaderFramework.CONTENT_LENGTH + ": 0\r\n").getBytes());
             session.out.write("\r\n".getBytes());                   
             session.out.flush();
@@ -363,12 +363,11 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return true;
     }
     
-    public Boolean EMPTY(final String arg, Session session) throws IOException {
-        if (++this.emptyRequestCount > 10) return serverCore.TERMINATE_CONNECTION;
-        return serverCore.RESUME_CONNECTION;
+    public Boolean EMPTY(final String arg, final Session session) throws IOException {
+        return (++this.emptyRequestCount > 10) ? serverCore.TERMINATE_CONNECTION : serverCore.RESUME_CONNECTION;
     }
     
-    public Boolean UNKNOWN(final String requestLine, Session session) throws IOException {
+    public Boolean UNKNOWN(final String requestLine, final Session session) throws IOException {
 
         Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, requestLine, session);
         int pos;
@@ -387,16 +386,16 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return serverCore.TERMINATE_CONNECTION;
     }
 
-    public Boolean GET(final String arg, Session session) {
+    public Boolean GET(final String arg, final Session session) {
         try {
             // parsing the http request line
-            Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
+            final Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header            
             final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
-            final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9)) 
-            			      ? new RequestHeader(reverseMappingCache) 
-                              : readHeader(prop, session);                  
+            final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))
+                    ? new RequestHeader(reverseMappingCache)
+                    : readHeader(prop, session);
             
             // handling transparent proxy support
             handleTransparentProxySupport(header, prop, virtualHost, HTTPDProxyHandler.isTransparentProxy); 
@@ -432,7 +431,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
     }
     
-    private void logUnexpectedError(final Exception e, String address) {
+    private void logUnexpectedError(final Exception e, final String address) {
         if (e instanceof InterruptedException) {
             log.logInfo("Interruption detected");
         } else {
@@ -454,15 +453,15 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }        
     }
 
-    public Boolean HEAD(final String arg, Session session) {
+    public Boolean HEAD(final String arg, final Session session) {
         try {
-            Properties prop = parseRequestLine(HeaderFramework.METHOD_HEAD, arg, session);
+            final Properties prop = parseRequestLine(HeaderFramework.METHOD_HEAD, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header
-            RequestHeader header;
             final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
-            if (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9)) header = new RequestHeader(reverseMappingCache);
-            else  header = readHeader(prop,session);
+            final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))
+                    ? new RequestHeader(reverseMappingCache)
+                    : readHeader(prop,session);
             
             // handle transparent proxy support
             handleTransparentProxySupport(header, prop, virtualHost, HTTPDProxyHandler.isTransparentProxy);
@@ -500,15 +499,15 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
     }
     
-    public Boolean POST(final String arg, Session session) {
+    public Boolean POST(final String arg, final Session session) {
         try {
-            Properties prop = parseRequestLine(HeaderFramework.METHOD_POST, arg, session);
+            final Properties prop = parseRequestLine(HeaderFramework.METHOD_POST, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header
-            RequestHeader header;
             final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
-            if (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))  header = new RequestHeader(reverseMappingCache);
-            else header = readHeader(prop, session);
+            final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))
+                    ? new RequestHeader(reverseMappingCache)
+                    : readHeader(prop, session);
             
             // handle transfer-coding
             final InputStream sessionIn;
@@ -582,16 +581,18 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST,(HTTPDemon.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
     }
     
-    public Boolean CONNECT(String arg, Session session) throws IOException {
+    public Boolean CONNECT(String arg, final Session session) throws IOException {
         // establish a ssh-tunneled http connection
         // this is to support https   
         
         // parse HTTP version
         int pos = arg.indexOf(' ');
-        String httpVersion = "HTTP/1.0";
+        final String httpVersion;
         if (pos >= 0) {
             httpVersion = arg.substring(pos + 1);
             arg = arg.substring(0, pos);
+        } else {
+            httpVersion = "HTTP/1.0";
         }
         Properties prop = new Properties();
         prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, httpVersion);
@@ -641,10 +642,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return serverCore.TERMINATE_CONNECTION;
     }
     
-    private final Properties parseRequestLine(final String cmd, final String s, Session session) {
+    private final Properties parseRequestLine(final String cmd, final String s, final Session session) {
         
         // parsing the header
-        Properties p = parseRequestLine(cmd, s, virtualHost);
+        final Properties p = parseRequestLine(cmd, s, virtualHost);
         
         // track the request
         final String path = p.getProperty(HeaderFramework.CONNECTION_PROP_URL);
@@ -788,7 +789,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // replace all other 
         final CharArrayWriter b = new CharArrayWriter(s.length());
         int end;
-        for (int i=0; i<s.length(); i++) {
+        for (int i = 0, len = s.length(); i < len; i++) {
             if (s.charAt(i) == '&' && (end = s.indexOf(';', i + 1)) > i) {
                 if (s.charAt(i + 1) == '#') {                           // &#1234; symbols
                     b.write(Integer.parseInt(s.substring(i + 2, end)));
@@ -818,7 +819,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, byte[]> parseMultipart(final RequestHeader header, final serverObjects args, final InputStream in) throws IOException {
-        //ByteArrayInputStream in = new ByteArrayInputStream(FileUtils.read(inx));
+
         final InputStream body = prepareBody(header, in);
         
         RequestContext request = new yacyContextRequest(header, body);
@@ -834,20 +835,18 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
 
         // parse data in memory
-        FileUpload upload = new FileUpload(diskFileItemFactory);
-        List<FileItem> items;
-        //long time = System.currentTimeMillis();
+        final FileUpload upload = new FileUpload(DISK_FILE_ITEM_FACTORY);
+        final List<FileItem> items;
+
         try {
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
-            //Log.logException(e);
             throw new IOException("FileUploadException " + e.getMessage());
         }
-        //System.out.println("**** FileUploadBase.parseRequest time = " + (System.currentTimeMillis() - time));
-        
+
         // format information for further usage
-        final HashMap<String, byte[]> files = new HashMap<String, byte[]>();
-        for (FileItem item : items) {
+        final Map<String, byte[]> files = new HashMap<String, byte[]>();
+        for (final FileItem item : items) {
             if (item.isFormField()) {
                 // simple text
                 if (item.getContentType() == null || !item.getContentType().contains("charset")) {
@@ -915,7 +914,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
          * @param header
          * @param in
          */
-        public yacyContextRequest(Map<String, String> requestHeader, InputStream in) {
+        public yacyContextRequest(final Map<String, String> requestHeader, final InputStream in) {
             super(null, requestHeader);
             this.inStream = in;
         }
@@ -932,38 +931,25 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
     }
 
-	/*
-	static int nextPos = -1;        
-    private static byte[] readLine(final int start, final byte[] array) {
-        // read a string from an array; line ending is always CRLF
-        // but we are also fuzzy with that: may also be only CR or LF
-        // if no remaining CR, CRLF or LF can be found, return null
-        if (start > array.length) return null;
-        int pos = indexOf(start, array, serverCore.CRLF); nextPos = pos + 2;
-        if (pos < 0) {pos = indexOf(start, array, new byte[] {serverCore.CR}); nextPos = pos + 1;}
-        if (pos < 0) {pos = indexOf(start, array, new byte[] {serverCore.LF}); nextPos = pos + 1;}
-        if (pos < 0) {nextPos = start; return null;}
-        final byte[] result = new byte[pos - start];
-        java.lang.System.arraycopy(array, start, result, 0, pos - start);
-        return result;
-    }
-    */
-	
     public static int indexOf(final int start, final byte[] array, final byte[] pattern) {
         // return a position of a pattern in an array
         if (start > array.length - pattern.length) return -1;
         if (pattern.length == 0) return start;
-        for (int pos = start; pos <= array.length - pattern.length; pos++)
-            if ((array[pos] == pattern[0]) && (equals(array, pos, pattern, 0, pattern.length)))
+        for (int pos = start, lens = array.length - pattern.length; pos <= lens; pos++) {
+            if ((array[pos] == pattern[0]) && (equals(array, pos, pattern, 0, pattern.length))) {
                 return pos;
+            }
+        }
         return -1;
     }
     
     public static boolean equals(final byte[] a, final int aoff, final byte[] b, final int boff, final int len) {
-        //System.out.println("equals: a = " + new String(a) + ", aoff = " + aoff + ", b = " + new String(b) + ", boff = " + boff + ", length = " + len);
         if ((aoff + len > a.length) || (boff + len > b.length)) return false;
-        for (int i = 0; i < len; i++) if (a[aoff + i] != b[boff + i]) return false;
-        //System.out.println("TRUE!");
+        for (int i = 0; i < len; i++) {
+            if (a[aoff + i] != b[boff + i]) {
+                return false;
+            }
+        }
         return true;
     }
     
@@ -979,7 +965,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         respond.write(body);
         respond.flush();        
     }
-    
     
     public static final void sendRespondError(
             final Properties conProp,
@@ -1059,11 +1044,13 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final String args = conProp.getProperty(HeaderFramework.CONNECTION_PROP_ARGS);
             final String method = conProp.getProperty(HeaderFramework.CONNECTION_PROP_METHOD);
             
-            int port = 80;
+            final int port;
             final int pos = host.indexOf(':');        
             if (pos != -1) {
                 port = Integer.parseInt(host.substring(pos + 1));
                 host = host.substring(0, pos);
+            } else {
+                port = 80;
             }
             
             String urlString;
@@ -1102,7 +1089,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile.toString());
                     if ((detailedErrorMsgValues != null) && !detailedErrorMsgValues.isEmpty()) {
                         // rewriting the value-names and add the proper name prefix:
-                        for (Entry<String, String> entry: detailedErrorMsgValues.entrySet()) {
+                        for (final Entry<String, String> entry: detailedErrorMsgValues.entrySet()) {
                             tp.put("errorMessageType_" + entry.getKey(), entry.getValue());
                         }                        
                     }                    
@@ -1141,8 +1128,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final byte[] result = o.toByteArray();
             o.close(); o = null;
 
-            if(header == null)
+            if(header == null) {
                 header = new ResponseHeader();
+            }
             header.put(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS, Integer.toString(httpStatusCode));
             header.put(HeaderFramework.DATE, systemDate);
             header.put(HeaderFramework.CONTENT_TYPE, "text/html");
@@ -1184,23 +1172,23 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
 
         if (!reqMethod.equals(HeaderFramework.METHOD_HEAD)){
-            if (!conProp.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close").equals("close")) {
-                if (transferEnc == null && contentLength < 0) {
-                    throw new IllegalArgumentException("Message MUST contain a Content-Length or a non-identity transfer-coding header field.");
-                }
+            if (!conProp.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close").equals("close") &&
+                    transferEnc == null && contentLength < 0) {
+                throw new IllegalArgumentException("Message MUST contain a Content-Length or a non-identity transfer-coding header field.");
             }
             if (transferEnc != null && contentLength >= 0) {
                 throw new IllegalArgumentException("Messages MUST NOT include both a Content-Length header field and a non-identity transfer-coding.");
             }            
         }
         
-        if(headers==null) headers = new ResponseHeader();
+        if (headers == null) {
+            headers = new ResponseHeader();
+        }
         final Date now = new Date(System.currentTimeMillis());
         
         headers.put(HeaderFramework.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(HeaderFramework.DATE, HeaderFramework.formatRFC1123(now));
         if (moddate.after(now)) {
-            //System.out.println("*** DEBUG: correcting moddate = " + moddate.toString() + " to now = " + now.toString());
             moddate = now;
         }
         headers.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(moddate));
@@ -1286,30 +1274,19 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 //responseHeader.put(HeaderFramework.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(HeaderFramework.CONNECTION_PROP_PREV_REQUESTLINE));
                   
                 //read custom headers
-                /*
-                if (requestProperties != null)     
-                {
-                	httpHeader outgoingHeader=requestProperties.getOutgoingHeader();
-                	if (outgoingHeader!=null)
-                	{*/
-                	final Iterator<ResponseHeader.Entry> it = responseHeader.getAdditionalHeaderProperties().iterator();
-                	while(it.hasNext()) {
-                		//Append user properties to the main String
-                		//TODO: Should we check for user properites. What if they intersect properties that are already in header?
-                	    final ResponseHeader.Entry e = it.next();
-                	    header.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");   
-                	}
-                	
-                	/*
-                	}
-                }*/
-                
+                final Iterator<ResponseHeader.Entry> it = responseHeader.getAdditionalHeaderProperties().iterator();
+                while(it.hasNext()) {
+                        //Append user properties to the main String
+                        //TODO: Should we check for user properites. What if they intersect properties that are already in header?
+                    final ResponseHeader.Entry e = it.next();
+                    header.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");
+                }
+
                 // write header
                 final Iterator<String> i = responseHeader.keySet().iterator();
                 String key;
                 char tag;
                 int count;
-                //System.out.println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
                 while (i.hasNext()) {
                     key = i.next();
                     tag = key.charAt(0);
@@ -1318,7 +1295,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                         for (int j = 0; j < count; j++) {
                             header.append(key).append(": ").append(responseHeader.getSingle(key, j)).append("\r\n");  
                         }
-                        //System.out.println("#" + key + ": " + value);
                     }            
                 }
                 
@@ -1386,10 +1362,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     // check if the destination port is equal to the port yacy is listening to
                     dstPort.equals(Integer.valueOf(serverCore.getPortNr(switchboard.getConfig("port", "8090")))) &&
                     (
-                            // check if the destination host is our local IP address
-                            Domains.isThisHostIP(dstHost) ||
-                            // check if the destination host is our seed ip address
-                            isThisSeedIP(dstHost)
+                        // check if the destination host is our local IP address
+                        Domains.isThisHostIP(dstHost) ||
+                        // check if the destination host is our seed ip address
+                        isThisSeedIP(dstHost)
                     )
             ) {
                  return true;                
@@ -1401,7 +1377,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     /**
      * @param alternativeResolver the alternativeResolver to set
      */
-    public static void setAlternativeResolver(AlternativeDomainNames alternativeResolver) {
+    public static void setAlternativeResolver(final AlternativeDomainNames alternativeResolver) {
         HTTPDemon.alternativeResolver = alternativeResolver;
     }
 
@@ -1462,7 +1438,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         prop.setProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE, cmd + " " + args);
         
         // this parses a whole URL
-        if (args.length() == 0) {
+        if (args.isEmpty()) {
             prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, virtualHost);
             prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, "/");
             prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
@@ -1472,7 +1448,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         
         // store the version propery "HTTP" and cut the query at both ends
         int sep = args.lastIndexOf(' ');
-        if ((sep >= 0)&&(args.substring(sep + 1).toLowerCase().startsWith("http/"))) {
+        if ((sep >= 0) && (args.substring(sep + 1).toLowerCase().startsWith("http/"))) {
             // HTTP version is given
             prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
             args = args.substring(0, sep).trim(); // cut off HTTP version mark
@@ -1496,19 +1472,22 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // properties of the query are stored with the prefix "&"
         // additionally, the values URL and ARGC are computed
         
-        String argsString = "";
+        final String argsString;
         sep = args.indexOf('?');
         if (sep >= 0) {
             // there are values attached to the query string
             argsString = args.substring(sep + 1); // cut head from tail of query
             args = args.substring(0, sep);
+        } else {
+            argsString = "";
         }
         prop.setProperty(HeaderFramework.CONNECTION_PROP_URL, args); // store URL
-        //System.out.println("HTTPD: ARGS=" + argsString);
-        if (argsString.length() != 0) prop.setProperty(HeaderFramework.CONNECTION_PROP_ARGS, argsString); // store arguments in original form
+        if (!argsString.isEmpty()) {
+            prop.setProperty(HeaderFramework.CONNECTION_PROP_ARGS, argsString);
+        } // store arguments in original form
         
         // finally find host string
-        String path;
+        final String path;
         if (args.toUpperCase().startsWith("HTTP://")) {
             // a host was given. extract it and set path
             args = args.substring(7);
@@ -1547,7 +1526,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, path);
 
         // find out file extension (we already stripped ?-parameters from args)
-        String ext = "";  // default when no file extension
+        final String ext;
         sep = path.lastIndexOf('.');
         if (sep >= 0) {
             final int ancpos = path.indexOf("#", sep + 1);
@@ -1558,6 +1537,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 // ex: /foo/bar.php => php
                 ext = path.substring(sep + 1).toLowerCase();
             }
+        } else {
+            ext = ""; // default when no file extension
         }
         prop.setProperty(HeaderFramework.CONNECTION_PROP_EXT, ext);
         

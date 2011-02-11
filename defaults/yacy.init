@@ -329,7 +329,7 @@ remoteProxyPort=4239
 remoteProxyUser=
 remoteProxyPwd=
 
-remoteProxyNoProxy=10\..*,127.*,172.(1[6-9]|2[0-9]|3[0-1])\..*,169.254.*,192.168.*,localhost,0:0:0:0:0:0:0:1
+remoteProxyNoProxy=10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,localhost,0:0:0:0:0:0:0:1
 
 # the proxy may filter the content of transferred web pages
 # the bluelist removes specific keywords from web pages
@@ -346,9 +346,9 @@ proxyBlueList=yacy.blue
 
 # proxyClient: client-ip's that may connect the proxy for proxy service
 # if several ip's are allowed then they must be separated by a ','
-# any ip may contain the wildcard-sign '*'
+# regular expressions may be used
 #proxyClient=192.168.0.4
-proxyClient=localhost,127.0.0.1,192.168.*,10\..*,0:0:0:0:0:0:0:1
+proxyClient=localhost,127\.0\.0\.1,192\.168\..*,10\..*,0:0:0:0:0:0:0:1
 
 # YaCyHop: allow public usage of proxy for yacy-protocol
 # this enables usage of the internal http proxy for everyone,
