@@ -40,6 +40,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.document.geolocalization.Location;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -56,7 +57,6 @@ import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.DidYouMean;
-import de.anomic.data.LibraryProvider;
 import de.anomic.search.AccessTracker;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.QueryParams;
@@ -520,7 +520,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader);
+            final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader);
             try {Thread.sleep(global ? 100 : 10);} catch (InterruptedException e1) {} // wait a little time to get first results in the search
             
             if (offset == 0) {

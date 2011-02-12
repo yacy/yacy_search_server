@@ -34,10 +34,10 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
-import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.SnippetExtractor;
+import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -426,7 +426,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
     
     private static boolean containsAllHashes(final String sentence, final HandleSet queryhashes) {
-        final SortedMap<byte[], Integer> m = Condenser.hashSentence(sentence, null);
+        final SortedMap<byte[], Integer> m = WordTokenizer.hashSentence(sentence, null);
         for (final byte[] b: queryhashes) {
             if (!(m.containsKey(b))) return false;
         }

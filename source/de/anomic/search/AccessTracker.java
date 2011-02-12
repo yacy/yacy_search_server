@@ -31,8 +31,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.data.LibraryProvider;
 
 public class AccessTracker {
 

@@ -89,6 +89,7 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.content.DCEntry;
@@ -129,10 +130,9 @@ import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.CrawlProfile.CacheStrategy;
-import de.anomic.crawler.retrieval.EventOrigin;
+import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.data.LibraryProvider;
 import de.anomic.data.WorkTables;
 import de.anomic.data.URLLicense;
 import de.anomic.data.BlogBoard;
@@ -200,7 +200,6 @@ public final class Switchboard extends serverSwitch {
     public  LoaderDispatcher               loader;
     public  CrawlSwitchboard               crawler;
     public  CrawlQueues                    crawlQueues;
-    public  ResultURLs                     crawlResults;
     public  CrawlStacker                   crawlStacker;
     public  MessageBoard                   messageDB;
     public  WikiBoard                      wikiDB;
@@ -254,6 +253,9 @@ public final class Switchboard extends serverSwitch {
         
         // set loglevel and log
         setLog(new Log("PLASMA"));
+        
+        // set default peer name
+        yacySeed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
         
         // UPnP port mapping
         if (getConfigBool(SwitchboardConstants.UPNP_ENABLED, false))
@@ -355,10 +357,6 @@ public final class Switchboard extends serverSwitch {
                 networkName,
                 log,
                 this.queuesRoot);
-        
-        
-        // init crawl results monitor cache
-        crawlResults = new ResultURLs(100);
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
@@ -839,7 +837,7 @@ public final class Switchboard extends serverSwitch {
             this.queuesRoot.mkdirs();
 
             // clear statistic data
-            this.crawlResults.clearStacks();
+            ResultURLs.clearStacks();
             
             // remove heuristics
             setConfig("heuristic.site", false);
@@ -1053,7 +1051,7 @@ public final class Switchboard extends serverSwitch {
     
     public void urlRemove(final Segment segment, final byte[] hash) {
         segment.urlMetadata().remove(hash);
-        crawlResults.remove(new String(hash));
+        ResultURLs.remove(new String(hash));
         crawlQueues.urlRemove(hash);
     }
     
@@ -1425,7 +1423,7 @@ public final class Switchboard extends serverSwitch {
         if ((crawlQueues.delegatedURL.stackSize() > 1000)) c++;
         if ((crawlQueues.errorURL.stackSize() > 1000)) c++;
         for (EventOrigin origin: EventOrigin.values()) {
-            if (crawlResults.getStackSize(origin) > 1000) c++;
+            if (ResultURLs.getStackSize(origin) > 1000) c++;
         }
         return c;
     }
@@ -1448,11 +1446,11 @@ public final class Switchboard extends serverSwitch {
             // refresh recrawl dates
             try{
                 CrawlProfile selentry;
-                for (byte[] handle: crawler.profilesActiveCrawls.keySet()) {
-                    selentry = new CrawlProfile(crawler.profilesActiveCrawls.get(handle));
+                for (byte[] handle: crawler.getActive()) {
+                    selentry = crawler.getActive(handle);
                     assert selentry.handle() != null : "profile.name = " + selentry.name();
                     if (selentry.handle() == null) {
-                        crawler.profilesActiveCrawls.remove(handle);
+                        crawler.removeActive(handle);
                         continue;
                     }
                     boolean insert = false;
@@ -1487,7 +1485,7 @@ public final class Switchboard extends serverSwitch {
                                 Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
                         insert = true;
                     }
-                    if (insert) crawler.profilesActiveCrawls.put(selentry.handle().getBytes(), selentry);
+                    if (insert) crawler.putActive(selentry.handle().getBytes(), selentry);
                 }
             } catch (final Exception e) {
                 Log.logException(e);
@@ -1547,9 +1545,9 @@ public final class Switchboard extends serverSwitch {
             // clean up loadedURL stack
             for (EventOrigin origin: EventOrigin.values()) {
                 checkInterruption();
-                if (crawlResults.getStackSize(origin) > 1000) {
-                    if (this.log.isFine()) log.logFine("Cleaning Loaded-URLs report stack, " + crawlResults.getStackSize(origin) + " entries on stack " + origin.getCode());
-                    crawlResults.clearStack(origin);
+                if (ResultURLs.getStackSize(origin) > 1000) {
+                    if (this.log.isFine()) log.logFine("Cleaning Loaded-URLs report stack, " + ResultURLs.getStackSize(origin) + " entries on stack " + origin.getCode());
+                    ResultURLs.clearStack(origin);
                 }
             }
             
@@ -1935,7 +1933,7 @@ public final class Switchboard extends serverSwitch {
         }
         
         // update url result list statistics
-        crawlResults.stack(
+        ResultURLs.stack(
                 newEntry,                            // loaded url db entry
                 queueEntry.initiator(),              // initiator peer hash
                 this.peers.mySeed().hash.getBytes(), // executor peer hash
@@ -2003,8 +2001,8 @@ public final class Switchboard extends serverSwitch {
         if (searchEvent != null) searchEvent.addHeuristic(url.hash(), heuristicName, true);
         if (indexSegments.segment(process).urlMetadata.exists(url.hash())) return; // don't do double-work
         final Request request = loader.request(url, true, true);
-        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
-        String acceptedError = this.crawlStacker.checkAcceptance(url, mp == null ? null : new CrawlProfile(mp), 0);
+        final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
+        String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
         if (acceptedError != null) {
             log.logWarning("addToIndex: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);
             return;

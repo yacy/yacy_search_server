@@ -33,7 +33,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -97,8 +96,8 @@ public class IndexCreateWWWLocalQueue_p {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
                             // XXX: what to do about the annoying LOST PROFILE messages in the log?
                             CrawlProfile entry;
-                            for (byte[] handle: sb.crawler.profilesActiveCrawls.keySet()) {
-                                entry = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(handle));
+                            for (byte[] handle: sb.crawler.getActive()) {
+                                entry = sb.crawler.getActive(handle);
                                 final String name = entry.name();
                                 if (name.equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
                                         name.equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
@@ -108,7 +107,7 @@ public class IndexCreateWWWLocalQueue_p {
                                         name.equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
                                         name.equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE))
                                     continue;
-                                if (compiledPattern.matcher(name).find()) sb.crawler.profilesActiveCrawls.remove(entry.handle().getBytes());
+                                if (compiledPattern.matcher(name).find()) sb.crawler.removeActive(entry.handle().getBytes());
                             }
                         } else {
                             // iterating through the list of URLs
@@ -170,8 +169,7 @@ public class IndexCreateWWWLocalQueue_p {
                 if ((urle != null)&&(urle.url()!=null)) {
                     initiator = sb.peers.getConnected(urle.initiator() == null ? "" : new String(urle.initiator()));
                     profileHandle = urle.profileHandle();
-                    final Map<String, String> mp = profileHandle == null ? null : sb.crawler.profilesActiveCrawls.get(profileHandle.getBytes());
-                    profileEntry = mp == null ? null : new CrawlProfile(mp);
+                    profileEntry = profileHandle == null ? null : sb.crawler.getActive(profileHandle.getBytes());
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");
                     prop.putHTML("crawler-queue_list_"+showNum+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()) );
                     prop.put("crawler-queue_list_"+showNum+"_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));

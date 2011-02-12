@@ -203,7 +203,7 @@ public class CrawlQueues {
             // move some tasks to the core crawl job so we have something to do
             final int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
-                noticeURL.shift(NoticedURL.StackType.LIMIT, NoticedURL.StackType.CORE, sb.crawler.profilesActiveCrawls);
+                noticeURL.shift(NoticedURL.StackType.LIMIT, NoticedURL.StackType.CORE, sb.crawler);
             }
             log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
                     ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "") +
@@ -233,20 +233,20 @@ public class CrawlQueues {
             try {
                 if (noticeURL.stackSize(NoticedURL.StackType.NOLOAD) > 0) {
                     // get one entry that will not be loaded, just indexed
-                    urlEntry = noticeURL.pop(NoticedURL.StackType.NOLOAD, true, sb.crawler.profilesActiveCrawls);
+                    urlEntry = noticeURL.pop(NoticedURL.StackType.NOLOAD, true, sb.crawler);
                     if (urlEntry == null) continue;
                     final String profileHandle = urlEntry.profileHandle();
                     if (profileHandle == null) {
                         log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
                     }
-                    Map<String, String> map = sb.crawler.profilesActiveCrawls.get(profileHandle);
-                    if (map == null) {
+                    CrawlProfile profile = sb.crawler.getActive(profileHandle.getBytes());
+                    if (profile == null) {
                         log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
                     }
                     try {
-                        sb.indexingDocumentProcessor.enQueue(new indexingQueueEntry(Segments.Process.LOCALCRAWLING, new Response(urlEntry, new CrawlProfile(map)), null, null));
+                        sb.indexingDocumentProcessor.enQueue(new indexingQueueEntry(Segments.Process.LOCALCRAWLING, new Response(urlEntry, profile), null, null));
                         Log.logInfo("CrawlQueues", "placed NOLOAD URL on indexing queue: " + urlEntry.url().toNormalform(true, false));
                     } catch (InterruptedException e) {
                         Log.logException(e);
@@ -254,7 +254,7 @@ public class CrawlQueues {
                     return true;
                 }
                 
-                urlEntry = noticeURL.pop(NoticedURL.StackType.CORE, true, sb.crawler.profilesActiveCrawls);
+                urlEntry = noticeURL.pop(NoticedURL.StackType.CORE, true, sb.crawler);
                 if (urlEntry == null) continue;
                 final String profileHandle = urlEntry.profileHandle();
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
@@ -282,14 +282,13 @@ public class CrawlQueues {
      * @return
      */
     private void load(Request urlEntry, final String stats, final String profileHandle) {
-        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(profileHandle.getBytes());
-        if (mp != null) {
+        final CrawlProfile profile = sb.crawler.getActive(profileHandle.getBytes());
+        if (profile != null) {
 
             // check if the protocol is supported
             final DigestURI url = urlEntry.url();
             final String urlProtocol = url.getProtocol();
             if (sb.loader.isSupportedProtocol(urlProtocol)) {
-                CrawlProfile profile = new CrawlProfile(mp);
                 if (this.log.isFine())
                     log.logFine(stats + ": URL=" + urlEntry.url()
                             + ", initiator=" + ((urlEntry.initiator() == null) ? "" : new String(urlEntry.initiator()))
@@ -520,7 +519,7 @@ public class CrawlQueues {
         final String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(NoticedURL.StackType.CORE) + ", " + noticeURL.stackSize(NoticedURL.StackType.LIMIT) + ", " + noticeURL.stackSize(NoticedURL.StackType.OVERHANG) + ", "
                         + noticeURL.stackSize(NoticedURL.StackType.REMOTE) + "]";
         try {
-            final Request urlEntry = noticeURL.pop(NoticedURL.StackType.REMOTE, true, sb.crawler.profilesActiveCrawls);
+            final Request urlEntry = noticeURL.pop(NoticedURL.StackType.REMOTE, true, sb.crawler);
             final String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +
@@ -533,7 +532,6 @@ public class CrawlQueues {
             return true;
         }
     }
-    
     
     public int workerSize() {
         return workers.size();
@@ -590,8 +588,7 @@ public class CrawlQueues {
                     try {
                         request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-                        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
-                        CrawlProfile e = mp == null ? null : new CrawlProfile(mp);
+                        final CrawlProfile e = sb.crawler.getActive(request.profileHandle().getBytes());
                         Response response = sb.loader.load(request, e == null ? CrawlProfile.CacheStrategy.IFEXIST : e.cacheStrategy(), maxFileSize, true);
                         if (response == null) {
                             request.setStatus("error", WorkflowJob.STATUS_FINISHED);

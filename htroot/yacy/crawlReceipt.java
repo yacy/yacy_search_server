@@ -33,7 +33,8 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.crawler.retrieval.EventOrigin;
+import de.anomic.crawler.ResultURLs;
+import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -141,7 +142,7 @@ public final class crawlReceipt {
         if ("fill".equals(result)) try {
             // put new entry into database
             sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
-            sb.crawlResults.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
+            ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + new String(entry.hash()) + ":" + metadata.url().toNormalform(false, true));
 

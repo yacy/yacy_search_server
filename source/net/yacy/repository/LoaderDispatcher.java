@@ -185,8 +185,7 @@ public final class LoaderDispatcher {
         final String host = url.getHost();
         
         // check if we have the page in the cache
-        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
-        CrawlProfile crawlProfile = mp == null ? null : new CrawlProfile(mp);
+        final CrawlProfile crawlProfile = sb.crawler.getActive(request.profileHandle().getBytes());
         if (crawlProfile != null && cacheStrategy != CrawlProfile.CacheStrategy.NOCACHE) {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry

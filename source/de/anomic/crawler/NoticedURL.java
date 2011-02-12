@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -228,19 +227,19 @@ public class NoticedURL {
         }
     }
     
-    public Request pop(final StackType stackType, final boolean delay, Map<byte[], Map<String, String>> profiles) throws IOException {
+    public Request pop(final StackType stackType, final boolean delay, CrawlSwitchboard cs) throws IOException {
         switch (stackType) {
-            case CORE:     return pop(coreStack, delay, profiles);
-            case LIMIT:    return pop(limitStack, delay, profiles);
-            case REMOTE:   return pop(remoteStack, delay, profiles);
-            case NOLOAD:   return pop(noloadStack, false, profiles);
+            case CORE:     return pop(coreStack, delay, cs);
+            case LIMIT:    return pop(limitStack, delay, cs);
+            case REMOTE:   return pop(remoteStack, delay, cs);
+            case NOLOAD:   return pop(noloadStack, false, cs);
             default: return null;
         }
     }
 
-    public void shift(final StackType fromStack, final StackType toStack, Map<byte[], Map<String, String>> profiles) {
+    public void shift(final StackType fromStack, final StackType toStack, CrawlSwitchboard cs) {
         try {
-            final Request entry = pop(fromStack, false, profiles);
+            final Request entry = pop(fromStack, false, cs);
             if (entry != null) push(toStack, entry);
         } catch (final IOException e) {
             return;
@@ -258,14 +257,14 @@ public class NoticedURL {
             }
     }
     
-    private Request pop(final Balancer balancer, final boolean delay, Map<byte[], Map<String, String>> profiles) throws IOException {
+    private Request pop(final Balancer balancer, final boolean delay, CrawlSwitchboard cs) throws IOException {
         // this is a filo - pop
         int s;
         Request entry;
         int errors = 0;
         synchronized (balancer) {
             while ((s = balancer.size()) > 0) {
-                entry = balancer.pop(delay, profiles);
+                entry = balancer.pop(delay, cs);
                 if (entry == null) {
                     if (s > balancer.size()) continue;
                     errors++;

@@ -22,7 +22,6 @@
 
 package de.anomic.crawler;
 
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -59,9 +58,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String XPSTOPW          = "xpstopw";
     public static final String CACHE_STRAGEGY   = "cacheStrategy";
     
-    private Map<String, DomProfile> doms;
     private Pattern mustmatch = null, mustnotmatch = null;
-    
     
     public CrawlProfile(
                  final String name,
@@ -100,13 +97,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(XDSTOPW,          xdstopw); // exclude dynamic stop-word
         put(XPSTOPW,          xpstopw); // exclude parent stop-words
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
-        doms = new ConcurrentHashMap<String, DomProfile>();
     }
     
     public CrawlProfile(Map<String, String> ext) {
         super(ext == null ? 1 : ext.size());
         if (ext != null) this.putAll(ext);
-        doms = new ConcurrentHashMap<String, DomProfile>();
     }
     
     public void put(String key, boolean value) {
@@ -240,63 +235,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         final String r = get(XPSTOPW);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
-    }
-    public void domInc(final String domain, final String referrer, final int depth) {
-        final DomProfile dp = doms.get(domain);
-        if (dp == null) {
-            // new domain
-            doms.put(domain, new DomProfile(referrer, depth));
-        } else {
-            // increase counter
-            dp.inc();
-        }
-    }
-    public boolean grantedDomCount(final String domain) {
-        final int max = domMaxPages();
-        if (max == Integer.MAX_VALUE) return true;
-        final DomProfile dp = doms.get(domain);
-        if (dp == null) {
-            return 0 < max;
-        }
-        return dp.count <= max;
-    }
-    public int domSize() {
-        return doms.size();
-    }
-
-    public String domName(final boolean attr, final int index){
-        final Iterator<Map.Entry<String, DomProfile>> domnamesi = doms.entrySet().iterator();
-        String domname="";
-        Map.Entry<String, DomProfile> ey;
-        DomProfile dp;
-        int i = 0;
-        while ((domnamesi.hasNext()) && (i < index)) {
-            ey = domnamesi.next();
-            i++;
-        }
-        if (domnamesi.hasNext()) {
-            ey = domnamesi.next();
-            dp = ey.getValue();
-            domname = ey.getKey() + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
-        }
-        return domname;
-    }
-    
-    public final static class DomProfile {
-        
-        public String referrer;
-        public int depth, count;
-        
-        public DomProfile(final String ref, final int d) {
-            this.referrer = ref;
-            this.depth = d;
-            this.count = 1;
-        }
-        
-        public void inc() {
-            this.count++;
-        }
-        
     }
     
     public static enum CacheStrategy {

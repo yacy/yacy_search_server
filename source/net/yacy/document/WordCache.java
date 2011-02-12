@@ -1,30 +1,24 @@
-// DidYouMeanLibrary.java
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 01.10.2009 on http://yacy.net
-//
-// This is a part of YaCy
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// LICENSE
-// 
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/**
+ *  WordCache
+ *  Copyright 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  first published 01.10.2009 on http://yacy.net
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *  
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-package de.anomic.data;
+package net.yacy.document;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -49,7 +43,7 @@ import net.yacy.kelondro.logging.Log;
  * provide a completion library for the did-you-mean class
  *
  */
-public class DidYouMeanLibrary {
+public class WordCache {
     
     // common word cache
     private static final int commonWordsMaxSize = 100000; // maximum size of common word cache
@@ -68,7 +62,7 @@ public class DidYouMeanLibrary {
      * Comment lines may be given and are encoded as line starting with '#'
      * @param dictionaryPath path to a directory with library files
      */
-    public DidYouMeanLibrary(final File dictionaryPath) {
+    public WordCache(final File dictionaryPath) {
         this.dictionaryPath = dictionaryPath;
         reload();
     }

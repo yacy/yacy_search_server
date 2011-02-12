@@ -33,8 +33,10 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
@@ -48,6 +50,7 @@ import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.FilterEngine;
 
+import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.retrieval.FTPLoader;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
@@ -70,6 +73,25 @@ public final class CrawlStacker {
     private final boolean           acceptLocalURLs, acceptGlobalURLs;
     private final FilterEngine      domainList;
 
+    public final static class DomProfile {
+        
+        public String referrer;
+        public int depth, count;
+        
+        public DomProfile(final String ref, final int d) {
+            this.referrer = ref;
+            this.depth = d;
+            this.count = 1;
+        }
+        
+        public void inc() {
+            this.count++;
+        }
+        
+    }
+    
+    private Map<String, DomProfile> doms;
+    
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
     public CrawlStacker(
@@ -92,10 +114,38 @@ public final class CrawlStacker {
 
         this.fastQueue = new WorkflowProcessor<Request>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
         this.slowQueue = new WorkflowProcessor<Request>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
-
+        this.doms = new ConcurrentHashMap<String, DomProfile>();
         this.log.logInfo("STACKCRAWL thread initialized.");
     }
 
+    private void domInc(final String domain, final String referrer, final int depth) {
+        final DomProfile dp = doms.get(domain);
+        if (dp == null) {
+            // new domain
+            doms.put(domain, new DomProfile(referrer, depth));
+        } else {
+            // increase counter
+            dp.inc();
+        }
+    }
+    public String domName(final boolean attr, final int index){
+        final Iterator<Map.Entry<String, DomProfile>> domnamesi = doms.entrySet().iterator();
+        String domname="";
+        Map.Entry<String, DomProfile> ey;
+        DomProfile dp;
+        int i = 0;
+        while ((domnamesi.hasNext()) && (i < index)) {
+            ey = domnamesi.next();
+            i++;
+        }
+        if (domnamesi.hasNext()) {
+            ey = domnamesi.next();
+            dp = ey.getValue();
+            domname = ey.getKey() + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
+        }
+        return domname;
+    }
+    
     public int size() {
         return this.fastQueue.queueSize() + this.slowQueue.queueSize();
     }
@@ -108,6 +158,7 @@ public final class CrawlStacker {
     public void clear() {
         this.fastQueue.clear();
         this.slowQueue.clear();
+        this.doms.clear();
     }
 
     public void announceClose() {
@@ -268,8 +319,7 @@ public final class CrawlStacker {
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
        
-        final Map<String, String> mp = crawler.profilesActiveCrawls.get(entry.profileHandle().getBytes());
-        CrawlProfile profile = mp == null ? null : new CrawlProfile(mp);
+        final CrawlProfile profile = crawler.getActive(entry.profileHandle().getBytes());
         String error;
         if (profile == null) {
             error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
@@ -280,13 +330,6 @@ public final class CrawlStacker {
         error = checkAcceptance(entry.url(), profile, entry.depth());
         if (error != null) return error;
         
-        final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : nextQueue.getURL(entry.referrerhash());
-
-        // add domain to profile domain list
-        if (profile.domMaxPages() != Integer.MAX_VALUE) {
-            profile.domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
-        }
-
         // store information
         final boolean local = Base64Order.enhancedCoder.equal(entry.initiator(), peers.mySeed().hash.getBytes());
         final boolean proxy = (entry.initiator() == null || entry.initiator().length == 0 || new String(entry.initiator()).equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
@@ -322,6 +365,13 @@ public final class CrawlStacker {
             return null;
         }
         
+        final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : nextQueue.getURL(entry.referrerhash());
+
+        // add domain to profile domain list
+        if (profile.domMaxPages() != Integer.MAX_VALUE) {
+            domInc(entry.url().getHost(), (referrerURL == null) ? null : referrerURL.getHost().toLowerCase(), entry.depth());
+        }
+
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
@@ -399,12 +449,6 @@ public final class CrawlStacker {
             return "post url not allowed";
         }
 
-        // deny urls that exceed allowed number of occurrences
-        if (!(profile.grantedDomCount(url.getHost()))) {
-            if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' appeared too often, a maximum of " + profile.domMaxPages() + " is allowed.");
-            return "domain counter exceeded";
-        }
-
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(url.hash()); // returns the name of the queue if entry exists
         URIMetadataRow oldEntry = indexSegment.urlMetadata().load(url.hash(), null, 0);
@@ -437,6 +481,21 @@ public final class CrawlStacker {
                         return "double in: " + dbocc;
                     }
                 }
+            }
+        }
+
+        // deny urls that exceed allowed number of occurrences
+        final int maxAllowedPagesPerDomain = profile.domMaxPages();
+        if (maxAllowedPagesPerDomain < Integer.MAX_VALUE) {
+            final DomProfile dp = doms.get(url.getHost());
+            if (dp != null && dp.count >= maxAllowedPagesPerDomain) {
+                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' appeared too often in crawl stack, a maximum of " + profile.domMaxPages() + " is allowed.");
+                return "crawl stack domain counter exceeded";
+            }
+            
+            if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= profile.domMaxPages()) {
+                if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' appeared too often in result stack, a maximum of " + profile.domMaxPages() + " is allowed.");
+                return "result stack domain counter exceeded";
             }
         }
         

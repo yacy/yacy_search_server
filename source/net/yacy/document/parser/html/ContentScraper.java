@@ -44,6 +44,7 @@ import java.util.Set;
 import javax.swing.event.EventListenerList;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
@@ -115,10 +116,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.htmlFilterEventListeners = new EventListenerList();
     }
     
-    public final static boolean punctuation(final char c) {
-        return c == '.' || c == '!' || c == '?';
-    }
-    
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + new String(newtext));
         String b = cleanLine(super.stripAll(newtext));
@@ -128,7 +125,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             // condenser to distinguish headlines from text beginnings.
             // to make it easier for the condenser, a dot ('.') is appended in case that
             // no punctuation is part of the newtext line
-            if ((b.length() != 0) && (!(punctuation(b.charAt(b.length() - 1))))) b = b + '.';
+            if ((b.length() != 0) && (!(SentenceReader.punctuation(b.charAt(b.length() - 1))))) b = b + '.';
             //System.out.println("*** Appended dot: " + b.toString());
         }
         // find http links inside text

@@ -36,8 +36,9 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
+import de.anomic.crawler.ResultURLs;
+import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.crawler.ResultURLs.InitExecEntry;
-import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -77,9 +78,9 @@ public class CrawlResults {
             post != null &&
             post.containsKey("autoforward") &&
             tabletype == EventOrigin.LOCAL_CRAWLING &&
-            sb.crawlResults.getStackSize(EventOrigin.LOCAL_CRAWLING) == 0) {
+            ResultURLs.getStackSize(EventOrigin.LOCAL_CRAWLING) == 0) {
             // the main menu does a request to the local crawler page, but in case this table is empty, the overview page is shown
-            tabletype = (sb.crawlResults.getStackSize(EventOrigin.SURROGATES) == 0) ? EventOrigin.UNKNOWN : EventOrigin.SURROGATES;
+            tabletype = (ResultURLs.getStackSize(EventOrigin.SURROGATES) == 0) ? EventOrigin.UNKNOWN : EventOrigin.SURROGATES;
         }
         
         // check if authorization is needed and/or given
@@ -107,7 +108,7 @@ public class CrawlResults {
             }
 
             // do the commands
-            if (post.containsKey("clearlist")) sb.crawlResults.clearStack(tabletype);
+            if (post.containsKey("clearlist")) ResultURLs.clearStack(tabletype);
 
             if (post.containsKey("deleteentry")) {
                 final String hash = post.get("hash", null);
@@ -124,7 +125,7 @@ public class CrawlResults {
                     // delete all urls for this domain from database
                     try {
                         sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).deleteDomain(hashpart);
-                        sb.crawlResults.deleteDomain(tabletype, domain, hashpart);
+                        ResultURLs.deleteDomain(tabletype, domain, hashpart);
                     } catch (IOException e) {
                         Log.logException(e);
                     }
@@ -146,18 +147,18 @@ public class CrawlResults {
         // create table
         if (tabletype == EventOrigin.UNKNOWN) {
             prop.put("table", "2");
-        } else if (sb.crawlResults.getStackSize(tabletype) == 0 && sb.crawlResults.getDomainListSize(tabletype) == 0) {
+        } else if (ResultURLs.getStackSize(tabletype) == 0 && ResultURLs.getDomainListSize(tabletype) == 0) {
             prop.put("table", "0");
         } else {
             prop.put("table", "1");
-            if (lines > sb.crawlResults.getStackSize(tabletype)) lines = sb.crawlResults.getStackSize(tabletype);
-            if (lines == sb.crawlResults.getStackSize(tabletype)) {
+            if (lines > ResultURLs.getStackSize(tabletype)) lines = ResultURLs.getStackSize(tabletype);
+            if (lines == ResultURLs.getStackSize(tabletype)) {
                 prop.put("table_size", "0");
             } else {
                 prop.put("table_size", "1");
                 prop.put("table_size_count", lines);
             }
-            prop.put("table_size_all", sb.crawlResults.getStackSize(tabletype));
+            prop.put("table_size_all", ResultURLs.getStackSize(tabletype));
             
             prop.putHTML("table_feedbackpage", "CrawlResults.html");
             prop.put("table_tabletype", tabletype.getCode());
@@ -175,7 +176,7 @@ public class CrawlResults {
             URIMetadataRow.Components metadata;
 
             int cnt = 0;
-            final Iterator<Map.Entry<String, InitExecEntry>> i = sb.crawlResults.results(tabletype);
+            final Iterator<Map.Entry<String, InitExecEntry>> i = ResultURLs.results(tabletype);
             Map.Entry<String, InitExecEntry> entry;
             while (i.hasNext()) {
                 entry = i.next();
@@ -260,7 +261,7 @@ public class CrawlResults {
             
             cnt = 0;
             dark = true;
-            final Iterator<String> j = sb.crawlResults.domains(tabletype);
+            final Iterator<String> j = ResultURLs.domains(tabletype);
             String domain;
             while (j.hasNext() && cnt < 100) {
                 domain = j.next();
@@ -270,7 +271,7 @@ public class CrawlResults {
                 prop.put("table_domains_" + cnt + "_tabletype", tabletype.getCode());
                 prop.put("table_domains_" + cnt + "_domain", domain);
                 prop.put("table_domains_" + cnt + "_hashpart", DigestURI.hosthash6(domain));
-                prop.put("table_domains_" + cnt + "_count", sb.crawlResults.domainCount(tabletype, domain));
+                prop.put("table_domains_" + cnt + "_count", ResultURLs.domainCount(tabletype, domain));
                 dark = !dark;
                 cnt++;
             }

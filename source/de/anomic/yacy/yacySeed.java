@@ -73,6 +73,8 @@ import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
 public class yacySeed implements Cloneable {
 
+    public static String ANON_PREFIX = "_anon";
+    
     public static final int maxsize = 16000;
     /**
      * <b>substance</b> "sI" (send index/words)
@@ -245,7 +247,7 @@ public class yacySeed implements Cloneable {
      * @return
      */
     private static String defaultPeerName() {
-        return "_anon" + OS.infoKey() + "-" + (System.currentTimeMillis() % 77777777L) + "-" + yacyCore.speedKey;
+        return ANON_PREFIX + OS.infoKey() + "-" + (System.currentTimeMillis() % 77777777L) + "-" + yacyCore.speedKey;
     }
     
     /**

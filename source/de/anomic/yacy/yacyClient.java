@@ -81,7 +81,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.crawler.retrieval.EventOrigin;
+import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
@@ -392,7 +392,6 @@ public final class yacyClient {
             final int partitions,
             final yacySeed target,
             final Segment indexSegment,
-            final ResultURLs crawlResults,
             final RankingProcess containerCache,
             final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
             final Blacklist blacklist,
@@ -478,7 +477,7 @@ public final class yacyClient {
             // passed all checks, store url
             try {
                 indexSegment.urlMetadata().store(urlEntry);
-                crawlResults.stack(urlEntry, mySeed.hash.getBytes(), target.hash.getBytes(), EventOrigin.QUERIES);
+                ResultURLs.stack(urlEntry, mySeed.hash.getBytes(), target.hash.getBytes(), EventOrigin.QUERIES);
             } catch (final IOException e) {
                 yacyCore.log.logSevere("could not store search result", e);
                 continue; // db-error

@@ -32,12 +32,12 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
-import de.anomic.data.LibraryProvider;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.BDecoder;

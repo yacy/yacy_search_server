@@ -28,6 +28,7 @@
 //if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
@@ -40,7 +41,9 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
+import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -48,7 +51,6 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.data.LibraryProvider;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
@@ -284,7 +286,12 @@ public class ViewFile {
                     // Search word highlighting
                     for (final StringBuilder s: sentences) {
                         sentence = s.toString();
-                        final Enumeration<String> tokens = Condenser.wordTokenizer(sentence, "UTF-8", LibraryProvider.dymLib);
+                        Enumeration<String> tokens = null;
+                        try {
+                            tokens = new WordTokenizer(new ByteArrayInputStream(sentence.getBytes("UTF-8")), LibraryProvider.dymLib);
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
                         while (tokens.hasMoreElements()) {
                             token = tokens.nextElement();
                             if (token.length() > 0) {

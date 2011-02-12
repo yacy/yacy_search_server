@@ -49,8 +49,8 @@ public class WatchWebStructure_p {
         if (host.equals("auto")) {
         	// try to find the host from the crawl profiles
         	CrawlProfile e;
-            for (byte[] handle: sb.crawler.profilesActiveCrawls.keySet()) {
-                e = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(handle));
+            for (byte[] handle: sb.crawler.getActive()) {
+                e = sb.crawler.getActive(handle);
                 if (e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
                     e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
                     e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||

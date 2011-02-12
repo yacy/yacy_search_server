@@ -37,6 +37,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
+import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.Switchboard;
@@ -108,21 +109,21 @@ public class CrawlProfileEditor_p {
         if (post != null) {
             if (post.containsKey("terminate")) try {
                 // termination of a crawl: shift the crawl from active to passive
-                final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(handle.getBytes());
-                if (mp != null) sb.crawler.profilesPassiveCrawls.put(handle.getBytes(), new CrawlProfile(mp));
+                final CrawlProfile p = sb.crawler.getActive(handle.getBytes());
+                if (p != null) sb.crawler.putPassive(handle.getBytes(), p);
                 // delete all entries from the crawl queue that are deleted here
-                sb.crawler.profilesActiveCrawls.remove(handle.getBytes());
+                sb.crawler.removeActive(handle.getBytes());
                 sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000); 
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
             }
             if (post.containsKey("delete")) {
                 // deletion of a terminated crawl profile
-                sb.crawler.profilesPassiveCrawls.remove(handle.getBytes());
+                sb.crawler.removePassive(handle.getBytes());
             }
             if (post.containsKey("deleteTerminatedProfiles")) {
-                for (final byte[] h: sb.crawler.profilesPassiveCrawls.keySet()) {
-                    sb.crawler.profilesPassiveCrawls.remove(h);
+                for (final byte[] h: sb.crawler.getPassive()) {
+                    sb.crawler.removePassive(h);
                 }
             }
         }
@@ -130,8 +131,8 @@ public class CrawlProfileEditor_p {
         // generate handle list: first sort by handle name
         CrawlProfile selentry;
         Map<String, String> orderdHandles = new TreeMap<String, String>();
-        for (final byte[] h : sb.crawler.profilesActiveCrawls.keySet()) {
-            selentry = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(h));
+        for (final byte[] h : sb.crawler.getActive()) {
+            selentry = sb.crawler.getActive(h);
             if (ignoreNames.contains(selentry.name())) continue;
             orderdHandles.put(selentry.name(), selentry.handle());
         }
@@ -146,8 +147,7 @@ public class CrawlProfileEditor_p {
             count++;
         }
         prop.put("profiles", count);
-        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(handle.getBytes());
-        selentry = (mp == null) ? null : new CrawlProfile(mp);
+        selentry = sb.crawler.getActive(handle.getBytes());
         assert selentry == null || selentry.handle() != null;
         // read post for change submit
         if ((post != null) && (selentry != null)) {
@@ -161,7 +161,7 @@ public class CrawlProfileEditor_p {
                         final String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
                         if (!cval.equals(val)) {
                             selentry.put(tee.name, val);
-                            sb.crawler.profilesActiveCrawls.put(selentry.handle().getBytes(), selentry);
+                            sb.crawler.putActive(selentry.handle().getBytes(), selentry);
                         }
                     }
                 } catch (final Exception ex) {
@@ -178,17 +178,17 @@ public class CrawlProfileEditor_p {
         final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
         CrawlProfile profile;
         // put active crawls into list
-        for (final byte[] h: sb.crawler.profilesActiveCrawls.keySet()) {
-            profile = new CrawlProfile(sb.crawler.profilesActiveCrawls.get(h));
-            putProfileEntry(prop, profile, true, dark, count, domlistlength);
+        for (final byte[] h: sb.crawler.getActive()) {
+            profile = sb.crawler.getActive(h);
+            putProfileEntry(prop, sb.crawlStacker, profile, true, dark, count, domlistlength);
             dark = !dark;
             count++;
         }
         // put passive crawls into list
         boolean existPassiveCrawls = false;
-        for (final byte[] h: sb.crawler.profilesPassiveCrawls.keySet()) {
-            profile = new CrawlProfile(sb.crawler.profilesPassiveCrawls.get(h));
-            putProfileEntry(prop, profile, false, dark, count, domlistlength);
+        for (final byte[] h: sb.crawler.getPassive()) {
+            profile = sb.crawler.getPassive(h);
+            putProfileEntry(prop, sb.crawlStacker, profile, false, dark, count, domlistlength);
             dark = !dark;
             count++;
             existPassiveCrawls = true;
@@ -226,7 +226,7 @@ public class CrawlProfileEditor_p {
         return prop;
     }
     
-    private static void putProfileEntry(final servletProperties prop, final CrawlProfile profile, final boolean active, final boolean dark, final int count, final int domlistlength) {
+    private static void putProfileEntry(final servletProperties prop, final CrawlStacker crawlStacker, final CrawlProfile profile, final boolean active, final boolean dark, final int count, final int domlistlength) {
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_name", profile.name());
@@ -245,7 +245,7 @@ public class CrawlProfileEditor_p {
         // start contrib [MN]
         int i = 0;
         String item;
-        while (i <= domlistlength && !"".equals(item = profile.domName(true, i))){
+        while (i <= domlistlength && !"".equals(item = crawlStacker.domName(true, i))){
             if (i == domlistlength) {
                 item = item + " ...";
             }

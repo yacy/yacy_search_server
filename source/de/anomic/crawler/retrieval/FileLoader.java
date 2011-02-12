@@ -25,7 +25,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -86,13 +85,13 @@ public class FileLoader {
             ResponseHeader responseHeader = new ResponseHeader();
             responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-            final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
+            final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
             Response response = new Response(
                     request, 
                     requestHeader,
                     responseHeader,
                     "200",
-                    mp == null ? null : new CrawlProfile(mp),
+                    profile,
                     content.toString().getBytes());
             
             return response;
@@ -126,13 +125,13 @@ public class FileLoader {
             
             // create response with metadata only
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
-            final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
+            final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
             Response response = new Response(
                     request, 
                     requestHeader,
                     responseHeader,
                     "200",
-                    mp == null ? null : new CrawlProfile(mp),
+                    profile,
                     url.toTokens().getBytes());
             return response;
         }
@@ -143,13 +142,13 @@ public class FileLoader {
         is.close();
         
         // create response with loaded content
-        final Map<String, String> mp = sb.crawler.profilesActiveCrawls.get(request.profileHandle().getBytes());
+        final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
         Response response = new Response(
                 request, 
                 requestHeader,
                 responseHeader,
                 "200",
-                mp == null ? null : new CrawlProfile(mp),
+                profile,
                 b);
         return response;
     }

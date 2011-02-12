@@ -54,6 +54,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.ResultURLs;
 import de.anomic.data.ListManager;
 import de.anomic.data.WorkTables;
 import de.anomic.http.client.Cache;
@@ -154,6 +155,7 @@ public class IndexControlRWIs_p {
                 if (post.get("deleteCrawlQueues", "").equals("on")) {
                     sb.crawlQueues.clear();
                     sb.crawlStacker.clear();
+                    ResultURLs.clearStacks();
                 }
                 if (post.get("deleteCache", "").equals("on")) {
                     Cache.clear();

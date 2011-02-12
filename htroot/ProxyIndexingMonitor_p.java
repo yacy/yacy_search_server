@@ -107,7 +107,7 @@ public class ProxyIndexingMonitor_p {
                     sb.crawler.defaultProxyProfile.put("remoteIndexing",proxyIndexingRemote ? "true":"false");
                     sb.crawler.defaultProxyProfile.put("indexText",proxyIndexingLocalText ? "true":"false");
                     sb.crawler.defaultProxyProfile.put("indexMedia",proxyIndexingLocalMedia ? "true":"false");
-                    sb.crawler.profilesActiveCrawls.put(sb.crawler.defaultProxyProfile.handle().getBytes(), sb.crawler.defaultProxyProfile);
+                    sb.crawler.putActive(sb.crawler.defaultProxyProfile.handle().getBytes(), sb.crawler.defaultProxyProfile);
                     
                     prop.put("info", "2");//new proxyPrefetchdepth
                     prop.put("info_message", newProxyPrefetchDepth);

@@ -38,9 +38,9 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.MimeTable;
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.HandleSet;
@@ -210,7 +210,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     private static HandleSet removeAppearanceHashes(final String sentence, final HandleSet queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;
-        final SortedMap<byte[], Integer> hs = Condenser.hashSentence(sentence, null);
+        final SortedMap<byte[], Integer> hs = WordTokenizer.hashSentence(sentence, null);
         final Iterator<byte[]> j = queryhashes.iterator();
         byte[] hash;
         Integer pos;

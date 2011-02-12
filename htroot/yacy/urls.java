@@ -69,7 +69,7 @@ public class urls {
                    (System.currentTimeMillis() < timeout) &&
                    (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
                 try {
-                    entry = sb.crawlQueues.noticeURL.pop(stackType, false, sb.crawler.profilesActiveCrawls);
+                    entry = sb.crawlQueues.noticeURL.pop(stackType, false, sb.crawler);
                 } catch (final IOException e) {
                     break;
                 }

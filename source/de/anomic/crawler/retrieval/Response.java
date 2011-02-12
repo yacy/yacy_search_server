@@ -39,6 +39,7 @@ import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.ResultURLs.EventOrigin;
 
 public class Response {
     

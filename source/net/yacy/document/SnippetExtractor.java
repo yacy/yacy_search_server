@@ -47,7 +47,7 @@ public class SnippetExtractor {
         int linenumber = 0;
         int fullmatchcounter = 0;
         lookup: for (StringBuilder sentence: sentences) {
-            hs = Condenser.hashSentence(sentence.toString(), null);
+            hs = WordTokenizer.hashSentence(sentence.toString(), null);
             positions = new TreeSet<Integer>();
             for (byte[] word: queryhashes) {
                 pos = hs.get(word);
@@ -126,7 +126,7 @@ public class SnippetExtractor {
             byte[] hash;
             
             // find all hashes that appear in the sentence
-            final Map<byte[], Integer> hs = Condenser.hashSentence(sentence, null);
+            final Map<byte[], Integer> hs = WordTokenizer.hashSentence(sentence, null);
             final Iterator<byte[]> j = queryhashes.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;

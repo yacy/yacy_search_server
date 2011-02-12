@@ -28,9 +28,9 @@ import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.StaticScore;
+import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.util.EventTracker;
 
-import de.anomic.data.LibraryProvider;
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;

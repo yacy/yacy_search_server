@@ -40,32 +40,61 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.ReverseMapIterator;
 
-import de.anomic.crawler.retrieval.EventOrigin;
-
 public final class ResultURLs {
 
-    private final Map<EventOrigin, Map<String, InitExecEntry>> resultStacks; // a mapping from urlHash to Entries
-    private final Map<EventOrigin, DynamicScore<String>> resultDomains;
+    public enum EventOrigin {
 
-    public class InitExecEntry {
+        // we must distinguish the following cases: resource-load was initiated by
+        // 1) global crawling: the index is extern, not here (not possible here)
+        // 2) result of search queries, some indexes are here (not possible here)
+        // 3) result of index transfer, some of them are here (not possible here)
+        // 4) proxy-load (initiator is "------------")
+        // 5) local prefetch/crawling (initiator is own seedHash)
+        // 6) local fetching for global crawling (other known or unknown initiator)
+        
+        UNKNOWN(0),
+        REMOTE_RECEIPTS(1),
+        QUERIES(2),
+        DHT_TRANSFER(3),
+        PROXY_LOAD(4),
+        LOCAL_CRAWLING(5),
+        GLOBAL_CRAWLING(6),
+        SURROGATES(7);
+        
+        protected int code;
+        private static final EventOrigin[] list = {
+            UNKNOWN, REMOTE_RECEIPTS, QUERIES, DHT_TRANSFER, PROXY_LOAD, LOCAL_CRAWLING, GLOBAL_CRAWLING, SURROGATES};
+        private EventOrigin(int code) {
+            this.code = code;
+        }
+        public int getCode() {
+            return this.code;
+        }
+        public static final EventOrigin getEvent(int key) {
+            return list[key];
+        }
+    }
+    
+    private final static int initialStackCapacity = 500;
+    private final static Map<EventOrigin, Map<String, InitExecEntry>> resultStacks = new ConcurrentHashMap<EventOrigin, Map<String, InitExecEntry>>(initialStackCapacity); // a mapping from urlHash to Entries
+    private final static Map<EventOrigin, DynamicScore<String>> resultDomains = new ConcurrentHashMap<EventOrigin, DynamicScore<String>>(initialStackCapacity);
+
+    static {
+        for (EventOrigin origin: EventOrigin.values()) {
+            resultStacks.put(origin, new LinkedHashMap<String, InitExecEntry>());
+            resultDomains.put(origin, new ScoreCluster<String>());
+        }
+    }
+    
+    public static class InitExecEntry {
         public byte[] initiatorHash, executorHash;
         public InitExecEntry(final byte[] initiatorHash, final byte[] executorHash) {
             this.initiatorHash = initiatorHash;
             this.executorHash = executorHash;
         }
     }
-    
-    public ResultURLs(int initialStackCapacity) {
-        // init result stacks
-        resultStacks = new ConcurrentHashMap<EventOrigin, Map<String, InitExecEntry>>(initialStackCapacity);
-        resultDomains = new ConcurrentHashMap<EventOrigin, DynamicScore<String>>(initialStackCapacity);
-        for (EventOrigin origin: EventOrigin.values()) {
-            resultStacks.put(origin, new LinkedHashMap<String, InitExecEntry>());
-            resultDomains.put(origin, new ScoreCluster<String>());
-        }
-    }
 
-    public synchronized void stack(
+    public static void stack(
             final URIMetadataRow e,
             final byte[] initiatorHash,
             final byte[] executorHash,
@@ -93,19 +122,19 @@ public final class ResultURLs {
         }
     }
     
-    public int getStackSize(final EventOrigin stack) {
+    public static int getStackSize(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack == null) return 0;
         return resultStack.size();
     }
     
-    public int getDomainListSize(final EventOrigin stack) {
+    public static int getDomainListSize(final EventOrigin stack) {
         final DynamicScore<String> domains = getDomains(stack);
         if (domains == null) return 0;
         return domains.size();
     }
     
-    public Iterator<Map.Entry<String, InitExecEntry>> results(final EventOrigin stack) {
+    public static Iterator<Map.Entry<String, InitExecEntry>> results(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack == null) return new LinkedHashMap<String, InitExecEntry>().entrySet().iterator();
         return new ReverseMapIterator<String, InitExecEntry>(resultStack);
@@ -115,12 +144,12 @@ public final class ResultURLs {
      * iterate all domains in the result domain statistic
      * @return iterator of domains in reverse order (downwards)
      */
-    public Iterator<String> domains(final EventOrigin stack) {
+    public static Iterator<String> domains(final EventOrigin stack) {
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).keys(false);
     }
     
-    public int deleteDomain(final EventOrigin stack, String host, String hosthash) {
+    public static int deleteDomain(final EventOrigin stack, String host, String hosthash) {
         assert host != null : "host = null";
         assert hosthash.length() == 6;
         final Iterator<Map.Entry<String, InitExecEntry>> i = results(stack);
@@ -141,7 +170,7 @@ public final class ResultURLs {
      * @param domain name
      * @return the number of occurrences of the domain in the stack statistics
      */
-    public int domainCount(final EventOrigin stack, String domain) {
+    public static int domainCount(final EventOrigin stack, String domain) {
         assert domain != null : "domain = null";
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).get(domain);
@@ -153,18 +182,18 @@ public final class ResultURLs {
      * @param stack id of resultStack
      * @return null if stack does not exist (id is unknown or stack is null (which should not occur and an error is logged))
      */
-    private Map<String, InitExecEntry> getStack(final EventOrigin stack) {
+    private static Map<String, InitExecEntry> getStack(final EventOrigin stack) {
         return resultStacks.get(stack);
     }
-    private DynamicScore<String> getDomains(final EventOrigin stack) {
+    private static DynamicScore<String> getDomains(final EventOrigin stack) {
         return resultDomains.get(stack);
     }
 
-    public void clearStacks() {
+    public static void clearStacks() {
         for (EventOrigin origin: EventOrigin.values()) clearStack(origin);
     }
     
-    public synchronized void clearStack(final EventOrigin stack) {
+    public static void clearStack(final EventOrigin stack) {
         final Map<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();
         final DynamicScore<String> resultDomains = getDomains(stack);
@@ -175,7 +204,7 @@ public final class ResultURLs {
         }
     }
 
-    public synchronized boolean remove(final String urlHash) {
+    public static boolean remove(final String urlHash) {
         if (urlHash == null) return false;
         Map<String, InitExecEntry> resultStack;
         for (EventOrigin origin: EventOrigin.values()) {
@@ -190,16 +219,15 @@ public final class ResultURLs {
      * @param args
      */
     public static void main(final String[] args) {
-        final ResultURLs results = new ResultURLs(10);
         try {
             final DigestURI url = new DigestURI("http", "www.yacy.net", 80, "/");
             final URIMetadataRow urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
             EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
             System.out.println("valid test:\n=======");
             // add
-            results.stack(urlRef, urlRef.hash(), url.hash(), stackNo);
+            stack(urlRef, urlRef.hash(), url.hash(), stackNo);
             // size
-            System.out.println("size of stack:\t"+ results.getStackSize(stackNo));
+            System.out.println("size of stack:\t"+ getStackSize(stackNo));
         } catch (final MalformedURLException e) {
             Log.logException(e);
         }

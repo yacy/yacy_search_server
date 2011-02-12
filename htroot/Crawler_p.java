@@ -252,7 +252,7 @@ public class Crawler_p {
                                 xdstopw,
                                 xpstopw,
                                 cachePolicy);
-                        sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
+                        sb.crawler.putActive(profile.handle().getBytes(), profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         final DigestURI url = crawlingStartURL;
                         sb.crawlStacker.enqueueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), "ftp", url.getHost(), url.getPort(), false);
@@ -290,7 +290,7 @@ public class Crawler_p {
                         sb.crawlQueues.errorURL.remove(urlhash);
                         
                         // stack url
-                        sb.crawler.profilesPassiveCrawls.remove(crawlingStartURL.hash()); // if there is an old entry, delete it
+                        sb.crawler.removePassive(crawlingStartURL.hash()); // if there is an old entry, delete it
                         final CrawlProfile pe = new CrawlProfile(
                                 (crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true, false) : crawlingStartURL.getHost(),
                                 crawlingStartURL,
@@ -307,7 +307,7 @@ public class Crawler_p {
                                 xdstopw,
                                 xpstopw,
                                 cachePolicy);
-                        sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
+                        sb.crawler.putActive(pe.handle().getBytes(), pe);
                         final String reasonString = sb.crawlStacker.stackCrawl(new Request(
                                 sb.peers.mySeed().hash.getBytes(),
                                 url,
@@ -421,7 +421,7 @@ public class Crawler_p {
                                     xdstopw,
                                     xpstopw,
                                     cachePolicy);
-                            sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
+                            sb.crawler.putActive(profile.handle().getBytes(), profile);
                             sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                             sb.crawlStacker.enqueueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
                         } catch (final PatternSyntaxException e) {
@@ -458,7 +458,7 @@ public class Crawler_p {
                 				xdstopw,
                 				xpstopw,
                 				cachePolicy);
-                		sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
+                		sb.crawler.putActive(pe.handle().getBytes(), pe);
                 		final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, pe);
                 		importer.start();
                 	} catch (final Exception e) {
@@ -507,7 +507,7 @@ public class Crawler_p {
                                 xdstopw,
                                 xpstopw,
                                 cachePolicy);
-                        sb.crawler.profilesActiveCrawls.put(profile.handle().getBytes(), profile);
+                        sb.crawler.putActive(profile.handle().getBytes(), profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         final Iterator<Map.Entry<MultiProtocolURI, String>> linkiterator = hyperlinks.entrySet().iterator();
                         DigestURI nexturl;

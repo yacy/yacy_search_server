@@ -296,7 +296,7 @@ dc_rights
     
     public List<StringBuilder> getSentences(final boolean pre) {
         if (this.text == null) return null;
-        final Condenser.sentencesFromInputStreamEnum e = Condenser.sentencesFromInputStream(getText());
+        final SentenceReader e = new SentenceReader(getText());
         e.pre(pre);
         List<StringBuilder> sentences = new ArrayList<StringBuilder>();
         while (e.hasNext()) {

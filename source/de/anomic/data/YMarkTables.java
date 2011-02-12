@@ -1,6 +1,7 @@
 package de.anomic.data;
 
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
@@ -19,6 +20,8 @@ import java.util.TreeMap;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.LibraryProvider;
+import net.yacy.document.WordTokenizer;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -464,7 +467,7 @@ public class YMarkTables {
 		        buffer.append(document.dc_title());
 		        buffer.append(document.dc_description());
 		        buffer.append(document.dc_subject(' '));
-		        final Enumeration<String> tokens = Condenser.wordTokenizer(buffer.toString(), "UTF-8", LibraryProvider.dymLib);
+		        final Enumeration<String> tokens = new WordTokenizer(new ByteArrayInputStream(buffer.toString().getBytes("UTF-8")), LibraryProvider.dymLib);
 		        while(tokens.hasMoreElements()) {
 		        	int max = 1;
 		        	String token = tokens.nextElement();

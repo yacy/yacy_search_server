@@ -28,7 +28,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Map;
 
 import net.yacy.cora.protocol.RequestHeader;
 
@@ -100,8 +99,7 @@ public class IndexCreateWWWRemoteQueue_p {
                 if (urle != null && urle.url() != null) {
                     initiator = sb.peers.getConnected((urle.initiator() == null) ? "" : new String(urle.initiator()));
                     profileHandle = urle.profileHandle();
-                    final Map<String, String> mp = profileHandle == null ? null : sb.crawler.profilesActiveCrawls.get(profileHandle.getBytes());
-                    profileEntry = mp == null ? null : new CrawlProfile(mp);
+                    profileEntry = profileHandle == null ? null : sb.crawler.getActive(profileHandle.getBytes());
                     prop.put("crawler-queue_list_" + showNum + "_dark", dark ? "1" : "0");
                     prop.putHTML("crawler-queue_list_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("crawler-queue_list_" + showNum + "_profile", ((profileEntry == null) ? "unknown" : profileEntry.name()));

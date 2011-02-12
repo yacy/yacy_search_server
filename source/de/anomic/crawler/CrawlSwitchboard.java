@@ -29,6 +29,7 @@ package de.anomic.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.word.Word;
@@ -58,7 +59,7 @@ public final class CrawlSwitchboard {
     public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     private final Log       log;
-    public        Map<byte[], Map<String, String>>   profilesActiveCrawls, profilesPassiveCrawls;
+    private        Map<byte[], Map<String, String>>   profilesActiveCrawls, profilesPassiveCrawls;
     public  CrawlProfile    defaultProxyProfile;
     public  CrawlProfile    defaultRemoteProfile;
     public  CrawlProfile    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
@@ -124,6 +125,46 @@ public final class CrawlSwitchboard {
         log.logInfo("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
                 ", " + this.profilesPassiveCrawls.size() + " entries" +
                 ", " + profilesPassiveFile.length()/1024);
+    }
+
+    public CrawlProfile getActive(byte[] profileKey) {
+        if (profileKey == null) return null;
+        Map<String, String> m = this.profilesActiveCrawls.get(profileKey);
+        if (m == null) return null;
+        return new CrawlProfile(m);
+    }
+
+    public CrawlProfile getPassive(byte[] profileKey) {
+        if (profileKey == null) return null;
+        Map<String, String> m = this.profilesPassiveCrawls.get(profileKey);
+        if (m == null) return null;
+        return new CrawlProfile(m);
+    }
+    
+    public Set<byte[]> getActive() {
+        return this.profilesActiveCrawls.keySet();
+    }
+
+    public Set<byte[]> getPassive() {
+        return this.profilesPassiveCrawls.keySet();
+    }
+    
+    public void removeActive(byte[] profileKey) {
+        if (profileKey == null) return;
+        this.profilesActiveCrawls.remove(profileKey);
+    }
+
+    public void removePassive(byte[] profileKey) {
+        if (profileKey == null) return;
+        this.profilesPassiveCrawls.remove(profileKey);
+    }
+    
+    public void putActive(byte[] profileKey, CrawlProfile profile) {
+        this.profilesActiveCrawls.put(profileKey, profile);
+    }
+    
+    public void putPassive(byte[] profileKey, CrawlProfile profile) {
+        this.profilesPassiveCrawls.put(profileKey, profile);
     }
     
     public void clear() {

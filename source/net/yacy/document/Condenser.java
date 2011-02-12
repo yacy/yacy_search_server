@@ -20,41 +20,31 @@
 
 package net.yacy.document;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
-import de.anomic.data.DidYouMeanLibrary;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.language.Identificator;
-import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 
@@ -114,7 +104,7 @@ public final class Condenser {
             final Document document,
             final boolean indexText,
             final boolean indexMedia,
-            final DidYouMeanLibrary meaningLib
+            final WordCache meaningLib
             ) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
@@ -238,13 +228,13 @@ public final class Condenser {
             final int flagpos,
             final Bitfield flagstemplate,
             final boolean useForLanguageIdentification,
-            final DidYouMeanLibrary meaningLib) {
+            final WordCache meaningLib) {
         if (text == null) return;
         String word;
         Word wprop;
-        sievedWordsEnum wordenum;
+        WordTokenizer wordenum;
         try {
-            wordenum = new sievedWordsEnum(new ByteArrayInputStream(text.getBytes("UTF-8")), meaningLib);
+            wordenum = new WordTokenizer(new ByteArrayInputStream(text.getBytes("UTF-8")), meaningLib);
         } catch (final UnsupportedEncodingException e) {
             return;
         }
@@ -264,7 +254,7 @@ public final class Condenser {
         }
     }
 
-    public Condenser(final InputStream text, final DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
+    public Condenser(final InputStream text, final WordCache meaningLib) throws UnsupportedEncodingException {
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         words = new TreeMap<String, Word>();
@@ -288,7 +278,7 @@ public final class Condenser {
         return this.languageIdentificator.getLanguage();
     }
 
-    private void createCondensement(final InputStream is, final DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
+    private void createCondensement(final InputStream is, final WordCache meaningLib) throws UnsupportedEncodingException {
         assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
         StringBuilder sentence = new StringBuilder(100);
@@ -308,7 +298,7 @@ public final class Condenser {
         final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
         
         // read source
-        final sievedWordsEnum wordenum = new sievedWordsEnum(is, meaningLib);
+        final WordTokenizer wordenum = new WordTokenizer(is, meaningLib);
         while (wordenum.hasMoreElements()) {
             word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             if (languageIdentificator != null) languageIdentificator.add(word);
@@ -317,7 +307,7 @@ public final class Condenser {
             // distinguish punctuation and words
             wordlen = word.length();
             Iterator<String> it;
-            if ((wordlen == 1) && (ContentScraper.punctuation(word.charAt(0)))) {
+            if ((wordlen == 1) && (SentenceReader.punctuation(word.charAt(0)))) {
                 // store sentence
                 if (sentence.length() > 0) {
                     // we store the punctuation symbol as first element of the sentence vector
@@ -461,285 +451,8 @@ public final class Condenser {
         this.RESULT_NUMB_SENTENCES = allsentencecounter;
         this.RESULT_DIFF_SENTENCES = sentenceHandleCount;
     }
-
-    public final static boolean invisible(final char c) {
-    	final int type = Character.getType(c);
-    	return !(type == Character.LOWERCASE_LETTER
-                || type == Character.DECIMAL_DIGIT_NUMBER
-                || type == Character.UPPERCASE_LETTER
-                || type == Character.MODIFIER_LETTER
-                || type == Character.OTHER_LETTER
-                || type == Character.TITLECASE_LETTER
-                || ContentScraper.punctuation(c));
-    }
-
-    /**
-     * tokenize the given sentence and generate a word-wordPos mapping
-     * @param sentence the sentence to be tokenized
-     * @return a ordered map containing word hashes as key and positions as value. The map is orderd by the hash ordering
-     */
-    public static SortedMap<byte[], Integer> hashSentence(final String sentence, final DidYouMeanLibrary meaningLib) {
-        final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        final Enumeration<String> words = wordTokenizer(sentence, "UTF-8", meaningLib);
-        int pos = 0;
-        String word;
-        byte[] hash;
-        Integer oldpos;
-        while (words.hasMoreElements()) {
-            word = words.nextElement();
-            hash = Word.word2hash(word.toString());
-            
-            // don't overwrite old values, that leads to too far word distances
-            oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
-            if (oldpos != null) {
-                map.put(hash, oldpos);
-            }
-            
-            pos += word.length() + 1;
-        }
-        return map;
-    }
     
-    public static Enumeration<String> wordTokenizer(final String s, final String charset, final DidYouMeanLibrary meaningLib) {
-        try {
-            return new sievedWordsEnum(new ByteArrayInputStream(s.getBytes(charset)), meaningLib);
-        } catch (final Exception e) {
-            return null;
-        }
-    }
-	
-    public static class sievedWordsEnum implements Enumeration<String> {
-        // this enumeration removes all words that contain either wrong characters or are too short
-        
-        private StringBuilder buffer = null;
-        private unsievedWordsEnum e;
-        private DidYouMeanLibrary meaningLib;
-
-        public sievedWordsEnum(final InputStream is, final DidYouMeanLibrary meaningLib) throws UnsupportedEncodingException {
-            assert is != null;
-            this.e = new unsievedWordsEnum(is);
-            this.buffer = nextElement0();
-            this.meaningLib = meaningLib;
-        }
-
-        public void pre(final boolean x) {
-            e.pre(x);
-        }
-        
-        private StringBuilder nextElement0() {
-            StringBuilder s;
-            loop: while (e.hasMoreElements()) {
-                s = e.nextElement();
-                if ((s.length() == 1) && (ContentScraper.punctuation(s.charAt(0)))) return s;
-                for (int i = 0; i < s.length(); i++) {
-                    if (invisible(s.charAt(i))) continue loop;
-                }
-                return s;
-            }
-            return null;
-        }
-
-        public boolean hasMoreElements() {
-            return buffer != null;
-        }
-
-        public String nextElement() {
-            final String r = (buffer == null) ? null : buffer.toString();
-            buffer = nextElement0();
-            // put word to words statistics cache
-            if (meaningLib != null) meaningLib.learn(r);
-            return r;
-        }
-
-    }
-    
-    private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
-        // returns an enumeration of StringBuilder Objects
-        private StringBuilder buffer = null;
-        private sentencesFromInputStreamEnum e;
-        private List<StringBuilder> s;
-        private int sIndex;
-
-        public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
-            assert is != null;
-            e = new sentencesFromInputStreamEnum(is);
-            s = new ArrayList<StringBuilder>();
-            sIndex = 0;
-            buffer = nextElement0();
-        }
-
-        public void pre(final boolean x) {
-            e.pre(x);
-        }
-        
-        private StringBuilder nextElement0() {
-            StringBuilder r;
-            StringBuilder sb;
-            char c;
-            if (sIndex >= s.size()) {
-                sIndex = 0;
-                s.clear();
-            }
-            while (s.isEmpty()) {
-                if (!e.hasNext()) return null;
-                r = e.next();
-                if (r == null) return null;
-                r = trim(r);
-                sb = new StringBuilder(20);
-                for (int i = 0; i < r.length(); i++) {
-                    c = r.charAt(i);
-                    if (invisible(c)) {
-                        if (sb.length() > 0) {s.add(sb); sb = new StringBuilder(20);}
-                    } else if (ContentScraper.punctuation(c)) {
-                        if (sb.length() > 0) {s.add(sb); sb = new StringBuilder(1);}
-                        sb.append(c);
-                        s.add(sb);
-                        sb = new StringBuilder(20);
-                    } else {
-                        sb = sb.append(c);
-                    }
-                }
-                if (sb.length() > 0) {
-                    s.add(sb);
-                    sb = null;
-                }
-            }
-            r = s.get(sIndex++);
-            return r;
-        }
-
-        public boolean hasMoreElements() {
-            return buffer != null;
-        }
-
-        public StringBuilder nextElement() {
-            final StringBuilder r = buffer;
-            buffer = nextElement0();
-            return r;
-        }
-
-    }
-    
-    static StringBuilder trim(StringBuilder sb) {
-        int i = 0;
-        while (i < sb.length() && sb.charAt(i) <= ' ') {
-            i++;
-        }
-        if (i > 0) {
-            sb.delete(0, i);
-        }
-        i = sb.length() - 1;
-        while (i >= 0 && i < sb.length() && sb.charAt(i) <= ' ') {
-            i--;
-        }
-        if (i > 0) {
-            sb.delete(i + 1, sb.length());
-        }
-        return sb;
-    }
-    
-    public static sentencesFromInputStreamEnum sentencesFromInputStream(final InputStream is) {
-        assert is != null;
-        try {
-            return new sentencesFromInputStreamEnum(is);
-        } catch (final UnsupportedEncodingException e) {
-            return null;
-        }
-    }
-    
-    public static class sentencesFromInputStreamEnum implements Iterator<StringBuilder> {
-        // read sentences from a given input stream
-        // this enumerates StringBuilder objects
-        
-        private StringBuilder buffer;
-        private BufferedReader raf;
-        private int counter = 0;
-        private boolean pre = false;
-
-        public sentencesFromInputStreamEnum(final InputStream is) throws UnsupportedEncodingException {
-            assert is != null;
-            raf = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-            buffer = nextElement0();
-            counter = 0;
-            pre = false;
-        }
-
-        public void pre(final boolean x) {
-            this.pre = x;
-        }
-        
-        private StringBuilder nextElement0() {
-            try {
-                final StringBuilder s = readSentence(raf, pre);
-                //System.out.println(" SENTENCE='" + s + "'"); // DEBUG 
-                if (s == null) {
-                    raf.close();
-                    return null;
-                }
-                return s;
-            } catch (final IOException e) {
-                try {
-                    raf.close();
-                } catch (final Exception ee) {
-                }
-                return null;
-            }
-        }
-
-        public boolean hasNext() {
-            return buffer != null;
-        }
-
-        public StringBuilder next() {
-            if (buffer == null) {
-                return null;
-            }
-            counter = counter + buffer.length() + 1;
-            final StringBuilder r = buffer;
-            buffer = nextElement0();
-            return r;
-        }
-
-        public int count() {
-            return counter;
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    static StringBuilder readSentence(final Reader reader, final boolean pre) throws IOException {
-        final StringBuilder s = new StringBuilder(80);
-        int nextChar;
-        char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
-        
-        // find sentence end
-        while (true) {
-            nextChar = reader.read();
-            //System.out.print((char) nextChar); // DEBUG    
-            if (nextChar < 0) {
-                if (s.length() == 0) return null;
-                break;
-            }
-            c = (char) nextChar;
-            if (pre && ((c == (char) 10) || (c == (char) 13))) break;
-            if (c < ' ') c = ' ';
-            if ((lc == ' ') && (c == ' ')) continue; // ignore double spaces
-            s.append(c);
-            if (ContentScraper.punctuation(lc) && invisible(c)) break;
-            lc = c;
-        }
-        
-        if (s.length() == 0) return s;
-        if (s.charAt(s.length() - 1) == ' ') {
-            s.trimToSize();
-            s.deleteCharAt(s.length() - 1);
-        }
-        return s;
-    }
-
-    public static Map<String, Word> getWords(final String text, final DidYouMeanLibrary meaningLib) {
+    public static Map<String, Word> getWords(final String text, final WordCache meaningLib) {
         // returns a word/indexWord relation map
         if (text == null) return null;
         ByteArrayInputStream buffer;

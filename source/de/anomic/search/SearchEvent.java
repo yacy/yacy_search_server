@@ -46,7 +46,6 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.repository.LoaderDispatcher;
 
-import de.anomic.crawler.ResultURLs;
 import de.anomic.data.WorkTables;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeedDB;
@@ -75,7 +74,6 @@ public final class SearchEvent {
     // class variables for remote searches
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private final SortedMap<byte[], String> preselectedPeerHashes;
-    private final ResultURLs crawlResults;
     private final Thread localSearchThread;
     private final SortedMap<byte[], Integer> IACount;
     private final SortedMap<byte[], String> IAResults;
@@ -86,14 +84,12 @@ public final class SearchEvent {
     public SearchEvent(final QueryParams query,
                              final yacySeedDB peers,
                              final WorkTables workTables,
-                             final ResultURLs crawlResults,
                              final SortedMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts,
                              final LoaderDispatcher loader) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
         this.workTables = workTables;
-        this.crawlResults = crawlResults;
         this.query = query;
         this.secondarySearchSuperviser = (query.queryHashes.size() > 1) ? new SecondarySearchSuperviser() : null; // generate abstracts only for combined searches
         if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
@@ -135,7 +131,6 @@ public final class SearchEvent {
                     query.maxDistance,
                     query.getSegment(),
                     peers,
-                    crawlResults,
                     rankingProcess,
                     secondarySearchSuperviser,
                     fetchpeers,
@@ -520,7 +515,7 @@ public final class SearchEvent {
                 rankingProcess.moreFeeders(1);
                 checkedPeers.add(peer);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, urls, query.getSegment(), peers, crawlResults, rankingProcess, peer, Switchboard.urlBlacklist,
+                        words, urls, query.getSegment(), peers, rankingProcess, peer, Switchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
             }
             

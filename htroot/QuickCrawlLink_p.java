@@ -162,7 +162,7 @@ public class QuickCrawlLink_p {
                         xdstopw,
                         xpstopw,
                         CrawlProfile.CacheStrategy.IFFRESH);
-                sb.crawler.profilesActiveCrawls.put(pe.handle().getBytes(), pe);
+                sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {
                 // mist
                 prop.put("mode_status", "2");//Error with url

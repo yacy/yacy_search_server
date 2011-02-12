@@ -39,7 +39,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.repository.Blacklist;
 
-import de.anomic.crawler.ResultURLs;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
@@ -67,8 +66,6 @@ public class yacySearch extends Thread {
     final private Bitfield constraint;
     final private yacySeedDB peers;
     
-    ResultURLs crawlResults;
-    
     public yacySearch(
               final String wordhashes, final String excludehashes,
               final String urlhashes,
@@ -80,7 +77,6 @@ public class yacySearch extends Thread {
               final yacySeed targetPeer,
               final Segment indexSegment,
               final yacySeedDB peers,
-              final ResultURLs crawlResults,
               final RankingProcess containerCache,
               final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
               final Blacklist blacklist,
@@ -101,7 +97,6 @@ public class yacySearch extends Thread {
         this.partitions = partitions;
         this.indexSegment = indexSegment;
         this.peers = peers;
-        this.crawlResults = crawlResults;
         this.containerCache = containerCache;
         this.secondarySearchSuperviser = secondarySearchSuperviser;
         this.blacklist = blacklist;
@@ -121,7 +116,7 @@ public class yacySearch extends Thread {
                         wordhashes, excludehashes, urlhashes, prefer, filter, language,
                         sitehash, authorhash,
                         count, maxDistance, global, partitions,
-                        targetPeer, indexSegment, crawlResults, containerCache, secondarySearchSuperviser,
+                        targetPeer, indexSegment, containerCache, secondarySearchSuperviser,
                         blacklist, rankingProfile, constraint);
             if (urls >= 0) {
                 // urls is an array of url hashes. this is only used for log output
@@ -262,7 +257,6 @@ public class yacySearch extends Thread {
             final int count, final int maxDist,
             final Segment indexSegment,
             final yacySeedDB peers,
-            final ResultURLs crawlResults,
             final RankingProcess containerCache,
             final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
             int targets,
@@ -295,7 +289,7 @@ public class yacySearch extends Thread {
                     wordhashes, excludehashes, "", prefer, filter, language,
                     sitehash, authorhash,
                     count, maxDist, true, targets, targetPeers[i],
-                    indexSegment, peers, crawlResults, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
+                    indexSegment, peers, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
                 searchThreads[i].start();
             } catch (OutOfMemoryError e) {
                 break;
@@ -308,7 +302,6 @@ public class yacySearch extends Thread {
             final String wordhashes, final String urlhashes,
             final Segment indexSegment,
             final yacySeedDB peers,
-            final ResultURLs crawlResults,
             final RankingProcess containerCache,
             final String targethash, final Blacklist blacklist,
             final RankingProfile rankingProfile,
@@ -326,7 +319,7 @@ public class yacySearch extends Thread {
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash.getBytes()));
         final yacySearch searchThread = new yacySearch(
                 wordhashes, "", urlhashes, Pattern.compile(""), Pattern.compile(".*"), "", "", "", 0, 9999, true, 0, targetPeer,
-                indexSegment, peers, crawlResults, containerCache, null, blacklist, rankingProfile, constraint);
+                indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;
     }

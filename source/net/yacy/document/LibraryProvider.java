@@ -20,7 +20,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.anomic.data;
+package net.yacy.document;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -47,7 +47,7 @@ public class LibraryProvider {
     
     public static final String disabledExtension = ".disabled";
     
-    public static DidYouMeanLibrary dymLib = new DidYouMeanLibrary(null);
+    public static WordCache dymLib = new WordCache(null);
     public static OverarchingLocalization geoLoc = new OverarchingLocalization();
     private static File dictSource = null;
     private static File dictRoot = null;
@@ -124,7 +124,7 @@ public class LibraryProvider {
     public static void initDidYouMean() {
     	final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
         if (!dymDict.exists()) dymDict.mkdirs();
-        dymLib = new DidYouMeanLibrary(dymDict);
+        dymLib = new WordCache(dymDict);
     }
     
     public static void integrateDeReWo() {
