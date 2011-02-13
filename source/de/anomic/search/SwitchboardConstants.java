@@ -271,6 +271,10 @@ public final class SwitchboardConstants {
     public static final String CLUSTER_MODE_PRIVATE_CLUSTER     = "privatecluster";
     public static final String CLUSTER_MODE_PUBLIC_PEER         = "publicpeer";
     public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
+
+    public static final String DHT_BURST_ROBINSON               = "network.unit.dht.burst.robinson";
+    public static final String DHT_BURST_MULTIWORD              = "network.unit.dht.burst.multiword";
+    
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>
      * <p>Name of the setting how many active crawler-threads may maximal be running on the same time</p>

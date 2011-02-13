@@ -24,16 +24,10 @@
 
 package de.anomic.yacy;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.storage.DynamicScore;
-import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
@@ -151,104 +145,7 @@ public class yacySearch extends Thread {
     public yacySeed target() {
         return targetPeer;
     }
-
-    private static yacySeed[] selectClusterPeers(final yacySeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
-    	final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
-    	final List<yacySeed> l = new ArrayList<yacySeed>();
-    	Map.Entry<byte[], String> entry;
-    	yacySeed s;
-    	while (i.hasNext()) {
-            entry = i.next();
-            s = seedDB.get(new String(entry.getKey())); // should be getConnected; get only during testing time
-            if (s != null) {
-                s.setAlternativeAddress(entry.getValue());
-                l.add(s);
-            }
-    	}
-//    	final yacySeed[] result = new yacySeed[l.size()];
-//    	for (int j = 0; j < l.size(); j++) {
-//    		result[j] = l.get(j);
-//    	}
-//    	return result;
-    	return l.toArray(new yacySeed[0]);
-    }
     
-    private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final HandleSet wordhashes, int seedcount, int redundancy) {
-        // find out a specific number of seeds, that would be relevant for the given word hash(es)
-        // the result is ordered by relevance: [0] is most relevant
-        // the seedcount is the maximum number of wanted results
-        if (seedDB == null) { return null; }
-        if ((seedcount >= seedDB.sizeConnected()) || (seedDB.noDHTActivity())) {
-            seedcount = seedDB.sizeConnected();
-        }
-        
-        // put in seeds according to dht
-        final DynamicScore<String> ranking = new ScoreCluster<String>();
-        final Map<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>();
-        final Map<String, yacySeed> matchingSeeds = new HashMap<String, yacySeed>();
-        yacySeed seed;
-        Iterator<yacySeed> dhtEnum;         
-        Iterator<byte[]> iter = wordhashes.iterator();
-        while (iter.hasNext()) {
-            PeerSelection.selectDHTPositions(seedDB, iter.next(), redundancy, regularSeeds, ranking);
-        }
-
-        // put in seeds according to size of peer
-        dhtEnum = seedDB.seedsSortedConnected(false, yacySeed.ICOUNT);
-        int c = Math.min(seedDB.sizeConnected(), seedcount);
-        int score;
-        while (dhtEnum.hasNext() && c > 0) {
-            seed = dhtEnum.next();
-            if (seed == null) continue;
-            if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
-            score = (int) Math.round(Math.random() * ((c / 3) + 3));
-            if (Log.isFine("PLASMA")) Log.logFine("PLASMA", "selectPeers/RWIcount: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getWordCount() + ", score " + score);
-            ranking.inc(seed.hash, score);
-            regularSeeds.put(seed.hash, seed);
-            c--;
-        }
-
-        // put in seeds that are public robinson peers and where the peer tags match with query
-        // or seeds that are newbies to ensure that public demonstrations always work
-        dhtEnum = seedDB.seedsConnected(true, false, null, (float) 0.50);
-        while (dhtEnum.hasNext()) {
-        	seed = dhtEnum.next();
-            if (seed == null) continue;
-            if (seed.matchPeerTags(wordhashes)) {
-                String specialized = seed.getPeerTags().toString();
-                if (!specialized.equals("[*]")) Log.logInfo("PLASMA", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + specialized);
-                regularSeeds.remove(seed.hash);
-                ranking.delete(seed.hash);
-                matchingSeeds.put(seed.hash, seed);
-            } else if (seed.getFlagAcceptRemoteIndex() && seed.getAge() < 1) { // the 'workshop feature'
-                Log.logInfo("PLASMA", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
-                regularSeeds.remove(seed.hash);
-                ranking.delete(seed.hash);
-                matchingSeeds.put(seed.hash, seed);
-            }
-        }
-        
-        // evaluate the ranking score and select seeds
-        seedcount = Math.min(ranking.size(), seedcount);
-        final yacySeed[] result = new yacySeed[seedcount + matchingSeeds.size()];
-        c = 0;
-        final Iterator<String> iters = ranking.keys(false); // higher are better
-        while (iters.hasNext() && c < seedcount) {
-            seed = regularSeeds.get(iters.next());
-            seed.selectscore = c;
-            Log.logInfo("PLASMA", "selectPeers/_dht_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
-            result[c++] = seed;
-        }
-        for (final yacySeed s: matchingSeeds.values()) {
-            s.selectscore = c;
-            Log.logInfo("PLASMA", "selectPeers/_match_: " + s.hash + ":" + s.getName() + " is choice " + c);
-            result[c++] = s;
-        }
-
-//      System.out.println("DEBUG yacySearch.selectPeers = " + seedcount + " seeds:"); for (int i = 0; i < seedcount; i++) System.out.println(" #" + i + ":" + result[i]); // debug
-        return result;
-    }
-
     public static yacySearch[] primaryRemoteSearches(
             final String wordhashes, final String excludehashes,
             final Pattern prefer, final Pattern filter, String language,
@@ -259,11 +156,12 @@ public class yacySearch extends Thread {
             final yacySeedDB peers,
             final RankingProcess containerCache,
             final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
-            int targets,
             final Blacklist blacklist,
             final RankingProfile rankingProfile,
             final Bitfield constraint,
-            final SortedMap<byte[], String> clusterselection) {
+            final SortedMap<byte[], String> clusterselection,
+            final int burstRobinsonPercent,
+            final int burstMultiwordPercent) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
@@ -272,14 +170,15 @@ public class yacySearch extends Thread {
         assert wordhashes.length() >= 12 : "wordhashes = " + wordhashes;
         final yacySeed[] targetPeers =
             (clusterselection == null) ?
-                    selectSearchTargets(
+                    PeerSelection.selectSearchTargets(
                             peers,
                             QueryParams.hashes2Set(wordhashes),
-                            targets,
-                            peers.redundancy())
-                  : selectClusterPeers(peers, clusterselection);
+                            peers.redundancy(),
+                            burstRobinsonPercent,
+                            burstMultiwordPercent)
+                  : PeerSelection.selectClusterPeers(peers, clusterselection);
         if (targetPeers == null) return new yacySearch[0];
-        targets = targetPeers.length;
+        int targets = targetPeers.length;
         if (targets == 0) return new yacySearch[0];
         final yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
@@ -292,6 +191,7 @@ public class yacySearch extends Thread {
                     indexSegment, peers, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
                 searchThreads[i].start();
             } catch (OutOfMemoryError e) {
+                e.printStackTrace();
                 break;
             }
         }

@@ -28,7 +28,6 @@ package de.anomic.search;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -423,11 +422,7 @@ public class Segment {
             }
             // get the word set
             Set<String> words = null;
-            try {
-                words = new Condenser(document, true, true, null).words().keySet();
-            } catch (final UnsupportedEncodingException e) {
-                Log.logException(e);
-            }
+            words = new Condenser(document, true, true, null).words().keySet();
             
             // delete all word references
             int count = 0;

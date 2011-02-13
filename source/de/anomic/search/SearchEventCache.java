@@ -104,7 +104,9 @@ public class SearchEventCache {
             final WorkTables workTables,
             final SortedMap<byte[], String> preselectedPeerHashes,
             final boolean generateAbstracts,
-            final LoaderDispatcher loader) {
+            final LoaderDispatcher loader,
+            final int burstRobinsonPercent,
+            final int burstMultiwordPercent) {
         
         String id = query.id(false);
         SearchEvent event = SearchEventCache.lastEvents.get(id);
@@ -126,7 +128,7 @@ public class SearchEventCache {
         }
         if (event == null) {
             // start a new event
-            event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader);
+            event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, burstRobinsonPercent, burstMultiwordPercent);
         }
     
         return event;

@@ -26,9 +26,12 @@ package de.anomic.yacy.dht;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.storage.DynamicScore;
@@ -53,13 +56,109 @@ import de.anomic.yacy.yacyVersion;
  */
 
 public class PeerSelection {
-    
-    public static void selectDHTPositions(
+
+    public static yacySeed[] selectClusterPeers(final yacySeedDB seedDB, final SortedMap<byte[], String> peerhashes) {
+        final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
+        final List<yacySeed> l = new ArrayList<yacySeed>();
+        Map.Entry<byte[], String> entry;
+        yacySeed s;
+        while (i.hasNext()) {
+            entry = i.next();
+            s = seedDB.get(new String(entry.getKey())); // should be getConnected; get only during testing time
+            if (s != null) {
+                s.setAlternativeAddress(entry.getValue());
+                l.add(s);
+            }
+        }
+        return l.toArray(new yacySeed[l.size()]);
+    }
+
+    public static yacySeed[] selectSearchTargets(
+            final yacySeedDB seedDB,
+            final HandleSet wordhashes,
+            int redundancy,
+            int burstRobinsonPercent,
+            int burstMultiwordPercent) {
+        // find out a specific number of seeds, that would be relevant for the given word hash(es)
+        // the result is ordered by relevance: [0] is most relevant
+        // the seedcount is the maximum number of wanted results
+        if (seedDB == null) { return null; }
+        
+        // put in seeds according to dht
+        final Map<String, yacySeed> regularSeeds = new HashMap<String, yacySeed>(); // dht position seeds
+        yacySeed seed;
+        Iterator<yacySeed> dhtEnum;         
+        Iterator<byte[]> iter = wordhashes.iterator();
+        while (iter.hasNext()) {
+            selectDHTPositions(seedDB, iter.next(), redundancy, regularSeeds);
+        }
+        //int minimumseeds = Math.min(seedDB.scheme.verticalPartitions(), regularSeeds.size()); // that should be the minimum number of seeds that are returned
+        //int maximumseeds = seedDB.scheme.verticalPartitions() * redundancy; // this is the maximum number of seeds according to dht and heuristics. It can be more using burst mode.
+        
+        // put in some seeds according to size of peer.
+        // But not all, that would produce too much load on the largest peers
+        dhtEnum = seedDB.seedsSortedConnected(false, yacySeed.ICOUNT);
+        int c = Math.max(Math.min(5, seedDB.sizeConnected()), wordhashes.size() > 1 ? seedDB.sizeConnected() * burstMultiwordPercent / 100 : 0);
+        while (dhtEnum.hasNext() && c-- > 0) {
+            seed = dhtEnum.next();
+            if (seed == null) continue;
+            if (seed.getAge() < 1) { // the 'workshop feature'
+                Log.logInfo("DHT", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
+                regularSeeds.put(seed.hash, seed);
+                continue;
+            }
+            if (Math.random() * 100 + (wordhashes.size() > 1 ? burstMultiwordPercent : 25) >= 50) {
+                if (Log.isFine("DHT")) Log.logFine("DHT", "selectPeers/CountBurst: " + seed.hash + ":" + seed.getName() + ", RWIcount=" + seed.getWordCount());
+                regularSeeds.put(seed.hash, seed);
+                continue;
+            }
+        }
+
+        // create a set that contains only robinson peers because these get a special handling
+        dhtEnum = seedDB.seedsConnected(true, false, null, 0.50f);
+        Set<yacySeed> robinson = new HashSet<yacySeed>();
+        while (dhtEnum.hasNext()) {
+            seed = dhtEnum.next();
+            if (seed == null) continue;
+            if (!seed.getFlagAcceptRemoteIndex()) robinson.add(seed);
+        }
+
+        // add robinson peers according to robinson burst rate
+        dhtEnum = robinson.iterator();
+        c = robinson.size() * burstRobinsonPercent / 100;
+        while (dhtEnum.hasNext() && c-- > 0) {
+            seed = dhtEnum.next();
+            if (Math.random() * 100 + burstRobinsonPercent >= 100) {
+                if (Log.isFine("DHT")) Log.logFine("DHT", "selectPeers/RobinsonBurst: " + seed.hash + ":" + seed.getName());
+                regularSeeds.put(seed.hash, seed);
+                continue;
+            }
+        }
+
+        // put in seeds that are public robinson peers and where the peer tags match with query
+        // or seeds that are newbies to ensure that private demonstrations always work
+        dhtEnum = robinson.iterator();
+        while (dhtEnum.hasNext()) {
+            seed = dhtEnum.next();
+            if (seed.matchPeerTags(wordhashes)) {
+                // peer tags match
+                String specialized = seed.getPeerTags().toString();
+                if (!specialized.equals("[*]")) Log.logInfo("DHT", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + specialized);
+                regularSeeds.put(seed.hash, seed);
+            }
+        }
+        
+        // produce return set
+        yacySeed[] result = new yacySeed[regularSeeds.size()];
+        result = regularSeeds.values().toArray(result);
+        return result;
+    }
+
+    private static void selectDHTPositions(
             final yacySeedDB seedDB, 
             byte[] wordhash,
             int redundancy, 
-            Map<String, yacySeed> regularSeeds,
-            DynamicScore<String> ranking) {
+            Map<String, yacySeed> regularSeeds) {
         // this method is called from the search target computation
         final long[] dhtVerticalTargets = seedDB.scheme.dhtPositions(wordhash);
         yacySeed seed;
@@ -72,50 +171,13 @@ public class PeerSelection {
                 seed = dhtEnum.next();
                 if (seed == null || seed.hash == null) continue;
                 if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
-                if (Log.isFine("PLASMA")) Log.logFine("PLASMA", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
-                ranking.inc(seed.hash, 2 * c);
+                if (Log.isFine("DHT")) Log.logFine("DHT", "selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
                 regularSeeds.put(seed.hash, seed);
                 c--;
             }
         }
     }
-    
-    private static int guessedOwn = 0;
-    
-    public static boolean shallBeOwnWord(final yacySeedDB seedDB, final byte[] wordhash, final String urlhash, final int redundancy) {
-        // the guessIfOwnWord is a fast method that should only fail in case that a 'true' may be incorrect, but a 'false' shall always be correct
-        if (guessIfOwnWord(seedDB, wordhash, urlhash)) {
-            // this case must be verified, because it can be wrong.
-            guessedOwn++;
-            return verifyIfOwnWord(seedDB, wordhash, urlhash, redundancy);
-        } else {
-            return false;
-        }
-        
-    }
-    
-    private static boolean guessIfOwnWord(final yacySeedDB seedDB, final byte[] wordhash, final String urlhash) {
-        if (seedDB == null) return false;
-        int connected = seedDB.sizeConnected();
-        if (connected == 0) return true;
-        final long target = seedDB.scheme.dhtPosition(wordhash, urlhash);
-        final long mypos = seedDB.scheme.dhtPosition(seedDB.mySeed().hash.getBytes(), urlhash);
-        long distance = FlatWordPartitionScheme.dhtDistance(target, mypos);
-        if (distance <= 0) return false;
-        if (distance <= Long.MAX_VALUE / connected * 2) return true;
-        return false;
-    }
-    
-    private static boolean verifyIfOwnWord(final yacySeedDB seedDB, byte[] wordhash, String urlhash, int redundancy) {
-        String myHash = seedDB.mySeed().hash;
-        wordhash = FlatWordPartitionScheme.positionToHash(seedDB.scheme.dhtPosition(wordhash, urlhash));
-        final Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, true);
-        while (dhtEnum.hasNext()) {
-            if (dhtEnum.next().hash.equals(myHash)) return true;
-        }
-        return false;
-    }
-    
+
     public static byte[] selectTransferStart() {
         return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + Word.commonHashLength).getBytes();
     }
@@ -131,7 +193,7 @@ public class PeerSelection {
             final byte[] starthash,
             int max,
             boolean alsoMyOwn) {
-        final Iterator<yacySeed> seedIter = PeerSelection.getAcceptRemoteIndexSeeds(seedDB, starthash, max, alsoMyOwn);
+        final Iterator<yacySeed> seedIter = getAcceptRemoteIndexSeeds(seedDB, starthash, max, alsoMyOwn);
         final ArrayList<yacySeed> targets = new ArrayList<yacySeed>();
         while (seedIter.hasNext() && max-- > 0) targets.add(seedIter.next());
         return targets;
@@ -159,7 +221,7 @@ public class PeerSelection {
         private int remaining;
         private boolean alsoMyOwn;
         
-        public acceptRemoteIndexSeedEnum(yacySeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
+        private acceptRemoteIndexSeedEnum(yacySeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
             this.remaining = max;
@@ -238,7 +300,7 @@ public class PeerSelection {
         private float minVersion;
         private yacySeedDB seedDB;
         
-        public seedDHTEnum(final yacySeedDB seedDB, final byte[] firstHash, final float minVersion) {
+        private seedDHTEnum(final yacySeedDB seedDB, final byte[] firstHash, final float minVersion) {
             this.seedDB = seedDB;
             this.steps = seedDB.sizeConnected();
             this.minVersion = minVersion;
@@ -290,7 +352,7 @@ public class PeerSelection {
         private yacySeed nextSeed;
         private yacySeedDB seedDB;
         
-        public providesRemoteCrawlURLsEnum(final yacySeedDB seedDB) {
+        private providesRemoteCrawlURLsEnum(final yacySeedDB seedDB) {
             this.seedDB = seedDB;
             se = getDHTSeeds(seedDB, null, yacyVersion.YACY_POVIDES_REMOTECRAWL_LISTS);
             nextSeed = nextInternal();

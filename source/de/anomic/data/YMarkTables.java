@@ -501,13 +501,9 @@ public class YMarkTables {
 	}
 	
 	public static TreeMap<String,Word> getWordCounts(final Document document) {
-        try {
-			if(document != null) {
-                return sortWordCounts(new Condenser(document, true, true, LibraryProvider.dymLib).words());
-			}
-		} catch (IOException e) {			
-			Log.logException(e);
-		}
+        if (document != null) {
+            return sortWordCounts(new Condenser(document, true, true, LibraryProvider.dymLib).words());
+        }
 		return new TreeMap<String, Word>();
 	}
 	

@@ -40,7 +40,7 @@ public class WordTokenizer implements Enumeration<String> {
     private unsievedWordsEnum e;
     private WordCache meaningLib;
 
-    public WordTokenizer(final InputStream is, final WordCache meaningLib) throws UnsupportedEncodingException {
+    public WordTokenizer(final InputStream is, final WordCache meaningLib) {
         assert is != null;
         this.e = new unsievedWordsEnum(is);
         this.buffer = nextElement0();
@@ -83,7 +83,7 @@ public class WordTokenizer implements Enumeration<String> {
         private List<StringBuilder> s;
         private int sIndex;
 
-        public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
+        public unsievedWordsEnum(final InputStream is) {
             assert is != null;
             e = new SentenceReader(is);
             s = new ArrayList<StringBuilder>();

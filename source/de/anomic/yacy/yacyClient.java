@@ -422,7 +422,7 @@ public final class yacyClient {
                 sitehash, authorhash, count, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
                 secondarySearchSuperviser, rankingProfile, constraint);
         } catch (final IOException e) {
-            yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore);
+            yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
             return -1;
         }
@@ -553,17 +553,12 @@ public final class yacyClient {
         }
         
         // generate statistics
-        if (yacyCore.log.isFine()) yacyCore.log.logFine("SEARCH "
-                + result.urlcount
-                + " URLS FROM "
-                + target.hash
-                + ":"
-                + target.getName()
-                + ", score="
-                + target.selectscore
-                + ", searchtime=" + result.searchtime + ", netdelay="
-                + (totalrequesttime - result.searchtime) + ", references="
-                + result.references);
+        if (yacyCore.log.isFine()) yacyCore.log.logFine(
+                "SEARCH " + result.urlcount +
+                " URLS FROM " + target.hash + ":" + target.getName() +
+                ", searchtime=" + result.searchtime +
+                ", netdelay=" + (totalrequesttime - result.searchtime) +
+                ", references=" + result.references);
         return result.urlcount;
     }
     

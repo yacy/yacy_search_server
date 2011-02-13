@@ -49,7 +49,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -1834,19 +1833,13 @@ public final class Switchboard extends serverSwitch {
         Condenser[] condenser = new Condenser[in.documents.length];
         if (this.log.isFine()) log.logFine("Condensing for '" + in.queueEntry.url().toNormalform(false, true) + "'");
         for (int i = 0; i < in.documents.length; i++) {
-            // strip out words and generate statistics
-            try {
-                condenser[i] = new Condenser(in.documents[i], in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia(), LibraryProvider.dymLib);
-    
-                // update image result list statistics
-                // its good to do this concurrently here, because it needs a DNS lookup
-                // to compute a URL hash which is necessary for a double-check
-                final CrawlProfile profile = in.queueEntry.profile();
-                ResultImages.registerImages(in.queueEntry.url(), in.documents[i], (profile == null) ? true : !profile.remoteIndexing());
-
-            } catch (final UnsupportedEncodingException e) {
-                return null;
-            }
+            condenser[i] = new Condenser(in.documents[i], in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia(), LibraryProvider.dymLib);
+   
+            // update image result list statistics
+            // its good to do this concurrently here, because it needs a DNS lookup
+            // to compute a URL hash which is necessary for a double-check
+            final CrawlProfile profile = in.queueEntry.profile();
+            ResultImages.registerImages(in.queueEntry.url(), in.documents[i], (profile == null) ? true : !profile.remoteIndexing());
         }
         return new indexingQueueEntry(in.process, in.queueEntry, in.documents, condenser);
     }

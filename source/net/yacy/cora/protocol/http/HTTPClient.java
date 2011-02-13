@@ -91,7 +91,7 @@ import org.apache.http.util.EntityUtils;
  */
 public class HTTPClient {
 
-	private final static int maxcon = 20;
+	private final static int maxcon = 200;
 	private static IdledConnectionEvictor idledConnectionEvictor = null;
 	private static HttpClient httpClient = initConnectionManager();
 	private Header[] headers = null;

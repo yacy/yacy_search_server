@@ -65,7 +65,7 @@ public interface PartitionScheme {
     public long dhtPosition(final byte[] wordHash, final int verticalPosition);
     
     public int verticalPosition(final byte[] urlHash);
-    
+
     public long[] dhtPositions(final byte[] wordHash);
  
     public long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer);

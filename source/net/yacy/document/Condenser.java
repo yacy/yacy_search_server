@@ -105,7 +105,7 @@ public final class Condenser {
             final boolean indexText,
             final boolean indexMedia,
             final WordCache meaningLib
-            ) throws UnsupportedEncodingException {
+            ) {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.words = new HashMap<String, Word>();
@@ -254,7 +254,7 @@ public final class Condenser {
         }
     }
 
-    public Condenser(final InputStream text, final WordCache meaningLib) throws UnsupportedEncodingException {
+    public Condenser(final InputStream text, final WordCache meaningLib) {
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         words = new TreeMap<String, Word>();
@@ -278,7 +278,7 @@ public final class Condenser {
         return this.languageIdentificator.getLanguage();
     }
 
-    private void createCondensement(final InputStream is, final WordCache meaningLib) throws UnsupportedEncodingException {
+    private void createCondensement(final InputStream is, final WordCache meaningLib) {
         assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
         StringBuilder sentence = new StringBuilder(100);
@@ -461,11 +461,7 @@ public final class Condenser {
 		} catch (UnsupportedEncodingException e1) {
 			buffer = new ByteArrayInputStream(text.getBytes());
 		}
-        try {
-            return new Condenser(buffer, meaningLib).words();
-        } catch (final UnsupportedEncodingException e) {
-            return null;
-        }
+        return new Condenser(buffer, meaningLib).words();
     }
     
     public static void main(final String[] args) {

@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -71,7 +72,7 @@ import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
-public class yacySeed implements Cloneable {
+public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yacySeed> {
 
     public static String ANON_PREFIX = "_anon";
     
@@ -171,7 +172,6 @@ public class yacySeed implements Cloneable {
     public String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
     private final ConcurrentHashMap<String, String> dna;
-    protected int selectscore = -1; // only for debugging
     private String alternativeIP = null;
 
     public yacySeed(final String theHash, final ConcurrentHashMap<String, String> theDna) {
@@ -857,6 +857,25 @@ public class yacySeed implements Cloneable {
         ConcurrentHashMap<String, String> ndna = new ConcurrentHashMap<String, String>();
         ndna.putAll(this.dna);
         return new yacySeed(this.hash, ndna);
+    }
+
+    @Override
+    public int compareTo(yacySeed arg0) {
+        // TODO Auto-generated method stub
+        int o1 = this.hashCode();
+        int o2 = arg0.hashCode();
+        if (o1 > o2) return 1;
+        if (o2 > o1) return -1;
+        return 0;
+    }
+    
+    public int hashCode() {
+        return (int) (Base64Order.enhancedCoder.cardinal(this.hash) & ((long) Integer.MAX_VALUE));
+    }
+
+    @Override
+    public int compare(yacySeed o1, yacySeed o2) {
+        return o1.compareTo(o2);
     }
     
 }

@@ -86,7 +86,9 @@ public final class SearchEvent {
                              final WorkTables workTables,
                              final SortedMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts,
-                             final LoaderDispatcher loader) {
+                             final LoaderDispatcher loader,
+                             final int burstRobinsonPercent,
+                             final int burstMultiwordPercent) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
         this.workTables = workTables;
@@ -107,8 +109,6 @@ public final class SearchEvent {
         if (remote && peers.sizeConnected() == 0) remote = false;
         final long start = System.currentTimeMillis();
         if (remote) {
-        	final int fetchpeers = 32;
-            
         	// initialize a ranking process that is the target for data
         	// that is generated concurrently from local and global search threads
             this.rankingProcess = new RankingProcess(this.query, this.order, max_results_preparation);
@@ -118,7 +118,6 @@ public final class SearchEvent {
                        
             // start global searches
             final long timer = System.currentTimeMillis();
-            Log.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
             this.primarySearchThreads = (query.queryHashes.isEmpty()) ? null : yacySearch.primaryRemoteSearches(
                     QueryParams.hashSet2hashString(query.queryHashes),
                     QueryParams.hashSet2hashString(query.excludeHashes),
@@ -133,11 +132,13 @@ public final class SearchEvent {
                     peers,
                     rankingProcess,
                     secondarySearchSuperviser,
-                    fetchpeers,
                     Switchboard.urlBlacklist,
                     query.ranking,
                     query.constraint,
-                    (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
+                    (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes,
+                    burstRobinsonPercent,
+                    burstMultiwordPercent);
+            Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
             if (this.primarySearchThreads != null) {
                 this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
