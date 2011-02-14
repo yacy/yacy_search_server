@@ -259,6 +259,8 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_scheduler_inline", inline ? "true" : "false");
                 prop.put("showtable_list_" + count + "_scheduler_filter", typefilter.pattern());
                 prop.put("showtable_list_" + count + "_scheduler_query", query.pattern());
+                prop.put("showtable_list_" + count + "_scheduler_startRecord", startRecord);
+                prop.put("showtable_list_" + count + "_scheduler_maximumRecords", maximumRecords);
                 count++;
             }
             if (scheduledactions) {
