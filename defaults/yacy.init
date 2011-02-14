@@ -446,10 +446,8 @@ staticIP=
 # status page. This is active by default, to make it easier for first-time
 # users to understand what this application does. You can disable browser
 # pop-up here or set a different start page, like the search page
-# the browser type is optional and works only under certain conditions
 browserPopUpTrigger=true
 browserPopUpPage=index.html
-browserPopUpApplication=firefox
 
 # a forward page can be given for the index.html page
 # when a user accesses the index.html page, he/she is forwarded to the page

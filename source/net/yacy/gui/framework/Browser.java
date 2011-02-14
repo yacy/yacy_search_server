@@ -24,10 +24,11 @@
 
 package net.yacy.gui.framework;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
+import java.net.URI;
 import java.util.Properties;
 
 import net.yacy.kelondro.logging.Log;
@@ -55,10 +56,6 @@ public class Browser {
     // calculated system constants
     public static int maxPathLength = 65535;
 
-    // Macintosh-specific statics
-    private static Class<?>    macMRJFileUtils = null;
-    private static Method      macOpenURL = null;
-
     // static initialization
     static {
         // check operation system type
@@ -76,63 +73,68 @@ public class Browser {
         isWindows = (systemOS == systemWindows);
         isWin32 = (isWindows && System.getProperty("os.arch", "").contains("x86"));
 
-        // set up the MRJ Methods through reflection
-        if (isMacArchitecture) try {
-            macMRJFileUtils = Class.forName("com.apple.mrj.MRJFileUtils");
-            macOpenURL = macMRJFileUtils.getMethod("openURL", new Class[] {Class.forName("java.lang.String")});
-            final byte[] nullb = new byte[4];
-            for (int i = 0; i < 4; i++) nullb[i] = 0;
-        } catch (final Exception e) {
-            //Log.logException(e);
-            macMRJFileUtils = null;
-        }
-
         // set up maximum path length according to system
         if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
     }
-
-
+    
     public static void openBrowser(final String url) {
-        openBrowser(url, "firefox");
+        boolean head = System.getProperty("java.awt.headless", "").equals("false");
+        try {
+            if (systemOS == systemMacOSX) {
+                openBrowserMac(url);
+            } else if (systemOS == systemUnix) {
+                openBrowserUnix(url);
+            } else if (systemOS == systemWindows) {
+                openBrowserWin(url);
+            } else {
+                throw new RuntimeException("System unknown");
+            }
+        } catch (Exception e) {
+            if (head) try {
+                openBrowserJava(url);
+            } catch (Exception ee) {
+                logBrowserFail(url, ee);
+            } else {
+                logBrowserFail(url, e);
+            }
+        }
     }
 
-    public static void openBrowser(final String url, final String app) {
-        try {
-            String cmd;
-            Process p;
-            if (systemOS != systemUnknown) {
-                if (systemOS == systemMacOSC) {
-                    if ((isMacArchitecture) && (macMRJFileUtils != null)) {
-                        macOpenURL.invoke(null, new Object[] {url});
-                    }
-                } else if (systemOS == systemMacOSX) {
-                    p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
-                    p.waitFor();
-                    if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
-                } else if (systemOS == systemUnix) {
-                    cmd = app + " -remote openURL(" + url + ")";
-                    p = Runtime.getRuntime().exec(cmd);
-                    p.waitFor();
-                    if (p.exitValue() != 0) {
-                        cmd = app + " "  + url;
-                        p = Runtime.getRuntime().exec(cmd);
-                        // no error checking, because it blocks until firefox is closed
-                    }
-                } else if (systemOS == systemWindows) {
-                    // see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
-                    if (System.getProperty("os.name").contains("2000")) cmd = "rundll32 url.dll,FileProtocolHandler " + url;
-                    else cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
-                    //cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
-                    p = Runtime.getRuntime().exec(cmd);
-                    p.waitFor();
-                    if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
-                }
-            }
-        } catch (final Exception e) {
-            System.err.println("ERROR "+ e.getClass() +" in openBrowser(): "+ e.getMessage());
-            // browser could not be started automatically, tell user to do it
-            System.out.println("please start your browser and open the following location: " + url);
+    private static void openBrowserJava(final String url) throws Exception {
+        Desktop.getDesktop().browse(new URI(url));
+    }
+    
+    private static void openBrowserMac(final String url) throws Exception {
+        Process p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
+        p.waitFor();
+        if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+    }
+    
+    private static void openBrowserUnix(final String url) throws Exception {
+        String cmd = "firefox -remote openURL(" + url + ")";
+        Process p = Runtime.getRuntime().exec(cmd);
+        p.waitFor();
+        if (p.exitValue() != 0) {
+            cmd = "/etc/alternatives/www-browser "  + url;
+            p = Runtime.getRuntime().exec(cmd);
+            // no error checking, because it blocks until firefox is closed
         }
+    }
+    
+    private static void openBrowserWin(final String url) throws Exception {
+        // see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
+        String cmd;
+        if (System.getProperty("os.name").contains("2000")) cmd = "rundll32 url.dll,FileProtocolHandler " + url;
+        else cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
+        //cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
+        Process p = Runtime.getRuntime().exec(cmd);
+        p.waitFor();
+        if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+    }
+
+    private static void logBrowserFail(final String url, Exception e) {
+        if (e != null) Log.logException(e);
+        Log.logInfo("Browser", "please start your browser and open the following location: " + url);
     }
     
     private static String errorResponse(final Process p) {

@@ -312,8 +312,7 @@ public final class yacy {
                     final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
                     //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
-                    final String  browserPopUpApplication = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_APPLICATION, "firefox");
-                    Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
+                    Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage);
                 }
                 
                 // unlock yacyTray browser popup
