@@ -27,7 +27,7 @@
     #(passwordNotSetWarning)#::<div class="error">No password is set for the administration account. Please define a password for the admin account.</div>#(/passwordNotSetWarning)#
 
     <fieldset><legend>Admin Account</legend>
-      <form action="ConfigAccounts_p.html" method="post">
+      <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
           <fieldset>
             <legend>
             <input type="radio" name="access" id="access_localhost" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
@@ -56,7 +56,7 @@
     </fieldset>
     
     <fieldset><legend>User Accounts</legend>
-	<form action="ConfigAccounts_p.html">
+	<form action="ConfigAccounts_p.html" accept-charset="UTF-8">
       <fieldset><legend>Select user</legend>
         <dl>
           <dt><label for="user">Select user</label>:</dt>
@@ -75,7 +75,7 @@
       </fieldset>
     </form>
     
-    <form action="ConfigAccounts_p.html" method="post">
+    <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
       <fieldset><legend>Edit current user: #[username]#</legend>
         <!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
         <input type="hidden" name="current_user" value="#[current_user]#" />

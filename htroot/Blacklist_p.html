@@ -55,7 +55,7 @@
           ::
           <p>Unable to create list <strong>#[name]#</strong> since a list of this name exists already.</p>
       #(/error)#
-        <form action="Blacklist_p.html" method="post" enctype="multipart/form-data"><fieldset>
+        <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8"><fieldset>
           <input type="text" id="newListName" size ="50" name="newListName" />
           <input type="submit" name="createNewList" value="create" />
         </fieldset></form>
@@ -67,7 +67,7 @@
       <!-- Blacklist configuration -->
       #(edit)#
 
-      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <p>Add new pattern:</p>
         <div>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
@@ -161,14 +161,14 @@
     
     <fieldset class="listSettings">
       <legend>Settings for this list</legend>
-      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <div>
           <input type="hidden" name="selectedListName" value="#[currentBlacklist]#" />
           <input type="submit" name="shareList" value="Share/don't share this list" />
           <input type="submit" name="deleteList" value="Delete this list" />
         </div>
       </form>
-      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data">
+      <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <fieldset>
           <legend>Activate this list for ...</legend>
           <dl>

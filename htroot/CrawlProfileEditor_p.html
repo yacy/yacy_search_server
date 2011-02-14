@@ -51,14 +51,14 @@
     <td>#[name]#</td>
     <td>#(terminateButton)#::
         <div style="text-decoration:blink">Running</div>
-        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data"><div>
+        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
         <input type="submit" name="terminate" value="Terminate" />
         </div></form>
         #(/terminateButton)#
 	    #(deleteButton)#::
 	    Finished
-        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data"><div>
+        <form action="CrawlProfileEditor_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
         <input type="hidden" name="handle" value="#[handle]#" />
         <input type="submit" name="delete" value="Delete" />
         </div></form>
@@ -81,7 +81,7 @@
   #{/crawlProfiles}# 
 </table>
 #(existPassiveCrawls)#::
-<form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data"><div>
+<form action="CrawlProfileEditor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8"><div>
 <input type="submit" name="deleteTerminatedProfiles" value="Delete finished crawls" />
 </div></form>
 #(/existPassiveCrawls)#
@@ -89,7 +89,7 @@
 
 
     <!-- crawl profile editor -->
-    <form action="CrawlProfileEditor_p.html#edit" method="post" enctype="multipart/form-data">
+    <form action="CrawlProfileEditor_p.html#edit" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset><legend>Select the profile to edit</legend>
         <select name="handle">#{profiles}# 
           <option value="#[handle]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>#{/profiles}# 
@@ -104,7 +104,7 @@
     
     #(edit)#::
     <a name="edit"></a>
-    <form action="/CrawlProfileEditor_p.html#edit" method="post" enctype="multipart/form-data">
+    <form action="/CrawlProfileEditor_p.html#edit" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset><legend>Edit Profile #[name]#</legend>
         <input type="hidden" name="handle" value="#[handle]#" />
         <dl>#{entries}# 

@@ -108,7 +108,7 @@
 		</div>
 		#(showselection)#::
 		<div style="width:310px; float:right;">
-			<form action="Table_YMark_p.html" method="get">
+			<form action="Table_YMark_p.html" method="get" accept-charset="UTF-8">
 			<fieldset><legend>Table Selection</legend>
 			  <dl>
 				<dt>
@@ -180,7 +180,7 @@
 			 </form>
 			 <fieldset>
 				<legend>Import Bookmarks</legend>
-				<form action="/api/ymarks/import_ymark.html" method="post"  enctype="multipart/form-data" accept-charset="UTF-8">
+				<form action="/api/ymarks/import_ymark.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 				<fieldset>
 					<input type="hidden" name="table" value="#[table]#" />
 					<input type="hidden" name="redirect" value="/Table_YMark_p.html?table=#[table]#&amp;count=100" />

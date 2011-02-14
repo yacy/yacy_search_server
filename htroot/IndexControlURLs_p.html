@@ -64,7 +64,7 @@ function updatepage(str) {
     #%env/templates/submenuIndexControl.template%#
     <h2>URL References Administration</h2>
     <p>The local index currently contains #[ucount]# URL references</p>
-    <form action="IndexControlURLs_p.html" id="searchform" method="post" enctype="multipart/form-data" onkeyup="xmlhttpPost(); return false;">
+    <form action="IndexControlURLs_p.html" id="searchform" method="post" enctype="multipart/form-data" accept-charset="UTF-8" onkeyup="xmlhttpPost(); return false;">
     <fieldset><legend>URL Retrieval</legend>
       <dl>
         <dt class="TableCellDark">Select Segment:</dt>
@@ -94,7 +94,7 @@ function updatepage(str) {
     
     
     #(statistics)#::
-    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Statistics about top-domains in URL Database</legend>
       <dl>
         <dt class="TableCellLight">&nbsp;</dt>
@@ -117,7 +117,7 @@ function updatepage(str) {
       #{domains}#
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
         <td>
-          <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+          <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
             <div>
               <input type="hidden" name="hashpart" value="#[hashpart]#" />
               <input type="hidden" name="lines" value="#[lines]#" />
@@ -133,7 +133,7 @@ function updatepage(str) {
     #(/statisticslines)#
     
     #(lurlexport)#::
-    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Loaded URL Export</legend>
       <dl>
         <dt class="TableCellDark">Export File</dt>
@@ -189,13 +189,13 @@ function updatepage(str) {
     Click the API icon to see an example call to the search rss API.
     To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
     </div>
-    <form action="ViewFile.html" method="get">
+    <form action="ViewFile.html" method="get" accept-charset="UTF-8">
 		<input type="hidden" name="viewMode" value="parsed" />
 		<input type="hidden" name="show" value="Show" />
 		<input type="hidden" name="urlHash" value="#[urlhash]#" />
 		<input type="submit" value="Show Content" name="showcontent" /><br />
 	</form>
-	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 		<input type="hidden" name="keystring" value="" />
 		<input type="hidden" name="keyhash" value="" />
 		<input type="hidden" name="urlstring" value="" />

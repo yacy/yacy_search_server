@@ -15,7 +15,7 @@
     <fieldset class="importListItems">
       <legend>Import blacklist items from...</legend>
       <!-- Blacklist import from other peer -->
-      <form action="sharedBlacklist_p.html" method="get">
+      <form action="sharedBlacklist_p.html" method="get" accept-charset="UTF-8">
         <fieldset>
           <legend>other YaCy peers:</legend>
           <select name="hash">
@@ -28,7 +28,7 @@
       </form>
 
       <!-- blacklist import from url -->
-      <form action="sharedBlacklist_p.html" method="get">
+      <form action="sharedBlacklist_p.html" method="get" accept-charset="UTF-8">
         <fieldset>
           <legend>URL:</legend>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />
@@ -38,7 +38,7 @@
       </form>
 
       <!-- blacklist import from text file -->
-      <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
+      <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <fieldset>
           <legend>plain text file:</legend>
           Upload a regular text file which contains one blacklist entry per line.<br /><br />
@@ -50,7 +50,7 @@
       </form>
 
       <!-- blacklist import from xml file -->
-      <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
+      <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <fieldset>
           <legend>XML file:</legend>
           Upload an XML file which contains one or more blacklists.<br /><br />
@@ -65,7 +65,7 @@
     <fieldset class="exportListItems">
         <legend>Export blacklist items to...</legend>
 
-        <form action="xml/blacklists_p.xml" method="get">
+        <form action="xml/blacklists_p.xml" method="get" accept-charset="UTF-8">
             <fieldset>
                 <legend>XML file:</legend>
                 Here you can export a blacklist as an XML file. This file will contain additional
@@ -80,7 +80,7 @@
             </fieldset>
         </form>
 
-        <form action="yacy/list.html" method="get">
+        <form action="yacy/list.html" method="get" accept-charset="UTF-8">
             <fieldset>
                 <legend>plain text file:</legend>
                 Here you can export a blacklist as a regular text file with one blacklist entry per line.

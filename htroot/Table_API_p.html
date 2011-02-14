@@ -76,7 +76,7 @@
           <td>#[dateNextExec]#</td>
           <td>
           #(scheduler)#
-           <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat">
+           <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="modify_repeat">
             <select name="repeat_select" onchange='this.form.submit()'>
               <option value="off" selected="selected">no repetition</option>
               <option value="on">activate scheduler</option>
@@ -86,7 +86,7 @@
             <input type="hidden" name="filter" value="#[filter]#" />
           </form>
           ::
-         <form action="Table_API_p.html" method="post" enctype="multipart/form-data" id="modify_repeat">
+         <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="modify_repeat">
             <table>
                 <tr><td>
                     <select name="repeat_time" onchange='this.form.submit()'>

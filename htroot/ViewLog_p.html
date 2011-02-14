@@ -9,7 +9,7 @@
     #(submenu)#::#%env/templates/submenuViewLog.template%##(/submenu)#
     <h2>Server Log</h2>
     
-    <form action="ViewLog_p.html" method="get" >
+    <form action="ViewLog_p.html" method="get" accept-charset="UTF-8">
       <fieldset>
         <input type="text" name="lines" id="lines" size ="4" value="#[lines]#" maxlength="9" /><label for="lines"> Lines (max. #[maxlines]#)</label>
         <input type="checkbox" name="mode" id="mode" value="reversed" #(reverseChecked)#::checked="checked"#(/reverseChecked)# /><label for="mode">reversed order</label>

@@ -9,7 +9,7 @@
     #%env/templates/submenuIndexControl.template%#
     <h2>Reverse Word Index Administration</h2>
     <p>The local index currently contains #[wcount]# reverse word indexes</p>
-    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
+    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>RWI Retrieval (= search for a single word)</legend>
       <dl>
         <dt class="TableCellDark">Select Segment:</dt>
@@ -36,7 +36,7 @@
     
     #(cleanup)#::
     </form>
-    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
+    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Cleanup</legend>
       <dl>
         <dt class="TableCellDark">Index Deletion</dt>
@@ -172,7 +172,7 @@
     No URL entries related to this word hash <span class="tt">#[keyHash]#</span>.
     ::
     <p>#[count]# URL entries related to this word hash <span class="tt">#[keyHash]#</span></p>
-    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
+    <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <p>
       <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader">

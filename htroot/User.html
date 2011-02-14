@@ -10,7 +10,7 @@
     #(logged-in)#
     <p>
       You are not logged in.<br />
-      <form action="User.html" method="post">
+      <form action="User.html" method="post" accept-charset="UTF-8">
         Username: <input type="text" name="username" /><br />
         Password: <input type="password" name="password" /><br />
         <input type="submit" value="login" />
@@ -20,7 +20,7 @@
     <p>
       You are currently logged in as #[username]#.<br />
       (Identified by #(identified-by)#IP::Username/Password::Cookie#(/identified-by)#)<br />
-      <form action="User.html">
+      <form action="User.html" accept-charset="UTF-8">
         <input type="submit" name="logout" value="logout">
       </form>
       #(limit)#::
@@ -29,7 +29,7 @@
       You have used <strong>#[timeused]#</strong> minutes of your onlinetime limit of <strong>#[timelimit]#</strong> minutes per day.<br />
       #(/limit)#
     </p>
-    <form action="User.html" method="POST">
+    <form action="User.html" method="POST" accept-charset="UTF-8">
       <table border="1">
         <tr>
           <td><label for="oldpass">old Password</label></td>
@@ -50,7 +50,7 @@
     </form>
     ::
     You are currently logged in as admin.<br />
-    <form action="User.html">
+    <form action="User.html" accept-charset="UTF-8">
       <input type="submit" name="logout" value="logout">
     </form>
     <br />
