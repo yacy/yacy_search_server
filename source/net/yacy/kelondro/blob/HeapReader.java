@@ -51,7 +51,7 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class HeapReader {
 
-    public final static long keepFreeMem = 20 * 1024 * 1024;
+    //public final static long keepFreeMem = 20 * 1024 * 1024;
     
     // input values
     protected int                keylength;  // the length of the primary key
@@ -414,12 +414,18 @@ public class HeapReader {
                 index.remove(key);
                 return null;
             }
-            if (MemoryControl.available() < len * 2 + keepFreeMem) {
-                if (!MemoryControl.request(len * 2 + keepFreeMem, true)) throw new RowSpaceExceededException(len * 2 + keepFreeMem, "HeapReader.get()"); // not enough memory available for this blob
+            long memr = len + index.row().primaryKeyLength + 64;
+            if (MemoryControl.available() < memr) {
+                if (!MemoryControl.request(memr, true)) throw new RowSpaceExceededException(memr, "HeapReader.get()/check"); // not enough memory available for this blob
             }
             
             // read the key
-            final byte[] keyf = new byte[index.row().primaryKeyLength];
+            byte[] keyf;
+            try {
+                keyf = new byte[index.row().primaryKeyLength];
+            } catch (OutOfMemoryError e) {
+                throw new RowSpaceExceededException(index.row().primaryKeyLength, "HeapReader.get()/keyf");
+            }
             file.readFully(keyf, 0, keyf.length);
             if (!this.ordering.equal(key, keyf)) {
                 // verification of the indexed access failed. we must re-read the index
@@ -435,7 +441,12 @@ public class HeapReader {
             }
             
             // read the blob
-            byte[] blob = new byte[len];
+            byte[] blob;
+            try {
+                blob = new byte[len];
+            } catch (OutOfMemoryError e) {
+                throw new RowSpaceExceededException(len, "HeapReader.get()/blob");
+            }
             file.readFully(blob, 0, blob.length);
             
             return blob;

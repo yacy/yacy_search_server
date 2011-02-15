@@ -276,8 +276,8 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if (allocram == 0) return;
         assert chunkcache.length < elements * rowdef.objectsize : "wrong alloc computation (1): elements * rowdef.objectsize = " + (elements * rowdef.objectsize) + ", chunkcache.length = " + chunkcache.length;
         assert allocram > chunkcache.length : "wrong alloc computation (2): allocram = " + allocram + ", chunkcache.length = " + chunkcache.length;
-        if (allocram > Integer.MAX_VALUE || !MemoryControl.request(allocram, true))
-        	throw new RowSpaceExceededException(allocram, "RowCollection grow");
+        if (allocram > Integer.MAX_VALUE || !MemoryControl.request(allocram + 32, true))
+        	throw new RowSpaceExceededException(allocram + 32, "RowCollection grow");
         try {
             final byte[] newChunkcache = new byte[(int) allocram]; // increase space
             System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);

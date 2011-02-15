@@ -177,7 +177,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         
         synchronized (this) {
             // remove from cache
-            cache.remove(key);
+            if (cache != null) cache.remove(key);
     
             // remove from file
             blob.delete(key);
