@@ -83,7 +83,11 @@ public class Browser {
             if (systemOS == systemMacOSX) {
                 openBrowserMac(url);
             } else if (systemOS == systemUnix) {
-                openBrowserUnix(url);
+                try {
+                    openBrowserUnixGeneric(url);
+                } catch (Exception e) {
+                    openBrowserUnixFirefox(url);
+                }
             } else if (systemOS == systemWindows) {
                 openBrowserWin(url);
             } else {
@@ -107,18 +111,21 @@ public class Browser {
     private static void openBrowserMac(final String url) throws Exception {
         Process p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
         p.waitFor();
-        if (p.exitValue() != 0) throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
+        if (p.exitValue() != 0) throw new RuntimeException("Mac Exec Error: " + errorResponse(p));
     }
     
-    private static void openBrowserUnix(final String url) throws Exception {
+    private static void openBrowserUnixFirefox(final String url) throws Exception {
         String cmd = "firefox -remote openURL(" + url + ")";
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
-        if (p.exitValue() != 0) {
-            cmd = "/etc/alternatives/www-browser "  + url;
-            p = Runtime.getRuntime().exec(cmd);
-            // no error checking, because it blocks until firefox is closed
-        }
+        if (p.exitValue() != 0) throw new RuntimeException("Unix Exec Error/Firefox: " + errorResponse(p));
+    }
+    
+    private static void openBrowserUnixGeneric(final String url) throws Exception {
+        String cmd = "/etc/alternatives/www-browser "  + url;
+        Process p = Runtime.getRuntime().exec(cmd);
+        p.waitFor();
+        if (p.exitValue() != 0) throw new RuntimeException("Unix Exec Error/generic: " + errorResponse(p));
     }
     
     private static void openBrowserWin(final String url) throws Exception {
