@@ -41,7 +41,7 @@ function newInterval(){
 function countdown(){
 	if(statusLoaded && queueLoaded){
 		document.getElementById("nextUpdate").value=wait;
-                        wait--;
+                wait--;
 		if(wait==0){
 			refresh();
 		}
