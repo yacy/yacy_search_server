@@ -1,7 +1,5 @@
 #[jsonp-start]#
 {
-  "xmlns$yacy": "http://www.yacy.net/",
-  "xmlns$os":   "http://a9.com/-/spec/opensearch/1.1/",
   "channels": [{
     "title": "YaCy P2P-Search for #[rss_query]#",
     "description": "Search for #[rss_query]#",
