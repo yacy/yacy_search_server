@@ -80,9 +80,9 @@ public class yacysearchtrailer {
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
                 i++;
             }
+            prop.put("nav-namespace_element", i);
             i--;
             prop.put("nav-namespace_element_" + i + "_nl", 0);
-            prop.put("nav-namespace_element", i);
         }
         
         // host navigators
@@ -104,9 +104,9 @@ public class yacysearchtrailer {
                 prop.put("nav-domains_element_" + i + "_nl", 1);
                 i++;
             }
+            prop.put("nav-domains_element", i);
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
-            prop.put("nav-domains_element", i);
         }
         
         // author navigators
@@ -130,9 +130,9 @@ public class yacysearchtrailer {
                 prop.put("nav-authors_element_" + i + "_nl", 1);
                 i++;
             }
+            prop.put("nav-authors_element", i);
             i--;
             prop.put("nav-authors_element_" + i + "_nl", 0);
-            prop.put("nav-authors_element", i);
         }
 
         // topics navigator
@@ -159,9 +159,9 @@ public class yacysearchtrailer {
                     i++;
                 }
             }
+            prop.put("nav-topics_element", i);
             i--;
             prop.put("nav-topics_element_" + i + "_nl", 0);
-            prop.put("nav-topics_element", i);
         }
         
         // about box
