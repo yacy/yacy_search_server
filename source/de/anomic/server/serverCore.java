@@ -152,14 +152,13 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             
             // trying to stop session
             s.setStopped(true);
-            try { Thread.sleep(100); } catch (final InterruptedException ex) {}
+            try { Thread.sleep(10); } catch (final InterruptedException ex) {}
             
             // trying to interrupt session
             synchronized (s) {
                 s.notify();
             }
             s.interrupt();
-            try {Thread.sleep(10);} catch (final InterruptedException ex) {}
             
             // trying to close socket
             if (s.isAlive()) {
