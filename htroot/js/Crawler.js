@@ -29,7 +29,11 @@ function changeInterval(){
 	}
 }
 function newInterval(){
-	refreshInterval=document.getElementById("nextUpdate").value;
+	var newInterval=document.getElementById("nextUpdate").value;
+        // make sure that only positive intervals can be set
+        if(newInterval>0){
+                refreshInterval=newInterval;
+        }
 	refresh();
 	countInterval=window.setInterval("countdown()", 1000);
 	changing=false;
@@ -37,7 +41,7 @@ function newInterval(){
 function countdown(){
 	if(statusLoaded && queueLoaded){
 		document.getElementById("nextUpdate").value=wait;
-		wait--;
+                        wait--;
 		if(wait==0){
 			refresh();
 		}
