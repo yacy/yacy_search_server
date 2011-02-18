@@ -1829,52 +1829,6 @@ Available after successful loading of rss feed in preview==Verfügbar nach dem e
 "Add Selected Items to Index \(full content of url\)"=="Füge ausgewählte Objekte zum Index hinzu (Voller Inhalt der URL)"
 #-----------------------------
 
-#File: LogStatistics_p.html
-#---------------------------
-: Log Statistics==: Logstatistik
->Log Statistics==>Logstatistik
-Needed \#\[totalParserTime\]\# \#\[totalParserTimeUnit\]\# to parse \#\[totalParserRuns\]\# Entries\#\(avgExists\)\#:: \(\#\[avgParserRunsPerMinute\]\#/sec\)==Es wurden #[totalParserTime]# #[totalParserTimeUnit]# gebraucht, um #[totalParserRuns]# Einträge zu durchsuchen#(avgExists)#:: (#[avgParserRunsPerMinute]#/Sek).
-To enable Log Statistics open DATA/LOG/yacy.logging and set "de.anomic.server.logging.LogalizerHandler.enabled = true".==Um die Logstatistik zu aktivieren, öffnen Sie DATA/LOG/yacy.logging und setzten Sie "de.anomic.server.logging.LogalizerHandler.enabled = true".
-#DHT==DHT
-#URLs==URLs
-URLs Received:==Empfangene URLs:
-URLs Requested:==Angeforderte URLs:
-URLs Blocked:==Blockierte URLs:
-Total receive time:==Gesamte Empfangszeit:
-URLs Sent:==Versandte URLs:
-RWIs / Words==RWIs / Wörter
-Words received:==Empfangene Wörter:
-RWIs received:==Empfangene RWIs:
-RWIs blocked:==Blockierte RWIs:
-RWIs selected:==Ausgewählte RWIs:
-Selection time:==Auswahlzeit:
-Chunks / Protocol==Chunks / Protokoll
-Sent traffic:==Ausgehender Traffic:
-Total peers selected:==Insgesamt gewählte Peers:
-DHT Distance: Min/Average/Max:==DHT Distanz: Min/Durchschnitt/Max:
-Not enough peers found for distribution:==Nicht genug Peers gefunden zur Verteilung:
-Peers busy:==Beschäftigte Peers:
-Distribution failed:==Fehlgeschlagene Verteilung: 
-Rejected index receives:==Abgelehnte Index Empfänge:
-Rejected index receives from:==Abgelehnte Index Empfänge von:
-Sent indexes to:==Versandte Indexe an:
-Ranking Distribution==Ranking Verteilung
-Submitted ranking files:==Verschickte Ranking Dateien:
-Total time submitting ranking files:==Insgesamte Versandzeit der Ranking Dateien: 
-Failed ranking distributions:==Fehlgeschlagene Ranking Verteilung:
-Indexing</legend>==Indexierung</legend>
-Indexed sites:==Indexierte Seiten:
-Size of indexed sites:==Größe der indexierten Seiten:
-Indexed words:==Indexierte Wörter:
-Indexed anchors:==Indexierte Verweise:
-Total link storage time:==Gesamte Link Speicherzeit:
-Total index storage time:==Gesamte Index Speicherzeit:
-Errors==Fehler
-Tried to create left child node twice==Doppelte Erzeugung des linken Tochterknoten wurde versucht
-Tried to create right child node twice==Doppelte Erzeugung des rechten Tochterknoten wurde versucht
-Malformed URL Exception==Missgeformte URL
-#-----------------------------
-
 #File: Messages_p.html
 #---------------------------
 >Messages==>Nachrichten
