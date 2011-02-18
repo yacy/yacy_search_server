@@ -1,10 +1,13 @@
-// plasmaNURL.java 
+// NoticedURL.java 
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 09.08.2004
+//
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,9 +29,9 @@ package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -52,7 +55,7 @@ public class NoticedURL {
     private Balancer noloadStack;    // links that are not passed to a loader; the index will be generated from the Request entry
     
     public NoticedURL(
-    		final File cachePath,
+            final File cachePath,
             final boolean useTailCache,
             final boolean exceed134217727) {
         Log.logInfo("NoticedURL", "CREATING STACKS at " + cachePath.toString());
@@ -107,11 +110,13 @@ public class NoticedURL {
         }
     }
     
-    protected void finalize() {
+    @Override
+    protected void finalize() throws Throwable {
         if ((coreStack != null) || (limitStack != null) || (remoteStack != null)) {
             Log.logWarning("plasmaCrawlNURL", "NURL stack closed by finalizer");
             close();
         }
+        super.finalize();
     }
     
     public boolean notEmpty() {
@@ -195,13 +200,14 @@ public class NoticedURL {
      */
     public boolean removeByURLHash(final byte[] urlhashBytes) {
         try {
-            HandleSet urlHashes = Base64Order.enhancedCoder.getHandleSet(12, 1);
+            final HandleSet urlHashes = Base64Order.enhancedCoder.getHandleSet(12, 1);
             urlHashes.put(urlhashBytes);
-            try {return noloadStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {return coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {return limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            try {return remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-            return false;
+            boolean ret = false;
+            try {ret |= noloadStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {ret |= coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {ret |= limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {ret |= remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            return ret;
         } catch (RowSpaceExceededException e) {
             Log.logException(e);
             return false;
@@ -217,7 +223,7 @@ public class NoticedURL {
         return removed;
     }
     
-    public ArrayList<Request> top(final StackType stackType, final int count) {
+    public List<Request> top(final StackType stackType, final int count) {
         switch (stackType) {
             case CORE:     return top(coreStack, count);
             case LIMIT:    return top(limitStack, count);
@@ -279,12 +285,10 @@ public class NoticedURL {
         return null;
     }
     
-    private ArrayList<Request> top(final Balancer balancer, int count) {
+    private List<Request> top(final Balancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
-        ArrayList<Request> list;
-        list = balancer.top(count);
-        return list;
+        return balancer.top(count);
     }
     
     public Iterator<Request> iterator(final StackType stackType) {

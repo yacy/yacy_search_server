@@ -25,8 +25,8 @@
 // if the shell's current path is HTROOT
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -86,7 +86,7 @@ public class IndexCreateWWWRemoteQueue_p {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            final ArrayList<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.StackType.REMOTE, showLimit);
+            final List<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.StackType.REMOTE, showLimit);
             
             Request urle;
             boolean dark = true;

@@ -1,6 +1,6 @@
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -55,13 +55,13 @@ public class queues_p {
         } else {
             final Request[] w = sb.crawlQueues.activeWorkerEntries();
             int count = 0;
-            for (int i = 0; i < w.length; i++)  {
-                if (w[i] == null) continue;
-                prop.put("list-loader_"+count+"_profile", w[i].profileHandle());
-                initiator = sb.peers.getConnected((w[i].initiator() == null) ? "" : new String(w[i].initiator()));
+            for (final Request r : w)  {
+                if (r == null) continue;
+                prop.put("list-loader_"+count+"_profile", r.profileHandle());
+                initiator = sb.peers.getConnected((r.initiator() == null) ? "" : new String(r.initiator()));
                 prop.putHTML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
-                prop.put("list-loader_"+count+"_depth", w[i].depth());
-                prop.putXML("list-loader_"+count+"_url", w[i].url().toString());
+                prop.put("list-loader_"+count+"_depth", r.depth());
+                prop.putXML("list-loader_"+count+"_url", r.url().toString());
                 count++;
             }
             prop.put("list-loader", count);
@@ -94,13 +94,11 @@ public class queues_p {
     }
     
     
-    public static final void addNTable(final Switchboard sb, final serverObjects prop, final String tableName, final ArrayList<Request> crawlerList) {
+    public static final void addNTable(final Switchboard sb, final serverObjects prop, final String tableName, final List<Request> crawlerList) {
 
         int showNum = 0;
-        Request urle;
         yacySeed initiator;
-        for (int i = 0; i < crawlerList.size(); i++) {
-            urle = crawlerList.get(i);
+        for (final Request urle : crawlerList) {
             if ((urle != null) && (urle.url() != null)) {
                 initiator = sb.peers.getConnected((urle.initiator() == null) ? "" : new String(urle.initiator()));
                 prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());

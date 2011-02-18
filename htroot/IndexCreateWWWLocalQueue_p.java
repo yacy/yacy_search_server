@@ -55,7 +55,7 @@ public class IndexCreateWWWLocalQueue_p {
         if (date == null) return "";
         return dayFormatter.format(date);
     }
-    
+
     private static final int INVALID    = 0;
     private static final int URL        = 1;
     private static final int ANCHOR     = 2;
@@ -63,7 +63,7 @@ public class IndexCreateWWWLocalQueue_p {
     private static final int DEPTH      = 4;
     private static final int INITIATOR  = 5;
     private static final int MODIFIED   = 6;
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -82,21 +82,20 @@ public class IndexCreateWWWLocalQueue_p {
                 
                 final String pattern = post.get("pattern", ".*").trim();
                 final int option  = post.getInt("option", INVALID);
-                if (pattern.equals(".*")) {
+                if (".*".equals(pattern)) {
                     c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.CORE);
                     sb.crawlQueues.noticeURL.clear(NoticedURL.StackType.CORE);
                     try { sb.cleanProfiles(); } catch (final InterruptedException e) {/* ignore this */}
                 } else if (option > INVALID) {
-                    Pattern compiledPattern = null;
                     try {
                         // compiling the regular expression
-                        compiledPattern = Pattern.compile(pattern);
+                        final Pattern compiledPattern = Pattern.compile(pattern);
                         
                         if (option == PROFILE) {
                             // search and delete the crawl profile (_much_ faster, independant of queue size)
                             // XXX: what to do about the annoying LOST PROFILE messages in the log?
                             CrawlProfile entry;
-                            for (byte[] handle: sb.crawler.getActive()) {
+                            for (final byte[] handle: sb.crawler.getActive()) {
                                 entry = sb.crawler.getActive(handle);
                                 final String name = entry.name();
                                 if (name.equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
@@ -113,7 +112,7 @@ public class IndexCreateWWWLocalQueue_p {
                             // iterating through the list of URLs
                             final Iterator<Request> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.StackType.CORE);
                             Request entry;
-                            List<byte[]> removehashes = new ArrayList<byte[]>();
+                            final List<byte[]> removehashes = new ArrayList<byte[]>();
                             while (iter.hasNext()) {
                                 if ((entry = iter.next()) == null) continue;
                                 String value = null;
@@ -129,10 +128,10 @@ public class IndexCreateWWWLocalQueue_p {
                                     default: value = null; break location;
                                 }
                                 
-                                if (value != null && compiledPattern.matcher(value).find()) removehashes.add(entry.url().hash());
+                                if (value != null && compiledPattern.matcher(value).matches()) removehashes.add(entry.url().hash());
                             }
                             Log.logInfo("IndexCreateWWWLocalQueue", "created a remove list with " + removehashes.size() + " entries for pattern '" + pattern + "'");
-                            for (byte[] b: removehashes) {
+                            for (final byte[] b: removehashes) {
                                 sb.crawlQueues.noticeURL.removeByURLHash(b);
                             }
                         }
@@ -156,7 +155,7 @@ public class IndexCreateWWWLocalQueue_p {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            final ArrayList<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.StackType.CORE, (int) (showLimit * 1.20));
+            final List<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.StackType.CORE, (int) (showLimit * 1.20));
 
             Request urle;
             boolean dark = true;
