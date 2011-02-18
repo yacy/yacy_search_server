@@ -1,5 +1,5 @@
 /**
- *  RSSLoader_p
+ *  oad_RSS_p
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 20.08.2010 at http://yacy.net
  *

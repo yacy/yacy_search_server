@@ -1,4 +1,4 @@
-// ConfigPHPBB3Search.java
+// Load_PHPBB3.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 09.06.2009 as IndexCreate_p.java on http://yacy.net
 //
@@ -40,8 +40,8 @@ public class Load_PHPBB3 {
         // define visible variables
         String a = sb.peers.mySeed().getPublicAddress();
         if (a == null) a = "localhost:" + sb.getConfig("port", "8090");
-        boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
-        String repository = "http://" + a + "/repository/";
+        final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
+        final String repository = "http://" + a + "/repository/";
         prop.put("starturl", (intranet) ? repository : "http://");
         prop.put("address", a);
         

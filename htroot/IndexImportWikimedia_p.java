@@ -56,15 +56,15 @@ public class IndexImportWikimedia_p {
                 prop.put("import_status", 0);
             } else {
                 if (post.containsKey("file")) {
-                    File sourcefile = new File(post.get("file"));
-                    String name = sourcefile.getName(); // i.e. dewiki-20090311-pages-articles.xml.bz2
+                    final File sourcefile = new File(post.get("file"));
+                    final String name = sourcefile.getName(); // i.e. dewiki-20090311-pages-articles.xml.bz2
                     if (!name.endsWith("pages-articles.xml.bz2")) {
                         prop.put("import", 0);
                         prop.put("import_status", 1);
                         prop.put("import_status_message", "file name must end with 'pages-articles.xml.bz2'");
                         return prop;
                     }
-                    String lang = name.substring(0, 2);
+                    final String lang = name.substring(0, 2);
                     try {
                         MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath, "http://" + lang + ".wikipedia.org/wiki/");
                         MediawikiImporter.job.start();

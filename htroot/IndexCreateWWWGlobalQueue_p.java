@@ -1,4 +1,4 @@
-// IndexCreateWWWCrawlQueue_p.java
+// IndexCreateWWWGlobalQueue_p.java
 // -------------------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net

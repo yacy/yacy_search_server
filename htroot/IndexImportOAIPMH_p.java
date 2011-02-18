@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -109,8 +111,8 @@ public class IndexImportOAIPMH_p {
             
             if (post.get("loadrows", "").length() > 0) {
                 // create a time-ordered list of events to execute
-                TreeSet<String> sources = new TreeSet<String>();
-                for (Map.Entry<String, String> entry: post.entrySet()) {
+                Set<String> sources = new TreeSet<String>();
+                for (final Map.Entry<String, String> entry: post.entrySet()) {
                     if (entry.getValue().startsWith("mark_")) {
                         sources.add(entry.getValue().substring(5));
                     }
@@ -120,7 +122,7 @@ public class IndexImportOAIPMH_p {
                 prop.put("iframetype", 1);
                 
                 // prepare the set for random read from it (to protect the servers at the beginning of the list)
-                ArrayList<String> sourceList = new ArrayList<String>(sources.size());
+                List<String> sourceList = new ArrayList<String>(sources.size());
                 for (String oaipmhurl: sources) sourceList.add(oaipmhurl);
                 Random r = new Random(System.currentTimeMillis());
                 

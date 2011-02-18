@@ -23,6 +23,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -45,11 +46,11 @@ public class IndexImportOAIPMHList_p {
         prop.put("source", 0);
         
         if (post != null && post.containsKey("source")) {
-            Set<String> oaiRoots = OAIListFriendsLoader.getListFriends(sb.loader).keySet();
+            final Set<String> oaiRoots = OAIListFriendsLoader.getListFriends(sb.loader).keySet();
             
             boolean dark = false;
             int count = 0;
-            for (String root: oaiRoots) {
+            for (final String root: oaiRoots) {
                 prop.put("source_table_" + count + "_dark", (dark) ? "1" : "0");
                 prop.put("source_table_" + count + "_count", count);
                 prop.put("source_table_" + count + "_source", CharacterCoding.unicode2html(root, true));
@@ -63,14 +64,14 @@ public class IndexImportOAIPMHList_p {
         }
         
         if (post != null && post.containsKey("import")) {
-            ArrayList<OAIPMHImporter> jobs = new ArrayList<OAIPMHImporter>();
+            final List<OAIPMHImporter> jobs = new ArrayList<OAIPMHImporter>();
             for (OAIPMHImporter job: OAIPMHImporter.runningJobs.keySet()) jobs.add(job);
             for (OAIPMHImporter job: OAIPMHImporter.startedJobs.keySet()) jobs.add(job);
             for (OAIPMHImporter job: OAIPMHImporter.finishedJobs.keySet()) jobs.add(job);
             
             boolean dark = false;
             int count = 0;
-            for (OAIPMHImporter job: jobs) {
+            for (final OAIPMHImporter job: jobs) {
                 prop.put("import_table_" + count + "_dark", (dark) ? "1" : "0");
                 prop.put("import_table_" + count + "_thread", (job.isAlive()) ? "<img src=\"/env/grafics/loading.gif\" alt=\"running\" />" : "finished");
                 prop.putXML("import_table_" + count + "_source", job.source());

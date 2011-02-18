@@ -1,4 +1,4 @@
-// plasmaCrawlBalancer.java 
+// Balancer.java 
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
