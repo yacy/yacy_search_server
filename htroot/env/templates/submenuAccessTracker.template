@@ -3,9 +3,10 @@
     <div class="SubMenugroup">
       <h3>Server Access</h3>
       <ul class="SubMenu">
-        <li><a href="/AccessTracker_p.html?page=0" class="MenuItemLink lock">Overview</a></li>
-        <li><a href="/AccessTracker_p.html?page=1" class="MenuItemLink lock">Details</a></li>
-        <li><a href="/Connections_p.html" class="MenuItemLink lock">Connections</a></li>
+        <li><a href="/AccessGrid_p.html" class="MenuItemLink lock">Access Grid</a></li>
+        <li><a href="/AccessTracker_p.html?page=0" class="MenuItemLink lock">Incoming Requests Overview</a></li>
+        <li><a href="/AccessTracker_p.html?page=1" class="MenuItemLink lock">Incoming Requests Details</a></li>
+        <li><a href="/Connections_p.html" class="MenuItemLink lock">All Connections</a></li>
       </ul>
     </div>
 

@@ -267,10 +267,10 @@ public class NetworkGraph {
         
         // draw description
         networkPicture.setColor(COL_HEADLINE);
-        PrintTool.print(networkPicture, 2, 8, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);
-        PrintTool.print(networkPicture, 2, 16, 0, networkTitle.toUpperCase(), -1);
-        PrintTool.print(networkPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
-        PrintTool.print(networkPicture, width - 2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", 1);
+        PrintTool.print(networkPicture, 2, 6, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);
+        PrintTool.print(networkPicture, 2, 14, 0, networkTitle.toUpperCase(), -1);
+        PrintTool.print(networkPicture, width - 2, 6, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
+        PrintTool.print(networkPicture, width - 2, 14, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", 1);
         
         return networkPicture;
     }
