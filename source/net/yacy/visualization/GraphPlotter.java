@@ -159,7 +159,7 @@ public class GraphPlotter {
             x = (xfactor == 0.0) ? width / 2 : (int) (leftborder + (c.x - leftmost) * xfactor);
             y = (yfactor == 0.0) ? height / 2 : (int) (height - bottomborder - (c.y - bottommost) * yfactor);
             image.setColor(color_dot);
-            image.dot(x, y, 6, true);
+            image.dot(x, y, 6, true, 100);
             image.setColor(color_text);
             PrintTool.print(image, x, y + 10, 0, name.toUpperCase(), 0);
         }

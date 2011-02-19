@@ -69,11 +69,11 @@ public class imagetest {
         for (int y = 0; y < 600; y = y + 50) PrintTool.print(img, 0, 6 + y, 0, Integer.toString(y), -1);
         for (int x = 0; x < 800; x = x + 50) PrintTool.print(img, x, 6    , 0, Integer.toString(x), -1);
         img.setColor(RasterPlotter.RED);
-        img.dot(550, 110, 90, true);
+        img.dot(550, 110, 90, true, 100);
         img.setColor(RasterPlotter.GREEN);
-        img.dot(480, 200, 90, true);
+        img.dot(480, 200, 90, true, 100);
         img.setColor(RasterPlotter.BLUE);
-        img.dot(620, 200, 90, true);
+        img.dot(620, 200, 90, true, 100);
         img.setColor(RasterPlotter.RED);
         img.arc(300, 270, 30, 70, 0, 360);
         img.setColor("330000");
@@ -85,10 +85,10 @@ public class imagetest {
         PrintTool.print(img, 50, 120, 0, "BROADCAST MESSAGE #772: NODE %882 GREEN abcefghijklmnopqrstuvwxyz", -1);
         for (long i = 0; i < 256; i++) {
             img.setColor(i);
-            img.dot(10 + 14 * (int) (i / 16), 200 + 14 * (int) (i % 16), 6, true);
+            img.dot(10 + 14 * (int) (i / 16), 200 + 14 * (int) (i % 16), 6, true, 100);
         }
         img.setColor("008000");
-        img.dot(10 + 14 * 8, 200 + 14 * 8, 90, true);
+        img.dot(10 + 14 * 8, 200 + 14 * 8, 90, true, 100);
         /*
         for (long r = 0; r < 256; r = r + 16) {
             for (long g = 0; g < 256; g = g + 16) {
@@ -108,7 +108,7 @@ public class imagetest {
         int angle;
         for (byte c = (byte) 'A'; c <= 'Z'; c++) {
             angle = (c - (byte) 'A') * 360 / ((byte) 'Z' - (byte) 'A');
-            img.arcLine(550, 400, 81, 100, angle);
+            img.arcLine(550, 400, 81, 100, angle, null, null, -1, -1, -1, false);
             PrintTool.arcPrint(img, 550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c);
         }
         return img;

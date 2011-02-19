@@ -99,7 +99,7 @@ public class CircleTool {
         return circles[radius - 1];
     }
     
-    public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius) {
+    public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, int intensity) {
         if (radius == 0) {
             matrix.plot(xc, yc, 100);
         } else {
@@ -108,10 +108,10 @@ public class CircleTool {
             for (int i = (c.length / 2) - 1; i >= 0; i--) {
                 x = c[2 * i    ];
                 y = c[2 * i + 1];
-                matrix.plot(xc + x    , yc - y - 1, 100); // quadrant 1
-                matrix.plot(xc - x + 1, yc - y - 1, 100); // quadrant 2
-                matrix.plot(xc + x    , yc + y    , 100); // quadrant 4
-                matrix.plot(xc - x + 1, yc + y    , 100); // quadrant 3
+                matrix.plot(xc + x    , yc - y - 1, intensity); // quadrant 1
+                matrix.plot(xc - x + 1, yc - y - 1, intensity); // quadrant 2
+                matrix.plot(xc + x    , yc + y    , intensity); // quadrant 4
+                matrix.plot(xc - x + 1, yc + y    , intensity); // quadrant 3
             }
         }
     }

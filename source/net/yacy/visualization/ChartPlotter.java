@@ -88,7 +88,7 @@ public class ChartPlotter extends RasterPlotter {
         final int x = (coord_x - offsets[dimension_x]) * pixels[dimension_x] / scales[dimension_x];
         final int y = (coord_y - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
         if (dotsize == 1) plot(leftborder + x, height - bottomborder - y, 100);
-                      else dot(leftborder + x, height - bottomborder - y, dotsize, true);
+                      else dot(leftborder + x, height - bottomborder - y, dotsize, true, 100);
         if (anot != null) PrintTool.print(this, leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), height - bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? -1 : ((anotAngle == 315) ? 1 : 0));
     }
     
