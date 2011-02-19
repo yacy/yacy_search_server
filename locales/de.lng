@@ -2673,7 +2673,7 @@ global index on your own search page.==der anderen Peers von Ihrer Suchseite aus
 "idea"="idee"
 "good"="gut"
 "Follow YaCy on Twitter"=="Folge YaCy auf Twitter"
-We encourage you to open your firewall for the port you configured \(usually: 8080\),==Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen,
+We encourage you to open your firewall for the port you configured \(usually: 8090\),==Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8090) in Ihrer Firewall zu öffnen,
 or to set up a 'virtual server' in your router settings \(often called DMZ\).==oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt).
 Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
