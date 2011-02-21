@@ -354,6 +354,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             return content.getBytes(charSet);
         } catch (final UnsupportedEncodingException e) {
             return content.getBytes();
+        } catch (final OutOfMemoryError e) {
+            Log.logException(e);
+            return new byte[0];
         }
     }
 
