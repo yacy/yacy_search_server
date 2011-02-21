@@ -64,7 +64,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         this.index = index;
     }
 
-    public HandleSet(Row rowdef, byte[] b) {
+    public HandleSet(Row rowdef, byte[] b) throws RowSpaceExceededException {
         this.rowdef = rowdef;
         this.index = RowSet.importRowSet(b, this.rowdef);
     }

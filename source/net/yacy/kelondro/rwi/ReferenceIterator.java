@@ -34,6 +34,7 @@ import java.util.Map;
 import net.yacy.kelondro.blob.HeapReader;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 
@@ -67,7 +68,12 @@ public class ReferenceIterator <ReferenceType extends Reference> implements Clon
     public ReferenceContainer<ReferenceType> next() {
         Map.Entry<byte[], byte[]> entry = blobs.next();
         byte[] payload = entry.getValue();
-        return new ReferenceContainer<ReferenceType>(factory, entry.getKey(), RowSet.importRowSet(payload, payloadrow));
+        try {
+            return new ReferenceContainer<ReferenceType>(factory, entry.getKey(), RowSet.importRowSet(payload, payloadrow));
+        } catch (RowSpaceExceededException e) {
+            Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because of too low memory: " + e.toString());
+            return null;
+        }
     }
     
     public void remove() {

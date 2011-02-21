@@ -32,6 +32,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> {
@@ -68,7 +69,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         assert rowdef.objectOrder != null;
     }
     
-    public final static RowSet importRowSet(final byte[] b, final Row rowdef) {
+    public final static RowSet importRowSet(final byte[] b, final Row rowdef) throws RowSpaceExceededException {
     	assert b.length >= exportOverheadSize : "b.length = " + b.length;
     	if (b.length < exportOverheadSize) return new RowSet(rowdef);
         final int size = (int) NaturalOrder.decodeLong(b, 0, 4);
@@ -80,7 +81,13 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         long alloc = ((long) size) * ((long) rowdef.objectsize);
         assert alloc <= Integer.MAX_VALUE : "alloc = " + alloc;
         assert alloc == b.length - exportOverheadSize;
-        final byte[] chunkcache = new byte[(int) alloc];
+        MemoryControl.request((int) alloc, true);
+        final byte[] chunkcache;
+        try {
+            chunkcache = new byte[(int) alloc];
+        } catch (OutOfMemoryError e) {
+            throw new RowSpaceExceededException((int) alloc, "importRowSet");
+        }
         //assert b.length - exportOverheadSize == size * rowdef.objectsize : "b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize;
         if (b.length - exportOverheadSize != alloc) {
             Log.logSevere("RowSet", "exportOverheadSize wrong: b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize);

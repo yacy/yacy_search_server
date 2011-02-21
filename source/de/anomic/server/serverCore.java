@@ -726,8 +726,22 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                                 parameter[0] = this.request.trim();
                             }
                         }
-                        //long commandStart = System.currentTimeMillis();
-                        Object result = commandMethod.invoke(this.commandObj, parameter);
+                        
+                        Object result = null;
+                        try {
+                            result = commandMethod.invoke(this.commandObj, parameter);
+                        } catch (OutOfMemoryError e) {
+                            // try again
+                            terminateOldSessions(2000);
+                            try {
+                                result = commandMethod.invoke(this.commandObj, parameter);
+                            } catch (OutOfMemoryError e2) {
+                                // try again
+                                Thread.sleep(1000);
+                                result = commandMethod.invoke(this.commandObj, parameter);
+                            }
+                        }
+                        
                         //announceMoreExecTime(commandStart - System.currentTimeMillis()); // shall be negative!
                         //this.log.logDebug("* session " + handle + " completed command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                         this.out.flush();

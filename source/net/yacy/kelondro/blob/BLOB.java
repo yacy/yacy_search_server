@@ -189,8 +189,9 @@ public interface BLOB {
          * of the input
          * @param b
          * @return an array that is equal or smaller in size than b
+         * @throws RowSpaceExceededException 
          */
-        public byte[] rewrite(byte[] b);
+        public byte[] rewrite(byte[] b) throws RowSpaceExceededException;
         
     }
     

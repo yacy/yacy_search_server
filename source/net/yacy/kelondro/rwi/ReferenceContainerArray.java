@@ -291,7 +291,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             this.wordHash = wordHash;
         }
         
-        public byte[] rewrite(byte[] b) {
+        public byte[] rewrite(byte[] b) throws RowSpaceExceededException {
             if (b == null) return null;
             ReferenceContainer<ReferenceType> c = rewriter.reduce(new ReferenceContainer<ReferenceType>(factory, this.wordHash, RowSet.importRowSet(b, payloadrow)));
             if (c == null) return null;

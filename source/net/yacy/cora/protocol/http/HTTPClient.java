@@ -445,8 +445,12 @@ public class HTTPClient {
             // get the response body
             final HttpEntity httpEntity = httpResponse.getEntity();
             if (httpEntity != null) {
-                if (getStatusCode() == 200 && httpEntity.getContentLength()  < maxBytes) {
+                if (getStatusCode() == 200 && httpEntity.getContentLength() < maxBytes) {
+                    try {
                         content = EntityUtils.toByteArray(httpEntity);
+                    } catch (OutOfMemoryError e) {
+                        throw new IOException(e.toString());
+                    }
                 } 
                 // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
             	EntityUtils.consume(httpEntity);
