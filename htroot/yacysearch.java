@@ -56,6 +56,7 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlProfile.CacheStrategy;
 import de.anomic.data.DidYouMean;
 import de.anomic.search.AccessTracker;
 import de.anomic.search.ContentDomain;
@@ -255,7 +256,7 @@ public class yacysearch {
                 // protection against too many remote server snippet loads (protects traffic on server)
                 if (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline()) {
                     if (accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1) {
-                        snippetFetchStrategy = null;
+                        snippetFetchStrategy = CacheStrategy.CACHEONLY;
                         Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + "/1s, " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed remote snippet loading");
                     }
                 }
