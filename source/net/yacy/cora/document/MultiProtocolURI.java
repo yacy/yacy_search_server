@@ -245,7 +245,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 }
                 path = url.substring(q);
             }
-            if (host.length() < 4 && !protocol.equals("file")) throw new MalformedURLException("host too short: '" + host + "'");
+            if (host.length() < 4 && !protocol.equals("file")) throw new MalformedURLException("host too short: '" + host + "', url = " + url);
             if (host.indexOf('&') >= 0) throw new MalformedURLException("invalid '&' in host");
             path = resolveBackpath(path);
             identPort(url, (isHTTP() ? 80 : (isHTTPS() ? 443 : (isFTP() ? 21 : (isSMB() ? 445 : -1)))));
