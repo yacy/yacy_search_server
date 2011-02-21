@@ -242,28 +242,27 @@ public class yacysearch {
         } else if (!authenticated && !localhostAccess) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized (trackerHandles) {
-                int accInOneSecond = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size();
                 int accInThreeSeconds = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size();
                 int accInOneMinute = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size();
                 int accInTenMinutes = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
                 // protections against too strong YaCy network load, reduces remote search
                 if (global) {
-                    if (accInTenMinutes >= 30 || accInOneMinute >= 6 || accInThreeSeconds >= 1) {
+                    if (accInTenMinutes >= 60 || accInOneMinute >= 6 || accInThreeSeconds >= 1) {
                         global = false;
-                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + "/1s, " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed global search");
+                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed global search");
                     }
                 }
                 // protection against too many remote server snippet loads (protects traffic on server)
                 if (snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline()) {
                     if (accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1) {
                         snippetFetchStrategy = CacheStrategy.CACHEONLY;
-                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + "/1s, " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed remote snippet loading");
+                        Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed remote snippet loading");
                     }
                 }
                 // general load protection
-                if (accInTenMinutes >= 2000 || accInOneMinute >= 600 || accInOneSecond >= 20) {
+                if (accInTenMinutes >= 3000 || accInOneMinute >= 600 || accInThreeSeconds >= 60) {
                     block = true;
-                    Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + "/1s, " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed search");
+                    Log.logWarning("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + "/3s, " + accInOneMinute + "/60s, " + accInTenMinutes + "/600s, " + " requests, disallowed search");
                 }
             }
         }
