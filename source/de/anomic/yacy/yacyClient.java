@@ -221,7 +221,7 @@ public final class yacyClient {
 
         final String error = mySeed.isProper(true);
         if (error != null) {
-            yacyCore.log.logSevere("yacyClient.hello mySeed error - not proper: " + error);
+            yacyCore.log.logWarning("yacyClient.hello mySeed error - not proper: " + error);
             return -1;
         }
 
@@ -265,7 +265,7 @@ public final class yacyClient {
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
             return yacySeed.genRemoteSeed(result.get("response"), salt, false);
         } catch (final Exception e) {
-            yacyCore.log.logSevere("yacyClient.querySeed error:" + e.getMessage());
+            yacyCore.log.logWarning("yacyClient.querySeed error:" + e.getMessage());
             return null;
         }
     }
@@ -286,7 +286,7 @@ public final class yacyClient {
             if (result == null || result.isEmpty()) { return -1; }
             return Integer.parseInt(result.get("response"));
         } catch (final Exception e) {
-            yacyCore.log.logSevere("yacyClient.queryRWICount error:" + e.getMessage());
+            yacyCore.log.logWarning("yacyClient.queryRWICount error:" + e.getMessage());
             return -1;
         }
     }
@@ -364,7 +364,7 @@ public final class yacyClient {
             seedDB.update(target.hash, target);
             return feed;
         } catch (final IOException e) {
-            yacyCore.log.logSevere("yacyClient.queryRemoteCrawlURLs error asking peer '" + target.getName() + "':" + e.toString());
+            yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs error asking peer '" + target.getName() + "':" + e.toString());
             return null;
         }
     }
@@ -479,7 +479,7 @@ public final class yacyClient {
                 indexSegment.urlMetadata().store(urlEntry);
                 ResultURLs.stack(urlEntry, mySeed.hash.getBytes(), target.hash.getBytes(), EventOrigin.QUERIES);
             } catch (final IOException e) {
-                yacyCore.log.logSevere("could not store search result", e);
+                yacyCore.log.logWarning("could not store search result", e);
                 continue; // db-error
             }
 
@@ -695,7 +695,7 @@ public final class yacyClient {
             return result;
         } catch (final Exception e) {
             // most probably a network time-out exception
-            yacyCore.log.logSevere("yacyClient.permissionMessage error:" + e.getMessage());
+            yacyCore.log.logWarning("yacyClient.permissionMessage error:" + e.getMessage());
             return null;
         }
     }
@@ -721,7 +721,7 @@ public final class yacyClient {
             final Map<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
-            yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
+            yacyCore.log.logWarning("yacyClient.postMessage error:" + e.getMessage());
             return null;
         }
     }
@@ -787,7 +787,7 @@ public final class yacyClient {
             return FileUtils.table(content);
         } catch (final Exception e) {
             // most probably a network time-out exception
-            yacyCore.log.logSevere("yacyClient.crawlReceipt error:" + e.getMessage());
+            yacyCore.log.logWarning("yacyClient.crawlReceipt error:" + e.getMessage());
             return null;
         }
     }
@@ -888,7 +888,7 @@ public final class yacyClient {
             
             return null;
         } catch (UnsupportedEncodingException e) {
-        	yacyCore.log.logSevere("yacyClient.transferIndex error:" + e.getMessage());
+        	yacyCore.log.logWarning("yacyClient.transferIndex error:" + e.getMessage());
         	return null;
 		} finally {
             resultObj.put("payloadSize", Integer.valueOf(payloadSize));
@@ -990,7 +990,7 @@ public final class yacyClient {
             result.put("urlPayloadSize", Integer.toString(urlPayloadSize));            
             return result;
         } catch (final Exception e) {
-            yacyCore.log.logSevere("yacyClient.transferURL to " + address + " error: " + e.getMessage());
+            yacyCore.log.logWarning("yacyClient.transferURL to " + address + " error: " + e.getMessage());
             return null;
         }
     }
@@ -1007,7 +1007,7 @@ public final class yacyClient {
             final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), 5000, targetSeed.getHexHash() + ".yacyh", parts);
             return FileUtils.table(content);
         } catch (final Exception e) {
-            yacyCore.log.logSevere("yacyClient.getProfile error:" + e.getMessage());
+            yacyCore.log.logWarning("yacyClient.getProfile error:" + e.getMessage());
             return null;
         }
     }

@@ -83,11 +83,11 @@ public class Browser {
             if (systemOS == systemMacOSX) {
                 openBrowserMac(url);
             } else if (systemOS == systemUnix) {
-                try {
-                    openBrowserUnixGeneric(url);
-                } catch (Exception e) {
+                //try {
+                //    openBrowserUnixGeneric(url);
+                //} catch (Exception e) {
                     openBrowserUnixFirefox(url);
-                }
+                //}
             } else if (systemOS == systemWindows) {
                 openBrowserWin(url);
             } else {
@@ -120,14 +120,14 @@ public class Browser {
         p.waitFor();
         if (p.exitValue() != 0) throw new RuntimeException("Unix Exec Error/Firefox: " + errorResponse(p));
     }
-    
+    /*
     private static void openBrowserUnixGeneric(final String url) throws Exception {
         String cmd = "/etc/alternatives/www-browser "  + url;
         Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
         if (p.exitValue() != 0) throw new RuntimeException("Unix Exec Error/generic: " + errorResponse(p));
     }
-    
+    */
     private static void openBrowserWin(final String url) throws Exception {
         // see forum at http://forum.java.sun.com/thread.jsp?forum=57&thread=233364&message=838441
         String cmd;
