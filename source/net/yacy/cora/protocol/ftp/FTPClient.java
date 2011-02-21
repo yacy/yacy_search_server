@@ -2066,7 +2066,7 @@ public class FTPClient {
 
         // save ip address in high byte order
         // byte[] Bytes = LocalIp.getAddress();
-        final byte[] b = Domains.myPublicLocalIP().getHostAddress().getBytes();
+        final byte[] b = Domains.myPublicLocalIP().getAddress();
 
         // bytes greater than 127 should not be printed as negative
         final short[] s = new short[4];
