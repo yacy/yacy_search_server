@@ -137,7 +137,7 @@ public class NetworkGraph {
             if (primarySearches[j] == null) continue;
             eventPicture.setColor((primarySearches[j].isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
             angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(primarySearches[j].target().hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
-            eventPicture.arcLine(cx, cy, cr - 20, cr, angle, null, null, -1, -1, -1, false);
+            eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
         }
 
         // draw in the secondary search peers
@@ -146,8 +146,8 @@ public class NetworkGraph {
                 if (secondarySearches[j] == null) continue;
                 eventPicture.setColor((secondarySearches[j].isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
                 angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(secondarySearches[j].target().hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
-                eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1, null, null, -1, -1, -1, false);
-                eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1, null, null, -1, -1, -1, false);
+                eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1, true, null, null, -1, -1, -1, false);
+                eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1, true, null, null, -1, -1, -1, false);
             }
         }
         
@@ -159,7 +159,7 @@ public class NetworkGraph {
             long[] positions = seedDB.scheme.dhtPositions(i.next());
             for (int j = 0; j < positions.length; j++) {
                 angle = (int) (360.0 * (((double) positions[j]) / ((double) Long.MAX_VALUE)));
-                eventPicture.arcLine(cx, cy, cr - 20, cr, angle, null, null, -1, -1, -1, false);
+                eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
             }
         }
 
@@ -258,14 +258,14 @@ public class NetworkGraph {
                 if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTRECEIVE: " + event.getLink());
-                    drawNetworkPictureDHT(networkPicture, width / 2, height / 2, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTIN);
+                    drawNetworkPictureDHT(networkPicture, width / 2, height / 2, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTIN, coronaangle, false);
                 }
             }
             for (Hit event: yacyChannel.channels(yacyChannel.DHTSEND)) {
                 if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTSEND: " + event.getLink());
-                    drawNetworkPictureDHT(networkPicture, width / 2, height / 2, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTOUT);
+                    drawNetworkPictureDHT(networkPicture, width / 2, height / 2, innerradius, seedDB.mySeed(), seedDB.get(event.getLink()), COL_DHTOUT, coronaangle, true);
                 }
             }
         }        
@@ -280,14 +280,16 @@ public class NetworkGraph {
         return networkPicture;
     }
 
-    private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final yacySeed mySeed, final yacySeed otherSeed, final String colorLine) {
+    private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final yacySeed mySeed, final yacySeed otherSeed, final String colorLine, final int coronaangle, boolean out) {
         final int angleMy = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(mySeed.hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
         final int angleOther = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(otherSeed.hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
         // draw line
-        img.setColor(colorLine);
-        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, null, null, -1, -1, -1, false);
-        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleOther, null, null, -1, -1, -1, false);
-        img.arcConnect(centerX, centerY, innerradius - 20, angleMy, angleOther);
+        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out,
+                colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+        img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleOther, out,
+                colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
+        img.arcConnect(centerX, centerY, innerradius - 20, angleMy, angleOther, out,
+                colorLine, 100, null, 100, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
     }
     
     private static void drawNetworkPicturePeer(
@@ -309,7 +311,7 @@ public class NetworkGraph {
         img.setColor(colorDot);
         img.arcDot(centerX, centerY, innerradius, angle, dotsize);
         // draw line to text
-        img.arcLine(centerX, centerY, innerradius + 18, innerradius + linelength, angle, colorLine, "111111", 12, coronaangle / 30, 1, true);
+        img.arcLine(centerX, centerY, innerradius + 18, innerradius + linelength, angle, true, colorLine, "444444", 12, coronaangle / 30, 0, true);
         // draw text
         img.setColor(colorText);
         PrintTool.arcPrint(img, centerX, centerY, innerradius + linelength, angle, name);

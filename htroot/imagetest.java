@@ -108,7 +108,7 @@ public class imagetest {
         int angle;
         for (byte c = (byte) 'A'; c <= 'Z'; c++) {
             angle = (c - (byte) 'A') * 360 / ((byte) 'Z' - (byte) 'A');
-            img.arcLine(550, 400, 81, 100, angle, null, null, -1, -1, -1, false);
+            img.arcLine(550, 400, 81, 100, angle, true, null, null, -1, -1, -1, false);
             PrintTool.arcPrint(img, 550, 400, 100, angle, "ANGLE" + angle + ":" + (char) c);
         }
         return img;

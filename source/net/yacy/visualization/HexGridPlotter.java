@@ -141,7 +141,8 @@ public class HexGridPlotter extends RasterPlotter {
             plot(x1, y1, (horizontal == 2) ? intensityLine : intensityLine * 8 / 10);
             if (dotc == dotPos) {
                 if (colorDot != null) this.setColor(colorDot);
-                if (dotRadius > 0) this.dot(x1, y1, dotRadius, dotFilled, intensityDot);
+                if (dotRadius == 0) this.plot(x1, y1, intensityDot);
+                else if (dotRadius > 0) this.dot(x1, y1, dotRadius, dotFilled, intensityDot);
             }
             dotc++;
             if (dotc == dotDist) dotc = 0;

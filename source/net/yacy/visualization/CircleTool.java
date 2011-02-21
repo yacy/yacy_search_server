@@ -34,8 +34,7 @@ import java.util.Set;
 
 public class CircleTool {    
 
-    private static int[][] circles = new int[0][];
-
+    private static int[][] circles = new int[0][]; 
     
     private static int[] getCircleCoords(final int radius) {
         if ((radius - 1) < circles.length) return circles[radius - 1];
@@ -44,7 +43,7 @@ public class CircleTool {
         Set<String> crds = new HashSet<String>();
         crds.add("0|0");
         String co;
-        for (int i = Math.max(0, circles.length - 5); i < circles.length; i++) {
+        for (int i = Math.max(0, circles.length - 2); i < circles.length; i++) {
             for (int j = 0; j < circles[i].length; j = j + 2) {
                 co = circles[i][j] + "|" + circles[i][j + 1];
                 if (!(crds.contains(co))) crds.add(co);
@@ -58,18 +57,20 @@ public class CircleTool {
         // compute more lines in new circles
         int x, y;
         List<int[]> crc;
+        int r1;
         for (int r = circles.length; r < newCircles.length; r++) {
+            r1 = r + 1;
             crc = new ArrayList<int[]>();
             for (int a = 0; a <= 2 * (r + 1); a++) {
-                x = (int) ((r + 1) * Math.cos(Math.PI * a / (4 * (r + 1))));
-                y = (int) ((r + 1) * Math.sin(Math.PI * a / (4 * (r + 1))));
+                x = (int) (r1 * Math.cos(Math.PI * a / (4 * r1)));
+                y = (int) (r1 * Math.sin(Math.PI * a / (4 * r1)));
                 co = x + "|" + y;
                 if (!(crds.contains(co))) {
                     crc.add(new int[]{x, y});
                     crds.add(co);
                 }
-                x = (int) ((r + 0.5) * Math.cos(Math.PI * a / (4 * (r + 1))));
-                y = (int) ((r + 0.5) * Math.sin(Math.PI * a / (4 * (r + 1))));
+                x = (int) (((double) r + 0.5) * Math.cos(Math.PI * a / (4 * r1)));
+                y = (int) (((double) r + 0.5) * Math.sin(Math.PI * a / (4 * r1)));
                 co = x + "|" + y;
                 if (!(crds.contains(co))) {
                     crc.add(new int[]{x, y});
@@ -80,10 +81,11 @@ public class CircleTool {
             //System.out.print("Radius " + r + " => " + crc.size() + " points: ");
             newCircles[r] = new int[2 * (crc.size() - 1)];
             int[] coords;
+            int i2 = 0;
             for (int i = 0; i < crc.size() - 1; i++) {
                 coords = crc.get(i);
-                newCircles[r][2 * i    ] = coords[0];
-                newCircles[r][2 * i + 1] = coords[1];
+                newCircles[r][i2++] = coords[0];
+                newCircles[r][i2++] = coords[1];
                 //System.out.print(circles[r][i][0] + "," +circles[r][i][1] + "; "); 
             }
             //System.out.println();
@@ -101,13 +103,15 @@ public class CircleTool {
     
     public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, int intensity) {
         if (radius == 0) {
-            matrix.plot(xc, yc, 100);
+            //matrix.plot(xc, yc, 100);
         } else {
             final int[] c = getCircleCoords(radius);
             int x, y;
-            for (int i = (c.length / 2) - 1; i >= 0; i--) {
-                x = c[2 * i    ];
-                y = c[2 * i + 1];
+            int limit = c.length / 2;
+            int i2 = 0;
+            for (int i = 0; i < limit; i++) {
+                x = c[i2++];
+                y = c[i2++];
                 matrix.plot(xc + x    , yc - y - 1, intensity); // quadrant 1
                 matrix.plot(xc - x + 1, yc - y - 1, intensity); // quadrant 2
                 matrix.plot(xc + x    , yc + y    , intensity); // quadrant 4
@@ -124,7 +128,7 @@ public class CircleTool {
         while (  toArc > 360)   toArc -=360;
         while (  toArc < 0  )   toArc +=360;
         if (radius == 0) {
-            matrix.plot(xc, yc, 100);
+            //matrix.plot(xc, yc, 100);
         } else {
             final int[] c = getCircleCoords(radius);
             final int q = c.length / 2;

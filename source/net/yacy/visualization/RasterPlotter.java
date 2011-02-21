@@ -229,7 +229,8 @@ public class RasterPlotter {
                 plot(Ax, Ay, intensityLine);
                 if (dotc == dotPos) {
                     if (colorDot != null) this.setColor(colorDot);
-                    if (dotRadius > 0) this.dot(Ax, Ay, dotRadius, dotFilled, intensityDot);
+                    if (dotRadius == 0) this.plot(Ax, Ay, intensityDot);
+                    else if (dotRadius > 0) this.dot(Ax, Ay, dotRadius, dotFilled, intensityDot);
                 }
                 dotc++;
                 if (dotc == dotDist) dotc = 0;
@@ -251,7 +252,8 @@ public class RasterPlotter {
                 plot(Ax, Ay, intensityLine);
                 if (dotc == dotPos) {
                     if (colorDot != null) this.setColor(colorDot);
-                    if (dotRadius > 0) this.dot(Ax, Ay, dotRadius, dotFilled, intensityDot);
+                    if (dotRadius == 0) this.plot(Ax, Ay, intensityDot);
+                    else if (dotRadius > 0) this.dot(Ax, Ay, dotRadius, dotFilled, intensityDot);
                 }
                 dotc++;
                 if (dotc == dotDist) dotc = 0;
@@ -316,6 +318,7 @@ public class RasterPlotter {
     }
 
     public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final int angle,
+            boolean in,
             String colorLine, String colorDot, int dotDist, int dotPos, int dotRadius, boolean dotFilled) {
         final double a = Math.PI * ((double) angle) / 180.0;
         final double cosa = Math.cos(a);
@@ -325,11 +328,19 @@ public class RasterPlotter {
         final int xo = cx + (int) (outerRadius * cosa);
         final int yo = cy - (int) (outerRadius * sina);
         //line(xi, yi, xo, yo, 100);
-        line(
-                xo, yo, xi, yi, 
-                colorLine, 100,
-                colorDot, 100, dotDist, dotPos, dotRadius, dotFilled
-                );
+        if (in) {
+            line(
+                    xo, yo, xi, yi, 
+                    colorLine, 100,
+                    colorDot, 100, dotDist, dotPos, dotRadius, dotFilled
+                   );
+        } else {
+            line(
+                    xi, yi, xo, yo,
+                    colorLine, 100,
+                    colorDot, 100, dotDist, dotPos, dotRadius, dotFilled
+                   );
+        }
     }
     
     public void arcDot(final int cx, final int cy, final int arcRadius, final int angle, final int dotRadius) {
@@ -339,14 +350,25 @@ public class RasterPlotter {
         dot(x, y, dotRadius, true, 100);
     }
     
-    public void arcConnect(final int cx, final int cy, final int arcRadius, final int angle1, final int angle2) {
+    public void arcConnect(final int cx, final int cy, final int arcRadius, final int angle1, final int angle2,
+            boolean in,
+            String colorLine, final int intensityLine,
+            String colorDot, final int intensityDot, int dotDist, int dotPos, int dotRadius, boolean dotFilled) {
         final double a1 = Math.PI * ((double) angle1) / 180.0;
         final double a2 = Math.PI * ((double) angle2) / 180.0;
         final int x1 = cx + (int) (arcRadius * Math.cos(a1));
         final int y1 = cy - (int) (arcRadius * Math.sin(a1));
         final int x2 = cx + (int) (arcRadius * Math.cos(a2));
         final int y2 = cy - (int) (arcRadius * Math.sin(a2));
-        line(x1, y1, x2, y2, 100);
+        if (in) {
+            line(x1, y1, x2, y2,
+                colorLine, intensityLine,
+                colorDot, intensityDot, dotDist, dotPos, dotRadius, dotFilled);
+        } else {
+            line(x2, y2, x1, y1, 
+                colorLine, intensityLine,
+                colorDot, intensityDot, dotDist, dotPos, dotRadius, dotFilled);
+        }
     }
     
     public void arcArc(final int cx, final int cy, final int arcRadius, final int angle, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {

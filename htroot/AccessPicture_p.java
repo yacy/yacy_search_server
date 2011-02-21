@@ -94,7 +94,7 @@ public class AccessPicture_p {
                 picture.gridDot(centerx, centery, 50, i * 60 + coronaangle / 6, i * 60 + 30 + coronaangle / 6);
             }
         } else {
-            picture.gridDot(centerx, centery, 50, 0, 360);
+            picture.gridDot(centerx, centery, 50);
         }
         //picture.gridDot(centerx, centery, 31, false);
         picture.setColor(color_text);
@@ -129,15 +129,15 @@ public class AccessPicture_p {
         for (int i = 0; i < hosts.length; i++) {
             if (hosts[i] != null) {
                 picture.setColor(color_dot);
-                picture.gridDot(gridLeft, i * 2 + 1, 7, 0, 360);
-                picture.gridDot(gridLeft, i * 2 + 1, 8, 0, 360);
+                picture.gridDot(gridLeft, i * 2 + 1, 7);
+                picture.gridDot(gridLeft, i * 2 + 1, 8);
                 picture.setColor(color_text);
                 picture.gridPrint(gridLeft, i * 2 + 1, 8, hosts[i].toUpperCase(), "COUNT = " + count[i] + ", TIME > " + ((time[i] >= 60000) ? ((time[i] / 60000) + " MINUTES") : ((time[i] / 1000) + " SECONDS")), -1);
                 if (corona) {
-                    picture.gridLine((centerx - gridLeft) / 2, i * 2 + 1, gridLeft, i * 2 + 1,
-                            color_line, 100, "111111", 100, 12, 11 - coronaangle / 30, 1, true);
-                    picture.gridLine(centerx, centery, (centerx - gridLeft) / 2, i * 2 + 1,
-                            color_line, 100, "111111", 100, 12, 11 - coronaangle / 30, 1, true);
+                    picture.gridLine((centerx - gridLeft) / 2 - 2, i * 2 + 1, gridLeft, i * 2 + 1,
+                            color_line, 100, "AAAAAA", 100, 12, 11 - coronaangle / 30, 0, true);
+                    picture.gridLine(centerx, centery, (centerx - gridLeft) / 2 - 2, i * 2 + 1,
+                            color_line, 100, "AAAAAA", 100, 12, 11 - coronaangle / 30, 0, true);
                 } else {
                     picture.setColor(color_line);
                     picture.gridLine(gridLeft, i * 2 + 1, (centerx - gridLeft) / 2, i * 2 + 1);
@@ -164,15 +164,15 @@ public class AccessPicture_p {
         for (int i = 0; i < hosts.length; i++) {
             if (hosts[i] != null) {
                 picture.setColor(color_dot);
-                picture.gridDot(gridRight, i * 2 + 1, 7, 0, 360);
-                picture.gridDot(gridRight, i * 2 + 1, 8, 0, 360);
+                picture.gridDot(gridRight, i * 2 + 1, 7);
+                picture.gridDot(gridRight, i * 2 + 1, 8);
                 picture.setColor(color_text);
                 picture.gridPrint(gridRight, i * 2 + 1, 8, hosts[i].toUpperCase(), count[i] + " BYTES, " + time[i] + " MS DUE", 1);
                 if (corona) {
-                    picture.gridLine(gridRight, i * 2 + 1, centerx + (gridRight - centerx) / 2, i * 2 + 1,
-                            color_line, 100, "111111", 100, 12, coronaangle / 30, 1, true);
-                    picture.gridLine(centerx, centery, centerx + (gridRight - centerx) / 2, i * 2 + 1,
-                            color_line, 100, "111111", 100, 12, coronaangle / 30, 1, true);
+                    picture.gridLine(gridRight, i * 2 + 1, centerx + (gridRight - centerx) / 2 + 2, i * 2 + 1,
+                            color_line, 100, "AAAAAA", 100, 12, 11 - coronaangle / 30, 0, true);
+                    picture.gridLine(centerx, centery, centerx + (gridRight - centerx) / 2 + 2, i * 2 + 1,
+                            color_line, 100, "AAAAAA", 100, 12, coronaangle / 30, 0, true);
                 } else {
                     picture.setColor(color_line);
                     picture.gridLine(gridRight, i * 2 + 1, centerx + (gridRight - centerx) / 2, i * 2 + 1);
