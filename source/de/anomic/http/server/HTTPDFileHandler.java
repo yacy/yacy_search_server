@@ -516,7 +516,6 @@ public final class HTTPDFileHandler {
             
             // track all files that had been accessed so far
             if (targetFile != null && targetFile.exists()) {
-                sb.setConfig("server.servlets.called", appendPath(sb.getConfig("server.servlets.called", ""), path));
                 if (args != null && args.size() > 0) sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), path));
             }
             
