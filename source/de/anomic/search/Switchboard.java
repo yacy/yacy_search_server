@@ -186,7 +186,7 @@ public final class Switchboard extends serverSwitch {
     
     // storage management
     public  File                           htCachePath;
-    public  File                           dictionariesPath;
+    public final File                      dictionariesPath;
     public  File                           listsPath;
     public  File                           htDocsPath;
     public  File                           workPath;
@@ -294,7 +294,11 @@ public final class Switchboard extends serverSwitch {
         
         // init libraries
         this.log.logConfig("initializing libraries");
-        LibraryProvider.initialize(this.dictionariesPath);
+        new Thread() {
+            public void run() {
+                LibraryProvider.initialize(dictionariesPath);
+            }
+        }.start();
         
         // set a high maximum cache size to current size; this is adopted later automatically
         final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
