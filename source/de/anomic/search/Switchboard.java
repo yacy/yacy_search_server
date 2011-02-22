@@ -1786,7 +1786,7 @@ public final class Switchboard extends serverSwitch {
                 
                 // process the next hyperlink
                 nextUrl = nextEntry.getKey();
-                String u = nextUrl.toNormalform(true, true, true);
+                String u = nextUrl.toNormalform(true, true, false, true);
                 if (!(u.startsWith("http://") || u.startsWith("ftp://") || u.startsWith("smb://") || u.startsWith("file://"))) continue;
                 // enqueue the hyperlink into the pre-notice-url db
                 try {
