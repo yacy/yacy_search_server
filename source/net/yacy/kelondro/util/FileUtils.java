@@ -43,7 +43,6 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,6 +51,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -393,7 +393,7 @@ public final class FileUtils {
         return set;
     }
 
-    public static Map<String, String> loadMap(final File f) {
+    public static ConcurrentHashMap<String, String> loadMap(final File f) {
         // load props
         try {
             final byte[] b = read(f);
@@ -500,15 +500,14 @@ public final class FileUtils {
         forceMove(tf, file);
     }
 
-
-    public static Map<String, String> table(Reader r) {
+    public static ConcurrentHashMap<String, String> table(Reader r) {
     	BufferedReader br = new BufferedReader(r);
     	return table(new StringsIterator(br));
 	}
     
-    public static Map<String, String> table(Iterator<String> li) {
+    public static ConcurrentHashMap<String, String> table(Iterator<String> li) {
     	String line;
-    	final HashMap<String, String> props = new HashMap<String, String>();
+    	final ConcurrentHashMap<String, String> props = new ConcurrentHashMap<String, String>();
     	while (li.hasNext()) {
         	int pos = 0;
     		line = li.next().trim();

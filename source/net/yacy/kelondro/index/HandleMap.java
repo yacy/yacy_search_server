@@ -248,19 +248,19 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return add(key, -1);
     }
     
-    public final synchronized ArrayList<Long[]> removeDoubles() throws RowSpaceExceededException {
-        final ArrayList<Long[]> report = new ArrayList<Long[]>();
-        Long[] is;
+    public final synchronized ArrayList<long[]> removeDoubles() throws RowSpaceExceededException {
+        final ArrayList<long[]> report = new ArrayList<long[]>();
+        long[] is;
         int c;
         long l;
         final int initialSize = this.size();
         for (final RowCollection rowset: index.removeDoubles()) {
-            is = new Long[rowset.size()];
+            is = new long[rowset.size()];
             c = 0;
             for (Row.Entry e: rowset) {
             	l = e.getColLong(1);
             	assert l < initialSize : "l = " + l + ", initialSize = " + initialSize;
-                is[c++] = Long.valueOf(l);
+                is[c++] = l;
             }
             report.add(is);
         }

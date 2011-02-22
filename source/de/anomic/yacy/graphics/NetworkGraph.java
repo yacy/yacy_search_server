@@ -253,8 +253,6 @@ public class NetworkGraph {
         if (communicationTimeout >= 0) {
             Date horizon = new Date(System.currentTimeMillis() - communicationTimeout);
             for (Hit event: yacyChannel.channels(yacyChannel.DHTRECEIVE)) {
-                assert event != null;
-                assert event.getPubDate() != null;
                 if (event == null || event.getPubDate() == null) continue;
                 if (event.getPubDate().after(horizon)) {
                     //System.out.println("*** NETWORK-DHTRECEIVE: " + event.getLink());

@@ -205,7 +205,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             
             // remove doubles
             if (!freshFile) {
-                final ArrayList<Long[]> doubles = index.removeDoubles();
+                final ArrayList<long[]> doubles = index.removeDoubles();
                 //assert index.size() + doubles.size() + fail == i;
                 //System.out.println(" -removed " + doubles.size() + " doubles- done.");
                 if (!doubles.isEmpty()) {
@@ -214,15 +214,15 @@ public class Table implements Index, Iterable<Row.Entry> {
                     // first put back one element each
                     final byte[] record = new byte[rowdef.objectsize];
                     key = new byte[rowdef.primaryKeyLength];
-                    for (final Long[] ds: doubles) {
-                        this.file.get(ds[0].intValue(), record, 0);
+                    for (final long[] ds: doubles) {
+                        this.file.get((int) ds[0], record, 0);
                         System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
-                        this.index.putUnique(key, ds[0].intValue());
+                        this.index.putUnique(key, (int) ds[0]);
                     }
                     // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
                     // first aggregate all the delete positions because the elements from the top positions must be removed first
                     final TreeSet<Long> delpos = new TreeSet<Long>();
-                    for (final Long[] ds: doubles) {
+                    for (final long[] ds: doubles) {
                         for (int j = 1; j < ds.length; j++) delpos.add(ds[j]);
                     }
                     // now remove the entries in a sorted way (top-down)
@@ -381,11 +381,11 @@ public class Table implements Index, Iterable<Row.Entry> {
         RowSet rows;
         final TreeSet<Long> d = new TreeSet<Long>();
         final byte[] b = new byte[rowdef.objectsize];
-        Long L;
+        long L;
         Row.Entry inconsistentEntry;
         // iterate over all entries that have inconsistent index references
         long lastlog = System.currentTimeMillis();
-        ArrayList<Long[]> doubles;
+        ArrayList<long[]> doubles;
         try {
             doubles = index.removeDoubles();
         } catch (RowSpaceExceededException e) {
@@ -393,16 +393,16 @@ public class Table implements Index, Iterable<Row.Entry> {
             table = null;
             doubles = index.removeDoubles();
         }
-        for (final Long[] is: doubles) {
+        for (final long[] is: doubles) {
             // 'is' is the set of all indexes, that have the same reference
             // we collect that entries now here
             rows = new RowSet(this.rowdef, is.length);
             for (int j = 0; j < is.length; j++) {
                 L = is[j];
-                assert L.intValue() < file.size() : "L.intValue() = " + L.intValue() + ", file.size = " + file.size(); // prevent ooBounds Exception
+                assert (int) L < file.size() : "L.intValue() = " + (int) L + ", file.size = " + file.size(); // prevent ooBounds Exception
                 d.add(L);
-                if (L.intValue() >= file.size()) continue; // prevent IndexOutOfBoundsException
-                file.get(L.intValue(), b, 0); // TODO: fix IndexOutOfBoundsException here
+                if ((int) L >= file.size()) continue; // prevent IndexOutOfBoundsException
+                file.get((int) L, b, 0); // TODO: fix IndexOutOfBoundsException here
                 inconsistentEntry = rowdef.newEntry(b);
                 try {
                     rows.addUnique(inconsistentEntry);

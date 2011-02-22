@@ -63,12 +63,11 @@ public class serverSwitch {
     protected       boolean firstInit;
     protected       Log     log;
     protected       int     serverJobs;
-    private         Map<String, String>                  configProps;
-    private   final Map<String, String>                  configRemoved;
-    private   final Map<InetAddress, String>             authorization;
-    private   final TreeMap<String, BusyThread>          workerThreads;
-    private   final TreeMap<String, serverSwitchAction>  switchActions;
-    private   final serverAccessTracker                  accessTracker;
+    private         ConcurrentHashMap<String, String>      configProps;
+    private   final ConcurrentHashMap<String, String>      configRemoved;
+    private   final ConcurrentHashMap<InetAddress, String> authorization;
+    private   final TreeMap<String, BusyThread>            workerThreads;
+    private   final serverAccessTracker                    accessTracker;
     
     public serverSwitch(final File dataPath, final File appPath, final String initPath, final String configPath) {
         // we initialize the switchboard with a property file,
@@ -86,7 +85,7 @@ public class serverSwitch {
         new File(configFile.getParent()).mkdir();
 
         // predefine init's
-        Map<String, String> initProps;
+        ConcurrentHashMap<String, String> initProps;
         if (initFile.exists())
             initProps = FileUtils.loadMap(initFile);
         else
@@ -144,9 +143,6 @@ public class serverSwitch {
         // init thread control
         workerThreads = new TreeMap<String, BusyThread>();
 
-        // init switch actions
-        switchActions = new TreeMap<String, serverSwitchAction>();
-
         // init busy state control
         serverJobs = 0;
         
@@ -202,35 +198,9 @@ public class serverSwitch {
     }
 
     public void setConfig(final String key, final String value) {
-        // perform action before setting new value
-        final Iterator<serverSwitchAction> bevore = switchActions.values().iterator();
-        final Iterator<serverSwitchAction> after  = switchActions.values().iterator();
-        synchronized (configProps) {
-            serverSwitchAction action;
-            
-            while (bevore.hasNext()) {
-                action = bevore.next();
-                try {
-                    action.doBevoreSetConfig(key, value);
-                } catch (final Exception e) {
-                    log.logSevere("serverAction bevoreSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
-                }
-            }
-
-            // set the value
-            final Object oldValue = configProps.put(key, value);
-            saveConfig();
-
-            // perform actions afterwards
-            while (after.hasNext()) {
-                action = after.next();
-                try {
-                    action.doAfterSetConfig(key, value, (oldValue == null) ? null : (String) oldValue);
-                } catch (final Exception e) {
-                    log.logSevere("serverAction afterSetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
-                }
-            }
-        }
+        // set the value
+        final String oldValue = configProps.put(key, value);
+        if (oldValue == null || !value.equals(oldValue)) saveConfig();
     }
 
     public void removeConfig(final String key) {
@@ -241,26 +211,12 @@ public class serverSwitch {
      * @see de.anomic.server.serverSwitch#getConfig(java.lang.String, java.lang.String)
      */
     public String getConfig(final String key, final String dflt) {
-        final Iterator<serverSwitchAction> i = switchActions.values().iterator();
-        synchronized (configProps) {
-            // get the value
-            final Object s = configProps.get(key);
+        // get the value
+        final String s = configProps.get(key);
 
-            // do action
-            serverSwitchAction action;
-            while (i.hasNext()) {
-                action = i.next();
-                try {
-                    action.doWhenGetConfig(key, (s == null) ? null : (String) s, dflt);
-                } catch (final Exception e) {
-                    log.logSevere("serverAction whenGetConfig '" + action.getShortDescription() + "' failed with exception: " + e.getMessage());
-                }
-            }
-
-            // return value
-            if (s == null) return dflt;
-            return (String) s;
-        }
+        // return value
+        if (s == null) return dflt;
+        return s;
     }
     
     public long getConfigLong(final String key, final long dflt) {
@@ -314,34 +270,18 @@ public class serverSwitch {
 
     private void saveConfig() {
         try {
-            synchronized (configProps) {
-                FileUtils.saveMap(configFile, configProps, configComment);
-            }
+            ConcurrentHashMap<String, String> configPropsCopy = new ConcurrentHashMap<String, String>();
+            configPropsCopy.putAll(configProps); // avoid concurrency problems
+            FileUtils.saveMap(configFile, configPropsCopy, configComment);
         } catch (final IOException e) {
         	log.logSevere("CONFIG: Cannot write config file " + configFile.toString() + ": " + e.getMessage());
             System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
         }
     }
 
-    public Map<String, String> getRemoved() {
+    public ConcurrentHashMap<String, String> getRemoved() {
         // returns configuration that had been removed during initialization
         return configRemoved;
-    }
-    
-    // add/remove action listener
-    public void deployAction(final String actionName, final String actionShortDescription, final String actionLongDescription,
-			     final serverSwitchAction newAction) {
-        newAction.setLog(log);
-        newAction.setDescription(actionShortDescription, actionLongDescription);
-        switchActions.put(actionName, newAction);
-        log.logInfo("Deployed Action '" + actionShortDescription + "', (" + switchActions.size() + " actions registered)");
-    }
-
-    public void undeployAction(final String actionName) {
-	final serverSwitchAction action = switchActions.get(actionName);
-	action.close();
-	switchActions.remove(actionName);
-	log.logInfo("Undeployed Action '" + action.getShortDescription() + "', (" + switchActions.size() + " actions registered)");
     }
 
     public void deployThread(
