@@ -102,7 +102,7 @@ public class Digest {
         return encodeHex(encodeMD5Raw(key));
     }
 
-    public static String encodeMD5Hex(final File file) {
+    public static String encodeMD5Hex(final File file) throws IOException {
         // generate a hex representation from the md5 of a file
         return encodeHex(encodeMD5Raw(file));
     }
@@ -145,7 +145,7 @@ public class Digest {
         return result;
     }
     
-    public static byte[] encodeMD5Raw(final File file) {
+    public static byte[] encodeMD5Raw(final File file) throws IOException {
         FileInputStream  in;
         try {
             in = new FileInputStream(file);
@@ -166,15 +166,16 @@ public class Digest {
         try {
             while (true) {
                 c = md5consumer.nextFree();
+                if (c == null) throw new IOException("c == null, probably interrupted");
                 c.n = in.read(c.b);
                 if (c.n <= 0) break;
                 md5consumer.consume(c);
             }
             in.close();
         } catch (final IOException e) {
-            System.out.println("file error with " + file.toString() + ": " + e.getMessage());
+            Log.logSevere("Digest", "file error with " + file.toString() + ": " + e.getMessage());
             md5consumer.consume(md5FilechunkConsumer.poison);
-            return null;
+            throw e;
         }
         // put in poison into queue to tell the consumer to stop
         md5consumer.consume(md5FilechunkConsumer.poison);
@@ -184,10 +185,11 @@ public class Digest {
             return md5result.get().digest();
         } catch (InterruptedException e) {
             Log.logException(e);
+            throw new IOException(e);
         } catch (ExecutionException e) {
             Log.logException(e);
+            throw new IOException(e);
         }
-        return null;
     }
     
     private static class filechunk {
@@ -228,12 +230,12 @@ public class Digest {
             }
         }
         
-        public filechunk nextFree() {
+        public filechunk nextFree() throws IOException {
             try {
                 return empty.take();
             } catch (InterruptedException e) {
                 Log.logException(e);
-                return null;
+                throw new IOException(e);
             }
         }
 
@@ -357,7 +359,11 @@ public class Digest {
         if (s[0].equals("-md5")) {
             // generate a md5 from a given file
             File f = new File(s[1]);
-            System.out.println("MD5 (" + f.getName() + ") = " + encodeMD5Hex(f));
+            try {
+                System.out.println("MD5 (" + f.getName() + ") = " + encodeMD5Hex(f));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         
         if (s[0].equals("-fhex")) {

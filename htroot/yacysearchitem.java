@@ -75,7 +75,9 @@ public class yacysearchitem {
         prop.put("references", "0");
         prop.put("rssreferences", "0");
         prop.put("dynamic", "0");
-        boolean isHtml = header.get(HeaderFramework.CONNECTION_PROP_PATH).endsWith(".html");
+        String p = header.get(HeaderFramework.CONNECTION_PROP_PATH);
+        boolean isHtml = p.endsWith(".html");
+        boolean isJson = p.endsWith(".json");
         
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
@@ -108,7 +110,7 @@ public class yacysearchitem {
             DigestURI resultURL = result.url();
             final int port = resultURL.getPort();
             DigestURI faviconURL = null;
-            if (isHtml && !sb.isIntranetMode() && !resultURL.isLocal()) try {
+            if ((isHtml || isJson) && !sb.isIntranetMode() && !resultURL.isLocal()) try {
                 faviconURL = new DigestURI(resultURL.getProtocol() + "://" + resultURL.getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
             } catch (final MalformedURLException e1) {
                 Log.logException(e1);

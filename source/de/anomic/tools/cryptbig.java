@@ -636,7 +636,12 @@ public class cryptbig {
 	if (s[0].equals("-md5")) {
 	    // generate a public key from a password that can be used for encryption
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    final String md5s = Digest.encodeMD5Hex(new File(s[1]));
+	    String md5s = "";
+        try {
+            md5s = Digest.encodeMD5Hex(new File(s[1]));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 	    System.out.println(md5s);
 	    System.exit(0);
 	}
