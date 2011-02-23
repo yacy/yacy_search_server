@@ -270,7 +270,9 @@ public class HTTPClient {
      * @throws IOException 
      */
     public byte[] GETbytes(final String uri, long maxBytes) throws IOException {
-    	final HttpGet httpGet = new HttpGet(uri);
+        MultiProtocolURI url = new MultiProtocolURI(uri);
+    	final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, true, false));
+    	httpGet.setHeader("Host", url.getHost()); // overwrite resolved IP
     	return getContentBytes(httpGet, maxBytes);
     }
     
@@ -284,7 +286,9 @@ public class HTTPClient {
      */
     public void GET(final String uri) throws IOException {
         if (currentRequest != null) throw new IOException("Client is in use!");
-        final HttpGet httpGet = new HttpGet(uri);
+        MultiProtocolURI url = new MultiProtocolURI(uri);
+        final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, true, false));
+        httpGet.setHeader("Host", url.getHost()); // overwrite resolved IP
         currentRequest = httpGet;
         execute(httpGet);
     }
@@ -297,7 +301,9 @@ public class HTTPClient {
      * @throws IOException
      */
     public HttpResponse HEADResponse(final String uri) throws IOException {
-    	final HttpHead httpHead = new HttpHead(uri);
+        MultiProtocolURI url = new MultiProtocolURI(uri);
+        final HttpHead httpHead = new HttpHead(url.toNormalform(true, false, true, false));
+        httpHead.setHeader("Host", url.getHost()); // overwrite resolved IP
     	execute(httpHead);
     	finish();
     	ConnectionInfo.removeConnection(httpHead.hashCode());
@@ -316,7 +322,9 @@ public class HTTPClient {
      */
     public void POST(final String uri, final InputStream instream, long length) throws IOException {
     	if (currentRequest != null) throw new IOException("Client is in use!");
-    	final HttpPost httpPost = new HttpPost(uri);
+        MultiProtocolURI url = new MultiProtocolURI(uri);
+        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
+        httpPost.setHeader("Host", url.getHost()); // overwrite resolved IP
     	final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
     	// statistics
     	upbytes = length;
@@ -334,7 +342,9 @@ public class HTTPClient {
      * @throws IOException 
      */
     public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip) throws IOException {
-    	final HttpPost httpPost = new HttpPost(uri);
+        MultiProtocolURI url = new MultiProtocolURI(uri);
+        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
+        httpPost.setHeader("Host", url.getHost()); // overwrite resolved IP
 
     	final MultipartEntity multipartEntity = new MultipartEntity();
     	for (final Entry<String,ContentBody> part : parts.entrySet())
@@ -355,7 +365,7 @@ public class HTTPClient {
 	 * 
 	 * @return HttpResponse from call
 	 */
-	public HttpResponse getHttpResponse() {
+    public HttpResponse getHttpResponse() {
 		return httpResponse;
 	}
 	
@@ -363,7 +373,7 @@ public class HTTPClient {
 	 * 
 	 * @return status code from http request
 	 */
-	public int getStatusCode() {
+    public int getStatusCode() {
 	    return httpResponse.getStatusLine().getStatusCode();
 	}
 	
@@ -375,7 +385,7 @@ public class HTTPClient {
      * @return the content as InputStream
      * @throws IOException
      */
-    public InputStream getContentstream() throws IOException {
+	public InputStream getContentstream() throws IOException {
         if (httpResponse != null && currentRequest != null) {
             final HttpEntity httpEntity = httpResponse.getEntity();
             if (httpEntity != null) try {
@@ -397,7 +407,7 @@ public class HTTPClient {
      * @param outputStream
      * @throws IOException
      */
-    public void writeTo(final OutputStream outputStream) throws IOException {
+	public void writeTo(final OutputStream outputStream) throws IOException {
         if (httpResponse != null && currentRequest != null) {
             final HttpEntity httpEntity = httpResponse.getEntity();
             if (httpEntity != null) try {
@@ -625,7 +635,7 @@ public class HTTPClient {
 	 * @see: http://hc.apache.org/httpcomponents-client-4.0.1/tutorial/html/connmgmt.html#d4e638
 	 *
 	 */
-	public static class IdledConnectionEvictor extends Thread {
+	private static class IdledConnectionEvictor extends Thread {
 
 		private final ClientConnectionManager clientConnectionManager;
 

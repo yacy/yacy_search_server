@@ -2433,7 +2433,7 @@ public final class Switchboard extends serverSwitch {
         
         yacySeed           ys;
         String             seedListFileURL;
-        DigestURI            url;
+        DigestURI          url;
         Iterator<String>   enu;
         int                lc;
         final int          sc = peers.sizeConnected();
@@ -2487,8 +2487,11 @@ public final class Switchboard extends serverSwitch {
                             try {
                                 ys = yacySeed.genRemoteSeed(enu.next(), null, false);
                                 if ((ys != null) &&
-                                        ((!peers.mySeedIsDefined()) || !peers.mySeed().hash.equals(ys.hash))) {
-                                        if (peers.peerActions.connectPeer(ys, false)) lc++;
+                                    (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash))) {
+                                        long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
+                                        if (lastseen < 240) {
+                                            if (peers.peerActions.connectPeer(ys, false)) lc++;
+                                        }
                                     }
                             } catch (IOException e) {
                                 yacyCore.log.logInfo("BOOTSTRAP: bad seed: " + e.getMessage());

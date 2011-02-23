@@ -80,7 +80,7 @@ public class HTTPConnector {
 		client.setUserAgent(this.userAgent);
 		client.setHost(vhost);
 		
-		return client.POSTbytes(url.toNormalform(false, false, true, false), post, usegzip);
+		return client.POSTbytes(url.toNormalform(true, false, true, false), post, usegzip);
 	}
 
 }
