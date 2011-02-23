@@ -919,7 +919,7 @@ public final class FileUtils {
      * @param path
      */
     public static void deletedelete(final File path) {
-        if (!path.exists()) return;
+        if (path == null || !path.exists()) return;
 
         // empty the directory first
         if (path.isDirectory()) {

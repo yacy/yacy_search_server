@@ -166,17 +166,19 @@ public final class Heap extends HeapModifier implements BLOB {
     public void flushBuffer() throws IOException {
         assert buffer != null;
         if (buffer == null) return;
+        
         // check size of buffer
         Iterator<Map.Entry<byte[], byte[]>> i = this.buffer.entrySet().iterator();
         int l = 0;
         while (i.hasNext()) l += i.next().getValue().length;
         assert l == this.buffersize;
         
-        // simulate write: this whole code block is only here to test the assert at the end of the block; remove after testing
-        i = this.buffer.entrySet().iterator();
         int posBuffer = 0;
         Map.Entry<byte[], byte[]> entry;
         byte[] key, blob;
+        // simulate write: this whole code block is only here to test the assert at the end of the block; remove after testing
+        /*
+        i = this.buffer.entrySet().iterator();
         while (i.hasNext()) {
             entry = i.next();
             key = normalizeKey(entry.getKey());
@@ -184,6 +186,11 @@ public final class Heap extends HeapModifier implements BLOB {
             posBuffer += 4 + this.keylength + blob.length;
         }
         assert l + (4 + this.keylength) * this.buffer.size() == posBuffer : "l = " + l + ", this.keylength = " + this.keylength + ", this.buffer.size() = " + this.buffer.size() + ", posBuffer = " + posBuffer;
+         */
+        
+        synchronized (this) {
+            super.deleteFingerprint();
+        }
         
         // append all contents of the buffer into one byte[]
         i = this.buffer.entrySet().iterator();
@@ -461,6 +468,8 @@ public final class Heap extends HeapModifier implements BLOB {
         key = normalizeKey(key);
         
         synchronized (this) {
+            super.deleteFingerprint();
+            
             // check the buffer
             assert buffer != null;
             if (buffer != null) {

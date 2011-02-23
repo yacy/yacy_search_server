@@ -67,6 +67,7 @@ public class HeapModifier extends HeapReader implements BLOB {
         this.file.close();
         this.file = null;
         FileUtils.deletedelete(this.heapFile);
+        super.deleteFingerprint();
         this.file = new CachedFileWriter(heapFile);
     }
 
@@ -118,6 +119,7 @@ public class HeapModifier extends HeapReader implements BLOB {
                 Log.logSevere("BLOBHeap", heapFile.getName() + ": too long size " + size + " in record at " + seek);
                 throw new IOException(heapFile.getName() + ": too long size " + size + " in record at " + seek);
             }
+            super.deleteFingerprint();
             
             // add entry to free array
             this.free.put(seek, size);
@@ -267,6 +269,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             if (MemoryControl.available() < len) {
                 if (!MemoryControl.request(len, true)) return 0; // not enough memory available for this blob
             }
+            super.deleteFingerprint();
             
             // read the key
             final byte[] keyf = new byte[this.keylength];

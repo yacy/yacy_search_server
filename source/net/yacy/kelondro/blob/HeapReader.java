@@ -1,4 +1,4 @@
-// kelondroBLOBHeapReader.java
+// HeapReader.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 30.12.2008 on http://yacy.net
 //
@@ -63,6 +63,7 @@ public class HeapReader {
     protected Writer             file;       // a random access to the file
     protected HandleMap          index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
+    private   File               fingerprintFileIdx, fingerprintFileGap; // files with dumped indexes. Will be deleted if file is written
     
     public HeapReader(
             final File heapFile,
@@ -77,6 +78,8 @@ public class HeapReader {
         this.file = new CachedFileWriter(this.heapFile);
         
         // read or initialize the index
+        fingerprintFileIdx = null;
+        fingerprintFileGap = null;
         if (initIndexReadDump()) {
             // verify that everything worked just fine
             // pick some elements of the index
@@ -153,19 +156,19 @@ public class HeapReader {
             Log.logSevere("HeapReader", "cannot generate a fingerprint for " + this.heapFile + ": null");
             return false;
         }
-        File fif = fingerprintIndexFile(this.heapFile, fingerprint);
-        if (!fif.exists()) fif = new File(fif.getAbsolutePath() + ".gz");
-        File fgf = fingerprintGapFile(this.heapFile, fingerprint);
-        if (!fgf.exists()) fgf = new File(fgf.getAbsolutePath() + ".gz");
-        if (!fif.exists() || !fgf.exists()) {
-            deleteAllFingerprints(this.heapFile, fif.getName(), fgf.getName());
+        this.fingerprintFileIdx = fingerprintIndexFile(this.heapFile, fingerprint);
+        if (!this.fingerprintFileIdx.exists()) this.fingerprintFileIdx = new File(this.fingerprintFileIdx.getAbsolutePath() + ".gz");
+        this.fingerprintFileGap = fingerprintGapFile(this.heapFile, fingerprint);
+        if (!this.fingerprintFileGap.exists()) this.fingerprintFileGap = new File(this.fingerprintFileGap.getAbsolutePath() + ".gz");
+        if (!this.fingerprintFileIdx.exists() || !this.fingerprintFileGap.exists()) {
+            deleteAllFingerprints(this.heapFile, this.fingerprintFileIdx.getName(), this.fingerprintFileGap.getName());
             return false;
         }
         
         // there is an index and a gap file:
         // read the index file:
         try {
-            this.index = new HandleMap(this.keylength, this.ordering, 8, fif);
+            this.index = new HandleMap(this.keylength, this.ordering, 8, this.fingerprintFileIdx);
         } catch (IOException e) {
             Log.logException(e);
             return false;
@@ -176,20 +179,15 @@ public class HeapReader {
 
         // check saturation
         int[] saturation = this.index.saturation();
-        Log.logInfo("HeapReader", "saturation of " + fif.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", possible saving: " + ((this.keylength - saturation[0] + 8 - saturation[1]) * index.size() / 1024 / 1024) + " MB");
-        
-        // an index file is a one-time throw-away object, so just delete it now
-        FileUtils.deletedelete(fif);
+        Log.logInfo("HeapReader", "saturation of " + this.fingerprintFileIdx.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", possible saving: " + ((this.keylength - saturation[0] + 8 - saturation[1]) * index.size() / 1024 / 1024) + " MB");
         
         // read the gap file:
         try {
-            this.free = new Gap(fgf);
+            this.free = new Gap(this.fingerprintFileGap);
         } catch (IOException e) {
             Log.logException(e);
             return false;
         }
-        // same with gap file
-        FileUtils.deletedelete(fgf);
         
         // everything is fine now
         return !this.index.isEmpty();
@@ -205,6 +203,23 @@ public class HeapReader {
         return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".gap");
     }
     
+    /**
+     * deletion of the fingerprint: this should happen if the heap is written or entries are deleted
+     * if the files are not deleted then it may be possible that they are not used anyway because the
+     * fingerprint hash does not fit with the heap dump file hash. But since the hash is not computed
+     * from all the data and just some key bytes it may be possible that the hash did not change.
+     */
+    public void deleteFingerprint() {
+        if (this.fingerprintFileIdx != null) {
+            FileUtils.deletedelete(this.fingerprintFileIdx);
+            this.fingerprintFileIdx = null;
+        }
+        if (this.fingerprintFileGap != null) {
+            FileUtils.deletedelete(this.fingerprintFileGap);
+            this.fingerprintFileGap = null;
+        }
+    }
+    
     protected static String fingerprintFileHash(File f) {
         assert f != null;
         assert f.exists() : "file = " + f.toString();
@@ -214,7 +229,7 @@ public class HeapReader {
         return fp.substring(0, 12);
     }
     
-    public static void deleteAllFingerprints(File f, String exception1, String exception2) {
+    private static void deleteAllFingerprints(File f, String exception1, String exception2) {
         File d = f.getParentFile();
         String n = f.getName();
         String[] l = d.list();
@@ -250,7 +265,7 @@ public class HeapReader {
                 //assert reclen > 0 : " reclen == 0 at seek pos " + seek;
                 if (reclen == 0) {
                     // very bad file inconsistency
-                    Log.logSevere("kelondroBLOBHeap", "reclen == 0 at seek pos " + seek + " in file " + heapFile);
+                    Log.logSevere("HeapReader", "reclen == 0 at seek pos " + seek + " in file " + heapFile);
                     this.file.setLength(seek); // delete everything else at the remaining of the file :-(
                     break loop;
                 }
@@ -277,7 +292,7 @@ public class HeapReader {
                     file.seek(seek + 4);
                     Arrays.fill(key, (byte) 0);
                     file.write(key); // mark the place as empty record
-                    Log.logWarning("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
+                    Log.logWarning("HeapReader", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
                 }
             }            
             // new seek position
@@ -321,7 +336,8 @@ public class HeapReader {
                     lastFree = nextFree;
                 }
             }
-            Log.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.toString() + ": merged " + merged + " free records");
+            Log.logInfo("HeapReader", "BLOB " + heapFile.toString() + ": merged " + merged + " free records");
+            if (merged > 0) deleteFingerprint();
         }
     }
     
@@ -465,7 +481,7 @@ public class HeapReader {
             file.readFully(keyf, 0, keyf.length);
             if (!this.ordering.equal(key, keyf)) {
                 // verification of the indexed access failed. we must re-read the index
-                Log.logSevere("kelondroBLOBHeap", "indexed verification access failed for " + heapFile.toString());
+                Log.logSevere("HeapReader", "indexed verification access failed for " + heapFile.toString());
                 // this is a severe operation, it should never happen.
                 // remove entry from index because keeping that element in the index would not make sense
                 index.remove(key);
@@ -548,18 +564,34 @@ public class HeapReader {
                 // now we can create a dump of the index and the gap information
                 // to speed up the next start
                 try {
-                    long start = System.currentTimeMillis();
                     String fingerprint = fingerprintFileHash(this.heapFile);
                     if (fingerprint == null) {
-                        Log.logSevere("kelondroBLOBHeap", "cannot write a dump for " + heapFile.getName()+ ": fingerprint is null");
+                        Log.logSevere("HeapReader", "cannot write a dump for " + heapFile.getName()+ ": fingerprint is null");
                     } else {
-                        free.dump(fingerprintGapFile(this.heapFile, fingerprint));
+                        File newFingerprintFileGap = fingerprintGapFile(this.heapFile, fingerprint);
+                        if (this.fingerprintFileGap != null &&
+                            this.fingerprintFileGap.getName().equals(newFingerprintFileGap.getName()) &&
+                            this.fingerprintFileGap.exists()) {
+                            Log.logInfo("HeapReader", "using existing gap dump instead of writing a new one: " + this.fingerprintFileGap.getName());
+                        } else {
+                            long start = System.currentTimeMillis();
+                            free.dump(newFingerprintFileGap);
+                            Log.logInfo("HeapReader", "wrote a dump for the " + this.free.size() +  " gap entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                        }
                     }
                     free.clear();
                     free = null;
                     if (fingerprint != null) {
-                        index.dump(fingerprintIndexFile(this.heapFile, fingerprint));
-                        Log.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                        File newFingerprintFileIdx = fingerprintIndexFile(this.heapFile, fingerprint);
+                        if (this.fingerprintFileIdx != null &&
+                            this.fingerprintFileIdx.getName().equals(newFingerprintFileIdx.getName()) &&
+                            this.fingerprintFileIdx.exists()) {
+                            Log.logInfo("HeapReader", "using existing idx dump instead of writing a new one: " + this.fingerprintFileIdx.getName());
+                        } else {
+                            long start = System.currentTimeMillis();
+                            index.dump(newFingerprintFileIdx);
+                            Log.logInfo("HeapReader", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                        }
                     }
                     index.close();
                     index = null;
