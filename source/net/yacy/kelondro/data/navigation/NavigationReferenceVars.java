@@ -26,6 +26,8 @@
 
 package net.yacy.kelondro.data.navigation;
 
+import java.util.Collection;
+
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
@@ -146,7 +148,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         throw new UnsupportedOperationException();
     }
 
-    public int positions() {
+    public Collection<Integer> positions() {
         throw new UnsupportedOperationException();
     }
     

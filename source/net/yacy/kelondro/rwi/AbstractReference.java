@@ -26,26 +26,27 @@
 
 package net.yacy.kelondro.rwi;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 
 
 public abstract class AbstractReference implements Reference {
 
-    protected static void a(List<Integer> a, int i) {
+    protected static void a(Collection<Integer> a, int i) {
         assert a != null;
         if (i < 0) return; // signal for 'do nothing'
-        synchronized (a) {
-            a.clear();
-            a.add(i);
-        }
+        a.clear();
+        a.add(i);
     }
-    protected static int max(List<Integer> a, List<Integer> b) {
+    
+    protected static int max(Collection<Integer> a, Collection<Integer> b) {
         assert a != null;
         if (a.size() == 0) return max(b);
         if (b.size() == 0) return max(a);
         return Math.max(max(a), max(b));
     }
-    protected static int min(List<Integer> a, List<Integer> b) {
+    
+    protected static int min(Collection<Integer> a, Collection<Integer> b) {
         assert a != null;
         if (a.size() == 0) return min(b);
         if (b.size() == 0) return min(a);
@@ -56,46 +57,56 @@ public abstract class AbstractReference implements Reference {
         return Math.min(ma, mb);
     }
 
-    private static int max(List<Integer> a) {
+    private static int max(Collection<Integer> a) {
         assert a != null;
         if (a.size() == 0) return -1;
-        if (a.size() == 1) return a.get(0);
-        if (a.size() == 2) return Math.max(a.get(0), a.get(1));
-        int r = a.get(0);
-        for (int i = 1; i < a.size(); i++) if (a.get(i) > r) r = a.get(i);
+        Iterator<Integer> i = a.iterator();
+        if (a.size() == 1) return i.next();
+        if (a.size() == 2) return Math.max(i.next(), i.next());
+        int r = i.next();
+        int s;
+        while (i.hasNext()) {
+            s = i.next();
+            if (s > r) r = s;
+        }
         return r;
     }
-    private static int min(List<Integer> a) {
+    
+    private static int min(Collection<Integer> a) {
         assert a != null;
         if (a.size() == 0) return -1;
-        if (a.size() == 1) return a.get(0);
-        if (a.size() == 2) return Math.min(a.get(0), a.get(1));
-        int r = a.get(0);
-        for (int i = 1; i < a.size(); i++) if (a.get(i) < r) r = a.get(i);
+        Iterator<Integer> i = a.iterator();
+        if (a.size() == 1) return i.next();
+        if (a.size() == 2) return Math.min(i.next(), i.next());
+        int r = i.next();
+        int s;
+        while (i.hasNext()) {
+            s = i.next();
+            if (s <r) r = s;
+        }
         return r;
     }
     
     public int maxposition() {
-        assert positions() > 0;
-        if (positions() == 1) return position(0);
-        int p = position(0);
-        for (int i = positions() - 1; i > 0; i--) if (position(i) > p) p = position(i);
-        return p;
+        assert positions().size() > 0;
+        return max(positions());
     }
     
     public int minposition() {
-        assert positions() > 0;
-        if (positions() == 1) return position(0);
-        int p = position(0);
-        for (int i = positions() - 1; i > 0; i--) if (position(i) < p) p = position(i);
-        return p;
+        assert positions().size() > 0;
+        return min(positions());
     }
     
     public int distance() {
+        if (positions().size() < 2) return 0;
         int d = 0;
-        for (int i = 0; i < this.positions() - 1; i++) {
-            d += Math.abs(this.position(i) - this.position(i + 1));
+        Iterator<Integer> i = positions().iterator();
+        int s0 = i.next(), s1;
+        while (i.hasNext()) {
+            s1 = i.next();
+            d += Math.abs(s0 - s1);
+            s0 = s1;
         }
-        return d;
+        return d / (positions().size() - 1);
     }
 }

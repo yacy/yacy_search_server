@@ -26,6 +26,8 @@
 
 package net.yacy.kelondro.data.citation;
 
+import java.util.Collection;
+
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
@@ -214,7 +216,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         throw new UnsupportedOperationException();
     }
 
-    public int positions() {
+    public Collection<Integer> positions() {
         throw new UnsupportedOperationException();
     }
 

@@ -26,6 +26,9 @@
 
 package net.yacy.kelondro.data.word;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
@@ -257,8 +260,8 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return (int) this.entry.getColLong(col_hitcount);
     }
 
-    public int positions() {
-        return 1;
+    public Collection<Integer> positions() {
+        return new ArrayList<Integer>(0);
     }
 
     public int position(final int p) {

@@ -26,6 +26,8 @@
 
 package net.yacy.kelondro.data.navigation;
 
+import java.util.Collection;
+
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
@@ -174,7 +176,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         throw new UnsupportedOperationException();
     }
 
-    public int positions() {
+    public Collection<Integer> positions() {
         throw new UnsupportedOperationException();
     }
     

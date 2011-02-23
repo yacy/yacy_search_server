@@ -34,7 +34,6 @@ import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -110,34 +109,6 @@ public final class HeapWriter {
         //os.flush(); // necessary? may cause bad IO performance :-(
     }
     
-    protected static File fingerprintIndexFile(File f, String fingerprint) {
-        assert f != null;
-        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".idx");
-    }
-    
-    protected static File fingerprintGapFile(File f, String fingerprint) {
-        assert f != null;
-        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".gap");
-    }
-    
-    protected static String fingerprintFileHash(File f) {
-        assert f != null;
-        assert f.exists() : "file = " + f.toString();
-        String fp = Digest.fastFingerprintB64(f, false);
-        assert fp != null : "file = " + f.toString();
-        if (fp == null) return null;
-        return fp.substring(0, 12);
-    }
-    
-    public static void deleteAllFingerprints(File f) {
-        File d = f.getParentFile();
-        String n = f.getName();
-        String[] l = d.list();
-        for (int i = 0; i < l.length; i++) {
-            if (l[i].startsWith(n) && (l[i].endsWith(".idx") || l[i].endsWith(".gap") || l[i].endsWith(".idx.gz") || l[i].endsWith(".gap.gz"))) FileUtils.deletedelete(new File(d, l[i]));
-        }
-    }
-    
     /**
      * close the BLOB table
      * @throws  
@@ -160,12 +131,12 @@ public final class HeapWriter {
             // now we can create a dump of the index and the gap information
             // to speed up the next start
             long start = System.currentTimeMillis();
-            String fingerprint = HeapWriter.fingerprintFileHash(this.heapFileREADY);
+            String fingerprint = HeapReader.fingerprintFileHash(this.heapFileREADY);
             if (fingerprint == null) {
                 Log.logSevere("kelondroBLOBHeapWriter", "cannot write a dump for " + heapFileREADY.getName()+ ": fingerprint is null");
             } else {
-                new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
-                index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
+                new Gap().dump(HeapReader.fingerprintGapFile(this.heapFileREADY, fingerprint));
+                index.dump(HeapReader.fingerprintIndexFile(this.heapFileREADY, fingerprint));
                 Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
             }
             index.close();

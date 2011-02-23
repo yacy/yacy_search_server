@@ -26,11 +26,10 @@
 
 package net.yacy.kelondro.data.word;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
@@ -62,7 +61,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                posinphrase, posofphrase,
                urlcomps, urllength, virtualAge,
                wordsintext, wordsintitle;
-    private final List<Integer> positions;
+    private final ConcurrentLinkedQueue<Integer> positions;
     public double termFrequency;
     
     public WordReferenceVars(
@@ -73,7 +72,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      hitcount,      // how often appears this word in the text
             final int      wordcount,     // total number of words
             final int      phrasecount,   // total number of phrases
-            final List<Integer> ps,       // positions of words that are joined into the reference
+            final ConcurrentLinkedQueue<Integer> ps,       // positions of words that are joined into the reference
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
@@ -98,8 +97,8 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.llocal = outlinksSame;
         this.lother = outlinksOther;
         this.phrasesintext = phrasecount;
-        this.positions = Collections.synchronizedList(new ArrayList<Integer>(ps.size()));
-        for (int i = 0; i < ps.size(); i++) this.positions.add(ps.get(i));
+        this.positions = new ConcurrentLinkedQueue<Integer>();
+        for (Integer i: ps) this.positions.add(i);
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
         this.urlcomps = urlComps;
@@ -121,8 +120,8 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.llocal = e.llocal();
         this.lother = e.lother();
         this.phrasesintext = e.phrasesintext();
-        this.positions = new ArrayList<Integer>(e.positions());
-        for (int i = 0; i < e.positions(); i++) this.positions.add(e.position(i));
+        this.positions = new ConcurrentLinkedQueue<Integer>();
+        for (Integer i: e.positions()) this.positions.add(i);
         this.posinphrase = e.posinphrase();
         this.posofphrase = e.posofphrase();
         this.urlcomps = e.urlcomps();
@@ -237,14 +236,10 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return posinphrase;
     }
 
-    public int positions() {
-        return this.positions.size();
+    public Collection<Integer> positions() {
+        return this.positions;
     }
-
-    public int position(final int p) {
-        return this.positions.get(p);
-    }
-
+    
     public int posofphrase() {
         return posofphrase;
     }
@@ -258,7 +253,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 hitcount,      // how often appears this word in the text
                 wordsintext,   // total number of words
                 phrasesintext, // total number of phrases
-                positions.get(0), // position of word in all words
+                positions.size() == 0 ? 1 : positions.iterator().next(), // position of word in all words
                 posinphrase,   // position of word in its phrase
                 posofphrase,   // number of the phrase where word appears
                 lastModified,  // last-modified time of the document where word appears
@@ -357,7 +352,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         
         // combine the distance
         WordReference oe = (WordReference) r; 
-        for (int i = 0; i < r.positions(); i++) this.positions.add(r.position(i));
+        for (Integer i: r.positions()) this.positions.add(i);
         this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
         this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
 

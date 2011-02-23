@@ -26,6 +26,8 @@
 
 package net.yacy.kelondro.rwi;
 
+import java.util.Collection;
+
 import net.yacy.kelondro.index.Row.Entry;
 
 public interface Reference {
@@ -48,13 +50,11 @@ public interface Reference {
 
     public void join(final Reference oe);
     
-    public int positions();
+    public Collection<Integer> positions();
     
     public int maxposition();
     
     public int minposition();
-    
-    public int position(int p);
     
     public int distance();
         

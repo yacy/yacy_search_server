@@ -26,6 +26,9 @@
 
 package net.yacy.kelondro.data.image;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
@@ -226,8 +229,8 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
         return (int) this.entry.getColLong(col_hitcount);
     }
 
-    public int positions() {
-        return 1;
+    public Collection<Integer> positions() {
+        return new ArrayList<Integer>(0);
     }
 
     public int position(int p) {

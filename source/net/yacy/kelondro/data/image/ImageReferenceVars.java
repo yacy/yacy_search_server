@@ -26,7 +26,8 @@
 
 package net.yacy.kelondro.data.image;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Bitfield;
@@ -53,7 +54,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
                posinphrase, posofphrase,
                urlcomps, urllength, virtualAge,
                wordsintext, wordsintitle;
-    private final ArrayList<Integer> positions;
+    private final ConcurrentLinkedQueue<Integer> positions;
     public double termFrequency;
     
     public ImageReferenceVars(
@@ -64,7 +65,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
             final int      hitcount,      // how often appears this word in the text
             final int      wordcount,     // total number of words
             final int      phrasecount,   // total number of phrases
-            final ArrayList<Integer> ps,  // positions of words that are joined into the reference
+            final ConcurrentLinkedQueue<Integer> ps,  // positions of words that are joined into the reference
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
@@ -89,8 +90,8 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         this.llocal = outlinksSame;
         this.lother = outlinksOther;
         this.phrasesintext = phrasecount;
-        this.positions = new ArrayList<Integer>(ps.size());
-        for (int i = 0; i < ps.size(); i++) this.positions.add(ps.get(i));
+        this.positions = new ConcurrentLinkedQueue<Integer>();
+        for (Integer i: ps) this.positions.add(i);
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
         this.urlcomps = urlComps;
@@ -112,8 +113,8 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         this.llocal = e.llocal();
         this.lother = e.lother();
         this.phrasesintext = e.phrasesintext();
-        this.positions = new ArrayList<Integer>(e.positions());
-        for (int i = 0; i < e.positions(); i++) this.positions.add(e.position(i));
+        this.positions = new ConcurrentLinkedQueue<Integer>();
+        for (Integer i: e.positions()) this.positions.add(i);
         this.posinphrase = e.posinphrase();
         this.posofphrase = e.posofphrase();
         this.urlcomps = e.urlcomps();
@@ -227,12 +228,8 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         return posinphrase;
     }
 
-    public int positions() {
-        return this.positions.size();
-    }
-
-    public int position(int p) {
-        return this.positions.get(p);
+    public Collection<Integer> positions() {
+        return this.positions;
     }
 
     public int posofphrase() {
@@ -248,7 +245,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
                 hitcount,      // how often appears this word in the text
                 wordsintext,   // total number of words
                 phrasesintext, // total number of phrases
-                positions.get(0), // position of word in all words
+                positions.iterator().next(), // position of word in all words
                 posinphrase,   // position of word in its phrase
                 posofphrase,   // number of the phrase where word appears
                 lastModified,  // last-modified time of the document where word appears
@@ -347,7 +344,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         
         // combine the distance
         ImageReference oe = (ImageReference) r; 
-        for (int i = 0; i < r.positions(); i++) this.positions.add(r.position(i));
+        for (Integer i: r.positions()) this.positions.add(i);
         this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
         this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
 
