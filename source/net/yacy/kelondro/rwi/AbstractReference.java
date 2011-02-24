@@ -34,32 +34,34 @@ public abstract class AbstractReference implements Reference {
 
     protected static void a(Collection<Integer> a, int i) {
         assert a != null;
-        if (i < 0) return; // signal for 'do nothing'
+        if (i == Integer.MAX_VALUE || i == Integer.MIN_VALUE) return; // signal for 'do nothing'
         a.clear();
         a.add(i);
     }
     
     protected static int max(Collection<Integer> a, Collection<Integer> b) {
-        assert a != null;
-        if (a.size() == 0) return max(b);
-        if (b.size() == 0) return max(a);
-        return Math.max(max(a), max(b));
+        if (a == null || a.size() == 0) return max(b);
+        if (b == null || b.size() == 0) return max(a);
+        int ma = max(a);
+        int mb = max(b);
+        if (ma == Integer.MIN_VALUE) return mb;
+        if (mb == Integer.MIN_VALUE) return ma;
+        return Math.max(ma, mb);
     }
     
     protected static int min(Collection<Integer> a, Collection<Integer> b) {
         assert a != null;
-        if (a.size() == 0) return min(b);
-        if (b.size() == 0) return min(a);
+        if (a == null || a.size() == 0) return min(b);
+        if (b == null || b.size() == 0) return min(a);
         int ma = min(a);
         int mb = min(b);
-        if (ma == -1) return mb;
-        if (mb == -1) return ma;
+        if (ma == Integer.MAX_VALUE) return mb;
+        if (mb == Integer.MAX_VALUE) return ma;
         return Math.min(ma, mb);
     }
 
     private static int max(Collection<Integer> a) {
-        assert a != null;
-        if (a.size() == 0) return -1;
+        if (a == null || a.size() == 0) return Integer.MIN_VALUE;
         Iterator<Integer> i = a.iterator();
         if (a.size() == 1) return i.next();
         if (a.size() == 2) return Math.max(i.next(), i.next());
@@ -73,8 +75,7 @@ public abstract class AbstractReference implements Reference {
     }
     
     private static int min(Collection<Integer> a) {
-        assert a != null;
-        if (a.size() == 0) return -1;
+        if (a == null || a.size() == 0) return Integer.MAX_VALUE;
         Iterator<Integer> i = a.iterator();
         if (a.size() == 1) return i.next();
         if (a.size() == 2) return Math.min(i.next(), i.next());
@@ -82,18 +83,16 @@ public abstract class AbstractReference implements Reference {
         int s;
         while (i.hasNext()) {
             s = i.next();
-            if (s <r) r = s;
+            if (s < r) r = s;
         }
         return r;
     }
     
     public int maxposition() {
-        assert positions().size() > 0;
         return max(positions());
     }
     
     public int minposition() {
-        assert positions().size() > 0;
         return min(positions());
     }
     

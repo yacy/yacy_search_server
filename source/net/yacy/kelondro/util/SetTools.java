@@ -136,15 +136,17 @@ public final class SetTools {
     
     @SuppressWarnings("unchecked")
     private static <A, B> SortedMap<A, B> joinConstructiveByTest(final SortedMap<A, B> small, final SortedMap<A, B> large, final boolean concatStrings) {
-        final Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
         final SortedMap<A, B> result = new TreeMap<A, B>(large.comparator());
-        synchronized (mi) {
+        synchronized (small) {
+            final Iterator<Map.Entry<A, B>> mi = small.entrySet().iterator();
             Map.Entry<A, B> mentry1;
             B mobj2;
             loop: while (mi.hasNext()) {
                 try {
                     mentry1 = mi.next();
-                    mobj2 = large.get(mentry1.getKey());
+                    synchronized (large) {
+                        mobj2 = large.get(mentry1.getKey());
+                    }
                     if (mobj2 != null) {
                         if (mentry1.getValue() instanceof String) {
                             result.put(mentry1.getKey(), (B) ((concatStrings) ? (mentry1.getValue() + (String) mobj2) : mentry1.getValue()));

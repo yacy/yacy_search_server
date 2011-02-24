@@ -157,12 +157,14 @@ public class Segments implements Iterable<Segment> {
     }
     
     public long RWICount() {
+        if (this.segments == null) return 0;
         long c = 0;
         for (Segment s: this.segments.values()) c += (long) s.termIndex().sizesMax();
         return c;
     }
     
     public int RWIBufferCount() {
+        if (this.segments == null) return 0;
         int c = 0;
         for (Segment s: this.segments.values()) c += s.termIndex().getBufferSize();
         return c;
