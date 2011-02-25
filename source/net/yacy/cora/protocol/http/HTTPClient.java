@@ -272,7 +272,7 @@ public class HTTPClient {
     public byte[] GETbytes(final String uri, long maxBytes) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
     	final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, true, false));
-    	// httpGet.setHeader("Host", url.getHost()); // overwrite resolved IP
+    	httpGet.setHeader("Host", url.getHost()); // overwrite resolved IP
     	return getContentBytes(httpGet, maxBytes);
     }
     
@@ -288,7 +288,7 @@ public class HTTPClient {
         if (currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, true, false));
-        // httpGet.setHeader("Host", url.getHost()); // overwrite resolved IP
+        httpGet.setHeader("Host", url.getHost()); // overwrite resolved IP
         currentRequest = httpGet;
         execute(httpGet);
     }
@@ -303,7 +303,7 @@ public class HTTPClient {
     public HttpResponse HEADResponse(final String uri) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpHead httpHead = new HttpHead(url.toNormalform(true, false, true, false));
-        // httpHead.setHeader("Host", url.getHost()); // overwrite resolved IP
+        httpHead.setHeader("Host", url.getHost()); // overwrite resolved IP
     	execute(httpHead);
     	finish();
     	ConnectionInfo.removeConnection(httpHead.hashCode());
@@ -324,7 +324,7 @@ public class HTTPClient {
     	if (currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
-        // httpPost.setHeader("Host", url.getHost()); // overwrite resolved IP
+        httpPost.setHeader("Host", url.getHost()); // overwrite resolved IP
     	final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
     	// statistics
     	upbytes = length;
@@ -344,7 +344,7 @@ public class HTTPClient {
     public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
-        // httpPost.setHeader("Host", url.getHost()); // overwrite resolved IP
+        httpPost.setHeader("Host", url.getHost()); // overwrite resolved IP
 
     	final MultipartEntity multipartEntity = new MultipartEntity();
     	for (final Entry<String,ContentBody> part : parts.entrySet())
