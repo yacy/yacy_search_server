@@ -260,7 +260,7 @@ public class MapDataMining extends MapHeap {
         if ((sortfields != null) || (longaccfields != null) || (floataccfields != null)) {
             Map<String, String> map;
             try {
-                map = super.get(key);
+                map = super.get(key, false);
                 if (map != null) {
 
                     // update accumulators (subtract)
@@ -382,7 +382,7 @@ public class MapDataMining extends MapHeap {
             while (keyIterator.hasNext()) {
                 nextKey = keyIterator.next();
                 try {
-                    map = get(nextKey);
+                    map = get(nextKey, false);
                 } catch (final IOException e) {
                     Log.logWarning("MapDataMining", e.getMessage());
                     continue;

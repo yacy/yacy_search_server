@@ -390,7 +390,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 return null;
             }
             try {
-                final Map<String, String> obj = get(nextKey);
+                final Map<String, String> obj = get(nextKey, false);
                 if (obj == null) throw new kelondroException("no more elements available");
                 return obj;
             } catch (final IOException e) {
