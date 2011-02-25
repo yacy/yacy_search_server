@@ -393,16 +393,18 @@ public final class SearchEvent {
                 if (oldAbstract == null) {
                     // new abstracts in the cache
                     abstractsCache.put(wordhash, singleAbstract);
-                } else synchronized (oldAbstract) {
+                } else {
                     // extend the abstracts in the cache: join the single abstracts
                     for (final Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
                         final String urlhash = oneref.getKey();
                         final String peerlistNew = oneref.getValue();
-                        final String peerlistOld = oldAbstract.get(urlhash);
-                        if (peerlistOld == null) {
-                            oldAbstract.put(urlhash, peerlistNew);
-                        } else {
-                            oldAbstract.put(urlhash, peerlistOld + peerlistNew);
+                        synchronized (oldAbstract) {
+                            final String peerlistOld = oldAbstract.get(urlhash);
+                            if (peerlistOld == null) {
+                                oldAbstract.put(urlhash, peerlistNew);
+                            } else {
+                                oldAbstract.put(urlhash, peerlistOld + peerlistNew);
+                            }
                         }
                     }
                     // abstractsCache.put(wordhash, oldAbstract);

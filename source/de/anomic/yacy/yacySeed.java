@@ -443,12 +443,16 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      */
     public final String getPublicAddress() {
         String ip = this.getIP();
-        if (ip == null || ip.length() < 8) ip = "localhost";
+        if (ip == null || ip.length() < 8 || ip.length() > 60) ip = "localhost";
         
         final String port = this.dna.get(yacySeed.PORT);
-        if ((port == null) || (port.length() < 2)) return null;
+        if (port == null || port.length() < 2 || port.length() > 5) return null;
 
-        return ip + ":" + port;
+        StringBuilder sb = new StringBuilder(ip.length() + port.length() + 1);
+        sb.append(ip);
+        sb.append(':');
+        sb.append(port);
+        return sb.toString();
     }
     
     /**
