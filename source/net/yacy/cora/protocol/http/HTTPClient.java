@@ -504,7 +504,7 @@ public class HTTPClient {
     private void setHeaders(final HttpUriRequest httpUriRequest) {
     	if (headers != null) {
             for (final Header header : headers) {
-                    httpUriRequest.addHeader(header);
+                    httpUriRequest.setHeader(header);
             }
     	}
         if (realm != null)
