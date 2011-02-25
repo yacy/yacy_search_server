@@ -828,7 +828,7 @@ public final class HTTPDFileHandler {
                             templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((Switchboard) switchboard).peers.myID());
-                            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
+                            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
                             yacySeed myPeer = sb.peers.mySeed();
                             templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1); 
                             templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);

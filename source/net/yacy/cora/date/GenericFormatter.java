@@ -50,21 +50,19 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         FORMAT_SHORT_MILSEC.setTimeZone(TZ_GMT);
     }
 
-    public static final GenericFormatter SHORT_DAY_FORMATTER     = new GenericFormatter(FORMAT_SHORT_DAY);
-    public static final GenericFormatter SHORT_SECOND_FORMATTER  = new GenericFormatter(FORMAT_SHORT_SECOND);
+    public static final long time_second =  1000L;
+    public static final long time_minute = 60000L;
+    public static final long time_hour   = 60 * time_minute;
+    public static final long time_day    = 24 * time_hour;
+
+    public static final GenericFormatter SHORT_DAY_FORMATTER     = new GenericFormatter(FORMAT_SHORT_DAY, time_minute);
+    public static final GenericFormatter SHORT_SECOND_FORMATTER  = new GenericFormatter(FORMAT_SHORT_SECOND, time_second);
     public static final GenericFormatter SHORT_MILSEC_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MILSEC, 1);
-    public static final GenericFormatter ANSIC_FORMATTER         = new GenericFormatter(FORMAT_ANSIC);
-    public static final GenericFormatter RFC1123_SHORT_FORMATTER = new GenericFormatter(FORMAT_RFC1123_SHORT);
+    public static final GenericFormatter ANSIC_FORMATTER         = new GenericFormatter(FORMAT_ANSIC, time_second);
+    public static final GenericFormatter RFC1123_SHORT_FORMATTER = new GenericFormatter(FORMAT_RFC1123_SHORT, time_minute);
     
     private SimpleDateFormat dateFormat;
     private long maxCacheDiff;
-    
-    public GenericFormatter(SimpleDateFormat dateFormat) {
-        this.dateFormat = dateFormat;
-        this.last_time = 0;
-        this.last_format = "";
-        this.maxCacheDiff = 1000;
-    }
 
     public GenericFormatter(SimpleDateFormat dateFormat, long maxCacheDiff) {
         this.dateFormat = dateFormat;
@@ -84,14 +82,22 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     @Override
     public String format(final Date date) {
         if (date == null) return "";
-        if (Math.abs(date.getTime() - last_time) < maxCacheDiff) return last_format;
+        synchronized (this.dateFormat) {
+            // calculate the date
+            return this.dateFormat.format(date);
+        }
+    }
+    
+    public String format() {
+        if (Math.abs(System.currentTimeMillis() - last_time) < maxCacheDiff) return last_format;
         synchronized (this.dateFormat) {
             // threads that had been waiting here may use the cache now instead of calculating the date again
-            if (Math.abs(date.getTime() - last_time) < maxCacheDiff) return last_format;
+            long time = System.currentTimeMillis();
+            if (Math.abs(time - last_time) < maxCacheDiff) return last_format;
             
             // if the cache is not fresh, calculate the date
-            last_format = this.dateFormat.format(date);
-            last_time = date.getTime();
+            last_format = this.dateFormat.format(new Date(time));
+            last_time = time;
         }
         return last_format;
     }

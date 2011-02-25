@@ -27,5 +27,6 @@ public interface DateFormatter {
 
     public Date parse(String s) throws ParseException;
     public String format(final Date date);
+    public String format();
     
 }

@@ -150,7 +150,7 @@ public class WebStructureGraph {
     
     private static String map2refstr(final Map<String, Integer> map) {
         final StringBuilder s = new StringBuilder(map.size() * 10);
-        s.append(GenericFormatter.SHORT_DAY_FORMATTER.format(new Date()));
+        s.append(GenericFormatter.SHORT_DAY_FORMATTER.format());
         String h;
         for (final Map.Entry<String, Integer> entry : map.entrySet()) {
             s.append(entry.getKey());
@@ -229,7 +229,7 @@ public class WebStructureGraph {
         return new structureEntry(
                 domhash,
                 host,
-                GenericFormatter.SHORT_DAY_FORMATTER.format(new Date()),
+                GenericFormatter.SHORT_DAY_FORMATTER.format(),
                 domhashes);
     }
     

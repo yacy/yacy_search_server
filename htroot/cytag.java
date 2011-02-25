@@ -28,8 +28,6 @@
 import java.awt.Image;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -52,7 +50,7 @@ public class cytag {
         // harvest request information
         StringBuilder connect = new StringBuilder();
         connect.append('{');
-        appendJSON(connect, "time", GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()));
+        appendJSON(connect, "time", GenericFormatter.SHORT_MILSEC_FORMATTER.format());
         appendJSON(connect, "trail", (referer == null) ? "" : referer.toNormalform(false, false));
         appendJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
         appendJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));

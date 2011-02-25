@@ -434,7 +434,7 @@ public class BlogBoard {
                 if (Log.isFinest("Blog")) {
                     Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
                 }
-                return GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date());
+                return GenericFormatter.SHORT_SECOND_FORMATTER.format();
             }
             return timestamp;
         }

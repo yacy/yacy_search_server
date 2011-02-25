@@ -26,7 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -85,7 +84,7 @@ public class AccessTracker {
         //if (query.resultcount == 0) return;
         if (query.queryString == null || query.queryString.length() == 0) return;
         StringBuilder sb = new StringBuilder(40);
-        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
+        sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format());
         sb.append(' ');
         sb.append(Integer.toString(query.resultcount));
         sb.append(' ');

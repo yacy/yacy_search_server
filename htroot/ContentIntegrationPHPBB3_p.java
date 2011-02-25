@@ -23,8 +23,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
-import java.util.Date;
-
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.content.dao.Dao;
@@ -107,7 +105,7 @@ public class ContentIntegrationPHPBB3_p {
                                             dbpw
                                             );
                     
-                    int files = db.writeSurrogates(db.query(0, -1, 100), sb.surrogatesInPath, "fullexport-" + GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()), ppf);
+                    int files = db.writeSurrogates(db.query(0, -1, 100), sb.surrogatesInPath, "fullexport-" + GenericFormatter.SHORT_SECOND_FORMATTER.format(), ppf);
                     prop.put("export", 1);
                     prop.put("export_files", files);
                     db.close();

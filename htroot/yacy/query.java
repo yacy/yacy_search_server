@@ -28,8 +28,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.util.Date;
-
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -75,7 +73,7 @@ public final class query {
         final String obj    = post.get("object", ""); // keyword for query subject
         final String env    = post.get("env", "");    // argument to query
 
-        prop.put("mytime", GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
+        prop.put("mytime", GenericFormatter.SHORT_SECOND_FORMATTER.format());
 
         // check if we are the right target and requester has correct information about this peer
         if (sb.peers.mySeed() == null || !sb.peers.mySeed().hash.equals(youare)) {

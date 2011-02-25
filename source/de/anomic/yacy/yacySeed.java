@@ -185,7 +185,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     }
     
     // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
 
     private yacySeed(final String theHash) {
         this.dna = new ConcurrentHashMap<String, String>();
@@ -728,7 +728,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? defaultPeerName() : name);
         newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8090 : port));
-        newSeed.dna.put(yacySeed.BDATE, my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/)) );
+        newSeed.dna.put(yacySeed.BDATE, my_SHORT_SECOND_FORMATTER.format());
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
         newSeed.dna.put(yacySeed.UTC, GenericFormatter.UTCDiffString());
         newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

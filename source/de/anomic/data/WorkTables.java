@@ -124,7 +124,7 @@ public class WorkTables extends Tables {
                 Data data = new Data();
                 data.put(TABLE_API_COL_TYPE, type.getBytes());
                 data.put(TABLE_API_COL_COMMENT, comment.getBytes());
-                byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()).getBytes();
+                byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format().getBytes();
                 data.put(TABLE_API_COL_DATE_RECORDING, date);
                 data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
                 data.put(TABLE_API_COL_URL, apiurl.getBytes());
@@ -136,7 +136,7 @@ public class WorkTables extends Tables {
                 // modify and update existing entry
 
                 // modify date attributes and patch old values
-                row.put(TABLE_API_COL_DATE_LAST_EXEC, GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()).getBytes());
+                row.put(TABLE_API_COL_DATE_LAST_EXEC, GenericFormatter.SHORT_MILSEC_FORMATTER.format().getBytes());
                 if (!row.containsKey(TABLE_API_COL_DATE_RECORDING)) row.put(TABLE_API_COL_DATE_RECORDING, row.get(TABLE_API_COL_DATE));
                 row.remove(TABLE_API_COL_DATE);
                 
@@ -185,7 +185,7 @@ public class WorkTables extends Tables {
             Data data = new Data();
             data.put(TABLE_API_COL_TYPE, type.getBytes());
             data.put(TABLE_API_COL_COMMENT, comment.getBytes());
-            byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()).getBytes();
+            byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format().getBytes();
             data.put(TABLE_API_COL_DATE_RECORDING, date);
             data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
             data.put(TABLE_API_COL_URL, apiurl.getBytes());
@@ -309,7 +309,7 @@ public class WorkTables extends Tables {
         try {
             // create and insert new entry
             Data data = new Data();
-            byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()).getBytes();
+            byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format().getBytes();
             data.put(TABLE_SEARCH_FAILURE_COL_URL, url.toNormalform(true, false));
             data.put(TABLE_SEARCH_FAILURE_COL_DATE, date);
             data.put(TABLE_SEARCH_FAILURE_COL_WORDS, queryHashes.export());

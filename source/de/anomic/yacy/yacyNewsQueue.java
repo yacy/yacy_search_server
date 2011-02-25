@@ -46,7 +46,6 @@ package de.anomic.yacy;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -169,7 +168,7 @@ public class yacyNewsQueue {
         newsDB.put(r);
         final Row.Entry b = queueStack.row().newEntry(new byte[][]{
                 r.id().getBytes(),
-                GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()).getBytes()});
+                GenericFormatter.SHORT_SECOND_FORMATTER.format().getBytes()});
         return b;
     }
     

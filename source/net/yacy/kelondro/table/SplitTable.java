@@ -136,7 +136,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     }
 
     private String newFilename() {
-        return prefix + "." + GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()) + ".table";
+        return prefix + "." + GenericFormatter.SHORT_MILSEC_FORMATTER.format() + ".table";
     }
     
     private void init() throws RowSpaceExceededException {

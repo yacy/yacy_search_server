@@ -28,7 +28,7 @@ public class get {
         if (post != null && post.containsKey("date")) {
             date = post.get("date");
         } else {
-            date = ISO8601Formatter.FORMATTER.format(new Date(System.currentTimeMillis()));
+            date = ISO8601Formatter.FORMATTER.format();
         }
         
         // if an extended xml should be used

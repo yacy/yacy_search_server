@@ -142,7 +142,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         // can be detected with given expiration date
         Date expiration = getExpirationDate();
         if (expiration != null) {
-            if (expiration.before(new Date())) throw new IOException("the resumption is expired at " + ISO8601Formatter.FORMATTER.format(expiration) + " (now: " + ISO8601Formatter.FORMATTER.format(new Date()));
+            if (expiration.before(new Date())) throw new IOException("the resumption is expired at " + ISO8601Formatter.FORMATTER.format(expiration) + " (now: " + ISO8601Formatter.FORMATTER.format());
             // the resumption token is still fresh
         }
         String u = url + "verb=ListRecords&resumptionToken=" + escape(token);

@@ -28,7 +28,6 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -102,7 +101,7 @@ public class IndexControlURLs_p {
             prop.put("reload", 1);
         } else {
             prop.put("lurlexport", 1);
-            prop.put("lurlexport_exportfile", sb.getDataPath() + "/DATA/EXPORT/" + GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
+            prop.put("lurlexport_exportfile", sb.getDataPath() + "/DATA/EXPORT/" + GenericFormatter.SHORT_SECOND_FORMATTER.format());
             if (export == null) {
                 // there has never been an export
                 prop.put("lurlexportfinished", 0);

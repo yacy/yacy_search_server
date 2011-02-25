@@ -41,5 +41,6 @@ public abstract class AbstractFormatter implements DateFormatter {
     
     public abstract Date parse(String s) throws ParseException;
     public abstract String format(final Date date);
+    public abstract String format();
     
 }

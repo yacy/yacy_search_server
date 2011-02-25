@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -130,7 +129,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
 
     
     // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
 
     /**
      * write a whole byte array as Map to the table
@@ -144,7 +143,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         assert key.length > 0;
         assert newMap != null;
         key = normalizeKey(key);
-        String s = map2string(newMap, "W" + my_SHORT_SECOND_FORMATTER.format(new Date()) + " ");
+        String s = map2string(newMap, "W" + my_SHORT_SECOND_FORMATTER.format() + " ");
         assert s != null;
         byte[] sb = s.getBytes();
         synchronized (this) {

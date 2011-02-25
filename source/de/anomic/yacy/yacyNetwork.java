@@ -27,7 +27,6 @@
 
 package de.anomic.yacy;
 
-import java.util.Date;
 import java.util.LinkedHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -93,7 +92,7 @@ public class yacyNetwork {
 	}
 	
 	// use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
     
     public static final LinkedHashMap<String,ContentBody> basicRequestParts(String myHash, String targetHash, String networkName) {
         // put in all the essentials for routing and network authentication
@@ -106,7 +105,7 @@ public class yacyNetwork {
             if (targetHash != null) parts.put("youare", UTF8.StringBody(targetHash));
             
             // time information for synchronization
-            parts.put("mytime", UTF8.StringBody(my_SHORT_SECOND_FORMATTER.format(new Date())));
+            parts.put("mytime", UTF8.StringBody(my_SHORT_SECOND_FORMATTER.format()));
             parts.put("myUTC", UTF8.StringBody(Long.toString(System.currentTimeMillis())));
 
             // network identification

@@ -90,7 +90,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         map.put("title", title);
         map.put("description", description);
         map.put("link", link);
-        map.put("pubDate", ISO8601Formatter.FORMATTER.format(new Date()));
+        map.put("pubDate", ISO8601Formatter.FORMATTER.format());
         map.put("guid", artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
     

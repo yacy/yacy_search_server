@@ -106,7 +106,7 @@ public class URIMetadataRow implements URIMetadata {
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
     
-    private static final GenericFormatter mySHORT_DAY_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY);
+    private static final GenericFormatter mySHORT_DAY_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
     
     public URIMetadataRow() {
         // create a dummy entry, good to produce poison objects

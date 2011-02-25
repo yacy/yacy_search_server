@@ -242,6 +242,6 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     public static final String filename4Source(DigestURI source) {
         return filenamePrefix + OAIPMHImporter.filenameSeparationChar +
                OAIPMHImporter.hostID(source) + OAIPMHImporter.filenameSeparationChar +
-               GenericFormatter.SHORT_MILSEC_FORMATTER.format(new Date()) + ".xml";
+               GenericFormatter.SHORT_MILSEC_FORMATTER.format() + ".xml";
     }
 }
