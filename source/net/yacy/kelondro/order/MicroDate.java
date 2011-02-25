@@ -48,7 +48,7 @@ public class MicroDate {
     }
         
     public static String microDateHoursStr(final long time) {
-        return Base64Order.enhancedCoder.encodeLong(microDateHoursInt(time), 3);
+        return Base64Order.enhancedCoder.encodeLongSB(microDateHoursInt(time), 3).toString();
     }
     
     public static int microDateHoursInt(final long time) {

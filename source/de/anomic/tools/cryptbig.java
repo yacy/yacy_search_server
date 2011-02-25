@@ -72,7 +72,7 @@ public class cryptbig {
         saltcounter++;
         // we generate 48-bit salt values, that are represented as 8-character
         // b64-encoded strings
-        return Base64Order.standardCoder.encodeLong(salt & 0XffffffffffffL, 8);
+        return Base64Order.standardCoder.encodeLongSB(salt & 0XffffffffffffL, 8).toString();
     }
 
     // --------------------------------------------------------
@@ -234,7 +234,7 @@ public class cryptbig {
 	    final File   inFile           = new File(inFileName);
 	    final String inFileDate       = dateFormatter.format(new Date(inFile.lastModified())); // 17 byte
 	    final String encryptionDate   = dateFormatter.format(new Date()); // 17 byte
-	    final String inFileSize       = Base64Order.standardCoder.encodeLong(inFile.length(), 11); // 64 / 6 = 11; 11 byte
+	    final String inFileSize       = Base64Order.standardCoder.encodeLongSB(inFile.length(), 11).toString(); // 64 / 6 = 11; 11 byte
 	    final String flag             = "1"; // 1 byte
 	    //int    inFileNameLength = inFileName.length(); // 256
 	    final String X                = inFileDate + encryptionDate + inFileSize + flag + inFileName;
@@ -259,8 +259,8 @@ public class cryptbig {
 	    // - after the magic String we write C, B and A
 	    try {
 		final String A = new String(ecipher.doFinal(X.getBytes("UTF8")));
-		final String B = new String(ecipher.doFinal(Base64Order.standardCoder.encodeLong(A.length(), 2).getBytes("UTF8"))); // most probable not longer than 4
-		final String C = Base64Order.standardCoder.encodeLong(B.length(), 1); // fixed length 1 (6 bits, that should be enough)
+		final String B = new String(ecipher.doFinal(Base64Order.standardCoder.encodeLongSB(A.length(), 2).toString().getBytes("UTF8"))); // most probable not longer than 4
+		final String C = Base64Order.standardCoder.encodeLongSB(B.length(), 1).toString(); // fixed length 1 (6 bits, that should be enough)
 		fout.write(magicString.getBytes()); // the magic string, used to identify a 'crypt'-file
 		fout.write(C.getBytes());
 		fout.write(B.getBytes());
@@ -581,7 +581,7 @@ public class cryptbig {
 	if (s[0].equals("-ec64")) {
 	    // generate a b64 encoding from a given cardinal
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    System.out.println(Base64Order.standardCoder.encodeLong(Long.parseLong(s[1]), 0));
+	    System.out.println(Base64Order.standardCoder.encodeLongSB(Long.parseLong(s[1]), 0).toString());
 	    System.exit(0);
 	}
 	if (s[0].equals("-dc64")) {

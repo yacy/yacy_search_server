@@ -1090,9 +1090,9 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     private static Random random = null;
     private static String randomHash() {
     	return
-    		Base64Order.enhancedCoder.encodeLong(random.nextLong(), 4) +
-    		Base64Order.enhancedCoder.encodeLong(random.nextLong(), 4) +
-    		Base64Order.enhancedCoder.encodeLong(random.nextLong(), 4);
+    		Base64Order.enhancedCoder.encodeLongSB(random.nextLong(), 4).toString() +
+    		Base64Order.enhancedCoder.encodeLongSB(random.nextLong(), 4).toString() +
+    		Base64Order.enhancedCoder.encodeLongSB(random.nextLong(), 4).toString();
     }
     
     public static void test(final int testsize) throws RowSpaceExceededException {

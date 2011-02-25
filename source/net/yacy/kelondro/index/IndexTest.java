@@ -46,8 +46,8 @@ public class IndexTest {
     public static byte[] randomHash(final long r0, final long r1) {
         // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
         // so we construct a generic Hash using two long values
-        final String s = (Base64Order.enhancedCoder.encodeLong(Math.abs(r0), 6) +
-                    Base64Order.enhancedCoder.encodeLong(Math.abs(r1), 6));
+        final String s = (Base64Order.enhancedCoder.encodeLongSB(Math.abs(r0), 6).toString() +
+                    Base64Order.enhancedCoder.encodeLongSB(Math.abs(r1), 6).toString());
         return s.getBytes();
     }
     

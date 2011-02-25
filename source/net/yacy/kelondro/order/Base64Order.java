@@ -37,8 +37,8 @@ import net.yacy.kelondro.logging.Log;
 
 public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
 
-    protected static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
-    protected static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
+    protected static final byte[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".getBytes();
+    protected static final byte[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".getBytes();
     protected static final byte[] ahpla_standard = new byte[128];
     protected static final byte[] ahpla_enhanced = new byte[128];
 
@@ -59,7 +59,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public static final Base64Order enhancedCoder = new Base64Order(true, false);
 
     private final boolean rfc1113compliant;
-    private final char[] alpha;
+    private final byte[] alpha;
     private final byte[] ahpla;
     private final byte[] ab; // decision table for comparisments
 
@@ -74,8 +74,8 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         byte acc, bcc;
         byte c;
         // pre-compute comparisment results: this omits one single ahpla lookup during comparisment
-        for (final char ac: alpha) {
-            for (final char bc: alpha) {
+        for (final byte ac: alpha) {
+            for (final byte bc: alpha) {
                 acc = ahpla[ac];
                 bcc = ahpla[bc];
                 c = 0;
@@ -95,7 +95,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public static byte[] zero(int length) {
         final byte[] z = new byte[length];
         while (length > 0) {
-            length--; z[length] = (byte) alpha_standard[0];
+            length--; z[length] = alpha_standard[0];
         }
         return z;
     }
@@ -137,7 +137,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
     
     public final char encodeByte(final byte b) {
-        return alpha[b];
+        return (char) alpha[b];
     }
 
     public final byte decodeByte(final byte b) {
@@ -148,30 +148,29 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return ahpla[b];
     }
 
-    public final String encodeLongSmart(final long c, int length) {
-        if (c >= max(length)) {
-            final StringBuilder s = new StringBuilder(length);
-            s.setLength(length);
-            while (length > 0) s.setCharAt(--length, alpha[63]);
-            return new String(s);
-        }
-        return encodeLong(c, length);
-    }
-
-    public final String encodeLong(long c, int length) {
+    public final StringBuilder encodeLongSB(long c, int length) {
         final StringBuilder s = new StringBuilder(length);
         s.setLength(length);
         while (length > 0) {
-            s.setCharAt(--length, alpha[(byte) (c & 0x3F)]);
+            s.setCharAt(--length, (char) alpha[(byte) (c & 0x3F)]);
             c >>= 6;
         }
-        return new String(s);
+        return s;
+    }
+    
+    public final byte[] encodeLongBA(long c, int length) {
+        byte[] s = new byte[length];
+        while (length > 0) {
+            s[--length] = alpha[(byte) (c & 0x3F)];
+            c >>= 6;
+        }
+        return s;
     }
 
     public final byte[] encodeLongSubstr(long c, int length) {
         final byte[] s = new byte[length];
         while (length > 0) {
-            s[--length] = (byte) alpha[(byte) (c & 0x3F)];
+            s[--length] = alpha[(byte) (c & 0x3F)];
             c >>= 6;
         }
         return s;
@@ -180,7 +179,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public final void encodeLong(long c, final byte[] b, final int offset, int length) {
         assert offset + length <= b.length;
         while (length > 0) {
-            b[--length + offset] = (byte) alpha[(byte) (c & 0x3F)];
+            b[--length + offset] = alpha[(byte) (c & 0x3F)];
             c >>= 6;
         }
     }
@@ -227,10 +226,10 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         while (in.length - pos >= 3) {
             l = ((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8) + (0XffL & in[pos + 2]);
             pos += 3;
-            out = out.append(encodeLong(l, 4));
+            out = out.append(encodeLongSB(l, 4));
         }
         // now there may be remaining bytes
-        if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLong((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).substring(0, 3) : encodeLong((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2));
+        if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLongSB((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).substring(0, 3) : encodeLongSB((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2));
         if (rfc1113compliant) while (out.length() % 4 > 0) out.append("=");
         // return result
         //assert lene == out.length() : "lene = " + lene + ", out.len = " + out.length();
@@ -252,10 +251,10 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         // now there may be remaining bytes
         if (in.length % 3 != 0 && writepos < sublen) {
             if (in.length % 3 == 2) {
-                System.arraycopy(encodeLong((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).getBytes(), 0, out, writepos, 3);
+                System.arraycopy(encodeLongBA((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4), 0, out, writepos, 3);
                 writepos += 3;
             } else {
-                System.arraycopy(encodeLong((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2).getBytes(), 0, out, writepos, 2);
+                System.arraycopy(encodeLongBA((((0XffL & in[pos])) << 8) << 8, 4), 0, out, writepos, 2);
                 writepos += 2;
             }
         }
@@ -357,11 +356,11 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         c = c >> 3;
         byte[] b = new byte[12];
         for (int p = 9; p >= 0; p--) {
-            b[p] = (byte) alpha[(int) (c & 0x3fL)];
+            b[p] = alpha[(int) (c & 0x3fL)];
             c = c >> 6;
         }
-        b[10] = (byte) alpha[0x3f];
-        b[11] = (byte) alpha[0x3f];
+        b[10] = alpha[0x3f];
+        b[11] = alpha[0x3f];
         return b;
     }
     
@@ -537,7 +536,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         }
         if ("-ec".equals(s[0])) {
             // generate a b64 encoding from a given cardinal
-            System.out.println(b64.encodeLong(Long.parseLong(s[1]), 4));
+            System.out.println(b64.encodeLongSB(Long.parseLong(s[1]), 4));
         }
         if ("-dc".equals(s[0])) {
             // generate a b64 decoding from a given cardinal

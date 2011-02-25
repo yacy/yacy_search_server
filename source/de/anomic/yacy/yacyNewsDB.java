@@ -181,7 +181,7 @@ public class yacyNewsDB {
             entry.setCol(0, r.id().getBytes());
             entry.setCol(1, r.category().getBytes("UTF-8"));
             entry.setCol(2, (r.received() == null) ? null : GenericFormatter.SHORT_SECOND_FORMATTER.format(r.received()).getBytes());
-            entry.setCol(3, Base64Order.enhancedCoder.encodeLong(r.distributed(), 2).getBytes());
+            entry.setCol(3, Base64Order.enhancedCoder.encodeLongBA(r.distributed(), 2));
             entry.setCol(4, attributes.getBytes("UTF-8"));
             return entry;
         } catch(final UnsupportedEncodingException e) {

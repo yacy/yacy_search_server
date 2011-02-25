@@ -47,7 +47,7 @@ public class crypt {
         saltcounter++;
         // we generate 48-bit salt values, that are represented as 8-character
         // b64-encoded strings
-        return Base64Order.standardCoder.encodeLong(salt & 0XffffffffffffL, 8);
+        return Base64Order.standardCoder.encodeLongSB(salt & 0XffffffffffffL, 8).toString();
     }
 
     // --------------------------------------------------------
