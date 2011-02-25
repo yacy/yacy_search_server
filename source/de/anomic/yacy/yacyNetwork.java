@@ -27,19 +27,14 @@
 
 package de.anomic.yacy;
 
-import java.io.UnsupportedEncodingException;
-//import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
-//import java.util.List;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.order.Digest;
-//import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.http.entity.mime.content.ContentBody;
-import org.apache.http.entity.mime.content.StringBody;
 
-//import de.anomic.http.client.DefaultCharsetStringPart;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -80,9 +75,7 @@ public class yacyNetwork {
         // put in all the essentials for routing and network authentication
 		// generate a session key
         final LinkedHashMap<String,ContentBody> parts = basicRequestParts(sb.peers.mySeed().hash, targetHash, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT));
-        try {
-            parts.put("key", new StringBody(salt));
-        } catch (UnsupportedEncodingException e) {}
+        parts.put("key", UTF8.StringBody(salt));
         
         // authentication essentials
         final String authenticationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");
@@ -92,9 +85,7 @@ public class yacyNetwork {
                 // generate an authentication essential using the salt, the iam-hash and the network magic
                 final String magic = sb.getConfig("network.unit.protocol.request.authentication.essentials", "");
                 final String md5 = Digest.encodeMD5Hex(salt + sb.peers.mySeed().hash + magic);
-                try {
-                    parts.put("magicmd5", new StringBody(md5));
-                } catch (UnsupportedEncodingException e) {}
+                parts.put("magicmd5", UTF8.StringBody(md5));
             }
         }        
         
@@ -103,25 +94,24 @@ public class yacyNetwork {
 	
 	// use our own formatter to prevent concurrency locks with other processes
     private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
-
+    
     public static final LinkedHashMap<String,ContentBody> basicRequestParts(String myHash, String targetHash, String networkName) {
         // put in all the essentials for routing and network authentication
         // generate a session key
         final LinkedHashMap<String,ContentBody> parts = new LinkedHashMap<String,ContentBody>();
         
         // just standard identification essentials
-        if (myHash != null)
-            try {
-                parts.put("iam", new StringBody(myHash));
-                if (targetHash != null) parts.put("youare", new StringBody(targetHash));
-                
-                // time information for synchronization
-                parts.put("mytime", new StringBody(my_SHORT_SECOND_FORMATTER.format(new Date())));
-                parts.put("myUTC", new StringBody(Long.toString(System.currentTimeMillis())));
+        if (myHash != null) {
+            parts.put("iam", UTF8.StringBody(myHash));
+            if (targetHash != null) parts.put("youare", UTF8.StringBody(targetHash));
+            
+            // time information for synchronization
+            parts.put("mytime", UTF8.StringBody(my_SHORT_SECOND_FORMATTER.format(new Date())));
+            parts.put("myUTC", UTF8.StringBody(Long.toString(System.currentTimeMillis())));
 
-                // network identification
-                parts.put(SwitchboardConstants.NETWORK_NAME, new StringBody(networkName));
-            } catch (UnsupportedEncodingException e) {}
+            // network identification
+            parts.put(SwitchboardConstants.NETWORK_NAME, UTF8.StringBody(networkName));
+        }
         
         return parts;
     }

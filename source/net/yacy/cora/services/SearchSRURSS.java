@@ -37,6 +37,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPConnector;
 
 public class SearchSRURSS extends Thread implements SearchAccumulator {
@@ -185,12 +186,12 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
         // send request
         try {
             final LinkedHashMap<String,ContentBody> parts = new LinkedHashMap<String,ContentBody>();
-            parts.put("query", new StringBody(query));
-            parts.put("startRecord", new StringBody(Integer.toString(startRecord)));
-            parts.put("maximumRecords", new StringBody(Long.toString(maximumRecords)));
-            parts.put("verify", new StringBody(verify ? "true" : "false"));
-            parts.put("resource", new StringBody(global ? "global" : "local"));
-            parts.put("nav", new StringBody("none"));
+            parts.put("query", UTF8.StringBody(query));
+            parts.put("startRecord", UTF8.StringBody(Integer.toString(startRecord)));
+            parts.put("maximumRecords", UTF8.StringBody(Long.toString(maximumRecords)));
+            parts.put("verify", UTF8.StringBody(verify ? "true" : "false"));
+            parts.put("resource", UTF8.StringBody(global ? "global" : "local"));
+            parts.put("nav", UTF8.StringBody("none"));
             final byte[] result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
             String debug = new String(result); System.out.println("*** DEBUG: " + debug);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
