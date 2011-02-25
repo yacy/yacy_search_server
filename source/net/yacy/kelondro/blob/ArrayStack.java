@@ -97,6 +97,10 @@ public class ArrayStack implements BLOB {
     // the thread pool for the keeperOf executor service
     private final ExecutorService executor;
     
+    // use our own formatter to prevent concurrency locks with other processes
+    private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_MILSEC);
+
+    
     public ArrayStack(
             final File heapLocation,
             final String prefix,
@@ -177,7 +181,7 @@ public class ArrayStack implements BLOB {
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 22 && files[i].startsWith(prefix) && files[i].endsWith(".blob")) {
                try {
-                   d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(files[i].substring(prefix.length() + 1, prefix.length() + 18));
+                   d = my_SHORT_MILSEC_FORMATTER.parse(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    time = d.getTime();
                    if (time > maxtime) maxtime = time;
                } catch (ParseException e) {continue;}
@@ -188,7 +192,7 @@ public class ArrayStack implements BLOB {
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 22 && files[i].startsWith(prefix) && files[i].endsWith(".blob")) {
                 try {
-                   d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(files[i].substring(prefix.length() + 1, prefix.length() + 18));
+                   d = my_SHORT_MILSEC_FORMATTER.parse(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
                    if (time == maxtime && !trimall) {
@@ -231,7 +235,7 @@ public class ArrayStack implements BLOB {
     public synchronized void mountBLOB(File location, boolean full) throws IOException {
         Date d;
         try {
-            d = GenericFormatter.SHORT_MILSEC_FORMATTER.parse(location.getName().substring(prefix.length() + 1, prefix.length() + 18));
+            d = my_SHORT_MILSEC_FORMATTER.parse(location.getName().substring(prefix.length() + 1, prefix.length() + 18));
         } catch (ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }
@@ -365,7 +369,7 @@ public class ArrayStack implements BLOB {
      */
     public synchronized File newBLOB(Date creation) {
         //return new File(heapLocation, DateFormatter.formatShortSecond(creation) + "." + blobSalt + ".blob");
-        return new File(heapLocation, prefix + "." + GenericFormatter.SHORT_MILSEC_FORMATTER.format(creation) + ".blob");
+        return new File(heapLocation, prefix + "." + my_SHORT_MILSEC_FORMATTER.format(creation) + ".blob");
     }
     
     public String name() {

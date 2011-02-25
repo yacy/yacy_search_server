@@ -106,6 +106,8 @@ public class URIMetadataRow implements URIMetadata {
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
     
+    private static final GenericFormatter mySHORT_DAY_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY);
+    
     public URIMetadataRow() {
         // create a dummy entry, good to produce poison objects
         this.entry = rowdef.newEntry();
@@ -228,17 +230,17 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher));
         try {
-            encodeDate(col_mod, GenericFormatter.SHORT_DAY_FORMATTER.parse(prop.getProperty("mod", "20000101")));
+            encodeDate(col_mod, mySHORT_DAY_FORMATTER.parse(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
-            encodeDate(col_load, GenericFormatter.SHORT_DAY_FORMATTER.parse(prop.getProperty("load", "20000101")));
+            encodeDate(col_load, mySHORT_DAY_FORMATTER.parse(prop.getProperty("load", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
-            encodeDate(col_fresh, GenericFormatter.SHORT_DAY_FORMATTER.parse(prop.getProperty("fresh", "20000101")));
+            encodeDate(col_fresh, mySHORT_DAY_FORMATTER.parse(prop.getProperty("fresh", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
@@ -306,11 +308,11 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",publisher=").append(crypt.simpleEncode(metadata.dc_publisher()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",mod=").append(GenericFormatter.SHORT_DAY_FORMATTER.format(moddate()));
+            s.append(",mod=").append(mySHORT_DAY_FORMATTER.format(moddate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",load=").append(GenericFormatter.SHORT_DAY_FORMATTER.format(loaddate()));
+            s.append(",load=").append(mySHORT_DAY_FORMATTER.format(loaddate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",fresh=").append(GenericFormatter.SHORT_DAY_FORMATTER.format(freshdate()));
+            s.append(",fresh=").append(mySHORT_DAY_FORMATTER.format(freshdate()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",referrer=").append(referrerHash() == null ? "" : new String(referrerHash()));
             assert (s.toString().indexOf(0) < 0);

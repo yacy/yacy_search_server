@@ -157,13 +157,16 @@ public class yacyNewsDB {
             return null;
         }
     }
+    
+    // use our own formatter to prevent concurrency locks with other processes
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
 
     private Record b2r(final Row.Entry b) {
         if (b == null) return null;
         return new yacyNewsDB.Record(
             b.getColString(0, null),
             b.getColString(1, "UTF-8"),
-            (b.empty(2)) ? null : GenericFormatter.SHORT_SECOND_FORMATTER.parse(b.getColString(2, null), GenericFormatter.UTCDiffString()),
+            (b.empty(2)) ? null : my_SHORT_SECOND_FORMATTER.parse(b.getColString(2, null), GenericFormatter.UTCDiffString()),
             (int) b.getColLong(3),
             MapTools.string2map(b.getColString(4, "UTF-8"), ",")
         );
@@ -180,7 +183,7 @@ public class yacyNewsDB {
             final Row.Entry entry = this.news.row().newEntry();
             entry.setCol(0, r.id().getBytes());
             entry.setCol(1, r.category().getBytes("UTF-8"));
-            entry.setCol(2, (r.received() == null) ? null : GenericFormatter.SHORT_SECOND_FORMATTER.format(r.received()).getBytes());
+            entry.setCol(2, (r.received() == null) ? null : my_SHORT_SECOND_FORMATTER.format(r.received()).getBytes());
             entry.setCol(3, Base64Order.enhancedCoder.encodeLongBA(r.distributed(), 2));
             entry.setCol(4, attributes.getBytes("UTF-8"));
             return entry;
@@ -239,8 +242,8 @@ public class yacyNewsDB {
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.category = (attributes.containsKey("cat")) ? attributes.get("cat") : "";
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
-            this.received = (attributes.containsKey("rec")) ? GenericFormatter.SHORT_SECOND_FORMATTER.parse(attributes.get("rec"), GenericFormatter.UTCDiffString()) : new Date();
-            this.created = (attributes.containsKey("cre")) ? GenericFormatter.SHORT_SECOND_FORMATTER.parse(attributes.get("cre"), GenericFormatter.UTCDiffString()) : new Date();
+            this.received = (attributes.containsKey("rec")) ? my_SHORT_SECOND_FORMATTER.parse(attributes.get("rec"), GenericFormatter.UTCDiffString()) : new Date();
+            this.created = (attributes.containsKey("cre")) ? my_SHORT_SECOND_FORMATTER.parse(attributes.get("cre"), GenericFormatter.UTCDiffString()) : new Date();
             this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt(attributes.get("dis")) : 0;
             this.originator = (attributes.containsKey("ori")) ? attributes.get("ori") : "";
             removeStandards();
@@ -263,7 +266,7 @@ public class yacyNewsDB {
             if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
             this.attributes = attributes;
             this.received = received;
-            this.created = GenericFormatter.SHORT_SECOND_FORMATTER.parse(id.substring(0, GenericFormatter.PATTERN_SHORT_SECOND.length()), GenericFormatter.UTCDiffString());
+            this.created = my_SHORT_SECOND_FORMATTER.parse(id.substring(0, GenericFormatter.PATTERN_SHORT_SECOND.length()), GenericFormatter.UTCDiffString());
             this.category = category;
             this.distributed = distributed;
             this.originator = id.substring(GenericFormatter.PATTERN_SHORT_SECOND.length());
@@ -284,8 +287,8 @@ public class yacyNewsDB {
             // attention: this has no additional encoding
             if (this.originator != null) attributes.put("ori", this.originator);
             if (this.category != null)   attributes.put("cat", this.category);
-            if (this.created != null)    attributes.put("cre", GenericFormatter.SHORT_SECOND_FORMATTER.format(this.created));
-            if (this.received != null)   attributes.put("rec", GenericFormatter.SHORT_SECOND_FORMATTER.format(this.received));
+            if (this.created != null)    attributes.put("cre", my_SHORT_SECOND_FORMATTER.format(this.created));
+            if (this.received != null)   attributes.put("rec", my_SHORT_SECOND_FORMATTER.format(this.received));
             attributes.put("dis", Integer.toString(this.distributed));
             final String theString = attributes.toString();
             removeStandards();
@@ -293,7 +296,7 @@ public class yacyNewsDB {
         }
 
         public String id() {
-            return GenericFormatter.SHORT_SECOND_FORMATTER.format(created) + originator;
+            return my_SHORT_SECOND_FORMATTER.format(created) + originator;
         }
 
         public String originator() {

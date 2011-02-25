@@ -31,14 +31,14 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final String PATTERN_SHORT_DAY    = "yyyyMMdd";
     public static final String PATTERN_SHORT_SECOND = "yyyyMMddHHmmss";
     public static final String PATTERN_SHORT_MILSEC = "yyyyMMddHHmmssSSS";
-    private static final String PATTERN_RFC1123_SHORT = "EEE, dd MMM yyyy";
-    private static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
+    public static final String PATTERN_RFC1123_SHORT = "EEE, dd MMM yyyy";
+    public static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
     
-    private static final SimpleDateFormat FORMAT_SHORT_DAY     = new SimpleDateFormat(PATTERN_SHORT_DAY, Locale.US);
-    private static final SimpleDateFormat FORMAT_SHORT_SECOND  = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
-    private static final SimpleDateFormat FORMAT_SHORT_MILSEC  = new SimpleDateFormat(PATTERN_SHORT_MILSEC, Locale.US);
-    private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
-    private static final SimpleDateFormat FORMAT_RFC1123_SHORT = new SimpleDateFormat(PATTERN_RFC1123_SHORT, Locale.US);
+    public static final SimpleDateFormat FORMAT_SHORT_DAY     = new SimpleDateFormat(PATTERN_SHORT_DAY, Locale.US);
+    public static final SimpleDateFormat FORMAT_SHORT_SECOND  = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
+    public static final SimpleDateFormat FORMAT_SHORT_MILSEC  = new SimpleDateFormat(PATTERN_SHORT_MILSEC, Locale.US);
+    public static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
+    public static final SimpleDateFormat FORMAT_RFC1123_SHORT = new SimpleDateFormat(PATTERN_RFC1123_SHORT, Locale.US);
 
     // find out time zone and DST offset
     private static Calendar thisCalendar = Calendar.getInstance();
@@ -86,6 +86,10 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         if (date == null) return "";
         if (Math.abs(date.getTime() - last_time) < maxCacheDiff) return last_format;
         synchronized (this.dateFormat) {
+            // threads that had been waiting here may use the cache now instead of calculating the date again
+            if (Math.abs(date.getTime() - last_time) < maxCacheDiff) return last_format;
+            
+            // if the cache is not fresh, calculate the date
             last_format = this.dateFormat.format(date);
             last_time = date.getTime();
         }

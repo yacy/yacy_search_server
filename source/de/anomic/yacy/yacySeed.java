@@ -183,6 +183,9 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if ((flags == null) || (flags.length() != 4)) { this.dna.put(yacySeed.FLAGS, yacySeed.FLAGSZERO); }
         this.dna.put(yacySeed.NAME, checkPeerName(get(yacySeed.NAME, "&empty;")));
     }
+    
+    // use our own formatter to prevent concurrency locks with other processes
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
 
     private yacySeed(final String theHash) {
         this.dna = new ConcurrentHashMap<String, String>();
@@ -212,7 +215,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(yacySeed.LASTSEEN, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/))); // for last-seen date
+        this.dna.put(yacySeed.LASTSEEN, my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
 
         // settings that are needed to organize the seed round-trip
@@ -491,7 +494,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        String ls = GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
+        String ls = my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
         //System.out.println("SETTING LAST-SEEN of " + this.getName() + " to " + ls);
         dna.put(yacySeed.LASTSEEN, ls );
     }
@@ -501,7 +504,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      */
     public final long getLastSeenUTC() {
         try {
-            final long t = GenericFormatter.SHORT_SECOND_FORMATTER.parse(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
+            final long t = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.LASTSEEN, "20040101000000")).getTime();
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
             // Therefore java subtracts the local UTC offset, to get a UTC number.
@@ -519,7 +522,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     /** @return the age of the seed in number of days */
     public final int getAge() {
         try {
-            final long t = GenericFormatter.SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
+            final long t = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
             return (int) ((System.currentTimeMillis() - (t /*- getUTCDiff() + DateFormatter.UTCDiff()*/)) / 1000 / 60 / 60 / 24);
         } catch (final java.text.ParseException e) {
             return -1;
@@ -725,7 +728,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? defaultPeerName() : name);
         newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8090 : port));
-        newSeed.dna.put(yacySeed.BDATE, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/)) );
+        newSeed.dna.put(yacySeed.BDATE, my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/)) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
         newSeed.dna.put(yacySeed.UTC, GenericFormatter.UTCDiffString());
         newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

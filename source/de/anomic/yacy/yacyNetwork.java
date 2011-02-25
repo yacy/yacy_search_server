@@ -101,6 +101,8 @@ public class yacyNetwork {
 		return parts;
 	}
 	
+	// use our own formatter to prevent concurrency locks with other processes
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
 
     public static final LinkedHashMap<String,ContentBody> basicRequestParts(String myHash, String targetHash, String networkName) {
         // put in all the essentials for routing and network authentication
@@ -114,7 +116,7 @@ public class yacyNetwork {
                 if (targetHash != null) parts.put("youare", new StringBody(targetHash));
                 
                 // time information for synchronization
-                parts.put("mytime", new StringBody(GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date())));
+                parts.put("mytime", new StringBody(my_SHORT_SECOND_FORMATTER.format(new Date())));
                 parts.put("myUTC", new StringBody(Long.toString(System.currentTimeMillis())));
 
                 // network identification

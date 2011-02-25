@@ -127,7 +127,11 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
         return map;
     }
+
     
+    // use our own formatter to prevent concurrency locks with other processes
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
+
     /**
      * write a whole byte array as Map to the table
      * @param key  the primary key
@@ -140,7 +144,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         assert key.length > 0;
         assert newMap != null;
         key = normalizeKey(key);
-        String s = map2string(newMap, "W" + GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()) + " ");
+        String s = map2string(newMap, "W" + my_SHORT_SECOND_FORMATTER.format(new Date()) + " ");
         assert s != null;
         byte[] sb = s.getBytes();
         synchronized (this) {

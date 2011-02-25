@@ -210,6 +210,9 @@ public class yacyCore {
         /*final int newSeeds =*/ publishMySeed(true);
         return (oldAddress != null && oldAddress.equals(sb.peers.mySeed().getPublicAddress()));
     }
+    
+    // use our own formatter to prevent concurrency locks with other processes
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND);
 
     protected class publishThread extends Thread {
         int added;
@@ -255,14 +258,14 @@ public class yacyCore {
                             if (newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC()) {
                                 if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
-                                    GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "'");
+                                    my_SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "'");
                                 newSeed.setLastSeenUTC();
                                 sb.peers.peerActions.peerArrival(newSeed, true);
                             } else {
                                 if (log.isFine()) log.logFine("publish: recently handshaked " + this.seed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) +
                                     " peer '" + this.seed.getName() + "' at " + this.seed.getPublicAddress() + " with old LastSeen: '" +
-                                    GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
-                                    GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(this.seed.getLastSeenUTC())) + "'");
+                                    my_SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" +
+                                    my_SHORT_SECOND_FORMATTER.format(new Date(this.seed.getLastSeenUTC())) + "'");
                                 this.seed.setLastSeenUTC();
                                 sb.peers.peerActions.peerArrival(this.seed, true);
                             }

@@ -59,7 +59,10 @@ public class Tables {
     private File location;
     private ConcurrentHashMap<String, BEncodedHeap> tables;
     int keymaxlen;
-    
+
+    // use our own formatter to prevent concurrency locks with other processes
+    private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_MILSEC);
+
     public Tables(final File location, final int keymaxlen) {
         this.location = new File(location.getAbsolutePath());
         if (!this.location.exists()) this.location.mkdirs();
@@ -408,7 +411,7 @@ public class Tables {
         }
         
         public void put(String colname, Date value) {
-            super.put(colname, GenericFormatter.SHORT_MILSEC_FORMATTER.format(value).getBytes());
+            super.put(colname, my_SHORT_MILSEC_FORMATTER.format(value).getBytes());
         }
         
         public byte[] get(String colname, byte[] dflt) {
@@ -447,7 +450,7 @@ public class Tables {
             byte[] r = this.get(colname);
             if (r == null) return dflt;
             try {
-                return GenericFormatter.SHORT_MILSEC_FORMATTER.parse(new String(r));
+                return my_SHORT_MILSEC_FORMATTER.parse(new String(r));
             } catch (ParseException e) {
                 return dflt;
             }
