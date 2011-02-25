@@ -160,7 +160,7 @@ public final class Row {
     public final Entry newEntry(final Entry oldrow, final int fromColumn) {
         if (oldrow == null) return null;
         assert (oldrow.getColBytes(0, false)[0] != 0);
-        assert (this.objectOrder.wellformed(oldrow.getColBytes(0, false), 0, this.primaryKeyLength));
+        assert (this.objectOrder.wellformed(oldrow.getPrimaryKeyBytes(), 0, this.primaryKeyLength));
         return new Entry(oldrow, fromColumn, false);
     }
     

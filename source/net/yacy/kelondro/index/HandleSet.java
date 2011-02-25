@@ -184,7 +184,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         Row.Entry indexentry;
         indexentry = index.removeOne();
         if (indexentry == null) return null;
-        return indexentry.getColBytes(0, true);
+        return indexentry.getPrimaryKeyBytes();
     }
     
     /**
@@ -198,7 +198,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         Row.Entry indexentry;
         indexentry = index.get(this.size() - 1 - idx, true);
         if (indexentry == null) return null;
-        return indexentry.getColBytes(0, true);
+        return indexentry.getPrimaryKeyBytes();
     }
     
     public final synchronized boolean isEmpty() {

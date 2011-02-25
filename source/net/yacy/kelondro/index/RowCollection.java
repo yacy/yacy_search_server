@@ -1008,9 +1008,9 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if (chunkcount != this.sortBound) return false;
         /*
         for (int i = 0; i < chunkcount - 1; i++) {
-        	//System.out.println("*" + new String(get(i).getColBytes(0)));
+        	//System.out.println("*" + new String(get(i).getPrimaryKeyBytes()));
         	if (compare(i, i + 1) > 0) {
-        		System.out.println("?" + new String(get(i + 1, false).getColBytes(0)));
+        		System.out.println("?" + new String(get(i + 1, false).getPrimaryKeyBytes()));
         		return false;
         	}
         }
@@ -1133,7 +1133,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     	System.out.println("create c   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds");
     	final RowCollection d = new RowCollection(r, testsize);
     	for (int i = 0; i < testsize; i++) {
-    		d.add(c.get(i, false).getColBytes(0, false));
+    		d.add(c.get(i, false).getPrimaryKeyBytes());
     	}
     	final long t2 = System.nanoTime();
     	System.out.println("copy c -> d: " + (t2 - t1) + " nanoseconds, " + d(testsize, (t2 - t1)) + " entries/nanoseconds");

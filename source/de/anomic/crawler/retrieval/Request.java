@@ -140,7 +140,7 @@ public class Request extends WorkflowJob {
         if (urlstring == null) throw new IOException ("url string is null");
         this.initiator = entry.getColBytes(1, true);
         this.initiator = (initiator == null) ? null : ((initiator.length == 0) ? null : initiator);
-        this.url = new DigestURI(urlstring, entry.getColBytes(0, true));
+        this.url = new DigestURI(urlstring, entry.getPrimaryKeyBytes());
         this.refhash = (entry.empty(3)) ? null : entry.getColBytes(3, true);
         this.name = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
         this.appdate = entry.getColLong(5);

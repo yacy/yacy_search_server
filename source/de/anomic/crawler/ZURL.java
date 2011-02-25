@@ -253,7 +253,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             this.workcount = (int) entry.getColLong(3);
             this.anycause = entry.getColString(4, "UTF-8");
             this.bentry = new Request(Request.rowdef.newEntry(entry.getColBytes(5, false)));
-            assert (Base64Order.enhancedCoder.equal(entry.getColBytes(0, false), bentry.url().hash()));
+            assert (Base64Order.enhancedCoder.equal(entry.getPrimaryKeyBytes(), bentry.url().hash()));
             this.stored = true;
             return;
         }

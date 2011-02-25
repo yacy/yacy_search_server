@@ -166,7 +166,7 @@ public class dbtest {
             try {
                 Row.Entry entryBytes = getTable_test().get(entry.getKey());
                 if (entryBytes != null) {
-                    final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0, true), entryBytes.getColBytes(1, true));
+                    final STEntry dbEntry = new STEntry(entryBytes.getPrimaryKeyBytes(), entryBytes.getColBytes(1, true));
                     if (!dbEntry.isValid()) {
                         System.out.println("INVALID table_test: " + dbEntry);
                     } /* else {
@@ -177,7 +177,7 @@ public class dbtest {
                 if (getTable_reference() != null) {
                 entryBytes = getTable_reference().get(entry.getKey());
                 if (entryBytes != null) {
-                    final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0, true), entryBytes.getColBytes(1, true));
+                    final STEntry dbEntry = new STEntry(entryBytes.getPrimaryKeyBytes(), entryBytes.getColBytes(1, true));
                     if (!dbEntry.isValid()) {
                         System.out.println("INVALID table_reference: " + dbEntry);
                     } /* else {
