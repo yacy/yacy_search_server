@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.text.Collator;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -39,6 +38,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.ASCIIComparator;
 import net.yacy.cora.document.MultiProtocolURI;
 
 
@@ -212,13 +212,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
     private final Map<String, String> reverseMappingCache;
 
-    
-    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
-    static {
-        insensitiveCollator.setStrength(Collator.SECONDARY);
-        insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
-    }
-
     public HeaderFramework() {
         this(null);
     }
@@ -229,13 +222,13 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         // 'proper' appearance, a translation cache is needed.
         // upon instantiation, such a mapping cache can be handed over
         // If the reverseMappingCache is null, none is used
-        super((Collator) insensitiveCollator.clone());
+        super(ASCIIComparator.insensitiveASCIIComparator);
         this.reverseMappingCache = reverseMappingCache;
     }
 
     public HeaderFramework(final Map<String, String> reverseMappingCache, final Map<String, String> othermap)  {
         // creates a case insensitive map from another map
-        super((Collator) insensitiveCollator.clone());
+        super(ASCIIComparator.insensitiveASCIIComparator);
         this.reverseMappingCache = reverseMappingCache;
 
         // load with data
@@ -334,13 +327,14 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public String add(final String key, final String value) {
         final int c = keyCount(key);
         if (c == 0) return put(key, value);
-        return put("*" + key + "-" + c, value);
+        return put("*" + key + "-" + Integer.toString(c), value);
     }
     
     public int keyCount(final String key) {
         if (!(containsKey(key))) return 0;
         int c = 1;
-        while (containsKey("*" + key + "-" + c)) c++;
+        String h = "*" + key + "-";
+        while (containsKey(h + Integer.toString(c))) c++;
         return c;
     }
     

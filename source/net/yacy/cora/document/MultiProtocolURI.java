@@ -29,12 +29,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.text.Collator;
 import java.util.LinkedHashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,19 +67,14 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     //private static final Pattern patternSpace = Pattern.compile("%20");
     
     // session id handling
-    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
-    private static final TreeSet<String> sessionIDnames;
-    static {
-        insensitiveCollator.setStrength(Collator.SECONDARY);
-        insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
-        sessionIDnames = new TreeSet<String>(insensitiveCollator);
-    }
+    private static final Object PRESENT = new Object();
+    private static final ConcurrentHashMap<String, Object> sessionIDnames = new ConcurrentHashMap<String, Object>();
     
     public static final void initSessionIDNames(Set<String> idNames) {
         for (String s: idNames) {
             if (s == null) continue;
             s = s.trim();
-            if (s.length() > 0) sessionIDnames.add(s);
+            if (s.length() > 0) sessionIDnames.put(s, PRESENT);
         }
     }
     
@@ -669,7 +662,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         }
         String q = quest;
         if (removeSessionID) {
-            for (String sid: sessionIDnames) {
+            for (String sid: sessionIDnames.keySet()) {
                 if (q.toLowerCase().startsWith(sid.toLowerCase() + "=")) {
                     int p = q.indexOf('&');
                     if (p < 0) {
@@ -936,7 +929,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     
     public final boolean isIndividual() {
         final String q = unescape(path.toLowerCase());
-        for (String sid: sessionIDnames) {
+        for (String sid: sessionIDnames.keySet()) {
             if (q.startsWith(sid.toLowerCase() + "=")) return true;
             int p = q.indexOf("&" + sid.toLowerCase() + "=");
             if (p >= 0) return true;

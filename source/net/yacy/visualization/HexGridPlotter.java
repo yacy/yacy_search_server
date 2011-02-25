@@ -98,8 +98,8 @@ public class HexGridPlotter extends RasterPlotter {
         }
     }
 
-    public void gridDot(final int x, final int y, final int radius) {
-        dot(projectionX(x, y), projectionY(y), radius, true, 100);
+    public void gridDot(final int x, final int y, final int radius, boolean filled, int intensity) {
+        dot(projectionX(x, y), projectionY(y), radius, filled, intensity);
     }
     
     public void gridDot(final int x, final int y, final int radius, int fromArc, int toArc) {
@@ -156,26 +156,26 @@ public class HexGridPlotter extends RasterPlotter {
         final HexGridPlotter picture = new HexGridPlotter(640, 480, DrawMode.MODE_SUB, "FFFFFF", 18);
         picture.drawGrid("555555");
         picture.setColor("33ff33");
-        picture.gridDot(0, 0, 5); picture.gridPrint(0, 0, 5, "", "0,0", -1);
+        picture.gridDot(0, 0, 5, true, 100); picture.gridPrint(0, 0, 5, "", "0,0", -1);
         for (int i = 1; i < picture.gridHeight() -1; i++) {
-            picture.setColor("33ff33");picture.gridDot(0, i, 3);
+            picture.setColor("33ff33");picture.gridDot(0, i, 3, true, 100);
             picture.setColor("334433");picture.gridPrint(0, i, 3, "", "0," + i, -1);
         }
         for (int i = 1; i < picture.gridWidth() -1; i++) {
-            picture.setColor("33ff33");picture.gridDot(i, 0, 3);
+            picture.setColor("33ff33");picture.gridDot(i, 0, 3, true, 100);
             picture.setColor("334433");picture.gridPrint315(i, 0, 3, i + ",0");
         }
         picture.setColor("33ff33");
-        picture.gridDot(0, picture.gheight - 1, 5); picture.gridPrint(0, picture.gheight - 1, 5, "0, grid.gheight - 1", "", -1);
-        picture.gridDot(picture.gwidth - 1, 0, 5); picture.gridPrint(picture.gwidth - 1, 0, 5, "", "grid.gwidth - 1, 0", -1);
-        picture.gridDot(picture.gwidth - 1, picture.gheight - 1, 5); picture.gridPrint(picture.gwidth - 1, picture.gheight - 1, 5, "grid.gwidth - 1, grid.gheight - 1", "", 1);
+        picture.gridDot(0, picture.gheight - 1, 5, true, 100); picture.gridPrint(0, picture.gheight - 1, 5, "0, grid.gheight - 1", "", -1);
+        picture.gridDot(picture.gwidth - 1, 0, 5, true, 100); picture.gridPrint(picture.gwidth - 1, 0, 5, "", "grid.gwidth - 1, 0", -1);
+        picture.gridDot(picture.gwidth - 1, picture.gheight - 1, 5, true, 100); picture.gridPrint(picture.gwidth - 1, picture.gheight - 1, 5, "grid.gwidth - 1, grid.gheight - 1", "", 1);
         
         
         picture.gridDot(3, 3, 20, 0, 360);
         
         picture.gridDot(7, 5, 5, 0, 360);
         picture.gridPrint(7, 5, 8, "COMMUNICATION TEST", "TRANSFER 64KBIT", -1);
-        picture.gridDot(14, 8, 5);
+        picture.gridDot(14, 8, 5, true, 100);
         picture.gridLine(7, 5, 14, 8);
         picture.gridPrint315(14, 8, 8, "NULL");
         

@@ -28,26 +28,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.ASCIIComparator;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 
 public class ContentTransformer extends AbstractTransformer implements Transformer {
     
     // statics: for initialization of the HTMLFilterAbstractTransformer
-    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
-    private static final TreeSet<String> linkTags0 = new TreeSet<String>(insensitiveCollator);;
-    private static final TreeSet<String> linkTags1 = new TreeSet<String>(insensitiveCollator);;
-
-    static {
-        insensitiveCollator.setStrength(Collator.SECONDARY);
-        insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
-    }
+    private static final TreeSet<String> linkTags0 = new TreeSet<String>(ASCIIComparator.insensitiveASCIIComparator);
+    private static final TreeSet<String> linkTags1 = new TreeSet<String>(ASCIIComparator.insensitiveASCIIComparator);
 
     static {
         linkTags0.add("img");

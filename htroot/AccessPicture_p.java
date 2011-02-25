@@ -88,13 +88,13 @@ public class AccessPicture_p {
         int centerx = (picture.gridWidth() >> 1) - 1;
         int centery = picture.gridHeight() >> 1;
         picture.setColor(color_dot);
-        picture.gridDot(centerx, centery, 5);
+        picture.gridDot(centerx, centery, 5, true, 100);
         if (corona) {
             for (int i = 0; i < 6; i++) {
                 picture.gridDot(centerx, centery, 50, i * 60 + coronaangle / 6, i * 60 + 30 + coronaangle / 6);
             }
         } else {
-            picture.gridDot(centerx, centery, 50);
+            picture.gridDot(centerx, centery, 50, false, 100);
         }
         //picture.gridDot(centerx, centery, 31, false);
         picture.setColor(color_text);
@@ -129,8 +129,8 @@ public class AccessPicture_p {
         for (int i = 0; i < hosts.length; i++) {
             if (hosts[i] != null) {
                 picture.setColor(color_dot);
-                picture.gridDot(gridLeft, i * 2 + 1, 7);
-                picture.gridDot(gridLeft, i * 2 + 1, 8);
+                picture.gridDot(gridLeft, i * 2 + 1, 7, false, 100);
+                picture.gridDot(gridLeft, i * 2 + 1, 8, false, 100);
                 picture.setColor(color_text);
                 picture.gridPrint(gridLeft, i * 2 + 1, 8, hosts[i].toUpperCase(), "COUNT = " + count[i] + ", TIME > " + ((time[i] >= 60000) ? ((time[i] / 60000) + " MINUTES") : ((time[i] / 1000) + " SECONDS")), -1);
                 if (corona) {
@@ -164,8 +164,8 @@ public class AccessPicture_p {
         for (int i = 0; i < hosts.length; i++) {
             if (hosts[i] != null) {
                 picture.setColor(color_dot);
-                picture.gridDot(gridRight, i * 2 + 1, 7);
-                picture.gridDot(gridRight, i * 2 + 1, 8);
+                picture.gridDot(gridRight, i * 2 + 1, 7, false, 100);
+                picture.gridDot(gridRight, i * 2 + 1, 8, false, 100);
                 picture.setColor(color_text);
                 picture.gridPrint(gridRight, i * 2 + 1, 8, hosts[i].toUpperCase(), count[i] + " BYTES, " + time[i] + " MS DUE", 1);
                 if (corona) {
