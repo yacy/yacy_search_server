@@ -111,8 +111,8 @@ public class PrintTool {
     
     private static final int arcDist = 8;
     public static void arcPrint(final RasterPlotter matrix, final int cx, final int cy, final int radius, final int angle, final String message) {
-        final int x = cx + (int) ((radius + 1) * Math.cos(Math.PI * angle / 180));
-        final int y = cy - (int) ((radius + 1) * Math.sin(Math.PI * angle / 180));
+        final int x = cx + (int) ((radius + 1) * Math.cos(RasterPlotter.PI180 * angle));
+        final int y = cy - (int) ((radius + 1) * Math.sin(RasterPlotter.PI180 * angle));
         int yp = y + 3;
         if ((angle > arcDist) && (angle < 180 - arcDist)) yp = y;
         if ((angle > 180 + arcDist) && (angle < 360 - arcDist)) yp = y + 6;

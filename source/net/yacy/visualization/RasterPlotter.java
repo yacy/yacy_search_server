@@ -50,6 +50,8 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public class RasterPlotter {
     
+    public static final double PI180 = Math.PI / 180.0d;
+    
     // colors regarding RGB Color Model
     public static final long RED    = 0xFF0000;
     public static final long GREEN  = 0x00FF00;
@@ -211,8 +213,8 @@ public class RasterPlotter {
     
     public void line(
             int Ax, int Ay, final int Bx, final int By,
-            String colorLine, final int intensityLine,
-            String colorDot, final int intensityDot, int dotDist, int dotPos, int dotRadius, boolean dotFilled
+            final String colorLine, final int intensityLine,
+            final String colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled
             ) {
         // Bresenham's line drawing algorithm
         int dX = Math.abs(Bx-Ax);
@@ -301,7 +303,7 @@ public class RasterPlotter {
         return grid.getPixel(x, y, c);
     }
 
-    public void dot(final int x, final int y, final int radius, final boolean filled, int intensity) {
+    public void dot(final int x, final int y, final int radius, final boolean filled, final int intensity) {
         if (filled) {
             for (int r = radius; r >= 0; r--) {
                 CircleTool.circle(this, x, y, r, intensity);
@@ -311,16 +313,21 @@ public class RasterPlotter {
         }
     }
     
+    public void arc(final int x, final int y, final int innerRadius, final int outerRadius, final int intensity) {
+        for (int r = innerRadius; r <= outerRadius; r++) {
+            CircleTool.circle(this, x, y, r, intensity);
+        }
+    }
+    
     public void arc(final int x, final int y, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
         for (int r = innerRadius; r <= outerRadius; r++) {
             CircleTool.circle(this, x, y, r, fromArc, toArc);
         }
     }
 
-    public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final int angle,
-            boolean in,
-            String colorLine, String colorDot, int dotDist, int dotPos, int dotRadius, boolean dotFilled) {
-        final double a = Math.PI * ((double) angle) / 180.0;
+    public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final int angle, final boolean in,
+            final String colorLine, final String colorDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
+        final double a = PI180 * ((double) angle);
         final double cosa = Math.cos(a);
         final double sina = Math.sin(a);
         final int xi = cx + (int) (innerRadius * cosa);
@@ -344,18 +351,17 @@ public class RasterPlotter {
     }
     
     public void arcDot(final int cx, final int cy, final int arcRadius, final int angle, final int dotRadius) {
-        final double a = Math.PI * ((double) angle) / 180.0;
+        final double a = PI180 * ((double) angle);
         final int x = cx + (int) (arcRadius * Math.cos(a));
         final int y = cy - (int) (arcRadius * Math.sin(a));
         dot(x, y, dotRadius, true, 100);
     }
     
-    public void arcConnect(final int cx, final int cy, final int arcRadius, final int angle1, final int angle2,
-            boolean in,
-            String colorLine, final int intensityLine,
-            String colorDot, final int intensityDot, int dotDist, int dotPos, int dotRadius, boolean dotFilled) {
-        final double a1 = Math.PI * ((double) angle1) / 180.0;
-        final double a2 = Math.PI * ((double) angle2) / 180.0;
+    public void arcConnect(final int cx, final int cy, final int arcRadius, final int angle1, final int angle2, final boolean in,
+            final String colorLine, final int intensityLine,
+            final String colorDot, final int intensityDot, final int dotDist, final int dotPos, final int dotRadius, final boolean dotFilled) {
+        final double a1 = PI180 * ((double) angle1);
+        final double a2 = PI180 * ((double) angle2);
         final int x1 = cx + (int) (arcRadius * Math.cos(a1));
         final int y1 = cy - (int) (arcRadius * Math.sin(a1));
         final int x2 = cx + (int) (arcRadius * Math.cos(a2));
@@ -371,8 +377,17 @@ public class RasterPlotter {
         }
     }
     
-    public void arcArc(final int cx, final int cy, final int arcRadius, final int angle, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
-        final double a = Math.PI * ((double) angle) / 180.0;
+    public void arcArc(final int cx, final int cy, final int arcRadius, final int angle,
+            final int innerRadius, final int outerRadius, final int intensity) {
+        final double a = PI180 * ((double) angle);
+        final int x = cx + (int) (arcRadius * Math.cos(a));
+        final int y = cy - (int) (arcRadius * Math.sin(a));
+        arc(x, y, innerRadius, outerRadius, intensity);
+    }
+    
+    public void arcArc(final int cx, final int cy, final int arcRadius, final int angle,
+            final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
+        final double a = PI180 * ((double) angle);
         final int x = cx + (int) (arcRadius * Math.cos(a));
         final int y = cy - (int) (arcRadius * Math.sin(a));
         arc(x, y, innerRadius, outerRadius, fromArc, toArc);

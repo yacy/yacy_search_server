@@ -186,7 +186,7 @@ public class NetworkGraph {
 
         // draw network circle
         networkPicture.setColor(COL_DHTCIRCLE);
-        networkPicture.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 0, 360);
+        networkPicture.arc(width / 2, height / 2, innerradius - 20, innerradius + 20, 100);
 
         //System.out.println("Seed Maximum distance is       " + yacySeed.maxDHTDistance);
         //System.out.println("Seed Minimum distance is       " + yacySeed.minDHTNumber);
@@ -343,7 +343,7 @@ public class NetworkGraph {
                     img.arcArc(centerX, centerY, innerradius, angle, dotsize + radius, dotsize + radius, a, a + 180/segments);
                 }
             } else {
-                img.arcArc(centerX, centerY, innerradius, angle, dotsize + radius, dotsize + radius, 0, 360);
+                img.arcArc(centerX, centerY, innerradius, angle, dotsize + radius, dotsize + radius, 100);
             }
         }
     }

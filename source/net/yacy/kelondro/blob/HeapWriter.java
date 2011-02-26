@@ -80,7 +80,12 @@ public final class HeapWriter {
         this.heapFileREADY = readyHeapFile;
         this.keylength = keylength;
         this.index = new HandleMap(keylength, ordering, 8, 100000, readyHeapFile.getAbsolutePath());
-        this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), outBuffer));
+        try {
+            this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), outBuffer));
+        } catch (OutOfMemoryError e) {
+            // try this again without buffer
+            this.os = new DataOutputStream(new FileOutputStream(temporaryHeapFile));
+        }
         this.seek = 0;
     }
 

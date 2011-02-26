@@ -146,12 +146,17 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         String s = map2string(newMap, "W" + my_SHORT_SECOND_FORMATTER.format() + " ");
         assert s != null;
         byte[] sb = s.getBytes();
-        synchronized (this) {
+        if (cache == null) {
             // write entry
-        	if (blob != null) blob.insert(key, sb);
+            if (blob != null) blob.insert(key, sb);
+        } else {
+            synchronized (this) {
+                // write entry
+                if (blob != null) blob.insert(key, sb);
     
-            // write map to cache
-            if (cache != null) cache.put(key, newMap);
+                // write map to cache
+                cache.put(key, newMap);
+            }
         }
     }
     

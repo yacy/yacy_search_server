@@ -151,7 +151,12 @@ public final class HandleMap implements Iterable<Row.Entry> {
         // everything much faster, but this is not an option here.
         final File tmp = new File(file.getParentFile(), file.getName() + ".prt");
         final Iterator<Row.Entry> i = this.index.rows(true, null);
-        OutputStream os = new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024);
+        OutputStream os;
+        try {
+            os = new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024);
+        } catch (OutOfMemoryError e) {
+            os = new FileOutputStream(tmp);
+        }
         if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os);
         int c = 0;
         while (i.hasNext()) {

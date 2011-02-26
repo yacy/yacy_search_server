@@ -137,7 +137,7 @@ public class OSMTile {
             // see http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
             this.zoom = zoom;
             this.xtile = (int) Math.floor((lon + 180) / 360 * (1 << zoom));
-            this.ytile = (int) Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * (1 << zoom));
+            this.ytile = (int) Math.floor((1 - Math.log(Math.tan(lat * RasterPlotter.PI180) + 1 / Math.cos(lat * RasterPlotter.PI180)) / Math.PI) / 2 * (1 << zoom));
         }
         
         public tileCoordinates(final int xtile, final int ytile, final int zoom) {

@@ -112,7 +112,12 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
         // everything much faster, but this is not an option here.
         final Iterator<Row.Entry> i = this.index.rows(true, null);
-        final OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
+        OutputStream os;
+        try {
+            os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
+        } catch (OutOfMemoryError e) {
+            os = new FileOutputStream(file);
+        }
         int c = 0;
         while (i.hasNext()) {
             os.write(i.next().bytes());

@@ -101,7 +101,7 @@ public class CircleTool {
         return circles[radius - 1];
     }
     
-    public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, int intensity) {
+    public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, final int intensity) {
         if (radius == 0) {
             //matrix.plot(xc, yc, 100);
         } else {
