@@ -34,6 +34,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import net.yacy.kelondro.logging.Log;
+
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
@@ -86,6 +88,7 @@ public class TimeoutRequest<E> {
                 throw new ExecutionException(e);
             }
         } catch (OutOfMemoryError e) {
+            Log.logWarning("TimeoutRequest.call", "OutOfMemoryError / retry follows", e);
             // in case that no memory is there to create a new native thread
             try {
                 return this.call.call();

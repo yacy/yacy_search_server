@@ -191,7 +191,7 @@ public class yacySearch extends Thread {
                     indexSegment, peers, containerCache, secondarySearchSuperviser, blacklist, rankingProfile, constraint);
                 searchThreads[i].start();
             } catch (OutOfMemoryError e) {
-                e.printStackTrace();
+                Log.logException(e);
                 break;
             }
         }

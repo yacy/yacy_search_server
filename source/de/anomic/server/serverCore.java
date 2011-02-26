@@ -731,11 +731,13 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         try {
                             result = commandMethod.invoke(this.commandObj, parameter);
                         } catch (OutOfMemoryError e) {
+                            log.logWarning("commandMethod.invoke: OutOfMemoryError / 1 (retry1 follows)");
                             // try again
                             terminateOldSessions(2000);
                             try {
                                 result = commandMethod.invoke(this.commandObj, parameter);
                             } catch (OutOfMemoryError e2) {
+                                log.logWarning("commandMethod.invoke: OutOfMemoryError / 2 (retry2 follows)");
                                 // try again
                                 Thread.sleep(1000);
                                 result = commandMethod.invoke(this.commandObj, parameter);
