@@ -52,6 +52,7 @@ public final class Tray {
 	private static boolean isIntegrated; // browser integration
 	private static boolean isShown = false;
 	final private static boolean deutsch = System.getProperty("user.language","").equals("de");
+	final private static boolean french = System.getProperty("user.language","").equals("fr");
 	
 	public static String trayLabel;
 	
@@ -96,8 +97,12 @@ public final class Tray {
 		if(isIntegrated) return menu;
 		
 		// YaCy Search
-		if(deutsch) label = "YaCy Suche";
-		else label = "YaCy Search";
+		if (deutsch)
+                    label = "YaCy Suche";
+                else if (french)
+                    label = "YaCy Recherche";
+                else
+                    label = "YaCy Search";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
@@ -107,8 +112,12 @@ public final class Tray {
 		menu.add(menuItem);
 		
 		// Compare YaCy
-		if(deutsch) label = "Vergleichs-Suche";
-		else label = "Compare YaCy";
+		if (deutsch)
+                    label = "Vergleichs-Suche";
+                else if (french)
+                    label = "Comparer YaCy";
+                else
+                    label = "Compare YaCy";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
@@ -118,8 +127,12 @@ public final class Tray {
 		menu.add(menuItem);
 		
 		// Peer Administration
-		if(deutsch) label = "Peer Administration";
-		else label = "Peer Administration";
+		if (deutsch)
+                    label = "Peer Administration";
+                else if (french)
+                    label = "Peer Administration";
+                else
+                    label = "Peer Administration";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
@@ -132,8 +145,12 @@ public final class Tray {
 		menu.addSeparator();
 
 		// Quit
-		if(deutsch) label = "Beenden";
-		else label = "Shutdown";
+		if(deutsch) 
+                    label = "YaCy Beenden";
+                else if(french)
+                    label = "Arrêt YaCy";
+                else
+                    label = "Shutdown YaCy";
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
@@ -148,8 +165,12 @@ public final class Tray {
 	protected static void trayClickAction(){	//doubleclick
 		if (lockBrowserPopup) {
 			String label;
-			if(deutsch) label = "Bitte warten bis YaCy gestartet ist.";
-			else label = "Please wait until YaCy is started.";
+			if (deutsch)
+                            label = "Bitte warten bis YaCy gestartet ist.";
+                        else if (french)
+                            label = "S'il vous plaît attendre jusqu'à YaCy est démarré.";
+                        else
+                            label = "Please wait until YaCy is started.";
 			ti.displayBalloonMessage("YaCy",label);
 		} else {
 			openBrowser("");
