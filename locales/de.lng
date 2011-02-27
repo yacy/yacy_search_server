@@ -530,6 +530,7 @@ your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/t
 #File: ConfigNetwork_p.html
 #---------------------------
 Network Configuration==Netzwerk Einstellungen
+No changes were made!==Es wurden keine Änderungen vorgenommen!
 Accepted Changes==Änderungen wurden gespeichert
 Inapplicable Setting Combination==unpassende Einstellungskombination
 #P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
