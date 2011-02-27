@@ -148,7 +148,7 @@ public final class Tray {
 		if(deutsch) 
                     label = "YaCy Beenden";
                 else if(french)
-                    label = "Arrêt YaCy";
+                    label = "ArrÃªt YaCy";
                 else
                     label = "Shutdown YaCy";
 		menuItem = new MenuItem(label);
@@ -168,7 +168,7 @@ public final class Tray {
 			if (deutsch)
                             label = "Bitte warten bis YaCy gestartet ist.";
                         else if (french)
-                            label = "S'il vous plaît attendre jusqu'à YaCy est démarré.";
+                            label = "S'il vous plaÃ®t attendre jusqu'Ã  YaCy est dÃ©marrÃ©.";
                         else
                             label = "Please wait until YaCy is started.";
 			ti.displayBalloonMessage("YaCy",label);
