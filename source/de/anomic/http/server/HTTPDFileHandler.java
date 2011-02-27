@@ -62,21 +62,27 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -512,6 +518,18 @@ public final class HTTPDFileHandler {
                         targetFile = new File(htDocsPath, path);
                         targetClass = rewriteClassFile(new File(htDocsPath, path));
                     }
+            }
+            
+            // implement proxy via url (not in servlet, because we need binary access on ouputStream)
+            if (path.equals("/proxy.html")) {
+            	List<Pattern> urlProxyAccess = Domains.makePatterns(sb.getConfig("proxyURL.access", "127.0.0.1"));
+            	if (sb.getConfigBool("proxyURL", false) && Domains.matchesList(clientIP, urlProxyAccess)) {
+            		doURLProxy(args, conProp, requestHeader, out);
+            		return;
+            	}
+            	else {
+        			HTTPDemon.sendRespondError(conProp,out,3,403,"Access denied",null,null);
+            	}
             }
             
             // track all files that had been accessed so far
@@ -1227,5 +1245,115 @@ public final class HTTPDFileHandler {
 
         return ret;
     }
+    
+    /**
+     * do a proxy request for document
+     * extracts url from GET-parameter url
+     * not in separete servlet, because we need access to binary outstream
+     * @throws IOException 
+     */
+    private static void doURLProxy(final serverObjects args, final Properties conProp, final RequestHeader requestHeader, OutputStream out) throws IOException {
+        final String httpVersion = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+		URL proxyurl = null;
+
+		if (args != null && args.containsKey("url")) {
+			String strUrl = args.get("url");
+			proxyurl = new URL(strUrl);
+		}
+		// set properties for proxy connection
+   		final Properties prop = new Properties();
+		prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
+		prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
+		prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
+		prop.setProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
+		prop.setProperty("CLIENTIP", "0:0:0:0:0:0:0:1");
+
+		// remove some stuff from request header, so it isn't send to the server
+		requestHeader.remove("CLIENTIP");
+		requestHeader.remove("EXT");
+		requestHeader.remove("PATH");
+		requestHeader.remove("Authorization");
+		requestHeader.remove("Connection");
+		requestHeader.put(HeaderFramework.HOST, proxyurl.getHost());
+
+		ByteArrayOutputStream o = new ByteArrayOutputStream();
+
+		HTTPDProxyHandler.doGet(prop, requestHeader, o);
+		//System.err.println(prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS));
+		if (o == null) {
+			HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
+			return;
+		}
+
+		// reparse header to extract content-length and mimetype
+		final ResponseHeader outgoingHeader = new ResponseHeader();
+		InputStream in = new ByteArrayInputStream(o.toByteArray());
+		String line = readLine(in);
+		while(line != null && !line.equals("")) {
+			int p;
+			if ((p = line.indexOf(':')) >= 0) {
+				// store a property
+				outgoingHeader.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
+			}
+			line = readLine(in);
+		}
+		if (line==null) {
+			HTTPDemon.sendRespondError(conProp,out,3,500,"null",null,null);
+			return;
+		}
+		
+		final int httpStatus = Integer.parseInt(prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS)); 
+		
+		if (outgoingHeader.getContentType().startsWith("text/html")) {
+			StringWriter buffer = new StringWriter();
+
+			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
+				FileUtils.copy(new ChunkedInputStream(in), buffer, Charset.forName("UTF-8"));
+			} else {
+				FileUtils.copy(in, buffer, Charset.forName("UTF-8"));
+			}
+
+			String sbuffer = buffer.toString();
+
+			String directory = "";
+			if (proxyurl.getPath().lastIndexOf('/') > 0)
+				directory = proxyurl.getPath().substring(0, proxyurl.getPath().lastIndexOf('/'));
+			sbuffer = sbuffer.replaceAll("(href|src)=\"/([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+"/$2\"");
+			sbuffer = sbuffer.replaceAll("(href|src)='/([^:\"]+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+"/$2'");
+			sbuffer = sbuffer.replaceAll("(href|src)=\"([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2\"");
+			sbuffer = sbuffer.replaceAll("(href|src)='([^:\"]+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2'");
+			sbuffer = sbuffer.replaceAll("url\\(", "url(/proxy.html?url=http://"+proxyurl.getHost()+proxyurl.getPath());
+			
+			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
+				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
+				
+				out = new ChunkedOutputStream(out);
+			} else {
+				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(sbuffer.getBytes().length));
+				
+				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
+			}
+
+			out.write(sbuffer.getBytes("UTF-8"));
+		} else {
+			if (!outgoingHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
+				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
+    		HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
+			FileUtils.copy(in, out);
+		}
+		return;
+    }
+	
+	private static String readLine(InputStream in) throws IOException {
+		ByteArrayOutputStream buf = new ByteArrayOutputStream();
+		int b;
+		while ((b=in.read()) != '\r' && b != -1) {
+			buf.write(b);
+		}
+		if (b == -1) return null;
+		b = in.read(); // read \n
+		if (b == -1) return null;
+		return buf.toString("UTF-8");
+	}
     
 }
