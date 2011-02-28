@@ -1014,12 +1014,14 @@ public final class yacySeedDB implements AlternativeDomainNames {
         private yacySeed internalNext() {
             if (it == null || !(it.hasNext())) return null;
             try {
+                Map<String, String> dna0;
                 ConcurrentHashMap<String, String> dna;
                 while (it.hasNext()) {
+                    dna0 = it.next();
+                    assert dna0 != null;
+                    if (dna0 == null) continue;
                     dna = new ConcurrentHashMap<String, String>();
-                    dna.putAll(it.next());
-                    assert dna != null;
-                    if (dna == null) continue;
+                    dna.putAll(dna0);
                     final String hash = dna.remove("key");
                     assert hash != null;
                     if (hash == null) continue; // bad seed

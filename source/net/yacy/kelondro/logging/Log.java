@@ -380,7 +380,7 @@ public final class Log {
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
                 public void uncaughtException(final Thread t, final Throwable e) {
                     String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
-                    exceptionLog.logWarning(msg);
+                    exceptionLog.logSevere(msg, e);
                     System.err.print("Exception in thread \"" + t.getName() + "\" ");
                     e.printStackTrace(System.err);
                 }

@@ -43,6 +43,7 @@
 
 package de.anomic.yacy;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -614,7 +615,14 @@ public final class yacyClient {
             
             // send request
             Map<String, String> resultMap = null;
-            parts.put("myseed", UTF8.StringBody((mySeed == null) ? "" : mySeed.genSeedStr(parts.get("key").toString())));
+            String key = "";
+            ContentBody keyBody = parts.get("key");
+            if (keyBody != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(20);
+                keyBody.writeTo(baos);
+                key = baos.toString();
+            }
+            parts.put("myseed", UTF8.StringBody((mySeed == null) ? "" : mySeed.genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
             parts.put("resource", UTF8.StringBody(((global) ? "global" : "local")));
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));

@@ -567,7 +567,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     	}
     
     	public void writeLine(final String messg) throws IOException {
-    	    send(this.out, messg + CRLF_STRING);
+    	    send(this.out, messg);
     	    log(true, messg);
     	}
     
@@ -894,8 +894,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
 
     public static void send(final OutputStream os, final String buf) throws IOException {
     	os.write(buf.getBytes());
-    	// TODO make sure there was no reason to add this additional newline
-    	//os.write(CRLF);
+    	os.write(CRLF);
     	os.flush();
     }
     

@@ -65,7 +65,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     private long maxCacheDiff;
 
     public GenericFormatter(SimpleDateFormat dateFormat, long maxCacheDiff) {
-        this.dateFormat = dateFormat;
+        this.dateFormat = (SimpleDateFormat) dateFormat.clone(); // avoid concurrency locking effects
         this.last_time = 0;
         this.last_format = "";
         this.maxCacheDiff = maxCacheDiff;

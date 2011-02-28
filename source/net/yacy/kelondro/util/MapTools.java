@@ -71,15 +71,14 @@ public final class MapTools {
     public static String map2string(final Map<String, String> m, final String separator, final boolean braces) {
         // m must be synchronized to prevent that a ConcurrentModificationException occurs
         synchronized (m) {
-            final StringBuilder buf = new StringBuilder(20 * m.size());
+            final StringBuilder buf = new StringBuilder(30 * m.size());
             if (braces) { buf.append("{"); }
             int retry = 10;
             critical: while (retry > 0) {
                 try {
                     for (final Entry<String, String> e: m.entrySet()) {
-                        buf.append(e.getKey()).append('=');
-                        if (e.getValue() != null) { buf.append(e.getValue()); }
-                        buf.append(separator);
+                        if (e.getValue() == null) continue;
+                        buf.append(e.getKey()).append('=').append(e.getValue()).append(separator);
                     }
                     break critical; // success
                 } catch (final ConcurrentModificationException e) {
