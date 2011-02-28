@@ -925,3 +925,24 @@ div#info:hover span {
   border: 1px dashed black;
   z-index: 100;
  }
+ 
+.info {
+  float:left;
+} 
+
+.info span {
+  display: none;
+}
+
+.info:hover span {
+  display: block;
+  position: absolute;
+  font-size:1em;
+  width: 200px;
+  padding: 3px;
+  color: #000000; 
+  background: #DDDDDD;
+  text-align: center;
+  border: 1px dashed black;
+  z-index: 100;
+ }
