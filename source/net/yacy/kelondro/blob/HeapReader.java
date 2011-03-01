@@ -672,7 +672,11 @@ public class HeapReader {
         
         public entries(final File blobFile, final int keylen) throws IOException {
             if (!(blobFile.exists())) throw new IOException("file " + blobFile + " does not exist");
-            this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 8*1024*1024));
+            try {
+                this.is = new DataInputStream(new BufferedInputStream(new FileInputStream(blobFile), 8*1024*1024));
+            } catch (OutOfMemoryError e) {
+                this.is = new DataInputStream(new FileInputStream(blobFile));
+            }
             this.keylen = keylen;
             this.blobFile = blobFile;
         }

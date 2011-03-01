@@ -102,6 +102,7 @@ public class PeerSelection {
         while (dhtEnum.hasNext() && c-- > 0) {
             seed = dhtEnum.next();
             if (seed == null) continue;
+            if (seed.isLastSeenTimeout(3600000)) continue;
             if (seed.getAge() < 1) { // the 'workshop feature'
                 Log.logInfo("DHT", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
                 regularSeeds.put(seed.hash, seed);
@@ -120,6 +121,7 @@ public class PeerSelection {
         while (dhtEnum.hasNext()) {
             seed = dhtEnum.next();
             if (seed == null) continue;
+            if (seed.isLastSeenTimeout(3600000)) continue;
             if (!seed.getFlagAcceptRemoteIndex()) robinson.add(seed);
         }
 
@@ -128,6 +130,8 @@ public class PeerSelection {
         c = robinson.size() * burstRobinsonPercent / 100;
         while (dhtEnum.hasNext() && c-- > 0) {
             seed = dhtEnum.next();
+            if (seed == null) continue;
+            if (seed.isLastSeenTimeout(3600000)) continue;
             if (Math.random() * 100 + burstRobinsonPercent >= 100) {
                 if (Log.isFine("DHT")) Log.logFine("DHT", "selectPeers/RobinsonBurst: " + seed.hash + ":" + seed.getName());
                 regularSeeds.put(seed.hash, seed);
@@ -140,6 +144,8 @@ public class PeerSelection {
         dhtEnum = robinson.iterator();
         while (dhtEnum.hasNext()) {
             seed = dhtEnum.next();
+            if (seed == null) continue;
+            if (seed.isLastSeenTimeout(3600000)) continue;
             if (seed.matchPeerTags(wordhashes)) {
                 // peer tags match
                 String specialized = seed.getPeerTags().toString();

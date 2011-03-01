@@ -81,7 +81,7 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     private final ReferenceOrder order;
     
-    public SearchEvent(final QueryParams query,
+    protected SearchEvent(final QueryParams query,
                              final yacySeedDB peers,
                              final WorkTables workTables,
                              final SortedMap<byte[], String> preselectedPeerHashes,
@@ -89,6 +89,7 @@ public final class SearchEvent {
                              final LoaderDispatcher loader,
                              final int burstRobinsonPercent,
                              final int burstMultiwordPercent) {
+        if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
         this.workTables = workTables;
@@ -202,7 +203,7 @@ public final class SearchEvent {
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.CLEANUP, "", 0, 0), false);
         
         // store this search to a cache so it can be re-used
-        if (MemoryControl.available() < 1024 * 1024 * 10) SearchEventCache.cleanupEvents(true);
+        if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
         SearchEventCache.put(query.id(false), this);
    }
    

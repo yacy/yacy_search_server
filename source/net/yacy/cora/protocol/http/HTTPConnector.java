@@ -79,8 +79,13 @@ public class HTTPConnector {
 		client.setTimout(timeout);
 		client.setUserAgent(this.userAgent);
 		client.setHost(vhost);
-		
-		return client.POSTbytes(url.toNormalform(true, false, true, false), post, usegzip);
+		byte[] b;
+		try {
+		    b = client.POSTbytes(url.toNormalform(true, false, true, false), post, usegzip);
+		} finally {
+		    client.finish();
+		}
+		return b;
 	}
 
 }

@@ -46,8 +46,8 @@ public class SearchEventCache {
     public static final long eventLifetimeBigMem = 600000; // the time an event will stay in the cache when available memory is high, 10 Minutes
     public static final long eventLifetimeMediumMem = 60000; // the time an event will stay in the cache when available memory is medium, 1 Minute
     public static final long eventLifetimeShortMem = 10000; // the time an event will stay in the cache when memory is low, 10 seconds
-    public static final long memlimitHigh = 400 * 1024 * 1024; // 400 MB
-    public static final long memlimitMedium = 100 * 1024 * 1024; // 100 MB
+    public static final long memlimitHigh = 600 * 1024 * 1024; // 400 MB
+    public static final long memlimitMedium = 200 * 1024 * 1024; // 100 MB
     public static String lastEventID = "";
     public static long cacheInsert = 0, cacheHit = 0, cacheMiss = 0, cacheDelete = 0;
     
