@@ -72,7 +72,6 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.message.BasicHeader;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -94,7 +93,7 @@ public class HTTPClient {
 	private final static int maxcon = 200;
 	private static IdledConnectionEvictor idledConnectionEvictor = null;
 	private static HttpClient httpClient = initConnectionManager();
-	private Header[] headers = null;
+	private Set<Entry<String, String>> headers = null;
 	private HttpResponse httpResponse = null;
 	private HttpUriRequest currentRequest = null;
 	private long upbytes = 0L;
@@ -196,13 +195,7 @@ public class HTTPClient {
      * @param entrys to be set as request header
      */
     public void setHeader(final Set<Entry<String, String>> entrys) {
-    	if (entrys != null) {
-	    	int i = 0;
-	    	headers = new Header[entrys.size()];
-	    	for (final Entry<String, String> entry : entrys) {
-	    		headers[i++] = new BasicHeader(entry.getKey(),entry.getValue());
-	    	}
-    	}
+    	this.headers = entrys;
     }
     
     /**
@@ -272,7 +265,7 @@ public class HTTPClient {
     public byte[] GETbytes(final String uri, long maxBytes) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
     	final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, true, false));
-    	httpGet.setHeader("Host", url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+    	setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	return getContentBytes(httpGet, maxBytes);
     }
     
@@ -288,7 +281,7 @@ public class HTTPClient {
         if (currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, true, false));
-        httpGet.setHeader("Host", url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         currentRequest = httpGet;
         execute(httpGet);
     }
@@ -303,7 +296,7 @@ public class HTTPClient {
     public HttpResponse HEADResponse(final String uri) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpHead httpHead = new HttpHead(url.toNormalform(true, false, true, false));
-        httpHead.setHeader("Host", url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	execute(httpHead);
     	finish();
     	ConnectionInfo.removeConnection(httpHead.hashCode());
@@ -324,7 +317,7 @@ public class HTTPClient {
     	if (currentRequest != null) throw new IOException("Client is in use!");
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
-        httpPost.setHeader("Host", url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
     	// statistics
     	upbytes = length;
@@ -344,7 +337,7 @@ public class HTTPClient {
     public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
-        httpPost.setHeader("Host", url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
 
     	final MultipartEntity multipartEntity = new MultipartEntity();
     	for (final Entry<String,ContentBody> part : parts.entrySet())
@@ -460,10 +453,11 @@ public class HTTPClient {
                         content = EntityUtils.toByteArray(httpEntity);
                     } catch (OutOfMemoryError e) {
                         throw new IOException(e.toString());
+                    } finally { 
+                        // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+                    	EntityUtils.consume(httpEntity);
                     }
-                } 
-                // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-            	EntityUtils.consume(httpEntity);
+                }
             }
         } catch (final IOException e) {
                 ConnectionInfo.removeConnection(httpUriRequest.hashCode());
@@ -503,10 +497,12 @@ public class HTTPClient {
     
     private void setHeaders(final HttpUriRequest httpUriRequest) {
     	if (headers != null) {
-            for (final Header header : headers) {
-                    httpUriRequest.setHeader(header);
+            for (final Entry<String, String> entry : headers) {
+                    httpUriRequest.setHeader(entry.getKey(),entry.getValue());
             }
     	}
+    	if (host != null)
+    		httpUriRequest.setHeader(HTTP.TARGET_HOST, host);
         if (realm != null)
             httpUriRequest.setHeader("Authorization", "realm=" + realm);
     }
