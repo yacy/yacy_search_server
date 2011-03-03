@@ -147,7 +147,6 @@ public class HTTPClient {
 		HttpConnectionParams.setConnectionTimeout(httpParams, 9500);
 		// SO_LINGER affects the socket close operation in seconds
 		// HttpConnectionParams.setLinger(httpParams, 6);
-		// TODO: is default ok?
 		// HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
 		// SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
 		HttpConnectionParams.setSoTimeout(httpParams, 9900);
@@ -155,7 +154,8 @@ public class HTTPClient {
 		HttpConnectionParams.setStaleCheckingEnabled(httpParams, true);
 		// conserve bandwidth by minimizing the number of segments that are sent
 		HttpConnectionParams.setTcpNoDelay(httpParams, false);
-		// TODO: testing noreuse - there will be HttpConnectionParams.setSoReuseaddr(HttpParams params, boolean reuseaddr) in core-4.1
+		// TODO: testing reuse of socket - there will be HttpConnectionParams.setSoReuseaddr(HttpParams params, boolean reuseaddr) in core-4.1
+		HttpConnectionParams.setSoReuseaddr(httpParams, true);
 		
 		httpClient = new DefaultHttpClient(clientConnectionManager, httpParams);
 		// ask for gzip
@@ -453,11 +453,10 @@ public class HTTPClient {
                         content = EntityUtils.toByteArray(httpEntity);
                     } catch (OutOfMemoryError e) {
                         throw new IOException(e.toString());
-                    } finally { 
-                        // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-                    	EntityUtils.consume(httpEntity);
                     }
-                }
+                } 
+                // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+            	EntityUtils.consume(httpEntity);
             }
         } catch (final IOException e) {
                 ConnectionInfo.removeConnection(httpUriRequest.hashCode());
