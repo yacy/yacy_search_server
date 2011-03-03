@@ -1020,8 +1020,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
                     dna0 = it.next();
                     assert dna0 != null;
                     if (dna0 == null) continue;
-                    dna = new ConcurrentHashMap<String, String>();
-                    dna.putAll(dna0);
+                    if (dna0 instanceof ConcurrentHashMap) {
+                        dna = (ConcurrentHashMap<String, String>) dna0;
+                    } else {
+                        dna = new ConcurrentHashMap<String, String>();
+                        dna.putAll(dna0);
+                    }
                     final String hash = dna.remove("key");
                     assert hash != null;
                     if (hash == null) continue; // bad seed

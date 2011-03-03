@@ -750,6 +750,9 @@ public final class FileUtils {
                 }
             } catch (IOException e) {
                 nextLine = null;
+            } catch (OutOfMemoryError e) {
+                Log.logException(e);
+                nextLine = null;
             }
             return line;
         }

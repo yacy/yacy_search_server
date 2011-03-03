@@ -225,7 +225,9 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     }
     
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
-        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
+        StringBuilder sb = new StringBuilder(subdom.length() + rootpath.length() + 8);
+        sb.append(subdom).append(':').append(Integer.toString(port)).append(':').append(rootpath);
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).charAt(0);
     }
 
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");

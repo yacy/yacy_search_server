@@ -802,16 +802,22 @@ public class ArrayStack implements BLOB {
             blobItem bi = blobs.get(0);
             bi.blob.delete(key);
         } else {
-            Thread[] t = new Thread[blobs.size()];
+            Thread[] t = new Thread[blobs.size() - 1];
             int i = 0;
             for (blobItem bi: blobs) {
-                final blobItem bi0 = bi;
-                t[i] = new Thread() {
-                    public void run() {
-                        try { bi0.blob.delete(key); } catch (IOException e) {}
-                    }
-                };
-                t[i].start();
+                if (i < t.length) {
+                    // run this in a concurrent thread
+                    final blobItem bi0 = bi;
+                    t[i] = new Thread() {
+                        public void run() {
+                            try { bi0.blob.delete(key); } catch (IOException e) {}
+                        }
+                    };
+                    t[i].start();
+                } else {
+                    // no additional thread, run in this thread
+                    try { bi.blob.delete(key); } catch (IOException e) {}
+                }
                 i++;
             }
             for (Thread s: t) try {s.join();} catch (InterruptedException e) {}

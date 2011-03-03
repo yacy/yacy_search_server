@@ -389,28 +389,29 @@ public final class SearchEvent {
          * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */
         public void addAbstract(String wordhash, TreeMap<String, String> singleAbstract) {
+            SortedMap<String, String> oldAbstract;
             synchronized (abstractsCache) {
-                SortedMap<String, String> oldAbstract = abstractsCache.get(wordhash);
+                oldAbstract = abstractsCache.get(wordhash);
                 if (oldAbstract == null) {
                     // new abstracts in the cache
                     abstractsCache.put(wordhash, singleAbstract);
-                } else {
-                    // extend the abstracts in the cache: join the single abstracts
-                    for (final Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
-                        final String urlhash = oneref.getKey();
-                        final String peerlistNew = oneref.getValue();
-                        synchronized (oldAbstract) {
-                            final String peerlistOld = oldAbstract.get(urlhash);
-                            if (peerlistOld == null) {
-                                oldAbstract.put(urlhash, peerlistNew);
-                            } else {
-                                oldAbstract.put(urlhash, peerlistOld + peerlistNew);
-                            }
-                        }
-                    }
-                    // abstractsCache.put(wordhash, oldAbstract);
+                    return;
                 }
             }
+            // extend the abstracts in the cache: join the single abstracts
+            for (final Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
+                final String urlhash = oneref.getKey();
+                final String peerlistNew = oneref.getValue();
+                synchronized (oldAbstract) {
+                    final String peerlistOld = oldAbstract.get(urlhash);
+                    if (peerlistOld == null) {
+                        oldAbstract.put(urlhash, peerlistNew);
+                    } else {
+                        oldAbstract.put(urlhash, peerlistOld + peerlistNew);
+                    }
+                }
+            }
+            // abstractsCache.put(wordhash, oldAbstract); // put not necessary since it is sufficient to just change the value content (it stays assigned)
         }
         
         public void commitAbstract() {
