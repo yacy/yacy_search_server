@@ -124,6 +124,7 @@ LangString finishPage 0 "Zeige die Windows Firewall Konfiguration fuer YaCy."
 Section "YaCy"
 	SectionIn 1 RO
 	SetShellVarContext current ; use system variables (folders) for current user
+	RMDir /r "$INSTDIR\lib" ;remove old libraries in case of update
 	RMDir /r "$SMPROGRAMS\YaCy" ;clear old shortcuts
 	Delete "$QUICKLAUNCH\YaCy-Search.lnk" ;old
 	Delete "$DESKTOP\YaCy-Search.lnk" ;old
