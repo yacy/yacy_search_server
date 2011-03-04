@@ -364,6 +364,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     public boolean put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         byte[] key = row.getPrimaryKeyBytes();
+        if (tables == null) return true;
         synchronized (this.tables) {
             Index keeper = keeperOf(key);
             if (keeper != null) return keeper.put(row);
@@ -378,6 +379,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
 
     private Index keeperOf(final byte[] key) {
         if (key == null) return null;
+        if (tables == null) return null;
         for (Index oi: tables.values()) {
             if (oi.has(key)) return oi;
         }

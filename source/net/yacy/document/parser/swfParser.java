@@ -66,7 +66,6 @@ public class swfParser extends AbstractParser implements Parser {
             try {
             	contents = swf2html.convertSWFToHTML(source);
             } catch (NegativeArraySizeException e) {
-                Log.logException(e);
                 throw new Parser.Failure(e.getMessage(), location);
             } catch (IOException e) {
                 throw new Parser.Failure(e.getMessage(), location);

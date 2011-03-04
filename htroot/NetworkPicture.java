@@ -64,8 +64,8 @@ public class NetworkPicture {
         
         int width = 1024; // 640x480 = VGA, 768x576 = SD/4:3, 1024x576 =SD/16:9 1280x720 = HD/16:9, 1920x1080 = FULL HD/16:9
         int height = 576;
-        int passiveLimit = 10080; // minutes; 1440 = 1 day; 720 = 12 hours; 10080 = 1 week;
-        int potentialLimit = 10080;
+        int passiveLimit = 1440; // minutes; 1440 = 1 day; 720 = 12 hours; 1440 = 24 hours, 10080 = 1 week;
+        int potentialLimit = 1440;
         int maxCount = 1000;
         String bgcolor = NetworkGraph.COL_BACKGROUND;
         boolean corona = true;
