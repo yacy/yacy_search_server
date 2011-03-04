@@ -1588,7 +1588,7 @@ public final class Switchboard extends serverSwitch {
                     seed = e.next();
                     if (seed != null) {
                         //list is sorted -> break when peers are too young to delete
-                        if (seed.isLastSeenTimeout(deleteOldSeedsTime)) break;
+                        if (!seed.isLastSeenTimeout(deleteOldSeedsTime)) break;
                         deleteQueue.add(seed.hash);
                     }
                 }
@@ -1601,7 +1601,7 @@ public final class Switchboard extends serverSwitch {
                     seed = e.next();
                     if (seed != null) {
                         //list is sorted -> break when peers are too young to delete
-                        if (seed.isLastSeenTimeout(deleteOldSeedsTime)) break;
+                        if (!seed.isLastSeenTimeout(deleteOldSeedsTime)) break;
                         deleteQueue.add(seed.hash);
                     }
                 }
