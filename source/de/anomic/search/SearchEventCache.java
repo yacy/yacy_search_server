@@ -105,6 +105,8 @@ public class SearchEventCache {
             final SortedMap<byte[], String> preselectedPeerHashes,
             final boolean generateAbstracts,
             final LoaderDispatcher loader,
+            final int remote_maxcount,
+            final long remote_maxtime,
             final int burstRobinsonPercent,
             final int burstMultiwordPercent) {
         
@@ -128,7 +130,7 @@ public class SearchEventCache {
         }
         if (event == null) {
             // start a new event
-            event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, burstRobinsonPercent, burstMultiwordPercent);
+            event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, burstRobinsonPercent, burstMultiwordPercent);
         }
     
         return event;

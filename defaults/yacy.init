@@ -723,6 +723,10 @@ search.result.show.metadata = true
 search.result.show.parser = true
 search.result.show.pictures = true
 
+# remote search details
+remotesearch.maxcount = 20
+remotesearch.maxtime = 1000
+
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
 useYacyReferer = false

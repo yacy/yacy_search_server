@@ -388,6 +388,7 @@ public final class yacyClient {
             final String sitehash,
             final String authorhash,
             final int count,
+            final long time,
             final int maxDistance,
             final boolean global, 
             final int partitions,
@@ -420,7 +421,7 @@ public final class yacyClient {
             result = new SearchResult(
                 yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
                 mySeed, wordhashes, excludehashes, urlhashes, prefer, filter, language,
-                sitehash, authorhash, count, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
+                sitehash, authorhash, count, time, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
                 secondarySearchSuperviser, rankingProfile, constraint);
         } catch (final IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
@@ -590,6 +591,7 @@ public final class yacyClient {
                 final String sitehash,
                 final String authorhash,
                 final int count,
+                final long time,
                 final int maxDistance,
                 final boolean global, 
                 final int partitions,
@@ -624,6 +626,7 @@ public final class yacyClient {
             }
             parts.put("myseed", UTF8.StringBody((mySeed == null) ? "" : mySeed.genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
+            parts.put("time", UTF8.StringBody(Long.toString(Math.max(3000, time))));
             parts.put("resource", UTF8.StringBody(((global) ? "global" : "local")));
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));
             parts.put("query", UTF8.StringBody(wordhashes));
@@ -1043,6 +1046,7 @@ public final class yacyClient {
                                 "", // sitehash,
                                 "", // authorhash,
                                 10, // count,
+                                3000, // time,
                                 1000, // maxDistance,
                                 true, //global, 
                                 16, // partitions,

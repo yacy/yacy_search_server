@@ -274,6 +274,12 @@ public final class SwitchboardConstants {
 
     public static final String DHT_BURST_ROBINSON               = "network.unit.dht.burst.robinson";
     public static final String DHT_BURST_MULTIWORD              = "network.unit.dht.burst.multiword";
+
+    public static final String REMOTESEARCH_MAXCOUNT_DEFAULT    = "network.unit.remotesearch.maxcount";
+    public static final String REMOTESEARCH_MAXTIME_DEFAULT     = "network.unit.remotesearch.maxtime";
+
+    public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
+    public static final String REMOTESEARCH_MAXTIME_USER        = "remotesearch.maxtime";
     
     /**
      * <p><code>public static final String <strong>CRAWLER_THREADS_ACTIVE_MAX</strong> = "crawler.MaxActiveThreads"</code></p>

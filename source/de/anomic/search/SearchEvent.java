@@ -87,6 +87,8 @@ public final class SearchEvent {
                              final SortedMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts,
                              final LoaderDispatcher loader,
+                             final int remote_maxcount,
+                             final long remote_maxtime,
                              final int burstRobinsonPercent,
                              final int burstMultiwordPercent) {
         if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
@@ -127,7 +129,8 @@ public final class SearchEvent {
                     query.targetlang == null ? "" : query.targetlang,
                     query.sitehash == null ? "" : query.sitehash,
                     query.authorhash == null ? "" : query.authorhash,
-                    query.displayResults(),
+                    remote_maxcount,
+                    remote_maxtime,
                     query.maxDistance,
                     query.getSegment(),
                     peers,
@@ -139,7 +142,7 @@ public final class SearchEvent {
                     (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes,
                     burstRobinsonPercent,
                     burstMultiwordPercent);
-            Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
+            Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + remote_maxcount + " URLs");
             if (this.primarySearchThreads != null) {
                 this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
@@ -388,8 +391,8 @@ public final class SearchEvent {
          * @param wordhash
          * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */
-        public void addAbstract(String wordhash, TreeMap<String, String> singleAbstract) {
-            SortedMap<String, String> oldAbstract;
+        public void addAbstract(String wordhash, final TreeMap<String, String> singleAbstract) {
+            final SortedMap<String, String> oldAbstract;
             synchronized (abstractsCache) {
                 oldAbstract = abstractsCache.get(wordhash);
                 if (oldAbstract == null) {
@@ -399,18 +402,18 @@ public final class SearchEvent {
                 }
             }
             // extend the abstracts in the cache: join the single abstracts
-            for (final Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
-                final String urlhash = oneref.getKey();
-                final String peerlistNew = oneref.getValue();
-                synchronized (oldAbstract) {
-                    final String peerlistOld = oldAbstract.get(urlhash);
-                    if (peerlistOld == null) {
-                        oldAbstract.put(urlhash, peerlistNew);
-                    } else {
-                        oldAbstract.put(urlhash, peerlistOld + peerlistNew);
+            new Thread() {
+                public void run() {
+                    for (final Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
+                        final String urlhash = oneref.getKey();
+                        final String peerlistNew = oneref.getValue();
+                        synchronized (oldAbstract) {
+                            final String peerlistOld = oldAbstract.put(urlhash, peerlistNew);
+                            if (peerlistOld != null) oldAbstract.put(urlhash, peerlistOld + peerlistNew);
+                        }
                     }
                 }
-            }
+            }.start();
             // abstractsCache.put(wordhash, oldAbstract); // put not necessary since it is sufficient to just change the value content (it stays assigned)
         }
         
@@ -520,7 +523,7 @@ public final class SearchEvent {
                 rankingProcess.moreFeeders(1);
                 checkedPeers.add(peer);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, urls, query.getSegment(), peers, rankingProcess, peer, Switchboard.urlBlacklist,
+                        words, urls, 6000, query.getSegment(), peers, rankingProcess, peer, Switchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
             }
             

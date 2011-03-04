@@ -95,7 +95,8 @@ public final class search {
         final String abstracts = post.get("abstracts", "");  // a string of word hashes for abstracts that shall be generated, or 'auto' (for maxcount-word), or '' (for none)
 //      final String  fwdep  = post.get("fwdep", "");  // forward depth. if "0" then peer may NOT ask another peer for more results
 //      final String  fwden  = post.get("fwden", "");  // forward deny, a list of seed hashes. They may NOT be target of forward hopping
-        final int     count  = Math.min(100, post.getInt("count", 10)); // maximum number of wanted results
+        final int     count  = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 100), post.getInt("count", 10)); // maximum number of wanted results
+        final long    maxtime = Math.min((int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000), post.getLong("time", 3000)); // maximum number of wanted results
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
@@ -295,13 +296,13 @@ public final class search {
             yacyChannel.channels(yacyChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
+            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
             
             // set statistic details of search result and find best result index set
             joincount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount();
             prop.put("joincount", Integer.toString(joincount));
             if (joincount != 0) {
-                accu = theSearch.result().completeResults(3000);
+                accu = theSearch.result().completeResults(maxtime);
             }
             if (joincount <= 0 || abstracts.length() == 0) {
                 prop.put("indexcount", "");
