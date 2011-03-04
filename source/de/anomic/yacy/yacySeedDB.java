@@ -1027,7 +1027,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                         dna.putAll(dna0);
                     }
                     final String hash = dna.remove("key");
-                    assert hash != null;
+                    //assert hash != null;
                     if (hash == null) continue; // bad seed
                     return new yacySeed(hash, dna);
                 }
