@@ -537,16 +537,17 @@ public final class yacyClient {
             ByteBuffer ci;
             int ac = 0;
             for (Map.Entry<byte[], String> abstractEntry: result.indexabstract.entrySet()) {
-                wordhash = new String(abstractEntry.getKey());
-                whacc += wordhash;
                 try {
-                    ci = new ByteBuffer(abstractEntry.getValue().getBytes("UTF-8"));
-                } catch (UnsupportedEncodingException e) {
+                    ci = new ByteBuffer(abstractEntry.getValue());
+                    wordhash = new String(abstractEntry.getKey());
+                } catch (OutOfMemoryError e) {
                     Log.logException(e);
-                    return -1;
+                    continue;
                 }
+                whacc += wordhash;
                 secondarySearchSuperviser.addAbstract(wordhash, ReferenceContainer.decompressIndex(ci, target.hash));
                 ac++;
+                
             }
             if (ac > 0) {
                 secondarySearchSuperviser.commitAbstract();

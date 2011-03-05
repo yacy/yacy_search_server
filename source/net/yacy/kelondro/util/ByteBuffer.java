@@ -32,6 +32,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
+import net.yacy.cora.document.UTF8;
+
 public final class ByteBuffer extends OutputStream {
     
     public static final byte singlequote = (byte) 39;
@@ -53,11 +55,17 @@ public final class ByteBuffer extends OutputStream {
         this.buffer = new byte[initLength];
         this.length = 0;
         this.offset = 0;
-    }        
+    }
     
     public ByteBuffer(final byte[] bb) {
         buffer = bb;
         length = bb.length;
+        offset = 0;
+    }
+    
+    public ByteBuffer(final String s) {
+        buffer = s.getBytes(UTF8.charset);
+        length = buffer.length;
         offset = 0;
     }
 
