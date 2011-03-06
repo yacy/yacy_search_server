@@ -308,8 +308,12 @@ public final class Log {
     
     protected final static logEntry poison = new logEntry();
     protected final static BlockingQueue<logEntry> logQueue = new LinkedBlockingQueue<logEntry>();
-    private   static logRunner logRunnerThread = null;
-    
+    private   final static logRunner logRunnerThread = new logRunner();
+
+    static {
+        logRunnerThread.start();
+    }
+
     protected final static class logRunner extends Thread {
         public logRunner() {
         	super("Log Runner");
@@ -371,9 +375,6 @@ public final class Log {
                 FileHandler handler = new FileHandler(logPattern, 1024*1024, 20, true);
                 logger.addHandler(handler); 
             }
-
-            logRunnerThread = new logRunner();
-            logRunnerThread.start();
             
             // redirect uncaught exceptions to logging
             final Log exceptionLog = new Log("UNCAUGHT-EXCEPTION");
@@ -381,8 +382,8 @@ public final class Log {
                 public void uncaughtException(final Thread t, final Throwable e) {
                     String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
                     exceptionLog.logSevere(msg, e);
-                    System.err.print("Exception in thread \"" + t.getName() + "\" ");
-                    e.printStackTrace(System.err);
+                    //System.err.print("Exception in thread \"" + t.getName() + "\" ");
+                    //e.printStackTrace(System.err);
                 }
             });
         } finally {
