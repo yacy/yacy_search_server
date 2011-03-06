@@ -41,7 +41,7 @@ public class CircleTool {
         
         // read some lines from known circles
         Set<String> crds = new HashSet<String>();
-        crds.add("0|0");
+        //crds.add("0|0");
         String co;
         for (short i = (short) Math.max(0, circles.length - 2); i < circles.length; i++) {
             for (short j = 0; j < circles[i].length; j = (short) (j + 2)) {
@@ -51,7 +51,7 @@ public class CircleTool {
         }
         
         // copy old circles into new array
-        short[][] newCircles = new short[radius + 30][];
+        short[][] newCircles = new short[radius][];
         System.arraycopy(circles, 0, newCircles, 0, circles.length);
         
         // compute more lines in new circles
@@ -61,7 +61,7 @@ public class CircleTool {
         for (short r = (short) circles.length; r < newCircles.length; r++) {
             r1 = (short) (r + 1);
             crc = new ArrayList<short[]>();
-            for (short a = 0; a <= 2 * (r + 1); a++) {
+            for (short a = 0; a < 2 * (r + 1); a++) {
                 x = (short) (r1 * Math.cos(Math.PI * a / (4 * r1)));
                 y = (short) (r1 * Math.sin(Math.PI * a / (4 * r1)));
                 co = x + "|" + y;

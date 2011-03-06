@@ -476,8 +476,17 @@ public final class Switchboard extends serverSwitch {
         ", " + this.userDB.size() + " entries" +
         ", " + ppRamString(userDbFile.length()/1024));
         
-        //Init bookmarks DB
-        initBookmarks();
+        // Init bookmarks DB: needs more time since this does a DNS lookup for each Bookmark.
+        // Can be started concurrently
+        new Thread(){
+            public void run() {
+                try {
+                    initBookmarks();
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
+            }
+        }.start();
         
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Type deny list");
