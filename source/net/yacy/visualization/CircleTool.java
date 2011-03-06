@@ -32,57 +32,57 @@ import java.util.List;
 import java.util.Set;
 
 
-public class CircleTool {    
+public class CircleTool {  
 
-    private static int[][] circles = new int[0][]; 
+    private static short[][] circles = new short[0][]; 
     
-    private static int[] getCircleCoords(final int radius) {
+    private static short[] getCircleCoords(final short radius) {
         if ((radius - 1) < circles.length) return circles[radius - 1];
         
         // read some lines from known circles
         Set<String> crds = new HashSet<String>();
         crds.add("0|0");
         String co;
-        for (int i = Math.max(0, circles.length - 2); i < circles.length; i++) {
-            for (int j = 0; j < circles[i].length; j = j + 2) {
+        for (short i = (short) Math.max(0, circles.length - 2); i < circles.length; i++) {
+            for (short j = 0; j < circles[i].length; j = (short) (j + 2)) {
                 co = circles[i][j] + "|" + circles[i][j + 1];
                 if (!(crds.contains(co))) crds.add(co);
             }
         }
         
         // copy old circles into new array
-        int[][] newCircles = new int[radius + 30][];
+        short[][] newCircles = new short[radius + 30][];
         System.arraycopy(circles, 0, newCircles, 0, circles.length);
         
         // compute more lines in new circles
-        int x, y;
-        List<int[]> crc;
-        int r1;
-        for (int r = circles.length; r < newCircles.length; r++) {
-            r1 = r + 1;
-            crc = new ArrayList<int[]>();
-            for (int a = 0; a <= 2 * (r + 1); a++) {
-                x = (int) (r1 * Math.cos(Math.PI * a / (4 * r1)));
-                y = (int) (r1 * Math.sin(Math.PI * a / (4 * r1)));
+        short x, y;
+        List<short[]> crc;
+        short r1;
+        for (short r = (short) circles.length; r < newCircles.length; r++) {
+            r1 = (short) (r + 1);
+            crc = new ArrayList<short[]>();
+            for (short a = 0; a <= 2 * (r + 1); a++) {
+                x = (short) (r1 * Math.cos(Math.PI * a / (4 * r1)));
+                y = (short) (r1 * Math.sin(Math.PI * a / (4 * r1)));
                 co = x + "|" + y;
                 if (!(crds.contains(co))) {
-                    crc.add(new int[]{x, y});
+                    crc.add(new short[]{x, y});
                     crds.add(co);
                 }
-                x = (int) (((double) r + 0.5) * Math.cos(Math.PI * a / (4 * r1)));
-                y = (int) (((double) r + 0.5) * Math.sin(Math.PI * a / (4 * r1)));
+                x = (short) (((double) r + 0.5) * Math.cos(Math.PI * a / (4 * r1)));
+                y = (short) (((double) r + 0.5) * Math.sin(Math.PI * a / (4 * r1)));
                 co = x + "|" + y;
                 if (!(crds.contains(co))) {
-                    crc.add(new int[]{x, y});
+                    crc.add(new short[]{x, y});
                     crds.add(co);
                 }
             }
             // put coordinates into array
             //System.out.print("Radius " + r + " => " + crc.size() + " points: ");
-            newCircles[r] = new int[2 * (crc.size() - 1)];
-            int[] coords;
-            int i2 = 0;
-            for (int i = 0; i < crc.size() - 1; i++) {
+            newCircles[r] = new short[2 * (crc.size() - 1)];
+            short[] coords;
+            short i2 = 0;
+            for (short i = 0; i < crc.size() - 1; i++) {
                 coords = crc.get(i);
                 newCircles[r][i2++] = coords[0];
                 newCircles[r][i2++] = coords[1];
@@ -105,11 +105,11 @@ public class CircleTool {
         if (radius == 0) {
             //matrix.plot(xc, yc, 100);
         } else {
-            final int[] c = getCircleCoords(radius);
-            int x, y;
-            int limit = c.length / 2;
-            int i2 = 0;
-            for (int i = 0; i < limit; i++) {
+            final short[] c = getCircleCoords((short) radius);
+            short x, y;
+            short limit = (short) (c.length / 2);
+            short i2 = 0;
+            for (short i = 0; i < limit; i++) {
                 x = c[i2++];
                 y = c[i2++];
                 matrix.plot(xc + x    , yc - y - 1, intensity); // quadrant 1
@@ -130,23 +130,23 @@ public class CircleTool {
         if (radius == 0) {
             //matrix.plot(xc, yc, 100);
         } else {
-            final int[] c = getCircleCoords(radius);
-            final int q = c.length / 2;
-            final int[] c4x = new int[q * 4];
-            final int[] c4y = new int[q * 4];
-            int a0, a1, a2, a3, b0, b1;
-            for (int i = 0; i < q; i++) {
-                b0 = 2 * (i        );
-                b1 = 2 * (q - 1 - i);
+            final short[] c = getCircleCoords((short) radius);
+            final short q = (short) (c.length / 2);
+            final short[] c4x = new short[q * 4];
+            final short[] c4y = new short[q * 4];
+            short a0, a1, a2, a3, b0, b1;
+            for (short i = 0; i < q; i++) {
+                b0 = (short) (2 * (i        ));
+                b1 = (short) (2 * (q - 1 - i));
                 a0 = c[b0    ];
                 a1 = c[b0 + 1];
                 a2 = c[b1    ];
                 a3 = c[b1 + 1];
                 c4x[i        ] =     a0    ; // quadrant 1
-                c4y[i        ] =    -a1 - 1; // quadrant 1
-                c4x[i +     q] = 1 - a2    ; // quadrant 2
-                c4y[i +     q] =    -a3 - 1; // quadrant 2
-                c4x[i + 2 * q] = 1 - a0    ; // quadrant 3
+                c4y[i        ] = (short) (-a1 - 1);  // quadrant 1
+                c4x[i +     q] = (short) (  1 - a2); // quadrant 2
+                c4y[i +     q] = (short) (-a3 - 1);  // quadrant 2
+                c4x[i + 2 * q] = (short) (  1 - a0); // quadrant 3
                 c4y[i + 2 * q] =     a1    ; // quadrant 3
                 c4x[i + 3 * q] =     a2    ; // quadrant 4
                 c4y[i + 3 * q] =     a3    ; // quadrant 4
