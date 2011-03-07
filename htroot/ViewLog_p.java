@@ -36,6 +36,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.logging.LogalizerHandler;
 
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -48,37 +49,38 @@ public class ViewLog_p {
         boolean reversed = false;
         boolean json = false;
         int maxlines = 400, lines = 200;
-        /* Usually a regex like this would make no sense, ".*" would be
-         * sufficient, but ".*.*" makes it a little bit more convenient
-         * for the user to input regexes like ".*FOO.*" in the HTML
-         * interface.
-         */
         String filter = ".*.*";
         
         if(post != null){
-            reversed = (post.containsKey("mode") && (post.get("mode")).equals("reversed"));
-            json = post.containsKey("json");
-            
+            if(post.containsKey("mode") && (post.get("mode")).equals("reversed")){
+                reversed=true;
+            }
             if(post.containsKey("lines")){
                 lines = Integer.parseInt(post.get("lines"));
             }
-
             if(post.containsKey("filter")){
                 filter = post.get("filter");
+            }
+            if(post.containsKey("json")){
+                json = true;
             }
         }
         
         
         final Logger logger = Logger.getLogger("");
         final Handler[] handlers = logger.getHandlers();
-        for (final Handler handler : handlers) {
-            if (handler instanceof GuiHandler) {
-                maxlines = ((GuiHandler)handler).getSize();
+        boolean displaySubmenu = false;
+        for (int i=0; i<handlers.length; i++) {
+            if (handlers[i] instanceof GuiHandler) {
+                maxlines = ((GuiHandler)handlers[i]).getSize();
                 if (lines > maxlines) lines = maxlines;
-                log = ((GuiHandler)handler).getLogLines(reversed,lines);
+                log = ((GuiHandler)handlers[i]).getLogLines(reversed,lines);
+            } else if (handlers[i] instanceof LogalizerHandler) {
+                displaySubmenu = true;
             }
         }
         
+        prop.put("submenu", displaySubmenu ? "1" : "0");
         prop.put("reverseChecked", reversed ? "1" : "0");
         prop.put("lines", lines);
         prop.put("maxlines",maxlines);
@@ -96,34 +98,22 @@ public class ViewLog_p {
 
         int level = 0;
         int lc = 0;
-        for (final String logLine : log) {
-            final String nextLogLine = logLine.trim();
+        for (int i=0; i < log.length; i++) {
+            final String nextLogLine = log[i].trim();
             
             if (filterMatcher != null) {
-            	filterMatcher.reset(nextLogLine);
-            	if (!filterMatcher.find()) continue;
+                filterMatcher.reset(nextLogLine);
+                if (!filterMatcher.find()) continue;
             }
             
-            if (nextLogLine.startsWith("E ")) {
-                level = 4;
-            } else if (nextLogLine.startsWith("W ")) {
-                level = 3;
-            } else if (nextLogLine.startsWith("S ")) {
-                level = 2;
-            } else if (nextLogLine.startsWith("I ")) {
-                level = 1;
-            } else if (nextLogLine.startsWith("D ")) {
-                level = 0;
-            }
-
+            if (nextLogLine.startsWith("E ")) level = 4;
+            else if (nextLogLine.startsWith("W ")) level = 3;
+            else if (nextLogLine.startsWith("S ")) level = 2;
+            else if (nextLogLine.startsWith("I ")) level = 1;
+            else if (nextLogLine.startsWith("D ")) level = 0;            
             prop.put("log_" + lc + "_level", level);
-
-            if (json) {
-                prop.putJSON("log_" + lc + "_line", nextLogLine);
-            } else {
-                prop.put("log_" + lc + "_line", nextLogLine);
-            }
-
+            if (json) prop.putJSON("log_" + lc + "_line", nextLogLine);
+            else prop.put("log_" + lc + "_line", nextLogLine);
             lc++;
         }
         prop.put("log", lc);
