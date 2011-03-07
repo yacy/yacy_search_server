@@ -252,7 +252,7 @@ public class RankingProfile {
             ext.append("=");
             ext.append(entry.getValue());
         }
-        return new String(ext);
+        return ext.toString();
     }
     
 }

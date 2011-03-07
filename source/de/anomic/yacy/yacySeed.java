@@ -60,6 +60,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
@@ -601,7 +602,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (flags.length() != 4) { flags = yacySeed.FLAGSZERO; }
         final bitfield f = new bitfield(flags.getBytes());
         f.set(flag, value);
-        dna.put(yacySeed.FLAGS, new String(f.getBytes()));
+        dna.put(yacySeed.FLAGS, UTF8.String(f.getBytes()));
     }
 
     public final void setFlagDirectConnect(final boolean value) { setFlag(FLAG_DIRECT_CONNECT, value); }
@@ -729,7 +730,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // generate a seed for the local peer
         // this is the birthplace of a seed, that then will start to travel to other peers
 
-        final String hashs = new String(bestGap(db));
+        final String hashs = UTF8.String(bestGap(db));
         yacyCore.log.logInfo("init: OWN SEED = " + hashs);
 
         final yacySeed newSeed = new yacySeed(hashs);

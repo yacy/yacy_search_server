@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -63,7 +64,7 @@ public class Table_YMark_p {
 			while(iter.hasNext()) {
 				key = iter.next();
 				name = sb.tables.bookmarks.tags.getKeyname(bmk_user, key);
-				prop.put("showselection_tags_" + count + "_tagHash", new String(key));
+				prop.put("showselection_tags_" + count + "_tagHash", UTF8.String(key));
 				prop.put("showselection_tags_" + count + "_tagName", name);
 				prop.put("showselection_tags_" + count + "_tagCount", sb.tables.bookmarks.tags.getBookmarkIds(bmk_user, name).size());
 				count++;
@@ -74,7 +75,7 @@ public class Table_YMark_p {
 			while(iter.hasNext()) {
 				key = iter.next();
 				name = sb.tables.bookmarks.folders.getKeyname(bmk_user, key);
-				prop.put("showselection_folders_" + count + "_folderHash", new String(key));
+				prop.put("showselection_folders_" + count + "_folderHash", UTF8.String(key));
 				prop.put("showselection_folders_" + count + "_folderName", name);
 				prop.put("showselection_folders_" + count + "_folderCount", sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, name).size());
 				count++;
@@ -194,7 +195,7 @@ public class Table_YMark_p {
                 }
             } else if (post.containsKey("addrow")) try {
                 // get a new key
-                String pk = new String(sb.tables.createRow(table));
+                String pk = UTF8.String(sb.tables.createRow(table));
                 setEdit(sb, prop, table, pk, columns);
             } catch (IOException e) {
                 Log.logException(e);
@@ -250,11 +251,11 @@ public class Table_YMark_p {
                         
                         // write table content
                         prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                        prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
+                        prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));
                         prop.put("showtable_list_" + count + "_count", count);
                         for (int i = 0; i < columns.size(); i++) {
                             cell = row.get(columns.get(i));
-                            prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
+                            prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : UTF8.String(cell));
                         }
                         prop.put("showtable_list_" + count + "_columns", columns.size());
                         count++;
@@ -288,7 +289,7 @@ public class Table_YMark_p {
         for (String col: columns) {
             cell = row.get(col);
             prop.put("showedit_list_" + count + "_key", col);
-            prop.put("showedit_list_" + count + "_value", cell == null ? "" : new String(cell));
+            prop.put("showedit_list_" + count + "_value", cell == null ? "" : UTF8.String(cell));
             count++;
         }
         prop.put("showedit_list", count);

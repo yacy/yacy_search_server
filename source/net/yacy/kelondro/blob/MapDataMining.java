@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.cora.storage.StaticScore;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -120,7 +121,7 @@ public class MapDataMining extends MapHeap {
                 
                 if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) {
                     cell = map.get(sortfields[i]);
-                    if (cell != null) cluster[i].set(new String(mapnameb), ScoreCluster.object2score(cell));
+                    if (cell != null) cluster[i].set(UTF8.String(mapnameb), ScoreCluster.object2score(cell));
                 }
 
                 if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) {
@@ -200,7 +201,7 @@ public class MapDataMining extends MapHeap {
         super.insert(key, newMap);
         
         // update sortCluster
-        if (sortClusterMap != null) updateSortCluster(new String(key), newMap);
+        if (sortClusterMap != null) updateSortCluster(UTF8.String(key), newMap);
     }
     
     private void updateAcc(final Map<String, String> map, final boolean add) {
@@ -267,7 +268,7 @@ public class MapDataMining extends MapHeap {
                     if ((longaccfields != null) || (floataccfields != null)) updateAcc(map, false);
 
                     // remove from sortCluster
-                    if (sortfields != null) deleteSortCluster(new String(key));
+                    if (sortfields != null) deleteSortCluster(UTF8.String(key));
                 }
             } catch (RowSpaceExceededException e) {
                 map = null;
@@ -391,7 +392,7 @@ public class MapDataMining extends MapHeap {
                     continue;
                 }
                 if (map == null) continue; // circumvention of a modified exception
-                map.put("key", new String(nextKey));
+                map.put("key", UTF8.String(nextKey));
                 return map;
             }
             return null;

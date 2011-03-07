@@ -52,6 +52,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.logging.Log;
@@ -587,7 +588,7 @@ dc_rights
             byte[] buffer = new byte[1000];
             int c = 0;
             InputStream is = this.getText();
-            while ((c = is.read(buffer)) > 0) os.write(new String(buffer, 0, c));
+            while ((c = is.read(buffer)) > 0) os.write(UTF8.String(buffer, 0, c));
             is.close();
             os.write("]]></dc:description>\n");
         }
@@ -604,7 +605,7 @@ dc_rights
             final Writer osw = new OutputStreamWriter(baos, "UTF-8");
             writeXML(osw, new Date());
             osw.close();
-            return new String(baos.toByteArray(), "UTF-8");
+            return UTF8.String(baos.toByteArray());
         } catch (UnsupportedEncodingException e1) {
             return "";
         } catch (IOException e) {

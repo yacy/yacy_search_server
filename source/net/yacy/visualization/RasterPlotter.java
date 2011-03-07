@@ -45,7 +45,6 @@ import javax.imageio.ImageIO;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.MemoryControl;
 
 
 public class RasterPlotter {

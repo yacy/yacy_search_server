@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.StaticScore;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
@@ -170,7 +171,7 @@ public final class SearchEvent {
                 for (final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankingProcess.searchContainerMap().entrySet()) {
                     wordhash = entry.getKey();
                     final ReferenceContainer<WordReference> container = entry.getValue();
-                    assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + new String(container.getTermHash()) + ", wordhash = " + new String(wordhash);
+                    assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + UTF8.String(container.getTermHash()) + ", wordhash = " + UTF8.String(wordhash);
                     if (container.size() > maxcount) {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();

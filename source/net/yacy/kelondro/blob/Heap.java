@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.AbstractWriter;
 import net.yacy.kelondro.logging.Log;
@@ -96,9 +97,9 @@ public final class Heap extends HeapModifier implements BLOB {
         int c = 0;
         while (i.hasNext()) {
             key = i.next();
-            System.out.println("*** DEBUG BLOBHeap " + this.name() + " KEY=" + new String(key));
+            System.out.println("*** DEBUG BLOBHeap " + this.name() + " KEY=" + UTF8.String(key));
             //b = get(key);
-            //System.out.println("BLOB=" + new String(b));
+            //System.out.println("BLOB=" + UTF8.String(b));
             //System.out.println();
             c++;
             if (c >= 20) break;
@@ -408,7 +409,7 @@ public final class Heap extends HeapModifier implements BLOB {
                 // remove the entry from the free list
                 i.remove();
                 
-                 //System.out.println("*** DEBUG BLOB: replaced-fit record at " + entry.seek + ", reclen=" + reclen + ", key=" + new String(key));
+                 //System.out.println("*** DEBUG BLOB: replaced-fit record at " + entry.seek + ", reclen=" + reclen + ", key=" + UTF8.String(key));
                 
                 // finished!
                 return true;
@@ -450,7 +451,7 @@ public final class Heap extends HeapModifier implements BLOB {
             // add a new free entry
             this.free.put(lseek + 4 + reclen, newfreereclen);
             
-            //System.out.println("*** DEBUG BLOB: replaced-split record at " + lseek + ", reclen=" + reclen + ", new reclen=" + newfreereclen + ", key=" + new String(key));
+            //System.out.println("*** DEBUG BLOB: replaced-split record at " + lseek + ", reclen=" + reclen + ", new reclen=" + newfreereclen + ", key=" + UTF8.String(key));
             
             // finished!
             return true;
@@ -528,11 +529,11 @@ public final class Heap extends HeapModifier implements BLOB {
             // iterate over keys
             Iterator<byte[]> i = heap.index.keys(true, null);
             while (i.hasNext()) {
-                System.out.println("key_a: " + new String(i.next()));
+                System.out.println("key_a: " + UTF8.String(i.next()));
             }
             i = heap.keys(true, false);
             while (i.hasNext()) {
-                System.out.println("key_b: " + new String(i.next()));
+                System.out.println("key_b: " + UTF8.String(i.next()));
             }
             heap.delete("aaaaaaaaaaab".getBytes());
             heap.delete("aaaaaaaaaaac".getBytes());

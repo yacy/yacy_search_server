@@ -31,6 +31,7 @@ import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
@@ -197,7 +198,7 @@ public class Load_RSS_p {
                     if (r != null && r.get("comment", "").matches(".*\\Q" + messageurl + "\\E.*")) {
                         // this is a recorded entry
                         Date date_next_exec = r.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
-                        prop.put("showscheduledfeeds_list_" + apic + "_pk", new String(row.getPK()));
+                        prop.put("showscheduledfeeds_list_" + apic + "_pk", UTF8.String(row.getPK()));
                         prop.put("showscheduledfeeds_list_" + apic + "_count", apic);
                         prop.putXML("showscheduledfeeds_list_" + apic + "_rss", messageurl);
                         prop.putXML("showscheduledfeeds_list_" + apic + "_title", row.get("title", ""));
@@ -211,7 +212,7 @@ public class Load_RSS_p {
                         apic++;
                     } else {
                         // this is a new entry
-                        prop.put("shownewfeeds_list_" + newc + "_pk", new String(row.getPK()));
+                        prop.put("shownewfeeds_list_" + newc + "_pk", UTF8.String(row.getPK()));
                         prop.put("shownewfeeds_list_" + newc + "_count", newc);
                         prop.putXML("shownewfeeds_list_" + newc + "_rss", messageurl);
                         prop.putXML("shownewfeeds_list_" + newc + "_title", row.get("title", ""));

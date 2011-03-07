@@ -103,7 +103,7 @@ public class Bitfield implements Cloneable {
     public String toString() {
         final StringBuilder sb = new StringBuilder(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((this.get(i)) ? '1' : '0');
-        return new String(sb);
+        return sb.toString();
     }
     
     public boolean equals(final Object obj) {

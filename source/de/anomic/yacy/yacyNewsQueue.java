@@ -159,7 +159,7 @@ public class yacyNewsQueue {
     yacyNewsDB.Record b2r(final Row.Entry b) throws IOException {
         if (b == null) return null;
         final String id = b.getColString(0, null);
-        //Date touched = yacyCore.parseUniversalDate(new String(b[1]));
+        //Date touched = yacyCore.parseUniversalDate(UTF8.String(b[1]));
         return newsDB.get(id);
     }
 

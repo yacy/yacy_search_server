@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -491,7 +492,7 @@ public class BookmarksDB {
                 url="http://"+url;
             }
             try {
-                this.urlHash = new String((new DigestURI(url)).hash());
+                this.urlHash = UTF8.String((new DigestURI(url)).hash());
             } catch (final MalformedURLException e) {
                 this.urlHash = null;
             }
@@ -512,7 +513,7 @@ public class BookmarksDB {
         }
         
         public Bookmark(final Map<String, String> map) throws MalformedURLException {
-            this(new String((new DigestURI(map.get(BOOKMARK_URL))).hash()), map);
+            this(UTF8.String((new DigestURI(map.get(BOOKMARK_URL))).hash()), map);
         }
         
         Map<String, String> toMap() {
@@ -685,7 +686,7 @@ public class BookmarksDB {
         }
         
         public Bookmark next() {
-            return getBookmark(new String(this.bookmarkIter.next()));
+            return getBookmark(UTF8.String(this.bookmarkIter.next()));
         }
         
         public void remove() {

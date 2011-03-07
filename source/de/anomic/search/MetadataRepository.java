@@ -41,6 +41,7 @@ import java.util.TreeSet;
 import de.anomic.crawler.CrawlStacker;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.DynamicScore;
 import net.yacy.cora.storage.ScoreCluster;
@@ -120,7 +121,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
-        assert urlIndexFile != null : "urlHash = " + new String(urlHash);
+        assert urlIndexFile != null : "urlHash = " + UTF8.String(urlHash);
         if (urlIndexFile == null) return null;
         try {
             final Row.Entry entry = urlIndexFile.get(urlHash);
@@ -306,15 +307,15 @@ public final class MetadataRepository implements Iterable<byte[]> {
                         		&& client.getHttpResponse().getStatusLine().getStatusCode() == 200) {
                             entry.setCol(1, newUrl.toString().getBytes());
                             urlIndexFile.put(entry);
-                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + new String(urlHashBytes) + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
+                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + UTF8.String(urlHashBytes) + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             remove(urlHashBytes);
-                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + new String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + (client.getHttpResponse() == null ? "null" : client.getHttpResponse().getStatusLine()));
+                            if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + UTF8.String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tConnection Status: " + (client.getHttpResponse() == null ? "null" : client.getHttpResponse().getStatusLine()));
                         }
                     }
                 } catch (final Exception e) {
                     remove(urlHashBytes);
-                    if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + new String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
+                    if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + UTF8.String(urlHashBytes) + "' removed\n\tURL: " + oldUrlStr + "\n\tExecption: " + e.getMessage());
                 }
             }
 
@@ -371,12 +372,12 @@ public final class MetadataRepository implements Iterable<byte[]> {
                         final URIMetadataRow.Components metadata = entry.metadata();
                         totalSearchedUrls++;
                         if (metadata == null) {
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "corrupted entry for hash = " + new String(entry.hash()));
+                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "corrupted entry for hash = " + UTF8.String(entry.hash()));
                             remove(entry.hash());
                             continue;
                         }
                         if (metadata.url() == null) {
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + new String(entry.hash()) + "URL == null");
+                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + UTF8.String(entry.hash()) + "URL == null");
                             remove(entry.hash());
                             continue;
                         }
@@ -384,15 +385,15 @@ public final class MetadataRepository implements Iterable<byte[]> {
                             blacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url()) ||
                             (crawlStacker.urlInAcceptedDomain(metadata.url()) != null)) {
                             lastBlacklistedUrl = metadata.url().toNormalform(true, true);
-                            lastBlacklistedHash = new String(entry.hash());
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + new String(entry.hash()) + " " + metadata.url().toNormalform(false, true));
+                            lastBlacklistedHash = UTF8.String(entry.hash());
+                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + UTF8.String(entry.hash()) + " " + metadata.url().toNormalform(false, true));
                             remove(entry.hash());
                             if (blacklistedUrls % 100 == 0) {
                                 Log.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
                             }
                         }
                         lastUrl = metadata.url().toNormalform(true, true);
-                        lastHash = new String(entry.hash());
+                        lastHash = UTF8.String(entry.hash());
                     }
                 }
             } catch (final RuntimeException e) {
@@ -527,7 +528,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                             if (metadata.dc_subject().length() > 0) pw.println("<description>" + CharacterCoding.unicode2xml(metadata.dc_subject(), true) + "</description>");
                             pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
                             pw.println("<yacy:size>" + entry.size() + "</yacy:size>");
-                            pw.println("<guid isPermaLink=\"false\">" + new String(entry.hash()) + "</guid>");
+                            pw.println("<guid isPermaLink=\"false\">" + UTF8.String(entry.hash()) + "</guid>");
                             pw.println("</item>");
                         }
                         count++;
@@ -572,7 +573,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         String urlhash, hosthash;
         hashStat ds;
         if (i != null) while (i.hasNext()) {
-            urlhash = new String(i.next());
+            urlhash = UTF8.String(i.next());
             hosthash = urlhash.substring(6);
             ds = map.get(hosthash);
             if (ds == null) {
@@ -679,7 +680,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
         String hash;
         while (i != null && i.hasNext()) {
-            hash = new String(i.next());
+            hash = UTF8.String(i.next());
             if (hosthash.equals(hash.substring(6))) l.add(hash);
         }
         

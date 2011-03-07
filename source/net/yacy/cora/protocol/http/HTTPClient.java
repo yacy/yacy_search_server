@@ -44,6 +44,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ConnectionInfo;
 
 import org.apache.http.Header;
@@ -591,7 +592,7 @@ public class HTTPClient {
                     url = "http://" + url;
             }
             try {
-                System.out.println(new String(client.GETbytes(url)));
+                System.out.println(UTF8.String(client.GETbytes(url)));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -612,7 +613,7 @@ public class HTTPClient {
         System.out.println(client.getHttpResponse().getStatusLine());
         // Post some
 //		try {
-//			System.out.println(new String(client.POSTbytes(url, newparts)));
+//			System.out.println(UTF8.String(client.POSTbytes(url, newparts)));
 //		} catch (IOException e1) {
 //			e1.printStackTrace();
 //		}

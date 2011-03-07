@@ -185,7 +185,7 @@ public class ReferenceOrder {
     }
     
     public int authority(final byte[] urlHash) {
-        return (doms.get(new String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
+        return (doms.get(UTF8.String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
     }
 
     /**

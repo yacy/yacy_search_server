@@ -51,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -686,7 +687,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             bout.close(); bout = null;
         }
         
-        final int argc = parseArgs(args, new String(buffer, "UTF-8"));
+        final int argc = parseArgs(args, UTF8.String(buffer));
         buffer = null;
         return argc;
     }
@@ -776,9 +777,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             }
         }
         
-        try {
-            return new String(baos.toByteArray(), "UTF-8");
-        } catch (final UnsupportedEncodingException e) { return null; }
+        return UTF8.String(baos.toByteArray());
     }
     
     // 06.01.2007: decode HTML entities by [FB]
@@ -1106,7 +1105,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 final ByteBuffer errorMsg = new ByteBuffer(100);
                 stackTrace.printStackTrace(new PrintStream(errorMsg));
                 tp.put("printStackTrace_exception", stackTrace.toString());
-                tp.put("printStackTrace_stacktrace", new String(errorMsg.getBytes(),"UTF-8"));
+                tp.put("printStackTrace_stacktrace", UTF8.String(errorMsg.getBytes()));
             } else {
                 tp.put("printStackTrace", 0);
             }

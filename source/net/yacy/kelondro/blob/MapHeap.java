@@ -41,6 +41,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -472,7 +473,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             // iterate over keys
             Iterator<byte[]> i = map.keys(true, false);
             while (i.hasNext()) {
-                System.out.println("key: " + new String(i.next()));
+                System.out.println("key: " + UTF8.String(i.next()));
             }
             // clean up
             map.close();

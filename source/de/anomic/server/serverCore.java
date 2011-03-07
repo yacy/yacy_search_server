@@ -58,6 +58,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -89,8 +90,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
      * Line End of HTTP/ICAP headers
      */
     public  static final byte[] CRLF = {CR, LF};
-    public  static final String CRLF_STRING = new String(CRLF);
-    public  static final String LF_STRING = new String(new byte[]{LF});
+    public  static final String CRLF_STRING = UTF8.String(CRLF);
+    public  static final String LF_STRING = UTF8.String(new byte[]{LF});
     public  static final Class<?>[] sessionCallType = {String.class, Session.class}; //  set up some reflection
     public  static final long startupTime = System.currentTimeMillis();
     private static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
@@ -582,7 +583,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
          */
         public String readLineAsString() {
             final byte[] l = readLine();
-            return (l == null) ? null: new String(l);
+            return (l == null) ? null: UTF8.String(l);
         }
     
         /**
@@ -676,7 +677,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                             ":" + this.controlSocket.getPort() + 
                             "#" + this.commandCounter);
                     
-                    this.request = new String(requestBytes);
+                    this.request = UTF8.String(requestBytes);
                     //this.log.logDebug("* session " + handle + " received command '" + request + "'. time = " + (System.currentTimeMillis() - handle));
                     log(false, this.request);
                     try {                        
@@ -912,7 +913,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     	os.write(CRLF);
     	os.flush();
     	if (bufferSize > 80) return "<LONG STREAM>";
-    	return new String(buffer);
+    	return UTF8.String(buffer);
     }
     
     public static final void checkInterruption() throws InterruptedException {

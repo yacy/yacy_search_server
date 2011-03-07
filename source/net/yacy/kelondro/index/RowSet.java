@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -245,7 +246,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         
         if (this.rowdef.objectOrder != null && this.rowdef.objectOrder instanceof Base64Order) {
             // first try to find in sorted area
-            assert this.rowdef.objectOrder.wellformed(a, astart, this.rowdef.primaryKeyLength) : "not wellformed: " + new String(a, astart, this.rowdef.primaryKeyLength);
+            assert this.rowdef.objectOrder.wellformed(a, astart, this.rowdef.primaryKeyLength) : "not wellformed: " + UTF8.String(a, astart, this.rowdef.primaryKeyLength);
         }
         
         // first try to find in sorted area
@@ -544,7 +545,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         Row.Entry entry;
         while (ii.hasNext()) {
             entry = ii.next();
-            s = new String(entry.getPrimaryKeyBytes()).trim();
+            s = UTF8.String(entry.getPrimaryKeyBytes()).trim();
             System.out.print(s + ", ");
             if (s.equals("drei")) ii.remove();
         }
@@ -649,7 +650,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         for (int i = 0; i < testsize; i++) {
             key = randomHash(random);
             if (i % 5 == 0) continue;
-            if (c.get(key) == null) System.out.println("missing entry " + new String(key));
+            if (c.get(key) == null) System.out.println("missing entry " + UTF8.String(key));
         }
         c.sort();
         System.out.println("RESULT SIZE: " + c.size());

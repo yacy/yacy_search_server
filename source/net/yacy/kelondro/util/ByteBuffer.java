@@ -391,27 +391,19 @@ public final class ByteBuffer extends OutputStream {
     
     
     public String toString() {
-	try {
-	    return new String(buffer, offset, length, "UTF-8");
-	} catch (UnsupportedEncodingException e) {
-	    return new String(buffer, offset, length);
-	}
+	return UTF8.String(buffer, offset, length);
     }
     
     public String toString(final String charsetName) {
         try {
             return new String(this.getBytes(),charsetName);
         } catch (final UnsupportedEncodingException e) {
-            return new String(this.getBytes());
+            return UTF8.String(this.getBytes());
         }
     }
 
     public String toString(final int left, final int rightbound) {
-        try {
-	    return new String(buffer, offset + left, rightbound - left, "UTF-8");
-	} catch (UnsupportedEncodingException e) {
-	    return new String(buffer, offset, length);
-	}
+        return UTF8.String(buffer, offset + left, rightbound - left);
     }
 
     public Properties propParser(final String charset) {
@@ -428,9 +420,9 @@ public final class ByteBuffer extends OutputStream {
             while ((pos < length) && (buffer[pos] != equal)) pos++;
             if (pos >= length) break; // this is the case if we found no equal
             try {
-                key = new String(buffer, start, pos - start,charset).trim().toLowerCase();
+                key = new String(buffer, start, pos - start, charset).trim().toLowerCase();
             } catch (final UnsupportedEncodingException e1) {
-                key = new String(buffer, start, pos - start).trim().toLowerCase();
+                key = UTF8.String(buffer, start, pos - start).trim().toLowerCase();
             }
             // we have a key
             pos++;
@@ -450,7 +442,7 @@ public final class ByteBuffer extends OutputStream {
                 try {
                     p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
                 } catch (final UnsupportedEncodingException e) {
-                    p.setProperty(key, new String(buffer, start, pos - start).trim());
+                    p.setProperty(key, UTF8.String(buffer, start, pos - start).trim());
                 } 
                 pos++;
             } else if (buffer[pos] == singlequote) {
@@ -462,7 +454,7 @@ public final class ByteBuffer extends OutputStream {
                 try {
                     p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
                 } catch (final UnsupportedEncodingException e) {
-                    p.setProperty(key, new String(buffer, start, pos - start).trim());
+                    p.setProperty(key, UTF8.String(buffer, start, pos - start).trim());
                 }
                 pos++;
             } else {
@@ -472,7 +464,7 @@ public final class ByteBuffer extends OutputStream {
                 try {
                     p.setProperty(key, new String(buffer, start, pos - start,charset).trim());
                 } catch (final UnsupportedEncodingException e) {
-                    p.setProperty(key, new String(buffer, start, pos - start).trim());
+                    p.setProperty(key, UTF8.String(buffer, start, pos - start).trim());
                 }
             }
             // pos should point now to a whitespace: eat up spaces

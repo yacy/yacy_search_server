@@ -27,6 +27,7 @@ package de.anomic.data.list;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+
 import org.apache.xerces.parsers.SAXParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;

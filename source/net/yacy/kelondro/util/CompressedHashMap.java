@@ -24,6 +24,8 @@ package net.yacy.kelondro.util;
 
 import java.util.Iterator;
 
+import net.yacy.cora.document.UTF8;
+
 public class CompressedHashMap {
 
     int keylen;
@@ -304,12 +306,12 @@ public class CompressedHashMap {
         int c = 0;
         while (i.hasNext()) {
             e = i.next();
-            System.out.println("key=" + new String(e.key) + ", value=" + new String(e.value) + ", retrieved=" + new String(map.get(e.key)));
+            System.out.println("key=" + UTF8.String(e.key) + ", value=" + UTF8.String(e.value) + ", retrieved=" + UTF8.String(map.get(e.key)));
             c++;
         }
         System.out.println("c = " + c + "; re-catch:");
         for (int j = 0; j < 100; j++) {
-            System.out.println("key=" + j + ", retrieved=" + new String(map.get(3333 + j)));
+            System.out.println("key=" + j + ", retrieved=" + UTF8.String(map.get(3333 + j)));
         }
         System.out.println("runtime = " + (System.currentTimeMillis() - start));
     }

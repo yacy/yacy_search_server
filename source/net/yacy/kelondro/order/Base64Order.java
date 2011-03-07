@@ -30,6 +30,7 @@ package net.yacy.kelondro.order;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -260,18 +261,12 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         }
                                 
         if (rfc1113compliant) while (writepos % 4 > 0 && writepos < sublen) out[writepos] = '=';
-        assert encode(in).substring(0, sublen).equals(new String(out));
+        assert encode(in).substring(0, sublen).equals(UTF8.String(out));
         return out;
     }
 
     public final String decodeString(final String in) {
-        try {
-            //return new String(decode(in), "ISO-8859-1");
-            return new String(decode(in), "UTF-8");
-        } catch (final java.io.UnsupportedEncodingException e) {
-            System.out.println("internal error in base64: " + e.getMessage());
-            return null;
-        }
+        return UTF8.String(decode(in));
     }
 
     public final byte[] decode(String in) {

@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -203,7 +204,7 @@ public class YMarkTables {
     
     public static String getISO8601(final byte[] date) {
     	if(date != null) {
-        	final String s = new String(date);
+        	final String s = UTF8.String(date);
         	if(s != null && s.length() > 0)
         		return ISO8601Formatter.FORMATTER.format(new Date(Long.parseLong(s)));	
     	}

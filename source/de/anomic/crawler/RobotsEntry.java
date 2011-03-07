@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.ByteArray;
 
 
@@ -62,7 +63,7 @@ public class RobotsEntry {
         
         if (this.mem.containsKey(DISALLOW_PATH_LIST)) {
             this.denyPathList = new LinkedList<String>();
-            final String csPl = new String(this.mem.get(DISALLOW_PATH_LIST));
+            final String csPl = UTF8.String(this.mem.get(DISALLOW_PATH_LIST));
             if (csPl.length() > 0){
                 final String[] pathArray = csPl.split(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
                 if ((pathArray != null)&&(pathArray.length > 0)) {
@@ -74,7 +75,7 @@ public class RobotsEntry {
         }
         if (this.mem.containsKey(ALLOW_PATH_LIST)) {
             this.allowPathList = new LinkedList<String>();
-            final String csPl = new String(this.mem.get(ALLOW_PATH_LIST));
+            final String csPl = UTF8.String(this.mem.get(ALLOW_PATH_LIST));
             if (csPl.length() > 0){
                 final String[] pathArray = csPl.split(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
                 if ((pathArray != null)&&(pathArray.length > 0)) {
@@ -147,7 +148,7 @@ public class RobotsEntry {
     }    
     
     public String getSitemap() {
-        return this.mem.containsKey(SITEMAP)? new String(this.mem.get(SITEMAP)): null;
+        return this.mem.containsKey(SITEMAP)? UTF8.String(this.mem.get(SITEMAP)): null;
     }
     
     public Date getLoadedDate() {
@@ -172,7 +173,7 @@ public class RobotsEntry {
     
     public String getETag() {
         if (this.mem.containsKey(ETAG)) {
-            return new String(this.mem.get(ETAG));
+            return UTF8.String(this.mem.get(ETAG));
         }
         return null;
     }          

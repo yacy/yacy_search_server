@@ -143,7 +143,7 @@ public class RobotsTxt {
                 /*
                 assert !loadedRobots.contains(robotsURL.toNormalform(false, false)) :
                     "robots-url=" + robotsURL.toString() +
-                    ", robots=" + ((result == null || result[DOWNLOAD_ROBOTS_TXT] == null) ? "NULL" : new String((byte[]) result[DOWNLOAD_ROBOTS_TXT])) +
+                    ", robots=" + ((result == null || result[DOWNLOAD_ROBOTS_TXT] == null) ? "NULL" : UTF8.String((byte[]) result[DOWNLOAD_ROBOTS_TXT])) +
                     ", robotsTxt4Host=" + ((robotsTxt4Host == null) ? "NULL" : robotsTxt4Host.getLoadedDate().toString());
                 loadedRobots.add(robotsURL.toNormalform(false, false));
                 */

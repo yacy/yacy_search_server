@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -137,7 +138,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
     
     private static Map<String, byte[]> b2m(byte[] b) {
         if (b == null) return null;
-        //System.out.println("b = " + new String(b));
+        //System.out.println("b = " + UTF8.String(b));
         BDecoder decoder = new BDecoder(b);
         BObject bobj = decoder.parse();
         if (bobj.getType() != BDecoder.BType.dictionary) return null;
@@ -268,7 +269,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
             prop = row.getValue();
             val = prop.get(columnName);
             if (val != null) {
-                if (columnMatcher.matcher(new String(val)).matches()) pks.add(row.getKey());
+                if (columnMatcher.matcher(UTF8.String(val)).matches()) pks.add(row.getKey());
             }
         }
         return pks;
@@ -291,7 +292,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
             prop = row.getValue();
             val = prop.get(columnName);
             if (val != null) {
-                if (columnMatcher.matcher(new String(val)).matches()) return row;
+                if (columnMatcher.matcher(UTF8.String(val)).matches()) return row;
             }
         }
         return null;
@@ -572,7 +573,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
                 Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
                 while (i.hasNext()) {
                     Map.Entry<byte[], Map<String, byte[]>> entry = i.next();
-                    System.out.println(new String(entry.getKey(), "UTF-8") + ": " + entry.getValue());
+                    System.out.println(UTF8.String(entry.getKey()) + ": " + entry.getValue());
                 }
                 // clean up
                 map.close();
@@ -588,7 +589,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
                 Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
                 while (i.hasNext()) {
                     Map.Entry<byte[], Map<String, byte[]>> entry = i.next();
-                    System.out.println(new String(entry.getKey(), "UTF-8") + ": " + entry.getValue());
+                    System.out.println(UTF8.String(entry.getKey()) + ": " + entry.getValue());
                 }
                 map.close();
             } catch (IOException e) {

@@ -38,6 +38,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
@@ -146,21 +147,12 @@ public class BlogComments {
                 prop.putHTML("LOCATION","BlogComments.html?page=" + pagename);
 
                 MessageBoard.entry msgEntry = null;
-                try {
-                    sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
-                            "blogComment",
-                            StrAuthor,
-                            sb.peers.mySeed().hash,
-                            sb.peers.mySeed().getName(), sb.peers.mySeed().hash,
-                            "new blog comment: " + new String(blogEntry.getSubject(),"UTF-8"), content));
-                } catch (final UnsupportedEncodingException e1) {
-                    sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
-                            "blogComment",
-                            StrAuthor,
-                            sb.peers.mySeed().hash,
-                            sb.peers.mySeed().getName(), sb.peers.mySeed().hash,
-                            "new blog comment: " + new String(blogEntry.getSubject()), content));
-                }
+                sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
+                        "blogComment",
+                        StrAuthor,
+                        sb.peers.mySeed().hash,
+                        sb.peers.mySeed().getName(), sb.peers.mySeed().hash,
+                        "new blog comment: " + UTF8.String(blogEntry.getSubject()), content));
 
                 messageForwardingViaEmail(sb, msgEntry);
 
@@ -192,13 +184,8 @@ public class BlogComments {
             prop.put("mode", "1");//preview
             prop.putHTML("mode_pageid", pagename);
             prop.putHTML("mode_allow_pageid", pagename);
-            try {
-                prop.putHTML("mode_author", new String(author, "UTF-8"));
-                prop.putHTML("mode_allow_author", new String(author, "UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
-                prop.putHTML("mode_author", new String(author));
-                prop.putHTML("mode_allow_author", new String(author));
-            }
+            prop.putHTML("mode_author", UTF8.String(author));
+            prop.putHTML("mode_allow_author", UTF8.String(author));
             prop.putHTML("mode_subject", post.get("subject",""));
             prop.put("mode_date", dateString(new Date()));
             prop.putWiki("mode_page", post.get("content", ""));
@@ -212,18 +199,9 @@ public class BlogComments {
                 //show 1 blog entry
                 prop.put("mode_pageid", page.getKey());
                 prop.putHTML("mode_allow_pageid", pagename);
-                try {
-                    prop.putHTML("mode_subject", new String(page.getSubject(),"UTF-8"));
-                } catch (final UnsupportedEncodingException e) {
-                    prop.putHTML("mode_subject", new String(page.getSubject()));
-                }
-                try {
-                    prop.putHTML("mode_author", new String(page.getAuthor(),"UTF-8"));
-                    prop.putHTML("mode_allow_author", new String(author, "UTF-8"));
-                } catch (final UnsupportedEncodingException e) {
-                    prop.putHTML("mode_author", new String(page.getAuthor()));
-                    prop.putHTML("mode_allow_author", new String(author));
-                }
+                prop.putHTML("mode_subject", UTF8.String(page.getSubject()));
+                prop.putHTML("mode_author", UTF8.String(page.getAuthor()));
+                prop.putHTML("mode_allow_author", UTF8.String(author));
                 prop.put("mode_comments", page.getCommentsSize());
                 prop.put("mode_date", dateString(page.getDate()));
                 prop.putWiki("mode_page", page.getPage());
@@ -231,87 +209,82 @@ public class BlogComments {
                     prop.put("mode_admin", "1");
                     prop.put("mode_admin_pageid", page.getKey());
                 }
-                //show all commments
-                try {
-                    final Iterator<String> i = page.getComments().iterator();
-                    final int commentMode = page.getCommentMode();
-                    String pageid;
-                    BlogBoardComments.CommentEntry entry;
-                    final boolean xml = post.containsKey("xml");
-                    int count = 0; //counts how many entries are shown to the user
-                    int start = post.getInt("start",0); //indicates from where entries should be shown
-                    int num   = post.getInt("num",10);  //indicates how many entries should be shown
+                final Iterator<String> i = page.getComments().iterator();
+                final int commentMode = page.getCommentMode();
+                String pageid;
+                BlogBoardComments.CommentEntry entry;
+                final boolean xml = post.containsKey("xml");
+                int count = 0; //counts how many entries are shown to the user
+                int start = post.getInt("start",0); //indicates from where entries should be shown
+                int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
-                    if (xml) {
-                        num = 0;
-                    }
-                    if (start < 0) {
-                        start = 0;
-                    }
-
-                    final int nextstart = start + num;  //indicates the starting offset for next results
-                    int prevstart = start - num;        //indicates the starting offset for previous results
-                    while (i.hasNext() && count < num) {
-
-                        pageid = i.next();
-                        
-                        if(start > 0) {
-                            start--;
-                            continue;
-                        }
-                            
-                        entry = sb.blogCommentDB.read(pageid);
-
-                        if (commentMode == 2 && !hasRights && !entry.isAllowed()) {
-                            continue;
-                        }
-
-                        prop.put("mode", "0");
-                        prop.put("mode_entries_"+count+"_pageid", entry.getKey());
-                        if (!xml) {
-                            prop.putHTML("mode_entries_"+count+"_subject", new String(entry.getSubject(),"UTF-8"));
-                            prop.putHTML("mode_entries_"+count+"_author", new String(entry.getAuthor(),"UTF-8"));
-                            prop.putWiki("mode_entries_"+count+"_page", entry.getPage());
-                        } else {
-                            prop.putHTML("mode_entries_"+count+"_subject", new String(entry.getSubject(),"UTF-8"));
-                            prop.putHTML("mode_entries_"+count+"_author", new String(entry.getAuthor(),"UTF-8"));
-                            prop.put("mode_entries_"+count+"_page", entry.getPage());
-                            prop.put("mode_entries_"+count+"_timestamp", entry.getTimestamp());
-                        }
-                        prop.put("mode_entries_"+count+"_date", dateString(entry.getDate()));
-                        prop.put("mode_entries_"+count+"_ip", entry.getIp());
-                        if(hasRights) {
-                            prop.put("mode_entries_"+count+"_admin", "1");
-                            prop.put("mode_entries_"+count+"_admin_pageid", page.getKey());
-                            prop.put("mode_entries_"+count+"_admin_commentid", pageid);
-                            if(page.getCommentMode() == 2 && !entry.isAllowed()) {
-                                prop.put("mode_entries_"+count+"_admin_moderate", "1");
-                                prop.put("mode_entries_"+count+"_admin_moderate_pageid", page.getKey());
-                                prop.put("mode_entries_"+count+"_admin_moderate_commentid", pageid);
-
-                            }
-                        }
-                        else prop.put("mode_entries_"+count+"_admin", 0);
-                        ++count;
-                    }
-                    prop.put ("mode_entries", count);
-                    if (i.hasNext()) {
-                        prop.put("mode_moreentries", "1"); //more entries are availible
-                        prop.put("mode_moreentries_start", nextstart);
-                        prop.put("mode_moreentries_num", num);
-                        prop.put("mode_moreentries_pageid", page.getKey());
-                    }
-                    else prop.put("mode_moreentries", "0");
-                    if (start > 1) {
-                        prop.put("mode_preventries", "1");
-                        if (prevstart < 0) prevstart = 0;
-                        prop.put("mode_preventries_start", prevstart);
-                        prop.put("mode_preventries_num", num);
-                        prop.put("mode_preventries_pageid", page.getKey());
-                    } else prop.put("mode_preventries", "0");
-                } catch (final IOException e) {
-
+                if (xml) {
+                    num = 0;
                 }
+                if (start < 0) {
+                    start = 0;
+                }
+
+                final int nextstart = start + num;  //indicates the starting offset for next results
+                int prevstart = start - num;        //indicates the starting offset for previous results
+                while (i.hasNext() && count < num) {
+
+                    pageid = i.next();
+                    
+                    if(start > 0) {
+                        start--;
+                        continue;
+                    }
+                        
+                    entry = sb.blogCommentDB.read(pageid);
+
+                    if (commentMode == 2 && !hasRights && !entry.isAllowed()) {
+                        continue;
+                    }
+
+                    prop.put("mode", "0");
+                    prop.put("mode_entries_"+count+"_pageid", entry.getKey());
+                    if (!xml) {
+                        prop.putHTML("mode_entries_"+count+"_subject", UTF8.String(entry.getSubject()));
+                        prop.putHTML("mode_entries_"+count+"_author", UTF8.String(entry.getAuthor()));
+                        prop.putWiki("mode_entries_"+count+"_page", entry.getPage());
+                    } else {
+                        prop.putHTML("mode_entries_"+count+"_subject", UTF8.String(entry.getSubject()));
+                        prop.putHTML("mode_entries_"+count+"_author", UTF8.String(entry.getAuthor()));
+                        prop.put("mode_entries_"+count+"_page", entry.getPage());
+                        prop.put("mode_entries_"+count+"_timestamp", entry.getTimestamp());
+                    }
+                    prop.put("mode_entries_"+count+"_date", dateString(entry.getDate()));
+                    prop.put("mode_entries_"+count+"_ip", entry.getIp());
+                    if(hasRights) {
+                        prop.put("mode_entries_"+count+"_admin", "1");
+                        prop.put("mode_entries_"+count+"_admin_pageid", page.getKey());
+                        prop.put("mode_entries_"+count+"_admin_commentid", pageid);
+                        if(page.getCommentMode() == 2 && !entry.isAllowed()) {
+                            prop.put("mode_entries_"+count+"_admin_moderate", "1");
+                            prop.put("mode_entries_"+count+"_admin_moderate_pageid", page.getKey());
+                            prop.put("mode_entries_"+count+"_admin_moderate_commentid", pageid);
+
+                        }
+                    }
+                    else prop.put("mode_entries_"+count+"_admin", 0);
+                    ++count;
+                }
+                prop.put ("mode_entries", count);
+                if (i.hasNext()) {
+                    prop.put("mode_moreentries", "1"); //more entries are availible
+                    prop.put("mode_moreentries_start", nextstart);
+                    prop.put("mode_moreentries_num", num);
+                    prop.put("mode_moreentries_pageid", page.getKey());
+                }
+                else prop.put("mode_moreentries", "0");
+                if (start > 1) {
+                    prop.put("mode_preventries", "1");
+                    if (prevstart < 0) prevstart = 0;
+                    prop.put("mode_preventries_start", prevstart);
+                    prop.put("mode_preventries_num", num);
+                    prop.put("mode_preventries_pageid", page.getKey());
+                } else prop.put("mode_preventries", "0");
             }
         }
 
@@ -355,7 +328,7 @@ public class BlogComments {
             .append("\nCategory:     ")
             .append(msgEntry.category())
             .append("\n===================================================================\n")
-            .append(new String(msgEntry.message()));
+            .append(UTF8.String(msgEntry.message()));
 
             final Process process=Runtime.getRuntime().exec(sendMail);
             final PrintWriter email = new PrintWriter(process.getOutputStream());

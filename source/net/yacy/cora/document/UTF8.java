@@ -35,12 +35,16 @@ import org.apache.http.entity.mime.content.StringBody;
  */
 public class UTF8 {
 
-    public static Charset charset;
+    public final static Charset charset;
     static {
         charset = Charset.forName("UTF-8");
     }
     
-    public static StringBody StringBody(String s) {
+    public final static StringBody StringBody(final byte[] b) {
+        return StringBody(UTF8.String(b));
+    }
+    
+    public final static StringBody StringBody(final String s) {
         try {
             return new StringBody(s, charset);
         } catch (UnsupportedEncodingException e) {
@@ -51,15 +55,16 @@ public class UTF8 {
     
     /**
      * using the string method with the default charset given as argument should prevent using the charset cache
-     * in FastCharsetProvider.java:118 which locks all concurrent threads using a new String() method
+     * in FastCharsetProvider.java:118 which locks all concurrent threads using a UTF8.String() method
      * @param bytes
      * @return
      */
-    public static String String(byte[] bytes) {
+    public final static String String(final byte[] bytes) {
         return new String(bytes, charset);
     }
     
-    public static String String(byte[] bytes, int offset, int length) {
-        return new String(bytes, charset);
+    public final static String String(final byte[] bytes, final int offset, final int length) {
+        return new String(bytes, offset, length, charset);
     }
+    
 }

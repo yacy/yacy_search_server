@@ -36,6 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -253,7 +254,7 @@ public final class search {
                     wordhash = entry.getKey();
                     final ReferenceContainer<WordReference> container = entry.getValue();
                     indexabstractContainercount += container.size();
-                    indexabstract.append("indexabstract." + new String(wordhash) + "=").append(ReferenceContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
+                    indexabstract.append("indexabstract." + UTF8.String(wordhash) + "=").append(ReferenceContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
                 }
             }
             
@@ -313,7 +314,7 @@ public final class search {
                 final Iterator<Map.Entry<byte[], Integer>> i = theSearch.abstractsCount();
                 while (i.hasNext()) {
                     entry = i.next();
-                    indexcount.append("indexcount.").append(new String(entry.getKey())).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
+                    indexcount.append("indexcount.").append(UTF8.String(entry.getKey())).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
                 }
                 if (abstractSet != null) {
                     // if a specific index-abstract is demanded, attach it here
@@ -322,7 +323,7 @@ public final class search {
                     while (j.hasNext()) {
                         wordhash = j.next();
                         indexabstractContainercount += theSearch.abstractsCount(wordhash);
-                        indexabstract.append("indexabstract." + new String(wordhash) + "=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
+                        indexabstract.append("indexabstract." + UTF8.String(wordhash) + "=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
@@ -335,11 +336,11 @@ public final class search {
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
                     indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsMaxCountHash());
-                    indexabstract.append("indexabstract." + new String(theSearch.getAbstractsMaxCountHash()) + "=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
-                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(new String(theSearch.getAbstractsNearDHTHash()).equals(new String(theSearch.getAbstractsMaxCountHash()))))) {
+                    indexabstract.append("indexabstract." + UTF8.String(theSearch.getAbstractsMaxCountHash()) + "=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
+                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(UTF8.String(theSearch.getAbstractsNearDHTHash()).equals(UTF8.String(theSearch.getAbstractsMaxCountHash()))))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
                         indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsNearDHTHash());
-                        indexabstract.append("indexabstract." + new String(theSearch.getAbstractsNearDHTHash()) + "=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
+                        indexabstract.append("indexabstract." + UTF8.String(theSearch.getAbstractsNearDHTHash()) + "=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);

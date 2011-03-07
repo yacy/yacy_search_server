@@ -39,6 +39,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
@@ -231,7 +232,7 @@ public class Compressor implements BLOB {
     public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
         // depending on the source of the result, we additionally do entry compression
         // because if a document was read once, we think that it will not be retrieved another time again soon
-        String keys = new String(key);
+        String keys = UTF8.String(key);
         byte[] b = null;
         synchronized (this) {
             b = buffer.remove(keys);
@@ -267,7 +268,7 @@ public class Compressor implements BLOB {
     }
     
     public synchronized boolean containsKey(byte[] key) {
-        return this.buffer.containsKey(new String(key)) || this.backend.containsKey(key);
+        return this.buffer.containsKey(UTF8.String(key)) || this.backend.containsKey(key);
     }
 
     public int keylength() {
@@ -284,7 +285,7 @@ public class Compressor implements BLOB {
     }
     
     public synchronized long length(byte[] key) throws IOException {
-        byte[] b = buffer.get(new String(key));
+        byte[] b = buffer.get(UTF8.String(key));
         if (b != null) return b.length;
         try {
             b = this.backend.get(key);
@@ -297,7 +298,7 @@ public class Compressor implements BLOB {
     }
     
     private int removeFromQueues(byte[] key) {
-        byte[] b = buffer.remove(new String(key));
+        byte[] b = buffer.remove(UTF8.String(key));
         if (b != null) return b.length;
         return 0;
     }
@@ -322,7 +323,7 @@ public class Compressor implements BLOB {
         // they are either written uncompressed to the database
         // or compressed later
         synchronized (this) {
-            this.buffer.put(new String(key), b);
+            this.buffer.put(UTF8.String(key), b);
             this.bufferlength += b.length;
         }
     }

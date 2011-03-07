@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -167,19 +168,19 @@ public final class BufferedRecords {
             t.add("=======1".getBytes(), 0);
             t.add("=======2".getBytes(), 0);
             t.cleanLast(b, 0);
-            System.out.println(new String(b));
+            System.out.println(UTF8.String(b));
             t.cleanLast(b, 0);
             //t.clean(2, b, 0);
-            System.out.println(new String(b));
+            System.out.println(UTF8.String(b));
             t.get(1, b, 0);
-            System.out.println(new String(b));
+            System.out.println(UTF8.String(b));
             t.put(1, "AbCdEfGh".getBytes(), 0);
             t.get(1, b, 0);
-            System.out.println(new String(b));
+            System.out.println(UTF8.String(b));
             t.get(3, b, 0);
-            System.out.println(new String(b));
+            System.out.println(UTF8.String(b));
             t.get(4, b, 0);
-            System.out.println(new String(b));
+            System.out.println(UTF8.String(b));
             System.out.println("size = " + t.size());
             //t.clean(t.size() - 2);
             t.cleanLast();

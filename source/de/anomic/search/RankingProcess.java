@@ -41,6 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.storage.DynamicScore;
 import net.yacy.cora.storage.ScoreCluster;
@@ -221,12 +222,12 @@ public final class RankingProcess extends Thread {
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
                 
                 // check site constraints
-                String domhash = new String(iEntry.metadataHash(), 6, 6);
+                String domhash = UTF8.String(iEntry.metadataHash(), 6, 6);
                 if (query.sitehash == null) {
                     // no site constraint there; maybe collect host navigation information
                     if (nav_hosts && query.urlMask_isCatchall) {
                         this.hostNavigator.inc(domhash);
-                        this.hostResolver.put(domhash, new String(iEntry.metadataHash()));
+                        this.hostResolver.put(domhash, UTF8.String(iEntry.metadataHash()));
                     }
                 } else {
                     if (!domhash.equals(query.sitehash)) {
@@ -315,7 +316,7 @@ public final class RankingProcess extends Thread {
                  }
                 
                 // check doubledom
-                final String domhash = new String(rwi.getElement().metadataHash(), 6, 6);
+                final String domhash = UTF8.String(rwi.getElement().metadataHash(), 6, 6);
                 synchronized (this.doubleDomCache) {
                     m = this.doubleDomCache.get(domhash);
                     if (m == null) {
@@ -359,7 +360,7 @@ public final class RankingProcess extends Thread {
             if (bestEntry == null) return null;
             
             // finally remove the best entry from the doubledom cache
-            m = this.doubleDomCache.get(new String(bestEntry.getElement().metadataHash()).substring(6));
+            m = this.doubleDomCache.get(UTF8.String(bestEntry.getElement().metadataHash()).substring(6));
             bestEntry = m.poll();
         }
         return bestEntry;
@@ -408,8 +409,8 @@ public final class RankingProcess extends Thread {
                 // in case that we do not have e catchall filter for urls
                 // we must also construct the domain navigator here
                 //if (query.sitehash == null) {
-                //    this.hostNavigator.inc(new String(urlhash, 6, 6));
-                //    this.hostResolver.put(new String(urlhash, 6, 6), new String(urlhash));
+                //    this.hostNavigator.inc(UTF8.String(urlhash, 6, 6));
+                //    this.hostResolver.put(UTF8.String(urlhash, 6, 6), UTF8.String(urlhash));
                 //}
             }
             
@@ -452,7 +453,7 @@ public final class RankingProcess extends Thread {
             // author navigation:
             if (pageauthor != null && pageauthor.length() > 0) {
             	// add author to the author navigator
-                String authorhash = new String(Word.word2hash(pageauthor));
+                String authorhash = UTF8.String(Word.word2hash(pageauthor));
 
                 // check if we already are filtering for authors
             	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {

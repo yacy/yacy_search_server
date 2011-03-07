@@ -52,6 +52,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -142,15 +143,11 @@ public class cryptbig {
 
     // Decode a string into a new string using b64, crypt and utf-8
     public String decryptString(final String str) {
-	try {
-	    final byte[] b64dec = Base64Order.standardCoder.decode(str);
-	    if (b64dec == null) return null; // error in input string (inconsistency)
-	    final byte[] dec = decryptArray(b64dec);
-	    if (dec == null) return null;
-	    return new String(dec, "UTF-8");
-	} catch (final UnsupportedEncodingException e) {
-	}
-	return null;
+	final byte[] b64dec = Base64Order.standardCoder.decode(str);
+    if (b64dec == null) return null; // error in input string (inconsistency)
+    final byte[] dec = decryptArray(b64dec);
+    if (dec == null) return null;
+    return UTF8.String(dec);
     }
 
     // Encode a byte array into a new byte array
@@ -258,8 +255,8 @@ public class cryptbig {
 	    // - the length of B is BL; BL is then b64-ed to a string C of fixed length 1
 	    // - after the magic String we write C, B and A
 	    try {
-		final String A = new String(ecipher.doFinal(X.getBytes("UTF8")));
-		final String B = new String(ecipher.doFinal(Base64Order.standardCoder.encodeLongSB(A.length(), 2).toString().getBytes("UTF8"))); // most probable not longer than 4
+		final String A = UTF8.String(ecipher.doFinal(X.getBytes("UTF8")));
+		final String B = UTF8.String(ecipher.doFinal(Base64Order.standardCoder.encodeLongSB(A.length(), 2).toString().getBytes("UTF8"))); // most probable not longer than 4
 		final String C = Base64Order.standardCoder.encodeLongSB(B.length(), 1).toString(); // fixed length 1 (6 bits, that should be enough)
 		fout.write(magicString.getBytes()); // the magic string, used to identify a 'crypt'-file
 		fout.write(C.getBytes());
@@ -292,18 +289,18 @@ public class cryptbig {
 	    final byte[] thisMagic = new byte[magicString.length()];
 	    fin.read(thisMagic);
 
-	    if (!((new String(thisMagic)).equals(magicString))) {
+	    if (!((UTF8.String(thisMagic)).equals(magicString))) {
 		// this is not an crypt file, so dont do anything
 		fin.close();
 		return;
 	    }
 	    final byte[] C = new byte[1];
 	    fin.read(C); // the length of the following String, encoded as b64
-	    final byte[] B = new byte[(int) Base64Order.standardCoder.decodeLong(new String(C))];
+	    final byte[] B = new byte[(int) Base64Order.standardCoder.decodeLong(UTF8.String(C))];
 	    fin.read(B); // this is again the length of the following string, as encrypted b64-ed integer
-	    final byte[] A = new byte[(int) Base64Order.standardCoder.decodeLong(new String(dcipher.doFinal(B), "UTF8"))];
+	    final byte[] A = new byte[(int) Base64Order.standardCoder.decodeLong(UTF8.String(dcipher.doFinal(B)))];
 	    fin.read(A);
-	    final String X = new String(dcipher.doFinal(A), "UTF8");
+	    final String X = UTF8.String(dcipher.doFinal(A));
 
 	    System.out.println("TEST: detecting X-String      : " + X);
 
@@ -397,11 +394,7 @@ public class cryptbig {
 	final byte[] dec = c.decryptArray(b64dec);
 	if (dec == null) return null;
 	if (gzFlag) return gzip.gunzipString(dec);
-	try {
-	    return new String(dec,"UTF8");
-	} catch (final UnsupportedEncodingException e) {
-	    return null;
-	}
+	return UTF8.String(dec);
 
     }
 

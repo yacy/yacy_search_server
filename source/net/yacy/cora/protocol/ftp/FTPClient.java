@@ -65,6 +65,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 
 import org.apache.log4j.Logger;
@@ -2794,7 +2795,7 @@ public class FTPClient {
                     ftpClient.open("192.168.1.90", 21);
                     ftpClient.login("anonymous", "anomic@");
                     byte[] b = ftpClient.get("/Movie/ATest Ordner/Unterordner/test file.txt");
-                    System.out.println(new String(b));
+                    System.out.println(UTF8.String(b));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

@@ -3,6 +3,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.crawler.NoticedURL;
@@ -58,7 +59,7 @@ public class queues_p {
             for (final Request r : w)  {
                 if (r == null) continue;
                 prop.put("list-loader_"+count+"_profile", r.profileHandle());
-                initiator = sb.peers.getConnected((r.initiator() == null) ? "" : new String(r.initiator()));
+                initiator = sb.peers.getConnected((r.initiator() == null) ? "" : UTF8.String(r.initiator()));
                 prop.putHTML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", r.depth());
                 prop.putXML("list-loader_"+count+"_url", r.url().toString());
@@ -100,7 +101,7 @@ public class queues_p {
         yacySeed initiator;
         for (final Request urle : crawlerList) {
             if ((urle != null) && (urle.url() != null)) {
-                initiator = sb.peers.getConnected((urle.initiator() == null) ? "" : new String(urle.initiator()));
+                initiator = sb.peers.getConnected((urle.initiator() == null) ? "" : UTF8.String(urle.initiator()));
                 prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());

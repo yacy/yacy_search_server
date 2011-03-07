@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
@@ -94,12 +95,12 @@ public class table_p {
                 if (row == null) continue;
                 prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
                 prop.put("showtable_list_" + count + "_showpk", showpk ? 1 : 0);
-                prop.put("showtable_list_" + count + "_showpk_pk", new String(trow.getPK()));
+                prop.put("showtable_list_" + count + "_showpk_pk", UTF8.String(trow.getPK()));
                 prop.put("showtable_list_" + count + "_count", count);
                 for (int i = 0; i < columns.size(); i++) {
                     cellName = columns.get(i);
                     if (trow.containsKey(cellName)) {
-                        cellValue = new String(trow.get(cellName));
+                        cellValue = UTF8.String(trow.get(cellName));
                         if (selectKey != null && cellName.equals(selectKey) && !cellValue.matches(selectValue)) continue rowloop;
                     } else {
                         cellValue = "";

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.BDecoder.BObject;
 
 public class BEncoder {
@@ -88,7 +89,7 @@ public class BEncoder {
         m.put("s", "222".getBytes());
         Map<String, BObject> t = transcode(m);
         byte[] b = encode(t);
-        System.out.println(new String(b));
+        System.out.println(UTF8.String(b));
         BDecoder d = new BDecoder(b);
         BObject o = d.parse();
         System.out.println(o.toString());

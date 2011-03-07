@@ -32,6 +32,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.cora.document.UTF8;
+
 public class BDecoder {
 
     final static byte[] _e = "e".getBytes();
@@ -102,7 +104,7 @@ public class BDecoder {
             return this.b;
         }
         public String toString() {
-            return new String(this.b);
+            return UTF8.String(this.b);
         }
         public void toStream(OutputStream os) throws IOException {
             os.write(Integer.toString(this.b.length).getBytes());
@@ -212,7 +214,7 @@ public class BDecoder {
             if (i + 1 < length) {
                 value = list.get(i + 1);
             }
-            m.put(new String(key), value);
+            m.put(UTF8.String(key), value);
         }
         return m;
     }
@@ -237,7 +239,7 @@ public class BDecoder {
             int end = pos;
             end++;
             while (b[end] != ':') ++end;
-            final int len = Integer.parseInt(new String(b, pos, end - pos));
+            final int len = Integer.parseInt(UTF8.String(b, pos, end - pos));
             final byte[] s = new byte[len];
             System.arraycopy(b, end + 1, s, 0, len);
             pos = end + len + 1;
@@ -252,7 +254,7 @@ public class BDecoder {
             pos++;
             int end = pos;
             while (b[end] != 'e') ++end;
-            BIntegerObject io = new BIntegerObject(Long.parseLong(new String(b, pos, end - pos)));
+            BIntegerObject io = new BIntegerObject(Long.parseLong(UTF8.String(b, pos, end - pos)));
             pos = end + 1;
             return io;
         } else {

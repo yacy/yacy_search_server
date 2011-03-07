@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.CachedFileWriter;
@@ -292,7 +293,7 @@ public class HeapReader {
                     file.seek(seek + 4);
                     Arrays.fill(key, (byte) 0);
                     file.write(key); // mark the place as empty record
-                    Log.logWarning("HeapReader", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
+                    Log.logWarning("HeapReader", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + UTF8.String(key) + " at seek pos " + seek);
                 }
             }            
             // new seek position
@@ -781,7 +782,7 @@ public class HeapReader {
             Map.Entry<byte[], byte[]> entry;
             while (hr.hasNext()) {
                 entry = hr.next();
-                System.out.println(new String(entry.getKey()) + ":" + new String(entry.getValue()));
+                System.out.println(UTF8.String(entry.getKey()) + ":" + UTF8.String(entry.getValue()));
             }
         } catch (IOException e) {
             Log.logException(e);

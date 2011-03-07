@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
@@ -367,8 +368,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie1 = se.next();
             ie2 = large.getReference(ie1.metadataHash());
             if ((ie1 != null) && (ie2 != null)) {
-                assert (ie1.metadataHash().length == keylength) : "ie0.urlHash() = " + new String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie2.metadataHash());
+                assert (ie1.metadataHash().length == keylength) : "ie0.urlHash() = " + UTF8.String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie2.metadataHash());
                 // this is a hit. Calculate word distance:
                 
                 ie1 = factory.produceFast(ie2);
@@ -401,8 +402,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + new String(ie2.metadataHash());
+                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + UTF8.String(ie2.metadataHash());
                 c = ordering.compare(ie1.metadataHash(), ie2.metadataHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
@@ -457,8 +458,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 ie0 = se.next();
                 ie1 = excl.getReference(ie0.metadataHash());
                 if ((ie0 != null) && (ie1 != null)) {
-                    assert (ie0.metadataHash().length == keylength) : "ie0.urlHash() = " + new String(ie0.metadataHash());
-                    assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
+                    assert (ie0.metadataHash().length == keylength) : "ie0.urlHash() = " + UTF8.String(ie0.metadataHash());
+                    assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
                     if (iterate_pivot) se.remove(); pivot.delete(ie0.metadataHash());
                 }
             }
@@ -483,8 +484,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + new String(ie2.metadataHash());
+                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + UTF8.String(ie2.metadataHash());
                 c = pivot.rowdef.getOrdering().compare(ie1.metadataHash(), ie2.metadataHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
@@ -505,11 +506,11 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public synchronized String toString() {
-        return "C[" + new String(termHash) + "] has " + this.size() + " entries";
+        return "C[" + UTF8.String(termHash) + "] has " + this.size() + " entries";
     }
     
     public int hashCode() {
-        return (int) Base64Order.enhancedCoder.decodeLong(new String(this.termHash).substring(0, 4));
+        return (int) Base64Order.enhancedCoder.decodeLong(UTF8.String(this.termHash).substring(0, 4));
     }
     
 
@@ -525,8 +526,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             while (i.hasNext()) {
                 iEntry = i.next();
                 if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.metadataHash()) != null)) continue; // do not include urls that are in excludeContainer
-                dom = new String(iEntry.metadataHash(), 6, 6);
-                mod = new String(iEntry.metadataHash(), 0, 6);
+                dom = UTF8.String(iEntry.metadataHash(), 6, 6);
+                mod = UTF8.String(iEntry.metadataHash(), 0, 6);
                 if ((paths = doms.get(dom)) == null) {
                     doms.put(dom, new StringBuilder(30).append(mod));
                 } else {

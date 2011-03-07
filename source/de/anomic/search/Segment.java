@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -217,7 +218,7 @@ public class Segment {
         Map.Entry<String, Word> wentry;
         String word;
         int len = (document == null) ? urlLength : document.dc_title().length();
-        WordReferenceRow ientry = new WordReferenceRow(new String(url.hash()),
+        WordReferenceRow ientry = new WordReferenceRow(UTF8.String(url.hash()),
                                 urlLength, urlComps, len,
                                 condenser.RESULT_NUMB_WORDS,
                                 condenser.RESULT_NUMB_SENTENCES,
@@ -332,7 +333,7 @@ public class Segment {
                 modDate,                                   // modification date
                 loadDate,                                  // loaded date
                 new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
-                (referrerURL == null) ? null : new String(referrerURL.hash()),            // referer hash
+                (referrerURL == null) ? null : UTF8.String(referrerURL.hash()),            // referer hash
                 new byte[0],                               // md5
                 (int) sourcesize,                          // size
                 condenser.RESULT_NUMB_WORDS,               // word count
@@ -372,7 +373,7 @@ public class Segment {
             // TODO: UTF-8 docDescription seems not to be displayed correctly because
             // of string concatenation
             log.logInfo("*Indexed " + words + " words in URL " + url +
-                    " [" + new String(url.hash()) + "]" +
+                    " [" + UTF8.String(url.hash()) + "]" +
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                     "Size: " + document.getTextLength() + " bytes | " +
@@ -490,7 +491,7 @@ public class Segment {
                     }
                     if (!urlHashs.isEmpty()) try {
                         final int removed = termIndex.remove(container.getTermHash(), urlHashs);
-                        Log.logFine("INDEXCLEANER", new String(container.getTermHash()) + ": " + removed + " of " + container.size() + " URL-entries deleted");
+                        Log.logFine("INDEXCLEANER", UTF8.String(container.getTermHash()) + ": " + removed + " of " + container.size() + " URL-entries deleted");
                         lastWordHash = container.getTermHash();
                         lastDeletionCounter = urlHashs.size();
                         urlHashs.clear();

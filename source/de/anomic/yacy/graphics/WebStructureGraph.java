@@ -39,6 +39,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -102,13 +103,13 @@ public class WebStructureGraph {
         final StringBuilder cpg = new StringBuilder(12 * (hl.size() + 1) + 1);
         assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
         final StringBuilder cpl = new StringBuilder(12 * (hl.size() + 1) + 1);
-        final String lhp = new String(url.hash(), 6, 6); // local hash part
+        final String lhp = UTF8.String(url.hash(), 6, 6); // local hash part
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
             nexturlhashb = new DigestURI(it.next()).hash();
             if (nexturlhashb != null) {
-                nexturlhash = new String(nexturlhashb);
+                nexturlhash = UTF8.String(nexturlhashb);
                 assert nexturlhash.length() == 12 : "nexturlhash.length() = " + nexturlhash.length() + ", nexturlhash = " + nexturlhash;
                 if (nexturlhash.substring(6).equals(lhp)) {
                     // this is a local link
@@ -307,7 +308,7 @@ public class WebStructureGraph {
     }
     
     private void learn(final DigestURI url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
-        final String domhash = new String(url.hash(), 6, 6);
+        final String domhash = UTF8.String(url.hash(), 6, 6);
 
         // parse the new reference string and join it with the stored references
         structureEntry structure = outgoingReferences(domhash);

@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -231,7 +232,7 @@ public class MessageBoard {
         
         public void findNext() {
             while (allIter.hasNext()) {
-                nextKey = new String(allIter.next());
+                nextKey = UTF8.String(allIter.next());
                 if (this.category == null || nextKey.startsWith(this.category)) return;
             }
             nextKey = null;

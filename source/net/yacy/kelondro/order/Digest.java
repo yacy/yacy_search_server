@@ -76,7 +76,7 @@ public class Digest {
             if ((0Xff & in[i]) < 8) result.append('0');
             result.append(Integer.toOctalString(0Xff & in[i]));
         }
-        return new String(result);
+        return result.toString();
     }
     
     public static String encodeHex(final byte[] in) {
@@ -86,7 +86,7 @@ public class Digest {
             if ((0Xff & in[i]) < 16) result.append('0');
             result.append(Integer.toHexString(0Xff & in[i]));
         }
-        return new String(result);
+        return result.toString();
     }
 
     public static byte[] decodeHex(final String hex) {

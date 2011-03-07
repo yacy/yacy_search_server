@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -123,7 +124,7 @@ public class urls {
                 prop.putXML("item_" + c + "_description", metadata.dc_title());
                 prop.put("item_" + c + "_author", metadata.dc_creator());
                 prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.moddate()));
-                prop.put("item_" + c + "_guid", new String(entry.hash()));
+                prop.put("item_" + c + "_guid", UTF8.String(entry.hash()));
                 c++;
             }
             prop.put("item", c);

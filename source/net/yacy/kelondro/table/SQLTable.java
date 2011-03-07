@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
@@ -175,7 +176,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             final String sqlQuery = "SELECT value from test where hash = ?";
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
-            sqlStatement.setString(1, new String(key));
+            sqlStatement.setString(1, UTF8.String(key));
             
             byte[] value = null;
             final ResultSet result = sqlStatement.executeQuery();
@@ -260,7 +261,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             
             
 			sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);                 
-            sqlStatement.setString(1, new String(key));
+            sqlStatement.setString(1, UTF8.String(key));
             sqlStatement.execute();
             
             return entry;

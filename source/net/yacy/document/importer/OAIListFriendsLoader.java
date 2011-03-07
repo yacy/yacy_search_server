@@ -37,6 +37,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -122,13 +123,13 @@ public class OAIListFriendsLoader {
                 this.saxParser.parse(this.stream, this);
             } catch (SAXException e) {
                 Log.logException(e);
-                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + new String(b));
+                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
             } catch (IOException e) {
                 Log.logException(e);
-                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + new String(b));
+                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
             } catch (ParserConfigurationException e) {
                 Log.logException(e);
-                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + new String(b));
+                Log.logWarning("OAIListFriendsLoader.Parser", "OAIListFriends was not parsed:\n" + UTF8.String(b));
                 throw new IOException(e.getMessage());
             } finally {
                 try {

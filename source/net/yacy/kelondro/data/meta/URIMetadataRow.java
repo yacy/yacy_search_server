@@ -35,6 +35,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
@@ -302,7 +303,7 @@ public class URIMetadataRow implements URIMetadata {
         GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
         
         try {
-            s.append("hash=").append(new String(hash()));
+            s.append("hash=").append(UTF8.String(hash()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",url=").append(crypt.simpleEncode(metadata.url().toNormalform(false, true)));
             assert (s.toString().indexOf(0) < 0);
@@ -320,7 +321,7 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",fresh=").append(formatter.format(freshdate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",referrer=").append(referrerHash() == null ? "" : new String(referrerHash()));
+            s.append(",referrer=").append(referrerHash() == null ? "" : UTF8.String(referrerHash()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",md5=").append(md5());
             assert (s.toString().indexOf(0) < 0);
@@ -385,23 +386,13 @@ public class URIMetadataRow implements URIMetadata {
         // parse elements from comp field;
         byte[] c = this.entry.getColBytes(col_comp, true);
         List<byte[]> cl = ByteBuffer.split(c, (byte) 10);
-        try {
-            this.comp = new Components(
-                        (cl.size() > 0) ? new String(cl.get(0), "UTF-8") : "",
-                        hash(),
-                        (cl.size() > 1) ? new String(cl.get(1), "UTF-8") : "",
-                        (cl.size() > 2) ? new String(cl.get(2), "UTF-8") : "",
-                        (cl.size() > 3) ? new String(cl.get(3), "UTF-8") : "",
-                        (cl.size() > 4) ? new String(cl.get(4), "UTF-8") : "");
-        } catch (UnsupportedEncodingException e) {
-            this.comp = new Components(
-                    (cl.size() > 0) ? new String(cl.get(0)) : "",
+        this.comp = new Components(
+                    (cl.size() > 0) ? UTF8.String(cl.get(0)) : "",
                     hash(),
-                    (cl.size() > 1) ? new String(cl.get(1)) : "",
-                    (cl.size() > 2) ? new String(cl.get(2)) : "",
-                    (cl.size() > 3) ? new String(cl.get(3)) : "",
-                    (cl.size() > 4) ? new String(cl.get(4)) : "");
-        }
+                    (cl.size() > 1) ? UTF8.String(cl.get(1)) : "",
+                    (cl.size() > 2) ? UTF8.String(cl.get(2)) : "",
+                    (cl.size() > 3) ? UTF8.String(cl.get(3)) : "",
+                    (cl.size() > 4) ? UTF8.String(cl.get(4)) : "");
         return this.comp;
     }
     

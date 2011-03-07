@@ -48,6 +48,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -1101,7 +1102,7 @@ public class ArrayStack implements BLOB {
             // iterate over keys
             Iterator<byte[]> i = heap.keys(true, false);
             while (i.hasNext()) {
-                System.out.println("key_b: " + new String(i.next()));
+                System.out.println("key_b: " + UTF8.String(i.next()));
             }
             heap.delete("aaaaaaaaaaab".getBytes());
             heap.delete("aaaaaaaaaaac".getBytes());

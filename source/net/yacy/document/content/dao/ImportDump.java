@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -57,7 +58,7 @@ public class ImportDump {
         	ByteArrayOutputStream baos = new ByteArrayOutputStream();
         	FileUtils.copy(dump, baos);
         	
-        	String s = new String(baos.toByteArray(), "UTF-8");
+        	String s = UTF8.String(baos.toByteArray());
         	int batchSize = 0;
         	int p, q;
         	String t;

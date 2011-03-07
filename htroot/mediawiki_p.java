@@ -27,6 +27,7 @@
 import java.io.File;
 import java.io.IOException;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.MediawikiImporter;
 
@@ -59,7 +60,7 @@ public class mediawiki_p {
         if (w == null) {
             return post;
         }
-        String page = new String(MediawikiImporter.read(dumpFile, w.start, (int) (w.end - w.start)), "UTF-8");
+        String page = UTF8.String(MediawikiImporter.read(dumpFile, w.start, (int) (w.end - w.start)));
         int p = page.indexOf("<text");
         if (p < 0) return prop;
         p = page.indexOf('>', p);

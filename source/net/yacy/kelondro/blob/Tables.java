@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteArray;
@@ -266,7 +267,7 @@ public class Tables {
         Row row;
         while ((maxcount < 0 || maxcount-- > 0) && rowIterator.hasNext()) {
             row = rowIterator.next();
-            sortTree.put(new String(row.pk), row);
+            sortTree.put(UTF8.String(row.pk), row);
         }
         return sortTree.values();
     }
@@ -279,9 +280,9 @@ public class Tables {
             row = rowIterator.next();
             r = row.get(sortColumn);
             if (r == null) {
-                sortTree.put("0000" + new String(row.pk), row);
+                sortTree.put("0000" + UTF8.String(row.pk), row);
             } else {
-                sortTree.put(new String(r) + new String(row.pk), row);
+                sortTree.put(UTF8.String(r) + UTF8.String(row.pk), row);
             }
         }
         return sortTree.values();
@@ -369,11 +370,11 @@ public class Tables {
                     if (this.whereColumn == null) {
                         // shall match any column
                         for (byte[] b: r.values()) {
-                            if (this.wherePattern.matcher(new String(b)).matches()) return r;
+                            if (this.wherePattern.matcher(UTF8.String(b)).matches()) return r;
                         }
                     } else {
                         // must match the given column
-                        if (this.wherePattern.matcher(new String(r.get(this.whereColumn))).matches()) return r;
+                        if (this.wherePattern.matcher(UTF8.String(r.get(this.whereColumn))).matches()) return r;
                     }
                 } else {
                     return r;
@@ -423,7 +424,7 @@ public class Tables {
         public String get(String colname, String dflt) {
             byte[] r = this.get(colname);
             if (r == null) return dflt;
-            return new String(r);
+            return UTF8.String(r);
         }
         
         public int get(String colname, int dflt) {
@@ -450,7 +451,7 @@ public class Tables {
             byte[] r = this.get(colname);
             if (r == null) return dflt;
             try {
-                return my_SHORT_MILSEC_FORMATTER.parse(new String(r));
+                return my_SHORT_MILSEC_FORMATTER.parse(UTF8.String(r));
             } catch (ParseException e) {
                 return dflt;
             }
@@ -460,7 +461,7 @@ public class Tables {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
             for (Map.Entry<String, byte[]> entry: this.entrySet()) {
-                sb.append(entry.getKey()).append('=').append(new String(entry.getValue())).append(", ");
+                sb.append(entry.getKey()).append('=').append(UTF8.String(entry.getValue())).append(", ");
             }
             if (sb.length() > 1) sb.setLength(sb.length() - 2);
             sb.append('}');
@@ -503,7 +504,7 @@ public class Tables {
         
         public String toString() {
             StringBuilder sb = new StringBuilder(keymaxlen + 20 * this.size());
-            sb.append(new String(pk)).append(":").append(super.toString());
+            sb.append(UTF8.String(pk)).append(":").append(super.toString());
             return sb.toString();
         }
     }

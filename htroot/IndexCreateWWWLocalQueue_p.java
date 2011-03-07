@@ -36,6 +36,7 @@ import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
 
@@ -122,7 +123,7 @@ public class IndexCreateWWWLocalQueue_p {
                                     case ANCHOR:    value = entry.name(); break location;
                                     case DEPTH:     value = Integer.toString(entry.depth()); break location;
                                     case INITIATOR:
-                                        value = (entry.initiator() == null || entry.initiator().length == 0) ? "proxy" : new String(entry.initiator());
+                                        value = (entry.initiator() == null || entry.initiator().length == 0) ? "proxy" : UTF8.String(entry.initiator());
                                         break location;
                                     case MODIFIED:  value = daydate(entry.appdate()); break location;
                                     default: value = null; break location;
@@ -166,7 +167,7 @@ public class IndexCreateWWWLocalQueue_p {
             for (i = 0; (i < crawlerList.size()) && (showNum < showLimit); i++) {
                 urle = crawlerList.get(i);
                 if ((urle != null)&&(urle.url()!=null)) {
-                    initiator = sb.peers.getConnected(urle.initiator() == null ? "" : new String(urle.initiator()));
+                    initiator = sb.peers.getConnected(urle.initiator() == null ? "" : UTF8.String(urle.initiator()));
                     profileHandle = urle.profileHandle();
                     profileEntry = profileHandle == null ? null : sb.crawler.getActive(profileHandle.getBytes());
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");

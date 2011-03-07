@@ -79,6 +79,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -1063,7 +1064,7 @@ public final class Switchboard extends serverSwitch {
     
     public void urlRemove(final Segment segment, final byte[] hash) {
         segment.urlMetadata().remove(hash);
-        ResultURLs.remove(new String(hash));
+        ResultURLs.remove(UTF8.String(hash));
         crawlQueues.urlRemove(hash);
     }
     
@@ -1516,7 +1517,7 @@ public final class Switchboard extends serverSwitch {
                     Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                     if (date_next_exec == null) continue;
                     if (date_next_exec.after(now)) continue;
-                    pks.add(new String(row.getPK()));              
+                    pks.add(UTF8.String(row.getPK()));              
                 }
             } catch (IOException e) {
                 Log.logException(e);
@@ -1745,7 +1746,7 @@ public final class Switchboard extends serverSwitch {
                 ", maxDepth=" + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth())) +
                 ", must-match=" + ((response.profile() == null) ? "null" : response.profile().mustMatchPattern().toString()) +
                 ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().mustNotMatchPattern().toString()) +
-                ", initiatorHash=" + ((response.initiator() == null) ? "null" : new String(response.initiator())) +
+                ", initiatorHash=" + ((response.initiator() == null) ? "null" : UTF8.String(response.initiator())) +
                 //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                 ", url=" + response.url()); // DEBUG
         
@@ -1960,11 +1961,11 @@ public final class Switchboard extends serverSwitch {
         
         // if this was performed for a remote crawl request, notify requester
         if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
-            final yacySeed initiatorPeer = peers.get(new String(queueEntry.initiator()));
+            final yacySeed initiatorPeer = peers.get(UTF8.String(queueEntry.initiator()));
             if (initiatorPeer != null) {
                 if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(queueEntry.initiator()));
                 // start a thread for receipt sending to avoid a blocking here
-                new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + new String(queueEntry.initiator())).start();
+                new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + UTF8.String(queueEntry.initiator())).start();
             }
         }
     }
@@ -2217,8 +2218,8 @@ public final class Switchboard extends serverSwitch {
                 log.logInfo("dhtTransferJob: approaching full DHT dispersion.");
                 return false;
             }
-            log.logInfo("dhtTransferJob: selected " + new String(startHash) + " as start hash");
-            log.logInfo("dhtTransferJob: selected " + new String(limitHash) + " as limit hash");
+            log.logInfo("dhtTransferJob: selected " + UTF8.String(startHash) + " as start hash");
+            log.logInfo("dhtTransferJob: selected " + UTF8.String(limitHash) + " as limit hash");
             boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
                     startHash,
                     limitHash,
@@ -2368,7 +2369,7 @@ public final class Switchboard extends serverSwitch {
                 try {
                     Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
                     byte[] resource = response == null ? null : response.getContent();
-                    //System.out.println("BLEKKO: " + new String(resource));
+                    //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
                 } catch (IOException e) {
                     Log.logException(e);

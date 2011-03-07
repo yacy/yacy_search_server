@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -152,7 +153,7 @@ public class ViewFile {
 
             // define an url by post parameter
             url = new DigestURI(MultiProtocolURI.unescape(urlString));
-            urlHash = new String(url.hash());
+            urlHash = UTF8.String(url.hash());
             pre = post.get("pre", "false").equals("true");
         } catch (final MalformedURLException e) {}
         
@@ -193,7 +194,7 @@ public class ViewFile {
             // TODO: how to handle very large files here ?
             String content;
             try {
-                content = new String(response.getContent(), "UTF-8");
+                content = UTF8.String(response.getContent());
             } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
@@ -238,7 +239,7 @@ public class ViewFile {
             }
             
             if (viewMode.equals("parsed")) {
-                final String content = new String(document.getTextBytes());
+                final String content = UTF8.String(document.getTextBytes());
                 // content = wikiCode.replaceHTML(content); // added by Marc Nause
                 prop.put("viewMode", VIEW_MODE_AS_PARSED_TEXT);
                 prop.put("viewMode_title", document.dc_title());

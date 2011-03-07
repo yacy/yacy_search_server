@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 
 
@@ -104,7 +105,7 @@ public class gzip {
 	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
-	    return new String(fout.toByteArray(), "UTF-8");
+	    return UTF8.String(fout.toByteArray());
     }
 
     private static void copy(final OutputStream out, final InputStream in, final int bufferSize) throws IOException {

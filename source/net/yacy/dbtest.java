@@ -11,6 +11,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
@@ -68,10 +69,10 @@ public class dbtest {
         }
 
         public boolean isValid() {
-            final String s = new String(this.value).trim();
+            final String s = UTF8.String(this.value).trim();
             if (s.length() == 0) return false;
             final long source = Long.parseLong(s);
-            return new String(this.key).equals(new String(randomHash(source, source)));
+            return UTF8.String(this.key).equals(UTF8.String(randomHash(source, source)));
         }
 
         public byte[] getKey() {
@@ -83,7 +84,7 @@ public class dbtest {
         }
 
         public String toString() {
-            return new String(this.key) + "#" + new String(this.value);
+            return UTF8.String(this.key) + "#" + UTF8.String(this.value);
         }
 
     }
@@ -232,7 +233,7 @@ public class dbtest {
             test_entry = i.next();
             reference_entry = reference.get(test_entry.getPrimaryKeyBytes());
             if (!test_entry.equals(reference_entry)) {
-                System.out.println("* FAILED: test entry with key '" + new String(test_entry.getPrimaryKeyBytes()) + "' has no equivalent entry in reference");
+                System.out.println("* FAILED: test entry with key '" + UTF8.String(test_entry.getPrimaryKeyBytes()) + "' has no equivalent entry in reference");
                 eq = false;
             }
         }
@@ -244,7 +245,7 @@ public class dbtest {
             reference_entry = i.next();
             test_entry = test.get(reference_entry.getPrimaryKeyBytes());
             if (!test_entry.equals(reference_entry)) {
-                System.out.println("* FAILED: reference entry with key '" + new String(test_entry.getPrimaryKeyBytes()) + "' has no equivalent entry in test");
+                System.out.println("* FAILED: reference entry with key '" + UTF8.String(test_entry.getPrimaryKeyBytes()) + "' has no equivalent entry in test");
                 eq = false;
             }
         }
@@ -330,15 +331,15 @@ public class dbtest {
                     key = randomHash(random);
                     entry = table_test.get(key);
                     if (entry == null)
-                        System.out.println("missing value for entry " + new String(key) + " in test table");
+                        System.out.println("missing value for entry " + UTF8.String(key) + " in test table");
                     else
-                        if (!(new String(entry.getColBytes(1, false)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1, false)) + " in test table");
+                        if (!(UTF8.String(entry.getColBytes(1, false)).equals(UTF8.String(key)))) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in test table");
                     if (table_reference != null) {
                         entry = table_reference.get(key);
                         if (entry == null)
-                            System.out.println("missing value for entry " + new String(key) + " in reference table");
+                            System.out.println("missing value for entry " + UTF8.String(key) + " in reference table");
                         else
-                            if (!(new String(entry.getColBytes(1, false)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1, false)) + " in reference table");
+                            if (!(UTF8.String(entry.getColBytes(1, false)).equals(UTF8.String(key)))) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in reference table");
                     }
                     
                     if (i % 1000 == 0) {

@@ -86,6 +86,7 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -1000,7 +1001,7 @@ public final class HTTPDFileHandler {
                     try {
                         if (targetMd5File.exists()) {
                             //String description = null;
-                            targetMD5 = new String(FileUtils.read(targetMd5File));
+                            targetMD5 = UTF8.String(FileUtils.read(targetMd5File));
                             int pos = targetMD5.indexOf('\n');
                             if (pos >= 0) {
                                 //description = targetMD5.substring(pos + 1);
@@ -1114,7 +1115,7 @@ public final class HTTPDFileHandler {
                 if (!conProp.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     // sending back an error message to the client 
                     // if we have not already send an http header
-                    HTTPDemon.sendRespondError(conProp,out, 4, httpStatusCode, httpStatusText, new String(errorMessage),errorExc);
+                    HTTPDemon.sendRespondError(conProp,out, 4, httpStatusCode, httpStatusText, errorMessage.toString(), errorExc);
                 } else {
                     // otherwise we close the connection
                     forceConnectionClose(conProp);
@@ -1122,7 +1123,7 @@ public final class HTTPDFileHandler {
                 
                 // if it is an unexpected error we log it 
                 if (httpStatusCode == 500) {
-                    theLogger.logWarning(new String(errorMessage),e);
+                    theLogger.logWarning(errorMessage.toString(), e);
                 }
                 
             } catch (final Exception ee) {

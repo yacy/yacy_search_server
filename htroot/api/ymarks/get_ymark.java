@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -74,9 +75,9 @@ public class get_ymark {
             try {
 				bmk_row = sb.tables.select(bmk_table, urlHash);
 	            if (bmk_row != null) {
-            		prop.putXML("bookmarks_"+count+"_id", new String(urlHash));
+            		prop.putXML("bookmarks_"+count+"_id", UTF8.String(urlHash));
 	            	for (YMarkTables.BOOKMARK bmk : YMarkTables.BOOKMARK.values()) {
-	            		prop.putXML("bookmarks_"+count+"_"+bmk.key(), new String(bmk_row.get(bmk.key(),bmk.deflt())));
+	            		prop.putXML("bookmarks_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()));
 	            	}
 		            count++;
 	            }

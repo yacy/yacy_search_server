@@ -183,7 +183,7 @@ public class ResultFetcher {
             for (final MediaSnippet ms: imagemedia) {
                 images.put(new ReverseElement<MediaSnippet>(ms, ms.ranking)); // remove smallest in case of overflow
                 c++;
-                //System.out.println("*** image " + new String(ms.href.hash()) + " images.size = " + images.size() + "/" + images.size());
+                //System.out.println("*** image " + UTF8.String(ms.href.hash()) + " images.size = " + images.size() + "/" + images.size());
             }
         }
         return c;

@@ -39,6 +39,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
@@ -1006,9 +1007,9 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if (chunkcount != this.sortBound) return false;
         /*
         for (int i = 0; i < chunkcount - 1; i++) {
-        	//System.out.println("*" + new String(get(i).getPrimaryKeyBytes()));
+        	//System.out.println("*" + UTF8.String(get(i).getPrimaryKeyBytes()));
         	if (compare(i, i + 1) > 0) {
-        		System.out.println("?" + new String(get(i + 1, false).getPrimaryKeyBytes()));
+        		System.out.println("?" + UTF8.String(get(i + 1, false).getPrimaryKeyBytes()));
         		return false;
         	}
         }
@@ -1021,7 +1022,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         final Iterator<Row.Entry> i = iterator();
         if (i.hasNext()) s.append(i.next().toString());
         while (i.hasNext()) s.append(", " + (i.next()).toString());
-        return new String(s);
+        return s.toString();
     }
 
     private final int compare(final int i, final int j) {
@@ -1107,7 +1108,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     	final ArrayList<RowCollection> del = a.removeDoubles();
     	System.out.println(del + "rows double");
     	final Iterator<Row.Entry> j = a.iterator();
-    	while (j.hasNext()) System.out.println(new String(j.next().bytes()));
+    	while (j.hasNext()) System.out.println(UTF8.String(j.next().bytes()));
     	
         System.out.println("kelondroRowCollection test with size = " + testsize);
         a = new RowCollection(r, testsize);

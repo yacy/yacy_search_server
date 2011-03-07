@@ -238,7 +238,7 @@ public final class Column {
             s.append(" {b256}");
             break;
         }
-        return new String(s);
+        return s.toString();
     }
 
 	/* (non-Javadoc)

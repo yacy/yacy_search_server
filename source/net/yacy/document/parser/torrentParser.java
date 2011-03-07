@@ -34,6 +34,7 @@ import java.util.Map;
 
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
@@ -68,7 +69,7 @@ public class torrentParser extends AbstractParser implements Parser {
         if (bo.getType() != BType.dictionary) throw new Parser.Failure("BDecoder object is not a dictionary", location);
         final Map<String, BObject> map = bo.getMap();
         final BObject commento = map.get("comment");
-        final String comment = (commento == null) ? "" : new String(commento.getString());
+        final String comment = (commento == null) ? "" : UTF8.String(commento.getString());
         //Date creation = new Date(map.get("creation date").getInteger());
         final BObject infoo = map.get("info");
         final StringBuilder filenames = new StringBuilder();
@@ -89,7 +90,7 @@ public class torrentParser extends AbstractParser implements Parser {
                 }
             }
             final BObject nameo = info.get("name");
-            if (nameo != null) title = new String(nameo.getString());
+            if (nameo != null) title = UTF8.String(nameo.getString());
         }
         if (title == null || title.length() == 0) title = MultiProtocolURI.unescape(location.getFileName());
         try {

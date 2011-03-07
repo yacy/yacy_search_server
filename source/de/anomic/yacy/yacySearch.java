@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
@@ -132,7 +133,7 @@ public class yacySearch extends Thread {
     public static String set2string(final HandleSet hashes) {
         StringBuilder wh = new StringBuilder();
         final Iterator<byte[]> iter = hashes.iterator();
-        while (iter.hasNext()) { wh.append(new String(iter.next())); }
+        while (iter.hasNext()) { wh.append(UTF8.String(iter.next())); }
         return wh.toString();
     }
 

@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import net.yacy.cora.date.AbstractFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.DynamicScore;
 import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.kelondro.data.word.Word;
@@ -64,7 +65,7 @@ public class PeerSelection {
         yacySeed s;
         while (i.hasNext()) {
             entry = i.next();
-            s = seedDB.get(new String(entry.getKey())); // should be getConnected; get only during testing time
+            s = seedDB.get(UTF8.String(entry.getKey())); // should be getConnected; get only during testing time
             if (s != null) {
                 s.setAlternativeAddress(entry.getValue());
                 l.add(s);

@@ -36,6 +36,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.AbstractOrder;
 import net.yacy.kelondro.order.Base64Order;
@@ -140,7 +141,7 @@ public final class Row {
             s.append(", ");
             s.append(row[i].toString());
         }
-        return new String(s);
+        return s.toString();
     }
     
     public final Entry newEntry() {
@@ -151,7 +152,7 @@ public final class Row {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
         if (!(this.objectOrder.wellformed(rowinstance, 0, this.primaryKeyLength))) {
-            Log.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + new String(rowinstance, 0, this.primaryKeyLength) + " / " + NaturalOrder.arrayList(rowinstance, 0, this.primaryKeyLength));
+            Log.logWarning("kelondroRow", "row not well-formed: rowinstance[0] = " + UTF8.String(rowinstance, 0, this.primaryKeyLength) + " / " + NaturalOrder.arrayList(rowinstance, 0, this.primaryKeyLength));
             return null;
         }
         return new Entry(rowinstance, false);
@@ -167,7 +168,7 @@ public final class Row {
     public final Entry newEntry(final byte[] rowinstance, final int start, final boolean clone) {
         if (rowinstance == null) return null;
         //assert (rowinstance[0] != 0);
-        assert (this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength)) : "rowinstance = " + new String(rowinstance);
+        assert (this.objectOrder.wellformed(rowinstance, start, this.primaryKeyLength)) : "rowinstance = " + UTF8.String(rowinstance);
         // this method offers the option to clone the content
         // this is necessary if it is known that the underlying byte array may change and therefore
         // the reference to the byte array does not contain the original content
@@ -499,7 +500,7 @@ public final class Row {
             if (length == 0) return null;
             try {
                 if ((encoding == null) || (encoding.length() == 0))
-                    return new String(rowinstance, offset + clstrt, length);
+                    return UTF8.String(rowinstance, offset + clstrt, length);
                 return new String(rowinstance, offset + clstrt, length, encoding);
             } catch (final UnsupportedEncodingException e) {
                 return "";

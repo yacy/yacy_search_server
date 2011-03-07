@@ -199,7 +199,7 @@ public final class TransformerWriter extends Writer {
     }
 
     private char[] filterTag(final String tag, final boolean opening, final char[] content, final char quotechar) {
-//      System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + new String(content)); // debug
+//      System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + UTF8.String(content)); // debug
         if (filterTag == null) {
             // we are not collection tag text
             if (tag == null) {
@@ -312,7 +312,7 @@ public final class TransformerWriter extends Writer {
 
     private char[] filterSentence(final char[] in, final char quotechar) {
         if (in.length == 0) return in;
-//      System.out.println("FILTER0: " + new String(in)); // debug
+//      System.out.println("FILTER0: " + UTF8.String(in)); // debug
         // scan the string and parse structure
         if (in.length > 2 && in[0] == lb) {
             
@@ -517,7 +517,7 @@ public final class TransformerWriter extends Writer {
     }
 
     public void write(final char b[], final int off, final int len) throws IOException {
-//      System.out.println(new String(b, off, len));
+//      System.out.println(UTF8.String(b, off, len));
         if ((off | len | (b.length - (len + off)) | (off + len)) < 0) throw new IndexOutOfBoundsException();
         for (int i = off ; i < (len - off) ; i++) this.write(b[i]);
     }

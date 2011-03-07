@@ -48,6 +48,7 @@ import java.util.zip.ZipOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.DynamicScore;
@@ -678,7 +679,7 @@ public final class yacy {
                     }
                     
                     if (wordCounter%500 == 0) {
-                        wordChunkEndHash = new String(wordIdxContainer.getTermHash());
+                        wordChunkEndHash = UTF8.String(wordIdxContainer.getTermHash());
                         wordChunkEnd = System.currentTimeMillis();
                         final long duration = wordChunkEnd - wordChunkStart;
                         log.logInfo(wordCounter + " words scanned " +
@@ -846,7 +847,7 @@ public final class yacy {
                         bos.write(container.getTermHash());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + new String(container.getTermHash()));
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + UTF8.String(container.getTermHash()));
                         }
                     }
                 }
@@ -863,14 +864,14 @@ public final class yacy {
                         bos.write(container.getTermHash());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + new String(container.getTermHash()));
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + UTF8.String(container.getTermHash()));
                         }
                     }
                 }
                 bos.flush();
                 bos.close();
             }
-            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : new String(container.getTermHash())));
+            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : UTF8.String(container.getTermHash())));
         } catch (final IOException e) {
             log.logSevere("IOException", e);
         }

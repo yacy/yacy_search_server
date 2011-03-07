@@ -39,6 +39,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.document.TextParser;
@@ -213,7 +214,7 @@ public final class CrawlStacker {
     public void enqueueEntry(final Request entry) {
 
         // DEBUG
-        if (log.isFinest()) log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : new String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
+        if (log.isFinest()) log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : UTF8.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
 
         if (prefetchHost(entry.url().getHost())) {
             try {
@@ -332,7 +333,7 @@ public final class CrawlStacker {
         
         // store information
         final boolean local = Base64Order.enhancedCoder.equal(entry.initiator(), peers.mySeed().hash.getBytes());
-        final boolean proxy = (entry.initiator() == null || entry.initiator().length == 0 || new String(entry.initiator()).equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
+        final boolean proxy = (entry.initiator() == null || entry.initiator().length == 0 || UTF8.String(entry.initiator()).equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
         final boolean remote = profile.handle().equals(crawler.defaultRemoteProfile.handle());
         final boolean global =
             (profile.remoteIndexing()) /* granted */ &&
@@ -344,7 +345,7 @@ public final class CrawlStacker {
             ) /* qualified */;
 
         if (!local && !global && !remote && !proxy) {
-            error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + ((entry.initiator() == null) ? "" : new String(entry.initiator())) + ", profile.handle = " + profile.handle();
+            error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + ((entry.initiator() == null) ? "" : UTF8.String(entry.initiator())) + ", profile.handle = " + profile.handle();
             this.log.logSevere(error);
             return error;
         }
@@ -375,20 +376,20 @@ public final class CrawlStacker {
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
             nextQueue.noticeURL.push(NoticedURL.StackType.LIMIT, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
             //this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT));
         } else if (local) {
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
             nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
             //this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE));
         } else if (proxy) {
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
             nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
@@ -540,8 +541,8 @@ public final class CrawlStacker {
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;
         return (local) ?
-            ("the urlhash '" + new String(urlhash) + "' is local, but local addresses are not accepted") :
-            ("the urlhash '" + new String(urlhash) + "' is global, but global addresses are not accepted");
+            ("the urlhash '" + UTF8.String(urlhash) + "' is local, but local addresses are not accepted") :
+            ("the urlhash '" + UTF8.String(urlhash) + "' is global, but global addresses are not accepted");
     }
 
     public boolean acceptLocalURLs() {

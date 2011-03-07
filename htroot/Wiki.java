@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
@@ -124,7 +125,7 @@ public class Wiki {
             final Map<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
-            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !new String(page.page()).equals(new String(content))) {
+            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !UTF8.String(page.page()).equals(UTF8.String(content))) {
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;
@@ -141,14 +142,11 @@ public class Wiki {
                 return prop;
             }
             
-            // edit the page
-            try {
-                prop.put("mode", "1"); //edit
-                prop.putHTML("mode_author", author);
-                prop.putHTML("mode_page-code", new String(page.page(), "UTF-8"));
-                prop.putHTML("mode_pagename", pagename);
-                prop.put("mode_display", display);
-            } catch (final UnsupportedEncodingException e) {}
+            prop.put("mode", "1"); //edit
+            prop.putHTML("mode_author", author);
+            prop.putHTML("mode_page-code", UTF8.String(page.page()));
+            prop.putHTML("mode_pagename", pagename);
+            prop.put("mode_display", display);
         }
 
         //contributed by [MN]
@@ -171,7 +169,7 @@ public class Wiki {
                 final Iterator<byte[]> i = sb.wikiDB.keys(true);
                 int count=0;
                 while (i.hasNext()) {
-                    final String subject = new String(i.next());
+                    final String subject = UTF8.String(i.next());
                     final WikiBoard.Entry entry = sb.wikiDB.read(subject);
                     prop.putHTML("mode_pages_" + count + "_name",WikiBoard.webalize(subject));
                     prop.putHTML("mode_pages_" + count + "_subject", subject);
@@ -203,7 +201,7 @@ public class Wiki {
                 int count = 0;
                 boolean oldselected = false, newselected = false;
                 while (it.hasNext()) {
-                    entry = sb.wikiDB.readBkp(new String(it.next()));
+                    entry = sb.wikiDB.readBkp(UTF8.String(it.next()));
                     prop.put("mode_error_versions_" + count + "_date", WikiBoard.dateString(entry.date()));
                     prop.put("mode_error_versions_" + count + "_fdate", dateString(entry.date()));
                     if (WikiBoard.dateString(entry.date()).equals(post.get("old", null))) {
@@ -244,8 +242,8 @@ public class Wiki {
                 if (post.containsKey("compare") && oentry != null && nentry != null) {
                     // TODO: split into paragraphs and compare them with the same diff-algo
                     final Diff diff = new Diff(
-                            new String(oentry.page(), "UTF-8"),
-                            new String(nentry.page(), "UTF-8"), 3);
+                            UTF8.String(oentry.page()),
+                            UTF8.String(nentry.page()), 3);
                     prop.put("mode_versioning_diff", de.anomic.data.Diff.toHTML(new Diff[] { diff }));
                     prop.put("mode_versioning", "1");
                 } else if (post.containsKey("viewold") && oentry != null) {
@@ -255,7 +253,7 @@ public class Wiki {
                     prop.putHTML("mode_versioning_author", oentry.author());
                     prop.put("mode_versioning_date", dateString(oentry.date()));
                     prop.putWiki("mode_versioning_page", oentry.page());
-                    prop.putHTML("mode_versioning_page-code", new String(oentry.page(), "UTF-8"));
+                    prop.putHTML("mode_versioning_page-code", UTF8.String(oentry.page()));
                 }
             } catch (final IOException e) {
                 prop.put("mode_error", "1"); //IO Error reading Wiki

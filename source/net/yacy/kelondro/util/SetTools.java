@@ -43,6 +43,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 
@@ -536,9 +537,9 @@ public final class SetTools {
     public static String setToString(final HandleSet set, final char separator) {
         final Iterator<byte[]> i = set.iterator();
         final StringBuilder sb = new StringBuilder(set.size() * 7);
-        if (i.hasNext()) sb.append(new String(i.next()));
+        if (i.hasNext()) sb.append(UTF8.String(i.next()));
         while (i.hasNext()) {
-            sb.append(separator).append(new String(i.next()));
+            sb.append(separator).append(UTF8.String(i.next()));
         }
         return sb.toString();
     }

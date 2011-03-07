@@ -30,6 +30,8 @@ import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
+
 public final class ScoreCluster<E> implements DynamicScore<E> {
     
     protected final Map<E, Long> map; // a mapping from a reference to the cluster key
@@ -124,7 +126,7 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         }
         String s = null;
         if (o instanceof String) s = (String) o;
-        if (o instanceof byte[]) s = new String((byte[]) o);
+        if (o instanceof byte[]) s = UTF8.String((byte[]) o);
         
         // this can be used to calculate a score from a string
         if (s == null || s.length() == 0 || s.charAt(0) == '-') return 0;

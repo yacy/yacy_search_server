@@ -46,6 +46,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -259,7 +260,7 @@ public class BlogBoardComments {
             setIp(ip);
             setPage(page);
             
-            WikiBoard.setAuthor(ip, new String(author));
+            WikiBoard.setAuthor(ip, UTF8.String(author));
         }
     
         CommentEntry(final String key, final Map<String, String> record) {
