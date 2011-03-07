@@ -1,13 +1,15 @@
-//LogParserPLASMA.java 
+//LogParser.java 
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-//This file ist contributed by Matthias Soehnholz
-//last major change: $LastChangedDate: 2008-11-17 16:23:17 +0000 (Mo, 17 Nov 2008) $ by $LastChangedBy: orbiter $
-//Revision: $LastChangedRevision: 7461 $
+//This file is contributed by Matthias Soehnholz
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -25,8 +27,10 @@
 
 package net.yacy.kelondro.logging;
 
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -209,10 +213,10 @@ public final class LogParser {
     private long DHTSendTraffic=0;
     private int DHTSendURLs=0;
     private int RWIRejectCount=0;
-    private final HashSet<String> RWIRejectPeerNames = new HashSet<String>();
-    private final HashSet<String> RWIRejectPeerHashs = new HashSet<String>();
-    private final HashSet<String> DHTPeerNames = new HashSet<String>();
-    private final HashSet<String> DHTPeerHashs = new HashSet<String>();
+    private final Set<String> RWIRejectPeerNames = new HashSet<String>();
+    private final Set<String> RWIRejectPeerHashs = new HashSet<String>();
+    private final Set<String> DHTPeerNames = new HashSet<String>();
+    private final Set<String> DHTPeerHashs = new HashSet<String>();
     private int DHTSelectionTargetCount = 1;
     private int DHTSelectionWordsCount = 0;
     private int DHTSelectionWordsTimeCount = 0;
@@ -243,11 +247,10 @@ public final class LogParser {
     
     public final int parse(final String logLevel, final String logLine) {
         final long start = System.currentTimeMillis();
-        if (logLevel.equals("INFO")){
+        if ("INFO".equals(logLevel)){
             m = i1.matcher (logLine);
             
             if (m.find () && m.groupCount() >= 3) {
-                //System.out.println(m.group(1) + " " + m.group(2) + " " + m.group(3));
                 urlSum += Integer.parseInt(m.group(1));
                 urlTimeSum += Integer.parseInt(m.group(2));
                 blockedURLSum += Integer.parseInt(m.group(3));
@@ -392,7 +395,7 @@ public final class LogParser {
                 return 0;
             }
 
-        } else if (logLevel.equals("WARNING")){
+        } else if ("WARNING".equals(logLevel)){
             m = w1.matcher (logLine);
             
             if (m.find ()) {
@@ -409,12 +412,12 @@ public final class LogParser {
                 totalParserRuns++;
                 return 0;
             }
-        } else if (logLevel.equals("SEVERE")){
+        } else if ("SEVERE".equals(logLevel)){
             m = e1.matcher (logLine);
             
             if (m.find () && m.groupCount() >= 1) {
-                if (m.group(1).equals("leftchild")) leftChildTwiceCount++;
-                else if (m.group(1).equals("rightchild")) rightChildTwiceCount++;
+                if ("leftchild".equals(m.group(1))) leftChildTwiceCount++;
+                else if ("rightchild".equals(m.group(1))) rightChildTwiceCount++;
                 totalParserTime += (System.currentTimeMillis() - start);
                 totalParserRuns++;
                 return 0;
@@ -433,8 +436,8 @@ public final class LogParser {
         return -1;
     }
 
-    public final Hashtable<String, Object> getResults() {
-        final Hashtable<String, Object> results = new Hashtable<String, Object>();
+    public final Map<String, Object> getResults() {
+        final Map<String, Object> results = new HashMap<String, Object>();
         results.put(PARSER_VERSION          , Float.valueOf(parserVersion));
         results.put(URLS_RECEIVED           , Integer.valueOf(urlSum));
         results.put(URLS_REQUESTED          , Integer.valueOf(urlReqSum));

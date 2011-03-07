@@ -3,8 +3,10 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: $LastChangedDate: 2009-01-30 14:48:11 +0000 (Fr, 30 Jan 2009) $ by $LastChangedBy$
-// Revision: $LastChangedRevision$
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -318,7 +320,7 @@ public final class Log {
 
     protected final static class logRunner extends Thread {
         public logRunner() {
-        	super("Log Runner");
+            super("Log Runner");
         }
         
         @Override
@@ -369,12 +371,12 @@ public final class Log {
             if (!log.canRead()) log.mkdir();
 
             // generating the root logger
-            Logger logger = Logger.getLogger("");
+            final Logger logger = Logger.getLogger("");
             logger.setUseParentHandlers(false);
             
             //for (Handler h: logger.getHandlers()) logger.removeHandler(h);
             if (!dataPath.getAbsolutePath().equals(appPath.getAbsolutePath())) {
-                FileHandler handler = new FileHandler(logPattern, 1024*1024, 20, true);
+                final FileHandler handler = new FileHandler(logPattern, 1024*1024, 20, true);
                 logger.addHandler(handler); 
             }
             
@@ -382,9 +384,9 @@ public final class Log {
             final Log exceptionLog = new Log("UNCAUGHT-EXCEPTION");
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
                 public void uncaughtException(final Thread t, final Throwable e) {
-                    String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    PrintStream ps = new PrintStream(baos);
+                    final String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
+                    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    final PrintStream ps = new PrintStream(baos);
                     e.printStackTrace(ps);
                     ps.close();
                     exceptionLog.logSevere(msg + "\n" + baos.toString(), e);

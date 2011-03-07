@@ -5,9 +5,11 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-//This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate: 2008-08-02 14:12:04 +0200 (Sa, 02 Aug 2008) $ by $LastChangedBy: low012 $
-//Revision: $LastChangedRevision: 6542 $
+//This file is contributed by Martin Thelian
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -53,7 +55,7 @@ public final class ConsoleOutErrHandler extends Handler {
     /**
      * Get any configuration properties set
      */
-    private final void configure() {
+    private void configure() {
         final LogManager manager = LogManager.getLogManager();
         final String className = getClass().getName();
         
@@ -80,11 +82,11 @@ public final class ConsoleOutErrHandler extends Handler {
         }
         
         final String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");
-        this.ignoreCtrlChr = (ignoreCtrlChrStr==null)?false:ignoreCtrlChrStr.equalsIgnoreCase("true");
+        this.ignoreCtrlChr = (ignoreCtrlChrStr==null) ? false : "true".equalsIgnoreCase(ignoreCtrlChrStr);
         
     }    
     
-    private final Level parseLevel(final String levelName) {
+    private Level parseLevel(final String levelName) {
         try {
             return (levelName == null) ? Level.INFO : Level.parse(levelName);
         } catch (final Exception e) {
@@ -92,7 +94,7 @@ public final class ConsoleOutErrHandler extends Handler {
         }
     }
     
-    private final Filter makeFilter(final String name) {
+    private Filter makeFilter(final String name) {
         if (name == null) return null;
         
         Filter f = null;
@@ -107,7 +109,7 @@ public final class ConsoleOutErrHandler extends Handler {
         return f;
     }    
     
-    private final Formatter makeFormatter(final String name) {
+    private Formatter makeFormatter(final String name) {
         if (name == null) return null;
         
         Formatter f = null;

@@ -5,9 +5,11 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-//This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate: 2009-10-12 23:59:39 +0200 (Mo, 12. Okt 2009) $ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+//This file is contributed by Martin Thelian
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -26,6 +28,7 @@
 package net.yacy.kelondro.logging;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.ErrorManager;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
@@ -52,7 +55,7 @@ public class GuiHandler extends Handler {
     /**
      * Get any configuration properties set
      */
-    private final void configure() {
+    private void configure() {
         final LogManager manager = LogManager.getLogManager();
         final String className = getClass().getName();
         
@@ -69,7 +72,7 @@ public class GuiHandler extends Handler {
         this.size = parseSize(sizeString);
     }    
     
-    private final int parseSize(final String sizeString) {
+    private int parseSize(final String sizeString) {
         int newSize = DEFAULT_SIZE;
         try {
             newSize = Integer.parseInt(sizeString);
@@ -79,7 +82,7 @@ public class GuiHandler extends Handler {
         return newSize;
     }
     
-    private final Filter makeFilter(final String name) {
+    private Filter makeFilter(final String name) {
         if (name == null) return null;
         
         Filter f = null;
@@ -92,7 +95,7 @@ public class GuiHandler extends Handler {
         return f;
     }    
     
-    private final Formatter makeFormatter(final String name) {
+    private Formatter makeFormatter(final String name) {
         if (name == null) return null;
         
         Formatter f = null;
@@ -106,7 +109,7 @@ public class GuiHandler extends Handler {
     }
     
     // Initialize.  Size is a count of LogRecords.
-    private final void init() {
+    private void init() {
         this.buffer = new LogRecord[this.size];
         this.start = 0;
         this.count = 0;
@@ -136,7 +139,7 @@ public class GuiHandler extends Handler {
 
 
     public final synchronized LogRecord[] getLogArray(final Long sequenceNumberStart) {
-        final ArrayList<LogRecord> tempBuffer = new ArrayList<LogRecord>(this.count);
+        final List<LogRecord> tempBuffer = new ArrayList<LogRecord>(this.count);
         
         for (int i = 0; i < this.count; i++) {
             final int ix = (this.start+i)%this.buffer.length;
@@ -157,15 +160,15 @@ public class GuiHandler extends Handler {
         final Formatter logFormatter = getFormatter();
         
         try {
-                final int start = (reversed)?this.start+this.count-1:this.start;
-                LogRecord record=null;
-                for (int i = 0; i < lineCount; i++) {
-                    final int ix = (reversed) ?
-                                Math.abs((start-i)%this.buffer.length) :
-                                (start+i)%this.buffer.length;
-                    record = this.buffer[ix];
-                    logMessages.append(logFormatter.format(record));                
-                }             
+            final int theStart = (reversed)?this.start+this.count-1:this.start;
+            LogRecord record=null;
+            for (int i = 0; i < lineCount; i++) {
+                final int ix = (reversed) ?
+                    Math.abs((theStart-i)%this.buffer.length) :
+                    (theStart+i)%this.buffer.length;
+                record = this.buffer[ix];
+                logMessages.append(logFormatter.format(record));
+            }
             return logMessages.toString();
         } catch (final Exception ex) {
             // We don't want to throw an exception here, but we
@@ -179,19 +182,19 @@ public class GuiHandler extends Handler {
         
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
         
-        final ArrayList<String> logMessages = new ArrayList<String>(this.count);
+        final List<String> logMessages = new ArrayList<String>(this.count);
         final Formatter logFormatter = getFormatter();
         
         try {
-                final int theStart = (reversed)?this.start+this.count-1:this.start+this.count-lineCount;
-                LogRecord record=null;
-                for (int i = 0; i < lineCount; i++) {
-                    final int ix = (reversed) ?
-                                Math.abs((theStart-i)%this.buffer.length) :
-                                (theStart + i) % this.buffer.length;
-                    record = this.buffer[ix];
-                    logMessages.add(logFormatter.format(record));                
-                }             
+            final int theStart = (reversed) ? this.start+this.count-1 : this.start+this.count-lineCount;
+            LogRecord record=null;
+            for (int i = 0; i < lineCount; i++) {
+                final int ix = (reversed) ?
+                    Math.abs((theStart-i)%this.buffer.length) :
+                    (theStart + i) % this.buffer.length;
+                record = this.buffer[ix];
+                logMessages.add(logFormatter.format(record));
+            }
             return logMessages.toArray(new String[logMessages.size()]);
         } catch (final Exception ex) {
             // We don't want to throw an exception here, but we

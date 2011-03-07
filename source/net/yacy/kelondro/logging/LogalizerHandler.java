@@ -5,9 +5,11 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-//This file ist contributed by Matthias Soehnholz
-//last major change: $LastChangedDate: 2009-10-12 23:59:39 +0200 (Mo, 12. Okt 2009) $ by $LastChangedBy: low012 $
-//Revision: $LastChangedRevision: 6542 $
+//This file is contributed by Matthias Soehnholz
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -25,7 +27,7 @@
 
 package net.yacy.kelondro.logging;
 
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
@@ -33,17 +35,17 @@ import java.util.logging.LogRecord;
 
 public final class LogalizerHandler extends Handler {
 
-    public static boolean enabled = false;
-    public static boolean debug = false;
+    public static boolean enabled;
+    public static boolean debug;
     
     public LogalizerHandler() {
         super();
         
         final LogManager manager = LogManager.getLogManager();
-        String className = getClass().getName();
+        final String className = getClass().getName();
 
-        if(manager.getProperty(className + ".enabled").equalsIgnoreCase("true")) enabled = true;
-        if(manager.getProperty(className + ".debug").equalsIgnoreCase("true")) debug = true;
+        enabled = "true".equalsIgnoreCase(manager.getProperty(className + ".enabled"));
+        debug = "true".equalsIgnoreCase(manager.getProperty(className + ".debug"));
     }
     
     public final void publish(final LogRecord record) {
@@ -51,14 +53,13 @@ public final class LogalizerHandler extends Handler {
             final LogParser temp = new LogParser();
             if (temp != null) try {
                 final int returnV = temp.parse(record.getLevel().toString(), record.getMessage());
-                //if (debug) System.out.println("Logalizertest: " + returnV + " --- " + record.getLevel() + " --- " + record.getMessage());
                 if (debug) System.out.println("Logalizertest: " + returnV + " --- " + record.getLevel());
             } catch (Exception e) {}
         }
         flush();
     }
     
-    public final Hashtable<String, Object> getParserResults(final LogParser parsername) {
+    public final Map<String, Object> getParserResults(final LogParser parsername) {
         return (parsername == null) ? null : parsername.getResults();
     }
     
