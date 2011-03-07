@@ -39,6 +39,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.kelondro.util.MemoryControl;
 
 public class Domains {
 
@@ -483,6 +484,11 @@ public class Domains {
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
         if (ip != null) return ip;
+        
+        if (MemoryControl.shortStatus()) {
+            NAME_CACHE_HIT.clear();
+            NAME_CACHE_MISS.clear();
+        }
         
         // try to resolve host by doing a name cache lookup
         ip = NAME_CACHE_HIT.get(host);

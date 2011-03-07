@@ -66,7 +66,12 @@ public class WebStructureGraph {
         this.structureFile = structureFile;
         
         // load web structure
-        final Map<String, String> loadedStructure = (this.structureFile.exists()) ? FileUtils.loadMap(this.structureFile) : new TreeMap<String, String>();
+        Map<String, String> loadedStructure;
+        try {
+            loadedStructure = (this.structureFile.exists()) ? FileUtils.loadMap(this.structureFile) : new TreeMap<String, String>();
+        } catch (OutOfMemoryError e) {
+            loadedStructure = new TreeMap<String, String>();
+        }
         if (loadedStructure != null) this.structure_old.putAll(loadedStructure);
         
         // delete out-dated entries in case the structure is too big

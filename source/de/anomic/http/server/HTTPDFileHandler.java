@@ -1220,7 +1220,12 @@ public final class HTTPDFileHandler {
     }
     
     private static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
+        try {
+            return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
+        } catch (OutOfMemoryError e) {
+            Log.logException(e);
+            return null;
+        }
     }
 
     /**

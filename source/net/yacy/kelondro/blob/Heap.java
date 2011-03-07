@@ -40,6 +40,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 public final class Heap extends HeapModifier implements BLOB {
@@ -349,7 +350,7 @@ public final class Heap extends HeapModifier implements BLOB {
             assert this.buffer != null;
             
             // if there is not enough space in the buffer, flush all
-            if (this.buffersize + b.length > buffermax) {
+            if (this.buffersize + b.length > buffermax || MemoryControl.shortStatus()) {
                 // this is too big. Flush everything
                 super.shrinkWithGapsAtEnd();
                 flushBuffer();

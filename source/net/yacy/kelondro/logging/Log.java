@@ -22,10 +22,12 @@
 
 package net.yacy.kelondro.logging;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.FileHandler;
@@ -381,7 +383,11 @@ public final class Log {
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
                 public void uncaughtException(final Thread t, final Throwable e) {
                     String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
-                    exceptionLog.logSevere(msg, e);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    PrintStream ps = new PrintStream(baos);
+                    e.printStackTrace(ps);
+                    ps.close();
+                    exceptionLog.logSevere(msg + "\n" + baos.toString(), e);
                     //System.err.print("Exception in thread \"" + t.getName() + "\" ");
                     //e.printStackTrace(System.err);
                 }

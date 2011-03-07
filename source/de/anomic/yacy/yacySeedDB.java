@@ -1017,7 +1017,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 Map<String, String> dna0;
                 ConcurrentHashMap<String, String> dna;
                 while (it.hasNext()) {
-                    dna0 = it.next();
+                    try {
+                        dna0 = it.next();
+                    } catch (OutOfMemoryError e) {
+                        Log.logException(e);
+                        dna0 = null;
+                    }
                     assert dna0 != null;
                     if (dna0 == null) continue;
                     if (dna0 instanceof ConcurrentHashMap) {

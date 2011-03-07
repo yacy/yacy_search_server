@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.io.InputStream;
 //import java.util.HashMap;
 
+import net.yacy.kelondro.logging.Log;
+
 public final class ByteCountInputStream extends FilterInputStream {
     
 //    private final static Object syncObject = new Object();
@@ -115,7 +117,11 @@ public final class ByteCountInputStream extends FilterInputStream {
 //    }
     
     public final void close() throws IOException {
-        super.close();
+        try {
+            super.close();
+        } catch (OutOfMemoryError e) {
+            Log.logException(e);
+        }
         this.finish();
     }
     

@@ -1173,7 +1173,7 @@ public final class Switchboard extends serverSwitch {
         blogDB.close();
         blogCommentDB.close();
         userDB.close();
-        bookmarksDB.close();
+        if (bookmarksDB != null) bookmarksDB.close(); // may null if concurrent initialization was not finished
         messageDB.close();
         webStructure.close();
         crawlQueues.close();

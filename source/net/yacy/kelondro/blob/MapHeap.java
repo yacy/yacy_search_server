@@ -50,6 +50,7 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.kelondroException;
 
 public class MapHeap implements Map<byte[], Map<String, String>> {
@@ -155,7 +156,11 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 if (blob != null) blob.insert(key, sb);
     
                 // write map to cache
-                cache.put(key, newMap);
+                if (MemoryControl.shortStatus()) {
+                    cache.clear();
+                } else {
+                    cache.put(key, newMap);
+                }
             }
         }
     }
@@ -283,8 +288,12 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                     throw new IOException(e.getMessage());
                 }
         
-                // write map to cache
-                cache.put(key, map);
+                if (MemoryControl.shortStatus()) {
+                    cache.clear();
+                } else {
+                    // write map to cache
+                    cache.put(key, map);
+                }
             }
             
             // return value

@@ -61,7 +61,12 @@ public class Gap extends TreeMap<Long, Integer> {
     public Gap(final File file) throws IOException {
         super();
         // read the index dump and fill the index
-        DataInputStream is = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 1024 * 1024));
+        DataInputStream is;
+        try {
+            is = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 1024 * 1024));
+        } catch (OutOfMemoryError e) {
+            is = new DataInputStream(new FileInputStream(file));
+        }
         long p;
         int l;
         while (true) {

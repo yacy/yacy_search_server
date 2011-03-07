@@ -79,7 +79,12 @@ public final class HandleMap implements Iterable<Row.Entry> {
     public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final File file) throws IOException, RowSpaceExceededException {
         this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)), file.getAbsolutePath());
         // read the index dump and fill the index
-        InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
+        InputStream is;
+        try {
+            is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
+        } catch (OutOfMemoryError e) {
+            is = new FileInputStream(file);
+        }
         if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
         final byte[] a = new byte[keylength + idxbytes];
         int c;

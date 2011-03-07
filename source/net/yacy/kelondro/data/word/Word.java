@@ -56,7 +56,14 @@ public class Word {
     public static final int commonHashLength = 12;
     
     private static final int hashCacheSize = Math.max(100000, Math.min(10000000, (int) (MemoryControl.available() / 20000L)));
-    private static final ARC<String, byte[]> hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, 2 * Runtime.getRuntime().availableProcessors());
+    private static ARC<String, byte[]> hashCache = null;
+    static {
+        try {
+            hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, 2 * Runtime.getRuntime().availableProcessors());
+        } catch (OutOfMemoryError e) {
+            hashCache = new ConcurrentARC<String, byte[]>(1000, Runtime.getRuntime().availableProcessors());
+        }
+    }
     
     // object carries statistics for words and sentences
     public  int      count;       // number of occurrences
@@ -112,7 +119,11 @@ public class Word {
         // calculate the hash
     	h = Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(wordlc), commonHashLength);
         assert h[2] != '@';
-        hashCache.put(wordlc, h); // prevent expensive MD5 computation and encoding
+        if (MemoryControl.shortStatus()) {
+            hashCache.clear();
+        } else {
+            hashCache.put(wordlc, h); // prevent expensive MD5 computation and encoding
+        }
         return h;
     }
     

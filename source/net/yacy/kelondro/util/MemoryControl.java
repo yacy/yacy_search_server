@@ -35,18 +35,16 @@ public class MemoryControl {
 	
     private static final Runtime runtime = Runtime.getRuntime();
     public static long maxMemory = runtime.maxMemory(); // this value does never change during runtime
-    
 	private static final Log log = new Log("MEMORY");
     
     private static final long[] gcs = new long[5];
     private static int gcs_pos = 0;
-
     private static long lastGC = 0l;
-    
     private static long DHTMbyte = 0L;
     private static long prevDHTtreshold = 0L;
     private static int DHTtresholdCount = 0;
     private static boolean allowDHT = true;
+    private static boolean shortStatus = false;
 
     /**
      * Runs the garbage collector if last garbage collection is more than last millis ago
@@ -139,6 +137,11 @@ public class MemoryControl {
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
+        boolean r = request0(size, force);
+        shortStatus = !r;
+        return r;
+    }
+    private static boolean request0(final long size, final boolean force) {
     	final long avg = getAverageGCFree();
     	if (avg >= size) return true;
         long avail = available();
@@ -166,6 +169,10 @@ public class MemoryControl {
                     + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
             return false;
         }
+    }
+    
+    public static boolean shortStatus() {
+        return shortStatus;
     }
     
     /**
