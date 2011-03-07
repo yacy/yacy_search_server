@@ -422,7 +422,7 @@ public final class SearchEvent {
             this.trigger.release();
         }
         
-        private String wordsFromPeer(final String peerhash, final String urls) {
+        private String wordsFromPeer(final String peerhash, final StringBuilder urls) {
             Map.Entry<String, SortedMap<String, StringBuilder>> entry;
             String word, url, wordlist = "";
             StringBuilder peerlist;
@@ -488,9 +488,9 @@ public final class SearchEvent {
             // the join result is now a urlhash: peer-list relation
             
             // generate a list of peers that have the urls for the joined search result
-            final SortedMap<String, String> secondarySearchURLs = new TreeMap<String, String>(); // a (peerhash:urlhash-liststring) mapping
-            String url, urls, peer;
-            StringBuilder peerlist;
+            final SortedMap<String, StringBuilder> secondarySearchURLs = new TreeMap<String, StringBuilder>(); // a (peerhash:urlhash-liststring) mapping
+            String url, peer;
+            StringBuilder urls, peerlist;
             final String mypeerhash = peers.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
@@ -504,7 +504,13 @@ public final class SearchEvent {
                     if ((peer.equals(mypeerhash)) && (mypeercount++ > 1)) continue;
                     //if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
                     urls = secondarySearchURLs.get(peer);
-                    urls = (urls == null) ? url : urls + url;
+                    if (urls == null) {
+                        urls = new StringBuilder(24);
+                        urls.append(url);
+                        secondarySearchURLs.put(peer, urls);
+                    } else {
+                        urls.append(url);
+                    }
                     secondarySearchURLs.put(peer, urls);
                 }
                 if (mypeercount == 1) mypeerinvolved = true;
@@ -514,7 +520,7 @@ public final class SearchEvent {
             String words;
             secondarySearchThreads = new yacySearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
             int c = 0;
-            for (Map.Entry<String, String> entry: secondarySearchURLs.entrySet()) {
+            for (Map.Entry<String, StringBuilder> entry: secondarySearchURLs.entrySet()) {
                 peer = entry.getKey();
                 if (peer.equals(mypeerhash)) continue; // we don't need to ask ourself
                 if (checkedPeers.contains(peer)) continue; // do not ask a peer again
@@ -526,7 +532,7 @@ public final class SearchEvent {
                 rankingProcess.moreFeeders(1);
                 checkedPeers.add(peer);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, urls, 6000, query.getSegment(), peers, rankingProcess, peer, Switchboard.urlBlacklist,
+                        words, urls.toString(), 6000, query.getSegment(), peers, rankingProcess, peer, Switchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
             }
             
