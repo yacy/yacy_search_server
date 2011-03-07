@@ -222,7 +222,7 @@ public class yacySearch extends Thread {
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash.getBytes()));
         final yacySearch searchThread = new yacySearch(
-                wordhashes, "", urlhashes, Pattern.compile(""), Pattern.compile(".*"), "", "", "", 0, time, 9999, true, 0, targetPeer,
+                wordhashes, "", urlhashes, Pattern.compile(""), Pattern.compile(".*"), "", "", "", 20, time, 9999, true, 0, targetPeer,
                 indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;

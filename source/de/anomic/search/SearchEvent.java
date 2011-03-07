@@ -377,12 +377,12 @@ public final class SearchEvent {
         
         // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
         // this relation contains the information where specific urls can be found in specific peers
-        SortedMap<String, SortedMap<String, String>> abstractsCache;
+        SortedMap<String, SortedMap<String, StringBuilder>> abstractsCache;
         SortedSet<String> checkedPeers;
         Semaphore trigger;
         
         public SecondarySearchSuperviser() {
-            this.abstractsCache = new TreeMap<String, SortedMap<String, String>>();
+            this.abstractsCache = new TreeMap<String, SortedMap<String, StringBuilder>>();
             this.checkedPeers = new TreeSet<String>();
             this.trigger = new Semaphore(0);
         }
@@ -392,8 +392,8 @@ public final class SearchEvent {
          * @param wordhash
          * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */
-        public void addAbstract(String wordhash, final TreeMap<String, String> singleAbstract) {
-            final SortedMap<String, String> oldAbstract;
+        public void addAbstract(String wordhash, final TreeMap<String, StringBuilder> singleAbstract) {
+            final SortedMap<String, StringBuilder> oldAbstract;
             synchronized (abstractsCache) {
                 oldAbstract = abstractsCache.get(wordhash);
                 if (oldAbstract == null) {
@@ -405,12 +405,12 @@ public final class SearchEvent {
             // extend the abstracts in the cache: join the single abstracts
             new Thread() {
                 public void run() {
-                    for (final Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
+                    for (final Map.Entry<String, StringBuilder> oneref: singleAbstract.entrySet()) {
                         final String urlhash = oneref.getKey();
-                        final String peerlistNew = oneref.getValue();
+                        final StringBuilder peerlistNew = oneref.getValue();
                         synchronized (oldAbstract) {
-                            final String peerlistOld = oldAbstract.put(urlhash, peerlistNew);
-                            if (peerlistOld != null) oldAbstract.put(urlhash, peerlistOld + peerlistNew);
+                            final StringBuilder peerlistOld = oldAbstract.put(urlhash, peerlistNew);
+                            if (peerlistOld != null) peerlistOld.append(peerlistNew);
                         }
                     }
                 }
@@ -423,13 +423,14 @@ public final class SearchEvent {
         }
         
         private String wordsFromPeer(final String peerhash, final String urls) {
-            Map.Entry<String, SortedMap<String, String>> entry;
-            String word, peerlist, url, wordlist = "";
-            SortedMap<String, String> urlPeerlist;
+            Map.Entry<String, SortedMap<String, StringBuilder>> entry;
+            String word, url, wordlist = "";
+            StringBuilder peerlist;
+            SortedMap<String, StringBuilder> urlPeerlist;
             int p;
             boolean hasURL;
             synchronized (this) {
-                final Iterator<Map.Entry <String, SortedMap<String, String>>> i = this.abstractsCache.entrySet().iterator();
+                final Iterator<Map.Entry <String, SortedMap<String, StringBuilder>>> i = this.abstractsCache.entrySet().iterator();
                 while (i.hasNext()) {
                     entry = i.next();
                     word = entry.getKey();
@@ -482,17 +483,18 @@ public final class SearchEvent {
             if (abstractsCache.size() != query.queryHashes.size()) return;
 
             // join all the urlhash:peerlist relations: the resulting map has values with a combined peer-list list
-            final SortedMap<String, String> abstractJoin = SetTools.joinConstructive(abstractsCache.values(), true);
+            final SortedMap<String, StringBuilder> abstractJoin = SetTools.joinConstructive(abstractsCache.values(), true);
             if (abstractJoin.isEmpty()) return;
             // the join result is now a urlhash: peer-list relation
             
             // generate a list of peers that have the urls for the joined search result
             final SortedMap<String, String> secondarySearchURLs = new TreeMap<String, String>(); // a (peerhash:urlhash-liststring) mapping
-            String url, urls, peer, peerlist;
+            String url, urls, peer;
+            StringBuilder peerlist;
             final String mypeerhash = peers.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
-            for (Map.Entry<String, String> entry: abstractJoin.entrySet()) {
+            for (Map.Entry<String, StringBuilder> entry: abstractJoin.entrySet()) {
                 url = entry.getKey();
                 peerlist = entry.getValue();
                 //System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peerlist);

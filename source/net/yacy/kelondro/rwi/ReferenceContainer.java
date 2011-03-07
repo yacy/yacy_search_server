@@ -556,23 +556,34 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return bb;
     }
 
-    public static final TreeMap<String, String> decompressIndex(ByteBuffer ci, final String peerhash) {
-        TreeMap<String, String> target = new TreeMap<String, String>();
+    public static final TreeMap<String, StringBuilder> decompressIndex(ByteBuffer ci, final String peerhash) {
+        TreeMap<String, StringBuilder> target = new TreeMap<String, StringBuilder>();
         // target is a mapping from url-hashes to a string of peer-hashes
         if (ci.byteAt(0) != '{' || ci.byteAt(ci.length() - 1) != '}') return target;
         //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
         ci = ci.trim(1, ci.length() - 2);
-        String dom, url, peers;
+        String dom, url;
+        StringBuilder peers;
+        StringBuilder urlsb;
         while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
             assert ci.length() >= 6 : "ci.length() = " + ci.length();
-            dom = ci.toString(0, 6);
+            dom = ci.toStringBuilder(0, 6, 6).toString();
             ci.trim(7);
             while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
                 assert ci.length() >= 6 : "ci.length() = " + ci.length();
-                url = ci.toString(0, 6) + dom;
+                urlsb = ci.toStringBuilder(0, 6, 12);
+                urlsb.append(dom);
+                url = urlsb.toString();
                 ci.trim(6);
-                peers = target.put(url, peerhash);
-                if (peers != null) target.put(url, peers + peerhash);
+                
+                peers = target.get(url);
+                if (peers == null) {
+                    peers = new StringBuilder(24);
+                    peers.append(peerhash);
+                    target.put(url, peers);
+                } else {
+                    peers.append(peerhash);
+                }
                 //System.out.println("DEBUG-DECOMPRESS: " + url + ":" + target.get(url));
             }
             if (ci.byteAt(0) == ',') ci.trim(1);

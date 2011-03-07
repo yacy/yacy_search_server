@@ -150,7 +150,9 @@ public final class SetTools {
                     }
                     if (mobj2 != null) {
                         if (mentry1.getValue() instanceof String) {
-                            result.put(mentry1.getKey(), (B) ((concatStrings) ? (mentry1.getValue() + (String) mobj2) : mentry1.getValue()));
+                            result.put(mentry1.getKey(), (B) ((concatStrings) ? (((String) mentry1.getValue()) + (String) mobj2) : (String) mentry1.getValue()));
+                        } else if (mentry1.getValue() instanceof StringBuilder) {
+                            result.put(mentry1.getKey(), (B) ((concatStrings) ? (((StringBuilder) mentry1.getValue()).append((StringBuilder) mobj2)) : mentry1.getValue()));
                         } else {
                             result.put(mentry1.getKey(), mentry1.getValue());
                         }
@@ -183,7 +185,9 @@ public final class SetTools {
                     if (mi2.hasNext()) mentry2 = mi2.next(); else break;
                 } else {
                     if (mentry1.getValue() instanceof String) {
-                        result.put(mentry1.getKey(), (B) ((concatStrings) ? ((String) mentry1.getValue() + (String) mentry2.getValue()) : (String) mentry1.getValue()));
+                        result.put(mentry1.getKey(), (B) ((concatStrings) ? (((String) mentry1.getValue()) + (String) mentry2.getValue()) : (String) mentry1.getValue()));
+                    } else if (mentry1.getValue() instanceof StringBuilder) {
+                        result.put(mentry1.getKey(), (B) ((concatStrings) ? (((StringBuilder) mentry1.getValue()).append((StringBuilder) mentry2.getValue())) : (StringBuilder) mentry1.getValue()));
                     } else {
                         result.put(mentry1.getKey(), mentry1.getValue());
                     }

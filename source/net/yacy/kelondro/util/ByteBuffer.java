@@ -302,7 +302,8 @@ public final class ByteBuffer extends OutputStream {
     }
     
     public ByteBuffer trim(final int start) {
-        trim(start, this.length - start);
+        this.offset += start;
+        this.length -= start;
         return this;
     }
 
@@ -402,8 +403,17 @@ public final class ByteBuffer extends OutputStream {
         }
     }
 
-    public String toString(final int left, final int rightbound) {
-        return UTF8.String(buffer, offset + left, rightbound - left);
+    public String toString(final int left, final int length) {
+        return UTF8.String(buffer, offset + left, length);
+    }
+
+    public StringBuilder toStringBuilder(final int left, final int length, final int sblength) {
+        assert sblength >= length;
+        final StringBuilder sb = new StringBuilder(sblength);
+        int i = 0;
+        sb.setLength(length);
+        for (int j = left; j < left + length; j++) sb.setCharAt(i++, (char) buffer[j]);
+        return sb;
     }
 
     public Properties propParser(final String charset) {
