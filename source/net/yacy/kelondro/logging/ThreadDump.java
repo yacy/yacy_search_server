@@ -5,9 +5,9 @@
 //
 // This File contains contributions from Alexander Fieger
 //
-// $LastChangedDate: 2010-09-02 21:24:22 +0200 (Do, 02 Sep 2010) $
-// $LastChangedRevision: 7092 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
