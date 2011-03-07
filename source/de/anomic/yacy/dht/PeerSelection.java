@@ -173,7 +173,7 @@ public class PeerSelection {
             wordhash = FlatWordPartitionScheme.positionToHash(dhtVerticalTarget);
             Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
             int c = Math.min(seedDB.sizeConnected(), redundancy);
-            int cc = 3; // select a maximum of 3, this is enough redundancy
+            int cc = 2; // select a maximum of 3, this is enough redundancy
             while (dhtEnum.hasNext() && c > 0 && cc-- > 0) {
                 seed = dhtEnum.next();
                 if (seed == null || seed.hash == null) continue;
