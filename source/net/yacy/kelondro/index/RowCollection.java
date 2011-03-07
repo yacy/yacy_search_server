@@ -345,11 +345,9 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         Row.Entry entry;
         final int addr = index * rowdef.objectsize;
-        synchronized (this) {
-            if (index >= chunkcount) return null;
-            if (addr + rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
-            entry = rowdef.newEntry(chunkcache, addr, clone);
-        }
+        if (index >= chunkcount) return null;
+        if (addr + rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
+        entry = rowdef.newEntry(chunkcache, addr, clone);
         return entry;
     }
     

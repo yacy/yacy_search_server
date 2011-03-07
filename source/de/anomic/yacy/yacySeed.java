@@ -234,7 +234,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     
     /**
      * check the peer name: protect against usage as XSS hack
-     * @param name
+     * @param id
      * @return a checked name without "<" and ">"
      */
     final static Pattern ltp = Pattern.compile("<");

@@ -48,4 +48,18 @@ public class UTF8 {
             return null;
         }
     }
+    
+    /**
+     * using the string method with the default charset given as argument should prevent using the charset cache
+     * in FastCharsetProvider.java:118 which locks all concurrent threads using a new String() method
+     * @param bytes
+     * @return
+     */
+    public static String String(byte[] bytes) {
+        return new String(bytes, charset);
+    }
+    
+    public static String String(byte[] bytes, int offset, int length) {
+        return new String(bytes, charset);
+    }
 }

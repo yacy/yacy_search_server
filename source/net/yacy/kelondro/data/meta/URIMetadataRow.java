@@ -106,8 +106,6 @@ public class URIMetadataRow implements URIMetadata {
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
     
-    private static final GenericFormatter mySHORT_DAY_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
-    
     public URIMetadataRow() {
         // create a dummy entry, good to produce poison objects
         this.entry = rowdef.newEntry();
@@ -229,18 +227,22 @@ public class URIMetadataRow implements URIMetadata {
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher));
+
+        // create new formatters to make concurrency possible
+        GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
+        
         try {
-            encodeDate(col_mod, mySHORT_DAY_FORMATTER.parse(prop.getProperty("mod", "20000101")));
+            encodeDate(col_mod, formatter.parse(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
-            encodeDate(col_load, mySHORT_DAY_FORMATTER.parse(prop.getProperty("load", "20000101")));
+            encodeDate(col_load, formatter.parse(prop.getProperty("load", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
-            encodeDate(col_fresh, mySHORT_DAY_FORMATTER.parse(prop.getProperty("fresh", "20000101")));
+            encodeDate(col_fresh, formatter.parse(prop.getProperty("fresh", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
@@ -295,6 +297,10 @@ public class URIMetadataRow implements URIMetadata {
         final StringBuilder s = new StringBuilder(300);
         if (metadata == null) return null;
         //System.out.println("author=" + comp.author());
+        
+        // create new formatters to make concurrency possible
+        GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
+        
         try {
             s.append("hash=").append(new String(hash()));
             assert (s.toString().indexOf(0) < 0);
@@ -308,11 +314,11 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",publisher=").append(crypt.simpleEncode(metadata.dc_publisher()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",mod=").append(mySHORT_DAY_FORMATTER.format(moddate()));
+            s.append(",mod=").append(formatter.format(moddate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",load=").append(mySHORT_DAY_FORMATTER.format(loaddate()));
+            s.append(",load=").append(formatter.format(loaddate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",fresh=").append(mySHORT_DAY_FORMATTER.format(freshdate()));
+            s.append(",fresh=").append(formatter.format(freshdate()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",referrer=").append(referrerHash() == null ? "" : new String(referrerHash()));
             assert (s.toString().indexOf(0) < 0);
