@@ -30,6 +30,7 @@
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -76,7 +77,6 @@ import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.graphics.ProfilingGraph;
 import de.anomic.yacy.yacyChannel;
-import java.util.Map;
 
 public class yacysearch {
 

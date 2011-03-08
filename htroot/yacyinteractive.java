@@ -38,13 +38,15 @@ public class yacyinteractive {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
-        String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
-        if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
+        final String promoteSearchPageGreeting =
+                (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ?
+                    env.getConfig("network.unit.description", "") :
+                    env.getConfig(SwitchboardConstants.GREETING, "");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         
-        String query = (post == null) ? "" : post.get("query", "");
+        final String query = (post == null) ? "" : post.get("query", "");
         prop.putHTML("query", query);
         prop.putHTML("querys", query.replaceAll(" ", "+"));
         return prop;
