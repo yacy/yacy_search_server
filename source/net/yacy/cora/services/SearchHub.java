@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen
  *  First released 25.05.2010 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General private
  *  License as published by the Free Software Foundation; either
@@ -126,6 +130,7 @@ public class SearchHub {
      * return a hash code of the search hub.
      * This is computed using only the query string because that identifies the object
      */
+    @Override
     public int hashCode() {
         return query.hashCode();
     }

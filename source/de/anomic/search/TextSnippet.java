@@ -32,6 +32,7 @@ import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.document.Document;
@@ -138,7 +139,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         // try to get snippet from snippetCache
         int source = SOURCE_CACHE;
         final String wordhashes = yacySearch.set2string(queryhashes);
-        final String urls = new String(url.hash());
+        final String urls = UTF8.String(url.hash());
         String snippetLine = snippetsCache.get(wordhashes, urls);
         if (snippetLine != null) {
             // found the snippet
@@ -374,7 +375,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 out = new StringBuilder();
                 //is character a special character?
                 if(p4.matcher(theWord.substring(k,k+1)).find()) {
-                    if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";
+                    if (UTF8.String(Word.word2hash(temp)).equals(UTF8.String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";
                     out.append(temp);
                     out.append(CharacterCoding.unicode2html(theWord.substring(k,k+1), false));
                     temp = "";
@@ -382,7 +383,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 //last character
                 else if(k == (theWord.length()-1)) {
                     temp = temp + theWord.substring(k,k+1);
-                    if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";
+                    if (UTF8.String(Word.word2hash(temp)).equals(UTF8.String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";
                     out.append(temp);
                     temp = "";
                 }
@@ -394,7 +395,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
 
         //end contrib [MN]
-        else if (new String(Word.word2hash(theWord)).equals(new String(h))) {
+        else if (UTF8.String(Word.word2hash(theWord)).equals(UTF8.String(h))) {
             theWord.replace(0, theWord.length(), CharacterCoding.unicode2html(theWord.toString(), false));
             theWord.insert(0, "<b>");
             theWord.append("</b>");

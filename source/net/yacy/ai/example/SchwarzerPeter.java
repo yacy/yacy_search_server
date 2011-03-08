@@ -26,9 +26,14 @@ public class SchwarzerPeter {
         public Karte(Kartentyp kartentyp, Kartenzaehler kartenzaehler) {
             this.kartentyp = kartentyp; this.kartenzaehler = kartenzaehler;
         }
+        @Override
         public boolean equals(Object obj) {
-            return this.kartentyp == ((Karte) obj).kartentyp && this.kartenzaehler == ((Karte) obj).kartenzaehler;
+            return obj != null
+                    && obj instanceof Karte
+                    && this.kartentyp == ((Karte) obj).kartentyp
+                    && this.kartenzaehler == ((Karte) obj).kartenzaehler;
         }
+        @Override
         public int hashCode() {
             return this.kartentyp.hashCode() + 16 + this.kartenzaehler.hashCode();
         }
@@ -77,10 +82,14 @@ public class SchwarzerPeter {
             return new Spieler(n, this.spieleranzahl);
         }
         
+        @Override
         public boolean equals(Object obj) {
-            return this.spielernummer == ((Spieler) obj).spielernummer;
+            return obj != null
+                    && obj instanceof Spieler
+                    && this.spielernummer == ((Spieler) obj).spielernummer;
         }
         
+        @Override
         public int hashCode() {
             return this.spielernummer;
         }

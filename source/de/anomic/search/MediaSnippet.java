@@ -38,6 +38,7 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.MimeTable;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
@@ -100,7 +101,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     
     @Override
     public String toString() {
-        return new String(href.hash());
+        return UTF8.String(href.hash());
     }
     
     @Override

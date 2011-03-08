@@ -2,9 +2,9 @@
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 30.03.2007 on http://yacy.net
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -26,6 +26,7 @@ package net.yacy.kelondro.util;
 
 import java.util.HashMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.order.ByteOrder;
 
 
@@ -80,6 +81,7 @@ public class ByteArray {
         return order.compare(this.buffer, aoffset, b.buffer, boffset, blength);
     }
     
+    @Override
     public int hashCode() {
         if (this.hash != 0) return this.hash;        
         this.hash = hashCode(this.buffer);
@@ -97,6 +99,7 @@ public class ByteArray {
         return h;
     }
     
+    @Override
     public boolean equals(Object other) {
         ByteArray b = (ByteArray) other;
         if (buffer == null && b == null) return true;
@@ -117,7 +120,7 @@ public class ByteArray {
         long multmin;
         long digit;
         
-        if (max <= 0) throw new NumberFormatException(new String(s));
+        if (max <= 0) throw new NumberFormatException(UTF8.String(s));
         if (s[0] == '-') {
             negative = true;
             limit = Long.MIN_VALUE;
@@ -128,20 +131,20 @@ public class ByteArray {
         multmin = limit / 10;
         if (i < max) {
             digit = s[i++] - 48;
-            if (digit < 0) throw new NumberFormatException(new String(s));
+            if (digit < 0) throw new NumberFormatException(UTF8.String(s));
             result = -digit;
         }
         while (i < max) {
             // Accumulating negatively avoids surprises near MAX_VALUE
             digit = s[i++] - 48;
-            if (digit < 0) throw new NumberFormatException(new String(s));
-            if (result < multmin) throw new NumberFormatException(new String(s));
+            if (digit < 0) throw new NumberFormatException(UTF8.String(s));
+            if (result < multmin) throw new NumberFormatException(UTF8.String(s));
             result *= 10;
-            if (result < limit + digit) throw new NumberFormatException(new String(s));
+            if (result < limit + digit) throw new NumberFormatException(UTF8.String(s));
             result -= digit;
         }
         if (negative) {
-            if (i > 1) return result; else throw new NumberFormatException(new String(s));
+            if (i > 1) return result; else throw new NumberFormatException(UTF8.String(s));
         } else {
             return -result;
         }
@@ -159,9 +162,9 @@ public class ByteArray {
         map.put(b, 2);
         System.out.println("map.size() = " + map.size());
         System.out.println("hashCode(a0) = " + a0.hashCode());
-        System.out.println("new String(a0).hashCode = " + (new String(a0.asBytes())).hashCode());
+        System.out.println("UTF8.String(a0).hashCode = " + (UTF8.String(a0.asBytes())).hashCode());
         System.out.println("hashCode(a1) = " + a1.hashCode());
-        System.out.println("new String(a1).hashCode = " + (new String(a1.asBytes())).hashCode());
+        System.out.println("UTF8.String(a1).hashCode = " + (UTF8.String(a1.asBytes())).hashCode());
         System.out.println("hashCode(b) = " + b.hashCode());
         System.out.println("a0 " + ((map.containsKey(a0)) ? "in" : "not in") + " map");
         System.out.println("a1 " + ((map.containsKey(a1)) ? "in" : "not in") + " map");

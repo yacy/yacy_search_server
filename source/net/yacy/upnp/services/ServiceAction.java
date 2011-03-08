@@ -183,7 +183,7 @@ public class ServiceAction {
         rtrVal.add( actArg );
       }
     }
-    if ( rtrVal.size() == 0 ) rtrVal = null;
+    if ( rtrVal.isEmpty() ) rtrVal = null;
     return rtrVal;
   }
   
@@ -196,7 +196,7 @@ public class ServiceAction {
         rtrVal.add( actArg.getName() );
       }
     }
-    if ( rtrVal.size() == 0 ) rtrVal = null;
+    if ( rtrVal.isEmpty() ) rtrVal = null;
     return rtrVal;
   }
 }

@@ -128,11 +128,11 @@ public class DiscoveryListener implements Runnable {
       Set<DiscoveryResultsHandler> handlers = registeredHandlers.get( searchTarget );
       if ( handlers != null ) {
         handlers.remove( resultsHandler );
-        if ( handlers.size() == 0 ) {
+        if (handlers.isEmpty()) {
           registeredHandlers.remove( searchTarget );
         }
       }
-      if ( registeredHandlers.size() == 0 ) {
+      if (registeredHandlers.isEmpty()) {
         stopDevicesListenerThread();
       }
     }

@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -269,11 +270,11 @@ public final class QueryParams {
         final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
         int p = 0;
         for (final byte[] b : hashes) {
-            assert b.length == Word.commonHashLength : "hash = " + new String(b);
+            assert b.length == Word.commonHashLength : "hash = " + UTF8.String(b);
             System.arraycopy(b, 0, bb, p, Word.commonHashLength);
             p += Word.commonHashLength;
         }
-        return new String(bb);
+        return UTF8.String(bb);
     }
 
     public static String anonymizedQueryHashes(final HandleSet hashes) {
@@ -284,14 +285,14 @@ public final class QueryParams {
         byte[] hash;
         if (i.hasNext()) {
             hash = i.next();
-            sb.append(new String(hash).substring(0, 3)).append(".........");
+            sb.append(UTF8.String(hash).substring(0, 3)).append(".........");
         }
         while (i.hasNext()) {
             hash = i.next();
-            sb.append(", ").append(new String(hash).substring(0, 3)).append(".........");
+            sb.append(", ").append(UTF8.String(hash).substring(0, 3)).append(".........");
         }
         sb.append("]");
-        return new String(sb);
+        return sb.toString();
     }
     
     /**
@@ -436,7 +437,7 @@ public final class QueryParams {
         context.append(asterisk);
         context.append(this.zonecode);
         context.append(asterisk);
-        context.append(new String(Word.word2hash(this.ranking.toExternalString())));
+        context.append(UTF8.String(Word.word2hash(this.ranking.toExternalString())));
         context.append(asterisk);
         context.append(this.prefer);
         context.append(asterisk);

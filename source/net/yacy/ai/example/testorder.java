@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -29,6 +33,7 @@ public class testorder implements Comparable<testorder> {
     public testorder(int x) {
         this.x = x;
     }
+    @Override
     public String toString() {
         return Integer.toString(this.x);
     }

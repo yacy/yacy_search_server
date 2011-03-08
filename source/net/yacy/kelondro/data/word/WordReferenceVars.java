@@ -1,10 +1,10 @@
-// ReferenceVars.java
+// WordReferenceVars.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 07.11.2007 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -253,7 +253,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 hitcount,      // how often appears this word in the text
                 wordsintext,   // total number of words
                 phrasesintext, // total number of phrases
-                positions.size() == 0 ? 1 : positions.iterator().next(), // position of word in all words
+                positions.isEmpty() ? 1 : positions.iterator().next(), // position of word in all words
                 posinphrase,   // position of word in its phrase
                 posofphrase,   // number of the phrase where word appears
                 lastModified,  // last-modified time of the document where word appears

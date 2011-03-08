@@ -2,9 +2,9 @@
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 14.01.2008 on http://yacy.net
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -375,17 +375,16 @@ public class Table implements Index, Iterable<Row.Entry> {
      * and 
      * @throws  
      */
-    public synchronized ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
+    public synchronized List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
+        final List<RowCollection> report = new ArrayList<RowCollection>();
         RowSet rows;
         final TreeSet<Long> d = new TreeSet<Long>();
         final byte[] b = new byte[rowdef.objectsize];
-        long L;
         Row.Entry inconsistentEntry;
         // iterate over all entries that have inconsistent index references
         long lastlog = System.currentTimeMillis();
-        ArrayList<long[]> doubles;
+        List<long[]> doubles;
         try {
             doubles = index.removeDoubles();
         } catch (RowSpaceExceededException e) {
@@ -397,8 +396,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             // 'is' is the set of all indexes, that have the same reference
             // we collect that entries now here
             rows = new RowSet(this.rowdef, is.length);
-            for (int j = 0; j < is.length; j++) {
-                L = is[j];
+            for (final long L : is) {
                 assert (int) L < file.size() : "L.intValue() = " + (int) L + ", file.size = " + file.size(); // prevent ooBounds Exception
                 d.add(L);
                 if ((int) L >= file.size()) continue; // prevent IndexOutOfBoundsException
@@ -438,6 +436,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         this.index = null;
     }
     
+    @Override
     protected void finalize() {
         if (this.file != null) this.close();
     }

@@ -1,8 +1,8 @@
-// kelondroBLOBHeapModifier.java
+// HeapModifier.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 05.01.2009 on http://yacy.net
 //
-// $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.SortedMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.logging.Log;
@@ -108,7 +109,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             if (seek < 0) return;
             
             // check consistency of the index
-            assert (checkKey(key, seek)) : "key compare failed; key = " + new String(key) + ", seek = " + seek;
+            assert (checkKey(key, seek)) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + seek;
             
             // access the file and read the container
             this.file.seek(seek);
@@ -261,7 +262,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             if (pos < 0) return 0;
             
             // check consistency of the index
-            assert checkKey(key, pos) : "key compare failed; key = " + new String(key) + ", seek = " + pos;
+            assert checkKey(key, pos) : "key compare failed; key = " + UTF8.String(key) + ", seek = " + pos;
             
             // access the file and read the container
             file.seek(pos);
@@ -292,7 +293,7 @@ public class HeapModifier extends HeapReader implements BLOB {
             
             // the new entry must be smaller than the old entry and must at least be 4 bytes smaller
             // because that is the space needed to write a new empty entry record at the end of the gap
-            if (blob.length > len - 4) throw new IOException("replace of BLOB for key " + new String(key) + " failed (too large): new size = " + blob.length + ", old size = " + (len - 4));
+            if (blob.length > len - 4) throw new IOException("replace of BLOB for key " + UTF8.String(key) + " failed (too large): new size = " + blob.length + ", old size = " + (len - 4));
             
             // replace old content
             this.file.seek(pos);

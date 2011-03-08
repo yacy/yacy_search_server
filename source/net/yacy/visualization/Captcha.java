@@ -3,9 +3,9 @@
 // part of YaCy
 // (C) by Marc Nause
 //
-// $LastChangedDate: 2007-04-03 22:56:00 +0100 (Di, 04 Apr 2007) $
-// $LastChangedRevision: 3542 $
-// $LastChangedBy: low012 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.BufferedObjectIndex;
 import net.yacy.kelondro.index.HandleSet;
@@ -253,7 +254,7 @@ public class Balancer {
         synchronized (this) {
             // double-check
             if (this.double_push_check.has(hash) || this.ddc.has(hash) || this.urlFileIndex.has(hash)) {
-                //Log.logSevere("Balancer", "double push: " + new String(hash));
+                //Log.logSevere("Balancer", "double push: " + UTF8.String(hash));
                 return;
             }
             if (this.double_push_check.size() > 10000) this.double_push_check.clear();
@@ -262,8 +263,8 @@ public class Balancer {
             // add to index
             final int s = this.urlFileIndex.size();
             this.urlFileIndex.put(entry.toRow());
-	        assert s < this.urlFileIndex.size() : "hash = " + new String(hash) + ", s = " + s + ", size = " + this.urlFileIndex.size();
-	        assert this.urlFileIndex.has(hash) : "hash = " + new String(hash);
+	        assert s < this.urlFileIndex.size() : "hash = " + UTF8.String(hash) + ", s = " + s + ", size = " + this.urlFileIndex.size();
+	        assert this.urlFileIndex.has(hash) : "hash = " + UTF8.String(hash);
 
 	        // add the hash to a queue
 	        pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
@@ -367,13 +368,13 @@ public class Balancer {
 		        //final int s = urlFileIndex.size();
 		        Row.Entry rowEntry = (nexthash == null) ? null : urlFileIndex.remove(nexthash);
 		        if (rowEntry == null) {
-		            //System.out.println("*** rowEntry=null, nexthash=" + new String(nexthash));
+		            //System.out.println("*** rowEntry=null, nexthash=" + UTF8.String(nexthash));
 		        	rowEntry = urlFileIndex.removeOne();
 		        	if (rowEntry == null) {
 		        	    nexthash = null;
 		        	} else {
 		        	    nexthash = rowEntry.getPrimaryKeyBytes();
-		        	    //System.out.println("*** rowEntry.getPrimaryKeyBytes()=" + new String(nexthash));
+		        	    //System.out.println("*** rowEntry.getPrimaryKeyBytes()=" + UTF8.String(nexthash));
 		        	}
 		        	
 		        }
@@ -399,8 +400,8 @@ public class Balancer {
 		                (profileEntry.cacheStrategy() == CrawlProfile.CacheStrategy.IFEXIST && Cache.has(crawlEntry.url()))
 		                ) ? 0 : Latency.waitingRemaining(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
 		        
-		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + new String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + new String(rowEntry.getPrimaryKeyBytes());
-		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + new String(nexthash) + ", crawlEntry.url().hash() = " + new String(crawlEntry.url().hash());
+		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + UTF8.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + UTF8.String(rowEntry.getPrimaryKeyBytes());
+		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + UTF8.String(nexthash) + ", crawlEntry.url().hash() = " + UTF8.String(crawlEntry.url().hash());
 		        
 		        if (failhash != null && Base64Order.enhancedCoder.equal(failhash, nexthash)) break; // prevent endless loops
 		        

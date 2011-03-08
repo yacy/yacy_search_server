@@ -5,9 +5,9 @@
 // This is a part of the kelondro database,
 // which is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.MemoryControl;
@@ -93,12 +94,12 @@ public class IndexTest {
         Runtime.getRuntime().gc();
         final long freeStartHash = MemoryControl.available();
         HashMap<String, Integer> hm = new HashMap<String, Integer>();
-        for (int i = 0; i < count; i++) hm.put(new String(tests[i]), 1);
+        for (int i = 0; i < count; i++) hm.put(UTF8.String(tests[i]), 1);
         final long t4 = System.currentTimeMillis();
         System.out.println("time   for HashMap<String> generation: " + (t4 - t3));
         
         bugs = 0;
-        for (int i = 0; i < count; i++) if (hm.get(new String(tests[i])) == null) bugs++;
+        for (int i = 0; i < count; i++) if (hm.get(UTF8.String(tests[i])) == null) bugs++;
         Runtime.getRuntime().gc();
         final long freeEndHash = MemoryControl.available();
         hm.clear(); hm = null;

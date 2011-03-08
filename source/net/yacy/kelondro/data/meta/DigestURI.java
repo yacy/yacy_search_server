@@ -1,8 +1,8 @@
-// yacyURL.java
+// DigestURI.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 13.07.2006 on http://yacy.net
 //
-// $LastChangedDate: 2009-10-10 01:22:22 +0200 (Sa, 10 Okt 2009) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -68,7 +69,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
             Log.logException(e);
             return null;
         }
-        return (url == null) ? null : new String(url.hash(), 6, 6);
+        return (url == null) ? null : UTF8.String(url.hash(), 6, 6);
     }
     
     /**
@@ -225,7 +226,9 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     }
     
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
-        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(subdom + ":" + port + ":" + rootpath)).charAt(0);
+        StringBuilder sb = new StringBuilder(subdom.length() + rootpath.length() + 8);
+        sb.append(subdom).append(':').append(Integer.toString(port)).append(':').append(rootpath);
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).charAt(0);
     }
 
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");
@@ -278,7 +281,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     public static final int domLengthEstimation(final byte[] urlHashBytes) {
         // generates an estimation of the original domain length
         assert (urlHashBytes != null);
-        assert (urlHashBytes.length == 12) : "urlhash = " + new String(urlHashBytes);
+        assert (urlHashBytes.length == 12) : "urlhash = " + UTF8.String(urlHashBytes);
         final int flagbyte = Base64Order.enhancedCoder.decodeByte(urlHashBytes[11]);
         final int domLengthKey = flagbyte & 3;
         switch (domLengthKey) {
@@ -301,7 +304,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     public static final int domDomain(final byte[] urlHash) {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
-        assert (urlHash.length == 12 || urlHash.length == 6) : "urlhash = " + new String(urlHash);
+        assert (urlHash.length == 12 || urlHash.length == 6) : "urlhash = " + UTF8.String(urlHash);
         return (Base64Order.enhancedCoder.decodeByte(urlHash[(urlHash.length == 12) ? 11 : 5]) & 28) >> 2;
     }
 
@@ -313,6 +316,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     /**
      *  checks for local/global IP range and local IP
      */
+    @Override
     public final boolean isLocal() {
         if (this.isFile()) return true;
         if (this.hash == null) synchronized (this) {

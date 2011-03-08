@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen
  *  First released 25.05.2010 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -79,8 +83,13 @@ public class HTTPConnector {
 		client.setTimout(timeout);
 		client.setUserAgent(this.userAgent);
 		client.setHost(vhost);
-		
-		return client.POSTbytes(url.toNormalform(true, false, true, false), post, usegzip);
+		byte[] b;
+		try {
+		    b = client.POSTbytes(url.toNormalform(true, false, true, false), post, usegzip);
+		} finally {
+		    client.finish();
+		}
+		return b;
 	}
 
 }

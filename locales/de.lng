@@ -647,15 +647,28 @@ Greeting Line<==Grußzeile<
 URL of Home Page<==URL der Homepage<
 URL of a Small Corporate Image<==URL des kleinen Corporate Identity Bildes<
 URL of a Large Corporate Image<==URL des großen Corporate Identity Bildes<
+Show Navigation Bar on Search Page?==Navigationsleiste auf Suchseite anzeigen?
+Show Navigation Top-Menu&nbsp;==Zeige Top-Menu Navigation&nbsp;
+no link to YaCy Menu \(admin must navigate to /Status.html manually\)==kein Verweis auf YaCy Menu (Der Admin muss manuell auf /Status.html wechseln)
+Show Advanced Search Options on Search Page?==Erweiterte Suchoptionen auf Suchseite anzeigen?
+Show Advanced Search Options on index.html&nbsp;==Erweiterte Suchoptionen auf index.html anzeigen?
+do not show Advanced Search==Erweiterte Suche nicht anzeigen
+Show Information Links for each Search Result Entry==Informationslinks für jeden Suchergebnis Eintrag anzeigen
+>Date&==>Datum&
+>Size&==>Größe&
+>Metadata&==>Metadaten&
+>Parser&==>Parser&
+>Pictures==>Bilder
 Default Pop-Up Page<==Standard Pop-up<
 >Status Page==>Status Seite
 >Search Front Page==>Frontseite Suche
 >Search Page \(small header\)==>Suchseite (kleine Kopfzeile)
 >Interactive Search Page==>Interaktive Suchseite
+Default index.html Page \(by forwarder\)==Standard index.html Seite (durch Weiterleitung)
 Target for Click on Search Results==Zielfenster beim Klicken auf ein Suchergebnis
 
 \"_blank\" \(new window\)=="_blank" (Neues Fenster)
-\"_self\" \(same window\)=="_self" (Selbes Fenster)
+\"_self\" \(same window\)=="_self" (Im gleichen Fenster)
 \"_parent\" \(the parent frame of a frameset\)=="_parent" (Der Parent Frame eines Framesets)
 \"_top\" \(top of all frames\)=="_top" (Oberster Frame)
 \"searchresult\" \(a default custom page name for search results\)=="Suchergebnis" (Eine standardmäßig konfigurierbare Setie für Suchergebnisse)
@@ -1288,8 +1301,7 @@ RWI-DB-Cleaner - Clean up the database by deletion of words with reference to bl
 
 #File: IndexControlRWIs_p.html
 #---------------------------
-Index Control==Index Kontrolle
-Index Administration==Index Administration
+Reverse Word Index Administration==Reverse Wort Indexverwaltung
 The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enthält im Moment #[wcount]# inverse Wort Indexe
 RWI Retrieval \(= search for a single word\)==RWI Abfrage (= Suche nach einem einzelnen Wort)
 Select Segment:==Segment Auswahl:
@@ -1304,6 +1316,7 @@ Cleanup==Aufräumen
 Stop Crawler and delete Crawl Queues==Crawler anhalten und Crawler Warteschlangen löschen
 Delete HTTP &amp; FTP Cache==Lösche HTTP &amp; FTP Cache
 Delete robots.txt Cache==Lösche robots.txt Cache
+Delete cached snippet-fetching failures during search==Lösche gecachte Snippet-Holen Fehler während der Suche
 "Delete"=="Löschen"
 No entry for word \'\#\[word\]\#\'==Keinen Eintrag zu Wort '#[word]#'
 No entry for word hash==Keinen Eintrag zu Wort-Hash
@@ -1374,8 +1387,7 @@ Blacklist Extension==Blacklist Erweiterung
 
 #File: IndexControlURLs_p.html
 #---------------------------
-Index Control==Index Kontrolle
-Index Administration==Index Administration
+URL References Administration==URL Referenzen Administration
 The local index currently contains \#\[ucount\]\# URL references==Der lokale Index enthält im Moment #[ucount]# URL-Referenzen
 URL Retrieval==URL Abfrage
 Select Segment:==Segment Auswahl:
@@ -2241,7 +2253,7 @@ or by POST-Parameters \(either in URL or as HTTP protocol\)==oder durch POST-Par
 and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
 
 Proxy Auto Config:==Automatische Proxy Konfiguration:
-this controls the proxy auto configuration script for browsers at http://localhost:8080/autoconfig.pac==Diese Einstellung regelt das Automatische Proxy Konfigurationsskript unter http://localhost:8080/autoconfig.pac
+this controls the proxy auto configuration script for browsers at http://localhost:8090/autoconfig.pac==Diese Einstellung regelt das Automatische Proxy Konfigurationsskript unter http://localhost:8090/autoconfig.pac
 .yacy-domains only==nur .yacy Domains
 whether the proxy should only be used for .yacy-Domains==Soll der Proxy nur für .yacy Domains verwendet werden diese Checkbox aktivieren.
 Proxy pre-fetch setting:==Proxy Indexier Einstellung:
@@ -2451,13 +2463,13 @@ Server/Proxy Port Configuration==Server/Proxy Port Konfiguration
 The socket addresses where YaCy should listen for incoming connections from other YaCy peers or http clients.==Die Socket-Adressen auf denen YaCy auf eingehende Verbindungen von anderen YaCy-Peers oder HTTP-Clients warten soll.
 You have four possibilities to specify the address:==Sie haben vier Möglichkeiten die Adresse anzugeben:
 defining a port only==nur einen Port angeben
-<em>e.g. 8080</em>==<em>z.B. 8080</em>
+<em>e.g. 8090</em>==<em>z.B. 8090</em>
 defining IP address and port==eine IP-Adresse und Port angeben
-<em>e.g. 192.168.0.1:8080</em>==<em>z.B. 192.168.0.1:8080</em>
+<em>e.g. 192.168.0.1:8090</em>==<em>z.B. 192.168.0.1:8090</em>
 defining host name and port==einen Hostnamen und Port angeben
-<em>e.g. home:8080</em>==<em>z.B. home:8080</em>
+<em>e.g. home:8090</em>==<em>z.B. home:8090</em>
 defining interface name and port==einen Interface-namen und Port angeben
-<em>e.g. #eth0:8080</em>==<em>z.B. #eth0:8080</em>
+<em>e.g. #eth0:8090</em>==<em>z.B. #eth0:8090</em>
 Hint: Dont forget to change your firewall configuration after you have changed the port.==Hinweis: Denken Sie daran Ihre Firewalleinstellungen zu ändern nachdem Sie den Port geändert haben.
 Proxy and http-Server Administration Port==Proxy und HTTP-Server Administrations Port
 Changes will take effect in 5-10 seconds==Die Änderungen werden in 5-10 Sekunden wirksam
@@ -3307,6 +3319,9 @@ Project Home==Projektseite
 #Deutsches Forum==Deutsches Forum
 English Forum==Englisches Forum
 YaCy Project Wiki==YaCy Projekt Wiki
+# Development Change Log==Entwicklung Änderungshistorie
+amp;language=en==amp;language=de
+Development Change Log==Entwicklung Changelog
 Peer Statistics::YaCy Statistics==Peer Statistiken::YaCy Statistiken
 #-----------------------------
 
@@ -3400,9 +3415,9 @@ User Profile==Benutzerprofil
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-#Index Administration==Index Administration
-#RWI Admin==RWI Admin
-URL Reference Admin==URL Referenzen Admin
+Index Administration==Indexverwaltung
+Reverse Word Index Administration==Reverse Wort Indexverwaltung
+URL References Database==URL Referenzen Datenbank
 URL Viewer==URL Betrachter
 #-----------------------------
 
@@ -3466,7 +3481,6 @@ File Hosting==Datei Freigabe
 #---------------------------
 Server Log Menu==Server Log Menü
 #Server Log==Server Log
-Log Statistics==Logstatistik
 #-----------------------------
 
 #File: env/templates/submenuWebStructure.template

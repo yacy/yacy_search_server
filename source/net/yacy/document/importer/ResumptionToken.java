@@ -40,6 +40,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
@@ -266,13 +267,13 @@ public class ResumptionToken extends TreeMap<String, String> {
                 this.saxParser.parse(this.stream, this);
             } catch (SAXException e) {
                 Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed (1):\n" + new String(b));
+                Log.logWarning("ResumptionToken", "token was not parsed (1):\n" + UTF8.String(b));
             } catch (IOException e) {
                 Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed (2):\n" + new String(b));
+                Log.logWarning("ResumptionToken", "token was not parsed (2):\n" + UTF8.String(b));
             } catch (ParserConfigurationException e) {
                 Log.logException(e);
-                Log.logWarning("ResumptionToken", "token was not parsed (3):\n" + new String(b));
+                Log.logWarning("ResumptionToken", "token was not parsed (3):\n" + UTF8.String(b));
                 throw new IOException(e.getMessage());
             } finally {
                 try {

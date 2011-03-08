@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 6539 $
-// $LastChangedBy: low012 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -86,6 +87,7 @@ public class WorkTables extends Tables {
         this.bookmarks = new YMarkTables(this);
     }
     
+    @Override
     public void clear(final String tablename) throws IOException {
     	super.clear(tablename);
     	this.bookmarks.clearIndex(tablename);
@@ -230,8 +232,8 @@ public class WorkTables extends Tables {
                 Log.logException(e);
             }
             if (row == null) continue;
-            String url = "http://" + host + ":" + port + new String(row.get(WorkTables.TABLE_API_COL_URL));
-            url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + new String(row.getPK());
+            String url = "http://" + host + ":" + port + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL));
+            url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
             try {
                 client.GETbytes(url);
                 l.put(url, client.getStatusCode());
@@ -249,7 +251,7 @@ public class WorkTables extends Tables {
         client.setRealm(realm);
         client.setTimout(120000);
         String url = "http://" + host + ":" + port + path;
-        if (pk != null) url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + new String(pk);
+        if (pk != null) url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(pk);
         try {
             client.GETbytes(url);
             return client.getStatusCode();
@@ -358,7 +360,7 @@ public class WorkTables extends Tables {
             Tables.Row row;
             while (i.hasNext()) {
                 row = i.next();
-                comments.put(row.getPK(), new String(row.get(WorkTables.TABLE_API_COL_COMMENT)));
+                comments.put(row.getPK(), UTF8.String(row.get(WorkTables.TABLE_API_COL_COMMENT)));
             }
         } catch (IOException e) {
             Log.logException(e);

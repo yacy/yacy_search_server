@@ -36,6 +36,7 @@ import java.util.HashSet;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 
@@ -142,14 +143,14 @@ public class opensearchdescriptionReader extends DefaultHandler {
             return null;
         }
         if (a.length < 100) {
-            Log.logWarning("opensearchdescriptionReader", "response=" + new String(a));
+            Log.logWarning("opensearchdescriptionReader", "response=" + UTF8.String(a));
             return null;
         }
         if (!ByteBuffer.equals(a, "<?xml".getBytes())) {
             Log.logWarning("opensearchdescriptionReader", "response does not contain valid xml");
             return null;
         }
-        final String end = new String(a, a.length - 10, 10);
+        final String end = UTF8.String(a, a.length - 10, 10);
         if (end.indexOf("rss") < 0) {
             Log.logWarning("opensearchdescriptionReader", "response incomplete");
             return null;

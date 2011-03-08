@@ -7,9 +7,9 @@
 //
 // This file ist contributed by Martin Thelian
 //
-// $LastChangedDate: 2006-02-20 23:57:42 +0100 (Mo, 20 Feb 2006) $
-// $LastChangedRevision: 1715 $
-// $LastChangedBy: theli $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

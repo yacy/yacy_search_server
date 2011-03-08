@@ -4,7 +4,7 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -48,6 +48,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -802,16 +803,22 @@ public class ArrayStack implements BLOB {
             blobItem bi = blobs.get(0);
             bi.blob.delete(key);
         } else {
-            Thread[] t = new Thread[blobs.size()];
+            Thread[] t = new Thread[blobs.size() - 1];
             int i = 0;
             for (blobItem bi: blobs) {
-                final blobItem bi0 = bi;
-                t[i] = new Thread() {
-                    public void run() {
-                        try { bi0.blob.delete(key); } catch (IOException e) {}
-                    }
-                };
-                t[i].start();
+                if (i < t.length) {
+                    // run this in a concurrent thread
+                    final blobItem bi0 = bi;
+                    t[i] = new Thread() {
+                        public void run() {
+                            try { bi0.blob.delete(key); } catch (IOException e) {}
+                        }
+                    };
+                    t[i].start();
+                } else {
+                    // no additional thread, run in this thread
+                    try { bi.blob.delete(key); } catch (IOException e) {}
+                }
                 i++;
             }
             for (Thread s: t) try {s.join();} catch (InterruptedException e) {}
@@ -1095,7 +1102,7 @@ public class ArrayStack implements BLOB {
             // iterate over keys
             Iterator<byte[]> i = heap.keys(true, false);
             while (i.hasNext()) {
-                System.out.println("key_b: " + new String(i.next()));
+                System.out.println("key_b: " + UTF8.String(i.next()));
             }
             heap.delete("aaaaaaaaaaab".getBytes());
             heap.delete("aaaaaaaaaaac".getBytes());

@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 17.05.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +24,7 @@
 
 package de.anomic.tools;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -53,7 +57,7 @@ public class disorderSet extends HashSet<String> implements Set<String> {
 
     public static void main(final String[] args) {
         final disorderSet ds = new disorderSet();
-        for (int i = 0; i < args.length; i++) ds.add(args[i]);
+        ds.addAll(Arrays.asList(args));
         for (int i = 0; i < args.length * 3; i++) System.out.print(ds.any() + " ");
         System.out.println();
     }

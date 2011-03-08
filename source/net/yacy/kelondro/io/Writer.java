@@ -1,4 +1,4 @@
-// RandomAccessWriter.java 
+// Writer.java 
 // -----------------------
 // (C) 2004 by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de

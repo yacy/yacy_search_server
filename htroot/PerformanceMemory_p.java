@@ -26,6 +26,7 @@
 
 //import java.util.Iterator;
 import java.io.File;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -127,7 +128,11 @@ public class PerformanceMemory_p {
         RAMIndex cache;
         long hitmem, totalhitmem = 0;
         while (oi.hasNext()) {
-            oie = oi.next();
+            try {
+                oie = oi.next();
+            } catch (ConcurrentModificationException e) {
+                break;
+            }
             filename = oie.getKey();
             cache = oie.getValue();
             prop.put("indexcache_" + c + "_Name", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));

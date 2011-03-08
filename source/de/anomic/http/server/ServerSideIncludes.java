@@ -67,7 +67,7 @@ public class ServerSideIncludes {
         if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
             final int q = in.indexOf("\"".getBytes(), off + 22);
             if (q > 0) {
-                final String path = in.toString(off + 22, q);
+                final String path = in.toString(off + 22, q - off - 22);
                 writeContent(path, out, authorization, requesthost);
             }
         }

@@ -22,6 +22,7 @@
 
 package net.yacy.document.importer;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
@@ -442,11 +443,7 @@ public class MediawikiImporter extends Thread implements Importer {
         }
         public wikisourcerecord(byte[] chunk, long start, long end) {
             String s;
-            try {
-                s = new String(chunk, "UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                throw new RuntimeException(e.getMessage());
-            }
+            s = UTF8.String(chunk);
             int t0 = s.indexOf("<title>");
             if (t0 >= 0) {
                 int t1 = s.indexOf("</title>", t0);
@@ -578,7 +575,7 @@ public class MediawikiImporter extends Thread implements Importer {
             start = in.pos() - 6;
             in.resetBuffer();
             if (!in.seek(pageendb)) break;
-            s = new String(in.bytes(), "UTF-8");
+            s = UTF8.String(in.bytes());
             in.resetBuffer();
             if (s.indexOf(m) >= 0) {
                 // we found the record
@@ -766,11 +763,7 @@ public class MediawikiImporter extends Thread implements Importer {
         if (s[0].equals("-read")) {
             long start = Integer.parseInt(s[1]);
             int  len   = Integer.parseInt(s[2]);
-            try {
-                System.out.println(new String(read(new File(s[3]), start, len), "UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                Log.logException(e);
-            }
+            System.out.println(UTF8.String(read(new File(s[3]), start, len)));
         }
         
         if (s[0].equals("-find")) {
@@ -779,7 +772,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 if (w == null) {
                     Log.logInfo("WIKITRANSLATION", "not found");
                 } else {
-                    System.out.println(new String(read(new File(s[2]), w.start, (int) (w.end - w.start)), "UTF-8"));
+                    System.out.println(UTF8.String(read(new File(s[2]), w.start, (int) (w.end - w.start))));
                 }
             } catch (IOException e) {
                 Log.logException(e);

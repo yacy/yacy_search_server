@@ -2,9 +2,9 @@
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 10.03.2009 on http://www.anomic.de
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -69,6 +69,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         this.index = RowSet.importRowSet(b, this.rowdef);
     }
 
+    @Override
     public HandleSet clone() {
         return new HandleSet(this.rowdef, this.index.clone());
     }
@@ -164,21 +165,19 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
-    public final synchronized boolean put(final byte[] key) throws RowSpaceExceededException {
+    public final boolean put(final byte[] key) throws RowSpaceExceededException {
         assert (key != null);
-        final Row.Entry newentry = index.row().newEntry();
-        newentry.setCol(0, key);
+        final Row.Entry newentry = index.row().newEntry(key);
         return index.put(newentry);
     }
     
-    public final synchronized void putUnique(final byte[] key) throws RowSpaceExceededException {
+    public final void putUnique(final byte[] key) throws RowSpaceExceededException {
         assert (key != null);
-        final Row.Entry newentry = this.rowdef.newEntry();
-        newentry.setCol(0, key);
+        final Row.Entry newentry = index.row().newEntry(key);
         index.addUnique(newentry);
     }
     
-    public final synchronized boolean remove(final byte[] key) {
+    public final boolean remove(final byte[] key) {
         assert (key != null);
         Row.Entry indexentry;
         indexentry = index.remove(key);
@@ -227,6 +226,7 @@ public final class HandleSet implements Iterable<byte[]>, Cloneable {
         index = null;
     }
     
+    @Override
     public final String toString() {
         return this.index.toString();
     }

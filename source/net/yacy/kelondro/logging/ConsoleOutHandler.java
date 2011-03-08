@@ -5,9 +5,11 @@
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-//This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate: 2008-08-02 14:12:04 +0200 (Sa, 02 Aug 2008) $ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+//This file is contributed by Martin Thelian
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by

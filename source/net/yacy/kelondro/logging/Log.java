@@ -3,8 +3,10 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: $LastChangedDate: 2009-01-30 14:48:11 +0000 (Fr, 30 Jan 2009) $ by $LastChangedBy$
-// Revision: $LastChangedRevision$
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,10 +24,12 @@
 
 package net.yacy.kelondro.logging;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.FileHandler;
@@ -308,11 +312,15 @@ public final class Log {
     
     protected final static logEntry poison = new logEntry();
     protected final static BlockingQueue<logEntry> logQueue = new LinkedBlockingQueue<logEntry>();
-    private   static logRunner logRunnerThread = null;
-    
+    private   final static logRunner logRunnerThread = new logRunner();
+
+    static {
+        logRunnerThread.start();
+    }
+
     protected final static class logRunner extends Thread {
         public logRunner() {
-        	super("Log Runner");
+            super("Log Runner");
         }
         
         @Override
@@ -363,26 +371,27 @@ public final class Log {
             if (!log.canRead()) log.mkdir();
 
             // generating the root logger
-            Logger logger = Logger.getLogger("");
+            final Logger logger = Logger.getLogger("");
             logger.setUseParentHandlers(false);
             
             //for (Handler h: logger.getHandlers()) logger.removeHandler(h);
             if (!dataPath.getAbsolutePath().equals(appPath.getAbsolutePath())) {
-                FileHandler handler = new FileHandler(logPattern, 1024*1024, 20, true);
+                final FileHandler handler = new FileHandler(logPattern, 1024*1024, 20, true);
                 logger.addHandler(handler); 
             }
-
-            logRunnerThread = new logRunner();
-            logRunnerThread.start();
             
             // redirect uncaught exceptions to logging
             final Log exceptionLog = new Log("UNCAUGHT-EXCEPTION");
             Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler(){
                 public void uncaughtException(final Thread t, final Throwable e) {
-                    String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
-                    exceptionLog.logWarning(msg);
-                    System.err.print("Exception in thread \"" + t.getName() + "\" ");
-                    e.printStackTrace(System.err);
+                    final String msg = String.format("Thread %s: %s",t.getName(), e.getMessage());
+                    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    final PrintStream ps = new PrintStream(baos);
+                    e.printStackTrace(ps);
+                    ps.close();
+                    exceptionLog.logSevere(msg + "\n" + baos.toString(), e);
+                    //System.err.print("Exception in thread \"" + t.getName() + "\" ");
+                    //e.printStackTrace(System.err);
                 }
             });
         } finally {

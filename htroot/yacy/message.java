@@ -35,6 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
@@ -205,11 +206,11 @@ public final class message {
             .append("\nCategory:     ")
             .append(msgEntry.category())
             .append("\n===================================================================\n")
-            .append(new String(msgEntry.message()));
+            .append(UTF8.String(msgEntry.message()));
 
             final Process process=Runtime.getRuntime().exec(sendMail);
             final PrintWriter email = new PrintWriter(process.getOutputStream());
-            email.print(new String(emailTxt));
+            email.print(emailTxt.toString());
             email.close();                        
         } catch (final Exception e) {
             yacyCore.log.logWarning("message: message forwarding via email failed. ",e);

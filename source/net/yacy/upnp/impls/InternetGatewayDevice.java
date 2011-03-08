@@ -263,7 +263,7 @@ public class InternetGatewayDevice {
           if ( log.isDebugEnabled() ) log.debug( "UnsupportedOperationException during discovery " + ex.getMessage() );
         }
       }
-      if ( valid.size() == 0 ) {
+      if (  valid.isEmpty() ) {
         return null;
       }
       rtrVal = new InternetGatewayDevice[valid.size()];

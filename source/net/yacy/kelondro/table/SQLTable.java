@@ -1,12 +1,12 @@
-// kelondroSQLTable.java
+// SQLTable.java
 // this class was written by Martin Thelian
 // (the class was once a sub-class of dbtest.java)
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
@@ -175,7 +176,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             final String sqlQuery = "SELECT value from test where hash = ?";
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
-            sqlStatement.setString(1, new String(key));
+            sqlStatement.setString(1, UTF8.String(key));
             
             byte[] value = null;
             final ResultSet result = sqlStatement.executeQuery();
@@ -260,7 +261,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             
             
 			sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);                 
-            sqlStatement.setString(1, new String(key));
+            sqlStatement.setString(1, UTF8.String(key));
             sqlStatement.execute();
             
             return entry;

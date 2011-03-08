@@ -43,6 +43,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 
@@ -149,7 +150,9 @@ public final class SetTools {
                     }
                     if (mobj2 != null) {
                         if (mentry1.getValue() instanceof String) {
-                            result.put(mentry1.getKey(), (B) ((concatStrings) ? (mentry1.getValue() + (String) mobj2) : mentry1.getValue()));
+                            result.put(mentry1.getKey(), (B) ((concatStrings) ? (((String) mentry1.getValue()) + (String) mobj2) : (String) mentry1.getValue()));
+                        } else if (mentry1.getValue() instanceof StringBuilder) {
+                            result.put(mentry1.getKey(), (B) ((concatStrings) ? (((StringBuilder) mentry1.getValue()).append((StringBuilder) mobj2)) : mentry1.getValue()));
                         } else {
                             result.put(mentry1.getKey(), mentry1.getValue());
                         }
@@ -182,7 +185,9 @@ public final class SetTools {
                     if (mi2.hasNext()) mentry2 = mi2.next(); else break;
                 } else {
                     if (mentry1.getValue() instanceof String) {
-                        result.put(mentry1.getKey(), (B) ((concatStrings) ? ((String) mentry1.getValue() + (String) mentry2.getValue()) : (String) mentry1.getValue()));
+                        result.put(mentry1.getKey(), (B) ((concatStrings) ? (((String) mentry1.getValue()) + (String) mentry2.getValue()) : (String) mentry1.getValue()));
+                    } else if (mentry1.getValue() instanceof StringBuilder) {
+                        result.put(mentry1.getKey(), (B) ((concatStrings) ? (((StringBuilder) mentry1.getValue()).append((StringBuilder) mentry2.getValue())) : (StringBuilder) mentry1.getValue()));
                     } else {
                         result.put(mentry1.getKey(), mentry1.getValue());
                     }
@@ -536,9 +541,9 @@ public final class SetTools {
     public static String setToString(final HandleSet set, final char separator) {
         final Iterator<byte[]> i = set.iterator();
         final StringBuilder sb = new StringBuilder(set.size() * 7);
-        if (i.hasNext()) sb.append(new String(i.next()));
+        if (i.hasNext()) sb.append(UTF8.String(i.next()));
         while (i.hasNext()) {
-            sb.append(separator).append(new String(i.next()));
+            sb.append(separator).append(UTF8.String(i.next()));
         }
         return sb.toString();
     }

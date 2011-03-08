@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Data;
@@ -57,7 +58,7 @@ public class YMarkIndex {
     public String getKeyname(final String user, final byte[] key) throws IOException, RowSpaceExceededException {
     	final String index_table = user + this.table_basename;
     	Tables.Row row = this.worktables.select(index_table, key);
-   		return new String(row.get(INDEX.NAME.key(), INDEX.NAME.deflt()));
+   		return row.get(INDEX.NAME.key(), INDEX.NAME.deflt());
     }
     
     public Iterator<String> getFolders(final String user, final String root) throws IOException {
@@ -71,7 +72,7 @@ public class YMarkIndex {
         while (it.hasNext()) {
             folder = it.next();
             path.setLength(0);
-            path.append(new String(folder.get(INDEX.NAME.key(), INDEX.NAME.deflt())));
+            path.append(folder.get(INDEX.NAME.key(), INDEX.NAME.deflt()));
             //TODO: get rid of .toString.equals()
             while(path.length() > 0 && !path.toString().equals(root)){
                 folders.add(path.toString());                  
@@ -131,13 +132,13 @@ public class YMarkIndex {
 		final String index_table = user + this.table_basename;
 		final String cacheKey = index_table+":"+keyname;
 		if (this.cache.containsKey(cacheKey)) {
-			return YMarkTables.keysStringToSet(new String(this.cache.get(cacheKey)));
+			return YMarkTables.keysStringToSet(UTF8.String(this.cache.get(cacheKey)));
 		} else {
 			final Tables.Row idx_row = this.worktables.select(index_table, YMarkTables.getKeyId(keyname));
 			if (idx_row != null) {						
 				final byte[] keys = idx_row.get(INDEX.URLS.key);
 				this.cache.put(cacheKey, keys);
-				return YMarkTables.keysStringToSet(new String(keys));
+				return YMarkTables.keysStringToSet(UTF8.String(keys));
 			}
 		}
 		return new HashSet<String>();
@@ -174,7 +175,7 @@ public class YMarkIndex {
 		while (plainIterator.hasNext()) {
 			Tables.Row row = plainIterator.next();
 			if (row != null && row.containsKey(this.table_basename.substring(1))) {
-				final String url = new String(row.get(YMarkTables.BOOKMARK.URL.key()));
+				final String url = UTF8.String(row.get(YMarkTables.BOOKMARK.URL.key()));
 				final String key = this.table_basename.substring(1);
 				final String keysString = row.get(key, YMarkTables.BOOKMARK.get(key).deflt());
 				this.insertIndexEntry(bmk_user, keysString, YMarkTables.getBookmarkId(url));
@@ -193,11 +194,11 @@ public class YMarkIndex {
     	final String index_table = user + this.table_basename;
         final String cacheKey = index_table+":"+keyname;
         final byte[] key = YMarkTables.getKeyId(keyname);
-        final String urlHash = new String(url);  
+        final String urlHash = UTF8.String(url);  
         Tables.Row row = null;
         
         // try to load urlSet from cache
-        HashSet<String>urlSet = this.cache.containsKey(cacheKey) ? YMarkTables.keysStringToSet(new String(this.cache.get(cacheKey))) : new HashSet<String>();
+        HashSet<String>urlSet = this.cache.containsKey(cacheKey) ? YMarkTables.keysStringToSet(UTF8.String(this.cache.get(cacheKey))) : new HashSet<String>();
         
     	try {
     		row = this.worktables.select(index_table, key);    		
@@ -227,7 +228,7 @@ public class YMarkIndex {
     			// key has no cache entry
     			if (urlSet.isEmpty()) {
 	    			// load urlSet from index_table
-    				urlSet = YMarkTables.keysStringToSet(new String(row.get(INDEX.URLS.key)));	   
+    				urlSet = YMarkTables.keysStringToSet(UTF8.String(row.get(INDEX.URLS.key)));	   
     			}    			
     			switch (action) {
 					case ADD:

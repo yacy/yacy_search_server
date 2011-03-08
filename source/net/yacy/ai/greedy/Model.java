@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -77,6 +81,7 @@ public interface Model<SpecificRole extends Role, SpecificFinding extends Findin
      * do not include a computation based on latest actions
      * @return a hash code
      */
+    @Override
     public int hashCode();
 
     /**
@@ -84,6 +89,7 @@ public interface Model<SpecificRole extends Role, SpecificFinding extends Findin
      * @param om
      * @return true if other model is equal to the current model.
      */
+    @Override
     public boolean equals(Object om);
 
     /**

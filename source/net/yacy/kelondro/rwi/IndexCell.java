@@ -1,12 +1,12 @@
-// ReverseIndexCell.java
+// IndexCell.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 1.3.2009 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
-// $LastChangedRevision: 6393 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -92,7 +92,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         
         this.array = new ReferenceContainerArray<ReferenceType>(cellPath, prefix, factory, termOrder, payloadrow, merger);
         this.ram = new ReferenceContainerCache<ReferenceType>(factory, payloadrow, termOrder);
-        this.countCache = new ComparableARC<byte[], Integer>(100, termOrder);
+        this.countCache = new ComparableARC<byte[], Integer>(1000, termOrder);
         this.maxRamEntries = maxRamEntries;
         this.merger = merger;
         this.lastCleanup = System.currentTimeMillis();

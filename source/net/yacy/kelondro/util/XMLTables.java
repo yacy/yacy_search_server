@@ -1,4 +1,4 @@
-// kelondroXMLTables.java
+// XMLTables.java
 // -------------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -6,9 +6,9 @@
 // Frankfurt, Germany, 2006
 // created 09.02.2006
 //
-// $LastChangedDate: 2008-08-06 19:43:12 +0000 (Mi, 06 Aug 2008) $
-// $LastChangedRevision: 5039 $
-// $LastChangedBy: danielr $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,13 +32,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 
 public class XMLTables {
 
-    private Hashtable<String, Hashtable<String, String>> tables;
+    private Map<String, Map<String, String>> tables;
 
     // tables is a hashtable that contains hashtables as values in the table
     private File propFile;
@@ -47,7 +48,7 @@ public class XMLTables {
     public XMLTables() {
         this.propFile = null;
         this.timestamp = System.currentTimeMillis();
-        this.tables = new Hashtable<String, Hashtable<String, String>>();
+        this.tables = new HashMap<String, Map<String, String>>();
     }
 
     @SuppressWarnings("unchecked")
@@ -56,10 +57,10 @@ public class XMLTables {
         this.timestamp = System.currentTimeMillis();
         if (propFile.exists()) {
             final XMLDecoder xmldec = new XMLDecoder(new FileInputStream(propFile));
-            tables = (Hashtable<String, Hashtable<String, String>>) xmldec.readObject();
+            tables = (HashMap<String, Map<String, String>>) xmldec.readObject();
             xmldec.close();
         } else {
-            tables = new Hashtable<String, Hashtable<String, String>>();
+            tables = new HashMap<String, Map<String, String>>();
         }
     }
 
@@ -103,23 +104,23 @@ public class XMLTables {
 
     public int sizeTable(final String table) {
         // returns number of entries in table; if table does not exist -1
-        final Hashtable<String, String> l = tables.get(table);
+        final Map<String, String> l = tables.get(table);
         if (l == null) return -1;
         return l.size();
     }
 
     public void createTable(final String table) throws IOException {
         // creates a new table
-        final Hashtable<String, String> l = tables.get(table);
+        final Map<String, String> l = tables.get(table);
         if (l != null)
             return; // we do not overwite
-        tables.put(table, new Hashtable<String, String>());
+        tables.put(table, new HashMap<String, String>());
         if (this.propFile != null) commit(false);
     }
 
     public void set(final String table, final String key, String value) throws IOException {
         if (table != null) {
-            final Hashtable<String, String> l = tables.get(table);
+            final Map<String, String> l = tables.get(table);
             if (l == null) throw new RuntimeException("Microtables.set: table does not exist");
             if (value == null) value = "";
             l.put(key, value);
@@ -130,7 +131,7 @@ public class XMLTables {
 
     public String get(final String table, final String key, final String deflt) {
         if (table != null) {
-            final Hashtable<String, String> l = tables.get(table);
+            final Map<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.get: table does not exist");
             if (!l.containsKey(key))
@@ -142,7 +143,7 @@ public class XMLTables {
 
     public boolean has(final String table, final String key) {
         if (table != null) {
-            final Hashtable<String, String> l = tables.get(table);
+            final Map<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.has: table does not exist");
             return (l.containsKey(key));
@@ -150,12 +151,12 @@ public class XMLTables {
         return false;
     }
 
-    public Enumeration<String> keys(final String table) {
+    public Iterator<String> keys(final String table) {
         if (table != null) {
-            final Hashtable<String, String> l = tables.get(table);
+            final Map<String, String> l = tables.get(table);
             if (l == null)
                 throw new RuntimeException("Microtables.keys: table does not exist");
-            return l.keys();
+            return l.keySet().iterator();
         }
         return null;
     }

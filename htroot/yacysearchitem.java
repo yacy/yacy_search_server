@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.TreeSet;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -125,10 +126,10 @@ public class yacysearchitem {
             prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
             prop.put("content_authorized", authenticated ? "1" : "0");
             prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
-            prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + new String(result.hash()) + "&urlmaskfilter=.*");
-            prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + new String(result.hash()) + "&urlmaskfilter=.*");
-            prop.put("content_authorized_urlhash", new String(result.hash()));
-            String resulthashString = new String(result.hash());
+            prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + UTF8.String(result.hash()) + "&urlmaskfilter=.*");
+            prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + UTF8.String(result.hash()) + "&urlmaskfilter=.*");
+            prop.put("content_authorized_urlhash", UTF8.String(result.hash()));
+            String resulthashString = UTF8.String(result.hash());
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
@@ -210,7 +211,7 @@ public class yacysearchitem {
                 prop.put("content_item_width", ms.width);
                 prop.put("content_item_height", ms.height);
                 prop.put("content_item_attr", (ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"); // attributes, here: original size of image
-                prop.put("content_item_urlhash", new String(ms.source.hash()));
+                prop.put("content_item_urlhash", UTF8.String(ms.source.hash()));
                 prop.put("content_item_source", ms.source.toNormalform(true, false));
                 prop.putXML("content_item_source-xml", ms.source.toNormalform(true, false));
                 prop.put("content_item_sourcedom", ms.source.getHost());

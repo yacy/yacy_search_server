@@ -1,13 +1,15 @@
-//severMiniLogFormatter.java 
+//MiniLogFormatter.java 
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
-//This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate: 2008-12-04 13:54:16 +0100 (Thu, 04 Dec 2008) $ by $LastChangedBy$
-//Revision: $LastChangedRevision$
+//This file is contributed by Martin Thelian
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -30,22 +32,22 @@ import java.util.logging.SimpleFormatter;
 
 public final class MiniLogFormatter extends SimpleFormatter {
 
-      private final StringBuilder buffer = new StringBuilder();
-  
-      public MiniLogFormatter() {
-          super();
-      }        
+    private final StringBuilder buffer = new StringBuilder();
+
+    public MiniLogFormatter() {
+        super();
+    }
       
     @Override
-      public final synchronized String format(final LogRecord record) {
-          
-          final StringBuilder stringBuilder = this.buffer;
-          stringBuilder.setLength(0);
-          stringBuilder.append(formatMessage(record));
-          
-          // adding the stack trace if available
-          stringBuilder.append(System.getProperty("line.separator"));
-          
-          return stringBuilder.toString();
+    public final synchronized String format(final LogRecord record) {
+
+        final StringBuilder stringBuilder = this.buffer;
+        stringBuilder.setLength(0);
+        stringBuilder.append(formatMessage(record));
+
+        // adding the stack trace if available
+        stringBuilder.append(System.getProperty("line.separator"));
+
+        return stringBuilder.toString();
       }
 }

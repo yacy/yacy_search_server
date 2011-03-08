@@ -72,7 +72,7 @@ public class HttpResponse {
       throw new IllegalArgumentException( "Empty HTTP response message" );
     }
     boolean bodyParsing = false;
-    StringBuffer bodyParsed = new StringBuffer();
+    StringBuilder bodyParsed = new StringBuilder();
     fields = new HashMap<String, String>();
     String[] lines = rawHttpResponse.split( "\\r\\n" );
     this.header = lines[0].trim();

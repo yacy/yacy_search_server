@@ -1,4 +1,4 @@
-// serverInstantBlockingThread.java
+// InstantBlockingThread.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 27.03.2008 on http://yacy.net
 //

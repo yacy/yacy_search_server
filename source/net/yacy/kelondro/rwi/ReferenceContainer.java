@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
-// $LastChangedRevision: 6393 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
@@ -367,8 +368,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie1 = se.next();
             ie2 = large.getReference(ie1.metadataHash());
             if ((ie1 != null) && (ie2 != null)) {
-                assert (ie1.metadataHash().length == keylength) : "ie0.urlHash() = " + new String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie2.metadataHash());
+                assert (ie1.metadataHash().length == keylength) : "ie0.urlHash() = " + UTF8.String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie2.metadataHash());
                 // this is a hit. Calculate word distance:
                 
                 ie1 = factory.produceFast(ie2);
@@ -401,8 +402,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + new String(ie2.metadataHash());
+                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + UTF8.String(ie2.metadataHash());
                 c = ordering.compare(ie1.metadataHash(), ie2.metadataHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
@@ -457,8 +458,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 ie0 = se.next();
                 ie1 = excl.getReference(ie0.metadataHash());
                 if ((ie0 != null) && (ie1 != null)) {
-                    assert (ie0.metadataHash().length == keylength) : "ie0.urlHash() = " + new String(ie0.metadataHash());
-                    assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
+                    assert (ie0.metadataHash().length == keylength) : "ie0.urlHash() = " + UTF8.String(ie0.metadataHash());
+                    assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
                     if (iterate_pivot) se.remove(); pivot.delete(ie0.metadataHash());
                 }
             }
@@ -483,8 +484,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
-                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + new String(ie2.metadataHash());
+                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + UTF8.String(ie2.metadataHash());
                 c = pivot.rowdef.getOrdering().compare(ie1.metadataHash(), ie2.metadataHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
@@ -505,11 +506,11 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public synchronized String toString() {
-        return "C[" + new String(termHash) + "] has " + this.size() + " entries";
+        return "C[" + UTF8.String(termHash) + "] has " + this.size() + " entries";
     }
     
     public int hashCode() {
-        return (int) Base64Order.enhancedCoder.decodeLong(new String(this.termHash).substring(0, 4));
+        return (int) Base64Order.enhancedCoder.decodeLong(UTF8.String(this.termHash).substring(0, 4));
     }
     
 
@@ -525,8 +526,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             while (i.hasNext()) {
                 iEntry = i.next();
                 if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.metadataHash()) != null)) continue; // do not include urls that are in excludeContainer
-                dom = new String(iEntry.metadataHash(), 6, 6);
-                mod = new String(iEntry.metadataHash(), 0, 6);
+                dom = UTF8.String(iEntry.metadataHash(), 6, 6);
+                mod = UTF8.String(iEntry.metadataHash(), 0, 6);
                 if ((paths = doms.get(dom)) == null) {
                     doms.put(dom, new StringBuilder(30).append(mod));
                 } else {
@@ -555,31 +556,37 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return bb;
     }
 
-    public static final TreeMap<String, String> decompressIndex(ByteBuffer ci, final String peerhash) {
-        TreeMap<String, String> target = new TreeMap<String, String>();
+    public static final TreeMap<String, StringBuilder> decompressIndex(ByteBuffer ci, final String peerhash) {
+        TreeMap<String, StringBuilder> target = new TreeMap<String, StringBuilder>();
         // target is a mapping from url-hashes to a string of peer-hashes
-        if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
-            //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
-            ci = ci.trim(1, ci.length() - 2);
-            String dom, url, peers;
-            while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
+        if (ci.byteAt(0) != '{' || ci.byteAt(ci.length() - 1) != '}') return target;
+        //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());
+        ci = ci.trim(1, ci.length() - 2);
+        String dom, url;
+        StringBuilder peers;
+        StringBuilder urlsb;
+        while ((ci.length() >= 13) && (ci.byteAt(6) == ':')) {
+            assert ci.length() >= 6 : "ci.length() = " + ci.length();
+            dom = ci.toStringBuilder(0, 6, 6).toString();
+            ci.trim(7);
+            while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
                 assert ci.length() >= 6 : "ci.length() = " + ci.length();
-                dom = ci.toString(0, 6);
-                ci.trim(7);
-                while ((ci.length() > 0) && (ci.byteAt(0) != ',')) {
-                    assert ci.length() >= 6 : "ci.length() = " + ci.length();
-                    url = ci.toString(0, 6) + dom;
-                    ci.trim(6);
-                    peers = target.get(url);
-                    if (peers == null) {
-                        target.put(url, peerhash);
-                    } else {
-                        target.put(url, peers + peerhash);
-                    }
-                    //System.out.println("DEBUG-DECOMPRESS: " + url + ":" + target.get(url));
+                urlsb = ci.toStringBuilder(0, 6, 12);
+                urlsb.append(dom);
+                url = urlsb.toString();
+                ci.trim(6);
+                
+                peers = target.get(url);
+                if (peers == null) {
+                    peers = new StringBuilder(24);
+                    peers.append(peerhash);
+                    target.put(url, peers);
+                } else {
+                    peers.append(peerhash);
                 }
-                if (ci.byteAt(0) == ',') ci.trim(1);
+                //System.out.println("DEBUG-DECOMPRESS: " + url + ":" + target.get(url));
             }
+            if (ci.byteAt(0) == ',') ci.trim(1);
         }
         return target;
     }

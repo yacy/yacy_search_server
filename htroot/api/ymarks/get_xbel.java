@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.blob.Tables;
@@ -73,7 +74,7 @@ public class get_xbel {
         		if (foldername.length >= n) {
         			n = foldername.length;
         			if(n != root_depth) {
-                		prop.put("xbel_"+count+"_elements", "<folder id=\"f:"+new String(YMarkTables.getKeyId(foldername[n-1]))+"\">");
+                		prop.put("xbel_"+count+"_elements", "<folder id=\"f:"+UTF8.String(YMarkTables.getKeyId(foldername[n-1]))+"\">");
                 		count++;
                 		prop.put("xbel_"+count+"_elements", "<title>" + CharacterCoding.unicode2xml(foldername[n-1], true) + "</title>");   		
                 		count++;	
@@ -83,7 +84,7 @@ public class get_xbel {
             	    	Tables.Row bmk_row = null;
             	    	String urlHash;
             			while(bit.hasNext()){ 
-            				urlHash = new String(bit.next());
+            				urlHash = bit.next();
             	    		if(alias.contains(urlHash)) {
             	    			buffer.setLength(0);
             	    			buffer.append(YMarksXBELImporter.XBEL.ALIAS.startTag(true));

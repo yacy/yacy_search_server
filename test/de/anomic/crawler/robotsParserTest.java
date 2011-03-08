@@ -13,7 +13,7 @@ public class robotsParserTest extends TestCase {
             System.out.println("ETag: " + result[robotsParser.DOWNLOAD_ETAG]);
             System.out.println("Mod-Date: " + result[robotsParser.DOWNLOAD_MODDATE]);
             System.out.println("-------------------------------- Robots.txt START: -------------------------------");
-            System.out.println(new String((byte[])result[robotsParser.DOWNLOAD_ROBOTS_TXT]));
+            System.out.println(UTF8.String((byte[])result[robotsParser.DOWNLOAD_ROBOTS_TXT]));
             System.out.println("-------------------------------- Robots.txt END: ---------------------------------");
         }*/
 	}

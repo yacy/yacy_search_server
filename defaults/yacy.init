@@ -492,6 +492,10 @@ proxyIndexingLocalMedia=true
 # proxy usage only for .yacy-Domains for autoconfig
 proxyYacyOnly=false
 
+# enable proxy via url (/proxy.html?url=http://yacy.net)
+proxyURL=false
+proxyURL.access=127.0.0.1,0:0:0:0:0:0:0:1
+
 # From the 'IndexCreate' menu point you can also define a crawling start point.
 # The crawling works the same way as the prefetch, but it is possible to
 # assign a different crawling depth.
@@ -718,6 +722,10 @@ search.result.show.size = true
 search.result.show.metadata = true
 search.result.show.parser = true
 search.result.show.pictures = true
+
+# remote search details
+remotesearch.maxcount = 20
+remotesearch.maxtime = 1000
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.

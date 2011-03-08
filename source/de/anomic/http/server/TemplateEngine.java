@@ -59,6 +59,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
@@ -247,7 +248,7 @@ public final class TemplateEngine {
                         }//for
                         structure.append("</".getBytes()).append(multi_key).append(">\n".getBytes());
                     } else {//transferUntil
-                        Log.logSevere("TEMPLATE", "No Close Key found for #{"+new String(multi_key)+"}#"); //prefix here?
+                        Log.logSevere("TEMPLATE", "No Close Key found for #{"+UTF8.String(multi_key)+"}#"); //prefix here?
                     }
                 }
                 
@@ -284,7 +285,7 @@ public final class TemplateEngine {
                     //TODO: better Error Handling
                     transferUntil(pis, keyStream, appendBytes("%%".getBytes(), patternName, null, null));
                     if(pis.available()==0){
-                        Log.logSevere("TEMPLATE", "No such Template: %%"+new String(patternName));
+                        Log.logSevere("TEMPLATE", "No such Template: %%"+UTF8.String(patternName));
                         return structure.getBytes();
                     }
                     keyStream.reset();
@@ -293,7 +294,7 @@ public final class TemplateEngine {
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
                     transferUntil(pis, keyStream, appendBytes("#(/".getBytes(),key,")#".getBytes("UTF-8"),null));
                     if(pis.available()==0){
-                        Log.logSevere("TEMPLATE", "No Close Key found for #("+new String(key)+")# (by Name)");
+                        Log.logSevere("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Name)");
                     }
                 } else {
                     while(!found){
@@ -346,7 +347,7 @@ public final class TemplateEngine {
                         if(!found){
                             text.append((byte)bb);/*
                             if(pis.available()==0){
-                                serverLog.logSevere("TEMPLATE", "No Close Key found for #("+new String(key)+")# (by Index)");
+                                serverLog.logSevere("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Index)");
                                 found=true;
                             }*/
                         }
@@ -388,7 +389,7 @@ public final class TemplateEngine {
                         BufferedReader br = null;
                         try{
                             //br = new BufferedReader(new InputStreamReader(new FileInputStream( filename ))); //Simple Include
-                            br = new BufferedReader( new InputStreamReader(new FileInputStream( HTTPDFileHandler.getLocalizedFile(new String(filename,"UTF-8"))),"UTF-8") ); //YaCy (with Locales)
+                            br = new BufferedReader( new InputStreamReader(new FileInputStream( HTTPDFileHandler.getLocalizedFile(UTF8.String(filename))),"UTF-8") ); //YaCy (with Locales)
                             //Read the Include
                             String line = "";
                             while ((line = br.readLine()) != null) {
@@ -396,7 +397,7 @@ public final class TemplateEngine {
                             }
                         } catch (final IOException e) {
                             //file not found?                    
-                            Log.logSevere("FILEHANDLER","Include Error with file " + new String(filename, "UTF-8") + ": " + e.getMessage());
+                            Log.logSevere("FILEHANDLER","Include Error with file " + UTF8.String(filename) + ": " + e.getMessage());
                         } finally {
                             if (br != null) try { br.close(); br=null; } catch (final Exception e) {}
                         }
@@ -467,9 +468,7 @@ public final class TemplateEngine {
         final ByteBuffer patternKey = new ByteBuffer(prefix.length + key.length);
         patternKey.append(prefix).append(key);
         try {
-            return new String(patternKey.getBytes(),"UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            return null;
+            return UTF8.String(patternKey.getBytes());
         } finally {
             try {
                 patternKey.close();

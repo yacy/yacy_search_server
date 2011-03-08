@@ -3,6 +3,10 @@
  *  Copyright 2011 by Michael Peter Christen
  *  First released 2.1.2011 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -65,7 +69,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     private long maxCacheDiff;
 
     public GenericFormatter(SimpleDateFormat dateFormat, long maxCacheDiff) {
-        this.dateFormat = dateFormat;
+        this.dateFormat = (SimpleDateFormat) dateFormat.clone(); // avoid concurrency locking effects
         this.last_time = 0;
         this.last_format = "";
         this.maxCacheDiff = maxCacheDiff;

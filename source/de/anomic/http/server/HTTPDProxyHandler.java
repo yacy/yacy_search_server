@@ -1198,7 +1198,7 @@ public final class HTTPDProxyHandler {
             .append("(YaCy ").append(sb.getConfig("vString", "0.0")).append(")");
             
             // storing header back
-            header.put(HeaderFramework.VIA, new String(viaValue));
+            header.put(HeaderFramework.VIA, viaValue.toString());
         }
     }
 
@@ -1561,7 +1561,7 @@ public final class HTTPDProxyHandler {
             userAgentStr.append(browserUserAgent);
         }
         
-        return new String(userAgentStr);
+        return userAgentStr.toString();
     }
     
     /**

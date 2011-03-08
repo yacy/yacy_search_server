@@ -1,10 +1,14 @@
-// kelondroMHashMap.java
+// CompressedHashMap.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
 // Created 08.12.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,6 +27,8 @@
 package net.yacy.kelondro.util;
 
 import java.util.Iterator;
+
+import net.yacy.cora.document.UTF8;
 
 public class CompressedHashMap {
 
@@ -304,12 +310,12 @@ public class CompressedHashMap {
         int c = 0;
         while (i.hasNext()) {
             e = i.next();
-            System.out.println("key=" + new String(e.key) + ", value=" + new String(e.value) + ", retrieved=" + new String(map.get(e.key)));
+            System.out.println("key=" + UTF8.String(e.key) + ", value=" + UTF8.String(e.value) + ", retrieved=" + UTF8.String(map.get(e.key)));
             c++;
         }
         System.out.println("c = " + c + "; re-catch:");
         for (int j = 0; j < 100; j++) {
-            System.out.println("key=" + j + ", retrieved=" + new String(map.get(3333 + j)));
+            System.out.println("key=" + j + ", retrieved=" + UTF8.String(map.get(3333 + j)));
         }
         System.out.println("runtime = " + (System.currentTimeMillis() - start));
     }

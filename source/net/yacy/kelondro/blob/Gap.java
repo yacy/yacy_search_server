@@ -1,10 +1,10 @@
-// kelondroBLOBGap.java
+// Gap.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 30.12.2008 on http:// yacy.net
 // 
 // This is a part of YaCy, a peer-to-peer based web search engine
 // 
-// $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 // 
@@ -61,7 +61,12 @@ public class Gap extends TreeMap<Long, Integer> {
     public Gap(final File file) throws IOException {
         super();
         // read the index dump and fill the index
-        DataInputStream is = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 1024 * 1024));
+        DataInputStream is;
+        try {
+            is = new DataInputStream(new BufferedInputStream(new FileInputStream(file), 1024 * 1024));
+        } catch (OutOfMemoryError e) {
+            is = new DataInputStream(new FileInputStream(file));
+        }
         long p;
         int l;
         while (true) {

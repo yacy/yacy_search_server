@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -291,7 +292,7 @@ public class CrawlQueues {
             if (sb.loader.isSupportedProtocol(urlProtocol)) {
                 if (this.log.isFine())
                     log.logFine(stats + ": URL=" + urlEntry.url()
-                            + ", initiator=" + ((urlEntry.initiator() == null) ? "" : new String(urlEntry.initiator()))
+                            + ", initiator=" + ((urlEntry.initiator() == null) ? "" : UTF8.String(urlEntry.initiator()))
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
                             + ", crawlDepth=" + profile.depth()

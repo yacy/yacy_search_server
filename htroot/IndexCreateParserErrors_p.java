@@ -25,6 +25,7 @@
 
 import java.util.ArrayList;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import de.anomic.crawler.ZURL;
@@ -83,8 +84,8 @@ public class IndexCreateParserErrors_p {
                 
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();
-                initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(new String(initiatorHash));
-                executorSeed = (executorHash == null) ? null : sb.peers.getConnected(new String(executorHash));
+                initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(UTF8.String(initiatorHash));
+                executorSeed = (executorHash == null) ? null : sb.peers.getConnected(UTF8.String(executorHash));
                 prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));

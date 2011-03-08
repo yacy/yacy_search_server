@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
@@ -184,14 +185,12 @@ public class Blog {
         if (post.containsKey("edit")) {
             //edit an entry
             if(hasRights) {
-                try {
-                    prop.put("mode", "1"); //edit
-                    prop.put("mode_commentMode", page.getCommentMode());
-                    prop.putHTML("mode_author", new String(page.getAuthor(),"UTF-8"));
-                    prop.put("mode_pageid", page.getKey());
-                    prop.putHTML("mode_subject", new String(page.getSubject(), "UTF-8"));
-                    prop.put("mode_page-code", new String(page.getPage(), "UTF-8"));
-                } catch (final UnsupportedEncodingException e) {}
+                prop.put("mode", "1"); //edit
+                prop.put("mode_commentMode", page.getCommentMode());
+                prop.putHTML("mode_author", UTF8.String(page.getAuthor()));
+                prop.put("mode_pageid", page.getKey());
+                prop.putHTML("mode_subject", UTF8.String(page.getSubject()));
+                prop.put("mode_page-code", UTF8.String(page.getPage()));
             }
             else {
                 prop.put("mode", "3"); //access denied (no rights)
@@ -202,11 +201,7 @@ public class Blog {
                 prop.put("mode", "2");//preview
                 prop.put("mode_commentMode", post.getInt("commentMode", 2));
                 prop.putHTML("mode_pageid", pagename);
-                try {
-                    prop.putHTML("mode_author", new String(author, "UTF-8"));
-                } catch (final UnsupportedEncodingException e) {
-                    prop.putHTML("mode_author", new String(author));
-                }
+                prop.putHTML("mode_author", UTF8.String(author));
                 prop.putHTML("mode_subject", post.get("subject",""));
                 prop.put("mode_date", dateString(new Date()));
                 prop.putWiki("mode_page", post.get("content", ""));
@@ -220,16 +215,8 @@ public class Blog {
             if(hasRights) {
                 prop.put("mode", "4");
                 prop.putHTML("mode_pageid", pagename);
-                try {
-                    prop.putHTML("mode_author",new String(page.getAuthor(), "UTF-8"));
-                } catch (final UnsupportedEncodingException e) {
-                    prop.putHTML("mode_author",new String(page.getAuthor()));
-                }
-                try {
-                    prop.putHTML("mode_subject",new String(page.getSubject(),"UTF-8"));
-                } catch (final UnsupportedEncodingException e) {
-                    prop.putHTML("mode_subject",new String(page.getSubject()));
-                }
+                prop.putHTML("mode_author",UTF8.String(page.getAuthor()));
+                prop.putHTML("mode_subject",UTF8.String(page.getSubject()));
             }
             else prop.put("mode", "3"); //access denied (no rights)
         }
@@ -326,19 +313,9 @@ public class Blog {
             final boolean hasRights,
             final boolean xml) 
     {
-        // subject
-        try {
-            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject(),"UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            prop.putHTML("mode_entries_" + number + "_subject", new String(entry.getSubject()));
-        }
+        prop.putHTML("mode_entries_" + number + "_subject", UTF8.String(entry.getSubject()));
 
-        // author
-        try {
-            prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor(),"UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            prop.putHTML("mode_entries_" + number + "_author", new String(entry.getAuthor()));
-        }
+        prop.putHTML("mode_entries_" + number + "_author", UTF8.String(entry.getAuthor()));
 
         // comments
         if (entry.getCommentMode() == 0) {

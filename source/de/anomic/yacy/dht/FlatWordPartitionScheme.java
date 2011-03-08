@@ -5,9 +5,9 @@
 // first published on http://yacy.net
 // Frankfurt, Germany, 28.01.2009
 //
-// $LastChangedDate: 2009-01-23 16:32:27 +0100 (Fr, 23 Jan 2009) $
-// $LastChangedRevision: 5514 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ package de.anomic.yacy.dht;
 import java.util.Random;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -95,7 +96,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
     
     public static byte[] positionToHash(final long l) {
         // transform the position of a peer position into a close peer hash
-        String s = new String(Base64Order.enhancedCoder.uncardinal(l));
+        String s = UTF8.String(Base64Order.enhancedCoder.uncardinal(l));
         while (s.length() < 12) s += "A";
         return s.getBytes();
     }

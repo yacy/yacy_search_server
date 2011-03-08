@@ -4,7 +4,7 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -28,6 +28,7 @@ package net.yacy.kelondro.data.navigation;
 
 import java.util.Collection;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
@@ -85,10 +86,10 @@ public final class NavigationReferenceRow extends AbstractReference implements N
             final int      pos,
             final byte     flags
     ) {
-        assert (termhash.length == 12) : "termhash = " + new String(termhash);
-        assert (refhash.length == 12) : "refhash = " + new String(refhash);
+        assert (termhash.length == 12) : "termhash = " + UTF8.String(termhash);
+        assert (refhash.length == 12) : "refhash = " + UTF8.String(refhash);
         this.entry = navEntryRow.newEntry();
-        this.entry.setCol(col_navhash, new String(termhash) + new String(refhash), null);
+        this.entry.setCol(col_navhash, UTF8.String(termhash) + UTF8.String(refhash), null);
         this.entry.setCol(col_count, count);
         this.entry.setCol(col_pos, pos);
         this.entry.setCol(col_flags, flags);

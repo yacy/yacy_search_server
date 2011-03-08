@@ -2,9 +2,9 @@
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 09.02.2009 on http://yacy.net
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -199,7 +200,7 @@ public class Transmission {
             	log.logInfo("Transfer of chunk to myself-target");
             	return true;
             }
-            log.logInfo("starting new index transmission request to " + new String(this.primaryTarget));
+            log.logInfo("starting new index transmission request to " + UTF8.String(this.primaryTarget));
             long start = System.currentTimeMillis();
             final String error = yacyClient.transferIndex(target, this.containers, this.references, gzipBody4Transfer, timeout4Transfer);
             if (error == null) {
@@ -208,7 +209,7 @@ public class Transmission {
                 Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
                 ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
                 log.logInfo("Index transfer of " + this.containers.size() + 
-                                 " words [" + ((firstContainer == null) ? null : new String(firstContainer.getTermHash())) + " .. " + new String(this.primaryTarget) + "]" + 
+                                 " words [" + ((firstContainer == null) ? null : UTF8.String(firstContainer.getTermHash())) + " .. " + UTF8.String(this.primaryTarget) + "]" + 
                                  " and " + this.references.size() + " URLs" +
                                  " to peer " + target.getName() + ":" + target.hash + 
                                  " in " + (transferTime / 1000) + 

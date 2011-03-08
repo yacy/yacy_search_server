@@ -30,6 +30,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Set;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
@@ -174,7 +175,7 @@ public class ConfigNetwork_p {
         prop.putHTML("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
         StringBuilder hashes = new StringBuilder();
         for (final byte[] h : sb.clusterhashes.keySet()) {
-            hashes.append(", ").append(new String(h));
+            hashes.append(", ").append(UTF8.String(h));
         }
         if (hashes.length() > 2) {
             hashes = hashes.delete(0, 2);

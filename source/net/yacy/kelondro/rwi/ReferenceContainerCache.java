@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
-// $LastChangedRevision: 6393 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -114,7 +115,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         final long startTime = System.currentTimeMillis();
         
         // sort the map
-        ArrayList<ReferenceContainer<ReferenceType>> cachecopy = sortedClone();
+        List<ReferenceContainer<ReferenceType>> cachecopy = sortedClone();
         
         // write wCache
         long wordcount = 0, urlcount = 0;
@@ -156,8 +157,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * create a clone of the cache content that is sorted using the this.containerOrder
      * @return the sorted ReferenceContainer[]
      */
-    protected ArrayList<ReferenceContainer<ReferenceType>> sortedClone() {
-        ArrayList<ReferenceContainer<ReferenceType>> cachecopy = new ArrayList<ReferenceContainer<ReferenceType>>(cache.size());
+    protected List<ReferenceContainer<ReferenceType>> sortedClone() {
+        final List<ReferenceContainer<ReferenceType>> cachecopy = new ArrayList<ReferenceContainer<ReferenceType>>(cache.size());
         synchronized (cache) {
             for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: cache.entrySet()) {
                 if (entry.getValue() != null && entry.getValue().getTermHash() != null) cachecopy.add(entry.getValue());
@@ -212,7 +213,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         // plus the mentioned features
         
         private final boolean rot;
-        private final ArrayList<ReferenceContainer<ReferenceType>> cachecopy;
+        private final List<ReferenceContainer<ReferenceType>> cachecopy;
         private int p;
         private byte[] latestTermHash;
         
@@ -256,7 +257,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             if (!rot) {
                 return null;
             }
-            if (this.cachecopy.size() == 0) return null;
+            if (this.cachecopy.isEmpty()) return null;
             p = 0;
             ReferenceContainer<ReferenceType> c = this.cachecopy.get(this.p++);
             this.latestTermHash = c.getTermHash();

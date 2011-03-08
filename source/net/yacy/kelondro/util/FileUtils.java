@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 05.08.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -57,6 +60,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
@@ -430,7 +434,7 @@ public final class FileUtils {
         final Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
         final byte[] b = read(file);
         for (int i = 0; (i + chunksize) <= b.length; i++) {
-            set.add(new String(b, i, chunksize, "UTF-8"));
+            set.add(UTF8.String(b, i, chunksize));
         }
         return set;
     }
@@ -438,7 +442,7 @@ public final class FileUtils {
     public static Set<String> loadSet(final File file, final String sep, final boolean tree) throws IOException {
         final Set<String> set = (tree) ? (Set<String>) new TreeSet<String>() : (Set<String>) new HashSet<String>();
         final byte[] b = read(file);
-        final StringTokenizer st = new StringTokenizer(new String(b, "UTF-8"), sep);
+        final StringTokenizer st = new StringTokenizer(UTF8.String(b), sep);
         while (st.hasMoreTokens()) {
             set.add(st.nextToken());
         }
@@ -487,11 +491,11 @@ public final class FileUtils {
             final Iterator<Row.Entry> i = set.iterator();
             String key;
             if (i.hasNext()) {
-                key = new String(i.next().getPrimaryKeyBytes());
+                key = UTF8.String(i.next().getPrimaryKeyBytes());
                 os.write(key.getBytes("UTF-8"));
             }
             while (i.hasNext()) {
-                key = new String(i.next().getPrimaryKeyBytes());
+                key = UTF8.String(i.next().getPrimaryKeyBytes());
                 if (sep != null) os.write(sep.getBytes("UTF-8"));
                 os.write(key.getBytes("UTF-8"));
             }
@@ -750,6 +754,9 @@ public final class FileUtils {
                 }
             } catch (IOException e) {
                 nextLine = null;
+            } catch (OutOfMemoryError e) {
+                Log.logException(e);
+                nextLine = null;
             }
             return line;
         }
@@ -955,7 +962,7 @@ public final class FileUtils {
                         Log.logSevere("FileUtils", "cannot execute command: " + command);
                     } else {
                         byte[] response = read(r.getInputStream());
-                        Log.logInfo("FileUtils", "deletedelete: " + new String(response));
+                        Log.logInfo("FileUtils", "deletedelete: " + UTF8.String(response));
                     }
                 } catch (IOException e) {
                     Log.logException(e);

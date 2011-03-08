@@ -1,11 +1,11 @@
-// kelondroMap.java
+// MapHeap.java
 // -----------------------
 // (C) 29.01.2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2004 as kelondroMap on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -41,6 +41,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -50,6 +51,7 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.kelondroException;
 
 public class MapHeap implements Map<byte[], Map<String, String>> {
@@ -155,7 +157,11 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 if (blob != null) blob.insert(key, sb);
     
                 // write map to cache
-                cache.put(key, newMap);
+                if (MemoryControl.shortStatus()) {
+                    cache.clear();
+                } else {
+                    cache.put(key, newMap);
+                }
             }
         }
     }
@@ -283,8 +289,12 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                     throw new IOException(e.getMessage());
                 }
         
-                // write map to cache
-                cache.put(key, map);
+                if (MemoryControl.shortStatus()) {
+                    cache.clear();
+                } else {
+                    // write map to cache
+                    cache.put(key, map);
+                }
             }
             
             // return value
@@ -463,7 +473,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             // iterate over keys
             Iterator<byte[]> i = map.keys(true, false);
             while (i.hasNext()) {
-                System.out.println("key: " + new String(i.next()));
+                System.out.println("key: " + UTF8.String(i.next()));
             }
             // clean up
             map.close();

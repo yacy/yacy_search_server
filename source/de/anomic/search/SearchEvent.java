@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.StaticScore;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
@@ -81,14 +82,17 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     private final ReferenceOrder order;
     
-    public SearchEvent(final QueryParams query,
+    protected SearchEvent(final QueryParams query,
                              final yacySeedDB peers,
                              final WorkTables workTables,
                              final SortedMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts,
                              final LoaderDispatcher loader,
+                             final int remote_maxcount,
+                             final long remote_maxtime,
                              final int burstRobinsonPercent,
                              final int burstMultiwordPercent) {
+        if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
         this.workTables = workTables;
@@ -126,7 +130,8 @@ public final class SearchEvent {
                     query.targetlang == null ? "" : query.targetlang,
                     query.sitehash == null ? "" : query.sitehash,
                     query.authorhash == null ? "" : query.authorhash,
-                    query.displayResults(),
+                    remote_maxcount,
+                    remote_maxtime,
                     query.maxDistance,
                     query.getSegment(),
                     peers,
@@ -138,7 +143,7 @@ public final class SearchEvent {
                     (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes,
                     burstRobinsonPercent,
                     burstMultiwordPercent);
-            Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
+            Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + remote_maxcount + " URLs");
             if (this.primarySearchThreads != null) {
                 this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
@@ -166,7 +171,7 @@ public final class SearchEvent {
                 for (final Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankingProcess.searchContainerMap().entrySet()) {
                     wordhash = entry.getKey();
                     final ReferenceContainer<WordReference> container = entry.getValue();
-                    assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + new String(container.getTermHash()) + ", wordhash = " + new String(wordhash);
+                    assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + UTF8.String(container.getTermHash()) + ", wordhash = " + UTF8.String(wordhash);
                     if (container.size() > maxcount) {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
@@ -202,7 +207,7 @@ public final class SearchEvent {
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.CLEANUP, "", 0, 0), false);
         
         // store this search to a cache so it can be re-used
-        if (MemoryControl.available() < 1024 * 1024 * 10) SearchEventCache.cleanupEvents(true);
+        if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
         SearchEventCache.put(query.id(false), this);
    }
    
@@ -372,12 +377,12 @@ public final class SearchEvent {
         
         // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
         // this relation contains the information where specific urls can be found in specific peers
-        SortedMap<String, SortedMap<String, String>> abstractsCache;
+        SortedMap<String, SortedMap<String, StringBuilder>> abstractsCache;
         SortedSet<String> checkedPeers;
         Semaphore trigger;
         
         public SecondarySearchSuperviser() {
-            this.abstractsCache = new TreeMap<String, SortedMap<String, String>>();
+            this.abstractsCache = new TreeMap<String, SortedMap<String, StringBuilder>>();
             this.checkedPeers = new TreeSet<String>();
             this.trigger = new Semaphore(0);
         }
@@ -387,43 +392,45 @@ public final class SearchEvent {
          * @param wordhash
          * @param singleAbstract // a mapping from url-hashes to a string of peer-hashes
          */
-        public void addAbstract(String wordhash, TreeMap<String, String> singleAbstract) {
+        public void addAbstract(String wordhash, final TreeMap<String, StringBuilder> singleAbstract) {
+            final SortedMap<String, StringBuilder> oldAbstract;
             synchronized (abstractsCache) {
-                SortedMap<String, String> oldAbstract = abstractsCache.get(wordhash);
+                oldAbstract = abstractsCache.get(wordhash);
                 if (oldAbstract == null) {
                     // new abstracts in the cache
                     abstractsCache.put(wordhash, singleAbstract);
-                } else {
-                    // extend the abstracts in the cache: join the single abstracts
-                    for (final Map.Entry<String, String> oneref: singleAbstract.entrySet()) {
-                        final String urlhash = oneref.getKey();
-                        final String peerlistNew = oneref.getValue();
-                        synchronized (oldAbstract) {
-                            final String peerlistOld = oldAbstract.get(urlhash);
-                            if (peerlistOld == null) {
-                                oldAbstract.put(urlhash, peerlistNew);
-                            } else {
-                                oldAbstract.put(urlhash, peerlistOld + peerlistNew);
-                            }
-                        }
-                    }
-                    // abstractsCache.put(wordhash, oldAbstract);
+                    return;
                 }
             }
+            // extend the abstracts in the cache: join the single abstracts
+            new Thread() {
+                public void run() {
+                    for (final Map.Entry<String, StringBuilder> oneref: singleAbstract.entrySet()) {
+                        final String urlhash = oneref.getKey();
+                        final StringBuilder peerlistNew = oneref.getValue();
+                        synchronized (oldAbstract) {
+                            final StringBuilder peerlistOld = oldAbstract.put(urlhash, peerlistNew);
+                            if (peerlistOld != null) peerlistOld.append(peerlistNew);
+                        }
+                    }
+                }
+            }.start();
+            // abstractsCache.put(wordhash, oldAbstract); // put not necessary since it is sufficient to just change the value content (it stays assigned)
         }
         
         public void commitAbstract() {
             this.trigger.release();
         }
         
-        private String wordsFromPeer(final String peerhash, final String urls) {
-            Map.Entry<String, SortedMap<String, String>> entry;
-            String word, peerlist, url, wordlist = "";
-            SortedMap<String, String> urlPeerlist;
+        private String wordsFromPeer(final String peerhash, final StringBuilder urls) {
+            Map.Entry<String, SortedMap<String, StringBuilder>> entry;
+            String word, url, wordlist = "";
+            StringBuilder peerlist;
+            SortedMap<String, StringBuilder> urlPeerlist;
             int p;
             boolean hasURL;
             synchronized (this) {
-                final Iterator<Map.Entry <String, SortedMap<String, String>>> i = this.abstractsCache.entrySet().iterator();
+                final Iterator<Map.Entry <String, SortedMap<String, StringBuilder>>> i = this.abstractsCache.entrySet().iterator();
                 while (i.hasNext()) {
                     entry = i.next();
                     word = entry.getKey();
@@ -476,17 +483,18 @@ public final class SearchEvent {
             if (abstractsCache.size() != query.queryHashes.size()) return;
 
             // join all the urlhash:peerlist relations: the resulting map has values with a combined peer-list list
-            final SortedMap<String, String> abstractJoin = SetTools.joinConstructive(abstractsCache.values(), true);
+            final SortedMap<String, StringBuilder> abstractJoin = SetTools.joinConstructive(abstractsCache.values(), true);
             if (abstractJoin.isEmpty()) return;
             // the join result is now a urlhash: peer-list relation
             
             // generate a list of peers that have the urls for the joined search result
-            final SortedMap<String, String> secondarySearchURLs = new TreeMap<String, String>(); // a (peerhash:urlhash-liststring) mapping
-            String url, urls, peer, peerlist;
+            final SortedMap<String, StringBuilder> secondarySearchURLs = new TreeMap<String, StringBuilder>(); // a (peerhash:urlhash-liststring) mapping
+            String url, peer;
+            StringBuilder urls, peerlist;
             final String mypeerhash = peers.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
-            for (Map.Entry<String, String> entry: abstractJoin.entrySet()) {
+            for (Map.Entry<String, StringBuilder> entry: abstractJoin.entrySet()) {
                 url = entry.getKey();
                 peerlist = entry.getValue();
                 //System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peerlist);
@@ -496,7 +504,13 @@ public final class SearchEvent {
                     if ((peer.equals(mypeerhash)) && (mypeercount++ > 1)) continue;
                     //if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
                     urls = secondarySearchURLs.get(peer);
-                    urls = (urls == null) ? url : urls + url;
+                    if (urls == null) {
+                        urls = new StringBuilder(24);
+                        urls.append(url);
+                        secondarySearchURLs.put(peer, urls);
+                    } else {
+                        urls.append(url);
+                    }
                     secondarySearchURLs.put(peer, urls);
                 }
                 if (mypeercount == 1) mypeerinvolved = true;
@@ -506,7 +520,7 @@ public final class SearchEvent {
             String words;
             secondarySearchThreads = new yacySearch[(mypeerinvolved) ? secondarySearchURLs.size() - 1 : secondarySearchURLs.size()];
             int c = 0;
-            for (Map.Entry<String, String> entry: secondarySearchURLs.entrySet()) {
+            for (Map.Entry<String, StringBuilder> entry: secondarySearchURLs.entrySet()) {
                 peer = entry.getKey();
                 if (peer.equals(mypeerhash)) continue; // we don't need to ask ourself
                 if (checkedPeers.contains(peer)) continue; // do not ask a peer again
@@ -518,7 +532,7 @@ public final class SearchEvent {
                 rankingProcess.moreFeeders(1);
                 checkedPeers.add(peer);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, urls, query.getSegment(), peers, rankingProcess, peer, Switchboard.urlBlacklist,
+                        words, urls.toString(), 6000, query.getSegment(), peers, rankingProcess, peer, Switchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
             }
             

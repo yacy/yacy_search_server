@@ -34,25 +34,25 @@ public class FilterEngine {
     public static final int ERR_DOUBLE_OCCURANCE = 6;
     public static final int ERR_HOST_REGEX = 7;
 
-	protected enum listTypes { type1 };
-	
-	protected class FilterEntry implements Comparable<FilterEntry> {
-		public String path;
-		public EnumSet<listTypes> types;
-		
-		public FilterEntry(String path, EnumSet<listTypes>types) {
-			this.path = path;
-			this.types = types;
-		}
+    protected enum listTypes { type1 };
 
-		public int compareTo(FilterEntry fe) {
-			return this.path.compareToIgnoreCase(fe.path);
-		}
-	}
+    protected class FilterEntry implements Comparable<FilterEntry> {
+        public String path;
+        public EnumSet<listTypes> types;
+
+        public FilterEntry(String path, EnumSet<listTypes>types) {
+            this.path = path;
+            this.types = types;
+        }
+
+        public int compareTo(FilterEntry fe) {
+            return this.path.compareToIgnoreCase(fe.path);
+        }
+    }
 	
     protected HashARC<DigestURI, EnumSet<listTypes>> cachedUrlHashs = null;
-    protected HashMap<String, Set<FilterEntry>> hostpaths_matchable = null;
-    protected HashMap<String, Set<FilterEntry>> hostpaths_notmatchable = null;
+    protected Map<String, Set<FilterEntry>> hostpaths_matchable = null;
+    protected Map<String, Set<FilterEntry>> hostpaths_notmatchable = null;
 
     
     public FilterEngine() {

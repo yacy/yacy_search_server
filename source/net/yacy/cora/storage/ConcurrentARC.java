@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 17.04.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -93,6 +97,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @param s
      * @param v
      */
+    @Override
     public final V put(final K s, final V v) {
         return this.arc[getPartition(s)].put(s, v);
     }
@@ -103,6 +108,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @return the value
      */
     @SuppressWarnings("unchecked")
+    @Override
     public final V get(final Object s) {
     	return this.arc[getPartition(s)].get((K) s);
     }
@@ -124,6 +130,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @return
      */
     @SuppressWarnings("unchecked")
+    @Override
     public final boolean containsKey(final Object s) {
     	return this.arc[getPartition(s)].containsKey((K) s);
     }
@@ -134,6 +141,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @return the old value
      */
     @SuppressWarnings("unchecked")
+    @Override
     public final V remove(final Object s) {
     	return this.arc[getPartition(s)].remove((K) s);
     }
@@ -141,6 +149,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     /**
      * clear the cache
      */
+    @Override
     public final void clear() {
     	for (ARC<K, V> a: this.arc) a.clear();
     }
@@ -149,6 +158,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * get the size of the ARC.
      * @return the complete number of entries in the ARC cache
      */
+    @Override
     public final int size() {
         int s = 0;
         for (ARC<K, V> a: this.arc) s += a.size();
@@ -182,6 +192,7 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * a hash code for this ARC
      * @return a hash code
      */
+    @Override
     public int hashCode() {
         return this.arc.hashCode();
     }

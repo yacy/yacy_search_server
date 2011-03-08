@@ -117,7 +117,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public void scrapeText(final char[] newtext, final String insideTag) {
-        // System.out.println("SCRAPE: " + new String(newtext));
+        // System.out.println("SCRAPE: " + UTF8.String(newtext));
         String b = cleanLine(super.stripAll(newtext));
         if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
@@ -234,7 +234,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public void scrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
-        // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
+        // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + UTF8.String(text));
         if (tagname.equalsIgnoreCase("a") && text.length < 2048) {
             final String href = tagopts.getProperty("href", "");
             MultiProtocolURI url;

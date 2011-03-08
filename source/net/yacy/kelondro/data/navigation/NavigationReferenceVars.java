@@ -4,7 +4,7 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -28,6 +28,7 @@ package net.yacy.kelondro.data.navigation;
 
 import java.util.Collection;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
@@ -90,7 +91,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
     }
 
     public String navigationHash() {
-        return new String(this.termhash) + new String(this.refhash);
+        return UTF8.String(this.termhash) + UTF8.String(this.refhash);
     }
     
     public byte[] metadataHash() {

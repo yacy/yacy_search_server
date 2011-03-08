@@ -26,13 +26,13 @@
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
@@ -135,12 +135,7 @@ public class Messages_p {
                     	// set the rfc822 date
                     	prop.put("mode_messages_"+count+"_rfc822Date", HeaderFramework.formatRFC1123(message.date()));
 
-                    	// also write out the message body (needed for the RSS feed)
-                        try {
-                        	prop.putXML("mode_messages_"+count+"_body",new String(message.message(), "UTF-8"));
-                        } catch (final UnsupportedEncodingException e) {
-                            // can not happen, because UTF-8 must be supported by every JVM
-                        }
+                    	prop.putXML("mode_messages_"+count+"_body",UTF8.String(message.message()));
                     }
 
                     dark = !dark;
@@ -164,11 +159,7 @@ public class Messages_p {
             prop.put("mode_date", dateString(message.date()));
             prop.putXML("mode_subject", message.subject());
             String theMessage = null;
-            try {
-                theMessage = new String(message.message(), "UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                // can not happen, because UTF-8 must be supported by every JVM
-            }
+            theMessage = UTF8.String(message.message());
             prop.putWiki("mode_message", theMessage);
             prop.put("mode_hash", message.authorHash());
             prop.putXML("mode_key", key);

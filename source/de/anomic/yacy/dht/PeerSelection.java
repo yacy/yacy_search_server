@@ -4,9 +4,9 @@
 // first published 05.11.2008 on http://yacy.net
 // Frankfurt, Germany, 2008
 //
-// $LastChangedDate: 2008-09-03 02:30:21 +0200 (Mi, 03 Sep 2008) $
-// $LastChangedRevision: 5102 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import net.yacy.cora.date.AbstractFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.DynamicScore;
 import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.kelondro.data.word.Word;
@@ -64,7 +65,7 @@ public class PeerSelection {
         yacySeed s;
         while (i.hasNext()) {
             entry = i.next();
-            s = seedDB.get(new String(entry.getKey())); // should be getConnected; get only during testing time
+            s = seedDB.get(UTF8.String(entry.getKey())); // should be getConnected; get only during testing time
             if (s != null) {
                 s.setAlternativeAddress(entry.getValue());
                 l.add(s);
@@ -102,6 +103,7 @@ public class PeerSelection {
         while (dhtEnum.hasNext() && c-- > 0) {
             seed = dhtEnum.next();
             if (seed == null) continue;
+            if (seed.isLastSeenTimeout(3600000)) continue;
             if (seed.getAge() < 1) { // the 'workshop feature'
                 Log.logInfo("DHT", "selectPeers/Age: " + seed.hash + ":" + seed.getName() + ", is newbie, age = " + seed.getAge());
                 regularSeeds.put(seed.hash, seed);
@@ -120,6 +122,7 @@ public class PeerSelection {
         while (dhtEnum.hasNext()) {
             seed = dhtEnum.next();
             if (seed == null) continue;
+            if (seed.isLastSeenTimeout(3600000)) continue;
             if (!seed.getFlagAcceptRemoteIndex()) robinson.add(seed);
         }
 
@@ -128,6 +131,8 @@ public class PeerSelection {
         c = robinson.size() * burstRobinsonPercent / 100;
         while (dhtEnum.hasNext() && c-- > 0) {
             seed = dhtEnum.next();
+            if (seed == null) continue;
+            if (seed.isLastSeenTimeout(3600000)) continue;
             if (Math.random() * 100 + burstRobinsonPercent >= 100) {
                 if (Log.isFine("DHT")) Log.logFine("DHT", "selectPeers/RobinsonBurst: " + seed.hash + ":" + seed.getName());
                 regularSeeds.put(seed.hash, seed);
@@ -140,6 +145,8 @@ public class PeerSelection {
         dhtEnum = robinson.iterator();
         while (dhtEnum.hasNext()) {
             seed = dhtEnum.next();
+            if (seed == null) continue;
+            if (seed.isLastSeenTimeout(3600000)) continue;
             if (seed.matchPeerTags(wordhashes)) {
                 // peer tags match
                 String specialized = seed.getPeerTags().toString();
@@ -166,7 +173,7 @@ public class PeerSelection {
             wordhash = FlatWordPartitionScheme.positionToHash(dhtVerticalTarget);
             Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, false);
             int c = Math.min(seedDB.sizeConnected(), redundancy);
-            int cc = 3; // select a maximum of 3, this is enough redundancy
+            int cc = 2; // select a maximum of 3, this is enough redundancy
             while (dhtEnum.hasNext() && c > 0 && cc-- > 0) {
                 seed = dhtEnum.next();
                 if (seed == null || seed.hash == null) continue;

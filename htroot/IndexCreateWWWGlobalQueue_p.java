@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.crawler.CrawlProfile;
@@ -100,7 +101,7 @@ public class IndexCreateWWWGlobalQueue_p {
             for (i = 0; (i < crawlerList.size()) && (showNum < showLimit); i++) {
                 urle = crawlerList.get(i);
                 if (urle != null && urle.url() != null) {
-                    initiator = sb.peers.getConnected((urle.initiator() == null) ? "" : new String(urle.initiator()));
+                    initiator = sb.peers.getConnected((urle.initiator() == null) ? "" : UTF8.String(urle.initiator()));
                     profileHandle = urle.profileHandle();
                     profileEntry = profileHandle == null ? null : sb.crawler.getActive(profileHandle.getBytes());
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");

@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -185,9 +186,9 @@ public class Table_API_p {
             while (mapIterator.hasNext()) {
                 r = mapIterator.next();
                 if (r == null) continue;
-                type = new String(r.get(WorkTables.TABLE_API_COL_TYPE));
+                type = UTF8.String(r.get(WorkTables.TABLE_API_COL_TYPE));
                 if (!typefilter.matcher(type).matches()) continue;
-                comment = new String(r.get(WorkTables.TABLE_API_COL_COMMENT));
+                comment = UTF8.String(r.get(WorkTables.TABLE_API_COL_COMMENT));
                 if (!query.matcher(comment).matches()) continue;
                 if (c >= startRecord) table.add(r);
                 c++;
@@ -205,7 +206,7 @@ public class Table_API_p {
                 int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
                 prop.put("showtable_list_" + count + "_inline", inline ? 1 : 0);
                 prop.put("showtable_list_" + count + "_dark", dark ? 1 : 0); dark=!dark;
-                prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
+                prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));
                 prop.put("showtable_list_" + count + "_count", count);
                 prop.put("showtable_list_" + count + "_callcount", callcount);
                 prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : DateFormat.getDateTimeInstance().format(date_recording));
@@ -217,15 +218,15 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_repeatTime", time);
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
-                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8090") + new String(row.get(WorkTables.TABLE_API_COL_URL)));
+                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8090") + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
 
                 if (time == 0) {
                     prop.put("showtable_list_" + count + "_scheduler", 0);
-                    prop.put("showtable_list_" + count + "_scheduler_pk", new String(row.getPK()));
+                    prop.put("showtable_list_" + count + "_scheduler_pk", UTF8.String(row.getPK()));
                 } else {
                     scheduledactions = true;
                     prop.put("showtable_list_" + count + "_scheduler", 1);
-                    prop.put("showtable_list_" + count + "_scheduler_pk", new String(row.getPK()));
+                    prop.put("showtable_list_" + count + "_scheduler_pk", UTF8.String(row.getPK()));
                     prop.put("showtable_list_" + count + "_scheduler_scale_" + 0 + "_time", "off");
                     prop.put("showtable_list_" + count + "_scheduler_selectedMinutes", 0);
                     prop.put("showtable_list_" + count + "_scheduler_selectedHours", 0);

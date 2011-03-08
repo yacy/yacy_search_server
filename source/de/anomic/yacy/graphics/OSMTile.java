@@ -3,9 +3,9 @@
  *  Copyright 2008 by Michael Peter Christen
  *  First released 12.02.2008 at http://yacy.net
  *  
- *  $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
- *  $LastChangedRevision: 1986 $
- *  $LastChangedBy: orbiter $
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

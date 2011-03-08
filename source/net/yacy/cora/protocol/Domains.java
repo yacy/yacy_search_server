@@ -3,6 +3,10 @@
  *  Copyright 2007 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 23.7.2007 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -39,6 +43,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.kelondro.util.MemoryControl;
 
 public class Domains {
 
@@ -483,6 +488,11 @@ public class Domains {
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
         if (ip != null) return ip;
+        
+        if (MemoryControl.shortStatus()) {
+            NAME_CACHE_HIT.clear();
+            NAME_CACHE_MISS.clear();
+        }
         
         // try to resolve host by doing a name cache lookup
         ip = NAME_CACHE_HIT.get(host);

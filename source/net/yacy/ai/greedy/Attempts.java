@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -20,6 +24,7 @@
 
 package net.yacy.ai.greedy;
 
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 
@@ -30,7 +35,7 @@ import java.util.concurrent.BlockingQueue;
  */
 public class Attempts<SpecificRole extends Role> {
 
-    TreeMap<Long, BlockingQueue<Finding<SpecificRole>>> stack;
+    Map<Long, BlockingQueue<Finding<SpecificRole>>> stack;
     
     public Attempts() {
         this.stack = new TreeMap<Long, BlockingQueue<Finding<SpecificRole>>>();

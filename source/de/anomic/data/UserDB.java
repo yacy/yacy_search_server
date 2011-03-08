@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -636,7 +637,7 @@ public final class UserDB {
         
         public Entry next() {
             try {
-                return getEntry(new String(this.userIter.next()));
+                return getEntry(UTF8.String(this.userIter.next()));
             } catch (final kelondroException e) {
                 resetDatabase();
                 return null;

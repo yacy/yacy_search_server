@@ -5,9 +5,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -39,6 +39,7 @@ import java.util.TreeSet;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -55,9 +56,9 @@ public class WebStructureGraph {
     public static int maxhosts = 20000; // maximum number of hosts in web structure map
     
     private final Log    log;
-    private final File         structureFile;
-    TreeMap<String, String> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
-    TreeMap<String, String> structure_new;
+    private final File   structureFile;
+    private final TreeMap<String, String> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    private final TreeMap<String, String> structure_new;
     
     public WebStructureGraph(final Log log, final File structureFile) {
         this.log = log;
@@ -66,7 +67,12 @@ public class WebStructureGraph {
         this.structureFile = structureFile;
         
         // load web structure
-        final Map<String, String> loadedStructure = (this.structureFile.exists()) ? FileUtils.loadMap(this.structureFile) : new TreeMap<String, String>();
+        Map<String, String> loadedStructure;
+        try {
+            loadedStructure = (this.structureFile.exists()) ? FileUtils.loadMap(this.structureFile) : new TreeMap<String, String>();
+        } catch (OutOfMemoryError e) {
+            loadedStructure = new TreeMap<String, String>();
+        }
         if (loadedStructure != null) this.structure_old.putAll(loadedStructure);
         
         // delete out-dated entries in case the structure is too big
@@ -97,13 +103,13 @@ public class WebStructureGraph {
         final StringBuilder cpg = new StringBuilder(12 * (hl.size() + 1) + 1);
         assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
         final StringBuilder cpl = new StringBuilder(12 * (hl.size() + 1) + 1);
-        final String lhp = new String(url.hash(), 6, 6); // local hash part
+        final String lhp = UTF8.String(url.hash(), 6, 6); // local hash part
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
             nexturlhashb = new DigestURI(it.next()).hash();
             if (nexturlhashb != null) {
-                nexturlhash = new String(nexturlhashb);
+                nexturlhash = UTF8.String(nexturlhashb);
                 assert nexturlhash.length() == 12 : "nexturlhash.length() = " + nexturlhash.length() + ", nexturlhash = " + nexturlhash;
                 if (nexturlhash.substring(6).equals(lhp)) {
                     // this is a local link
@@ -302,7 +308,7 @@ public class WebStructureGraph {
     }
     
     private void learn(final DigestURI url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
-        final String domhash = new String(url.hash(), 6, 6);
+        final String domhash = UTF8.String(url.hash(), 6, 6);
 
         // parse the new reference string and join it with the stored references
         structureEntry structure = outgoingReferences(domhash);
@@ -346,7 +352,7 @@ public class WebStructureGraph {
         }
     }
     
-    private static final void joinStructure(final TreeMap<String, String> into, final TreeMap<String, String> from) {
+    private static void joinStructure(final TreeMap<String, String> into, final TreeMap<String, String> from) {
         for (final Map.Entry<String, String> e: from.entrySet()) {
             if (into.containsKey(e.getKey())) {
                 final Map<String, Integer> s0 = refstr2map(into.get(e.getKey()));

@@ -3,9 +3,9 @@
  *  Copyright 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 26.10.2005 at http://yacy.net
  *  
- *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
- *  $LastChangedRevision: 6922 $
- *  $LastChangedBy: orbiter $
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,6 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,7 +53,7 @@ public interface Index extends Iterable<Row.Entry> {
      */
     public boolean put(Row.Entry row) throws IOException, RowSpaceExceededException;
     public void addUnique(Row.Entry row) throws RowSpaceExceededException, IOException; // no double-check
-    public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException; // removes all elements that are double (to be used after all addUnique)
+    public List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException; // removes all elements that are double (to be used after all addUnique)
     public boolean delete(byte[] key) throws IOException;
     public Row.Entry remove(byte[] key) throws IOException;
     public Row.Entry removeOne() throws IOException;

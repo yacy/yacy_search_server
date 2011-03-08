@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -250,7 +251,7 @@ public class WikiBoard {
         public String author() {
             final String a = record.get("author");
             final byte[] b;
-            return (a != null && (b = Base64Order.enhancedCoder.decode(a)) != null) ? new String(b) : ANONYMOUS;
+            return (a != null && (b = Base64Order.enhancedCoder.decode(a)) != null) ? UTF8.String(b) : ANONYMOUS;
         }
 
         /**
@@ -262,7 +263,7 @@ public class WikiBoard {
             final String r = record.get("reason");
             if (r != null) {
                 final byte[] b;
-                ret = ((b = Base64Order.enhancedCoder.decode(r)) != null) ? new String(b) : "unknown";
+                ret = ((b = Base64Order.enhancedCoder.decode(r)) != null) ? UTF8.String(b) : "unknown";
             } else {
                 ret = "";
             }
@@ -330,7 +331,7 @@ public class WikiBoard {
         private String getChildName() {
             final String c = record.get("child");
             final byte[] subject;
-            return (c != null && (subject = Base64Order.enhancedCoder.decode(c)) != null) ? new String(subject) : null;
+            return (c != null && (subject = Base64Order.enhancedCoder.decode(c)) != null) ? UTF8.String(subject) : null;
         }
 
         /**

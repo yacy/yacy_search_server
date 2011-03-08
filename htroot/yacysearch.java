@@ -34,6 +34,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.yacy.cora.document.RSSMessage;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -367,7 +368,7 @@ public class yacysearch {
             		author = querystring.substring(authori + 7, ftb);
                     querystring = querystring.replace("author:" + author, "");
             	}
-            	authorhash = new String(Word.word2hash(author));
+            	authorhash = UTF8.String(Word.word2hash(author));
             }
             int tld = querystring.indexOf("tld:");
             if (tld >= 0) {
@@ -520,7 +521,12 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
+            final SearchEvent theSearch = SearchEventCache.getEvent(
+                    theQuery, sb.peers, sb.tables, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader,
+                    (int) sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER, sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_DEFAULT, 10)),
+                          sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_USER, sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)), 
+                    (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0),
+                    (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
             try {Thread.sleep(global ? 100 : 10);} catch (InterruptedException e1) {} // wait a little time to get first results in the search
             
             if (offset == 0) {

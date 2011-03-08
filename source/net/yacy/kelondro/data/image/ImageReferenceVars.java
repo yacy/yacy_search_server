@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
-// $LastChangedRevision: 5736 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -149,6 +149,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         this.termFrequency = 0.0;
     }
     
+    @Override
     public ImageReferenceVars clone() {
         final ImageReferenceVars c = new ImageReferenceVars(
                 this.urlHash,
@@ -353,6 +354,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         this.wordsintext = this.wordsintext + oe.wordsintext();
     }
 
+    @Override
     public int hashCode() {
         return ByteArray.hashCode(this.urlHash);
     }

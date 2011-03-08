@@ -237,6 +237,9 @@ public final class Cache {
         } catch (RowSpaceExceededException e) {
             Log.logException(e);
             return null;
+        } catch (OutOfMemoryError e) {
+            Log.logException(e);
+            return null;
         }
     }
     

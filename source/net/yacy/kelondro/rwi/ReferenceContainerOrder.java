@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-10-10 01:22:22 +0200 (Sa, 10 Okt 2009) $
-// $LastChangedRevision: 6392 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -43,6 +43,7 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
         return embeddedOrder.wellformed(a.getTermHash());
     }
     
+    @Override
     public void direction(final boolean ascending) {
         this.embeddedOrder.direction(ascending);
     }
@@ -59,6 +60,7 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
         return this.embeddedOrder.equal(a.getTermHash(), b.getTermHash());
     }
     
+    @Override
     public void rotate(final ReferenceContainer<ReferenceType> zero) {
         this.embeddedOrder.rotate(zero.getTermHash());
         this.zero = new ReferenceContainer<ReferenceType>(this.factory, this.embeddedOrder.zero(), zero);
@@ -77,6 +79,7 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
     }
     
     @SuppressWarnings("unchecked")
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;

@@ -229,7 +229,7 @@ public class ISO8601Date {
   public static String getIsoDate(Date date) {
     Calendar calendar = new GregorianCalendar();
     calendar.setTime(date);
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     buffer.append(calendar.get(Calendar.YEAR));
     buffer.append("-");
     buffer.append(twoDigit(calendar.get(Calendar.MONTH) + 1));
@@ -246,7 +246,7 @@ public class ISO8601Date {
   public static String getIsoDateTime(Date date) {
     Calendar calendar = new GregorianCalendar();
     calendar.setTime(date);
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     buffer.append(calendar.get(Calendar.YEAR));
     buffer.append("-");
     buffer.append(twoDigit(calendar.get(Calendar.MONTH) + 1));
@@ -271,7 +271,7 @@ public class ISO8601Date {
   public static String getIsoDateTimeZone(Date date) {
     Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     calendar.setTime(date);
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     buffer.append(calendar.get(Calendar.YEAR));
     buffer.append("-");
     buffer.append(twoDigit(calendar.get(Calendar.MONTH) + 1));
@@ -297,7 +297,7 @@ public class ISO8601Date {
   public static String getIsoTime(Date date) {
     Calendar calendar = new GregorianCalendar();
     calendar.setTime(date);
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     buffer.append(twoDigit(calendar.get(Calendar.HOUR_OF_DAY)));
     buffer.append(":");
     buffer.append(twoDigit(calendar.get(Calendar.MINUTE)));
@@ -316,7 +316,7 @@ public class ISO8601Date {
   public static String getIsoTimeZone(Date date) {
     Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
     calendar.setTime(date);
-    StringBuffer buffer = new StringBuffer();
+    StringBuilder buffer = new StringBuilder();
     buffer.append(twoDigit(calendar.get(Calendar.HOUR_OF_DAY)));
     buffer.append(":");
     buffer.append(twoDigit(calendar.get(Calendar.MINUTE)));

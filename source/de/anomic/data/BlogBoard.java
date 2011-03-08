@@ -47,6 +47,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -327,7 +328,7 @@ public class BlogBoard {
         
         public BlogEntry next() {
             try {
-                return readBlogEntry(new String(this.blogIter.next()));
+                return readBlogEntry(UTF8.String(this.blogIter.next()));
             } catch (final kelondroException e) {
                 //resetDatabase();
                 return null;
@@ -366,7 +367,7 @@ public class BlogBoard {
             // TODO: implement this function
             record.put("privacy", "public");
             
-            WikiBoard.setAuthor(ip, new String(author));
+            WikiBoard.setAuthor(ip, UTF8.String(author));
         }
         
         BlogEntry(final String key, final Map<String, String> record) {

@@ -80,7 +80,7 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
     			this.folder.append(data);
     			break;
     		case FOLDER_DESC:
-    			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folder+" desc: "+new String(data));
+    			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folder+" desc: " + new String(data));
     			break;
     		case BMK_DESC:
     			this.bmk.put(YMarkTables.BOOKMARK.DESC.key(), new String(data));

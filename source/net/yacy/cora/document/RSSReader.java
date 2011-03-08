@@ -79,12 +79,12 @@ public class RSSReader extends DefaultHandler {
             throw new IOException("response=null");
         }
         if (a.length < 100) {
-            throw new IOException("response=" + new String(a));
+            throw new IOException("response=" + UTF8.String(a));
         }
         if (!equals(a, "<?xml".getBytes()) && !equals(a, "<rss".getBytes())) {
             throw new IOException("response does not contain valid xml");
         }
-        final String end = new String(a, a.length - 80, 80);
+        final String end = UTF8.String(a, a.length - 80, 80);
         Type type = Type.none;
         if (end.indexOf("rss") > 0) type = Type.rss;
         if (end.indexOf("feed") > 0) type = Type.atom;

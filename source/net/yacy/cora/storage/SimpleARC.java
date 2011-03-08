@@ -4,6 +4,10 @@
  *  Copyright 2009 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 17.04.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -84,6 +88,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @return the value
      */
     @SuppressWarnings("unchecked")
+    @Override
     public final V get(final Object s) {
         V v = this.levelB.get(s);
         if (v != null) return v;
@@ -123,6 +128,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @param s
      * @return
      */
+    @Override
     public final boolean containsKey(final Object s) {
         if (this.levelB.containsKey(s)) return true;
         return this.levelA.containsKey(s);
@@ -134,6 +140,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * @param s
      * @return the old value
      */
+    @Override
     public final synchronized V remove(final Object s) {
         final V r = this.levelB.remove(s);
         if (r != null) return r;
@@ -143,6 +150,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
     /**
      * clear the cache
      */
+    @Override
     public final synchronized void clear() {
         this.levelA.clear();
         this.levelB.clear();
@@ -152,6 +160,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * get the size of the ARC. this returns the sum of main and ghost cache
      * @return the complete number of entries in the ARC cache
      */
+    @Override
     public final synchronized int size() {
         return this.levelA.size() + this.levelB.size();
     }
@@ -182,6 +191,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      * a hash code for this ARC
      * @return the hash code of one of the ARC partial hash tables
      */
+    @Override
     public final int hashCode() {
         return this.levelA.hashCode();
     }

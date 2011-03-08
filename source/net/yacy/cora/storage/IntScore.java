@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 14.10.2010 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -76,10 +80,12 @@ public class IntScore implements Comparable<IntScore>, Comparator<IntScore> {
         if (n > this.value) this.value = n;
     }
     
+    @Override
     public boolean equals(Object o) {
         return (o instanceof IntScore) && this.value == ((IntScore) o).value;
     }
     
+    @Override
     public int hashCode() {
         return this.value;
         // return (int) (this.value ^ (this.value >>> 32)); // hash code for long values
@@ -95,6 +101,7 @@ public class IntScore implements Comparable<IntScore>, Comparator<IntScore> {
         return o1.compareTo(o2);
     }
     
+    @Override
     public String toString() {
         return Integer.toString(this.value);
     }

@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen
  *  First released 06.01.2011 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -92,6 +96,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
         this.userAgent = userAgent;
     }
     
+    @Override
     public void run() {
         searchSRURSS(results, urlBase, query, timeoutInit, maximumRecordsInit, verify, global, userAgent);
         int p = 1;
@@ -119,6 +124,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             final boolean global,
             final String userAgent) {
         Thread job = new Thread() {
+            @Override
             public void run() {
                 int startRecord = 0;
                 RSSMessage message;
@@ -192,7 +198,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             parts.put("resource", UTF8.StringBody(global ? "global" : "local"));
             parts.put("nav", UTF8.StringBody("none"));
             final byte[] result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
-            String debug = new String(result); System.out.println("*** DEBUG: " + debug);
+            String debug = UTF8.String(result); System.out.println("*** DEBUG: " + debug);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {
                 throw new IOException("cora.Search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (1), reader == null");

@@ -54,8 +54,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.parser.html.CharacterCoding;
-import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Formatter;
 
 import de.anomic.search.Switchboard;
@@ -122,12 +122,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return      the previous value as String.
      */
     public String put(final String key, final byte[] value) {
-        try {
-			return this.put(key, new String(value, "UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-		    Log.logException(e);
-			return null;
-		}
+        return this.put(key, UTF8.String(value));
     }
 
     /**
@@ -180,7 +175,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     	return put(key, value);
     }
     public String putJSON(final String key, final byte[] value) {
-        return putJSON(key, new String(value));
+        return putJSON(key, UTF8.String(value));
     }
     
     /**
@@ -194,7 +189,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         return put(key, CharacterCoding.unicode2html(value, true));
     }
     public String putHTML(final String key, final byte[] value) {
-        return putHTML(key, new String(value));
+        return putHTML(key, UTF8.String(value));
     }
 
     /**

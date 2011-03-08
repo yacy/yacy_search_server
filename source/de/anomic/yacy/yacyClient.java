@@ -43,9 +43,9 @@
 
 package de.anomic.yacy;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -353,7 +353,7 @@ public final class yacyClient {
             if (feed == null) {
                 // case where the rss reader does not understand the content
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (2)");
-                //System.out.println("***DEBUG*** rss input = " + new String(result));
+                //System.out.println("***DEBUG*** rss input = " + UTF8.String(result));
                 target.put(yacySeed.RCOUNT, "0");
                 seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
                 //Log.logException(e);
@@ -387,6 +387,7 @@ public final class yacyClient {
             final String sitehash,
             final String authorhash,
             final int count,
+            final long time,
             final int maxDistance,
             final boolean global, 
             final int partitions,
@@ -419,7 +420,7 @@ public final class yacyClient {
             result = new SearchResult(
                 yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
                 mySeed, wordhashes, excludehashes, urlhashes, prefer, filter, language,
-                sitehash, authorhash, count, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
+                sitehash, authorhash, count, time, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
                 secondarySearchSuperviser, rankingProfile, constraint);
         } catch (final IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
@@ -446,7 +447,7 @@ public final class yacyClient {
         for (URIMetadataRow urlEntry: result.links) {
             // get one single search result
             if (urlEntry == null) continue;
-            assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + new String(urlEntry.hash());
+            assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + UTF8.String(urlEntry.hash());
             if (urlEntry.hash().length != 12) continue; // bad url hash
             final URIMetadataRow.Components metadata = urlEntry.metadata();
             if (metadata == null) continue;
@@ -470,7 +471,7 @@ public final class yacyClient {
 
             // the search-result-url transports all the attributes of word indexes
             if (!Base64Order.enhancedCoder.equal(entry.metadataHash(), urlEntry.hash())) {
-                yacyCore.log.logInfo("remote search: url-hash " + new String(urlEntry.hash()) + " does not belong to word-attached-hash " + new String(entry.metadataHash()) + "; url = " + metadata.url() + " from peer " + target.getName());
+                yacyCore.log.logInfo("remote search: url-hash " + UTF8.String(urlEntry.hash()) + " does not belong to word-attached-hash " + UTF8.String(entry.metadataHash()) + "; url = " + metadata.url() + " from peer " + target.getName());
                 continue; // spammed
             }
 
@@ -488,7 +489,7 @@ public final class yacyClient {
                 // because they are search-specific.
                 // instead, they are placed in a snipped-search cache.
                 // System.out.println("--- RECEIVED SNIPPET '" + urlEntry.snippet() + "'");
-                TextSnippet.snippetsCache.put(wordhashes, new String(urlEntry.hash()), urlEntry.snippet());
+                TextSnippet.snippetsCache.put(wordhashes, UTF8.String(urlEntry.hash()), urlEntry.snippet());
             }
             
             // add the url entry to the word indexes
@@ -535,16 +536,17 @@ public final class yacyClient {
             ByteBuffer ci;
             int ac = 0;
             for (Map.Entry<byte[], String> abstractEntry: result.indexabstract.entrySet()) {
-                wordhash = new String(abstractEntry.getKey());
-                whacc += wordhash;
                 try {
-                    ci = new ByteBuffer(abstractEntry.getValue().getBytes("UTF-8"));
-                } catch (UnsupportedEncodingException e) {
+                    ci = new ByteBuffer(abstractEntry.getValue());
+                    wordhash = UTF8.String(abstractEntry.getKey());
+                } catch (OutOfMemoryError e) {
                     Log.logException(e);
-                    return -1;
+                    continue;
                 }
+                whacc += wordhash;
                 secondarySearchSuperviser.addAbstract(wordhash, ReferenceContainer.decompressIndex(ci, target.hash));
                 ac++;
+                
             }
             if (ac > 0) {
                 secondarySearchSuperviser.commitAbstract();
@@ -589,6 +591,7 @@ public final class yacyClient {
                 final String sitehash,
                 final String authorhash,
                 final int count,
+                final long time,
                 final int maxDistance,
                 final boolean global, 
                 final int partitions,
@@ -614,8 +617,16 @@ public final class yacyClient {
             
             // send request
             Map<String, String> resultMap = null;
-            parts.put("myseed", UTF8.StringBody((mySeed == null) ? "" : mySeed.genSeedStr(parts.get("key").toString())));
+            String key = "";
+            ContentBody keyBody = parts.get("key");
+            if (keyBody != null) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream(20);
+                keyBody.writeTo(baos);
+                key = baos.toString();
+            }
+            parts.put("myseed", UTF8.StringBody((mySeed == null) ? "" : mySeed.genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
+            parts.put("time", UTF8.StringBody(Long.toString(Math.max(3000, time))));
             parts.put("resource", UTF8.StringBody(((global) ? "global" : "local")));
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));
             parts.put("query", UTF8.StringBody(wordhashes));
@@ -712,11 +723,7 @@ public final class yacyClient {
             parts.put("process", UTF8.StringBody("post"));
             parts.put("myseed", UTF8.StringBody(seedDB.mySeed().genSeedStr(salt)));
             parts.put("subject", UTF8.StringBody(subject));
-            try {
-            	parts.put("message", UTF8.StringBody(new String(message, "UTF-8")));
-            } catch (final UnsupportedEncodingException e) {
-            	parts.put("message", UTF8.StringBody(new String(message)));
-            }
+            parts.put("message", UTF8.StringBody(message));
             final byte[] content = postToFile(seedDB, targetHash, "message.html", parts, 20000);
             final Map<String, String> result = FileUtils.table(content);
             return result;
@@ -777,7 +784,7 @@ public final class yacyClient {
             // prepare request
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("process", UTF8.StringBody(process));
-            parts.put("urlhash", UTF8.StringBody(((entry == null) ? "" : new String(entry.hash()))));
+            parts.put("urlhash", UTF8.StringBody(((entry == null) ? "" : UTF8.String(entry.hash()))));
             parts.put("result", UTF8.StringBody(result));
             parts.put("reason", UTF8.StringBody(reason));
             parts.put("wordh", UTF8.StringBody(wordhashes));
@@ -817,7 +824,7 @@ public final class yacyClient {
             while (eenum.hasNext()) {
                 entry = eenum.next();
                 if (urlCache.get(entry.metadataHash()) == null) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + new String(entry.metadataHash()) + "' is not contained in urlCache");
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + UTF8.String(entry.metadataHash()) + "' is not contained in urlCache");
                 }
             }
         }        
@@ -903,7 +910,7 @@ public final class yacyClient {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
-                entrypost.append(new String(ic.getTermHash())) 
+                entrypost.append(UTF8.String(ic.getTermHash())) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.CRLF_STRING);
                 indexcount++;
@@ -1026,7 +1033,7 @@ public final class yacyClient {
                         result = new SearchResult(
                                 yacyNetwork.basicRequestParts((String) null, (String) null, "freeworld"),
                                 null, // sb.peers.mySeed(),
-                                new String(wordhashe),
+                                UTF8.String(wordhashe),
                                 "", // excludehashes,
                                 "", // urlhashes,
                                 Pattern.compile(""), // prefer,
@@ -1035,6 +1042,7 @@ public final class yacyClient {
                                 "", // sitehash,
                                 "", // authorhash,
                                 10, // count,
+                                3000, // time,
                                 1000, // maxDistance,
                                 true, //global, 
                                 16, // partitions,
@@ -1076,7 +1084,7 @@ public final class yacyClient {
 			byte[] res;
 			try {
 				res = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(url, timeout, vhost, newpost, true);
-				System.out.println(new String(res));
+				System.out.println(UTF8.String(res));
 			} catch (IOException e1) {
 				Log.logException(e1);
 			}

@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -45,6 +44,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -297,12 +297,8 @@ public final class yacyRelease extends yacyVersion {
             	final byte[] signatureData = client.GETbytes(this.getUrl().toString() + ".sig");
                 if (signatureData == null) {
                     Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
-                } else try {
-                    signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8").trim());
-                } catch (UnsupportedEncodingException e) {
-                    Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed: unsupported encoding");
                 }
-                // in case that the download of a signature file failed (can be caused by bad working http servers), then it is assumed that no signature exists
+                else signatureBytes = Base64Order.standardCoder.decode(UTF8.String(signatureData).trim());
             }
             client.setTimout(120000);
             client.GET(this.getUrl().toString());

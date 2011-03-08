@@ -27,6 +27,7 @@
 // javac -classpath .:../classes IndexCreate_p.java
 // if the shell's current path is HTROOT
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.Switchboard;
@@ -53,7 +54,7 @@ public class IndexCreateLoaderQueue_p {
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
                 
-                initiator = sb.peers.getConnected((w[i].initiator() == null) ? "" : new String(w[i].initiator()));
+                initiator = sb.peers.getConnected((w[i].initiator() == null) ? "" : UTF8.String(w[i].initiator()));
                 prop.put("loader-set_list_"+count+"_dark", dark ? "1" : "0");
                 prop.putHTML("loader-set_list_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("loader-set_list_"+count+"_depth", w[i].depth());

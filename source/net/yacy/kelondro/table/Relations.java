@@ -1,12 +1,12 @@
-// kelondroRelations.java
+// kRelations.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 3.07.2008 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
-// $LastChangedRevision: 4558 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -138,7 +139,7 @@ public class Relations {
     public String putRelation(final String name, final String key, final String value) throws IOException, RowSpaceExceededException {
         final byte[] r = putRelation(name, key.getBytes(), value.getBytes());
         if (r == null) return null;
-        return new String(r);
+        return UTF8.String(r);
     }
     
     public byte[] putRelation(final String name, final byte[] key, final byte[] value) throws IOException, RowSpaceExceededException {
@@ -157,7 +158,7 @@ public class Relations {
     public String getRelation(final String name, final String key) throws IOException, RowSpaceExceededException {
         final byte[] r = getRelation(name, key.getBytes());
         if (r == null) return null;
-        return new String(r);
+        return UTF8.String(r);
     }
     
     public byte[] getRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {

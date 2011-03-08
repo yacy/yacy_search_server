@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2005
 // created 29.12.2005
 //
-// $LastChangedDate: 2005-09-22 22:01:26 +0200 (Thu, 22 Sep 2005) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //

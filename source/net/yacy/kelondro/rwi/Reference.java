@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
-// $LastChangedRevision: 6393 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -40,12 +40,15 @@ public interface Reference {
 
     public long lastModified();
     
+    @Override
     public String toString();
  
     public boolean isOlder(Reference other);
 
+    @Override
     public int hashCode();
     
+    @Override
     public boolean equals(Object other);
 
     public void join(final Reference oe);

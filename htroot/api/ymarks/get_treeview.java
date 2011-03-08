@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
@@ -100,11 +101,11 @@ public class get_treeview {
 	        	try {
 					it = sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, root).iterator();
 		        	while (it.hasNext()) {
-		        		final String urlHash = new String(it.next());
+		        		final String urlHash = it.next();
 		        		bmk_row = sb.tables.select(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), urlHash.getBytes());
 			        	if(bmk_row != null) {
-			        		final String url = new String(bmk_row.get(YMarkTables.BOOKMARK.URL.key()));
-			        		final String title = new String(bmk_row.get(YMarkTables.BOOKMARK.TITLE.key(), YMarkTables.BOOKMARK.TITLE.deflt()));
+			        		final String url = UTF8.String(bmk_row.get(YMarkTables.BOOKMARK.URL.key()));
+			        		final String title = bmk_row.get(YMarkTables.BOOKMARK.TITLE.key(), YMarkTables.BOOKMARK.TITLE.deflt());
 			        			
 			        		// TODO: get_treeview - get rid of bmtype
 			        		if (post.containsKey("bmtype")) {    			 
@@ -145,7 +146,7 @@ public class get_treeview {
 			            while(it.hasNext()) {
 			            	final String key = it.next();
 			            	if(key.startsWith("date")) {
-				            	final String d = new String(bmk_row.get(key));
+				            	final String d = UTF8.String(bmk_row.get(key));
 				            	if(!d.isEmpty()) {
 				            		final String date = ISO8601Formatter.FORMATTER.format(new Date(Long.parseLong(d)));
 					            	prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> " + date + "</small>");
@@ -153,7 +154,7 @@ public class get_treeview {
 			    					count++;
 				            	}
 			            	} else {
-								final String value = new String(bmk_row.get(key));
+								final String value = UTF8.String(bmk_row.get(key));
 								if (key.equals("url"))
 									url = value;
 								prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> " + value + "</small>");								

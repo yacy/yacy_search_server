@@ -2,7 +2,7 @@
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 22.22.2006 on http://www.anomic.de
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -103,9 +103,10 @@ public class Bitfield implements Cloneable {
     public String toString() {
         final StringBuilder sb = new StringBuilder(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((this.get(i)) ? '1' : '0');
-        return new String(sb);
+        return sb.toString();
     }
     
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -116,6 +117,7 @@ public class Bitfield implements Cloneable {
         return true;
     }
     
+    @Override
     public int hashCode() {
         return this.toString().hashCode();
     }

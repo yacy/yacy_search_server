@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -117,7 +118,7 @@ public class IndexControlRWIs_p {
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
             prop.putHTML("keystring", keystring);
-            prop.putHTML("keyhash", new String(keyhash));
+            prop.putHTML("keyhash", UTF8.String(keyhash));
 
             // read values from checkboxes
             String[] urls = post.getAll("urlhx.*");
@@ -137,13 +138,13 @@ public class IndexControlRWIs_p {
             }
     
             if (post.containsKey("keyhashsearch")) {
-                if (keystring.length() == 0 || !new String(Word.word2hash(keystring)).equals(new String(keyhash))) {
+                if (keystring.length() == 0 || !UTF8.String(Word.word2hash(keystring)).equals(UTF8.String(keyhash))) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 final RankingProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 2);
-                    prop.putHTML("searchresult_wordhash", new String(keyhash));
+                    prop.putHTML("searchresult_wordhash", UTF8.String(keyhash));
                 }
             }
             
@@ -215,7 +216,7 @@ public class IndexControlRWIs_p {
             }
             
             if (post.containsKey("urllist")) {
-                if (keystring.length() == 0 || !new String(Word.word2hash(keystring)).equals(new String(keyhash))) {
+                if (keystring.length() == 0 || !UTF8.String(Word.word2hash(keystring)).equals(UTF8.String(keyhash))) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 final Bitfield flags = compileFlags(post);
@@ -226,7 +227,7 @@ public class IndexControlRWIs_p {
 
             // transfer to other peer
             if (post.containsKey("keyhashtransfer")) try {
-                if (keystring.length() == 0 || !new String(Word.word2hash(keystring)).equals(new String(keyhash))) {
+                if (keystring.length() == 0 || !UTF8.String(Word.word2hash(keystring)).equals(UTF8.String(keyhash))) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 
@@ -404,7 +405,7 @@ public class IndexControlRWIs_p {
     
     public static void genURLList(final serverObjects prop, final byte[] keyhash, final String keystring, final RankingProcess ranked, final Bitfield flags, final int maxlines) {
         // search for a word hash and generate a list of url links
-        prop.put("genUrlList_keyHash", new String(keyhash));
+        prop.put("genUrlList_keyHash", UTF8.String(keyhash));
         
         if (ranked.filteredCount() == 0) {
             prop.put("genUrlList", 1);
@@ -430,7 +431,7 @@ public class IndexControlRWIs_p {
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.word().metadataHash());
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
-                prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", new String(keyhash));
+                prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", UTF8.String(keyhash));
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
@@ -533,7 +534,7 @@ public class IndexControlRWIs_p {
     }
 
     public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, Segment segment, final byte[] keyhash, final Bitfield filter) {
-        final QueryParams query = new QueryParams(new String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
+        final QueryParams query = new QueryParams(UTF8.String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
         final ReferenceOrder order = new ReferenceOrder(query.ranking, query.targetlang);
         final RankingProcess ranked = new RankingProcess(query, order, Integer.MAX_VALUE);
         ranked.run();

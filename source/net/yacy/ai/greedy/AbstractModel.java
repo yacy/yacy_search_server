@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ * 
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -29,6 +33,7 @@ public abstract class AbstractModel<SpecificRole extends Role, SpecificFinding e
         this.currentRole = currentRole;
     }
 
+    @Override
     public abstract Object clone();
     
     /**
@@ -48,6 +53,8 @@ public abstract class AbstractModel<SpecificRole extends Role, SpecificFinding e
         this.currentRole = (SpecificRole) this.currentRole.nextRole();
     }
     
+    @Override
     public abstract boolean equals(Object other);
+    @Override
     public abstract int hashCode();  
 }

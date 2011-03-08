@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.ArrayList;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.kelondro.logging.ThreadDumpGenerator;
+import net.yacy.kelondro.logging.ThreadDump;
 import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.search.Switchboard;
@@ -58,14 +58,14 @@ public class Threaddump_p {
     	final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
     	Runtime runtime = Runtime.getRuntime();
     	
-    	ThreadDumpGenerator.bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
-    	ThreadDumpGenerator.bufferappend(buffer, plain, "");
-    	ThreadDumpGenerator.bufferappend(buffer, plain, "YaCy Version: " + versionstring);
-    	ThreadDumpGenerator.bufferappend(buffer, plain, "Assigned&nbsp;&nbsp;&nbsp;Memory = " + (runtime.maxMemory()));
-    	ThreadDumpGenerator.bufferappend(buffer, plain, "Used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Memory = " + (runtime.totalMemory() - runtime.freeMemory()));
-    	ThreadDumpGenerator.bufferappend(buffer, plain, "Available&nbsp;&nbsp;Memory = " + (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()));
-    	ThreadDumpGenerator.bufferappend(buffer, plain, "");
-    	ThreadDumpGenerator.bufferappend(buffer, plain, "");
+    	ThreadDump.bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
+    	ThreadDump.bufferappend(buffer, plain, "");
+    	ThreadDump.bufferappend(buffer, plain, "YaCy Version: " + versionstring);
+    	ThreadDump.bufferappend(buffer, plain, "Assigned&nbsp;&nbsp;&nbsp;Memory = " + (runtime.maxMemory()));
+    	ThreadDump.bufferappend(buffer, plain, "Used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Memory = " + (runtime.totalMemory() - runtime.freeMemory()));
+    	ThreadDump.bufferappend(buffer, plain, "Available&nbsp;&nbsp;Memory = " + (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()));
+    	ThreadDump.bufferappend(buffer, plain, "");
+    	ThreadDump.bufferappend(buffer, plain, "");
     	
     	int multipleCount = 100;
     	File appPath = sb.getAppPath();
@@ -76,7 +76,7 @@ public class Threaddump_p {
                 traces.add(Thread.getAllStackTraces());
                 if (MemoryControl.available() < 20 * 1024 * 1024) break;
             }
-            ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, null);
+            ThreadDump.appendStackTraceStats(appPath, buffer, traces, plain, null);
             /*
             ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.BLOCKED);
             ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.RUNNABLE);
@@ -88,15 +88,15 @@ public class Threaddump_p {
         } else {
             // generate a single thread dump
             final Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
-            ThreadDumpGenerator.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.BLOCKED);
-            ThreadDumpGenerator.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.RUNNABLE);
-            ThreadDumpGenerator.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.TIMED_WAITING);
-            ThreadDumpGenerator.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.WAITING);
-            ThreadDumpGenerator.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.NEW);
-            ThreadDumpGenerator.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.TERMINATED);
+            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.BLOCKED);
+            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.RUNNABLE);
+            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.TIMED_WAITING);
+            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.WAITING);
+            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.NEW);
+            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.TERMINATED);
         }
         
-        ThreadDumpGenerator.bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
+        ThreadDump.bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
     
     	prop.put("plain_count", multipleCount);
     	prop.put("plain_content", buffer.toString());

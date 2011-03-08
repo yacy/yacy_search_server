@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -45,7 +45,6 @@ import javax.imageio.ImageIO;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
-import net.yacy.kelondro.util.MemoryControl;
 
 
 public class RasterPlotter {
@@ -68,7 +67,7 @@ public class RasterPlotter {
     
     protected final int            width, height;
     private final   int[]          cc;
-    private final   BufferedImage  image;
+    private   BufferedImage  image;
     private final   WritableRaster grid;
     private         int            defaultColR, defaultColG, defaultColB;
     private final   long           backgroundCol;
@@ -79,9 +78,6 @@ public class RasterPlotter {
     }
     
     public RasterPlotter(final int width, final int height, final DrawMode drawMode, final long backgroundColor) {
-        if (!(MemoryControl.request(1024 * 1024 + 3 * width * height, false))) {
-            throw new RuntimeException(RasterPlotter.class.getSimpleName() + ": not enough memory (" + MemoryControl.available() + ") available");
-        }
         this.cc = new int[3];
         this.width = width;
         this.height = height;
@@ -90,8 +86,12 @@ public class RasterPlotter {
         this.defaultColG = 0xFF;
         this.defaultColB = 0xFF;
         this.defaultMode = drawMode;
-        
-        this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        try {
+            this.image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        } catch (OutOfMemoryError e) {
+            this.image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+            //throw new RuntimeException(RasterPlotter.class.getSimpleName() + ": not enough memory (" + MemoryControl.available() + ") available");
+        }
         this.clear();
         this.grid = image.getRaster();
     }

@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 13.05.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,6 +38,7 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 
 
@@ -50,10 +54,8 @@ public class gzip {
 	    fin.close();
 	    fout.close();
 	} catch (final FileNotFoundException e) {
-            //System.err.println("ERROR: file '" + inFile + "' not found");
 	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
 	} catch (final IOException e) {
-            //System.err.println("ERROR: IO trouble ");
             logger.logWarning("ERROR: IO trouble ",e);
 	}
     }
@@ -74,10 +76,8 @@ public class gzip {
 	    fin.close();
 	    fout.close();
 	} catch (final FileNotFoundException e) {
-            //System.err.println("ERROR: file '" + inFile + "' not found");
 	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
 	} catch (final IOException e) {
-            //System.err.println("ERROR: IO trouble ");
             logger.logWarning("ERROR: IO trouble ",e);
 	}
     }
@@ -92,7 +92,6 @@ public class gzip {
 	    fout.close();
 	    return baos.toByteArray();
 	} catch (final IOException e) {
-            //System.err.println("ERROR: IO trouble ");
 	    logger.logWarning("ERROR: IO trouble ",e);
 	    return null;
 	}
@@ -104,7 +103,7 @@ public class gzip {
 	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
-	    return new String(fout.toByteArray(), "UTF-8");
+	    return UTF8.String(fout.toByteArray());
     }
 
     private static void copy(final OutputStream out, final InputStream in, final int bufferSize) throws IOException {

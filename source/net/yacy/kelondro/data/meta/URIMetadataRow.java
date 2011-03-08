@@ -1,10 +1,10 @@
-// URLMetadata.java
+// URLMetadataRow.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2006 on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -35,6 +35,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
@@ -105,8 +106,6 @@ public class URIMetadataRow implements URIMetadata {
     private WordReferenceVars word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
-    
-    private static final GenericFormatter mySHORT_DAY_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
     
     public URIMetadataRow() {
         // create a dummy entry, good to produce poison objects
@@ -229,18 +228,22 @@ public class URIMetadataRow implements URIMetadata {
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher));
+
+        // create new formatters to make concurrency possible
+        GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
+        
         try {
-            encodeDate(col_mod, mySHORT_DAY_FORMATTER.parse(prop.getProperty("mod", "20000101")));
+            encodeDate(col_mod, formatter.parse(prop.getProperty("mod", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_mod, new Date());
         }
         try {
-            encodeDate(col_load, mySHORT_DAY_FORMATTER.parse(prop.getProperty("load", "20000101")));
+            encodeDate(col_load, formatter.parse(prop.getProperty("load", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_load, new Date());
         }
         try {
-            encodeDate(col_fresh, mySHORT_DAY_FORMATTER.parse(prop.getProperty("fresh", "20000101")));
+            encodeDate(col_fresh, formatter.parse(prop.getProperty("fresh", "20000101")));
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
@@ -295,8 +298,12 @@ public class URIMetadataRow implements URIMetadata {
         final StringBuilder s = new StringBuilder(300);
         if (metadata == null) return null;
         //System.out.println("author=" + comp.author());
+        
+        // create new formatters to make concurrency possible
+        GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
+        
         try {
-            s.append("hash=").append(new String(hash()));
+            s.append("hash=").append(UTF8.String(hash()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",url=").append(crypt.simpleEncode(metadata.url().toNormalform(false, true)));
             assert (s.toString().indexOf(0) < 0);
@@ -308,13 +315,13 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",publisher=").append(crypt.simpleEncode(metadata.dc_publisher()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",mod=").append(mySHORT_DAY_FORMATTER.format(moddate()));
+            s.append(",mod=").append(formatter.format(moddate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",load=").append(mySHORT_DAY_FORMATTER.format(loaddate()));
+            s.append(",load=").append(formatter.format(loaddate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",fresh=").append(mySHORT_DAY_FORMATTER.format(freshdate()));
+            s.append(",fresh=").append(formatter.format(freshdate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",referrer=").append(referrerHash() == null ? "" : new String(referrerHash()));
+            s.append(",referrer=").append(referrerHash() == null ? "" : UTF8.String(referrerHash()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",md5=").append(md5());
             assert (s.toString().indexOf(0) < 0);
@@ -379,23 +386,13 @@ public class URIMetadataRow implements URIMetadata {
         // parse elements from comp field;
         byte[] c = this.entry.getColBytes(col_comp, true);
         List<byte[]> cl = ByteBuffer.split(c, (byte) 10);
-        try {
-            this.comp = new Components(
-                        (cl.size() > 0) ? new String(cl.get(0), "UTF-8") : "",
-                        hash(),
-                        (cl.size() > 1) ? new String(cl.get(1), "UTF-8") : "",
-                        (cl.size() > 2) ? new String(cl.get(2), "UTF-8") : "",
-                        (cl.size() > 3) ? new String(cl.get(3), "UTF-8") : "",
-                        (cl.size() > 4) ? new String(cl.get(4), "UTF-8") : "");
-        } catch (UnsupportedEncodingException e) {
-            this.comp = new Components(
-                    (cl.size() > 0) ? new String(cl.get(0)) : "",
+        this.comp = new Components(
+                    (cl.size() > 0) ? UTF8.String(cl.get(0)) : "",
                     hash(),
-                    (cl.size() > 1) ? new String(cl.get(1)) : "",
-                    (cl.size() > 2) ? new String(cl.get(2)) : "",
-                    (cl.size() > 3) ? new String(cl.get(3)) : "",
-                    (cl.size() > 4) ? new String(cl.get(4)) : "");
-        }
+                    (cl.size() > 1) ? UTF8.String(cl.get(1)) : "",
+                    (cl.size() > 2) ? UTF8.String(cl.get(2)) : "",
+                    (cl.size() > 3) ? UTF8.String(cl.get(3)) : "",
+                    (cl.size() > 4) ? UTF8.String(cl.get(4)) : "");
         return this.comp;
     }
     

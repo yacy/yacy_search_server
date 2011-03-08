@@ -4,6 +4,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 09.09.2010 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -274,7 +278,9 @@ public class WeakPriorityBlockingQueue<E> {
         public long getWeight();
         public E getElement();
         public boolean equals(Element<E> o);
+        @Override
         public int hashCode();
+        @Override
         public String toString();
     }
     
@@ -294,11 +300,13 @@ public class WeakPriorityBlockingQueue<E> {
         public boolean equals(Element<E> o) {
             return this.element.equals(o.getElement());
         }
-        
+
+        @Override
         public int hashCode() {
             return this.element.hashCode();
         }
         
+        @Override
         public String toString() {
             return element.toString() + "/" + weight;
         }
@@ -365,6 +373,7 @@ public class WeakPriorityBlockingQueue<E> {
         final WeakPriorityBlockingQueue<String> a = new WeakPriorityBlockingQueue<String>(3);
         //final Element<String> REVERSE_POISON = new ReverseElement<String>("", Long.MIN_VALUE);
         new Thread(){
+            @Override
             public void run() {
                 Element<String> e;
                 try {

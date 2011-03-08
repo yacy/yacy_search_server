@@ -157,6 +157,7 @@ public class sitemapParser extends AbstractParser implements Parser {
             catch (ParserConfigurationException e) { throw new IOException (e); }
             catch (SAXParseException e) { throw new IOException (e); }
             catch (SAXException e) { throw new IOException (e); }
+            catch (OutOfMemoryError e) { throw new IOException (e); }
             NodeList sitemapNodes = doc.getElementsByTagName("sitemap");
             for (int i = 0; i < sitemapNodes.getLength(); i++) {
                 String url = new SitemapEntry((Element) sitemapNodes.item(i)).url();
