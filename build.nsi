@@ -18,6 +18,7 @@ COMMAND LINE OPTIONS (case sensitive):
 !include MUI2.nsh
 
 !include x64.nsh
+!include FileFunc.nsh
 
 ; ----------------------------------------
 ; GENERAL
@@ -35,6 +36,9 @@ OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe
 ;default installation folder
 InstallDir "$PROFILE\YaCy"
 InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString"
+
+;recommend free space in GB for YaCy
+!define RecommendSpace "30"
 
 ;requested execution level on Vista / 7
 RequestExecutionLevel admin
@@ -79,6 +83,7 @@ BrandingText "yacy.net"
 !insertmacro MUI_PAGE_COMPONENTS
 ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 
+!define MUI_PAGE_CUSTOMFUNCTION_LEAVE CheckDriveSpace
 !insertmacro MUI_PAGE_DIRECTORY
 
 !insertmacro MUI_PAGE_INSTFILES
@@ -105,16 +110,22 @@ LangString stillRunning ${LANG_ENGLISH} "YaCy is still active. Please stop YaCy 
 LangString keepData 0 "Do you want to keep the data?"
 LangString noAdminForJava 0 "You need Administrator privileges to install Java. Java will now be downloaded to the shared documents folder. YaCy won't run without Java."
 LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
+LangString yacyNoHd 0 "YaCy should be installed on a hard disk. Continue with selected folder?" 
+LangString yacyNeedSpace 0 "We recommend ${RecommendSpace} GB free space for YaCy. There are only $TempDriveFree GB left. Continue anyway?"
 
 LangString stillRunning ${LANG_FRENCH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
 LangString noAdminForJava 0 "You need Administrator privileges to install Java. Java will now be downloaded to the shared documents folder. YaCy won't run without Java."
 LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
+LangString yacyNoHd 0 "YaCy should be installed on a hard disk. Continue with selected folder?"
+LangString yacyNeedSpace 0 "We recommend ${RecommendSpace} GB free space for YaCy. There are only $TempDriveFree GB left. Continue anyway?"
 
 LangString stillRunning ${LANG_GERMAN} "YaCy ist noch aktiv. Bitte beenden Sie YaCy."
 LangString keepData 0 "Moechten Sie die Daten behalten?"
 LangString noAdminForJava 0 "Sie benoetigen Administrator-Rechte um Java zu installieren. Java wird nun in 'Gemeinsame Dokumente' gespeichert. YaCy benoetigt Java zur Ausfuehrung."
 LangString finishPage 0 "Zeige die Windows Firewall Konfiguration fuer YaCy."
+LangString yacyNoHd 0 "YaCy sollte auf einer Festplatte installiert werden. Soll der gewaehlte Ordner trotzdem verwendet werden?" 
+LangString yacyNeedSpace 0 "Wir empfehlen ${RecommendSpace} GB fuer YaCy. Es sind noch $TempDriveFree GB frei. Trotzdem fortfahren?"
 
 ; ----------------------------------------
 ; INSTALLABLE MODULES
@@ -249,4 +260,67 @@ Function DetectJRE
 	StrCmp $2 ${JRE_VERSION6} doneDetectJRE
 	Call GetJRE
 	doneDetectJRE:
+FunctionEnd
+
+Function CheckDriveSpace
+	var /global RootFolder
+   	var /global TempDriveFree
+   	var /global RootFolderType
+
+; If "\\Folder" it's a Network-Folder
+   	StrCpy $RootFolder $InstDir 2
+   	StrCmp $RootFolder "\\" NetworkFolder Driveletter
+
+   	Networkfolder:
+; prepare String for DriveSpace
+      		${GetRoot} $RootFolder $InstDir
+      		goto NoHDD
+
+; Now check drive-letters
+   	Driveletter:
+   		StrCpy $RootFolder $InstDir 3
+
+; prepare for {GetDrives-Loop}
+   		StrCpy $RootFolderType "invalid"
+   		${GetDrives} "ALL" "CheckDriveType"
+
+; jump if error
+   		StrCmp $RootFolderType "invalid" CheckSpace
+
+; jump if HDD
+   		StrCmp $RootFolderType "HDD" CheckSpace
+
+   	NoHDD:
+; Stay on folder-selection if user wants to give another folder, else check free space
+      		MessageBox MB_ICONEXCLAMATION|MB_YESNO "$(yacyNoHd)" IDYES NextPage
+      		Abort      
+
+   	CheckSpace:
+
+   	ClearErrors
+   	${DriveSpace} $RootFolder "/D=F /S=G" $TempDriveFree
+; If DriveSpace fails for any reason -> jump ahead
+   	IfErrors NextPage
+
+   	${If} $TempDriveFree < ${RecommendSpace} 
+		MessageBox MB_ICONEXCLAMATION|MB_YESNO "$(yacyNeedSpace)" IDYES NextPage
+      		Abort	
+	${EndIf}
+
+; IntCmp $TempDriveFree ${RecommendSpace} EnoughSpace LowSpace EnoughSpace
+   	
+;	LowSpace:
+;      		MessageBox MB_ICONEXCLAMATION|MB_YESNO "$(yacyNeedSpace)" IDYES NextPage
+;      		Abort
+
+;   	EnoughSpace:
+   	NextPage:
+FunctionEnd
+
+Function CheckDriveType
+; based on http://nsis.sourceforge.net/GetDrives  
+   	StrCmp $9 $RootFolder 0 +3
+   	StrCpy $RootFolderType $8   
+   	StrCpy $0 StopGetDrives
+   	Push $0
 FunctionEnd
