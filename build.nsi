@@ -224,6 +224,7 @@ SectionEnd
 ; FUNCTIONS
 
 Function GetJRE
+
 ; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
     ${If} ${RunningX64}
     StrCpy $3 ${JRE_64}
@@ -307,13 +308,6 @@ Function CheckDriveSpace
       		Abort	
 	${EndIf}
 
-; IntCmp $TempDriveFree ${RecommendSpace} EnoughSpace LowSpace EnoughSpace
-   	
-;	LowSpace:
-;      		MessageBox MB_ICONEXCLAMATION|MB_YESNO "$(yacyNeedSpace)" IDYES NextPage
-;      		Abort
-
-;   	EnoughSpace:
    	NextPage:
 FunctionEnd
 
