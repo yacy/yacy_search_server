@@ -64,19 +64,14 @@ public class ViewLog_p {
             json = post.containsKey("json");
 
             if(post.containsKey("lines")){
-                try {
-                    lines = Integer.parseInt(post.get("lines"));
-                } catch (NumberFormatException e) {
-                    Log.logException(e);
-                }
+                lines = post.getInt("lines", lines);
             }
 
             if(post.containsKey("filter")){
                 filter = post.get("filter");
             }
         }
-        
-        
+
         final Logger logger = Logger.getLogger("");
         final Handler[] handlers = logger.getHandlers();
         boolean displaySubmenu = false;
@@ -104,7 +99,6 @@ public class ViewLog_p {
         } catch (final PatternSyntaxException e) {
             Log.logException(e);
         }
-        
 
         int level = 0;
         int lc = 0;

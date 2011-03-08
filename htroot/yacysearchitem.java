@@ -26,7 +26,7 @@
 
 import java.net.MalformedURLException;
 import java.util.List;
-import java.util.TreeSet;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
@@ -56,10 +56,13 @@ import de.anomic.yacy.graphics.ProfilingGraph;
 
 
 public class yacysearchitem {
+    
+    private static final String SHORTEN_SUFFIX = "...";
+    private static final int SHORTEN_SUFFIX_LENGTH = SHORTEN_SUFFIX.length();
+    private static final int MAX_NAME_LENGTH = 60;
+    private static final int MAX_URL_LENGTH = 120;
 
     private static boolean col = true;
-    private static final int namelength = 60;
-    private static final int urllength = 120;
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
@@ -69,16 +72,16 @@ public class yacysearchitem {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
         final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
-        
+        final String path = header.get(HeaderFramework.CONNECTION_PROP_PATH);
+        final boolean isHtml = path.endsWith(".html");
+        final boolean isJson = path.endsWith(".json");
+
         // default settings for blank item
         prop.put("content", "0");
         prop.put("rss", "0");
         prop.put("references", "0");
         prop.put("rssreferences", "0");
         prop.put("dynamic", "0");
-        String p = header.get(HeaderFramework.CONNECTION_PROP_PATH);
-        boolean isHtml = p.endsWith(".html");
-        boolean isJson = p.endsWith(".json");
         
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
@@ -100,7 +103,7 @@ public class yacysearchitem {
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
         
-        String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
+        final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
         if (theQuery.contentdom == ContentDomain.TEXT) {
             // text search
 
@@ -108,7 +111,7 @@ public class yacysearchitem {
             final ResultEntry result = theSearch.oneResult(item, theQuery.isLocal() ? 1000 : 5000);
             if (result == null) return prop; // no content
 
-            DigestURI resultURL = result.url();
+            final DigestURI resultURL = result.url();
             final int port = resultURL.getPort();
             DigestURI faviconURL = null;
             if ((isHtml || isJson) && !sb.isIntranetMode() && !resultURL.isLocal()) try {
@@ -142,7 +145,7 @@ public class yacysearchitem {
             prop.put("content_showMetadata_urlhash", resulthashString);
             prop.put("content_showParser_urlhash", resulthashString);
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(resulthashString));
-            prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
+            prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
             prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.modified()));
             prop.put("content_date822", HeaderFramework.formatRFC1123(result.modified()));
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
@@ -156,11 +159,14 @@ public class yacysearchitem {
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author
             prop.putHTML("content_subject", result.subject());
-            final TreeSet<String>[] query = theQuery.queryWords();
-            String s = ""; for (String t: query[0]) s += "+" + t;
-            if (s.length() > 0) s = s.substring(1);
-            prop.putHTML("content_words", s);
-            prop.putHTML("content_showParser_words", s);
+            final Set<String>[] query = theQuery.queryWords();
+            final StringBuilder s = new StringBuilder();
+            for (final String t: query[0]) {
+                s.append("+").append(t);
+            }
+            final String words = (s.length() > 0) ? s.substring(1) : "";
+            prop.putHTML("content_words", words);
+            prop.putHTML("content_showParser_words", words);
             prop.putHTML("content_former", theQuery.queryString);
             prop.putHTML("content_showPictures_former", theQuery.queryString);
             final TextSnippet snippet = result.textSnippet();
@@ -180,7 +186,7 @@ public class yacysearchitem {
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.FINALIZATION, "" + item, 0, 0), false);
-            String ext = resultURL.getFileExtension().toLowerCase();
+            final String ext = resultURL.getFileExtension().toLowerCase();
             if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
                 String license = sb.licensedURLs.aquireLicense(resultURL);
                 prop.put("content_code", license);
@@ -190,8 +196,7 @@ public class yacysearchitem {
             theQuery.transmitcount = item + 1;
             return prop;
         }
-        
-        
+
         if (theQuery.contentdom == ContentDomain.IMAGE) {
             // image search; shows thumbnails
 
@@ -200,12 +205,12 @@ public class yacysearchitem {
             if (ms == null) {
                 prop.put("content_item", "0");
             } else {
-                String license = sb.licensedURLs.aquireLicense(ms.href);
+                final String license = sb.licensedURLs.aquireLicense(ms.href);
                 sb.loader.loadIfNotExistBackground(ms.href.toNormalform(true, false), 1024 * 1024 * 10);
                 prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
                 prop.putHTML("content_item_href", ms.href.toNormalform(true, false));
                 prop.put("content_item_code", license);
-                prop.putHTML("content_item_name", shorten(ms.name, namelength));
+                prop.putHTML("content_item_name", shorten(ms.name, MAX_NAME_LENGTH));
                 prop.put("content_item_mimetype", ms.mime);
                 prop.put("content_item_fileSize", ms.fileSize);
                 prop.put("content_item_width", ms.width);
@@ -238,9 +243,9 @@ public class yacysearchitem {
                 int c = 0;
                 for (final MediaSnippet ms : media) {
                     prop.putHTML("content_items_" + c + "_href", ms.href.toNormalform(true, false));
-                    prop.putHTML("content_items_" + c + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), urllength));
+                    prop.putHTML("content_items_" + c + "_hrefshort", nxTools.shortenURLString(ms.href.toNormalform(true, false), MAX_URL_LENGTH));
                     prop.putHTML("content_items_" + c + "_target", target);
-                    prop.putHTML("content_items_" + c + "_name", shorten(ms.name, namelength));
+                    prop.putHTML("content_items_" + c + "_name", shorten(ms.name, MAX_NAME_LENGTH));
                     prop.put("content_items_" + c + "_col", (col) ? "0" : "1");
                     c++;
                     col = !col;
@@ -257,13 +262,24 @@ public class yacysearchitem {
     }
     
     private static String shorten(final String s, final int length) {
-        if (s.length() <= length) return s;
-        final int p = s.lastIndexOf('.');
-        if (p < 0) return s.substring(0, length - 3) + "...";
-        assert p >= 0;
-        String ext = s.substring(p + 1);
-        if (ext.length() > 4) return s.substring(0, length / 2 - 2) + "..." + s.substring(s.length() - (length / 2 - 2));
-        return s.substring(0, length - ext.length() - 3) + "..." + ext;
+        final String ret;
+        if (s.length() <= length) {
+            ret = s;
+        } else {
+            final int p = s.lastIndexOf('.');
+            if (p < 0) {
+                ret = s.substring(0, length - SHORTEN_SUFFIX_LENGTH) + SHORTEN_SUFFIX;
+            } else {
+                assert p >= 0;
+                final String ext = s.substring(p + 1);
+                if (ext.length() > 4) {
+                    ret = s.substring(0, length / 2 - 2) + SHORTEN_SUFFIX + s.substring(s.length() - (length / 2 - 2));
+                } else {
+                    ret = s.substring(0, length - ext.length() - SHORTEN_SUFFIX_LENGTH) + SHORTEN_SUFFIX + ext;
+                }
+            }
+        }
+        return ret;
     }
     
     private static String sizename(int size) {
