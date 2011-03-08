@@ -84,6 +84,7 @@ public final class CachedFileReader extends AbstractReader implements Reader {
         this.cache = null;
     }
 
+    @Override
     protected void finalize() throws Throwable {
         this.close();
         super.finalize();

@@ -1,4 +1,4 @@
-// kelondroObjectBuffer.java
+// ObjectBuffer.java
 // ------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -6,7 +6,7 @@
 //
 // This is a part of the kelondro database, which is a part of YaCy
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //

@@ -73,6 +73,7 @@ public class ServiceEventMessageParser extends org.xml.sax.helpers.DefaultHandle
     return changedStateVars;
   }
 
+    @Override
   public void characters( char[] ch, int start, int length ) {
     if ( currentPropName != null ) {
       String origChars = changedStateVars.get( currentPropName );
@@ -85,6 +86,7 @@ public class ServiceEventMessageParser extends org.xml.sax.helpers.DefaultHandle
     }
   }
 
+    @Override
   public void startElement( String uri, String localName, String qName, Attributes attributes ) {
     if ( localName.equals( "property" ) ) {
       readPropertyName = true;
@@ -93,6 +95,7 @@ public class ServiceEventMessageParser extends org.xml.sax.helpers.DefaultHandle
     }
   }
   
+    @Override
   public void endElement( String uri, String localName, String qName ) {
     if ( currentPropName != null && localName.equals( currentPropName ) ) {
       readPropertyName = false;

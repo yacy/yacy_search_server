@@ -1,10 +1,14 @@
-// kelondroObjectSpace.java 
+// ObjectSpace.java 
 // ------------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
 // created: 12.12.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +29,9 @@ package net.yacy.kelondro.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 public class ObjectSpace {
@@ -33,8 +39,8 @@ public class ObjectSpace {
     private static final int minSize = 10;
     private static final int maxSize = 256;
     
-    private static Map<Integer, ArrayList<byte[]>> objHeap = new HashMap<Integer, ArrayList<byte[]>>();
-    private static TreeMap<Integer, Integer> aliveNow = new TreeMap<Integer, Integer>();
+    private static Map<Integer, List<byte[]>> objHeap = new HashMap<Integer, List<byte[]>>();
+    private static NavigableMap<Integer, Integer> aliveNow = new TreeMap<Integer, Integer>();
     //private static TreeMap aliveMax = new TreeMap();
     
     private static void incAlive(final int size) {
@@ -57,7 +63,7 @@ public class ObjectSpace {
         if ((len < minSize) || (len > maxSize)) return new byte[len];
         incAlive(len);
         synchronized (objHeap) {
-            final ArrayList<byte[]> buf = objHeap.get(Integer.valueOf(len));
+            final List<byte[]> buf = objHeap.get(Integer.valueOf(len));
             if (buf == null || buf.isEmpty()) return new byte[len];
             return buf.remove(buf.size() - 1);
         }
@@ -70,7 +76,7 @@ public class ObjectSpace {
         decAlive(b.length);
         synchronized (objHeap) {
             final Integer i = Integer.valueOf(b.length);
-            ArrayList<byte[]> buf = objHeap.get(i);
+            List<byte[]> buf = objHeap.get(i);
             if (buf == null) {
                 buf = new ArrayList<byte[]>();
                 buf.add(b);
@@ -81,7 +87,7 @@ public class ObjectSpace {
         }
     }
     
-    public static TreeMap<Integer, Integer> statAlive() {
+    public static NavigableMap<Integer, Integer> statAlive() {
         return aliveNow;
     }
     
@@ -91,8 +97,8 @@ public class ObjectSpace {
         // and shows how many Objects are held in this space for usage
         final TreeMap<Integer, Integer> result = new TreeMap<Integer, Integer>();
         synchronized (objHeap) {
-            final Iterator<Map.Entry<Integer, ArrayList<byte[]>>> i = objHeap.entrySet().iterator();
-            Map.Entry<Integer, ArrayList<byte[]>> entry;
+            final Iterator<Map.Entry<Integer, List<byte[]>>> i = objHeap.entrySet().iterator();
+            Map.Entry<Integer, List<byte[]>> entry;
             while (i.hasNext()) {
                 entry = i.next();
                 result.put(entry.getKey(), Integer.valueOf(entry.getValue().size()));

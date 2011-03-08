@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 6539 $
-// $LastChangedBy: low012 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -457,6 +457,7 @@ public class Tables {
             }
         }
         
+        @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
@@ -502,6 +503,7 @@ public class Tables {
             return this.pk;
         }
         
+        @Override
         public String toString() {
             StringBuilder sb = new StringBuilder(keymaxlen + 20 * this.size());
             sb.append(UTF8.String(pk)).append(":").append(super.toString());

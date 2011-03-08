@@ -3,8 +3,12 @@
 // by Marc Nause
 // created: 05.04.2007
 //
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
 // based on:
-// ymageFontGenerator.java
+// FontGenerator5Pixle.java
 // ---------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de

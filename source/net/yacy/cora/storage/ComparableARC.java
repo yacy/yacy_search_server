@@ -4,6 +4,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 24.08.2010 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -45,9 +49,11 @@ public final class ComparableARC<K, V> extends SimpleARC<K, V> implements Map<K,
             this.limit = cacheSize;
             this.keys = new LinkedList<K>();
         }
+        @Override
         public synchronized V get(Object k) {
             return super.get(k);
         }
+        @Override
         public synchronized V put(K k, V v) {
             V r = super.put(k, v);
             if (r == null) keys.add(k);
@@ -59,9 +65,11 @@ public final class ComparableARC<K, V> extends SimpleARC<K, V> implements Map<K,
             }
             return r;
         }
+        @Override
         public void putAll(Map<? extends K, ? extends V> map) {
             for (Map.Entry<? extends K, ? extends V> entry: map.entrySet()) put(entry.getKey(), entry.getValue());
         }
+        @Override
         public synchronized V remove(Object k) {
             V r = super.remove(k);
             if (r == null) return null;
@@ -70,18 +78,21 @@ public final class ComparableARC<K, V> extends SimpleARC<K, V> implements Map<K,
             assert removed;
             return r;
         }
+        @Override
         public synchronized Map.Entry<K,V> pollFirstEntry() {
             Map.Entry<K,V> entry = super.pollFirstEntry();
             boolean removed = removeFromKeys(entry.getKey());
             assert removed;
             return entry;
         }
+        @Override
         public synchronized Map.Entry<K,V> pollLastEntry() {
             Map.Entry<K,V> entry = super.pollLastEntry();
             boolean removed = removeFromKeys(entry.getKey());
             assert removed;
             return entry;
         }
+        @Override
         public synchronized void clear() {
             super.clear();
             this.keys.clear();

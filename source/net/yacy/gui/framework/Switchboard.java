@@ -3,9 +3,9 @@
  *  Copyright 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 05.08.2010 at http://yacy.net
  *  
- *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
- *  $LastChangedRevision: 6922 $
- *  $LastChangedBy: orbiter $
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -85,6 +85,7 @@ public class Switchboard {
         public InfoUpdater(long steptime) {
             this.steptime = steptime;
         }
+        @Override
         public void run() {
             while (shallrun) {
                 if (InfoBox != null) {
@@ -111,6 +112,7 @@ public class Switchboard {
             this.shutdownSemaphore = semaphore;
         }
 
+        @Override
         public void run() {
             try {
                 if (shallrun()) {

@@ -3,9 +3,9 @@
  *  Copyright 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 05.08.2010 at http://yacy.net
  *  
- *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
- *  $LastChangedRevision: 6922 $
- *  $LastChangedBy: orbiter $
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -68,6 +68,7 @@ public class YaCyApp {
         private static final long serialVersionUID = -8823028472678019008L;
         ImageObserver obs;
         public splashCanvas(ImageObserver obs) { this.obs = obs; }
+        @Override
         public void paint(Graphics g) {
             if (splashImg != null) g.drawImage(splashImg, 0, 0, obs);
         }
@@ -131,6 +132,7 @@ public class YaCyApp {
         // registering shutdown hook
         log.info("Registering Shutdown Hook");
         Thread t = new Thread() {
+            @Override
             public void run() {
                 app = new Application("YaCy GUI", operation, menues, new InfoPage("localhost", 8090));
                 app.setLocationRelativeTo(null);

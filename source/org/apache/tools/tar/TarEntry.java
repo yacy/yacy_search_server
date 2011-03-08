@@ -282,6 +282,7 @@ public class TarEntry implements TarConstants {
      * @param it Entry to be checked for equality.
      * @return True if the entries are equal.
      */
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -295,6 +296,7 @@ public class TarEntry implements TarConstants {
      *
      * @return the entry hashcode
      */
+    @Override
     public int hashCode() {
         return getName().hashCode();
     }

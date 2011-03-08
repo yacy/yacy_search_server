@@ -1,11 +1,11 @@
-// serverMemory.java
+// MemoryControl.java
 // -------------------------------------------
 // (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 22.09.2005 on http://yacy.net
 //
-// $LastChangedDate: 2008-12-04 13:54:16 +0100 (Do, 04 Dez 2008) $
-// $LastChangedRevision: 5379 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -56,10 +56,8 @@ public class MemoryControl {
         final long elapsed = System.currentTimeMillis() - lastGC;
         if (elapsed > last) {
             final long before = free();
-            //System.out.println("vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv");
             final long start = System.currentTimeMillis();
             System.gc();
-            //System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ if you see this many times please report to forum");
             lastGC = System.currentTimeMillis();
             final long after = free();
             gcs[gcs_pos++] = after - before;

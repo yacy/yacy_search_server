@@ -3,9 +3,9 @@
  *  Copyright 2010 by Michael Peter Christen
  *  First released 18.4.2010 at http://yacy.net
  *  
- *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
- *  $LastChangedRevision: 6922 $
- *  $LastChangedBy: orbiter $
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -179,7 +179,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         }
     }
 
-    public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
+    public List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         synchronized (this.backend) {
             flushBuffer();
             return this.backend.removeDoubles();

@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 28.10.2010 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -83,6 +87,7 @@ public class Scanner extends Thread {
         public MultiProtocolURI url() throws MalformedURLException {
             return new MultiProtocolURI(this.protocol.name() + "://" + getHostName() + "/");
         }
+        @Override
         public String toString() {
             try {
                 return new MultiProtocolURI(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + "/").toNormalform(true, false);
@@ -90,9 +95,11 @@ public class Scanner extends Thread {
                 return "";
             }
         }
+        @Override
         public int hashCode() {
             return this.inetAddress.hashCode();
         }
+        @Override
         public boolean equals(Object o) {
             return (o instanceof Service) && ((Service) o).protocol == this.protocol && ((Service) o).inetAddress.equals(this.inetAddress);
         }
@@ -141,7 +148,7 @@ public class Scanner extends Thread {
      */
     public static boolean acceptURL(MultiProtocolURI url) {
         // if the scan range is empty, then all urls are accepted
-        if (scancacheScanrange == null || scancacheScanrange.size() == 0) return true;
+        if (scancacheScanrange == null || scancacheScanrange.isEmpty()) return true;
         
         //if (System.currentTimeMillis() > scancacheValidUntilTime) return true;
         InetAddress a = Domains.dnsResolve(url.getHost()); // try to avoid that!
@@ -186,6 +193,7 @@ public class Scanner extends Thread {
         this(Domains.myIntranetIPs(), concurrentRunner, timeout);
     }
     
+    @Override
     public void run() {
         Service uri;
         try {
@@ -226,6 +234,7 @@ public class Scanner extends Thread {
             this.service = service;
             this.starttime = System.currentTimeMillis();
         }
+        @Override
         public void run() {
             try {
                 if (TimeoutRequest.ping(this.service.getInetAddress().getHostAddress(), this.service.getProtocol().port, timeout)) {
@@ -240,7 +249,7 @@ public class Scanner extends Thread {
                                 ftpClient.login("anonymous", "anomic@");
                                 List<String> list = ftpClient.list("/", false);
                                 ftpClient.CLOSE();
-                                access = list == null || list.size() == 0 ? Access.empty : Access.granted;
+                                access = list == null || list.isEmpty() ? Access.empty : Access.granted;
                             } catch (IOException e) {
                                 access = Access.denied;
                             }
@@ -265,9 +274,11 @@ public class Scanner extends Thread {
         public long age() {
             return System.currentTimeMillis() - this.starttime;
         }
+        @Override
         public boolean equals(Object o) {
             return (o instanceof Runner) && this.service.equals(((Runner) o).service);
         }
+        @Override
         public int hashCode() {
             return this.service.hashCode();
         }

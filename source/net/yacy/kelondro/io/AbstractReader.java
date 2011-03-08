@@ -1,12 +1,12 @@
-// AbstractRandomAccessWriter.java
+// AbstractReader.java
 // -------------------------------
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 09.09.2009
 //
-// $LastChangedDate: 2009-01-30 15:48:11 +0100 (Fr, 30 Jan 2009) $
-// $LastChangedRevision: 5539 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

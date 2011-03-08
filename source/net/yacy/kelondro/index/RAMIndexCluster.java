@@ -3,9 +3,9 @@
  *  Copyright 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 12.03.2009 at http://yacy.net
  *  
- *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
- *  $LastChangedRevision: 6922 $
- *  $LastChangedBy: orbiter $
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -63,6 +63,7 @@ public final class RAMIndexCluster implements Index, Iterable<Row.Entry>, Clonea
         for (RAMIndex i: this.cluster) if (i != null)  i.trim();
     }
     
+    @Override
     public RAMIndexCluster clone() {
         RAMIndex[] a = new RAMIndex[this.cluster.length];
         for (int i = 0; i < this.cluster.length; i++) {

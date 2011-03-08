@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -41,12 +45,14 @@ public interface Role {
      * @param obj
      * @return true if the current role and the given role are equal
      */
+    @Override
     public boolean equals(Object obj);
     
     /**
      * necessary hashCode method for usage of Role in hash tables
      * @return a hash code of the role
      */
+    @Override
     public int hashCode();
     
 }

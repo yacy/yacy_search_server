@@ -4,9 +4,9 @@
  *  Copyright 2010 by Michael Peter Christen for LGPL
  *  Dual-Licensing for LGPL granted by Daniel Raap 07.08.2010 by email
  *  
- *  $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
- *  $LastChangedRevision: 4558 $
- *  $LastChangedBy: orbiter $
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public

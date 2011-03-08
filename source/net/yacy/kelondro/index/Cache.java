@@ -3,9 +3,9 @@
  *  Copyright 2006 by Michael Peter Christen
  *  First released 26.10.2006 at http://yacy.net
  *  
- *  $LastChangedDate: 2010-06-16 17:11:21 +0200 (Mi, 16 Jun 2010) $
- *  $LastChangedRevision: 6922 $
- *  $LastChangedBy: orbiter $
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,6 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -451,7 +450,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         }
     }
 
-    public final synchronized ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
+    public final synchronized List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         return index.removeDoubles();
         // todo: remove reported entries from the cache!!!
     }

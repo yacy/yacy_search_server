@@ -281,7 +281,7 @@ public class UPNPDevice {
         rtrVal.add( service );
       }
     }
-    if ( rtrVal.size() == 0 ) {
+    if ( rtrVal.isEmpty() ) {
       return null;
     }
     return rtrVal;
@@ -291,6 +291,7 @@ public class UPNPDevice {
    * The toString return the device type
    * @return the device type
    */
+    @Override
   public String toString() {
     return getDeviceType();
   }

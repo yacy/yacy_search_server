@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -73,6 +77,7 @@ public class Engine<
     
     
     public class SettingRunner extends Thread {
+        @Override
         public void run() {
             Agent<SpecificRole, SpecificFinding, SpecificModel> agent;
             Challenge<SpecificRole, SpecificFinding, SpecificModel> challenge;
@@ -115,6 +120,7 @@ public class Engine<
     
     public class AssetRunner extends Thread {
         @SuppressWarnings("unchecked")
+        @Override
         public void run() {
             Challenge<SpecificRole, SpecificFinding, SpecificModel> challenge;
             Agent<SpecificRole, SpecificFinding, SpecificModel> agent, nextAgent;

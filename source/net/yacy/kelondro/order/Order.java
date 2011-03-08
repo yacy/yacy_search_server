@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2005
 // created 29.12.2005
 //
-// $LastChangedDate: 2005-09-22 22:01:26 +0200 (Thu, 22 Sep 2005) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -50,7 +50,9 @@ public interface Order<A> extends Comparator<A> {
 
     public void rotate(A zero); // defines that the ordering rotates, and sets the zero point for the rotation
     
+    @Override
     public boolean equals(Object o); // used to compare different order objects; they may define the same ordering
 
+    @Override
     public int hashCode();
 }

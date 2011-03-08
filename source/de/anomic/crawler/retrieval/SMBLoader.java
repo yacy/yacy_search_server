@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based search engine
 //
-// $LastChangedDate: 2010-03-07 00:41:51 +0100 (So, 07 Mrz 2010) $
-// $LastChangedRevision: 6719 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 

@@ -1,8 +1,8 @@
-// yacyURL.java
+// DigestURI.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 13.07.2006 on http://yacy.net
 //
-// $LastChangedDate: 2009-10-10 01:22:22 +0200 (Sa, 10 Okt 2009) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -316,6 +316,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     /**
      *  checks for local/global IP range and local IP
      */
+    @Override
     public final boolean isLocal() {
         if (this.isFile()) return true;
         if (this.hash == null) synchronized (this) {

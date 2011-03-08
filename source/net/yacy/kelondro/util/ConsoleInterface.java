@@ -1,8 +1,12 @@
-//consoleInterface.java
+//ConsoleInterface.java
 //-----------------------
 //part of YaCy
 //(C) by Detlef Reichl; detlef!reichl()gmx!org
 //Pforzheim, Germany, 2008
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -50,6 +54,7 @@ public class ConsoleInterface extends Thread {
         }
     }
 
+    @Override
     public void run() {
         // a second run adds data! a output.clear() maybe needed
         try {

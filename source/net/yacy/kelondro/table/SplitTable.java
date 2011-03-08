@@ -1,12 +1,12 @@
-// kelondroSplitTable.java
+// SplitTable.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 12.10.2006 on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -396,9 +396,9 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         table.addUnique(row);
     }
     
-    public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
+    public List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         final Iterator<Index> i = tables.values().iterator();
-        final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
+        final List<RowCollection> report = new ArrayList<RowCollection>();
         while (i.hasNext()) {
             report.addAll(i.next().removeDoubles());
         }

@@ -206,7 +206,7 @@ public class Discovery {
 
     DiscoveryListener.getInstance().unRegisterResultsHandler( handler, searchTarget );
     
-    if ( devices.size() == 0 ) {
+    if ( devices.isEmpty() ) {
       return null;
     }
     int j = 0;
@@ -238,7 +238,7 @@ public class Discovery {
     java.net.MulticastSocket skt = new java.net.MulticastSocket( null );
     skt.bind( new InetSocketAddress( src, bindPort ) );
     skt.setTimeToLive( ttl );
-    StringBuffer packet = new StringBuffer();
+    StringBuilder packet = new StringBuilder();
     packet.append( "M-SEARCH * HTTP/1.1\r\n" );
     packet.append( "HOST: 239.255.255.250:1900\r\n" );
     packet.append( "MAN: \"ssdp:discover\"\r\n" );

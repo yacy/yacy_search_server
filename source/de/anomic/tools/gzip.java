@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 13.05.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -51,10 +54,8 @@ public class gzip {
 	    fin.close();
 	    fout.close();
 	} catch (final FileNotFoundException e) {
-            //System.err.println("ERROR: file '" + inFile + "' not found");
 	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
 	} catch (final IOException e) {
-            //System.err.println("ERROR: IO trouble ");
             logger.logWarning("ERROR: IO trouble ",e);
 	}
     }
@@ -75,10 +76,8 @@ public class gzip {
 	    fin.close();
 	    fout.close();
 	} catch (final FileNotFoundException e) {
-            //System.err.println("ERROR: file '" + inFile + "' not found");
 	    logger.logWarning("ERROR: file '" + inFile + "' not found", e);
 	} catch (final IOException e) {
-            //System.err.println("ERROR: IO trouble ");
             logger.logWarning("ERROR: IO trouble ",e);
 	}
     }
@@ -93,7 +92,6 @@ public class gzip {
 	    fout.close();
 	    return baos.toByteArray();
 	} catch (final IOException e) {
-            //System.err.println("ERROR: IO trouble ");
 	    logger.logWarning("ERROR: IO trouble ",e);
 	    return null;
 	}

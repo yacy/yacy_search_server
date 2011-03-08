@@ -2,7 +2,11 @@
  *  ASCIIComparator
  *  Copyright 2010 by Michael Peter Christen
  *  First released 25.2.2011 at http://yacy.net
- *  
+ *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This file is part of YaCy Content Integration
  *
  *  This library is free software; you can redistribute it and/or
@@ -41,6 +45,7 @@ public class ASCIIComparator implements Comparator<String> {
         this.insensitive = insensitive;
     }
 
+    @Override
     public Object clone() {
         return this; // because we do not have any class variables that changes
     }
@@ -67,10 +72,12 @@ public class ASCIIComparator implements Comparator<String> {
         return 0;
     }
 
+    @Override
     public boolean equals(Object obj) {
         return (obj == this);
     }
 
+    @Override
     public int hashCode() {
         return System.identityHashCode(this);
     }

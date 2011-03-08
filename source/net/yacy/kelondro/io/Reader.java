@@ -1,8 +1,12 @@
-// RandomAccessReader.java 
+// Reader.java 
 // -----------------------
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
 // first published on http://yacy.net
 // Frankfurt, Germany, 09.09.2009
+//
+//  $LastChangedDate$
+//  $LastChangedRevision$
+//  $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

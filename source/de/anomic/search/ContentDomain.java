@@ -20,11 +20,11 @@ public enum ContentDomain {
     }
     
     public static ContentDomain contentdomParser(final String dom) {
-        if (dom.equals("text")) return TEXT;
-        else if (dom.equals("image")) return IMAGE;
-        else if (dom.equals("audio")) return AUDIO;
-        else if (dom.equals("video")) return VIDEO;
-        else if (dom.equals("app")) return APP;
+        if ("text".equals(dom)) return TEXT;
+        else if ("image".equals(dom)) return IMAGE;
+        else if ("audio".equals(dom)) return AUDIO;
+        else if ("video".equals(dom)) return VIDEO;
+        else if ("app".equals(dom)) return APP;
         return TEXT;
     }
     

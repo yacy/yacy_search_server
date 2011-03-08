@@ -3,6 +3,10 @@
  *  Copyright 2007 by Michael Peter Christen
  *  First released 16.7.2007 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -21,6 +25,7 @@
 package net.yacy.cora.document;
 
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
@@ -56,7 +61,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         private Token(String keylist) {
             String[] k = keylist.split(",");
             this.keys = new HashSet<String>();
-            for (String s: k) this.keys.add(s);
+            this.keys.addAll(Arrays.asList(k));
         }
         
         public String valueFrom(Map<String, String> map, String dflt) {
@@ -115,10 +120,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return Token.link.valueFrom(this.map, "");
     }
     
+    @Override
     public boolean equals(Object o) {
         return (o instanceof RSSMessage) && ((RSSMessage) o).getLink().equals(this.getLink());
     }
     
+    @Override
     public int hashCode() {
         return getLink().hashCode();
     }
@@ -204,6 +211,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         return sb.toString();
     }
     
+    @Override
     public String toString() {
         return this.map.toString();
     }

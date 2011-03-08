@@ -4,6 +4,10 @@
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
  *  First released 20.09.2010 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -49,8 +53,11 @@ public class YaCySearchClient {
     private String host, query;
     private int port, offset;
     
-    public YaCySearchClient(String host, int port, String query) {
-        this.host = host; this.port = port; this.offset = -10; this.query = query;
+    public YaCySearchClient(final String host, final int port, final String query) {
+        this.host = host;
+        this.port = port;
+        this.offset = -10;
+        this.query = query;
     }
     
     public SearchResult next() throws IOException {
@@ -63,18 +70,24 @@ public class YaCySearchClient {
         public SearchResult() throws IOException {
             URL url;
             Document doc;
-            String u =
-                "http://" + host + ":" + port + "/yacysearch.rss?verify=false" +
-                "&startRecord=" + offset + "&maximumRecords=10&resource=local" +
-                "&query=" + query.replaceAll(" ", "+");
+            String u = new StringBuilder().append("http://")
+                    .append(host)
+                    .append(":")
+                    .append(port)
+                    .append("/yacysearch.rss?verify=false&startRecord=")
+                    .append(offset)
+                    .append("&maximumRecords=10&resource=local&query=")
+                    .append(query.replaceAll(" ", "+")).toString();
             try { url = new URL(u); } catch (MalformedURLException e) { throw new IOException (e); }
             try { doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openStream()); }
             catch (ParserConfigurationException e) { throw new IOException (e); }
             catch (SAXException e) { throw new IOException (e); }
-            NodeList nodes = doc.getElementsByTagName("item");
+            final NodeList nodes = doc.getElementsByTagName("item");
             for (int i = 0; i < nodes.getLength(); i++)
                 this.add(new RSSEntry((Element) nodes.item(i)));
         }
+        
+        @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
             for (RSSEntry entry: this) sb.append(entry.toString());
@@ -95,8 +108,16 @@ public class YaCySearchClient {
             return (child instanceof CharacterData) ?
                     ((CharacterData) child).getData() : dflt;
         }
+
+        @Override
         public String toString() {
-            return "Title      : " + title + "\nLink       : " + link + "\nDescription: " + snippet + "\n";
+            return new StringBuilder().append("Title      : ")
+                    .append(title)
+                    .append("\nLink       : ")
+                    .append(link)
+                    .append("\nDescription: ")
+                    .append(snippet)
+                    .append("\n").toString();
         }
     }
     

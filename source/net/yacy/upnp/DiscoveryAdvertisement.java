@@ -155,7 +155,7 @@ public class DiscoveryAdvertisement implements Runnable {
         Set<DiscoveryEventHandler> handlers = aliveRegistered.get( nt );
         if ( handlers != null ) {
           handlers.remove( eventHandler );
-          if ( handlers.size() == 0 ) {
+          if (handlers.isEmpty()) {
             aliveRegistered.remove( nt );
           }
         }
@@ -163,14 +163,14 @@ public class DiscoveryAdvertisement implements Runnable {
         Set<DiscoveryEventHandler> handlers = byeByeRegistered.get( nt );
         if ( handlers != null ) {
           handlers.remove( eventHandler );
-          if ( handlers.size() == 0 ) {
+          if (handlers.isEmpty()) {
             byeByeRegistered.remove( nt );
           }
         }
       } else {
         throw new IllegalArgumentException( "Unknown notificationEvent type" );	
       }
-      if ( aliveRegistered.size() == 0 && byeByeRegistered.size() == 0 ) {
+      if (aliveRegistered.isEmpty() && byeByeRegistered.isEmpty()) {
         stopDevicesListenerThread();
       }
     }

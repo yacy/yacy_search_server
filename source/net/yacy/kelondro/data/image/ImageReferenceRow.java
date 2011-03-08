@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
-// $LastChangedRevision: 5736 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -195,6 +195,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
         this.entry = rentry;
     }
     
+    @Override
     public ImageReferenceRow clone() {
         final byte[] b = new byte[urlEntryRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
@@ -263,6 +264,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
         return new Bitfield(this.entry.getColBytes(col_flags, true));
     }
     
+    @Override
     public String toString() {
         return toPropertyForm();
     }
@@ -273,6 +275,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
         return false;
     }
     
+    @Override
     public int hashCode() {
         return ByteArray.hashCode(this.metadataHash());
     }

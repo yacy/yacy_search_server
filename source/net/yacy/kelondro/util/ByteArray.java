@@ -2,9 +2,9 @@
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 30.03.2007 on http://yacy.net
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -81,6 +81,7 @@ public class ByteArray {
         return order.compare(this.buffer, aoffset, b.buffer, boffset, blength);
     }
     
+    @Override
     public int hashCode() {
         if (this.hash != 0) return this.hash;        
         this.hash = hashCode(this.buffer);
@@ -98,6 +99,7 @@ public class ByteArray {
         return h;
     }
     
+    @Override
     public boolean equals(Object other) {
         ByteArray b = (ByteArray) other;
         if (buffer == null && b == null) return true;

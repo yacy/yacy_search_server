@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -65,12 +69,14 @@ public interface Finding<SpecificRole extends Role> extends Comparator<Finding<S
      * @param other
      * @return true if this finding is equal to the other finding
      */
+    @Override
     public boolean equals(Object other);
     
     /**
      * the hash code computation, necessary to place findings into hashtables
      * @return a hash code for this object
      */
+    @Override
     public int hashCode();
     
 }

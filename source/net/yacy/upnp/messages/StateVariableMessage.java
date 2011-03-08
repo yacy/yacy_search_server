@@ -188,7 +188,7 @@ public class StateVariableMessage {
   private String getResponseBody( InputStream in ) throws IOException {
     byte[] buffer = new byte[256];
     int readen = 0;
-    StringBuffer content = new StringBuffer( 256 );
+    StringBuilder content = new StringBuilder( 256 );
     while ( ( readen = in.read( buffer ) ) != -1 ) {
       content.append( new String( buffer, 0 , readen ) );
     }

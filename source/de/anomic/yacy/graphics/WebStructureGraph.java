@@ -5,9 +5,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -56,9 +56,9 @@ public class WebStructureGraph {
     public static int maxhosts = 20000; // maximum number of hosts in web structure map
     
     private final Log    log;
-    private final File         structureFile;
-    TreeMap<String, String> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
-    TreeMap<String, String> structure_new;
+    private final File   structureFile;
+    private final TreeMap<String, String> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    private final TreeMap<String, String> structure_new;
     
     public WebStructureGraph(final Log log, final File structureFile) {
         this.log = log;
@@ -352,7 +352,7 @@ public class WebStructureGraph {
         }
     }
     
-    private static final void joinStructure(final TreeMap<String, String> into, final TreeMap<String, String> from) {
+    private static void joinStructure(final TreeMap<String, String> into, final TreeMap<String, String> from) {
         for (final Map.Entry<String, String> e: from.entrySet()) {
             if (into.containsKey(e.getKey())) {
                 final Map<String, Integer> s0 = refstr2map(into.get(e.getKey()));

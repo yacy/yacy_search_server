@@ -3,7 +3,10 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 26.12.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,6 +27,7 @@ package de.anomic.tools;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.util.FileUtils;
@@ -34,7 +38,7 @@ public class enumerateFiles implements Enumeration<File> {
     // implements iterative search through recursively defined subdirectories
     // and return all paths to the files
     
-    private final ArrayList<TreeSet<File>> hierarchy; // contains TreeSet elements, each TreeSet contains File Entries
+    private final List<TreeSet<File>> hierarchy; // contains TreeSet elements, each TreeSet contains File Entries
     private final boolean incOrder;    // if true, the smallest value is returned first
     private File buffer;       // the prefetch-buffer
     private final boolean return_files;

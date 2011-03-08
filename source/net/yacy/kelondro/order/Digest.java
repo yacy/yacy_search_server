@@ -4,7 +4,7 @@
 // first published 28.12.2008 on http://yacy.net
 // this uses methods that had been implemented in serverCodings
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //

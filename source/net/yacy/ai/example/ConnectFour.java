@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ * 
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -47,6 +51,7 @@ public class ConnectFour {
         public Coin nextRole() {
             return (this == red) ? blue : red;
         }
+        @Override
         public String toString() {return this.c;}
         public final static Coin[] allCoins = {red, blue};
     }
@@ -74,6 +79,7 @@ public class ConnectFour {
         public int hashCode() {
             return this.column;
         }
+        @Override
         public String toString() {
             return super.getRole().toString() + ":" + Integer.toString(this.column);
         }
@@ -134,6 +140,7 @@ public class ConnectFour {
         }
 
         public boolean equals(Object o) {
+            if (!(o instanceof Board)) return false;
             Board om = (Board) o;
             Coin c0, c1;
             for (int i = 0; i < b.length; i++) {
@@ -237,8 +244,9 @@ public class ConnectFour {
             return moves;
         }
         
+        @Override
         public String toString() {
-            StringBuffer s = new StringBuffer((width + 1) * height);
+            StringBuilder s = new StringBuilder((width + 1) * height);
             Coin coin;
             for (int row = height - 1; row >= 0; row--) {
                 s.append('\"');

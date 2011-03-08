@@ -5,9 +5,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-03-30 17:31:25 +0200 (Mo, 30. March 2009) $
-// $LastChangedRevision: 5756 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -69,6 +69,7 @@ public class SignatureOutputStream extends FilterOutputStream {
      * write byte
      * @see FilterOutputStream.write(int b)
      */
+    @Override
     public void write(int b) throws IOException {
 	try {
 	    signature.update((byte)b);
@@ -78,6 +79,7 @@ public class SignatureOutputStream extends FilterOutputStream {
 	out.write(b);
     }
 
+    @Override
     public void write(byte[] b, int off, int len) throws IOException {
 	try {
 	    signature.update(b, off, len);

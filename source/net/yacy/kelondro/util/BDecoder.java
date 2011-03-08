@@ -6,6 +6,10 @@
 // Frankfurt, Germany, 2010
 // Created 03.01.2010
 //
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
 // this is an BDecoder implementation according to http://wiki.theory.org/BitTorrentSpecification
 //
 // This program is free software; you can redistribute it and/or modify
@@ -60,6 +64,7 @@ public class BDecoder {
         public long getInteger();
         public List<BObject> getList();
         public Map<String, BObject> getMap();
+        @Override
         public String toString();
         public void toStream(OutputStream os) throws IOException;
     }
@@ -86,6 +91,7 @@ public class BDecoder {
             throw new UnsupportedOperationException();
         }
 
+        @Override
         public String toString() {
             throw new UnsupportedOperationException();
         }
@@ -97,12 +103,15 @@ public class BDecoder {
         public BStringObject(byte[] b) {
             this.b = b;
         }
+        @Override
         public BType getType() {
             return BType.string;
         }
+        @Override
         public byte[] getString() {
             return this.b;
         }
+        @Override
         public String toString() {
             return UTF8.String(this.b);
         }
@@ -128,12 +137,15 @@ public class BDecoder {
         public BListObject(List<BObject> l) {
             this.l = l;
         }
+        @Override
         public BType getType() {
             return BType.list;
         }
+        @Override
         public List<BObject> getList() {
             return this.l;
         }
+        @Override
         public String toString() {
             StringBuilder s = new StringBuilder();
             s.append("[");
@@ -154,12 +166,15 @@ public class BDecoder {
         public BDictionaryObject(Map<String, BObject> m) {
             this.m = m;
         }
+        @Override
         public BType getType() {
             return BType.dictionary;
         }
+        @Override
         public Map<String, BObject> getMap() {
             return this.m;
         }
+        @Override
         public String toString() {
             StringBuilder s = new StringBuilder();
             s.append("{");
@@ -189,12 +204,15 @@ public class BDecoder {
         public BIntegerObject(long i) {
             this.i = i;
         }
+        @Override
         public BType getType() {
             return BType.integer;
         }
+        @Override
         public long getInteger() {
             return this.i;
         }
+        @Override
         public String toString() {
             return Long.toString(this.i);
         }

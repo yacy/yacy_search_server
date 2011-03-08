@@ -164,7 +164,7 @@ public class ServicesEventing implements Runnable {
       out.flush();
 
       InputStream in = skt.getInputStream();      
-      StringBuffer data = new StringBuffer();
+      StringBuilder data = new StringBuilder();
       int readen = 0;
       byte[] buffer = new byte[256];
       while ( ( readen = in.read( buffer ) ) != -1 ) {
@@ -261,7 +261,7 @@ public class ServicesEventing implements Runnable {
         synchronized( registered ) {
           registered.remove( sub );
         }
-        if ( registered.size() == 0 ) {
+        if (registered.isEmpty()) {
           stopServicesEventingThread(); 
         }
         
@@ -277,7 +277,7 @@ public class ServicesEventing implements Runnable {
         out.flush();
   
         InputStream in = skt.getInputStream();      
-        StringBuffer data = new StringBuffer();
+        StringBuilder data = new StringBuilder();
         int readen = 0;
         byte[] buffer = new byte[256];
         while ( ( readen = in.read( buffer ) ) != -1 ) {
@@ -362,7 +362,7 @@ public class ServicesEventing implements Runnable {
         OutputStream out = client.getOutputStream();
 
         int readen = 0;
-        StringBuffer data = new StringBuffer();    
+        StringBuilder data = new StringBuilder();
         byte[] buffer = new byte[256];
         boolean EOF = false;
         while ( !EOF && ( readen = in.read( buffer ) ) != -1 ) {

@@ -439,7 +439,7 @@ public class UPNPRootDevice extends UPNPDevice {
         java.io.InputStream in = deviceDefLoc.openConnection().getInputStream();
         int readen = 0;
         byte[] buff = new byte[512];
-        StringBuffer strBuff = new StringBuffer();
+        StringBuilder strBuff = new StringBuilder();
         while( ( readen = in.read( buff ) ) != -1 ) {
           strBuff.append( new String( buff, 0, readen ) );
         }

@@ -1,10 +1,10 @@
-// IODespatcher.java
+// IODispatcher.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 20.03.2009 on http://yacy.net
 //
-// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
-// $LastChangedRevision: 6393 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -141,6 +141,7 @@ public class IODispatcher extends Thread {
         }
     }
     
+    @Override
     public void run() {
         MergeJob mergeJob;
         DumpJob<? extends Reference> dumpJob;

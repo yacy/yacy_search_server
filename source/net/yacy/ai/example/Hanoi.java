@@ -3,6 +3,10 @@
  *  Copyright 2009 by Michael Peter Christen, Frankfurt a. M., Germany
  *  First published 03.12.2009 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -45,7 +49,7 @@ public class Hanoi {
 
         @Override
         public boolean equals(Object other) {
-            return this.size == ((Coin) other).size;
+            return (other != null && other instanceof Coin && this.size == ((Coin) other).size);
         }
 
         @Override
@@ -53,6 +57,7 @@ public class Hanoi {
             return this.size;
         }
         
+        @Override
         public String toString() {
             return Integer.toString(size);
         }
@@ -79,7 +84,10 @@ public class Hanoi {
 
         @Override
         public boolean equals(Object other) {
-            return this.from == ((Move) other).from && this.to == ((Move) other).to;
+            return (other != null
+                    && other instanceof Move
+                    && this.from == ((Move) other).from
+                    && this.to == ((Move) other).to);
         }
 
         @Override
@@ -87,6 +95,7 @@ public class Hanoi {
             return 3 * this.from + 7 * this.to;
         }
         
+        @Override
         public String toString() {
             return from + " -> " + to;
         }
@@ -106,6 +115,7 @@ public class Hanoi {
             this.moves = 0;
         }
         
+        @Override
         public String toString() {
             StringBuilder s = new StringBuilder();
             s.append(stacks[0].toString());
@@ -128,6 +138,7 @@ public class Hanoi {
 
         @Override
         public boolean equals(Object other) {
+            if (other == null || !(other instanceof Board)) return false;
             Board b = (Board) other;
             for (int i = 0; i < 3; i++) {
                 if (this.stacks[i].size() != b.stacks[i].size()) return false;
@@ -164,7 +175,7 @@ public class Hanoi {
         }
 
         public List<Move> explore() {
-            ArrayList<Move> moves = new ArrayList<Move>();
+            final List<Move> moves = new ArrayList<Move>();
             for (int from = 0; from < 3; from++) {
                 toloop: for (int to = 0; to < 3; to++) {
                     if (from == to) continue toloop;
@@ -185,11 +196,11 @@ public class Hanoi {
         }
 
         public boolean isTermination(Unirole role) {
-            return stacks[0].size() == 0 && stacks[2].size() == 0;
+            return stacks[0].isEmpty() && stacks[2].isEmpty();
         }
 
         public Unirole isTermination() {
-            return (stacks[0].size() == 0 && stacks[2].size() == 0) ? Unirole.unirole : null;
+            return (stacks[0].isEmpty() && stacks[2].isEmpty()) ? Unirole.unirole : null;
         }
     }
     

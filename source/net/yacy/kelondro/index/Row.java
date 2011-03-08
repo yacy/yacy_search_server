@@ -5,9 +5,9 @@
 // This is a part of the kelondro database,
 // which is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -134,6 +134,7 @@ public final class Row {
         return w;
     }
     
+    @Override
     public final String toString() {
         final StringBuilder s = new StringBuilder();
         s.append(row[0].toString());
@@ -339,6 +340,7 @@ public final class Row {
         }
 
         // compare the content of the primary key
+        @Override
         public boolean equals(final Object obj) {
             if (this == obj) return true;
             if (obj == null) return false;
@@ -352,6 +354,7 @@ public final class Row {
             return true;
         }
         
+        @Override
         public int hashCode() {
             final byte[] b = this.getPrimaryKeyBytes();
             final int len = b.length;
@@ -595,6 +598,7 @@ public final class Row {
             return bb.toString();
         }
         
+        @Override
         public final String toString() {
             return toPropertyForm(true, false, false);
         }
@@ -684,6 +688,7 @@ public final class Row {
         return true;
     }
     
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -697,6 +702,7 @@ public final class Row {
         return true;
     }
     
+    @Override
     public int hashCode() {
         return this.toString().hashCode();
     }

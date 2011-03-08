@@ -2,9 +2,9 @@
 // (C) 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 12.01.2010 on http://yacy.net
 //
-// $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
-// $LastChangedRevision: 6563 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -532,6 +532,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
     /**
      * a hashcode for the object
      */
+    @Override
     public int hashCode() {
         return this.table.name().hashCode();
     }

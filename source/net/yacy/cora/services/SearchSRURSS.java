@@ -3,6 +3,10 @@
  *  Copyright 2010 by Michael Peter Christen
  *  First released 06.01.2011 at http://yacy.net
  *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
@@ -92,6 +96,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
         this.userAgent = userAgent;
     }
     
+    @Override
     public void run() {
         searchSRURSS(results, urlBase, query, timeoutInit, maximumRecordsInit, verify, global, userAgent);
         int p = 1;
@@ -119,6 +124,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             final boolean global,
             final String userAgent) {
         Thread job = new Thread() {
+            @Override
             public void run() {
                 int startRecord = 0;
                 RSSMessage message;

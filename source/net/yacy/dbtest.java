@@ -83,6 +83,7 @@ public class dbtest {
             return this.value;
         }
 
+        @Override
         public String toString() {
             return UTF8.String(this.key) + "#" + UTF8.String(this.value);
         }
@@ -448,6 +449,7 @@ final class memprofiler extends Thread {
         start = System.currentTimeMillis();
     }
     
+    @Override
     public void run() {
         try {
             int seconds0 = 0, kilobytes0 = 0;

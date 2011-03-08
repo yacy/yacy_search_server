@@ -86,10 +86,12 @@ public class UPNPResponseException extends Exception {
     return detailErrorDescription;
   }
 
+    @Override
   public String getMessage() {
     return "Detailed error code :" + detailErrorCode + ", Detailed error description :" + detailErrorDescription;
   }
 
+    @Override
   public String getLocalizedMessage() {
     return getMessage();
   }

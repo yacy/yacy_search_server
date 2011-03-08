@@ -2,7 +2,11 @@
  *  FileLoader
  *  Copyright 2010 by Michael Peter Christen
  *  First released 25.5.2010 at http://yacy.net
- *  
+ *
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
+ *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either

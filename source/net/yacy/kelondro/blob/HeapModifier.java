@@ -1,8 +1,8 @@
-// kelondroBLOBHeapModifier.java
+// HeapModifier.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 05.01.2009 on http://yacy.net
 //
-// $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //

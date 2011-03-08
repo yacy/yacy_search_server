@@ -1,9 +1,12 @@
-// serverByteBuffer.java 
+// ByteBuffer.java 
 // ---------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 11.03.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -146,10 +149,12 @@ public final class ByteBuffer extends OutputStream {
         buffer[offset + length++] = b;
     }
     
+    @Override
     public void write(final byte[] bb) {
         write(bb, 0, bb.length);
     }
     
+    @Override
     public void write(final byte[] bb, final int of, final int le) {
         while (offset + length + le > buffer.length) grow();
         System.arraycopy(bb, of, buffer, offset + length, le);
@@ -391,6 +396,7 @@ public final class ByteBuffer extends OutputStream {
     }
     
     
+    @Override
     public String toString() {
 	return UTF8.String(buffer, offset, length);
     }

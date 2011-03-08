@@ -87,8 +87,9 @@ public class ActionResponse {
     outArgumentsVals.put( arg.getName(), value );
   }
 
+    @Override
   public String toString() {
-    StringBuffer rtrVal = new StringBuffer();
+    StringBuilder rtrVal = new StringBuilder();
     for ( Iterator<String> i = outArguments.keySet().iterator(); i.hasNext(); ) {
       String name = i.next();
       String value = outArgumentsVals.get( name );

@@ -6,7 +6,11 @@
  *  last major change: 06.05.2004
  *  added html generation for directories: 5.9.2006
  *  migrated to the cora package and re-licensed under lgpl: 23.08.2010
- *  
+ *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This file is part of YaCy Content Integration
  *
  *  This library is free software; you can redistribute it and/or
@@ -1144,6 +1148,7 @@ public class FTPClient {
          * 
          * @see java.lang.Object#toString()
          */
+        @Override
         public String toString() {
             final StringBuilder info = new StringBuilder(100);
             info.append(name);
@@ -2531,6 +2536,7 @@ public class FTPClient {
         ftpClient.login("anonymous", "anomic@");
         final LinkedBlockingQueue<entryInfo> queue = new LinkedBlockingQueue<entryInfo>();
         new Thread() {
+            @Override
             public void run() {
                 try {
                     sitelist(ftpClient, "/", queue);
@@ -2616,16 +2622,16 @@ public class FTPClient {
 
         page.append("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n");
         page.append("<html><head>\n");
-        page.append("  <title>" + title + "</title>\n");
+        page.append("  <title>").append(title).append("</title>\n");
         page.append("  <meta name=\"generator\" content=\"YaCy directory listing\">\n");
         if (metaRobotNoindex) {
             page.append("  <meta name=\"robots\" content=\"noindex\">\n");
         }
-        page.append("  <base href=\"" + base + "\">\n");
+        page.append("  <base href=\"").append(base).append("\">\n");
         page.append("</head><body>\n");
-        page.append("  <h1>" + title + "</h1>\n");
+        page.append("  <h1>").append(title).append("</h1>\n");
         if (servermessage != null && greeting != null) {
-            page.append("  <p><pre>Server \"" + servermessage + "\" responded:\n");
+            page.append("  <p><pre>Server \"").append(servermessage).append("\" responded:\n");
             page.append("  \n");
             page.append(greeting);
             page.append("\n");
@@ -2641,13 +2647,13 @@ public class FTPClient {
                 // with link
                 nameStart = line.indexOf(info.name);
                 page.append(line.substring(0, nameStart));
-                page.append("<a href=\"" + base + info.name + ((info.type == filetype.directory) ? "/" : "") + "\">" + info.name + "</a>");
+                page.append("<a href=\"").append(base).append(info.name).append((info.type == filetype.directory) ? "/" : "").append("\">").append(info.name).append("</a>");
                 nameEnd = nameStart + info.name.length();
                 if (line.length() > nameEnd) {
                     page.append(line.substring(nameEnd));
                 }
             } else if (line.startsWith("http://") || line.startsWith("ftp://") || line.startsWith("smb://") || line.startsWith("file://")) {
-                page.append("<a href=\"" + line + "\">" + line + "</a>");
+                page.append("<a href=\"").append(line).append("\">").append(line).append("</a>");
             } else {
                // raw
                page.append(line);
@@ -2656,7 +2662,7 @@ public class FTPClient {
         }
         page.append("  </pre>\n");
         page.append("  <hr>\n");
-        if (system != null) page.append("  <pre>System info: \"" + system + "\"</pre>\n");
+        if (system != null) page.append("  <pre>System info: \"").append(system).append("\"</pre>\n");
         page.append("</body></html>\n");
 
         return page;

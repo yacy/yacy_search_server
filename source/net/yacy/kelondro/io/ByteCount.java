@@ -5,8 +5,8 @@
 //Frankfurt, Germany, 2004
 //
 // This file is contributed by Sebastian Gäbel
-// last major change: $LastChangedDate: 2010-04-23 11:32:29 +0200 (Fr, 23. Apr 2010) $ by $LastChangedBy: sixcooler $
-// Revision: $LastChangedRevision: 6835 $
+// last major change: $LastChangedDate$ by $LastChangedBy$
+// Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by

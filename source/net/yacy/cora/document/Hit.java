@@ -2,7 +2,11 @@
  *  Hit
  *  Copyright 2010 by Michael Peter Christen
  *  First released 10.5.2010 at http://yacy.net
- *  
+ *
+ *  $LastChangedDate$
+ *  $LastChangedRevision$
+ *  $LastChangedBy$
+ *
  *  This file is part of YaCy Content Integration
  *
  *  This library is free software; you can redistribute it and/or

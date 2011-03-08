@@ -1,10 +1,13 @@
-// CachedRandomAccessFileWriter.java 
+// CachedFileWriter.java 
 // ---------------------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://yacy.net
-// Frankfurt, Germany, 2004-2008
-// last major change: 09.12.2008
+// Frankfurt, Germany, 2004-2008s
+//
+//  $LastChangedDate$
+//  $LastChangedRevision$
+//  $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -158,6 +161,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         this.cachelen = 0;
     }
 
+    @Override
     protected final void finalize() throws Throwable {
         this.close();
         super.finalize();

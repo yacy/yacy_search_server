@@ -6,7 +6,7 @@
 // Frankfurt, Germany, 2005
 // created 29.12.2005
 //
-// $LastChangedDate: 2005-09-22 22:01:26 +0200 (Thu, 22 Sep 2005) $
+// $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$
 //
@@ -52,6 +52,7 @@ public abstract class AbstractOrder<A> implements Order<A> {
     }
     
     @SuppressWarnings("unchecked")
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -63,6 +64,7 @@ public abstract class AbstractOrder<A> implements Order<A> {
         return thisSig.equals(otherSig);
     }
     
+    @Override
     public int hashCode() {
         return this.signature().hashCode();
     }

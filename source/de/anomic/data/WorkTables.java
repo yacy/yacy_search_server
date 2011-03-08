@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 6539 $
-// $LastChangedBy: low012 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -87,6 +87,7 @@ public class WorkTables extends Tables {
         this.bookmarks = new YMarkTables(this);
     }
     
+    @Override
     public void clear(final String tablename) throws IOException {
     	super.clear(tablename);
     	this.bookmarks.clearIndex(tablename);
