@@ -147,7 +147,7 @@ public class BDecoder {
         }
         @Override
         public String toString() {
-            StringBuilder s = new StringBuilder();
+            StringBuilder s = new StringBuilder(l.size() * 40 + 1);
             s.append("[");
             for (BObject o: l) s.append(o.toString()).append(",");
             s.setLength(s.length() - 1);
@@ -176,11 +176,11 @@ public class BDecoder {
         }
         @Override
         public String toString() {
-            StringBuilder s = new StringBuilder();
-            s.append("{");
-            for (Map.Entry<String, BObject> e: m.entrySet()) s.append(e.getKey()).append(":").append(e.getValue().toString()).append(","); 
+            StringBuilder s = new StringBuilder(m.size() * 40 + 1);
+            s.append('{');
+            for (Map.Entry<String, BObject> e: m.entrySet()) s.append(e.getKey()).append(':').append(e.getValue().toString()).append(','); 
             s.setLength(s.length() - 1);
-            s.append("}");
+            s.append('}');
             return s.toString();
         }
         public void toStream(OutputStream os) throws IOException {

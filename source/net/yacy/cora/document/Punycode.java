@@ -45,16 +45,16 @@ public class Punycode {
     int n = INITIAL_N;
     int delta = 0;
     int bias = INITIAL_BIAS;
-    final StringBuilder output = new StringBuilder();
+    final StringBuilder output = new StringBuilder(input.length() + 1);
 
     // Copy all basic code points to the output
     int b = 0;
     for (int i = 0; i < input.length(); i++) {
-      final char c = input.charAt(i);
-      if (isBasic(c)) {
-	output.append(c);
-	b++;
-      }
+        final char c = input.charAt(i);
+        if (isBasic(c)) {
+            output.append(c);
+            b++;
+        }
     }
 
     // Append delimiter
@@ -133,20 +133,20 @@ public class Punycode {
     int n = INITIAL_N;
     int i = 0;
     int bias = INITIAL_BIAS;
-    final StringBuilder output = new StringBuilder();
 
     int d = input.lastIndexOf(DELIMITER);
+    final StringBuilder output = new StringBuilder(d + 1);
     if (d > 0) {
-      for (int j = 0; j < d; j++) {
-	final char c = input.charAt(j);
-	if (!isBasic(c)) {
-	  throw new PunycodeException(PunycodeException.BAD_INPUT);
-	}
-	output.append(c);
-      }
-      d++;
+        for (int j = 0; j < d; j++) {
+            final char c = input.charAt(j);
+            if (!isBasic(c)) {
+                throw new PunycodeException(PunycodeException.BAD_INPUT);
+            }
+            output.append(c);
+        }
+        d++;
     } else {
-      d = 0;
+        d = 0;
     }
 
     while (d < input.length()) {

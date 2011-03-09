@@ -1,7 +1,11 @@
-// suggestionsjava
+// suggest.java
 // -----------------------
 // (C) 2010 by Michael Peter Christen; mc@yacy.net
 // first published 11.10.2010 in Frankfurt, Germany on http://yacy.net
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -60,17 +64,20 @@ public class suggest {
         final boolean more = post != null && post.containsKey("more");
         
         // get query
-        String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
-        String querystring =  originalquerystring.replace('+', ' ');
-        int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
-        int count = (post == null) ? 20 : post.getInt("count", 20);
+        final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", "")).trim();
+        final String querystring =  originalquerystring.replace('+', ' ');
+        final int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
+        final int count = (post == null) ? 20 : post.getInt("count", 20);
         
         // get segment
-        Segment indexSegment = null;
+        final Segment indexSegment;
         if (post != null && post.containsKey("segment")) {
             String segmentName = post.get("segment");
             if (sb.indexSegments.segmentExist(segmentName)) {
                 indexSegment = sb.indexSegments.segment(segmentName);
+            } else {
+                // take default segment
+                indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
             }
         } else {
             // take default segment
@@ -78,26 +85,39 @@ public class suggest {
         }
         
         int c = 0;
-        if (more || !indexSegment.termIndex().has(Word.word2hash(querystring))) {
-            DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
-            Iterator<String> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
+        if (more ||
+                (indexSegment != null &&
+                !indexSegment.termIndex().has(Word.word2hash(querystring))))
+        {
+            final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
+            final Iterator<String> meanIt = didYouMean.getSuggestions(timeout, count).iterator();
             String suggestion;
             //[#[query]#,[#{suggestions}##[text]##(eol)#,::#(/eol)##{/suggestions}#]]
             while (c < meanMax && meanIt.hasNext()) {
                 suggestion = meanIt.next();
-                if (json) prop.putJSON("suggestions_" + c + "_text", suggestion);
-                else if (xml) prop.putXML("suggestions_" + c + "_text", suggestion);
-                else prop.putHTML("suggestions_" + c + "_text", suggestion);
+                if (json) {
+                    prop.putJSON("suggestions_" + c + "_text", suggestion);
+                } else if (xml) {
+                    prop.putXML("suggestions_" + c + "_text", suggestion);
+                } else {
+                    prop.putHTML("suggestions_" + c + "_text", suggestion);
+                }
                 prop.put("suggestions_" + c + "_eol", 0);
                 c++;
             }
         }
         
-        if (c > 0) prop.put("suggestions_" + (c - 1) + "_eol", 1);
+        if (c > 0) {
+            prop.put("suggestions_" + (c - 1) + "_eol", 1);
+        }
         prop.put("suggestions", c);
-        if (json) prop.putJSON("query", originalquerystring);
-        else if (xml) prop.putXML("query", originalquerystring);
-        else prop.putHTML("query", originalquerystring);
+        if (json) {
+            prop.putJSON("query", originalquerystring);
+        } else if (xml) {
+            prop.putXML("query", originalquerystring);
+        } else {
+            prop.putHTML("query", originalquerystring);
+        }
 
         // Adding CORS Access header for xml output
         if (xml) {

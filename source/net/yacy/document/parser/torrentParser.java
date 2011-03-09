@@ -72,7 +72,7 @@ public class torrentParser extends AbstractParser implements Parser {
         final String comment = (commento == null) ? "" : UTF8.String(commento.getString());
         //Date creation = new Date(map.get("creation date").getInteger());
         final BObject infoo = map.get("info");
-        final StringBuilder filenames = new StringBuilder();
+        final StringBuilder filenames = new StringBuilder(80);
         String title = "";
         if (infoo != null) {
             final Map<String, BObject> info = infoo.getMap();

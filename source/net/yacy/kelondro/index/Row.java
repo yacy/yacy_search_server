@@ -136,7 +136,7 @@ public final class Row {
     
     @Override
     public final String toString() {
-        final StringBuilder s = new StringBuilder();
+        final StringBuilder s = new StringBuilder(80);
         s.append(row[0].toString());
         for (int i = 1; i < row.length; i++) {
             s.append(", ");

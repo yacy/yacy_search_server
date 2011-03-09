@@ -109,8 +109,8 @@ public final class MapTools {
     }
     
     public static String set2string(final Set<String> s, final String separator, final boolean braces) {
-        final StringBuilder buf = new StringBuilder();
-        if (braces) buf.append("{");
+        final StringBuilder buf = new StringBuilder(s.size() * 40 + 1);
+        if (braces) buf.append('{');
         final Iterator<String> i = s.iterator();
         boolean hasNext = i.hasNext();
         while (hasNext) {
@@ -118,7 +118,7 @@ public final class MapTools {
             hasNext = i.hasNext();
             if (hasNext) buf.append(separator);
         }
-        if (braces) buf.append("}");
+        if (braces) buf.append('}');
         return new String(buf);
     }
 

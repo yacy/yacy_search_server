@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
@@ -95,7 +96,7 @@ public class WebStructurePicture_p {
             // find domain with most references
             host = sb.webStructure.hostWithMaxReferences();
         }
-        RasterPlotter graphPicture;
+        final RasterPlotter graphPicture;
         if (host == null) {
             // probably no information available
             graphPicture = new RasterPlotter(width, height, RasterPlotter.DrawMode.MODE_SUB, color_back);
@@ -132,9 +133,9 @@ public class WebStructurePicture_p {
         GraphPlotter.coordinate center = graph.getPoint(centerhost);
         int mynodes = 0;
         if (center == null) {
-        	/*center =*/ graph.addPoint(centerhost, x, y, nextlayer);
-        	maxnodes--;
-        	mynodes++;
+            graph.addPoint(centerhost, x, y, nextlayer);
+            maxnodes--;
+            mynodes++;
         }
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
@@ -145,7 +146,7 @@ public class WebStructurePicture_p {
         String targethash, targethost;
         // first set points to next hosts
         final Iterator<Map.Entry<String, Integer>> i = next.entrySet().iterator();
-        final ArrayList<String[]> targets = new ArrayList<String[]>();
+        final List<String[]> targets = new ArrayList<String[]>();
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;

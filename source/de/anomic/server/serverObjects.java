@@ -373,7 +373,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      */
     public String toString() {
         if (this.size() == 0) return "";
-        StringBuilder param = new StringBuilder();
+        StringBuilder param = new StringBuilder(this.size() * 40);
         for (Map.Entry<String, String> entry: this.entrySet()) {
             param.append(MultiProtocolURI.escape(entry.getKey()));
             param.append('=');

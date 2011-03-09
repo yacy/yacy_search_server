@@ -58,7 +58,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private final InputStream stream;
     
     public SurrogateReader(final InputStream stream, int queueSize) throws IOException {
-        this.buffer = new StringBuilder();
+        this.buffer = new StringBuilder(300);
         this.parsingValue = false;
         this.surrogate = null;
         this.elementName = null;

@@ -32,7 +32,7 @@ import java.util.logging.SimpleFormatter;
 
 public final class MiniLogFormatter extends SimpleFormatter {
 
-    private final StringBuilder buffer = new StringBuilder();
+    private final StringBuilder buffer = new StringBuilder(80);
 
     public MiniLogFormatter() {
         super();

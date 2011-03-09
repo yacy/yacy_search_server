@@ -64,12 +64,12 @@ public class docParser extends AbstractParser implements Parser {
             throw new Parser.Failure("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
         }
 
-        final StringBuilder contents = new StringBuilder();
+        final StringBuilder contents = new StringBuilder(80);
         try {
             contents.append(extractor.getText().trim());
-            contents.append(" ");
+            contents.append(' ');
             contents.append(extractor.getHeaderText());
-            contents.append(" ");
+            contents.append(' ');
             contents.append(extractor.getFooterText());
         } catch (Exception e) {
             throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);

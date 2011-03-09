@@ -602,7 +602,7 @@ public final class FileUtils {
      * @return String representation of the file content.
      */
     public static String getListString(final File listFile, final boolean withcomments){
-        final StringBuilder temp = new StringBuilder();
+        final StringBuilder temp = new StringBuilder(300);
         
         BufferedReader br = null;        
         try{
@@ -726,7 +726,7 @@ public final class FileUtils {
      * @return returns <code>true</code> if successful, <code>false</code> otherwise
      */
     public static boolean writeList(final File listFile, final String[] list){
-        final StringBuilder out = new StringBuilder();
+        final StringBuilder out = new StringBuilder(list.length * 40 + 1);
         for(int i=0;i < list.length; i++){
             out.append(list[i]).append(CR).append(LF);
         }

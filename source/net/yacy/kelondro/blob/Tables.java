@@ -459,7 +459,7 @@ public class Tables {
         
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(this.size() * 40);
             sb.append('{');
             for (Map.Entry<String, byte[]> entry: this.entrySet()) {
                 sb.append(entry.getKey()).append('=').append(UTF8.String(entry.getValue())).append(", ");

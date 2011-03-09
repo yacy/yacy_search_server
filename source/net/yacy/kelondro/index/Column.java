@@ -194,7 +194,7 @@ public final class Column {
 
     @Override
     public final String toString() {
-        final StringBuilder s = new StringBuilder();
+        final StringBuilder s = new StringBuilder(20);
         switch (celltype) {
         case celltype_undefined:
             s.append(nickname);

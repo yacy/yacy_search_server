@@ -1018,7 +1018,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     }
     
     public synchronized String toString() {
-        final StringBuilder s = new StringBuilder();
+        final StringBuilder s = new StringBuilder(80);
         final Iterator<Row.Entry> i = iterator();
         if (i.hasNext()) s.append(i.next().toString());
         while (i.hasNext()) s.append(", " + (i.next()).toString());

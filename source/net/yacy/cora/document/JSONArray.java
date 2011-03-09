@@ -284,7 +284,7 @@ public class JSONArray {
      */
     private String join(String separator) throws JSONException {
         int len = length();
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(len * 20);
 
         for (int i = 0; i < len; i += 1) {
             if (i > 0) {
