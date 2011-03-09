@@ -55,6 +55,7 @@ public class htmlParser extends AbstractParser implements Parser {
         super("HTML Parser"); 
         SUPPORTED_EXTENSIONS.add("htm");
         SUPPORTED_EXTENSIONS.add("html");
+        SUPPORTED_EXTENSIONS.add("phtml");
         SUPPORTED_EXTENSIONS.add("shtml");
         SUPPORTED_EXTENSIONS.add("xhtml");
         SUPPORTED_EXTENSIONS.add("php");
