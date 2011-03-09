@@ -894,6 +894,7 @@ public final class HTTPDFileHandler {
 
                             // storing the content into the cache
                             ref = new SoftReference<TemplateCacheEntry>(templateCacheEntry);
+                            if (MemoryControl.shortStatus()) templateCache.clear();
                             templateCache.put(targetFile, ref);
                             if (theLogger.isFinest()) theLogger.logFinest("Cache MISS for file " + targetFile);
                         } else {
@@ -1207,6 +1208,7 @@ public final class HTTPDFileHandler {
             if (useTemplateCache) {
                 // storing the method into the cache
                 final SoftReference<Method> ref = new SoftReference<Method>(m);
+                if (MemoryControl.shortStatus()) templateMethodCache.clear();
                 templateMethodCache.put(classFile, ref);
             }
             

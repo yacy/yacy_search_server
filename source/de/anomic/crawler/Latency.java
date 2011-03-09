@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.search.Switchboard;
 
@@ -43,6 +44,7 @@ public class Latency {
         Host h = map.get(host);
         if (h == null) {
             h = new Host(host, time);
+            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
             map.put(host, h);
         } else {
             h.update(time);
@@ -55,6 +57,7 @@ public class Latency {
         Host h = map.get(host);
         if (h == null) {
             h = new Host(host, 3000);
+            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
             map.put(host, h);
         } else {
             h.update();
@@ -67,6 +70,7 @@ public class Latency {
         Host h = map.get(host);
         if (h == null) {
             h = new Host(host, 3000);
+            if (map.size() > 1000 || MemoryControl.shortStatus()) map.clear();
             map.put(host, h);
         } else {
             h.slowdown();

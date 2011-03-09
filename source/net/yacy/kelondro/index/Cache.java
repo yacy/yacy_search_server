@@ -180,7 +180,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         
         // check memory
         long available = MemoryControl.available();
-        if (available - 2 * 1024 * 1024 < readMissCache.memoryNeededForGrow()) {
+        if (MemoryControl.shortStatus() || available - 2 * 1024 * 1024 < readMissCache.memoryNeededForGrow()) {
             readMissCache.clear();
         }
         available = MemoryControl.available();
@@ -200,7 +200,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         
         // check memory
         long available = MemoryControl.available();
-        if (available - 2 * 1024 * 1024 < readHitCache.memoryNeededForGrow()) {
+        if (MemoryControl.shortStatus() || available - 2 * 1024 * 1024 < readHitCache.memoryNeededForGrow()) {
             readHitCache.clear();
         }
         available = MemoryControl.available();

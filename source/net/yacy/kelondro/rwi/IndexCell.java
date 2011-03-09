@@ -73,7 +73,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private final int                                    writeBufferSize;
     private       Semaphore                              dumperSemaphore = new Semaphore(1);
     private       Semaphore                              cleanerSemaphore = new Semaphore(1);
-    private final Map<byte[], HandleSet>                 failedURLs; // mapping from word hashes to a list of url hashes
+    private final Map<byte[], HandleSet>                 removeDelayedURLs; // mapping from word hashes to a list of url hashes
     
     
     public IndexCell(
@@ -100,7 +100,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.targetFileSize = targetFileSize;
         this.maxFileSize = maxFileSize;
         this.writeBufferSize = writeBufferSize;
-        this.failedURLs = new TreeMap<byte[], HandleSet>(URIMetadataRow.rowdef.objectOrder);
+        this.removeDelayedURLs = new TreeMap<byte[], HandleSet>(URIMetadataRow.rowdef.objectOrder);
     }
 
     
@@ -174,12 +174,13 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         assert countRam == null || countRam.size() >= 0;
         int c = countRam == null ? countFile : countFile + countRam.size();
         // exclude entries from delayed remove
-        synchronized (this.failedURLs) {
-            HandleSet s = this.failedURLs.get(termHash);
+        synchronized (this.removeDelayedURLs) {
+            HandleSet s = this.removeDelayedURLs.get(termHash);
             if (s != null) c -= s.size();
             if (c < 0) c = 0;
         }
         // put count result into cache
+        if (MemoryControl.shortStatus()) this.countCache.clear();
         this.countCache.put(termHash, c);
         return c;
     }
@@ -219,8 +220,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
         if (result == null) return null;
         // remove the failed urls
-        synchronized (this.failedURLs) {
-            HandleSet s = this.failedURLs.get(termHash);
+        synchronized (this.removeDelayedURLs) {
+            HandleSet s = this.removeDelayedURLs.get(termHash);
             if (s != null) result.removeEntries(s);
         }
         return result;
@@ -261,8 +262,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     
     public void removeDelayed(byte[] termHash, HandleSet urlHashes) {
         HandleSet r;
-        synchronized (failedURLs) {
-            r = this.failedURLs.get(termHash);
+        synchronized (removeDelayedURLs) {
+            r = this.removeDelayedURLs.get(termHash);
         }
         if (r == null) {
             r = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
@@ -273,15 +274,15 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             try {remove(termHash, urlHashes);} catch (IOException e1) {}
             return;
         }
-        synchronized (failedURLs) {
-            this.failedURLs.put(termHash, r);
+        synchronized (removeDelayedURLs) {
+            this.removeDelayedURLs.put(termHash, r);
         }
     }
     
     public void removeDelayed(byte[] termHash, byte[] urlHashBytes) {
         HandleSet r;
-        synchronized (failedURLs) {
-            r = this.failedURLs.get(termHash);
+        synchronized (removeDelayedURLs) {
+            r = this.removeDelayedURLs.get(termHash);
         }
         if (r == null) {
             r = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
@@ -292,20 +293,20 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             try {remove(termHash, urlHashBytes);} catch (IOException e1) {}
             return;
         }
-        synchronized (failedURLs) {
-            this.failedURLs.put(termHash, r);
+        synchronized (removeDelayedURLs) {
+            this.removeDelayedURLs.put(termHash, r);
         }
     }
     
     public void removeDelayed() throws IOException {
         HandleSet words = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0); // a set of url hashes where a worker thread tried to work on, but failed.
-        synchronized (failedURLs) {
-            for (byte[] b: failedURLs.keySet()) try {words.put(b);} catch (RowSpaceExceededException e) {}
+        synchronized (removeDelayedURLs) {
+            for (byte[] b: removeDelayedURLs.keySet()) try {words.put(b);} catch (RowSpaceExceededException e) {}
         }
 
-        synchronized (failedURLs) {
+        synchronized (removeDelayedURLs) {
             for (byte[] b: words) {
-                HandleSet urls = failedURLs.remove(b);
+                HandleSet urls = removeDelayedURLs.remove(b);
                 if (urls != null) remove(b, urls);
             }
         }
@@ -410,7 +411,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     public synchronized void clear() throws IOException {
         this.countCache.clear();
-        this.failedURLs.clear();
+        this.removeDelayedURLs.clear();
         this.ram.clear();
         this.array.clear();
     }

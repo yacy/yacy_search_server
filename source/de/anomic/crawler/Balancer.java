@@ -48,6 +48,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.client.Cache;
@@ -268,7 +269,7 @@ public class Balancer {
             if (this.ddc.has(hash)) return "double occurrence in ddc";
             if (this.urlFileIndex.has(hash)) return "double occurrence in urlFileIndex";
             
-            if (this.double_push_check.size() > 10000) this.double_push_check.clear();
+            if (this.double_push_check.size() > 10000 || MemoryControl.shortStatus()) this.double_push_check.clear();
             this.double_push_check.put(hash);
         
             // add to index
@@ -437,8 +438,10 @@ public class Balancer {
 		        }
 		        break;
 	    	}
-    		if (crawlEntry != null)
+    		if (crawlEntry != null) {
+                if (this.ddc.size() > 10000 || MemoryControl.shortStatus()) this.ddc.clear();
                 try { this.ddc.put(crawlEntry.url().hash()); } catch (RowSpaceExceededException e) {}
+    		}
     	}
     	if (crawlEntry == null) return null;
     	

@@ -76,9 +76,8 @@ public final class ResultURLs {
         }
     }
     
-    private final static int initialStackCapacity = 500;
-    private final static Map<EventOrigin, Map<String, InitExecEntry>> resultStacks = new ConcurrentHashMap<EventOrigin, Map<String, InitExecEntry>>(initialStackCapacity); // a mapping from urlHash to Entries
-    private final static Map<EventOrigin, DynamicScore<String>> resultDomains = new ConcurrentHashMap<EventOrigin, DynamicScore<String>>(initialStackCapacity);
+    private final static Map<EventOrigin, Map<String, InitExecEntry>> resultStacks = new ConcurrentHashMap<EventOrigin, Map<String, InitExecEntry>>(); // a mapping from urlHash to Entries
+    private final static Map<EventOrigin, DynamicScore<String>> resultDomains = new ConcurrentHashMap<EventOrigin, DynamicScore<String>>();
 
     static {
         for (EventOrigin origin: EventOrigin.values()) {

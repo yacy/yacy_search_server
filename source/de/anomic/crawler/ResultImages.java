@@ -35,6 +35,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 public class ResultImages {
@@ -55,6 +56,9 @@ public class ResultImages {
     public static void registerImages(final DigestURI source, final Document document, final boolean privateEntry) {
         if (document == null) return;
         if (source == null) return;
+
+        if (MemoryControl.shortStatus()) clearQueues();
+        limitQueues(1000);
         
         final Map<MultiProtocolURI, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
@@ -134,13 +138,20 @@ public class ResultImages {
     public static int publicQueueLowSize() {
         return publicImageQueueLow.size();
     }
-    
+
     public static void clearQueues() {
         privateImageQueueHigh.clear();
         privateImageQueueLow.clear();
         publicImageQueueHigh.clear();
         publicImageQueueLow.clear();
         doubleCheck.clear();
+    }
+    
+    public static void limitQueues(int limit) {
+        while (privateImageQueueHigh.size() > limit) privateImageQueueHigh.poll();
+        while (privateImageQueueLow.size() > limit) privateImageQueueLow.poll();
+        while (publicImageQueueHigh.size() > limit) publicImageQueueHigh.poll();
+        while (publicImageQueueLow.size() > limit) publicImageQueueLow.poll();
     }
     
     public static class OriginEntry {

@@ -253,7 +253,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     
     private boolean abandonTable() {
         // check if not enough memory is there to maintain a memory copy of the table
-        return MemoryControl.available() < minmemremaining;
+        return MemoryControl.shortStatus() || MemoryControl.available() < minmemremaining;
     }
     
     public byte[] smallestKey() {

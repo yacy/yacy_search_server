@@ -38,6 +38,7 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.cora.storage.IntScore;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.MemoryControl;
 
 /**
  * provide a completion library for the did-you-mean class
@@ -74,6 +75,7 @@ public class WordCache {
     public void learn(String word) {
         if (word == null) return;
         if (word.length() < commonWordsMinLength) return;
+        if (MemoryControl.shortStatus()) commonWords.clear();
         commonWords.inc(word);
         if (commonWords.size() > commonWordsMaxSize) {
             commonWords.shrinkToMaxSize(commonWordsMaxSize / 2);
