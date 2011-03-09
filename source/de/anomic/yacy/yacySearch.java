@@ -131,7 +131,7 @@ public class yacySearch extends Thread {
     }
     
     public static String set2string(final HandleSet hashes) {
-        StringBuilder wh = new StringBuilder();
+        StringBuilder wh = new StringBuilder(hashes.size() * 12);
         final Iterator<byte[]> iter = hashes.iterator();
         while (iter.hasNext()) { wh.append(UTF8.String(iter.next())); }
         return wh.toString();

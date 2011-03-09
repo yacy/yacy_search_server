@@ -85,10 +85,11 @@ public class getpageinfo_p {
                     prop.putXML("lang", (languages == null) ? "unknown" : languages.iterator().next());
                     
                     // get links and put them into a semicolon-separated list
-                    StringBuilder links = new StringBuilder();
-                    StringBuilder filter = new StringBuilder();
+                    Set<MultiProtocolURI> uris = scraper.getAnchors().keySet();
+                    StringBuilder links = new StringBuilder(uris.size() * 80);
+                    StringBuilder filter = new StringBuilder(uris.size() * 40);
                     count = 0;
-                    for (MultiProtocolURI uri: scraper.getAnchors().keySet()) {
+                    for (MultiProtocolURI uri: uris) {
                         links.append(';').append(uri.toNormalform(true, false));
                         filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
                         prop.putXML("links_" + count + "_link", uri.toNormalform(true, false));

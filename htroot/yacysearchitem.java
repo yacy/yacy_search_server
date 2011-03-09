@@ -160,9 +160,9 @@ public class yacysearchitem {
             prop.putHTML("content_creator", result.creator());// author
             prop.putHTML("content_subject", result.subject());
             final Set<String>[] query = theQuery.queryWords();
-            final StringBuilder s = new StringBuilder();
+            final StringBuilder s = new StringBuilder(query[0].size() * 20);
             for (final String t: query[0]) {
-                s.append("+").append(t);
+                s.append('+').append(t);
             }
             final String words = (s.length() > 0) ? s.substring(1) : "";
             prop.putHTML("content_words", words);

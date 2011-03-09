@@ -56,7 +56,7 @@ public class URLLicense {
     
     public String aquireLicense(final DigestURI url) {
         // generate license key
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder(keylen * 2);
         if (url == null) return stringBuilder.toString();
         while (stringBuilder.length() < keylen) stringBuilder.append(Integer.toHexString(random.nextInt()));
         String license = stringBuilder.substring(0, keylen);

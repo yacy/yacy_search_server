@@ -298,18 +298,18 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         // handle international domains
         if (!Punycode.isBasic(host)) try {
             final String[] domainParts = patternDot.split(host, 0);
-            StringBuilder buffer = new StringBuilder();
+            StringBuilder buffer = new StringBuilder(80);
             // encode each domain-part separately
-            for(int i=0; i<domainParts.length; i++) {
-            final String part = domainParts[i];
-            if(!Punycode.isBasic(part)) {
-                    buffer.append("xn--").append(Punycode.encode(part));
-            } else {
-                buffer.append(part);
-            }
-            if(i != domainParts.length-1) {
-                buffer.append('.');
-            }
+            for(int i = 0; i < domainParts.length; i++) {
+	            final String part = domainParts[i];
+	            if (!Punycode.isBasic(part)) {
+	                buffer.append("xn--").append(Punycode.encode(part));
+	            } else {
+	                buffer.append(part);
+	            }
+	            if (i != domainParts.length-1) {
+	                buffer.append('.');
+	            }
             }
             host = buffer.toString();
         } catch (final PunycodeException e) {}

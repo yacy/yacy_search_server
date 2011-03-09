@@ -261,7 +261,7 @@ public class yacyPeerActions {
         try {
             final long mins = millis / 60000;
             
-            final StringBuilder uptime = new StringBuilder();
+            final StringBuilder uptime = new StringBuilder(40);
             
             final int uptimeDays  = (int) (Math.floor(mins/1440.0));
             final int uptimeHours = (int) (Math.floor(mins/60.0)%24);
@@ -271,7 +271,7 @@ public class yacyPeerActions {
                   .append(((uptimeDays == 1)?" day ":" days "))
                   .append((uptimeHours < 10)?"0":"")
                   .append(uptimeHours)
-                  .append(":")
+                  .append(':')
                   .append((uptimeMins < 10)?"0":"")
                   .append(uptimeMins);            
             

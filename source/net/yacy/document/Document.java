@@ -644,11 +644,11 @@ dc_rights
         
         long docTextLength = 0;
         final ByteBuffer         content       = new ByteBuffer();
-        final StringBuilder      authors       = new StringBuilder();
-        final StringBuilder      publishers    = new StringBuilder();
-        final StringBuilder      subjects      = new StringBuilder();
-        final StringBuilder      title         = new StringBuilder();
-        final StringBuilder      description   = new StringBuilder();
+        final StringBuilder      authors       = new StringBuilder(80);
+        final StringBuilder      publishers    = new StringBuilder(80);
+        final StringBuilder      subjects      = new StringBuilder(80);
+        final StringBuilder      title         = new StringBuilder(80);
+        final StringBuilder      description   = new StringBuilder(80);
         final LinkedList<String> sectionTitles = new LinkedList<String>();
 
         final Map<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();

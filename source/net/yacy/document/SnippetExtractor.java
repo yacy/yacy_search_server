@@ -165,6 +165,7 @@ public class SnippetExtractor {
                 // so cut it here at both ends at once
                 assert maxpos >= minpos;
                 final int newlen = Math.max(10, maxpos - minpos + 10);
+                assert maxLength >= newlen: "maxLength = " + maxLength + ", newlen = " + newlen;
                 final int around = (maxLength - newlen) / 2;
                 assert minpos - around < sentence.length() : "maxpos = " + maxpos + ", minpos = " + minpos + ", around = " + around + ", sentence.length() = " + sentence.length() + ", maxLength = " + maxLength + ", newlen = " + newlen; //maxpos = 435, minpos = 17, around = -124, sentence.length() = 44
                 sentence = "[..] " + sentence.substring(minpos - around, ((maxpos + around) > sentence.length()) ? sentence.length() : (maxpos + around)).trim() + " [..]";

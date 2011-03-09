@@ -175,7 +175,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         }
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder(300);
             for (final URLEntry entry: this) {
                 sb.append(entry.toString());
             }

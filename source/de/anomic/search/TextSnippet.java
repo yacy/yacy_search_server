@@ -350,8 +350,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         //especially p. 123 and p. 390/391 (in the German version of the 2nd edition)
 
         StringBuilder theWord = new StringBuilder(word);
-        StringBuilder prefix = new StringBuilder();
-        StringBuilder postfix = new StringBuilder();
+        StringBuilder prefix = new StringBuilder(40);
+        StringBuilder postfix = new StringBuilder(40);
         int len = 0;
 
         // cut off prefix if it contains of non-characters or non-numbers
@@ -372,7 +372,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             StringBuilder out = null;
             String temp = "";
             for(int k=0; k < theWord.length(); k++) {
-                out = new StringBuilder();
+                out = new StringBuilder(80);
                 //is character a special character?
                 if(p4.matcher(theWord.substring(k,k+1)).find()) {
                     if (UTF8.String(Word.word2hash(temp)).equals(UTF8.String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";

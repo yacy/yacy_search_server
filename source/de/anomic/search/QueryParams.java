@@ -472,7 +472,7 @@ public final class QueryParams {
             final String ext, final int page, final QueryParams theQuery,
             String newQueryString, final String originalUrlMask, final String nav) {
 
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
         sb.append(ext);
         sb.append("?query=");

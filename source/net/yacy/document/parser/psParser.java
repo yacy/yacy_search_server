@@ -66,7 +66,7 @@ public class psParser extends AbstractParser implements Parser {
     private boolean testForPs2Ascii() {
         try {
             String procOutputLine = null;
-            final StringBuilder procOutput = new StringBuilder();
+            final StringBuilder procOutput = new StringBuilder(80);
             
             final Process ps2asciiProc = Runtime.getRuntime().exec(new String[]{"ps2ascii", "--version"});
             final BufferedReader stdOut = new BufferedReader(new InputStreamReader(ps2asciiProc.getInputStream()));

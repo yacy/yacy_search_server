@@ -123,13 +123,13 @@ public class ListManager {
      * @return String with elements from set separated by comma.
      */
     public static String collection2string(final Collection<String> col){
-        final StringBuilder str = new StringBuilder();
+        final StringBuilder str = new StringBuilder(col.size() * 40);
         
         if (col != null && !col.isEmpty()) {
             final Iterator<String> it = col.iterator();
             str.append(it.next());
             while(it.hasNext()) {
-                str.append(",").append(it.next());
+                str.append(',').append(it.next());
             }
         }
         

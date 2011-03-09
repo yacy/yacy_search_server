@@ -218,7 +218,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
     }
     
     public String getChilds() {
-        StringBuilder s = new StringBuilder();
+        StringBuilder s = new StringBuilder(this.childs.length * 40 + 1);
         for (int i = 0; i < this.childs.length; i++) {
             s.append(this.childs[i]);
             s.append(' ');

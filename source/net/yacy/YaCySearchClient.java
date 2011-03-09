@@ -70,7 +70,7 @@ public class YaCySearchClient {
         public SearchResult() throws IOException {
             URL url;
             Document doc;
-            String u = new StringBuilder().append("http://")
+            String u = new StringBuilder(120).append("http://")
                     .append(host)
                     .append(":")
                     .append(port)
@@ -89,7 +89,7 @@ public class YaCySearchClient {
         
         @Override
         public String toString() {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(this.size() * 80 + 1);
             for (RSSEntry entry: this) sb.append(entry.toString());
             return sb.toString();
         }
@@ -111,7 +111,7 @@ public class YaCySearchClient {
 
         @Override
         public String toString() {
-            return new StringBuilder().append("Title      : ")
+            return new StringBuilder(80).append("Title      : ")
                     .append(title)
                     .append("\nLink       : ")
                     .append(link)

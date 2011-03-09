@@ -27,7 +27,6 @@
 package de.anomic.search;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.logging.Log;
@@ -241,15 +240,13 @@ public class RankingProfile {
     }
     
     public String toExternalURLGet(final String prefix) {
-        final Iterator<Map.Entry<String, String>> i = toExternalMap("").entrySet().iterator();
-        Map.Entry<String, String> entry;
-        final StringBuilder ext = new StringBuilder();
-        while (i.hasNext()) {
-            entry = i.next();
-            ext.append("&");
+    	final Map<String, String> emap = toExternalMap("");
+        final StringBuilder ext = new StringBuilder(emap.size() * 40);
+        for (Map.Entry<String, String> entry: emap.entrySet()) {
+            ext.append('&');
             ext.append(prefix);
             ext.append(entry.getKey());
-            ext.append("=");
+            ext.append('=');
             ext.append(entry.getValue());
         }
         return ext.toString();
