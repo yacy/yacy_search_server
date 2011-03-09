@@ -51,8 +51,6 @@ SetCompressor /SOLID LZMA
 ; http://www.java.com/de/download/manual.jsp BundleId +1 / +2
 
 !define JRE_VERSION6 "1.6"
-;!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=37718" ;jre-6u18-windows-i586.exe
-;!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=37401" ;jre-6u18-windows-x64.exe
 !define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
 !define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
 
@@ -143,8 +141,8 @@ Section "YaCy"
 	
 	SetOutPath $INSTDIR
 	;set noindex attribute for windows indexing service
-    Exec 'attrib +I "$INSTDIR"'
-    Exec 'attrib +I "$INSTDIR\*" /S /D'
+    	nsExec::Exec 'attrib +I "$INSTDIR"'
+	nsExec::Exec 'attrib +I "$INSTDIR\*" /S /D'
     
 	File /r "RELEASE\MAIN\*"
 
@@ -153,10 +151,10 @@ Section "YaCy"
 	WriteUninstaller "uninstall.exe"
 SectionEnd
 
-Section "Sun Java"
-    SectionIn 1 RO
-    SetShellVarContext current
-    Call DetectJRE
+Section "Sun Java" Sec_Java_id
+    	SectionIn 1 RO
+    	SetShellVarContext current
+    	Call GetJRE
 SectionEnd
 
 Section "Start Menu Group"
@@ -193,7 +191,7 @@ Section "Uninstall"
 	SetShellVarContext current
 
 	RMDir /r "$INSTDIR\addon"
-    RMDir /r "$INSTDIR\bin"
+    	RMDir /r "$INSTDIR\bin"
 	RMDir /r "$INSTDIR\classes"
 	RMDir /r "$INSTDIR\defaults"
 	RMDir /r "$INSTDIR\htroot"
@@ -223,44 +221,57 @@ SectionEnd
 ; ----------------------------------------
 ; FUNCTIONS
 
+Function .onInit
+; Detect JRE first
+	var /global InstalledJREVersion
+	${If} ${RunningX64}
+		SetRegView 64
+	${EndIf}
+	ReadRegStr $InstalledJREVersion HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
+; If right JRE already installed hide JRE section 
+	${If} $InstalledJREVersion = ${JRE_VERSION6}
+		SectionSetText ${Sec_Java_id} ""
+	${EndIf}
+FunctionEnd
+
 Function GetJRE
+; Skip if JRE already installed 
+	${If} $InstalledJREVersion = ${JRE_VERSION6}
+		Return
+	${EndIf}
 
 ; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
-    ${If} ${RunningX64}
-    StrCpy $3 ${JRE_64}
-    ${Else}
-    StrCpy $3 ${JRE_32}
-    ${EndIf}
-    
+    	${If} ${RunningX64}
+    		StrCpy $3 ${JRE_64}
+    	${Else}
+    		StrCpy $3 ${JRE_32}
+    	${EndIf}
+
+;check if admin before download, advise if non    
 	userInfo::getAccountType
 	Pop $0
-		StrCmp $0 "Admin" download ; download without message if admin
+
+	${If} $0 != "Admin" 
 		MessageBox MB_ICONEXCLAMATION "$(noAdminForJava)" /SD IDOK
-    download:
+	${EndIf}
+
 	SetShellVarContext all
 	StrCpy $2 "$DOCUMENTS\Java Runtime (install for YaCy).exe"
 	SetShellVarContext current
 	nsisdl::download /TIMEOUT=30000 $3 $2
 	Pop $R0 ;Get the return value
-		StrCmp $R0 "success" +3
+	
+	${If} $R0 != "success" 
 		MessageBox MB_OK "Download failed: $R0" /SD IDOK
 		Return
-	StrCmp $0 "Admin" install ; install if admin
-		CreateShortCut "$DESKTOP\Install Java for YaCy.lnk" "$2"
-		Return ; don't delete if not admin
-    install:
-	ExecWait "$2 /s"
-	Delete $2
-FunctionEnd
-
-Function DetectJRE
-	${If} ${RunningX64}
-		SetRegView 64
 	${EndIf}
-	ReadRegStr $2 HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
-	StrCmp $2 ${JRE_VERSION6} doneDetectJRE
-	Call GetJRE
-	doneDetectJRE:
+
+	${If} $0 == "Admin" 
+		ExecWait "$2 /s"
+		Delete $2
+	${Else}
+		CreateShortCut "$DESKTOP\Install Java for YaCy.lnk" "$2"
+	${EndIf}
 FunctionEnd
 
 Function CheckDriveSpace
@@ -313,8 +324,9 @@ FunctionEnd
 
 Function CheckDriveType
 ; based on http://nsis.sourceforge.net/GetDrives  
-   	StrCmp $9 $RootFolder 0 +3
-   	StrCpy $RootFolderType $8   
-   	StrCpy $0 StopGetDrives
+   	${If} $9 == $RootFolder 
+   		StrCpy $RootFolderType $8   
+   		StrCpy $0 StopGetDrives
+	${EndIf}
    	Push $0
 FunctionEnd
