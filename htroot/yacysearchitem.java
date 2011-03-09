@@ -155,7 +155,7 @@ public class yacysearchitem {
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
             prop.putHTML("content_file", resultURL.getFile());
             prop.putHTML("content_path", resultURL.getPath());
-            prop.put("content_nl", (item == 0) ? 0 : 1);
+            prop.put("content_nl", (item == theQuery.offset) ? 0 : 1);
             prop.putHTML("content_publisher", result.publisher());
             prop.putHTML("content_creator", result.creator());// author
             prop.putHTML("content_subject", result.subject());
@@ -220,7 +220,7 @@ public class yacysearchitem {
                 prop.put("content_item_source", ms.source.toNormalform(true, false));
                 prop.putXML("content_item_source-xml", ms.source.toNormalform(true, false));
                 prop.put("content_item_sourcedom", ms.source.getHost());
-                prop.put("content_item_nl", (item == 0) ? 0 : 1);
+                prop.put("content_item_nl", (item == theQuery.offset) ? 0 : 1);
                 prop.put("content_item", 1);
             }
             theQuery.transmitcount = item + 1;
