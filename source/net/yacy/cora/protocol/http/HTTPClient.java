@@ -265,8 +265,9 @@ public class HTTPClient {
      */
     public byte[] GETbytes(final String uri, long maxBytes) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-    	final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, true, false));
-    	setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        boolean localhost = url.getHost().equals("localhost");
+    	final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, !localhost, false));
+    	if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	return getContentBytes(httpGet, maxBytes);
     }
     
@@ -488,7 +489,6 @@ public class HTTPClient {
     	    
 			httpResponse = httpClient.execute(httpUriRequest, httpContext);
         } catch (Exception e) {
-            //e.printStackTrace();
                 ConnectionInfo.removeConnection(httpUriRequest.hashCode());
                 httpUriRequest.abort();
                 throw new IOException("Client can't execute: " + e.getMessage());

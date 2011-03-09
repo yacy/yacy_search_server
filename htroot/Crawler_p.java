@@ -26,6 +26,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Date;
@@ -192,6 +193,13 @@ public class Crawler_p {
                 long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);
                 env.setConfig("crawlingIfOlder", crawlingIfOlder);
 
+                // remove crawlingFileContent before we record the call
+                final String crawlingFileName = post.get("crawlingFile");
+                final File crawlingFile = (crawlingFileName != null && crawlingFileName.length() > 0) ? new File(crawlingFileName) : null;
+                if (crawlingFile != null && crawlingFile.exists()) {
+                    post.remove("crawlingFile$file");
+                }
+                
                 // store this call as api call
                 if (repeat_time > 0) {
                     // store as scheduled api call
@@ -255,7 +263,7 @@ public class Crawler_p {
                         sb.crawler.putActive(profile.handle().getBytes(), profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         final DigestURI url = crawlingStartURL;
-                        sb.crawlStacker.enqueueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), "ftp", url.getHost(), url.getPort(), false);
+                        sb.crawlStacker.enqueueEntriesFTP(sb.peers.mySeed().hash.getBytes(), profile.handle(), url.getHost(), url.getPort(), false);
                     } catch (final PatternSyntaxException e) {
                         prop.put("info", "4"); // crawlfilter does not match url
                         prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
@@ -392,20 +400,26 @@ public class Crawler_p {
                     
                 } else if ("file".equals(crawlingMode)) {
                     if (post.containsKey("crawlingFile")) {
-                        final String fileName = post.get("crawlingFile");  
+                        final String crawlingFileContent = post.get("crawlingFile$file", "");
                         try {
                             // check if the crawl filter works correctly
                             Pattern.compile(newcrawlingMustMatch);
-                            final File file = new File(fileName);
-                            final String fileString = post.get("crawlingFile$file");
-                            final ContentScraper scraper = new ContentScraper(new DigestURI(file));
+                            final ContentScraper scraper = new ContentScraper(new DigestURI(crawlingFile));
                             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
-                            FileUtils.copy(fileString, writer);
+                            if (crawlingFile != null && crawlingFile.exists()) {
+                                FileUtils.copy(new FileInputStream(crawlingFile), writer);
+                            } else {
+                                FileUtils.copy(crawlingFileContent, writer);
+                            }
                             writer.close();
+                            
+                            // get links and generate filter
                             final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
-                            final DigestURI crawlURL = new DigestURI("file://" + file.toString());
+                            if (fullDomain) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                            
+                            final DigestURI crawlURL = new DigestURI("file://" + crawlingFile.toString());
                             final CrawlProfile profile = new CrawlProfile(
-                                    fileName,
+                                    crawlingFileName,
                                     crawlURL,
                                     newcrawlingMustMatch,
                                     CrawlProfile.MATCH_NEVER,
@@ -431,7 +445,7 @@ public class Crawler_p {
                         } catch (final Exception e) {
                             // mist
                             prop.put("info", "7"); // Error with file
-                            prop.putHTML("info_crawlingStart", fileName);
+                            prop.putHTML("info_crawlingStart", crawlingFileName);
                             prop.putHTML("info_error", e.getMessage());
                             Log.logException(e);
                         }
@@ -478,16 +492,8 @@ public class Crawler_p {
                         // String description = scraper.getDescription();
                         
                         // get links and generate filter
-                        final StringBuilder filter = new StringBuilder();
                         final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
-                        final Set<String> filterSet = new HashSet<String>();
-                        for (final MultiProtocolURI uri: hyperlinks.keySet()) {
-                            filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*").toString());
-                        }
-                        for (final String element : filterSet) {
-                            filter.append('|').append(element);
-                        }
-                        newcrawlingMustMatch = filter.length() > 0 ? filter.substring(1) : "";
+                        if (fullDomain) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
 
                         // put links onto crawl queue
                         final CrawlProfile profile = new CrawlProfile(
@@ -581,4 +587,18 @@ public class Crawler_p {
         sb.setPerformance(wantedPPM);
     }
     
+    private static String siteFilter(Set<MultiProtocolURI> uris) {
+        final StringBuilder filter = new StringBuilder();
+        final Set<String> filterSet = new HashSet<String>();
+        for (final MultiProtocolURI uri: uris) {
+            filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*").toString());
+            if (!uri.getHost().startsWith("www.")) {
+                filterSet.add(new StringBuilder().append(uri.getProtocol()).append("://www.").append(uri.getHost()).append(".*").toString());
+            }
+        }
+        for (final String element : filterSet) {
+            filter.append('|').append(element);
+        }
+        return filter.length() > 0 ? filter.substring(1) : "";
+    }
 }

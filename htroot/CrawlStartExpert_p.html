@@ -26,7 +26,7 @@
     You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".
     </p>
     
-    <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data">
+    <form id="Crawler" action="Crawler_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" cellpadding="5" cellspacing="1">
         <tr class="TableHeader">
           <td><strong>Attribute</strong></td>
@@ -46,7 +46,7 @@
               </tr>
               <tr>
                 <td><label for="url"><span class="nobr">From Link-List of URL</span></label>:</td>
-                <td><input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled"/></td>
+                <td><input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled" onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/></td>
                 <td>
                   <div id="sitelistURLs"></div>
                 </td>              
@@ -60,8 +60,8 @@
               </tr>
               <tr>
                 <td><label for="file"><span class="nobr">From File</span></label>:</td>
-                <td><input type="radio" name="crawlingMode" id="file" value="file" /></td>
-                <td><input type="file" name="crawlingFile" size="18" onfocus="check('file')" /></td>
+                <td><input type="radio" name="crawlingMode" id="file" value="file" onclick="document.getElementById('Crawler').rangeDomain.checked = true;"/></td>
+                <td><input type="text" name="crawlingFile" size="41" onfocus="check('file')"/><!--<input type="file" name="crawlingFile" size="18" onfocus="check('file')"/>--></td>
               </tr>
               <tr>
               	<td colspan="3" class="commit">
@@ -138,10 +138,10 @@
         <tr valign="top" class="TableCellLight">
           <td><label for="mustmatch">Must-Match Filter</label>:</td>
           <td>
-			<input type="radio" name="range" value="wide" checked="checked" />Use filter&nbsp;&nbsp;
+			<input type="radio" name="range" id="rangeWide" value="wide" checked="checked" />Use filter&nbsp;&nbsp;
 			<input name="mustmatch" id="mustmatch" type="text" size="60" maxlength="100" value="#[mustmatch]#" /><br />
-			<input type="radio" name="range" value="domain" />Restrict to start domain<br />
-			<input type="radio" name="range" value="subpath" />Restrict to sub-path
+			<input type="radio" name="range" id="rangeDomain" value="domain" />Restrict to start domain<br />
+			<input type="radio" name="range" id="rangeSubpath" value="subpath" />Restrict to sub-path
 		  </td>
           <td>
             The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>

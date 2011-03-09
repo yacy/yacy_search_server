@@ -188,6 +188,10 @@ public class Balancer {
         for (final byte[] urlhash: urlHashes) {
             final Row.Entry entry = urlFileIndex.remove(urlhash);
             if (entry != null) removedCounter++;
+            
+            // remove from double-check caches
+            ddc.remove(urlhash);
+            double_push_check.remove(urlhash);
         }
         if (removedCounter == 0) return 0;
         assert urlFileIndex.size() + removedCounter == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s;
@@ -216,8 +220,8 @@ public class Balancer {
             for (final byte[] handle: urlHashes) stack.remove(handle);
             if (stack.isEmpty()) q.remove();
         }
-       
-       return removedCounter;
+
+        return removedCounter;
     }
     
     public boolean has(final byte[] urlhashb) {
@@ -248,15 +252,22 @@ public class Balancer {
         return false;
     }
     
-    public void push(final Request entry) throws IOException, RowSpaceExceededException {
+    /**
+     * push a crawl request on the balancer stack
+     * @param entry
+     * @return null if this was successful or a String explaining what went wrong in case of an error
+     * @throws IOException
+     * @throws RowSpaceExceededException
+     */
+    public String push(final Request entry) throws IOException, RowSpaceExceededException {
         assert entry != null;
         final byte[] hash = entry.url().hash();
         synchronized (this) {
             // double-check
-            if (this.double_push_check.has(hash) || this.ddc.has(hash) || this.urlFileIndex.has(hash)) {
-                //Log.logSevere("Balancer", "double push: " + UTF8.String(hash));
-                return;
-            }
+            if (this.double_push_check.has(hash)) return "double occurrence in double_push_check";
+            if (this.ddc.has(hash)) return "double occurrence in ddc";
+            if (this.urlFileIndex.has(hash)) return "double occurrence in urlFileIndex";
+            
             if (this.double_push_check.size() > 10000) this.double_push_check.clear();
             this.double_push_check.put(hash);
         
@@ -268,6 +279,7 @@ public class Balancer {
 
 	        // add the hash to a queue
 	        pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
+	        return null;
         }
     }
     

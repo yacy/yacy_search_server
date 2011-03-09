@@ -165,45 +165,43 @@ public class RasterPlotter {
     public void plot(final int x, final int y, final int intensity) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
-        synchronized (cc) {
-            if (this.defaultMode == DrawMode.MODE_REPLACE) {
-                if (intensity == 100) {
-                    cc[0] = defaultColR;
-                    cc[1] = defaultColG;
-                    cc[2] = defaultColB;
-                    grid.setPixel(x, y, cc);
-                } else {
-                    final int[] c = grid.getPixel(x, y, cc);
-                    c[0] = (intensity * defaultColR + (100 - intensity) * c[0]) / 100;
-                    c[1] = (intensity * defaultColG + (100 - intensity) * c[1]) / 100;
-                    c[2] = (intensity * defaultColB + (100 - intensity) * c[2]) / 100;
-                    grid.setPixel(x, y, c);
-                }
-            } else if (this.defaultMode == DrawMode.MODE_ADD) {
+        if (this.defaultMode == DrawMode.MODE_REPLACE) {
+            if (intensity == 100) synchronized (cc) {
+                cc[0] = defaultColR;
+                cc[1] = defaultColG;
+                cc[2] = defaultColB;
+                grid.setPixel(x, y, cc);
+            } else synchronized (cc) {
                 final int[] c = grid.getPixel(x, y, cc);
-                if (intensity == 100) {
-                    c[0] = (0xff & c[0]) + defaultColR; if (cc[0] > 255) cc[0] = 255;
-                    c[1] = (0xff & c[1]) + defaultColG; if (cc[1] > 255) cc[1] = 255;
-                    c[2] = (0xff & c[2]) + defaultColB; if (cc[2] > 255) cc[2] = 255;
-                } else {
-                    c[0] = (0xff & c[0]) + (intensity * defaultColR / 100); if (cc[0] > 255) cc[0] = 255;
-                    c[1] = (0xff & c[1]) + (intensity * defaultColG / 100); if (cc[1] > 255) cc[1] = 255;
-                    c[2] = (0xff & c[2]) + (intensity * defaultColB / 100); if (cc[2] > 255) cc[2] = 255;
-                }
-                grid.setPixel(x, y, c);
-            } else if (this.defaultMode == DrawMode.MODE_SUB) {
-                final int[] c = grid.getPixel(x, y, cc);
-                if (intensity == 100) {
-                    c[0] = (0xff & c[0]) - defaultColR; if (cc[0] < 0) cc[0] = 0;
-                    c[1] = (0xff & c[1]) - defaultColG; if (cc[1] < 0) cc[1] = 0;
-                    c[2] = (0xff & c[2]) - defaultColB; if (cc[2] < 0) cc[2] = 0;
-                } else {
-                    c[0] = (0xff & c[0]) - (intensity * defaultColR / 100); if (cc[0] < 0) cc[0] = 0;
-                    c[1] = (0xff & c[1]) - (intensity * defaultColG / 100); if (cc[1] < 0) cc[1] = 0;
-                    c[2] = (0xff & c[2]) - (intensity * defaultColB / 100); if (cc[2] < 0) cc[2] = 0;
-                }
+                c[0] = (intensity * defaultColR + (100 - intensity) * c[0]) / 100;
+                c[1] = (intensity * defaultColG + (100 - intensity) * c[1]) / 100;
+                c[2] = (intensity * defaultColB + (100 - intensity) * c[2]) / 100;
                 grid.setPixel(x, y, c);
             }
+        } else if (this.defaultMode == DrawMode.MODE_ADD) synchronized (cc) {
+            final int[] c = grid.getPixel(x, y, cc);
+            if (intensity == 100) {
+                c[0] = (0xff & c[0]) + defaultColR; if (cc[0] > 255) cc[0] = 255;
+                c[1] = (0xff & c[1]) + defaultColG; if (cc[1] > 255) cc[1] = 255;
+                c[2] = (0xff & c[2]) + defaultColB; if (cc[2] > 255) cc[2] = 255;
+            } else {
+                c[0] = (0xff & c[0]) + (intensity * defaultColR / 100); if (cc[0] > 255) cc[0] = 255;
+                c[1] = (0xff & c[1]) + (intensity * defaultColG / 100); if (cc[1] > 255) cc[1] = 255;
+                c[2] = (0xff & c[2]) + (intensity * defaultColB / 100); if (cc[2] > 255) cc[2] = 255;
+            }
+            grid.setPixel(x, y, c);
+        } else if (this.defaultMode == DrawMode.MODE_SUB) synchronized (cc) {
+            final int[] c = grid.getPixel(x, y, cc);
+            if (intensity == 100) {
+                c[0] = (0xff & c[0]) - defaultColR; if (cc[0] < 0) cc[0] = 0;
+                c[1] = (0xff & c[1]) - defaultColG; if (cc[1] < 0) cc[1] = 0;
+                c[2] = (0xff & c[2]) - defaultColB; if (cc[2] < 0) cc[2] = 0;
+            } else {
+                c[0] = (0xff & c[0]) - (intensity * defaultColR / 100); if (cc[0] < 0) cc[0] = 0;
+                c[1] = (0xff & c[1]) - (intensity * defaultColG / 100); if (cc[1] < 0) cc[1] = 0;
+                c[2] = (0xff & c[2]) - (intensity * defaultColB / 100); if (cc[2] < 0) cc[2] = 0;
+            }
+            grid.setPixel(x, y, c);
         }
     }
 

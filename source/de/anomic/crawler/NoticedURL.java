@@ -161,25 +161,29 @@ public class NoticedURL {
             noloadStack.has(urlhashb);
     }
     
-    public void push(final StackType stackType, final Request entry) {
+    /**
+     * push a crawl request on one of the different crawl stacks
+     * @param stackType
+     * @param entry
+     * @return null if this was successful or a String explaining what went wrong in case of an error
+     */
+    public String push(final StackType stackType, final Request entry) {
         try {
             switch (stackType) {
                 case CORE:
-                    coreStack.push(entry);
-                    break;
+                    return coreStack.push(entry);
                 case LIMIT:
-                    limitStack.push(entry);
-                    break;
+                    return limitStack.push(entry);
                 case REMOTE:
-                    remoteStack.push(entry);
-                    break;
+                    return remoteStack.push(entry);
                 case NOLOAD:
-                    noloadStack.push(entry);
-                    break;
-                default: break;
+                    return noloadStack.push(entry);
+                default:
+                    return "stack type unknown";
             }
         } catch (final Exception er) {
             Log.logException(er);
+            return "error pushing onto the crawl stack: " + er.getMessage();
         }
     }
 
@@ -246,7 +250,12 @@ public class NoticedURL {
     public void shift(final StackType fromStack, final StackType toStack, CrawlSwitchboard cs) {
         try {
             final Request entry = pop(fromStack, false, cs);
-            if (entry != null) push(toStack, entry);
+            if (entry != null) {
+                String warning = push(toStack, entry);
+                if (warning != null) {
+                    Log.logWarning("NoticedURL", "shift from " + fromStack + " to " + toStack + ": " + warning);
+                }
+            }
         } catch (final IOException e) {
             return;
         }

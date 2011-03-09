@@ -65,7 +65,6 @@ public final class CrawlStacker {
     private final Log log = new Log("STACKCRAWL");
 
     private final WorkflowProcessor<Request>  fastQueue, slowQueue;
-    //private long                   dnsHit;
     private long                    dnsMiss;
     private final CrawlQueues       nextQueue;
     private final CrawlSwitchboard  crawler;
@@ -242,13 +241,24 @@ public final class CrawlStacker {
             final byte[] urlhash = url.hash();
             if (replace) {
                 indexSegment.urlMetadata().remove(urlhash);
-                this.nextQueue.noticeURL.removeByURLHash(urlhash);
-                this.nextQueue.errorURL.remove(urlhash);
+                this.nextQueue.urlRemove(urlhash);
+                String u = url.toNormalform(true, true);
+                if (u.endsWith("/")) {
+                    u = u + "index.html";
+                } else if (!u.contains(".")) {
+                    u = u + "/index.html";
+                }
+                try {
+                    byte[] uh = new DigestURI(u, null).hash();
+                    indexSegment.urlMetadata().remove(uh);
+                    this.nextQueue.noticeURL.removeByURLHash(uh);
+                    this.nextQueue.errorURL.remove(uh);
+                } catch (MalformedURLException e1) {}
             }
             
             if (url.getProtocol().equals("ftp")) {
                 // put the whole ftp site on the crawl stack
-                enqueueEntries(initiator, profileHandle, "ftp", url.getHost(), url.getPort(), replace);
+                enqueueEntriesFTP(initiator, profileHandle, url.getHost(), url.getPort(), replace);
             } else {
                 // put entry on crawl stack
                 enqueueEntry(new Request(
@@ -267,7 +277,7 @@ public final class CrawlStacker {
         }
     }
     
-    public void enqueueEntries(final byte[] initiator, final String profileHandle, final String protocol, final String host, final int port, final boolean replace) {
+    public void enqueueEntriesFTP(final byte[] initiator, final String profileHandle, final String host, final int port, final boolean replace) {
         final CrawlQueues cq = this.nextQueue;
         new Thread() {
             public void run() {
@@ -280,10 +290,7 @@ public final class CrawlStacker {
                         // delete old entry, if exists to force a re-load of the url (thats wanted here)
                         DigestURI url = null;
                         try {
-                            if (protocol.equals("ftp")) url = new DigestURI("ftp://" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
-                            else if (protocol.equals("smb")) url = new DigestURI("smb://" + host + MultiProtocolURI.escape(entry.name));
-                            else if (protocol.equals("http")) url = new DigestURI("http://" + host + (port == 80 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
-                            else if (protocol.equals("https")) url = new DigestURI("https://" + host + (port == 443 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
+                            url = new DigestURI("ftp://" + host + (port == 21 ? "" : ":" + port) + MultiProtocolURI.escape(entry.name));
                         } catch (MalformedURLException e) {
                             continue;
                         }
@@ -359,10 +366,12 @@ public final class CrawlStacker {
         }
 
         // check availability of parser and maxfilesize
+        String warning = null;
         if (entry.size() > maxFileSize ||
             (entry.url().getFileExtension().length() > 0 && TextParser.supports(entry.url(), null) != null)
             ) {
-            nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
+            warning = nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry);
+            if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
             return null;
         }
         
@@ -377,29 +386,18 @@ public final class CrawlStacker {
             // it may be possible that global == true and local == true, so do not check an error case against it
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
-            nextQueue.noticeURL.push(NoticedURL.StackType.LIMIT, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT);
-            //this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.LIMIT));
+            warning = nextQueue.noticeURL.push(NoticedURL.StackType.LIMIT, entry);
         } else if (local) {
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = proxy" + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
-            nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
-            //this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE));
+            warning = nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
         } else if (proxy) {
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + UTF8.String(entry.initiator()) + ", profile.handle = " + profile.handle());
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
-            nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE);
-            //this.log.logInfo("stacked/proxy: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.StackType.CORE));
+            warning = nextQueue.noticeURL.push(NoticedURL.StackType.CORE, entry);
         } else if (remote) {
-            //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
-            nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry);
-            //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
-            //this.log.logInfo("stacked/remote: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
+            warning = nextQueue.noticeURL.push(NoticedURL.StackType.REMOTE, entry);
         }
+        if (warning != null) this.log.logWarning("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
 
         return null;
     }

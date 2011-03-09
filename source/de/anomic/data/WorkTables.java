@@ -234,6 +234,7 @@ public class WorkTables extends Tables {
             if (row == null) continue;
             String url = "http://" + host + ":" + port + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL));
             url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
+            Log.logInfo("WorkTables", "executing url: " + url);
             try {
                 client.GETbytes(url);
                 l.put(url, client.getStatusCode());
