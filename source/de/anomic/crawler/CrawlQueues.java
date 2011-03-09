@@ -210,10 +210,11 @@ public class CrawlQueues {
                     ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "") +
                     ", robinsonMode=" + ((sb.isRobinsonMode()) ? "on" : "off"));
         }
-        
-        String queueCheck = loadIsPossible(NoticedURL.StackType.CORE);
-        if (queueCheck != null) {
-            if (log.isFine()) log.logFine("omitting de-queue/local: " + queueCheck);
+
+        String queueCheckCore = loadIsPossible(NoticedURL.StackType.CORE);
+        String queueCheckNoload = loadIsPossible(NoticedURL.StackType.NOLOAD);
+        if (queueCheckCore != null && queueCheckNoload != null) {
+            if (log.isFine()) log.logFine("omitting de-queue/local: " + queueCheckCore + ":" + queueCheckNoload);
             return false;
         }
         
