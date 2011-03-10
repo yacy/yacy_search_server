@@ -55,7 +55,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -237,16 +236,16 @@ public final class TemplateEngine {
 
                         structure.append('<')
                                  .append(multi_key)
-                                 .append(" type=\"multi\" num=\"".getBytes())
-                                 .append(Integer.toString(num).getBytes())
-                                 .append("\">\n".getBytes());
+                                 .append(UTF8.getBytes(" type=\"multi\" num=\""))
+                                 .append(UTF8.getBytes(Integer.toString(num)))
+                                 .append(UTF8.getBytes("\">\n"));
                         for(int i=0;i < num;i++) {
                             final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text));
                             //System.out.println("recursing with text(prefix="+ multi_key + "_" + i + "_" +"):"); //DEBUG
                             //System.out.println(text);
                             structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,multi_key,i)));
                         }//for
-                        structure.append("</".getBytes()).append(multi_key).append(">\n".getBytes());
+                        structure.append(UTF8.getBytes("</")).append(multi_key).append(UTF8.getBytes(">\n"));
                     } else {//transferUntil
                         Log.logSevere("TEMPLATE", "No Close Key found for #{"+UTF8.String(multi_key)+"}#"); //prefix here?
                     }
@@ -273,7 +272,7 @@ public final class TemplateEngine {
                     }catch(final NumberFormatException e){
                         whichPattern=0;
                         byName=true;
-                        patternName=patternId.getBytes("UTF-8");
+                        patternName = UTF8.getBytes(patternId);
                     }
                 }
 
@@ -283,16 +282,16 @@ public final class TemplateEngine {
                 PushbackInputStream pis2;
                 if (byName) {
                     //TODO: better Error Handling
-                    transferUntil(pis, keyStream, appendBytes("%%".getBytes(), patternName, null, null));
+                    transferUntil(pis, keyStream, appendBytes(UTF8.getBytes("%%"), patternName, null, null));
                     if(pis.available()==0){
-                        Log.logSevere("TEMPLATE", "No such Template: %%"+UTF8.String(patternName));
+                        Log.logSevere("TEMPLATE", "No such Template: %%" + UTF8.String(patternName));
                         return structure.getBytes();
                     }
                     keyStream.reset();
                     transferUntil(pis, keyStream, dpdpa);
                     pis2 = new PushbackInputStream(new ByteArrayInputStream(keyStream.toByteArray()));
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
-                    transferUntil(pis, keyStream, appendBytes("#(/".getBytes(),key,")#".getBytes("UTF-8"),null));
+                    transferUntil(pis, keyStream, appendBytes(UTF8.getBytes("#(/"), key, UTF8.getBytes(")#"), null));
                     if(pis.available()==0){
                         Log.logSevere("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Name)");
                     }
@@ -308,16 +307,16 @@ public final class TemplateEngine {
                                 if (java.util.Arrays.equals(keyStream.toByteArray(),appendBytes(slashChar, key, null,null))) {
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
                                     //this maybe the wrong, but its the last
-                                    structure.append('<').append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes()).append("\" found=\"0\">\n".getBytes());
+                                    structure.append('<').append(key).append(UTF8.getBytes(" type=\"alternative\" which=\"")).append(UTF8.getBytes(Integer.toString(whichPattern))).append(UTF8.getBytes("\" found=\"0\">\n"));
                                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
-                                    structure.append("</".getBytes()).append(key).append(">\n".getBytes());
+                                    structure.append(UTF8.getBytes("</")).append(key).append(UTF8.getBytes(">\n"));
                                     found=true;
                                 }else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
                                     others--;
-                                    text.append(aOpen).append(keyStream.toByteArray()).append(")#".getBytes());
+                                    text.append(aOpen).append(keyStream.toByteArray()).append(UTF8.getBytes(")#"));
                                 } else { //nested
                                     others++;
-                                    text.append(aOpen).append(keyStream.toByteArray()).append(")#".getBytes());
+                                    text.append(aOpen).append(keyStream.toByteArray()).append(UTF8.getBytes(")#"));
                                 }
                                 keyStream.reset(); //reset stream
                                 continue;
@@ -330,11 +329,11 @@ public final class TemplateEngine {
                             if ((bb & 0xFF) == ':'){
                                 if(currentPattern == whichPattern){ //found the pattern
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
-                                    structure.append('<').append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes()).append("\" found=\"0\">\n".getBytes());
+                                    structure.append('<').append(key).append(UTF8.getBytes(" type=\"alternative\" which=\"")).append(UTF8.getBytes(Integer.toString(whichPattern))).append(UTF8.getBytes("\" found=\"0\">\n"));
                                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
-                                    structure.append("</".getBytes()).append(key).append(">\n".getBytes());
+                                    structure.append(UTF8.getBytes("</")).append(key).append(UTF8.getBytes(">\n"));
 
-                                    transferUntil(pis, keyStream, appendBytes("#(/".getBytes(),key,")#".getBytes("UTF-8"),null));//to #(/key)#.
+                                    transferUntil(pis, keyStream, appendBytes(UTF8.getBytes("#(/"),key,UTF8.getBytes(")#"),null));//to #(/key)#.
 
                                     found=true;
                                 }
@@ -342,7 +341,7 @@ public final class TemplateEngine {
                                 text.clear();
                                 continue;
                             }
-                            text.append(":".getBytes());
+                            text.append(UTF8.getBytes(":"));
                         }
                         if(!found){
                             text.append((byte)bb);/*
@@ -361,9 +360,9 @@ public final class TemplateEngine {
                     key = keyStream.toByteArray();
                     final String patternKey = getPatternKey(prefix, key);
                     replacement = replacePattern(patternKey, pattern, dflt); //replace
-                    structure.append("<".getBytes()).append(key).append(" type=\"normal\">\n".getBytes());
+                    structure.append(UTF8.getBytes("<")).append(key).append(UTF8.getBytes(" type=\"normal\">\n"));
                     structure.append(replacement);
-                    structure.append("</".getBytes()).append(key).append(">\n".getBytes());
+                    structure.append(UTF8.getBytes("</")).append(key).append(UTF8.getBytes(">\n"));
 
                     FileUtils.copy(replacement, out);
                 } else {
@@ -393,7 +392,7 @@ public final class TemplateEngine {
                             //Read the Include
                             String line = "";
                             while ((line = br.readLine()) != null) {
-                                include.append(line.getBytes("UTF-8")).append(de.anomic.server.serverCore.CRLF_STRING.getBytes());
+                                include.append(UTF8.getBytes(line)).append(UTF8.getBytes(de.anomic.server.serverCore.CRLF_STRING));
                             }
                         } catch (final IOException e) {
                             //file not found?                    
@@ -422,18 +421,14 @@ public final class TemplateEngine {
         Object value;
         if (pattern.containsKey(key)) {
             value = pattern.get(key);
-            try {
-                if (value instanceof byte[]) {
-                    replacement = (byte[]) value;
-                } else if (value instanceof String) {
-                    //replacement = ((String) value).getBytes();
-                    replacement = ((String) value).getBytes("UTF-8");
-                } else {
-                    //replacement = value.toString().getBytes();
-                    replacement = value.toString().getBytes("UTF-8");
-                }
-            } catch (final UnsupportedEncodingException e) {
-                replacement = dflt;
+            if (value instanceof byte[]) {
+                replacement = (byte[]) value;
+            } else if (value instanceof String) {
+                //replacement = ((String) value).getBytes();
+                replacement = UTF8.getBytes(((String) value));
+            } else {
+                //replacement = value.toString().getBytes();
+                replacement = UTF8.getBytes(value.toString());
             }
         } else {
             replacement = dflt;
@@ -495,10 +490,10 @@ public final class TemplateEngine {
     public static void main(final String[] args) {
         // arg1 = test input; arg2 = replacement for pattern 'test'; arg3 = default replacement
         try {
-            final InputStream i = new ByteArrayInputStream(args[0].getBytes("UTF-8"));
+            final InputStream i = new ByteArrayInputStream(UTF8.getBytes(args[0]));
             final Map<String, String> h = new HashMap<String, String>();
             h.put("test", args[1]);
-            writeTemplate(new PushbackInputStream(i, 100), System.out, h, args[2].getBytes("UTF-8"));
+            writeTemplate(new PushbackInputStream(i, 100), System.out, h, UTF8.getBytes(args[2]));
             System.out.flush();
         } catch (final Exception e) {
             Log.logException(e);

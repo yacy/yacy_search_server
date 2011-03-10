@@ -26,7 +26,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -234,11 +233,7 @@ public final class Condenser {
         String word;
         Word wprop;
         WordTokenizer wordenum;
-        try {
-            wordenum = new WordTokenizer(new ByteArrayInputStream(text.getBytes("UTF-8")), meaningLib);
-        } catch (final UnsupportedEncodingException e) {
-            return;
-        }
+        wordenum = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(text)), meaningLib);
         int pip = 0;
         while (wordenum.hasMoreElements()) {
             word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH);
@@ -457,11 +452,7 @@ public final class Condenser {
         // returns a word/indexWord relation map
         if (text == null) return null;
         ByteArrayInputStream buffer;
-		try {
-			buffer = new ByteArrayInputStream(text.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
-			buffer = new ByteArrayInputStream(text.getBytes());
-		}
+		buffer = new ByteArrayInputStream(UTF8.getBytes(text));
         return new Condenser(buffer, meaningLib).words();
     }
     

@@ -27,9 +27,9 @@
 package de.anomic.crawler.retrieval;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
@@ -179,11 +179,7 @@ public class Request extends WorkflowJob {
         final byte[] sizestr = NaturalOrder.encodeLong(this.size, rowdef.width(14));
         // store the hash in the hash cache
         byte[] namebytes;
-        try {
-            namebytes = this.name.getBytes("UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            namebytes = this.name.getBytes();
-        }
+        namebytes = UTF8.getBytes(this.name);
         final byte[][] entry = new byte[][] {
                 this.url.hash(),
                 initiator,

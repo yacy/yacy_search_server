@@ -25,7 +25,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
@@ -218,30 +217,30 @@ public class Supporter {
             
             entry = null;
             if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) &&
-                ((seed = sb.peers.getConnected(record.originator())) != null)) try {
+                ((seed = sb.peers.getConnected(record.originator())) != null)) {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 url.getBytes(),
-                                ("Home Page of " + seed.getName()).getBytes("UTF-8"),
+                                UTF8.getBytes(("Home Page of " + seed.getName())),
                                 record.id().getBytes()
                         });
                 score = 1 + timeFactor(record.created());
-            } catch (final IOException e) {}
+            }
 
             if ((record.category().equals(yacyNewsPool.CATEGORY_PROFILE_BROADCAST)) &&
-                ((seed = sb.peers.getConnected(record.originator())) != null)) try {
+                ((seed = sb.peers.getConnected(record.originator())) != null)) {
                 url = record.attribute("homepage", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 url.getBytes(),
-                                ("Home Page of " + seed.getName()).getBytes("UTF-8"),
+                                UTF8.getBytes(("Home Page of " + seed.getName())),
                                 record.id().getBytes()
                         });
                 score = 1 + timeFactor(record.created());
-            } catch (final IOException e) {}
+            }
 
             // add/subtract votes and write record
             if (entry != null) {

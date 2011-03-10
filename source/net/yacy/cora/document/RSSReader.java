@@ -81,7 +81,7 @@ public class RSSReader extends DefaultHandler {
         if (a.length < 100) {
             throw new IOException("response=" + UTF8.String(a));
         }
-        if (!equals(a, "<?xml".getBytes()) && !equals(a, "<rss".getBytes())) {
+        if (!equals(a, UTF8.getBytes("<?xml")) && !equals(a, UTF8.getBytes("<rss"))) {
             throw new IOException("response does not contain valid xml");
         }
         final String end = UTF8.String(a, a.length - 80, 80);

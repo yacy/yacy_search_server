@@ -51,6 +51,7 @@ import com.drew.metadata.exif.ExifReader;
 import com.drew.metadata.iptc.IptcReader;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -198,7 +199,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              location.getHost(), // Publisher
              new String[]{}, // sections
              description == null ? "" : description, // description
-             infoString.getBytes(), // content text
+             UTF8.getBytes(infoString), // content text
              anchors, // anchors
              null,
              images,

@@ -5,7 +5,7 @@
     <title>YaCy '#[clientname]#': Integration of a Search Portal</title>
     #%env/templates/metas.template%#
   </head>
-  <body id="ConfigSkins">
+  <body id="ConfigSkins" onload="document.getElementById('promoteSearchPageGreeting').focus()">
     #%env/templates/header.template%#
     #%env/templates/submenuPortalIntegration.template%#
     <h2>Integration of a Search Portal</h2>
@@ -15,11 +15,11 @@
       and a link to a home page that is reached when the 'corporate identity'-images are clicked.
       To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.
     </p>
-    <form action="ConfigPortal.html" accept-charset="UTF-8">
+    <form action="ConfigPortal.html" id="ConfigPortal" accept-charset="UTF-8">
       <fieldset>
         <dl>
           <dt>Greeting Line</dt>
-          <dd><input type="text" name="promoteSearchPageGreeting" value="#[promoteSearchPageGreeting]#" size="60" /></dd>
+          <dd><input type="text" name="promoteSearchPageGreeting" id="promoteSearchPageGreeting" value="#[promoteSearchPageGreeting]#" size="60" /></dd>
           
           <dt>URL of Home Page</dt>
           <dd><input type="text" name="promoteSearchPageGreeting.homepage" value="#[promoteSearchPageGreeting.homepage]#" size="60" /></dd>
@@ -125,7 +125,8 @@
        height="180"
        frameborder="0"
        scrolling="auto"
-       id="target2">
+       id="target2"
+       onfocus="removeFocus(this);">
       </iframe>
       
     <h3>
@@ -148,7 +149,8 @@
        height="180"
        frameborder="0"
        scrolling="auto"
-       id="target3">
+       id="target3"
+       onfocus="removeFocus(this);">
       </iframe>
     
     #%env/templates/footer.template%#

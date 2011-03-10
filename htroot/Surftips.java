@@ -25,7 +25,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
@@ -225,85 +224,85 @@ public class Surftips {
             if (record == null) continue;
             
             entry = null;
-            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) try {
+            if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                 final String intention = record.attribute("intention", "");
                 url = record.attribute("startURL", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
                                 (((intention.length() == 0) || intention.equals("simple web crawl") || intention.equals("Automatic ReCrawl!")) ? record.attribute("startURL", "") : intention).getBytes(),
-                                intention.equals("Automatic ReCrawl!") ? ("Automatic ReCrawl").getBytes("UTF-8") : ("Crawl Start Point").getBytes("UTF-8"),
+                                intention.equals("Automatic ReCrawl!") ? UTF8.getBytes("Automatic ReCrawl") : UTF8.getBytes("Crawl Start Point"),
                                 record.id().getBytes()
                         });
                 score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
-            } catch (final IOException e) {}
+            }
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) try {
+            if (record.category().equals(yacyNewsPool.CATEGORY_BOOKMARK_ADD)) {
                 url = record.attribute("url", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (record.attribute("title", "")).getBytes("UTF-8"),
-                                ("Bookmark: " + record.attribute("description", "")).getBytes("UTF-8"),
+                                UTF8.getBytes(record.attribute("title", "")),
+                                UTF8.getBytes("Bookmark: " + record.attribute("description", "")),
                                 record.id().getBytes()
                         });
                 score = 8 + timeFactor(record.created());
-            } catch (final IOException e) {}
+            }
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) try {
+            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_ADD)) {
                 url = record.attribute("url", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (record.attribute("title", "")).getBytes("UTF-8"),
-                                ("Surf Tipp: " + record.attribute("description", "")).getBytes("UTF-8"),
+                                UTF8.getBytes(record.attribute("title", "")),
+                                UTF8.getBytes("Surf Tipp: " + record.attribute("description", "")),
                                 record.id().getBytes()
                         });
                 score = 5 + timeFactor(record.created());
-            } catch (final IOException e) {}
+            }
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) try {
+            if (record.category().equals(yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD)) {
                 if (!(record.attribute("vote", "negative").equals("positive"))) continue;
                 url = record.attribute("url", "");
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                record.attribute("title", "").getBytes("UTF-8"),
-                                record.attribute("description", "").getBytes("UTF-8"),
-                                record.attribute("refid", "").getBytes()
+                                UTF8.getBytes(record.attribute("title", "")),
+                                UTF8.getBytes(record.attribute("description", "")),
+                                UTF8.getBytes(record.attribute("refid", ""))
                         });
                 score = 5 + timeFactor(record.created());
-            } catch (final IOException e) {}
+            }
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) try {
+            if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
                 yacySeed seed = sb.peers.getConnected(record.originator());
                 if (seed == null) seed = sb.peers.getDisconnected(record.originator());
                 if (seed != null) {
                     url = "http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
-                                url.getBytes(),
-                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes("UTF-8"),
-                                ("Wiki Update: " + record.attribute("description", "")).getBytes("UTF-8"),
-                                record.id().getBytes()
+                                UTF8.getBytes(url),
+                                UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
+                                UTF8.getBytes("Wiki Update: " + record.attribute("description", "")),
+                                UTF8.getBytes(record.id())
                         });
                     score = 4 + timeFactor(record.created());
                 }
-            } catch (final IOException e) {}
+            }
             
-            if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) try {
+            if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
                 yacySeed seed = sb.peers.getConnected(record.originator());
                 if (seed == null) seed = sb.peers.getDisconnected(record.originator());
                 if (seed != null) {
                     url = "http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
-                                url.getBytes(),
-                                (record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")).getBytes("UTF-8"),
-                                ("Blog Entry: " + record.attribute("subject", "")).getBytes("UTF-8"),
-                                record.id().getBytes()
+                            UTF8.getBytes(url),
+                            UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
+                            UTF8.getBytes("Blog Entry: " + record.attribute("subject", "")),
+                            UTF8.getBytes(record.id())
                         });
                     score = 4 + timeFactor(record.created());
                 }
-            } catch (final IOException e) {}
+            }
 
             // add/subtract votes and write record
             if (entry != null) {

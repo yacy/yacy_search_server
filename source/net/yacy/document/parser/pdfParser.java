@@ -32,8 +32,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -45,6 +43,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.util.PDFTextStripper;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -149,12 +148,7 @@ public class pdfParser extends AbstractParser implements Parser {
         }
     
         byte[] contentBytes;
-        try {
-            contentBytes = writer.toString().getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            Log.logException(e);
-            throw new Parser.Failure(e.getMessage(), location);
-        }
+        contentBytes = UTF8.getBytes(writer.toString());
 
         // clear resources in pdfbox. they say that is resolved but it's not. see:
         // https://issues.apache.org/jira/browse/PDFBOX-313

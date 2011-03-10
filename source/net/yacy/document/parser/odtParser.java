@@ -39,6 +39,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -156,7 +157,7 @@ public class odtParser extends AbstractParser implements Parser {
             
             // create the parser document
             Document[] docs = null;
-            final byte[] contentBytes = writer.toString().getBytes("UTF-8");
+            final byte[] contentBytes = UTF8.getBytes(writer.toString());
             docs = new Document[]{new Document(
                     location,
                     mimeType,

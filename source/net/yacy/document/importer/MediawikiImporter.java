@@ -74,8 +74,8 @@ public class MediawikiImporter extends Thread implements Importer {
     private static final String textend = "</text>";
     private static final String pagestart = "<page>";
     private static final String pageend = "</page>";
-    private static final byte[] pagestartb = pagestart.getBytes();
-    private static final byte[] pageendb = pageend.getBytes();
+    private static final byte[] pagestartb = UTF8.getBytes(pagestart);
+    private static final byte[] pageendb = UTF8.getBytes(pageend);
     private static final int    docspermbinxmlbz2 = 800;  // documents per megabyte in a xml.bz2 wikimedia dump
     
     public static Importer job; // if started from a servlet, this object is used to store the thread
@@ -488,11 +488,9 @@ public class MediawikiImporter extends Thread implements Importer {
         public void genDocument() throws Parser.Failure {
             try {
 				url = new DigestURI(urlStub + title);
-				document = Document.mergeDocuments(url, "text/html", TextParser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8")));
+				document = Document.mergeDocuments(url, "text/html", TextParser.parseSource(url, "text/html", "UTF-8", UTF8.getBytes(html)));
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				document.setTitle(title);
-			} catch (UnsupportedEncodingException e) {
-			    Log.logException(e);
 			} catch (MalformedURLException e1) {
 			    Log.logException(e1);
 			}
@@ -571,7 +569,7 @@ public class MediawikiImporter extends Thread implements Importer {
         long start;
         String m = "<title>" + title + "</title>";
         String s;
-        while (in.seek("<page ".getBytes())) {
+        while (in.seek(UTF8.getBytes("<page "))) {
             start = in.pos() - 6;
             in.resetBuffer();
             if (!in.seek(pageendb)) break;

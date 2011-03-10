@@ -61,7 +61,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
     }
 
     public final long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer) {
-        return dhtDistance(word, urlHash, peer.hash.getBytes());
+        return dhtDistance(word, urlHash, UTF8.getBytes(peer.hash));
     }
     
     private final long dhtDistance(final byte[] from, final String urlHash, final byte[] to) {
@@ -98,7 +98,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         // transform the position of a peer position into a close peer hash
         String s = UTF8.String(Base64Order.enhancedCoder.uncardinal(l));
         while (s.length() < 12) s += "A";
-        return s.getBytes();
+        return UTF8.getBytes(s);
     }
     
 

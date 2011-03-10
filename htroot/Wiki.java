@@ -31,7 +31,6 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -114,11 +113,7 @@ public class Wiki {
             
             // store a new page
             byte[] content;
-            try {
-                content = post.get("content", "").getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                content = post.get("content", "").getBytes();
-            }
+            content = UTF8.getBytes(post.get("content", ""));
             final WikiBoard.Entry newEntry = sb.wikiDB.newEntry(pagename, author, ip, post.get("reason", "edit"), content);
             sb.wikiDB.write(newEntry);
             // create a news message

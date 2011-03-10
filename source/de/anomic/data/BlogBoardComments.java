@@ -31,7 +31,6 @@ package de.anomic.data;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -209,25 +208,9 @@ public class BlogBoardComments {
                 return false;
     		
             byte[] subject,author,page;
-            try {
-                subject = StrSubject.getBytes("UTF-8");
-            }
-            catch (final UnsupportedEncodingException ex) {
-                subject = StrSubject.getBytes();
-            }
-            try {
-                author = StrAuthor.getBytes("UTF-8");
-            }
-            catch (final UnsupportedEncodingException ex) {
-                author = StrAuthor.getBytes();
-            }
-            try {
-                page = StrPage.getBytes("UTF-8");
-            }
-            catch (final UnsupportedEncodingException ex) {
-                page = StrPage.getBytes();
-            }
-
+            subject = UTF8.getBytes(StrSubject);
+            author = UTF8.getBytes(StrAuthor);
+            page = UTF8.getBytes(StrPage);
             write (newEntry(key, subject, author, ip, date, page));
     	}
         

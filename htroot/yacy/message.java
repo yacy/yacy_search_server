@@ -30,7 +30,6 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -135,11 +134,7 @@ public final class message {
             // save message
             MessageBoard.entry msgEntry = null;
             byte[] mb;
-            try {
-                mb = message.getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                mb = message.getBytes();
-            }
+            mb = UTF8.getBytes(message);
             sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                     "remote",
                     otherSeed.get(yacySeed.NAME, "anonymous"), otherSeed.hash,

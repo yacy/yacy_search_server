@@ -30,7 +30,6 @@
 // javac -classpath .:../classes Blog.java
 // if the shell's current path is HTROOT
 
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -119,11 +118,7 @@ public class Blog {
         }
 
         byte[] author;
-        try {
-            author = StrAuthor.getBytes("UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            author = StrAuthor.getBytes();
-        }
+        author = UTF8.getBytes(StrAuthor);
 
         if (hasRights && post.containsKey("delete") && "sure".equals(post.get("delete"))) {
             page = sb.blogDB.readBlogEntry(pagename);
@@ -141,11 +136,7 @@ public class Blog {
         if (post.containsKey("submit") && hasRights) {
             // store a new/edited blog-entry
             byte[] content;
-            try {
-                content = post.get("content", "").getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                content = post.get("content", "").getBytes();
-            }
+            content = UTF8.getBytes(post.get("content", ""));
 
             final Date date;
             List<String> comments = null;
@@ -162,11 +153,7 @@ public class Blog {
             final String commentMode = post.get("commentMode", "2");
             final String StrSubject = post.get("subject", "");
             byte[] subject;
-            try {
-                subject = StrSubject.getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                subject = StrSubject.getBytes();
-            }
+            subject = UTF8.getBytes(StrSubject);
 
             sb.blogDB.writeBlogEntry(sb.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
 

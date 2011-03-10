@@ -36,6 +36,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -73,7 +74,7 @@ public class mmParser extends AbstractParser implements Parser {
                 sb.append(". ");
             }
 
-            content = sb.toString().getBytes("UTF-8");
+            content = UTF8.getBytes(sb.toString());
 
         } catch (ParserConfigurationException ex) {
             log.logWarning(ex.getMessage());

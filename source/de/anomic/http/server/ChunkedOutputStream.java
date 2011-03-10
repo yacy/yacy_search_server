@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -60,7 +61,7 @@ public final class ChunkedOutputStream extends FilterOutputStream {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");        
         if (b.length == 0) return;
             
-        this.out.write(Integer.toHexString(b.length).getBytes());
+        this.out.write(UTF8.getBytes(Integer.toHexString(b.length)));
         this.out.write(serverCore.CRLF);
         this.out.write(b);
         this.out.write(serverCore.CRLF);
@@ -71,7 +72,7 @@ public final class ChunkedOutputStream extends FilterOutputStream {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         if (len == 0) return;
         
-        this.out.write(Integer.toHexString(len).getBytes());
+        this.out.write(UTF8.getBytes(Integer.toHexString(len)));
         this.out.write(serverCore.CRLF);
         this.out.write(b, off, len);
         this.out.write(serverCore.CRLF);
@@ -82,7 +83,7 @@ public final class ChunkedOutputStream extends FilterOutputStream {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         if (len == 0) return;
         
-        this.out.write(Integer.toHexString(len).getBytes());
+        this.out.write(UTF8.getBytes(Integer.toHexString(len)));
         this.out.write(serverCore.CRLF);
         this.out.write(b.getBytes(off, len));
         this.out.write(serverCore.CRLF);
@@ -94,7 +95,7 @@ public final class ChunkedOutputStream extends FilterOutputStream {
         final int len = b.available();
         if (len == 0) return;
         
-        this.out.write(Integer.toHexString(len).getBytes());
+        this.out.write(UTF8.getBytes(Integer.toHexString(len)));
         this.out.write(serverCore.CRLF);
         FileUtils.copy(b, out, len);
         this.out.write(serverCore.CRLF);
@@ -104,7 +105,7 @@ public final class ChunkedOutputStream extends FilterOutputStream {
     public void write(final int b) throws IOException {
         if (this.finished) throw new IOException("ChunkedOutputStream already finalized.");
         
-        this.out.write("1".getBytes());
+        this.out.write(UTF8.getBytes("1"));
         this.out.write(serverCore.CRLF);
         this.out.write(b);
         this.out.write(serverCore.CRLF);

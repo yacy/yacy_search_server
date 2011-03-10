@@ -32,7 +32,6 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
@@ -104,11 +103,7 @@ public class BlogComments {
         }
 
         byte[] author;
-        try {
-            author = StrAuthor.getBytes("UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            author = StrAuthor.getBytes();
-        }
+        author = UTF8.getBytes(StrAuthor);
 
         final BlogBoard.BlogEntry page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
         final boolean pageExists = sb.blogDB.contains(pagename);
@@ -123,22 +118,14 @@ public class BlogComments {
                 if ("".equals(post.get("subject", ""))) {
                     post.putHTML("subject", "no title");
                 }
-                try {
-                    content = post.get("content", "").getBytes("UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    content = post.get("content", "").getBytes();
-                }
+                content = UTF8.getBytes(post.get("content", ""));
 
                 final Date date = null;
 
                 //set name for new entry or date for old entry
                 final String StrSubject = post.get("subject", "");
                 byte[] subject;
-                try {
-                    subject = StrSubject.getBytes("UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    subject = StrSubject.getBytes();
-                }
+                subject = UTF8.getBytes(StrSubject);
                 final String commentID = String.valueOf(System.currentTimeMillis());
                 final BlogEntry blogEntry = sb.blogDB.readBlogEntry(pagename);
                 blogEntry.addComment(commentID);

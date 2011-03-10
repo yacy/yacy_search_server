@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.cora.document.Hit;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
@@ -136,7 +137,7 @@ public class NetworkGraph {
         for (int j = 0; j < primarySearches.length; j++) {
             if (primarySearches[j] == null) continue;
             eventPicture.setColor((primarySearches[j].isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
-            angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(primarySearches[j].target().hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
+            angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(primarySearches[j].target().hash), null)) / ((double) Long.MAX_VALUE)));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle, true, null, null, -1, -1, -1, false);
         }
 
@@ -145,7 +146,7 @@ public class NetworkGraph {
             for (int j = 0; j < secondarySearches.length; j++) {
                 if (secondarySearches[j] == null) continue;
                 eventPicture.setColor((secondarySearches[j].isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
-                angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(secondarySearches[j].target().hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
+                angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(secondarySearches[j].target().hash), null)) / ((double) Long.MAX_VALUE)));
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1, true, null, null, -1, -1, -1, false);
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1, true, null, null, -1, -1, -1, false);
             }
@@ -279,8 +280,8 @@ public class NetworkGraph {
     }
 
     private static void drawNetworkPictureDHT(final RasterPlotter img, final int centerX, final int centerY, final int innerradius, final yacySeed mySeed, final yacySeed otherSeed, final String colorLine, final int coronaangle, boolean out) {
-        final int angleMy = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(mySeed.hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
-        final int angleOther = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(otherSeed.hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
+        final int angleMy = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(mySeed.hash), null)) / ((double) Long.MAX_VALUE)));
+        final int angleOther = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(otherSeed.hash), null)) / ((double) Long.MAX_VALUE)));
         // draw line
         img.arcLine(centerX, centerY, innerradius, innerradius - 20, angleMy, !out,
                 colorLine, null, 12, (coronaangle < 0) ? -1 : coronaangle / 30, 2, true);
@@ -299,7 +300,7 @@ public class NetworkGraph {
         final String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
-        final int angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(seed.hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
+        final int angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(seed.hash), null)) / ((double) Long.MAX_VALUE)));
         //System.out.println("Seed " + seed.hash + " has distance " + seed.dhtDistance() + ", angle = " + angle);
         int linelength = 20 + outerradius * (20 * (name.length() - shortestName) / (longestName - shortestName) + Math.abs(seed.hash.hashCode() % 20)) / 60;
         if (linelength > outerradius) linelength = outerradius;

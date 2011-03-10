@@ -27,7 +27,6 @@
 
 package net.yacy.kelondro.order;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 
 import net.yacy.cora.document.UTF8;
@@ -208,11 +207,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
 
     public final String encodeString(final String in) {
-        try {
-            return encode(in.getBytes("UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            return "";
-        }
+        return encode(UTF8.getBytes(in));
     }
 
     // we will use this encoding to encode strings with 2^8 values to

@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -116,7 +117,7 @@ public class swfParser extends AbstractParser implements Parser {
                     "",
                     sections,     // an array of section headlines
                     abstrct,     // an abstract
-                    contents.getBytes("UTF-8"),     // the parsed document text
+                    UTF8.getBytes(contents),     // the parsed document text
                     anchors,      // a map of extracted anchors
                     null,
                     null,

@@ -1,8 +1,8 @@
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
@@ -42,14 +42,7 @@ public class import_ymark {
         	}
         	
         	if(post.containsKey("bmkfile") && post.containsKey("importer")){
-        		try {
-					byteIn = new ByteArrayInputStream(post.get("bmkfile$file").getBytes("UTF-8"));
-				} catch (UnsupportedEncodingException e) {
-					//TODO: display an error message
-					Log.logException(e);
-					prop.put("result", "0");
-					return prop;
-				}
+        		byteIn = new ByteArrayInputStream(UTF8.getBytes(post.get("bmkfile$file")));
         		if(post.get("importer").equals("html") && byteIn != null) {
 					final YMarksHTMLImporter htmlImporter = new YMarksHTMLImporter(byteIn, 100);
 		            t = new Thread(htmlImporter, "YMarks - HTML Importer");

@@ -31,7 +31,6 @@ package de.anomic.data;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -162,7 +161,7 @@ public class BlogBoard {
     	final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     	try {
             final DocumentBuilder builder = factory.newDocumentBuilder();
-            return parseXMLimport(builder.parse(new ByteArrayInputStream(input.getBytes("UTF-8"))));
+            return parseXMLimport(builder.parse(new ByteArrayInputStream(UTF8.getBytes(input))));
         } catch (final ParserConfigurationException ex) {
             Log.logException(ex);
         } catch (final SAXException ex) {
@@ -220,24 +219,9 @@ public class BlogBoard {
             }
 
             byte[] subject,author,page;
-            try {
-                subject = StrSubject.getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e1) {
-                subject = StrSubject.getBytes();
-            }
-
-            try {
-                author = StrAuthor.getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e1) {
-                author = StrAuthor.getBytes();
-            }
-
-            try {
-                page = StrPage.getBytes("UTF-8");
-            } catch (final UnsupportedEncodingException e1) {
-                page = StrPage.getBytes();
-            }
-
+            subject = UTF8.getBytes(StrSubject);
+            author = UTF8.getBytes(StrAuthor);
+            page = UTF8.getBytes(StrPage);
             writeBlogEntry (newEntry(key, subject, author, ip, date, page, null, null));
     	}
     	return true;

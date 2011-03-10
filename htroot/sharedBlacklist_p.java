@@ -48,6 +48,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -196,11 +197,7 @@ public class sharedBlacklist_p {
                     final String fileString = post.get("file$file");
 
                     if (fileString != null) {
-                        try {
-                            otherBlacklist = FileUtils.strings(fileString.getBytes("UTF-8"));
-                        } catch (IOException ex) {
-                            prop.put("status", STATUS_FILE_ERROR);
-                        }
+                        otherBlacklist = FileUtils.strings(UTF8.getBytes(fileString));
                     }
                 }
             } else if (post.containsKey("add")) {

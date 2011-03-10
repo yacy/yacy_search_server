@@ -116,7 +116,7 @@ public class BookmarkHelper {
     public static int importFromBookmarks(BookmarksDB db, final DigestURI baseURL, final String input, final String tag, final boolean importPublic){
         try {
             // convert string to input stream
-            final ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
+            final ByteArrayInputStream byteIn = new ByteArrayInputStream(UTF8.getBytes(input));
             final InputStreamReader reader = new InputStreamReader(byteIn,"UTF-8");
             
             // import stream
@@ -165,15 +165,11 @@ public class BookmarkHelper {
     
     
     public static int importFromXML(BookmarksDB db, final String input, final boolean importPublic){
-        try {
-            // convert string to input stream
-            final ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
-            
-            // import stream
-            return importFromXML(db, byteIn,importPublic);
-        } catch (final UnsupportedEncodingException e) { 
-            return 0;
-        }       
+        // convert string to input stream
+        final ByteArrayInputStream byteIn = new ByteArrayInputStream(UTF8.getBytes(input));
+        
+        // import stream
+        return importFromXML(db, byteIn,importPublic);       
     }
     
     private static int importFromXML(BookmarksDB db, final InputStream input, final boolean importPublic){

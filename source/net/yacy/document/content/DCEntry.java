@@ -27,7 +27,6 @@ package net.yacy.document.content;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.Collator;
 import java.text.ParseException;
@@ -37,6 +36,7 @@ import java.util.Locale;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -243,27 +243,22 @@ public class DCEntry extends TreeMap<String, String> {
         HashSet<String> languages = new HashSet<String>();
         languages.add(getLanguage());
         
-        try {
-            return new Document(
-                getIdentifier(true),
-                "text/html",
-                "UTF-8",
-                languages,
-                getSubject(),
-                getTitle(),
-                getCreator(),
-                getPublisher(),
-                null,
-                "",
-                getDescription().getBytes("UTF-8"),
-                null,
-                null,
-                null,
-                false);
-        } catch (UnsupportedEncodingException e) {
-            Log.logException(e);
-            return null;
-        }
+        return new Document(
+            getIdentifier(true),
+            "text/html",
+            "UTF-8",
+            languages,
+            getSubject(),
+            getTitle(),
+            getCreator(),
+            getPublisher(),
+            null,
+            "",
+            UTF8.getBytes(getDescription()),
+            null,
+            null,
+            null,
+            false);
     }
     
     public void writeXML(OutputStreamWriter os) throws IOException {

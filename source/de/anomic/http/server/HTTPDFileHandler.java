@@ -75,7 +75,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -505,7 +504,7 @@ public final class HTTPDFileHandler {
                     // write the list to the client
                     HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, "text/html; charset=UTF-8", aBuffer.length(), new Date(targetFile.lastModified()), null, new ResponseHeader(), null, null, true);
                     if (!method.equals(HeaderFramework.METHOD_HEAD)) {
-                        out.write(aBuffer.toString().getBytes("UTF-8"));
+                        out.write(UTF8.getBytes(aBuffer.toString()));
                     }
                     return;
                 }
@@ -747,7 +746,7 @@ public final class HTTPDFileHandler {
 
                 if (exitValue == 0 || (cgiBody != null && !cgiBody.equals(""))) {
                     HTTPDemon.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, cgiBody.length(), targetDate, null, null, null, null, nocache);
-                    out.write(cgiBody.getBytes());
+                    out.write(UTF8.getBytes(cgiBody));
                 } else {
                     HTTPDemon.sendRespondError(conProp, out, exitValue, statusCode, null, HeaderFramework.http1_1.get(Integer.toString(statusCode)), null);
                 }
@@ -941,7 +940,7 @@ public final class HTTPDFileHandler {
                         // send page in chunks and parse SSIs
                         final ByteBuffer o = new ByteBuffer();
                         // apply templates
-                        TemplateEngine.writeTemplate(fis, o, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        TemplateEngine.writeTemplate(fis, o, templatePatterns, UTF8.getBytes("-UNRESOLVED_PATTERN-"));
                         fis.close();
                         HTTPDemon.sendRespondHeader(conProp, out,
                                 httpVersion, 200, null, mimeType, -1,
@@ -957,7 +956,7 @@ public final class HTTPDFileHandler {
                         final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
                         final ByteBuffer o1 = new ByteBuffer();
-                        TemplateEngine.writeTemplate(fis, o1, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        TemplateEngine.writeTemplate(fis, o1, templatePatterns, UTF8.getBytes("-UNRESOLVED_PATTERN-"));
                         fis.close();
                         final ByteBuffer o = new ByteBuffer();
                         
@@ -1316,9 +1315,9 @@ public final class HTTPDFileHandler {
 			StringWriter buffer = new StringWriter();
 
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
-				FileUtils.copy(new ChunkedInputStream(in), buffer, Charset.forName("UTF-8"));
+				FileUtils.copy(new ChunkedInputStream(in), buffer, UTF8.charset);
 			} else {
-				FileUtils.copy(in, buffer, Charset.forName("UTF-8"));
+				FileUtils.copy(in, buffer, UTF8.charset);
 			}
 
 			String sbuffer = buffer.toString();
@@ -1342,7 +1341,7 @@ public final class HTTPDFileHandler {
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
 			}
 
-			out.write(sbuffer.getBytes("UTF-8"));
+			out.write(UTF8.getBytes(sbuffer));
 		} else {
 			if (!outgoingHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
 				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));

@@ -288,11 +288,7 @@ public class ViewFile {
                     for (final StringBuilder s: sentences) {
                         sentence = s.toString();
                         Enumeration<String> tokens = null;
-                        try {
-                            tokens = new WordTokenizer(new ByteArrayInputStream(sentence.getBytes("UTF-8")), LibraryProvider.dymLib);
-                        } catch (UnsupportedEncodingException e) {
-                            e.printStackTrace();
-                        }
+                        tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), LibraryProvider.dymLib);
                         while (tokens.hasMoreElements()) {
                             token = tokens.nextElement();
                             if (token.length() > 0) {

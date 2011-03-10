@@ -204,11 +204,7 @@ public final class ByteBuffer extends OutputStream {
     }
 
     public ByteBuffer append(final String s) {
-        try {
-	    return append(s.getBytes("UTF-8"));
-	} catch (UnsupportedEncodingException e) {
-	    return append(UTF8.getBytes(s));
-	}
+        return append(UTF8.getBytes(s));
     }
     
     public ByteBuffer append(final String s, final String charset) throws UnsupportedEncodingException {

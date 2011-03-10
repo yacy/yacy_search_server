@@ -119,7 +119,7 @@ public class torrentParser extends AbstractParser implements Parser {
         try {
             byte[] b = FileUtils.read(new File(args[0]));
             torrentParser parser = new torrentParser();
-            Document[] d = parser.parse(new MultiProtocolURI("http://localhost/test.torrent"), null, "utf-8", new ByteArrayInputStream(b));
+            Document[] d = parser.parse(new MultiProtocolURI("http://localhost/test.torrent"), null, "UTF-8", new ByteArrayInputStream(b));
             Condenser c = new Condenser(d[0], true, true, LibraryProvider.dymLib);
             Map<String, Word> w = c.words();
             for (Map.Entry<String, Word> e: w.entrySet()) System.out.println("Word: " + e.getKey() + " - " + e.getValue().posInText);

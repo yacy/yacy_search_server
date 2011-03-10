@@ -894,7 +894,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     }
 
     public static void send(final OutputStream os, final String buf) throws IOException {
-    	os.write(buf.getBytes());
+    	os.write(UTF8.getBytes(buf));
     	os.write(CRLF);
     	os.flush();
     }

@@ -71,6 +71,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -1254,9 +1255,9 @@ public final class HTTPDProxyHandler {
         final OutputStream promiscuousOut = sslSocket.getOutputStream();
         
         // now then we can return a success message
-        clientOut.write((httpVersion + " 200 Connection established" + serverCore.CRLF_STRING +
+        clientOut.write(UTF8.getBytes(httpVersion + " 200 Connection established" + serverCore.CRLF_STRING +
                 "Proxy-agent: YACY" + serverCore.CRLF_STRING +
-                serverCore.CRLF_STRING).getBytes());
+                serverCore.CRLF_STRING));
         
         log.logInfo("SSL connection to " + host + ":" + port + " established.");
         

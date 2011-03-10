@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.logging.Log;
 
@@ -104,7 +105,7 @@ public class AccessTracker {
             RandomAccessFile raf = new RandomAccessFile(file, "rw");
             raf.seek(raf.length());
             for (String s: log) {
-                raf.write(s.getBytes("UTF-8"));
+                raf.write(UTF8.getBytes(s));
                 raf.writeByte(10);
             }
             log.clear();

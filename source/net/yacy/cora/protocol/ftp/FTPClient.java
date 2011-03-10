@@ -2817,7 +2817,7 @@ public class FTPClient {
                     final File file = new File("dirindex.html");
                     FileOutputStream fos;
                     fos = new FileOutputStream(file);
-                    fos.write(page.toString().getBytes());
+                    fos.write(UTF8.getBytes(page.toString()));
                     fos.close();
                 } catch (final FileNotFoundException e) {
                     log.error(e);

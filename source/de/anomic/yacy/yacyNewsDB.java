@@ -46,7 +46,6 @@ package de.anomic.yacy;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -55,6 +54,7 @@ import java.util.Properties;
 import java.util.Map.Entry;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -174,23 +174,18 @@ public class yacyNewsDB {
 
     private final Row.Entry r2b(final Record r) {
         if (r == null) return null;
-        try {
-            String attributes = r.attributes().toString();
-            if (attributes.length() > attributesMaxLength) {
-                Log.logWarning("yacyNewsDB", "attribute length=" + attributes.length() + " exceeds maximum size=" + attributesMaxLength);
-                attributes = new HashMap<String, String>().toString();
-            }
-            final Row.Entry entry = this.news.row().newEntry();
-            entry.setCol(0, r.id().getBytes());
-            entry.setCol(1, r.category().getBytes("UTF-8"));
-            entry.setCol(2, (r.received() == null) ? null : my_SHORT_SECOND_FORMATTER.format(r.received()).getBytes());
-            entry.setCol(3, Base64Order.enhancedCoder.encodeLongBA(r.distributed(), 2));
-            entry.setCol(4, attributes.getBytes("UTF-8"));
-            return entry;
-        } catch(final UnsupportedEncodingException e) {
-            // ignore this. this should never occure
-            return null;
+        String attributes = r.attributes().toString();
+        if (attributes.length() > attributesMaxLength) {
+            Log.logWarning("yacyNewsDB", "attribute length=" + attributes.length() + " exceeds maximum size=" + attributesMaxLength);
+            attributes = new HashMap<String, String>().toString();
         }
+        final Row.Entry entry = this.news.row().newEntry();
+        entry.setCol(0, r.id().getBytes());
+        entry.setCol(1, UTF8.getBytes(r.category()));
+        entry.setCol(2, (r.received() == null) ? null : my_SHORT_SECOND_FORMATTER.format(r.received()).getBytes());
+        entry.setCol(3, Base64Order.enhancedCoder.encodeLongBA(r.distributed(), 2));
+        entry.setCol(4, UTF8.getBytes(attributes));
+        return entry;
     }
     
     public Record newRecord(final yacySeed mySeed, final String category, final Properties attributes) {

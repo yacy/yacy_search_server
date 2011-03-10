@@ -30,6 +30,7 @@ package net.yacy.document.parser;
 import java.io.InputStream;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -122,7 +123,7 @@ public class xlsParser extends AbstractParser implements Parser {
                         "", // TODO: publisher
                         null,
                         null,
-                        contents.getBytes("UTF-8"),
+                        UTF8.getBytes(contents),
                         null,
                         null,
                         null,

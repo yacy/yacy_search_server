@@ -328,7 +328,7 @@ public final class yacyRelease extends yacyVersion {
                 }
                 // Save signature
                 File signatureFile = new File(download.getAbsoluteFile() + ".sig");
-                FileUtils.copy(Base64Order.standardCoder.encode(signatureBytes).getBytes("UTF-8"), signatureFile);
+                FileUtils.copy(UTF8.getBytes(Base64Order.standardCoder.encode(signatureBytes)), signatureFile);
                 if ((!signatureFile.exists()) || (signatureFile.length() == 0)) throw new IOException("create signature file failed");
             } else {
                 // just copy into file

@@ -116,7 +116,7 @@ public class cryptbig {
 	    final SecretKey key = keyFactory.generateSecret(keySpec);
 
 	    // create parameter spec for PBE
-	    final PBEParameterSpec paramSpec = new PBEParameterSpec(salt.getBytes(), 1000 /*ITERATIONS*/);
+	    final PBEParameterSpec paramSpec = new PBEParameterSpec(UTF8.getBytes(salt), 1000 /*ITERATIONS*/);
         
 	    // Create a cipher and initialize it for encrypting end decrypting
 	    cryptMethod = method;

@@ -233,7 +233,7 @@ dc_rights
         try {
             if (this.text == null) return new ByteArrayInputStream("".getBytes());
             if (this.text instanceof String) {
-                return new ByteArrayInputStream(((String) this.text).getBytes("UTF-8"));
+                return new ByteArrayInputStream(UTF8.getBytes(((String) this.text)));
             } else if (this.text instanceof InputStream) {
                 return (InputStream) this.text;
             } else if (this.text instanceof File) {
@@ -255,7 +255,7 @@ dc_rights
         try {
             if (this.text == null) return new byte[0];
             if (this.text instanceof String) {
-                return ((String) this.text).getBytes("UTF-8");
+                return UTF8.getBytes((String) this.text);
             } else if (this.text instanceof InputStream) {
                 return FileUtils.read((InputStream) this.text);
             } else if (this.text instanceof File) {

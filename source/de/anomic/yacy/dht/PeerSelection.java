@@ -191,7 +191,7 @@ public class PeerSelection {
     
     public static byte[] limitOver(final yacySeedDB seedDB, final byte[] startHash) {
         final Iterator<yacySeed> seeds = getAcceptRemoteIndexSeeds(seedDB, startHash, 1, false);
-        if (seeds.hasNext()) return seeds.next().hash.getBytes();
+        if (seeds.hasNext()) return UTF8.getBytes(seeds.next().hash);
         return null;
     }
 
@@ -234,7 +234,7 @@ public class PeerSelection {
             this.remaining = max;
             this.doublecheck = new HandleSet(12, Base64Order.enhancedCoder, 0);
             this.nextSeed = nextInternal();
-            this.alsoMyOwn = alsoMyOwn && nextSeed != null && (Base64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) > 0);
+            this.alsoMyOwn = alsoMyOwn && nextSeed != null && (Base64Order.enhancedCoder.compare(UTF8.getBytes(seedDB.mySeed().hash), UTF8.getBytes(nextSeed.hash)) > 0);
         }
         
         public boolean hasNext() {
@@ -248,7 +248,7 @@ public class PeerSelection {
                 while (se.hasNext()) {
                     s = se.next();
                     if (s == null) return null;
-                    byte[] hashb = s.hash.getBytes();
+                    byte[] hashb = UTF8.getBytes(s.hash);
                     if (doublecheck.has(hashb)) return null;
                     try {
                         this.doublecheck.put(hashb);
@@ -271,7 +271,7 @@ public class PeerSelection {
         }
         
         public yacySeed next() {
-            if (alsoMyOwn && Base64Order.enhancedCoder.compare(seedDB.mySeed().hash.getBytes(), nextSeed.hash.getBytes()) < 0) {
+            if (alsoMyOwn && Base64Order.enhancedCoder.compare(UTF8.getBytes(seedDB.mySeed().hash), UTF8.getBytes(nextSeed.hash)) < 0) {
                 // take my own seed hash instead the enumeration result
                 alsoMyOwn = false;
                 return seedDB.mySeed();

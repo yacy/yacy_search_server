@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -43,10 +44,10 @@ public class ServerSideIncludes {
     }
     
     public static void writeSSI(final ByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
-        int p = in.indexOf("<!--#".getBytes(), off);
+        int p = in.indexOf(UTF8.getBytes("<!--#"), off);
         int q;
         while (p >= 0) {
-            q = in.indexOf("-->".getBytes(), p + 10);
+            q = in.indexOf(UTF8.getBytes("-->"), p + 10);
             if (out instanceof ChunkedOutputStream) {
                 ((ChunkedOutputStream) out).write(in, off, p - off);
             } else {
@@ -54,7 +55,7 @@ public class ServerSideIncludes {
             }
             parseSSI(in, p, out, authorization, requesthost);
             off = q + 3;
-            p = in.indexOf("<!--#".getBytes(), off);
+            p = in.indexOf(UTF8.getBytes("<!--#"), off);
         }
         if (out instanceof ChunkedOutputStream) {
             ((ChunkedOutputStream) out).write(in, off, in.length() - off);
@@ -64,8 +65,8 @@ public class ServerSideIncludes {
     }
     
     private static void parseSSI(final ByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost) {
-        if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
-            final int q = in.indexOf("\"".getBytes(), off + 22);
+        if (in.startsWith(UTF8.getBytes("<!--#include virtual=\""), off)) {
+            final int q = in.indexOf(UTF8.getBytes("\""), off + 22);
             if (q > 0) {
                 final String path = in.toString(off + 22, q - off - 22);
                 writeContent(path, out, authorization, requesthost);

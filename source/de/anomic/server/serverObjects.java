@@ -340,7 +340,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
             for (Map.Entry<String, String> entry: entrySet()) {
                 key = entry.getKey();
                 value = patternNewline.matcher(entry.getValue()).replaceAll("\\\\n");
-                fos.write((key + "=" + value + "\r\n").getBytes());
+                fos.write(UTF8.getBytes(key + "=" + value + "\r\n"));
             }
         } finally {
             if (fos != null) {

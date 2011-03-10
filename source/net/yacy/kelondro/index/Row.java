@@ -391,8 +391,7 @@ public final class Row {
             return rowinstance[offset + colstart[column]] == 0;
         }
         
-        @Deprecated
-        public final void setCol(final String nickname, final byte[] cell) {
+        private final void setCol(final String nickname, final byte[] cell) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
             if (ref == null) return;
@@ -432,8 +431,7 @@ public final class Row {
             setCol(column, UTF8.getBytes(cell));
         }
         
-        @Deprecated
-        public final void setCol(final String nickname, final long cell) {
+        private final void setCol(final String nickname, final long cell) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
             if (ref == null) return;

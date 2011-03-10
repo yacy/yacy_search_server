@@ -28,9 +28,8 @@
 package net.yacy.document.parser;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -85,26 +84,22 @@ public class docParser extends AbstractParser implements Parser {
         }
 
         Document[] docs;
-        try {
-            docs = new Document[]{new Document(
-                      location,
-                      mimeType,
-                      "UTF-8",
-                      null,
-                      null,
-                      title,
-                      "", // TODO: AUTHOR
-                      extractor.getDocSummaryInformation().getCompany(), // publisher
-                      null,
-                      null,
-                      contents.toString().getBytes("UTF-8"),
-                      null,
-                      null,
-                      null,
-                      false)};
-        } catch (UnsupportedEncodingException e) {
-            throw new Parser.Failure("error in docParser, getBytes: " + e.getMessage(), location);
-        }
+        docs = new Document[]{new Document(
+                  location,
+                  mimeType,
+                  "UTF-8",
+                  null,
+                  null,
+                  title,
+                  "", // TODO: AUTHOR
+                  extractor.getDocSummaryInformation().getCompany(), // publisher
+                  null,
+                  null,
+                  UTF8.getBytes(contents.toString()),
+                  null,
+                  null,
+                  null,
+                  false)};
           
         return docs;
     }

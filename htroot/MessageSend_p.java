@@ -25,12 +25,12 @@
 //javac -classpath .:../Classes MessageSend_p.java
 //if the shell's current path is HTROOT
 
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.search.Switchboard;
@@ -128,11 +128,7 @@ public class MessageSend_p {
                 if (subject.length() > 100) subject = subject.substring(0, 100);
                 if (message.length() > messagesize) message = message.substring(0, messagesize);
                 byte[] mb;
-                try {
-                    mb = message.getBytes("UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    mb = message.getBytes();
-                }
+                mb = UTF8.getBytes(message);
                 final Map<String, String> result = yacyClient.postMessage(sb.peers, hash, subject, mb);
 
                 //message has been sent

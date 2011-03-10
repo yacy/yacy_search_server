@@ -26,13 +26,13 @@ package net.yacy.document;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -173,11 +173,7 @@ public class WordTokenizer implements Enumeration<String> {
     public static SortedMap<byte[], Integer> hashSentence(final String sentence, final WordCache meaningLib) {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         Enumeration<String> words = null;
-        try {
-            words = new WordTokenizer(new ByteArrayInputStream(sentence.getBytes("UTF-8")), meaningLib);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        words = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(sentence)), meaningLib);
         int pos = 0;
         String word;
         byte[] hash;

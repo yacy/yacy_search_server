@@ -46,13 +46,20 @@
     <ul class="menu">
       <li><a href="/index.html" accesskey="s" class="MenuItemLink">Search Page</a></li>
       <li><a href="/yacyinteractive.html" class="MenuItemLink">Interactive local Search</a></li>
-      <li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>
+      <!--<li><a href="/yacy/ui/" accesskey="s" class="MenuItemLink">Rich Client Search</a></li>-->
       <li><a href="/compare_yacy.html?display=1" class="MenuItemLink">Compare Search</a></li>
-      <li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>
       <li><a href="/Surftips.html?display=1" class="MenuItemLink">Surftips</a></li>
       <li><a href="/Wiki.html?display=1" class="MenuItemLink">Publication</a></li>
       <li><a href="/Bookmarks.html" class="MenuItemLink">Bookmarks</a></li>
       <li><a href="/Help.html" class="MenuItemLink">Help</a></li>
+    </ul>
+  </li>
+  <li class="menugroup" id="menugroupIntegration">
+    <h3>Search Integration</h3>
+    <ul class="menu">
+      <li><a href="/ConfigPortal.html" class="MenuItemLink">Search Portals</a></li>
+      <li><a href="/ConfigAppearance_p.html" class="MenuItemLink lock">Customization</a></li>
+      <li><a href="/Ranking_p.html" class="MenuItemLink lock">Ranking Config</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupCrawlerControl">
@@ -63,13 +70,6 @@
       <li><a href="/CrawlResults.html?process=5&amp;autoforward=" class="MenuItemLink">Crawl Results</a></li>
       <li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Index Administration</a></li>
       <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>
-    </ul>
-  </li>
-  <li class="menugroup" id="menugroupIntegration">
-    <h3>Search Integration</h3>
-    <ul class="menu">
-      <li><a href="/ConfigPortal.html" class="MenuItemLink">Search Portals</a></li>
-      <li><a href="/ConfigAppearance_p.html" class="MenuItemLink lock">Customization</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupMonitoring">

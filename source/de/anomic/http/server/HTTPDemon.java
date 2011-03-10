@@ -353,10 +353,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 return false;
             }
             // ask for authenticate
-            session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.CRLF_STRING +
-            RequestHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING).getBytes());
-            session.out.write((HeaderFramework.CONTENT_LENGTH + ": 0\r\n").getBytes());
-            session.out.write("\r\n".getBytes());                   
+            session.out.write(UTF8.getBytes(httpVersion + " 407 Proxy Authentication Required" + serverCore.CRLF_STRING +
+            RequestHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING));
+            session.out.write(UTF8.getBytes(HeaderFramework.CONTENT_LENGTH + ": 0\r\n"));
+            session.out.write(UTF8.getBytes("\r\n"));                   
             session.out.flush();
             return false;
         }
@@ -1122,7 +1122,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     fis = new FileInputStream(new File(htRootPath, "/proxymsg/error.html")), 
                     o = new ByteArrayOutputStream(512), 
                     tp, 
-                    "-UNRESOLVED_PATTERN-".getBytes()
+                    UTF8.getBytes("-UNRESOLVED_PATTERN-")
             );
             final byte[] result = o.toByteArray();
             o.close(); o = null;
@@ -1301,7 +1301,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 header.append("\r\n");
                 
                 // sending headers to the client
-                respond.write(header.toString().getBytes());            
+                respond.write(UTF8.getBytes(header.toString()));            
                 
                 // flush stream
                 respond.flush();

@@ -468,7 +468,7 @@ public class YMarkTables {
 		        buffer.append(document.dc_title());
 		        buffer.append(document.dc_description());
 		        buffer.append(document.dc_subject(' '));
-		        final Enumeration<String> tokens = new WordTokenizer(new ByteArrayInputStream(buffer.toString().getBytes("UTF-8")), LibraryProvider.dymLib);
+		        final Enumeration<String> tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
 		        while(tokens.hasMoreElements()) {
 		        	int max = 1;
 		        	String token = tokens.nextElement();

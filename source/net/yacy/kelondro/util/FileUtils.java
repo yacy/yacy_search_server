@@ -466,7 +466,7 @@ public final class FileUtils {
         if(os != null) {
             for (final Iterator<byte[]> i = set.iterator(); i.hasNext(); ) {
                 os.write(i.next());
-                if (sep != null) os.write(sep.getBytes("UTF-8"));
+                if (sep != null) os.write(UTF8.getBytes(sep));
             }
             os.close();
         }
@@ -492,12 +492,12 @@ public final class FileUtils {
             String key;
             if (i.hasNext()) {
                 key = UTF8.String(i.next().getPrimaryKeyBytes());
-                os.write(key.getBytes("UTF-8"));
+                os.write(UTF8.getBytes(key));
             }
             while (i.hasNext()) {
                 key = UTF8.String(i.next().getPrimaryKeyBytes());
-                if (sep != null) os.write(sep.getBytes("UTF-8"));
-                os.write(key.getBytes("UTF-8"));
+                if (sep != null) os.write(UTF8.getBytes(sep));
+                os.write(UTF8.getBytes(key));
             }
             os.close();
         }

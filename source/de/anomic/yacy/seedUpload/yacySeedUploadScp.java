@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import net.yacy.cora.document.UTF8;
+
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -149,7 +151,7 @@ class sshc {
                 command+=localFile.toString();
             }
             command+="\n";
-            out.write(command.getBytes()); out.flush();
+            out.write(UTF8.getBytes(command)); out.flush();
             
             checkAck(in);
             

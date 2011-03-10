@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.ASCIIComparator;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 
 
 /**
@@ -364,7 +365,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         try {
             fos = new FileOutputStream(f);
             for (java.util.Map.Entry<String, String> entry: entrySet()) {
-                fos.write((entry.getKey() + "=" + entry.getValue() + "\r\n").getBytes());
+                fos.write(UTF8.getBytes((entry.getKey() + "=" + entry.getValue() + "\r\n")));
             }
             fos.flush();
         } finally {

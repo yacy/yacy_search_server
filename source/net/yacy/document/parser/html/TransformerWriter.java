@@ -44,6 +44,7 @@ import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
@@ -585,7 +586,7 @@ public final class TransformerWriter extends Writer {
             final Transformer transformer = new ContentTransformer();            
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
-            final Writer os = new TransformerWriter(fos, Charset.forName("UTF-8"),scraper, transformer, false);
+            final Writer os = new TransformerWriter(fos, UTF8.charset, scraper, transformer, false);
             int i;
             while ((i = is.read(buffer)) > 0) os.write(buffer, 0, i);
             os.close();
