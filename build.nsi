@@ -19,6 +19,7 @@ COMMAND LINE OPTIONS (case sensitive):
 
 !include x64.nsh
 !include FileFunc.nsh
+!include WinVer.nsh
 
 ; ----------------------------------------
 ; GENERAL
@@ -110,6 +111,7 @@ LangString noAdminForJava 0 "You need Administrator privileges to install Java. 
 LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
 LangString yacyNoHd 0 "YaCy should be installed on a hard disk. Continue with selected folder?" 
 LangString yacyNeedSpace 0 "We recommend ${RecommendSpace} GB free space for YaCy. There are only $TempDriveFree GB left. Continue anyway?"
+LangString yacyNeedOs 0 "Please run Windows 2000 or better (e.g. Windows XP, Vista or Windows 7) for YaCy."
 
 LangString stillRunning ${LANG_FRENCH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
@@ -117,6 +119,7 @@ LangString noAdminForJava 0 "You need Administrator privileges to install Java. 
 LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
 LangString yacyNoHd 0 "YaCy should be installed on a hard disk. Continue with selected folder?"
 LangString yacyNeedSpace 0 "We recommend ${RecommendSpace} GB free space for YaCy. There are only $TempDriveFree GB left. Continue anyway?"
+LangString yacyNeedOs 0 "Please run Windows 2000 or better (e.g. Windows XP, Vista or Windows 7) for YaCy."
 
 LangString stillRunning ${LANG_GERMAN} "YaCy ist noch aktiv. Bitte beenden Sie YaCy."
 LangString keepData 0 "Moechten Sie die Daten behalten?"
@@ -124,6 +127,7 @@ LangString noAdminForJava 0 "Sie benoetigen Administrator-Rechte um Java zu inst
 LangString finishPage 0 "Zeige die Windows Firewall Konfiguration fuer YaCy."
 LangString yacyNoHd 0 "YaCy sollte auf einer Festplatte installiert werden. Soll der gewaehlte Ordner trotzdem verwendet werden?" 
 LangString yacyNeedSpace 0 "Wir empfehlen ${RecommendSpace} GB fuer YaCy. Es sind noch $TempDriveFree GB frei. Trotzdem fortfahren?"
+LangString yacyNeedOs 0 "YaCy benoetigt Windows 2000 oder besser (z.B. Windows XP, Vista oder Windows 7)."
 
 ; ----------------------------------------
 ; INSTALLABLE MODULES
@@ -222,24 +226,25 @@ SectionEnd
 ; FUNCTIONS
 
 Function .onInit
-; Detect JRE first
+	; check Windows-Version, need Win 2000 or higher
+	${If} ${AtMostWinME} 
+		MessageBox MB_ICONSTOP "$(yacyNeedOs)" 
+		Abort 
+	${EndIf}		
+	; detect JRE first
 	var /global InstalledJREVersion
 	${If} ${RunningX64}
 		SetRegView 64
 	${EndIf}
 	ReadRegStr $InstalledJREVersion HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
-; If right JRE already installed hide JRE section 
+	; if right JRE already installed hide and deselect JRE section
 	${If} $InstalledJREVersion = ${JRE_VERSION6}
 		SectionSetText ${Sec_Java_id} ""
+		SectionSetFlags ${Sec_Java_id} 0
 	${EndIf}
 FunctionEnd
 
 Function GetJRE
-; Skip if JRE already installed 
-	${If} $InstalledJREVersion = ${JRE_VERSION6}
-		Return
-	${EndIf}
-
 ; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
     	${If} ${RunningX64}
     		StrCpy $3 ${JRE_64}
