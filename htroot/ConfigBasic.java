@@ -178,7 +178,7 @@ public class ConfigBasic {
                 sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
             }
-            if ("portal".equals(post.get("usecase", "")) && !"webprotal".equals(networkName)) {
+            if ("portal".equals(post.get("usecase", "")) && !"webportal".equals(networkName)) {
                 // switch to webportal network
                 sb.switchNetwork("defaults/yacy.network.webportal.unit");
                 // switch to robinson mode
