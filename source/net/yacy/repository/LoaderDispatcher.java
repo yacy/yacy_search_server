@@ -41,6 +41,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -114,7 +115,7 @@ public final class LoaderDispatcher {
             final boolean global
                     ) {
         return new Request(
-                    sb.peers.mySeed().hash.getBytes(), 
+                UTF8.getBytes(sb.peers.mySeed().hash), 
                     url, 
                     null, 
                     "", 
@@ -185,7 +186,7 @@ public final class LoaderDispatcher {
         final String host = url.getHost();
         
         // check if we have the page in the cache
-        final CrawlProfile crawlProfile = sb.crawler.getActive(request.profileHandle().getBytes());
+        final CrawlProfile crawlProfile = sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
         if (crawlProfile != null && cacheStrategy != CrawlProfile.CacheStrategy.NOCACHE) {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry

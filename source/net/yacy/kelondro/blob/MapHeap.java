@@ -147,7 +147,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         key = normalizeKey(key);
         String s = map2string(newMap, "W" + my_SHORT_SECOND_FORMATTER.format() + " ");
         assert s != null;
-        byte[] sb = s.getBytes();
+        byte[] sb = UTF8.getBytes(s);
         if (cache == null) {
             // write entry
             if (blob != null) blob.insert(key, sb);
@@ -243,7 +243,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         if (key == null) return null;
         try {
             if (key instanceof byte[]) return get((byte[]) key);
-            if (key instanceof String) return get(((String) key).getBytes());
+            if (key instanceof String) return get(UTF8.getBytes((String) key));
         } catch (IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {

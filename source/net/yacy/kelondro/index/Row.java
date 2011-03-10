@@ -27,7 +27,6 @@
 
 package net.yacy.kelondro.index;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -313,7 +312,7 @@ public final class Row {
                         } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_bitfield)) {
                             setCol(nick, (new Bitfield(row[i].cellwidth, elts[i].substring(p + 1).trim())).bytes());
                         } else {
-                            setCol(nick, elts[i].substring(p + 1).trim().getBytes());
+                            setCol(nick, UTF8.getBytes(elts[i].substring(p + 1).trim()));
                         }
                     }
                 }
@@ -430,18 +429,7 @@ public final class Row {
         }
         
         public final void setCol(final int column, final String cell) {
-            setCol(column, cell.getBytes());
-        }
-        
-        public final void setCol(final int column, final String cell, final String encoding) {
-            if (encoding == null)
-                setCol(column, cell.getBytes());
-            else
-                try {
-                    setCol(column, (cell == null) ? null : cell.getBytes(encoding));
-                } catch (final UnsupportedEncodingException e) {
-                    Log.logSevere("Row", "", e);
-                }
+            setCol(column, UTF8.getBytes(cell));
         }
         
         @Deprecated
@@ -491,23 +479,17 @@ public final class Row {
             throw new kelondroException("ROW", "addCol did not find appropriate encoding");
         }
         
-        public final String getColString(final int column, final String encoding) {
-            return getColString(colstart[column], row[column].cellwidth, encoding);
+        public final String getColString(final int column) {
+            return getColString(colstart[column], row[column].cellwidth);
         }
         
-        private final String getColString(final int clstrt, int length, final String encoding) {
+        private final String getColString(final int clstrt, int length) {
             if (rowinstance[offset + clstrt] == 0) return null;
             assert length <= rowinstance.length - offset - clstrt;
             if (length > rowinstance.length - offset - clstrt) length = rowinstance.length - offset - clstrt;
             while ((length > 0) && (rowinstance[offset + clstrt + length - 1] == 0)) length--;
             if (length == 0) return null;
-            try {
-                if ((encoding == null) || (encoding.length() == 0))
-                    return UTF8.String(rowinstance, offset + clstrt, length);
-                return new String(rowinstance, offset + clstrt, length, encoding);
-            } catch (final UnsupportedEncodingException e) {
-                return "";
-            }
+            return UTF8.String(rowinstance, offset + clstrt, length);
         }
         
         public final long getColLong(final int column) {

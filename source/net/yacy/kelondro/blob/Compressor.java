@@ -112,7 +112,7 @@ public class Compressor implements BLOB {
             try {
                 while ((entry = writeQueue.take()) != poisonWorkerEntry) {
                     try {
-                        Compressor.this.backend.insert(entry.getKey().getBytes(), compress(entry.getValue()));
+                        Compressor.this.backend.insert(UTF8.getBytes(entry.getKey()), compress(entry.getValue()));
                     } catch (IOException e) {
                         Log.logException(e);
                         buffer.put(entry.getKey(), entry.getValue());

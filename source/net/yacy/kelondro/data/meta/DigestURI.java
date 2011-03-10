@@ -220,7 +220,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         assert hashs.length() == 12;
 
         // return result hash
-        byte[] b = hashs.toString().getBytes();
+        byte[] b = UTF8.getBytes(hashs.toString());
         assert b.length == 12;
         return b;
     }

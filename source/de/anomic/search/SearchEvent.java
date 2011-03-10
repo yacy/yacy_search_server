@@ -108,7 +108,7 @@ public final class SearchEvent {
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localSearchThread = null;
-        this.order = new ReferenceOrder(query.ranking, query.targetlang);
+        this.order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
         boolean remote = (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) || (query.domType == QueryParams.SEARCHDOM_CLUSTERALL);
         if (remote && peers.sizeConnected() == 0) remote = false;
         final long start = System.currentTimeMillis();

@@ -49,7 +49,7 @@ public class IndexTest {
         // so we construct a generic Hash using two long values
         final String s = (Base64Order.enhancedCoder.encodeLongSB(Math.abs(r0), 6).toString() +
                     Base64Order.enhancedCoder.encodeLongSB(Math.abs(r1), 6).toString());
-        return s.getBytes();
+        return UTF8.getBytes(s);
     }
     
     public static byte[] randomHash(final Random r) {

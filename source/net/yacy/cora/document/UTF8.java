@@ -71,4 +71,9 @@ public class UTF8 {
         return new String(bytes, offset, length, charset);
     }
     
+    public final static byte[] getBytes(final String s) {
+        if (s == null) return null;
+        return s.getBytes(charset);
+    }
+    
 }

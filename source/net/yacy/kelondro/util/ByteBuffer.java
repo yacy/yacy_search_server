@@ -207,7 +207,7 @@ public final class ByteBuffer extends OutputStream {
         try {
 	    return append(s.getBytes("UTF-8"));
 	} catch (UnsupportedEncodingException e) {
-	    return append(s.getBytes());
+	    return append(UTF8.getBytes(s));
 	}
     }
     
@@ -400,14 +400,6 @@ public final class ByteBuffer extends OutputStream {
     public String toString() {
 	return UTF8.String(buffer, offset, length);
     }
-    
-    public String toString(final String charsetName) {
-        try {
-            return new String(this.getBytes(),charsetName);
-        } catch (final UnsupportedEncodingException e) {
-            return UTF8.String(this.getBytes());
-        }
-    }
 
     public String toString(final int left, final int length) {
         return UTF8.String(buffer, offset + left, length);
@@ -491,7 +483,10 @@ public final class ByteBuffer extends OutputStream {
     }
     
     public static boolean equals(final byte[] buffer, final byte[] pattern) {
-        return equals(buffer, 0, pattern);
+        // compares two byte arrays: true, if pattern appears completely at offset position
+        if (buffer.length < pattern.length) return false;
+        for (int i = 0; i < pattern.length; i++) if (buffer[i] != pattern[i]) return false;
+        return true;
     }
     
     public static boolean equals(final byte[] buffer, final int offset, final byte[] pattern) {

@@ -29,6 +29,8 @@ package net.yacy.kelondro.order;
 
 import java.util.Comparator;
 
+import net.yacy.cora.document.UTF8;
+
 public class StringOrder implements Comparator<String> {
 
     public ByteOrder baseOrder;
@@ -41,6 +43,6 @@ public class StringOrder implements Comparator<String> {
     }
     
     public final int compare(final String s1, final String s2) {
-        return baseOrder.compare(s1.getBytes(), s2.getBytes());
+        return baseOrder.compare(UTF8.getBytes(s1), UTF8.getBytes(s2));
     }
 }

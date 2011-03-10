@@ -660,8 +660,9 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
     public static byte[] randomHash(final long r0, final long r1) {
         // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
         // so we construct a generic Hash using two long values
-        return (Base64Order.enhancedCoder.encodeLongSB(Math.abs(r0), 11).substring(5) +
-                Base64Order.enhancedCoder.encodeLongSB(Math.abs(r1), 11).substring(5)).getBytes();
+        return UTF8.getBytes(
+                Base64Order.enhancedCoder.encodeLongSB(Math.abs(r0), 11).substring(5) +
+                Base64Order.enhancedCoder.encodeLongSB(Math.abs(r1), 11).substring(5));
     }
     public static byte[] randomHash(final Random r) {
         return randomHash(r.nextLong(), r.nextLong());

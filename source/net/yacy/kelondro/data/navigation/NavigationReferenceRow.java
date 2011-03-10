@@ -89,7 +89,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         assert (termhash.length == 12) : "termhash = " + UTF8.String(termhash);
         assert (refhash.length == 12) : "refhash = " + UTF8.String(refhash);
         this.entry = navEntryRow.newEntry();
-        this.entry.setCol(col_navhash, UTF8.String(termhash) + UTF8.String(refhash), null);
+        this.entry.setCol(col_navhash, UTF8.String(termhash) + UTF8.String(refhash));
         this.entry.setCol(col_count, count);
         this.entry.setCol(col_pos, pos);
         this.entry.setCol(col_flags, flags);
@@ -119,15 +119,15 @@ public final class NavigationReferenceRow extends AbstractReference implements N
     }
 
     public String navigationHash() {
-        return this.entry.getColString(col_navhash, null);
+        return this.entry.getColString(col_navhash);
     }
 
     public byte[] metadataHash() {
-        return navigationHash().substring(12).getBytes();
+        return UTF8.getBytes(navigationHash().substring(12));
     }
 
     public byte[] termHash() {
-        return navigationHash().substring(0, 12).getBytes();
+        return UTF8.getBytes(navigationHash().substring(0, 12));
     }
 
     public int hitcount() {

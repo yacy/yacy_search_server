@@ -129,6 +129,7 @@ public class Segments implements Iterable<Segment> {
     }
     
     public Segment segment(final String segmentName) {
+        if (segments == null) return null;
         Segment segment = segments.get(segmentName);
         if (segment == null) {
             // generate the segment

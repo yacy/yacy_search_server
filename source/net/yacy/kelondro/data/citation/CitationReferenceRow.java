@@ -28,6 +28,7 @@ package net.yacy.kelondro.data.citation;
 
 import java.util.Collection;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
@@ -86,7 +87,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         this.entry = citationRow.newEntry();
         final int mddlm = MicroDate.microDateDays(lastmodified);
         final int mddct = MicroDate.microDateDays(updatetime);
-        this.entry.setCol(col_urlhash, urlHash, null);
+        this.entry.setCol(col_urlhash, urlHash);
         this.entry.setCol(col_lastModified, mddlm);
         this.entry.setCol(col_lastAccessed, mddct);
         this.entry.setCol(col_posintext, posintext);
@@ -100,7 +101,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
     
     public CitationReferenceRow(final String urlHash, final String code) {
         // the code is the external form of the row minus the leading urlHash entry
-        this.entry = citationRow.newEntry((urlHash + code).getBytes());
+        this.entry = citationRow.newEntry(UTF8.getBytes((urlHash + code)));
     }
     
     public CitationReferenceRow(final String external) {

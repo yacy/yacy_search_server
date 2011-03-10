@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -51,10 +52,11 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	 */
 	public static final WordReferenceVars poison = new WordReferenceVars();
 	private static int cores = Runtime.getRuntime().availableProcessors();
+	public static final byte[] default_language = UTF8.getBytes("uk");
 	
     public Bitfield flags;
     public long lastModified;
-    public String language;
+    public byte[] language;
     public byte[] urlHash;
     public char type;
     public int hitcount, llocal, lother, phrasesintext,
@@ -77,14 +79,14 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
             final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-                  String   language,      // (guessed) language of document
+                  byte[]   language,      // (guessed) language of document
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
             final Bitfield flags,  // attributes to the url and to the word according the url
             final double   termfrequency
     ) {
-        if ((language == null) || (language.length() != 2)) language = "uk";
+        if (language == null || language.length != 2) language = default_language;
         final int mddlm = MicroDate.microDateDays(lastmodified);
         //final int mddct = MicroDate.microDateDays(updatetime);
         this.flags = flags;
@@ -199,7 +201,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return freshUntil;
     }
 */
-    public String getLanguage() {
+    public byte[] getLanguage() {
         return language;
     }
 

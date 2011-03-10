@@ -283,25 +283,13 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     final Row.Entry entry = urlIndexFile.get(urlHashBytes);
 
                     // getting the wrong url string
-                    oldUrlStr = entry.getColString(1, null).trim();
+                    oldUrlStr = entry.getColString(1).trim();
 
                     int pos = -1;
                     if ((pos = oldUrlStr.indexOf("://")) != -1) {
                         // trying to correct the url
                         final String newUrlStr = "http://" + oldUrlStr.substring(pos + 3);
                         final DigestURI newUrl = new DigestURI(newUrlStr);
-
-                        // doing a http head request to test if the url is correct
-//                        final Client client = new Client(10000);
-//                        ResponseContainer res = null;
-//                        try {
-//                            res = client.HEAD(newUrl.toString());
-//                        } finally {
-//                            if(res != null) {
-//                                // release connection
-//                                res.closeStream();
-//                            }
-//                        }
 
                         if (client.HEADResponse(newUrl.toString()) != null
                         		&& client.getHttpResponse().getStatusLine().getStatusCode() == 200) {

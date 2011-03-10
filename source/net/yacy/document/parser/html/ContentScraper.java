@@ -28,7 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
@@ -346,13 +345,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public byte[] getText() {
-        return this.getText("UTF-8");
-    }
-    
-    public byte[] getText(final String charSet) {
         try {
-            return content.getBytes(charSet);
-        } catch (final UnsupportedEncodingException e) {
             return content.getBytes();
         } catch (final OutOfMemoryError e) {
             Log.logException(e);

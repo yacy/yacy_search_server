@@ -116,19 +116,19 @@ public class BDecoder {
             return UTF8.String(this.b);
         }
         public void toStream(OutputStream os) throws IOException {
-            os.write(Integer.toString(this.b.length).getBytes());
+            os.write(UTF8.getBytes(Integer.toString(this.b.length)));
             os.write(_p);
             os.write(this.b);
         }
         public static void toStream(OutputStream os, byte[] b) throws IOException {
-            os.write(Integer.toString(b.length).getBytes());
+            os.write(UTF8.getBytes(Integer.toString(b.length)));
             os.write(_p);
             os.write(b);
         }
         public static void toStream(OutputStream os, String s) throws IOException {
-            os.write(Integer.toString(s.length()).getBytes());
+            os.write(UTF8.getBytes(Integer.toString(s.length())));
             os.write(_p);
-            os.write(s.getBytes());
+            os.write(UTF8.getBytes(s));
         }
     }
     
@@ -218,7 +218,7 @@ public class BDecoder {
         }
         public void toStream(OutputStream os) throws IOException {
             os.write(_i);
-            os.write(Long.toString(this.i).getBytes());
+            os.write(UTF8.getBytes(Long.toString(this.i)));
             os.write(_e);
         }
     }

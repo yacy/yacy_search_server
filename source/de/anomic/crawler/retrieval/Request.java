@@ -136,15 +136,15 @@ public class Request extends WorkflowJob {
     }
 
     private void insertEntry(final Row.Entry entry) throws IOException {
-        final String urlstring = entry.getColString(2, null);
+        final String urlstring = entry.getColString(2);
         if (urlstring == null) throw new IOException ("url string is null");
         this.initiator = entry.getColBytes(1, true);
         this.initiator = (initiator == null) ? null : ((initiator.length == 0) ? null : initiator);
         this.url = new DigestURI(urlstring, entry.getPrimaryKeyBytes());
         this.refhash = (entry.empty(3)) ? null : entry.getColBytes(3, true);
-        this.name = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();
+        this.name = (entry.empty(4)) ? "" : entry.getColString(4).trim();
         this.appdate = entry.getColLong(5);
-        this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6, null).trim();
+        this.profileHandle = (entry.empty(6)) ? null : entry.getColString(6).trim();
         this.depth = (int) entry.getColLong(7);
         this.anchors = (int) entry.getColLong(8);
         this.forkfactor = (int) entry.getColLong(9);

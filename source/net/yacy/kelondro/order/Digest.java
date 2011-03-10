@@ -32,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -44,6 +43,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 
 
@@ -128,11 +128,7 @@ public class Digest {
 			fromPool = false;
 		}
         byte[] keyBytes;
-        try {
-            keyBytes = key.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            keyBytes = key.getBytes();
-        }
+        keyBytes = UTF8.getBytes(key);
         digest.update(keyBytes);
         byte[] result = digest.digest();
         digest.reset();

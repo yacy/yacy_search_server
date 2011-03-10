@@ -164,11 +164,11 @@ public class yacyNewsDB {
     private Record b2r(final Row.Entry b) {
         if (b == null) return null;
         return new yacyNewsDB.Record(
-            b.getColString(0, null),
-            b.getColString(1, "UTF-8"),
-            (b.empty(2)) ? null : my_SHORT_SECOND_FORMATTER.parse(b.getColString(2, null), GenericFormatter.UTCDiffString()),
+            b.getColString(0),
+            b.getColString(1),
+            (b.empty(2)) ? null : my_SHORT_SECOND_FORMATTER.parse(b.getColString(2), GenericFormatter.UTCDiffString()),
             (int) b.getColLong(3),
-            MapTools.string2map(b.getColString(4, "UTF-8"), ",")
+            MapTools.string2map(b.getColString(4), ",")
         );
     }
 

@@ -205,7 +205,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
             
-            sqlStatement.setString(1, row.getColString(0, null));
+            sqlStatement.setString(1, row.getColString(0));
             sqlStatement.setBytes(2, row.bytes());
             sqlStatement.execute();
             
@@ -226,7 +226,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
             
-            sqlStatement.setString(1, row.getColString(0, null));
+            sqlStatement.setString(1, row.getColString(0));
             sqlStatement.setBytes(2, row.bytes());
             sqlStatement.execute();
             

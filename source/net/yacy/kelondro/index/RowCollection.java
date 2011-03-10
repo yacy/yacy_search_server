@@ -132,7 +132,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
             this.chunkcount = chunkcachelength / rowdef.objectsize; // patch problem
         }
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
-        final String sortOrderKey = exportedCollection.getColString(exp_order_type, null);
+        final String sortOrderKey = exportedCollection.getColString(exp_order_type);
         ByteOrder oldOrder = null;
         if ((sortOrderKey == null) || (sortOrderKey.equals("__"))) {
             oldOrder = null;
@@ -241,7 +241,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         entry.setCol(exp_chunkcount, this.chunkcount);
         entry.setCol(exp_last_read, daysSince2000(System.currentTimeMillis()));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
-        entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? "__".getBytes() :this.rowdef.objectOrder.signature().getBytes());
+        entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? UTF8.getBytes("__") : UTF8.getBytes(this.rowdef.objectOrder.signature()));
         entry.setCol(exp_order_bound, this.sortBound);
         entry.setCol(exp_collection, this.chunkcache);
         return entry.bytes();

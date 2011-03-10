@@ -36,6 +36,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -193,7 +194,7 @@ public class DocumentIndex extends Segment {
     public ArrayList<DigestURI> find(String querystring, int count) {
         // make a query and start a search
         QueryParams query = new QueryParams(querystring, count, null, this, textRankingDefault, "DocumentIndex");
-        ReferenceOrder order = new ReferenceOrder(query.ranking, query.targetlang);
+        ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
         RankingProcess rankedCache = new RankingProcess(query, order, SearchEvent.max_results_preparation);
         rankedCache.start();
         

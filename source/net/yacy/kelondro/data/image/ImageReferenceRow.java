@@ -29,6 +29,7 @@ package net.yacy.kelondro.data.image;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
@@ -163,7 +164,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
                         this.entry = urlEntryRow.newEntry();
                         final int mddlm = MicroDate.microDateDays(lastmodified);
                         final int mddct = MicroDate.microDateDays(updatetime);
-                        this.entry.setCol(col_urlhash, urlHash, null);
+                        this.entry.setCol(col_urlhash, urlHash);
                         this.entry.setCol(col_lastModified, mddlm);
                         this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
                         this.entry.setCol(col_doctype, new byte[]{(byte) doctype});
@@ -175,7 +176,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
     
     public ImageReferenceRow(final String urlHash, final String code) {
         // the code is the external form of the row minus the leading urlHash entry
-        this.entry = urlEntryRow.newEntry((urlHash + code).getBytes());
+        this.entry = urlEntryRow.newEntry(UTF8.getBytes((urlHash + code)));
     }
     
     public ImageReferenceRow(final String external) {

@@ -28,9 +28,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Properties;
+
+import net.yacy.cora.document.UTF8;
 
 public final class CharBuffer extends Writer {
     
@@ -271,16 +272,8 @@ public final class CharBuffer extends Writer {
         return tmp;
     }
     
-    public byte[] getBytes(String charset) throws UnsupportedEncodingException {
-        return new String(buffer, offset, length).getBytes(charset);
-    }
-    
     public byte[] getBytes() {
-        try {
-            return getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return null;
-        }
+        return UTF8.getBytes(new String(buffer, offset, length));
     }
 
     public CharBuffer trim(final int start) {

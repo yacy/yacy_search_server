@@ -136,15 +136,15 @@ public class Surftips {
                 row = surftips.get(urlhash);
                 if (row == null) continue;
                 
-                url = row.getColString(0, null);
+                url = row.getColString(0);
                 try{
                 	if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new DigestURI(url)))
                 		continue;
                 }catch(final MalformedURLException e){continue;};
-                title = row.getColString(1,"UTF-8");
-                description = row.getColString(2,"UTF-8");
+                title = row.getColString(1);
+                description = row.getColString(2);
                 if ((url == null) || (title == null) || (description == null)) continue;
-                refid = row.getColString(3, null);
+                refid = row.getColString(3);
                 voted = (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
                 		(sb.peers.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 prop.put("surftips_results_" + i + "_authorized", (authenticated) ? "1" : "0");

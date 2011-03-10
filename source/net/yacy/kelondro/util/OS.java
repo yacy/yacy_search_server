@@ -33,6 +33,7 @@ import java.util.Vector;
 
 import de.anomic.server.serverCore;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 
 
@@ -149,7 +150,7 @@ public final class OS {
 	}
 
 	public static void deployScript(final File scriptFile, final String theScript) throws IOException {
-		FileUtils.copy(theScript.getBytes(), scriptFile);
+		FileUtils.copy(UTF8.getBytes(theScript), scriptFile);
 		if(!isWindows){ // set executable
 			try {
 				Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();

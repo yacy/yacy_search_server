@@ -400,7 +400,7 @@ public class dbtest {
                     Row.Entry row;
                     while (i.hasNext()) {
                         row = i.next();
-                        for (int j = 0; j < row.columns(); j++) System.out.print(row.getColString(j, null) + ",");
+                        for (int j = 0; j < row.columns(); j++) System.out.print(row.getColString(j) + ",");
                         System.out.println();
                     }
                 }

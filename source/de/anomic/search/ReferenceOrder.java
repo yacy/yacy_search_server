@@ -45,6 +45,7 @@ import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.util.ByteBuffer;
 
 
 public class ReferenceOrder {
@@ -55,9 +56,9 @@ public class ReferenceOrder {
     private       WordReferenceVars min, max;
     private final DynamicScore<String> doms; // collected for "authority" heuristic 
     private final RankingProfile ranking;
-    private final String language;
+    private final byte[] language;
     
-    public ReferenceOrder(final RankingProfile profile, String language) {
+    public ReferenceOrder(final RankingProfile profile, byte[] language) {
         this.min = null;
         this.max = null;
         this.ranking = profile;
@@ -234,7 +235,7 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio        : 0)
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0)
-           + ((patchUK(t.language).equals(this.language))  ? 255 << ranking.coeff_language           : 0)
+           + ((ByteBuffer.equals(t.language, this.language)) ? 255 << ranking.coeff_language           : 0)
            + ((DigestURI.probablyRootURL(t.metadataHash())) ?  15 << ranking.coeff_urllength          : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
@@ -242,8 +243,4 @@ public class ReferenceOrder {
         return r; // the higher the number the better the ranking.
     }
 
-    private static final String patchUK(String l) {
-        // this is to patch a bad language name setting that was used in 0.60 and before
-        if (l == null || l.equals("uk")) return "en"; else return l;
-    }
 }

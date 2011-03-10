@@ -137,7 +137,7 @@ public class Relations {
     }
     
     public String putRelation(final String name, final String key, final String value) throws IOException, RowSpaceExceededException {
-        final byte[] r = putRelation(name, key.getBytes(), value.getBytes());
+        final byte[] r = putRelation(name, UTF8.getBytes(key), UTF8.getBytes(value));
         if (r == null) return null;
         return UTF8.String(r);
     }
@@ -156,7 +156,7 @@ public class Relations {
     }
     
     public String getRelation(final String name, final String key) throws IOException, RowSpaceExceededException {
-        final byte[] r = getRelation(name, key.getBytes());
+        final byte[] r = getRelation(name, UTF8.getBytes(key));
         if (r == null) return null;
         return UTF8.String(r);
     }

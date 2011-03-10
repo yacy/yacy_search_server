@@ -140,10 +140,10 @@ public class Tables {
     }
     
     private byte[] ukey(String tablename) throws IOException, RowSpaceExceededException {
-        Row row = select(system_table_pkcounter, tablename.getBytes());
+        Row row = select(system_table_pkcounter, UTF8.getBytes(tablename));
         if (row == null) {
             // table counter entry in pkcounter table does not exist: make a new table entry
-            row = new Row(tablename.getBytes(), system_table_pkcounter_counterName, int2key(0).getBytes());
+            row = new Row(UTF8.getBytes(tablename), system_table_pkcounter_counterName, UTF8.getBytes(int2key(0)));
             update(system_table_pkcounter, row);
         }
         byte[] pk = row.get(system_table_pkcounter_counterName);
@@ -154,7 +154,7 @@ public class Tables {
             pki = (int) (ByteArray.parseDecimal(pk) + 1);
         }
         while (true) {
-            pk = int2key(pki).getBytes();
+            pk = UTF8.getBytes(int2key(pki));
             if (!has(tablename, pk)) break;
             pki++;
         }
@@ -181,7 +181,7 @@ public class Tables {
         byte[] uk = ukey(tablename);
         update(tablename, uk, map);
         BEncodedHeap heap = getHeap(system_table_pkcounter);
-        heap.insert(tablename.getBytes(), system_table_pkcounter_counterName, uk);
+        heap.insert(UTF8.getBytes(tablename), system_table_pkcounter_counterName, uk);
         return uk;
     }
 
@@ -400,19 +400,19 @@ public class Tables {
         }
         
         public void put(String colname, String value) {
-            super.put(colname, value.getBytes());
+            super.put(colname, UTF8.getBytes(value));
         }
         
         public void put(String colname, int value) {
-            super.put(colname, Integer.toString(value).getBytes());
+            super.put(colname, UTF8.getBytes(Integer.toString(value)));
         }
         
         public void put(String colname, long value) {
-            super.put(colname, Long.toString(value).getBytes());
+            super.put(colname, UTF8.getBytes(Long.toString(value)));
         }
         
         public void put(String colname, Date value) {
-            super.put(colname, my_SHORT_MILSEC_FORMATTER.format(value).getBytes());
+            super.put(colname, UTF8.getBytes(my_SHORT_MILSEC_FORMATTER.format(value)));
         }
         
         public byte[] get(String colname, byte[] dflt) {

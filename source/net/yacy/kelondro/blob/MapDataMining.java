@@ -312,7 +312,7 @@ public class MapDataMining extends MapHeap {
         public byte[] next() {
             final String r = s.next();
             if (r == null) return null;
-            return r.getBytes();
+            return UTF8.getBytes(r);
         }
 
         public void remove() {

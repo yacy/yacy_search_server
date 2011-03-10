@@ -26,7 +26,6 @@
 
 package net.yacy.kelondro.data.meta;
 
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
@@ -145,21 +144,13 @@ public class URIMetadataRow implements URIMetadata {
         encodeDate(col_mod, mod);
         encodeDate(col_load, load);
         encodeDate(col_fresh, fresh);
-        try {
-			this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			this.entry.setCol(col_referrer, (referrer == null) ? null : referrer.getBytes());
-		}
+        this.entry.setCol(col_referrer, (referrer == null) ? null : UTF8.getBytes(referrer));
         this.entry.setCol(col_md5, md5);
         this.entry.setCol(col_size, size);
         this.entry.setCol(col_wc, wc);
         this.entry.setCol(col_dt, new byte[]{(byte) dt});
         this.entry.setCol(col_flags, flags.bytes());
-        try {
-			this.entry.setCol(col_lang, lang.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			this.entry.setCol(col_lang, lang.getBytes());
-		}
+        this.entry.setCol(col_lang, UTF8.getBytes(lang));
         this.entry.setCol(col_llocal, llocal);
         this.entry.setCol(col_lother, lother);
         this.entry.setCol(col_limage, limage);
@@ -195,11 +186,7 @@ public class URIMetadataRow implements URIMetadata {
         s.append(dc_creator).append(10);
         s.append(dc_subject).append(10);
         s.append(dc_publisher).append(10);
-        try {
-			return s.toString().getBytes("UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			return s.toString().getBytes();
-		}
+		return UTF8.getBytes(s.toString());
     }
     
     public URIMetadataRow(final Row.Entry entry, final WordReferenceVars searchedWord, final long ranking) {
@@ -216,7 +203,7 @@ public class URIMetadataRow implements URIMetadata {
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         DigestURI url;
         try {
-            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), prop.getProperty("hash").getBytes());
+            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), UTF8.getBytes(prop.getProperty("hash")));
         } catch (final MalformedURLException e) {
             url = null;
         }
@@ -247,11 +234,7 @@ public class URIMetadataRow implements URIMetadata {
         } catch (final ParseException e) {
             encodeDate(col_fresh, new Date());
         }
-        try {
-			this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e1) {
-			this.entry.setCol(col_referrer, prop.getProperty("referrer", "").getBytes());
-		}
+        this.entry.setCol(col_referrer, UTF8.getBytes(prop.getProperty("referrer", "")));
         this.entry.setCol(col_md5, Digest.decodeHex(prop.getProperty("md5", "")));
         this.entry.setCol(col_size, Integer.parseInt(prop.getProperty("size", "0")));
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
@@ -259,11 +242,7 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_dt, dt.length() > 0 ? new byte[]{(byte) dt.charAt(0)} : new byte[]{(byte) 't'});
         final String flags = prop.getProperty("flags", "AAAAAA");
         this.entry.setCol(col_flags, (flags.length() > 6) ? QueryParams.empty_constraint.bytes() : (new Bitfield(4, flags)).bytes());
-        try {
-			this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes());
-		}
+        this.entry.setCol(col_lang, UTF8.getBytes(prop.getProperty("lang", "uk")));
         this.entry.setCol(col_llocal, Integer.parseInt(prop.getProperty("llocal", "0")));
         this.entry.setCol(col_lother, Integer.parseInt(prop.getProperty("lother", "0")));
         this.entry.setCol(col_limage, Integer.parseInt(prop.getProperty("limage", "0")));
@@ -431,7 +410,7 @@ public class URIMetadataRow implements URIMetadata {
     }
 
     public String language() {
-        return this.entry.getColString(col_lang, null);
+        return this.entry.getColString(col_lang);
     }
 
     public int size() {
@@ -511,7 +490,7 @@ public class URIMetadataRow implements URIMetadata {
 
     public Request toBalancerEntry(final String initiatorHash) {
         return new Request(
-                initiatorHash.getBytes(), 
+                UTF8.getBytes(initiatorHash), 
                 metadata().url(), 
                 referrerHash(), 
                 metadata().dc_title(),
