@@ -73,7 +73,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
     private final Row.Entry entry;
     
     public CitationReferenceRow(
-            final String   urlHash,
+            final byte[]   urlHash,
             final long     lastmodified,  // last-modified time of the document where word appears
             final long     updatetime,    // update time
             final int      posintext,     // occurrence of url; counts the url
@@ -83,7 +83,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
             final int      urlComps,      // number of path components
             final byte     typeofurl      // outlinks to same domain
     ) {
-        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
+        assert (urlHash.length == 12) : "urlhash = " + UTF8.String(urlHash);
         this.entry = citationRow.newEntry();
         final int mddlm = MicroDate.microDateDays(lastmodified);
         final int mddct = MicroDate.microDateDays(updatetime);

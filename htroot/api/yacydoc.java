@@ -102,7 +102,7 @@ public class yacydoc {
         prop.putXML("dc_date", entry.moddate().toString());
         prop.putXML("dc_type", String.valueOf(entry.doctype()));
         prop.putXML("dc_identifier", metadata.url().toNormalform(false, true));
-        prop.putXML("dc_language", entry.language());
+        prop.putXML("dc_language", UTF8.String(entry.language()));
 
         prop.put("yacy_urlhash", metadata.url().hash());
         prop.putXML("yacy_loaddate", entry.loaddate().toString());

@@ -68,7 +68,7 @@ public class URIMetadataRow implements URIMetadata {
         "Cardinal wc-3 {b256}, " +      // size of file by number of words; for video and audio: seconds
         "byte[] dt-1, " +               // doctype, taken from extension or any other heuristic
         "Bitfield flags-4, " +          // flags; any stuff (see Word-Entity definition)
-        "String lang-2, " +             // language
+        "byte[] lang-2, " +             // language
         "Cardinal llocal-2 {b256}, " +  // # of outlinks to same domain; for video and image: width 
         "Cardinal lother-2 {b256}, " +  // # of outlinks to outside domain; for video and image: height
         "Cardinal limage-2 {b256}, " +  // # of embedded image links
@@ -130,7 +130,7 @@ public class URIMetadataRow implements URIMetadata {
             final int wc,
             final char dt,
             final Bitfield flags,
-            final String lang,
+            final byte[] lang,
             final int llocal,
             final int lother,
             final int laudio,
@@ -150,7 +150,7 @@ public class URIMetadataRow implements URIMetadata {
         this.entry.setCol(col_wc, wc);
         this.entry.setCol(col_dt, new byte[]{(byte) dt});
         this.entry.setCol(col_flags, flags.bytes());
-        this.entry.setCol(col_lang, UTF8.getBytes(lang));
+        this.entry.setCol(col_lang, lang);
         this.entry.setCol(col_llocal, llocal);
         this.entry.setCol(col_lother, lother);
         this.entry.setCol(col_limage, limage);
@@ -409,8 +409,8 @@ public class URIMetadataRow implements URIMetadata {
         return (char) entry.getColByte(col_dt);
     }
 
-    public String language() {
-        return this.entry.getColString(col_lang);
+    public byte[] language() {
+        return this.entry.getColBytes(col_lang, true);
     }
 
     public int size() {

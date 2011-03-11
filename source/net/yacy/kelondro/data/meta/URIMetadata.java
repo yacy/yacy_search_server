@@ -54,7 +54,7 @@ public interface URIMetadata {
 
     public char doctype();
 
-    public String language();
+    public byte[] language();
 
     public int size();
 

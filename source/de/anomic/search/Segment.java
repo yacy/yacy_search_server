@@ -218,13 +218,13 @@ public class Segment {
         Map.Entry<String, Word> wentry;
         String word;
         int len = (document == null) ? urlLength : document.dc_title().length();
-        WordReferenceRow ientry = new WordReferenceRow(UTF8.String(url.hash()),
+        WordReferenceRow ientry = new WordReferenceRow(url.hash(),
                                 urlLength, urlComps, len,
                                 condenser.RESULT_NUMB_WORDS,
                                 condenser.RESULT_NUMB_SENTENCES,
                                 urlModified.getTime(),
                                 System.currentTimeMillis(),
-                                language,
+                                UTF8.getBytes(language),
                                 doctype,
                                 outlinksSame, outlinksOther);
         Word wprop;
@@ -247,10 +247,10 @@ public class Segment {
                 try {
                     container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
                     container.add(ientry);
+                    rankingProcess.add(container, true, sourceName, -1);
                 } catch (RowSpaceExceededException e) {
                     continue;
                 }
-                rankingProcess.add(container, true, sourceName, -1);
             }
         }
         if (rankingProcess != null) rankingProcess.oneFeederTerminated();
@@ -339,7 +339,7 @@ public class Segment {
                 condenser.RESULT_NUMB_WORDS,               // word count
                 Response.docType(document.dc_format()), // doctype
                 condenser.RESULT_FLAGS,                    // flags
-                language,                                  // language
+                UTF8.getBytes(language),                   // language
                 document.inboundLinks(),                   // inbound links
                 document.outboundLinks(),                  // outbound links
                 document.getAudiolinks().size(),           // laudio

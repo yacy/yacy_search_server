@@ -147,7 +147,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
         this.entry.setCol(col_reserve2, 0);
     }
     
-    public ImageReferenceRow(final String  urlHash,
+    public ImageReferenceRow(final byte[]  urlHash,
                             final int      urlLength,     // byte-length of complete URL
                             final int      urlComps,      // number of path components
                             final int      titleLength,   // length of description/length (longer are better?)
@@ -160,7 +160,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
                             final int      outlinksSame,  // outlinks to same domain
                             final int      outlinksOther  // outlinks to other domain
                     ) {
-                        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
+                        assert (urlHash.length == 12) : "urlhash = " + UTF8.String(urlHash);
                         this.entry = urlEntryRow.newEntry();
                         final int mddlm = MicroDate.microDateDays(lastmodified);
                         final int mddct = MicroDate.microDateDays(updatetime);

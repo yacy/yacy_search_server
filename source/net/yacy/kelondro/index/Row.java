@@ -478,10 +478,8 @@ public final class Row {
         }
         
         public final String getColString(final int column) {
-            return getColString(colstart[column], row[column].cellwidth);
-        }
-        
-        private final String getColString(final int clstrt, int length) {
+            final int clstrt = colstart[column];
+            int length = row[column].cellwidth;
             if (rowinstance[offset + clstrt] == 0) return null;
             assert length <= rowinstance.length - offset - clstrt;
             if (length > rowinstance.length - offset - clstrt) length = rowinstance.length - offset - clstrt;

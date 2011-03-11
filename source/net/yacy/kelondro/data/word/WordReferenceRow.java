@@ -162,7 +162,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_reserve2, 0);
     }
     
-    public WordReferenceRow(final String  urlHash,
+    public WordReferenceRow(final byte[]   urlHash,
                             final int      urlLength,     // byte-length of complete URL
                             final int      urlComps,      // number of path components
                             final int      titleLength,   // length of description/length (longer are better?)
@@ -170,12 +170,12 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                             final int      phrasecount,   // total number of phrases
                             final long     lastmodified,  // last-modified time of the document where word appears
                             final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-                            final String   language,      // (guessed) language of document
+                            final byte[]   language,      // (guessed) language of document
                             final char     doctype,       // type of document
                             final int      outlinksSame,  // outlinks to same domain
                             final int      outlinksOther  // outlinks to other domain
                     ) {
-                        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
+                        assert (urlHash.length == 12) : "urlhash = " + UTF8.String(urlHash);
                         this.entry = urlEntryRow.newEntry();
                         final int mddlm = MicroDate.microDateDays(lastmodified);
                         final int mddct = MicroDate.microDateDays(updatetime);
@@ -186,7 +186,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_wordsInText, wordcount);
                         this.entry.setCol(col_phrasesInText, phrasecount);
                         this.entry.setCol(col_doctype, new byte[]{(byte) doctype});
-                        this.entry.setCol(col_language, ((language == null) || (language.length() != urlEntryRow.width(col_language))) ? "uk" : language);
+                        this.entry.setCol(col_language, ((language == null) || (language.length != urlEntryRow.width(col_language))) ? WordReferenceVars.default_language : language);
                         this.entry.setCol(col_llocal, outlinksSame);
                         this.entry.setCol(col_lother, outlinksOther);
                         this.entry.setCol(col_urlLength, urlLength);
@@ -202,11 +202,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_posintext, word.posInText);
                         this.entry.setCol(col_posinphrase, word.posInPhrase);
                         this.entry.setCol(col_posofphrase, word.numOfPhrase);
-    }
-    
-    public WordReferenceRow(final String urlHash, final String code) {
-        // the code is the external form of the row minus the leading urlHash entry
-        this.entry = urlEntryRow.newEntry(UTF8.getBytes((urlHash + code)));
     }
     
     public WordReferenceRow(final String external) {

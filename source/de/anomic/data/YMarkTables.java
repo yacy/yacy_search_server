@@ -429,7 +429,7 @@ public class YMarkTables {
         	metadata.put(METADATA.SNIPPET, String.valueOf(urlEntry.snippet()));
         	metadata.put(METADATA.WORDCOUNT, String.valueOf(urlEntry.wordCount()));
         	metadata.put(METADATA.MIMETYPE, String.valueOf(urlEntry.doctype()));
-        	metadata.put(METADATA.LANGUAGE, urlEntry.language());
+        	metadata.put(METADATA.LANGUAGE, UTF8.String(urlEntry.language()));
         	
         	final URIMetadataRow.Components meta = urlEntry.metadata();
         	if (meta != null) {	        	
