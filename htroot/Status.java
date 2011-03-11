@@ -309,8 +309,8 @@ public class Status {
 
         // connection information
         final serverCore httpd = (serverCore) sb.getThread("10_httpd");
-        prop.putNum("connectionsActive", httpd.getJobCount());
-        prop.putNum("connectionsMax", httpd.getMaxSessionCount());
+        //prop.putNum("connectionsActive", httpd.getJobCount());
+        //prop.putNum("connectionsMax", httpd.getMaxSessionCount());
         
         // Queue information
         final int loaderJobCount = sb.crawlQueues.workerSize();

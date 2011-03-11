@@ -644,7 +644,7 @@
       <jvmarg line="-Xdebug"/>
       <jvmarg line="-Xnoagent"/>
       <jvmarg line="-Djava.compiler=none"/>
-      <jvmarg line="-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=n"/>
+      <jvmarg line="-Xrunjdwp:transport=dt_socket,address=8000,server=y,suspend=y"/>
     </java>
   </target>
 

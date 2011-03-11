@@ -6,20 +6,16 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 public class HttpServer {
 	
-	public static void initYaCyServer() {
-		// create directories
-	}
+	private Server server = new Server();
 	
 	/**
 	 * @param port TCP Port to listen for http requests
-	 * @throws Exception 
 	 */
-	public static void runHttpServer(int port) throws Exception {
-        Server server = new Server();
+	public HttpServer(int port) {
+        server = new Server();
         SelectChannelConnector connector = new SelectChannelConnector();
         connector.setPort(port);
         //connector.setThreadPool(new QueuedThreadPool(20));
@@ -29,21 +25,34 @@ public class HttpServer {
         resource_handler.setDirectoriesListed(true);
         resource_handler.setWelcomeFiles(new String[]{ "index.html" });
  
-        resource_handler.setResourceBase("DATA/HTDOCS");
+        resource_handler.setResourceBase("htroot/");
         
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[] { new TemplateHandler(), resource_handler, new DefaultHandler() });
         server.setHandler(handlers);
-        
+	}
+	
+	public void start() throws Exception {
         server.start();
+	}
+
+	public void initYaCyServer() {
+		// TODO: delete?
+		// create directories
+	}
+	
+	public void stop() throws Exception {
+		server.stop();
         server.join();
-    }
+	}
 
 	/**
 	 * just for testing and debugging
 	 */
 	public static void main(String[] args) throws Exception {
-		runHttpServer(8080);
+		HttpServer server = new HttpServer(8090);
+		server.start();
+		server.stop();
 	}
 
 }

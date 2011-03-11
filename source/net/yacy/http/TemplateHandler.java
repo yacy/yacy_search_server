@@ -1,28 +1,49 @@
 package net.yacy.http;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.visualization.RasterPlotter;
 
+import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import de.anomic.data.MimeTable;
+import de.anomic.http.server.HTTPDemon;
+import de.anomic.http.server.TemplateEngine;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverClassLoader;
+import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
+import de.anomic.yacy.yacyBuildProperties;
+import de.anomic.yacy.yacySeed;
 
 public class TemplateHandler extends AbstractHandler {
 
@@ -35,6 +56,8 @@ public class TemplateHandler extends AbstractHandler {
     boolean useTemplateCache = false;
     private ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>> templateCache = null;
     private ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
+    
+    private MimeTypes mimeTypes = new MimeTypes();
 
 	@Override
 	protected void doStart() throws Exception {
@@ -119,22 +142,54 @@ public class TemplateHandler extends AbstractHandler {
     }
     
     
-    private final Object invokeServlet(final File targetClass, final HttpServletRequest request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, null}); // add switchboard
+    private final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        return rewriteMethod(targetClass).invoke(null, new Object[] {request, args, Switchboard.getSwitchboard()}); // add switchboard
+    }
+    
+    private RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
+    	RequestHeader legacyRequestHeader = new RequestHeader();
+		@SuppressWarnings("unchecked")
+		Enumeration<String> headers = request.getHeaderNames();
+    	while (headers.hasMoreElements()) {
+        	String headerName = headers.nextElement();
+    		@SuppressWarnings("unchecked")
+			Enumeration<String> header = request.getHeaders(headerName);
+    		while(header.hasMoreElements())
+    			legacyRequestHeader.add(headerName, header.nextElement());
+    	}
+    	
+    	legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
+    	legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
+    	legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
+    	
+    	return legacyRequestHeader;
     }
 
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
+    	Switchboard sb = Switchboard.getSwitchboard();
+
+		System.err.println("Page: " + target);
 		String localeSelection = "default";
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(new File(htDefaultPath, target));
+        String targetExt = target.substring(target.lastIndexOf('.') + 1, target.length());
         
         if ((targetClass != null)) {
-        	serverObjects args = new serverObjects(request.getParameterMap());
+        	@SuppressWarnings("unchecked")
+			serverObjects args = new serverObjects();
+        	@SuppressWarnings("unchecked")
+			Enumeration<String> argNames = request.getParameterNames();
+        	while (argNames.hasMoreElements()) {
+        		String argName = argNames.nextElement();
+        		args.put(argName, request.getParameter(argName));
+        	}
+        	RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
+        	
             Object tmp;
 			try {
-				tmp = invokeServlet(targetClass, request, args);
+				tmp = invokeServlet(targetClass, legacyRequestHeader, args);
 			} catch (InvocationTargetException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -147,8 +202,52 @@ public class TemplateHandler extends AbstractHandler {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 				throw new ServletException();
-
 			}
+			
+			if (tmp instanceof RasterPlotter) {
+                final RasterPlotter yp = (RasterPlotter) tmp;
+                // send an image to client
+                final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+                final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), "png");
+                
+                response.setContentType(mimeType);
+                response.setContentLength(result.length());
+                response.setStatus(HttpServletResponse.SC_OK);
+                
+                result.writeTo(response.getOutputStream());
+                
+                // we handled this request, break out of handler chain
+        		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+        		base_request.setHandled(true);
+
+        		return;
+            }
+			
+            if (tmp instanceof Image) {
+                final Image i = (Image) tmp;
+                final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+
+                // generate an byte array from the generated image
+                int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
+                int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
+                final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
+                final ByteBuffer result = RasterPlotter.exportImage(bi, targetExt);
+                
+                response.setContentType(targetExt);
+                response.setContentLength(result.length());
+                response.setStatus(HttpServletResponse.SC_OK);
+                
+                result.writeTo(response.getOutputStream());
+                
+                // we handled this request, break out of handler chain
+        		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+        		base_request.setHandled(true);
+
+        		return;
+            }
+
+			
             servletProperties templatePatterns = null;
             if (tmp == null) {
                 // if no args given, then tp will be an empty Hashtable object (not null)
@@ -158,13 +257,41 @@ public class TemplateHandler extends AbstractHandler {
             } else {
                 templatePatterns = new servletProperties((serverObjects) tmp);
             }
+            // add the application version, the uptime and the client name to every rewrite table
+            templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
+            templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
+            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
+            templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
+            templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
+            yacySeed myPeer = sb.peers.mySeed();
+            templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1); 
+            templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
             
-            response.setContentType("text/html");
-    		response.setStatus(HttpServletResponse.SC_OK);
-    		response.getWriter().println("<h1>Hello OneHandler</h1>");
-    		
-    		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-    		base_request.setHandled(true);
+            if(targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
+            	String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+            	
+                InputStream fis = null;
+                long fileSize = targetFile.length();
+
+            	if (fileSize <= Math.min(4 * 1024 * 1204, MemoryControl.available() / 100)) {
+                    // read file completely into ram, avoid that too many files are open at the same time
+                    fis = new ByteArrayInputStream(FileUtils.read(targetFile));
+                } else {
+                    fis = new BufferedInputStream(new FileInputStream(targetFile));
+                }
+            	
+            	// set response header
+                response.setContentType(mimeType);
+                response.setStatus(HttpServletResponse.SC_OK);
+                
+                // apply templates
+                TemplateEngine.writeTemplate(fis, response.getOutputStream(), templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                fis.close();
+                
+                // we handled this request, break out of handler chain
+        		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+        		base_request.setHandled(true);
+            }
         }
 	}
 

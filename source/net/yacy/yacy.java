@@ -55,6 +55,7 @@ import net.yacy.cora.storage.DynamicScore;
 import net.yacy.cora.storage.ScoreCluster;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
+import net.yacy.http.HttpServer;
 import net.yacy.kelondro.blob.MapDataMining;
 //import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -290,21 +291,24 @@ public final class yacy {
             HTTPClient.setDefaultUserAgent(userAgent);
             
             // start main threads
-            final String port = sb.getConfig("port", "8090");
+            final long port = sb.getConfigLong("port", 8090);
             try {
-                final HTTPDemon protocolHandler = new HTTPDemon(sb);
-                final serverCore server = new serverCore(
-                        timeout /*control socket timeout in milliseconds*/,
-                        true /* block attacks (wrong protocol) */,
-                        protocolHandler /*command class*/,
-                        sb,
-                        30000 /*command max length incl. GET args*/);
-                server.setName("httpd:"+port);
-                server.setPriority(Thread.MAX_PRIORITY);
-                server.setObeyIntermission(false);
+            	// start jetty http server
+            	HttpServer httpServer = new HttpServer((int)port);
+            	httpServer.start();
+                //final HTTPDemon protocolHandler = new HTTPDemon(sb);
+                //final serverCore server = new serverCore(
+                //        timeout /*control socket timeout in milliseconds*/,
+                //        true /* block attacks (wrong protocol) */,
+                //        protocolHandler /*command class*/,
+                //        sb,
+                //        30000 /*command max length incl. GET args*/);
+                //server.setName("httpd:"+port);
+                //server.setPriority(Thread.MAX_PRIORITY);
+                //server.setObeyIntermission(false);
                 
                 // start the server
-                sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
+                //sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
                 //server.start();
 
                 // open the browser window
@@ -313,7 +317,7 @@ public final class yacy {
                     final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
                     //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
-                    Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage);
+                    Browser.openBrowser((false?"https":"http") + "://localhost:" + port + "/" + browserPopUpPage);
                 }
                 
                 // unlock yacyTray browser popup
@@ -387,9 +391,10 @@ public final class yacy {
                 // shut down
                 if (RowCollection.sortingthreadexecutor != null) RowCollection.sortingthreadexecutor.shutdown();
                 Log.logConfig("SHUTDOWN", "caught termination signal");
-                server.terminate(false);
-                server.interrupt();
-                server.close();
+                //server.terminate(false);
+                //server.interrupt();
+                //server.close();
+                httpServer.stop();
                 /*
                 if (server.isAlive()) try {
                     // TODO only send request, don't read response (cause server is already down resulting in error)
@@ -404,11 +409,11 @@ public final class yacy {
 //                MultiThreadedHttpConnectionManager.shutdownAll();
                 
                 // idle until the processes are down
-                if (server.isAlive()) {
+                //if (server.isAlive()) {
                     //Thread.sleep(2000); // wait a while
-                    server.interrupt();
+                //    server.interrupt();
 //                    MultiThreadedHttpConnectionManager.shutdownAll();
-                }
+                //}
 //                MultiThreadedHttpConnectionManager.shutdownAll();
                 Log.logConfig("SHUTDOWN", "server has terminated");
                 sb.close();
