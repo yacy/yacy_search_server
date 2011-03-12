@@ -365,7 +365,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         try {
             fos = new FileOutputStream(f);
             for (java.util.Map.Entry<String, String> entry: entrySet()) {
-                fos.write(UTF8.getBytes((entry.getKey() + "=" + entry.getValue() + "\r\n")));
+                fos.write(UTF8.getBytes(entry.getKey() + "=" + entry.getValue() + "\r\n"));
             }
             fos.flush();
         } finally {

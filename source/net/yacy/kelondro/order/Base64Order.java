@@ -229,7 +229,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         if (rfc1113compliant) while (out.length() % 4 > 0) out.append("=");
         // return result
         //assert lene == out.length() : "lene = " + lene + ", out.len = " + out.length();
-        return new String(out);
+        return out.toString();
     }
     
     public final byte[] encodeSubstring(final byte[] in, int sublen) {

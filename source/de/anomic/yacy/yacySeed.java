@@ -47,6 +47,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -174,6 +175,10 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
     private final ConcurrentHashMap<String, String> dna;
     private String alternativeIP = null;
+    private final long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
+
+    // use our own formatter to prevent concurrency locks with other processes
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
 
     public yacySeed(final String theHash, final ConcurrentHashMap<String, String> theDna) {
         // create a seed with a pre-defined hash map
@@ -183,11 +188,15 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         final String flags = this.dna.get(yacySeed.FLAGS);
         if ((flags == null) || (flags.length() != 4)) { this.dna.put(yacySeed.FLAGS, yacySeed.FLAGSZERO); }
         this.dna.put(yacySeed.NAME, checkPeerName(get(yacySeed.NAME, "&empty;")));
+        long b;
+        try {
+            b = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
+        } catch (ParseException e) {
+            b = System.currentTimeMillis();
+        }
+        this.birthdate = b;
     }
     
-    // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
-
     private yacySeed(final String theHash) {
         this.dna = new ConcurrentHashMap<String, String>();
 
@@ -195,8 +204,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // at first startup -
         this.hash = theHash; // the hash key of the peer - very important. should be static somehow, even after restart
         this.dna.put(yacySeed.NAME, defaultPeerName());
-        this.dna.put(yacySeed.BDATE, "&empty;");
-        this.dna.put(yacySeed.UTC, "+0000");
+        
         // later during operation -
         this.dna.put(yacySeed.ISPEED, yacySeed.ZERO);
         this.dna.put(yacySeed.RSPEED, yacySeed.ZERO);
@@ -212,11 +220,9 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // settings that is created during the 'hello' phase - in first contact
         this.dna.put(yacySeed.IP, "");                 // 123.234.345.456
         this.dna.put(yacySeed.PORT, "&empty;");
-        this.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // virgin/junior/senior/principal
         this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(yacySeed.LASTSEEN, my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
 
         // settings that are needed to organize the seed round-trip
@@ -231,6 +237,14 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         this.dna.put(yacySeed.INDEX_IN, yacySeed.ZERO);  // received index
         this.dna.put(yacySeed.URL_OUT, yacySeed.ZERO);   // send URLs
         this.dna.put(yacySeed.URL_IN, yacySeed.ZERO);    // received URLs
+        
+        // default first filling
+        this.dna.put(yacySeed.BDATE, my_SHORT_SECOND_FORMATTER.format());
+        this.dna.put(yacySeed.LASTSEEN, this.dna.get(yacySeed.BDATE)); // just as initial setting
+        this.dna.put(yacySeed.UTC, GenericFormatter.UTCDiffString());
+        this.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // virgin/junior/senior/principal
+        
+        this.birthdate = System.currentTimeMillis();
     }
     
     /**
@@ -531,14 +545,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
 
     /** @return the age of the seed in number of days */
     public final int getAge() {
-        try {
-            final long t = my_SHORT_SECOND_FORMATTER.parse(get(yacySeed.BDATE, "20040101000000")).getTime();
-            return (int) ((System.currentTimeMillis() - (t /*- getUTCDiff() + DateFormatter.UTCDiff()*/)) / 1000 / 60 / 60 / 24);
-        } catch (final java.text.ParseException e) {
-            return -1;
-        } catch (final java.lang.NumberFormatException e) {
-            return -1;
-        }
+        return (int) Math.abs((System.currentTimeMillis() - birthdate) / 1000 / 60 / 60 / 24);
     }
 
     public void setPeerTags(final Set<String> keys) {
@@ -738,11 +745,6 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? defaultPeerName() : name);
         newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8090 : port));
-        newSeed.dna.put(yacySeed.BDATE, my_SHORT_SECOND_FORMATTER.format());
-        newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
-        newSeed.dna.put(yacySeed.UTC, GenericFormatter.UTCDiffString());
-        newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
-
         return newSeed;
     }
 

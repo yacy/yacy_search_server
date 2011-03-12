@@ -510,7 +510,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
     
     public int hashCode() {
-        return (int) Base64Order.enhancedCoder.decodeLong(UTF8.String(this.termHash).substring(0, 4));
+        return (int) Base64Order.enhancedCoder.decodeLong(this.termHash, 0, 4);
     }
     
 
