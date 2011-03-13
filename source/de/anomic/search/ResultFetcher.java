@@ -32,7 +32,7 @@ import java.util.List;
 
 
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.storage.StaticScore;
+import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
@@ -202,7 +202,7 @@ public class ResultFetcher {
 
     public long postRanking(
             final ResultEntry rentry,
-            final StaticScore<String> topwords) {
+            final ScoreMap<String> topwords) {
 
         long r = 0;
         

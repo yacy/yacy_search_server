@@ -35,8 +35,8 @@ import java.util.SortedMap;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.storage.DynamicScore;
-import net.yacy.cora.storage.ScoreCluster;
+import net.yacy.cora.storage.ConcurrentScoreMap;
+import net.yacy.cora.storage.ScoreMap;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -410,7 +410,7 @@ public class PeerSelection {
         if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
 
         // fill a score object
-        final DynamicScore<String> seedScore = new ScoreCluster<String>();
+        final ScoreMap<String> seedScore = new ConcurrentScoreMap<String>();
         yacySeed ys;
         long absage;
         final Iterator<yacySeed> s = seedDB.seedsConnected(true, false, null, (float) 0.0);

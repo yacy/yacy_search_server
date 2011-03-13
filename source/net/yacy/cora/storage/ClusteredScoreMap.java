@@ -26,7 +26,6 @@ package net.yacy.cora.storage;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -36,24 +35,15 @@ import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
 
-public final class ScoreCluster<E> implements DynamicScore<E> {
+public final class ClusteredScoreMap<E> implements ReversibleScoreMap<E> {
     
     protected final Map<E, Long> map; // a mapping from a reference to the cluster key
     protected final TreeMap<Long, E> pam; // a mapping from the cluster key to the reference
     private long gcount;
     private int encnt;
     
-    public ScoreCluster()  {
-        this(null);
-    }
-    
-    public ScoreCluster(Comparator<? super E> comparator)  {
-        if (comparator == null) {
-            //map = new HashMap<E, Long>();
-            map = new TreeMap<E, Long>(comparator);
-        } else {
-            map = new TreeMap<E, Long>(comparator);
-        }
+    public ClusteredScoreMap()  {
+        map = new TreeMap<E, Long>();
         pam = new TreeMap<Long, E>();
         gcount = 0;
         encnt = 0;
@@ -402,7 +392,7 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         }
         
         System.out.println("Test for Score: start");
-        final ScoreCluster<String> s = new ScoreCluster<String>();
+        final ClusteredScoreMap<String> s = new ClusteredScoreMap<String>();
         long c = 0;
 
         // create cluster
@@ -410,12 +400,10 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         final Random random = new Random(1234);
         int r;
         final int count = 20;
-        final int[] mem = new int[count];
         
-        for (int x = 0; x < 100; x++) {
+        for (int x = 0; x < 100000; x++) {
             for (int i = 0; i < count; i++) {
-                r = random.nextInt();
-                mem[i] = r;
+                r = Math.abs(random.nextInt(100));
                 s.inc("score#" + r, r);
                 c += r;
             }
@@ -423,14 +411,15 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
             // delete some
             int p;
             for (int i = 0; i < (count / 2); i++) {
-                p = (int) (random.nextFloat() * count);
-                if (s.containsKey("score#" + mem[p])) {
-                    System.out.println("delete score#" + mem[p]);
-                    s.delete("score#" + mem[p]);
-                    c -= mem[p];
+                p = Math.abs(random.nextInt(1000));
+                if (s.containsKey("score#" + p)) {
+                    //System.out.println("delete score#" + s.get("score#" + p));
+                    c -= s.delete("score#" + p);
                 }
             }
         }
+
+        System.out.println("finished create. time = " + (System.currentTimeMillis() - time));
         
         System.out.println("result:");
         Iterator<String> i = s.keys(true);
@@ -438,7 +427,6 @@ public final class ScoreCluster<E> implements DynamicScore<E> {
         i = s.keys(false);
         while (i.hasNext()) System.out.println("down: " + i.next());
 	
-        System.out.println("finished create. time = " + (System.currentTimeMillis() - time));
         System.out.println("total=" + s.totalCount() + ", elements=" + s.size() + ", redundant count=" + c);
     }
 }

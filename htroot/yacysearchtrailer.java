@@ -27,7 +27,7 @@
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.storage.StaticScore;
+import net.yacy.cora.storage.ScoreMap;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.util.EventTracker;
 
@@ -59,7 +59,7 @@ public class yacysearchtrailer {
         // compose search navigation
 
         // namespace navigators
-        StaticScore<String> namespaceNavigator = theSearch.getNamespaceNavigator();
+        ScoreMap<String> namespaceNavigator = theSearch.getNamespaceNavigator();
         String name;
         int count;
         Iterator<String> navigatorIterator;
@@ -86,7 +86,7 @@ public class yacysearchtrailer {
         }
         
         // host navigators
-        StaticScore<String> hostNavigator = theSearch.getHostNavigator();
+        ScoreMap<String> hostNavigator = theSearch.getHostNavigator();
         if (hostNavigator == null || hostNavigator.isEmpty()) {
             prop.put("nav-domains", 0);
         } else {
@@ -110,7 +110,7 @@ public class yacysearchtrailer {
         }
         
         // author navigators
-        StaticScore<String> authorNavigator = theSearch.getAuthorNavigator();
+        ScoreMap<String> authorNavigator = theSearch.getAuthorNavigator();
         if (authorNavigator == null || authorNavigator.isEmpty()) {
             prop.put("nav-authors", 0);
         } else {
@@ -136,7 +136,7 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        StaticScore<String> topicNavigator = theSearch.getTopicNavigator(MAX_TOPWORDS);
+        ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(MAX_TOPWORDS);
         if (topicNavigator == null || topicNavigator.isEmpty()) {
             prop.put("nav-topics", "0");
         } else {

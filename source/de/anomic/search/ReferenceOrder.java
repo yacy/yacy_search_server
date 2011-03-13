@@ -34,8 +34,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.storage.DynamicScore;
-import net.yacy.cora.storage.ScoreCluster;
+import net.yacy.cora.storage.ReversibleScoreMap;
+import net.yacy.cora.storage.ClusteredScoreMap;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -54,7 +54,7 @@ public class ReferenceOrder {
     
     private       int maxdomcount;
     private       WordReferenceVars min, max;
-    private final DynamicScore<String> doms; // collected for "authority" heuristic 
+    private final ReversibleScoreMap<String> doms; // collected for "authority" heuristic 
     private final RankingProfile ranking;
     private final byte[] language;
     
@@ -62,7 +62,7 @@ public class ReferenceOrder {
         this.min = null;
         this.max = null;
         this.ranking = profile;
-        this.doms = new ScoreCluster<String>();
+        this.doms = new ClusteredScoreMap<String>();
         this.maxdomcount = 0;
         this.language = language;
     }

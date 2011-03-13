@@ -1,5 +1,5 @@
 /**
- *  StaticScore
+ *  ReversibleScoreMap
  *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 14.10.2010 at http://yacy.net
  *
@@ -24,49 +24,10 @@
 
 package net.yacy.cora.storage;
 
-import java.util.Iterator;
+public interface ReversibleScoreMap<E> extends ScoreMap<E> {
 
-public interface StaticScore<E> {
-
-    public void clear();
-    
-    /**
-     * shrink the cluster to a demanded size
-     * @param maxsize
-     */
-    public void shrinkToMaxSize(int maxsize);
-    
-    /**
-     * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
-     * @param minScore
-     */
-    public void shrinkToMinScore(int minScore);
-    
-    public long totalCount();
-    
-    public int size();
-    
-    public boolean isEmpty();
-    
-    public void set(final E obj, final int newScore);
-    
-    public int delete(final E obj);
-
-    public boolean containsKey(final E obj);
-    
-    public int get(final E obj);
-    
     public int getMaxScore();
-
     public int getMinScore();
-
     public E getMaxKey();
-    
     public E getMinKey();
-    
-    @Override
-    public String toString();
-    
-    public Iterator<E> keys(final boolean up);
-    
 }

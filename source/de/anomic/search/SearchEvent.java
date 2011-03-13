@@ -36,7 +36,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.storage.StaticScore;
+import net.yacy.cora.storage.ScoreMap;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
@@ -311,20 +311,20 @@ public final class SearchEvent {
         return this.rankingProcess;
     }
 
-    public StaticScore<String> getNamespaceNavigator() {
+    public ScoreMap<String> getNamespaceNavigator() {
         return this.rankingProcess.getNamespaceNavigator();
     }
     
-    public StaticScore<String> getHostNavigator() {
+    public ScoreMap<String> getHostNavigator() {
         return this.rankingProcess.getHostNavigator();
     }
     
-    public StaticScore<String> getTopicNavigator(int count) {
+    public ScoreMap<String> getTopicNavigator(int count) {
         // returns a set of words that are computed as toplist
         return this.rankingProcess.getTopicNavigator(count);
     }
     
-    public StaticScore<String> getAuthorNavigator() {
+    public ScoreMap<String> getAuthorNavigator() {
         // returns a list of authors so far seen on result set
         return this.rankingProcess.getAuthorNavigator();
     }

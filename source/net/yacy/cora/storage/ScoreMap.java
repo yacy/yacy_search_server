@@ -24,260 +24,47 @@
 
 package net.yacy.cora.storage;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.TreeSet;
 
+public interface ScoreMap<E> {
 
-public class ScoreMap<E> implements DynamicScore<E> {
-
-    protected final Map<E, IntScore> map; // a mapping from a reference to the cluster key
-    private long gcount;
-    
-    public ScoreMap()  {
-        this(null);
-    }
-    
-    public ScoreMap(Comparator<? super E> comparator)  {
-        if (comparator == null) {
-            map = new HashMap<E, IntScore>();
-        } else {
-            map = new TreeMap<E, IntScore>(comparator);
-        }
-        gcount = 0;
-    }
-    
-    public synchronized void clear() {
-        map.clear();
-        gcount = 0;
-    }
+    public void clear();
     
     /**
      * shrink the cluster to a demanded size
      * @param maxsize
      */
-    public void shrinkToMaxSize(int maxsize) {
-        if (this.map.size() <= maxsize) return;
-        int minScore = getMinScore();
-        while (this.map.size() > maxsize) {
-            minScore++;
-            shrinkToMinScore(minScore);
-        }
-    }
+    public void shrinkToMaxSize(int maxsize);
     
     /**
      * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
      * @param minScore
      */
-    public void shrinkToMinScore(int minScore) {
-        synchronized (this) {
-            Iterator<Map.Entry<E, IntScore>> i = this.map.entrySet().iterator();
-            Map.Entry<E, IntScore> entry;
-            while (i.hasNext()) {
-                entry = i.next();
-                if (entry.getValue().intValue() < minScore) i.remove();
-            }
-        }
-    }
+    public void shrinkToMinScore(int minScore);
     
-    public synchronized long totalCount() {
-        return gcount;
-    }
+    public long totalCount();
     
-    public synchronized int size() {
-        return map.size();
-    }
+    public int size();
     
-    public synchronized boolean isEmpty() {
-        return map.isEmpty();
-    }
+    public boolean isEmpty();
     
-    public void inc(final E obj) {
-        if (obj == null) return;
-        synchronized (this) {
-            IntScore score = this.map.get(obj);
-            if (score == null) {
-                this.map.put(obj, IntScore.ONE);
-            } else {
-                score.inc();
-            }
-        }        
-        // increase overall counter
-        gcount++;
-    }
+    public void set(final E obj, final int newScore);
     
-    public void dec(final E obj) {
-        if (obj == null) return;
-        synchronized (this) {
-            IntScore score = this.map.get(obj);
-            if (score == null) {
-                this.map.put(obj, IntScore.valueOf(-1));
-            } else {
-                score.dec();
-            }
-        }        
-        // increase overall counter
-        gcount--;
-    }
-    
-    public void set(final E obj, final int newScore) {
-        if (obj == null) return;
-        synchronized (this) {
-            IntScore score = this.map.get(obj);
-            if (score == null) {
-                this.map.put(obj, IntScore.ONE);
-            } else {
-                gcount -= score.intValue();
-                score.set(newScore);
-            }
-        }        
-        // increase overall counter
-        gcount += newScore;
-    }
-    
-    public void inc(final E obj, final int incrementScore) {
-        if (obj == null) return;
-        synchronized (this) {
-            IntScore score = this.map.get(obj);
-            if (score == null) {
-                this.map.put(obj, IntScore.valueOf(incrementScore));
-            } else {
-                score.inc(incrementScore);
-            }
-        }        
-        // increase overall counter
-        gcount += incrementScore;
-    }
-    
-    public void dec(final E obj, final int incrementScore) {
-        inc(obj, -incrementScore);
-    }
-    
-    public int delete(final E obj) {
-        // deletes entry and returns previous score
-        if (obj == null) return 0;
-        final IntScore score;
-        synchronized (this) {
-            score = map.remove(obj);
-            if (score == null) return 0;
-        }
+    public int delete(final E obj);
 
-        // decrease overall counter
-        gcount -= score.intValue();
-        return score.intValue();
-    }
-
-    public synchronized boolean containsKey(final E obj) {
-        return map.containsKey(obj);
-    }
+    public boolean containsKey(final E obj);
     
-    public int get(final E obj) {
-        if (obj == null) return 0;
-        final IntScore score;
-        synchronized (this) {
-            score = map.get(obj);
-        }
-        if (score == null) return 0;
-        return score.intValue();
-    }
-    
-    public SortedMap<E, IntScore> tailMap(E obj) {
-        if (this.map instanceof TreeMap) {
-            return ((TreeMap<E, IntScore>) this.map).tailMap(obj);
-        }
-        throw new UnsupportedOperationException("map must have comparator");
-    }
-    
-    
-    public int getMaxScore() {
-        if (map.isEmpty()) return -1;
-        int maxScore = Integer.MIN_VALUE;
-        synchronized (this) {
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) if (entry.getValue().intValue() > maxScore) {
-                maxScore = entry.getValue().intValue();
-            }
-        }
-        return maxScore;
-    }
-
-    public int getMinScore() {
-        if (map.isEmpty()) return -1;
-        int minScore = Integer.MAX_VALUE;
-        synchronized (this) {
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) if (entry.getValue().intValue() < minScore) {
-                minScore = entry.getValue().intValue();
-            }
-        }
-        return minScore;
-    }
-
-    public E getMaxKey() {
-        if (map.isEmpty()) return null;
-        E maxObject = null;
-        int maxScore = Integer.MIN_VALUE;
-        synchronized (this) {
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) if (entry.getValue().intValue() > maxScore) {
-                maxScore = entry.getValue().intValue();
-                maxObject = entry.getKey();
-            }
-        }
-        return maxObject;
-    }
-    
-    public E getMinKey() {
-        if (map.isEmpty()) return null;
-        E minObject = null;
-        int minScore = Integer.MAX_VALUE;
-        synchronized (this) {
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) if (entry.getValue().intValue() < minScore) {
-                minScore = entry.getValue().intValue();
-                minObject = entry.getKey();
-            }
-        }
-        return minObject;
-    }
+    public int get(final E obj);
     
     @Override
-    public String toString() {
-        return map.toString();
-    }
-
-    public Iterator<E> keys(boolean up) {
-        synchronized (this) {
-            // re-organize entries
-            TreeMap<IntScore, Set<E>> m = new TreeMap<IntScore, Set<E>>();
-            Set<E> s;
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) {
-                s = m.get(entry.getValue());
-                if (s == null) {
-                    s = this.map instanceof TreeMap ? new TreeSet<E>(((TreeMap<E, IntScore>) this.map).comparator()) : new HashSet<E>();
-                    s.add(entry.getKey());
-                    m.put(entry.getValue(), s);
-                } else {
-                    s.add(entry.getKey());
-                }
-            }
-            
-            // flatten result
-            List<E> l = new ArrayList<E>(this.map.size());
-            for (Set<E> f: m.values()) {
-                for (E e: f) l.add(e);
-            }
-            if (up) return l.iterator();
-            
-            // optionally reverse list
-            List<E> r = new ArrayList<E>(l.size());
-            for (int i = l.size() - 1; i >= 0; i--) r.add(r.get(i));
-            return r.iterator();
-        }
-    }
+    public String toString();
     
+    public Iterator<E> keys(final boolean up);
+
+    public void inc(final E obj);
+    public void inc(final E obj, final int incrementScore);
+    
+    public void dec(final E obj);
+    public void dec(final E obj, final int incrementScore);
+
 }

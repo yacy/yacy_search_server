@@ -36,7 +36,7 @@ import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.cora.storage.IntScore;
-import net.yacy.cora.storage.ScoreMap;
+import net.yacy.cora.storage.OrderedScoreMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -49,7 +49,7 @@ public class WordCache {
     // common word cache
     private static final int commonWordsMaxSize = 100000; // maximum size of common word cache
     private static final int commonWordsMinLength = 5;    // words must have that length at minimum
-    private ScoreMap<String> commonWords = new ScoreMap<String>(String.CASE_INSENSITIVE_ORDER);    
+    private OrderedScoreMap<String> commonWords = new OrderedScoreMap<String>(String.CASE_INSENSITIVE_ORDER);    
     
     // dictionaries
     private final File dictionaryPath;

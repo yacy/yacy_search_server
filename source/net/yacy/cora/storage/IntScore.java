@@ -34,9 +34,6 @@ import java.util.Comparator;
  * rewriting the new key value to a map.
  */
 public class IntScore implements Comparable<IntScore>, Comparator<IntScore> {
-
-    public static IntScore ZERO = new IntScore(0);
-    public static IntScore ONE = new IntScore(1);
     
     private int value;
     

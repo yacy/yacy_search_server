@@ -40,7 +40,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.storage.StaticScore;
+import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
@@ -351,7 +351,7 @@ public final class search {
             
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            StaticScore<String> topicNavigator = theSearch.getTopicNavigator(5);
+            ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(5);
             final StringBuilder refstr = new StringBuilder(6000);
             Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;

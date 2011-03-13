@@ -43,8 +43,8 @@ import de.anomic.crawler.CrawlStacker;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.storage.DynamicScore;
-import net.yacy.cora.storage.ScoreCluster;
+import net.yacy.cora.storage.ConcurrentScoreMap;
+import net.yacy.cora.storage.ScoreMap;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -602,7 +602,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         Map<String, hashStat> map = domainSampleCollector();
         
         // order elements by size
-        DynamicScore<String> s = new ScoreCluster<String>();
+        ScoreMap<String> s = new ConcurrentScoreMap<String>();
         for (Map.Entry<String, hashStat> e: map.entrySet()) {
             s.inc(e.getValue().urlhash, e.getValue().count);
         }

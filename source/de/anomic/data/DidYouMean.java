@@ -7,8 +7,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import net.yacy.cora.storage.DynamicScore;
-import net.yacy.cora.storage.ScoreCluster;
+import net.yacy.cora.storage.ReversibleScoreMap;
+import net.yacy.cora.storage.ClusteredScoreMap;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -135,7 +135,7 @@ public class DidYouMean {
             return preSorted;
         }
         
-        final DynamicScore<String> scored = new ScoreCluster<String>();
+        final ReversibleScoreMap<String> scored = new ClusteredScoreMap<String>();
         for (final String s: preSorted) {
             if (System.currentTimeMillis() > timelimit) break;
             if (scored.size() >= 2 * preSortSelection) break;

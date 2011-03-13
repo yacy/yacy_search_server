@@ -43,9 +43,9 @@ import java.util.concurrent.TimeUnit;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Scanner;
-import net.yacy.cora.storage.DynamicScore;
-import net.yacy.cora.storage.ScoreCluster;
-import net.yacy.cora.storage.StaticScore;
+import net.yacy.cora.storage.ConcurrentScoreMap;
+import net.yacy.cora.storage.ClusteredScoreMap;
+import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
@@ -84,11 +84,11 @@ public final class RankingProcess extends Thread {
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
     
-    private final DynamicScore<String> ref;  // reference score computation for the commonSense heuristic
-    private final DynamicScore<String> hostNavigator; // a counter for the appearance of the host hash
+    private final ScoreMap<String> ref;  // reference score computation for the commonSense heuristic
+    private final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
     private final Map<String, String> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
-    private final DynamicScore<String> authorNavigator;
-    private final DynamicScore<String> namespaceNavigator;
+    private final ScoreMap<String> authorNavigator;
+    private final ScoreMap<String> namespaceNavigator;
     private final ReferenceOrder order;
     private final long startTime;
     
@@ -112,11 +112,11 @@ public final class RankingProcess extends Thread {
         //this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
-        this.hostNavigator = new ScoreCluster<String>();
+        this.hostNavigator = new ConcurrentScoreMap<String>();
         this.hostResolver = new ConcurrentHashMap<String, String>();
-        this.authorNavigator = new ScoreCluster<String>();
-        this.namespaceNavigator = new ScoreCluster<String>();
-        this.ref = new ScoreCluster<String>();
+        this.authorNavigator = new ConcurrentScoreMap<String>();
+        this.namespaceNavigator = new ConcurrentScoreMap<String>();
+        this.ref = new ConcurrentScoreMap<String>();
         this.feeders = 1;
         this.startTime = System.currentTimeMillis();
     }
@@ -551,14 +551,14 @@ public final class RankingProcess extends Thread {
         return this.misses.size();
     }
     
-    public StaticScore<String> getNamespaceNavigator() {
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ScoreCluster<String>();
+    public ScoreMap<String> getNamespaceNavigator() {
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ClusteredScoreMap<String>();
         if (this.namespaceNavigator.size() < 2) this.namespaceNavigator.clear(); // navigators with one entry are not useful
         return this.namespaceNavigator;
     }
     
-    public StaticScore<String> getHostNavigator() {
-        ScoreCluster<String> result = new ScoreCluster<String>();
+    public ScoreMap<String> getHostNavigator() {
+        ScoreMap<String> result = new ConcurrentScoreMap<String>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return result;
         
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
@@ -586,10 +586,10 @@ public final class RankingProcess extends Thread {
         }
     };
 
-    public StaticScore<String> getTopicNavigator(int count) {
+    public ScoreMap<String> getTopicNavigator(int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        final ScoreCluster<String> result = new ScoreCluster<String>();
+        final ScoreMap<String> result = new ConcurrentScoreMap<String>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return result;
         if (this.ref.size() < 2) this.ref.clear(); // navigators with one entry are not useful
         final Map<String, Float> counts = new HashMap<String, Float>();
@@ -643,10 +643,10 @@ public final class RankingProcess extends Thread {
         addTopic(descrcomps);
     }
     
-    public StaticScore<String> getAuthorNavigator() {
+    public ScoreMap<String> getAuthorNavigator() {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ScoreCluster<String>();
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ConcurrentScoreMap<String>();
         if (this.authorNavigator.size() < 2) this.authorNavigator.clear(); // navigators with one entry are not useful
         return this.authorNavigator;
     }

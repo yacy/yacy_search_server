@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.cora.storage.ScoreMap;
 
 public class SearchHub {
@@ -100,7 +101,7 @@ public class SearchHub {
      * @return a score map of urls
      */
     public ScoreMap<String> getResults() {
-        ScoreMap<String> scores = new ScoreMap<String>();
+        ScoreMap<String> scores = new ConcurrentScoreMap<String>();
         int m = threads.size();
         for (Map.Entry<RSSMessage, List<Integer>> entry: this.result.entrySet()) {
             int a = 0;
