@@ -16,7 +16,6 @@ COMMAND LINE OPTIONS (case sensitive):
 ; MODERN UI
 
 !include MUI2.nsh
-
 !include x64.nsh
 !include FileFunc.nsh
 !include WinVer.nsh
@@ -40,6 +39,15 @@ InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
 
 ;recommend free space in GB for YaCy
 !define RecommendSpace "30"
+
+; some string for Firewall
+!define WinXPAddFwRule 'netsh firewall add portopening protocol=tcp port=8090 name=YaCy mode=enable'
+!define WinXPDelFwRule 'netsh firewall del portopening protocol=tcp port=8090'
+!define WinVistaAddFwRule 'netsh advfirewall firewall add rule name="YaCy" dir=in action=allow protocol=tcp localport=8090'
+!define WinVistaDelFwRule 'netsh advfirewall firewall del rule name="YaCy"'
+var WinAddFwRule
+var WinDelFwRule
+
 
 ;requested execution level on Vista / 7
 RequestExecutionLevel admin
@@ -87,6 +95,7 @@ ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 
 !insertmacro MUI_PAGE_INSTFILES
 
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW SHOW_PageFinish_custom
 !define MUI_FINISHPAGE_SHOWREADME http://www.yacy-websuche.de/wiki/index.php/InstallerFinished
 !define MUI_FINISHPAGE_SHOWREADME_TEXT $(finishPage)
 !insertmacro MUI_PAGE_FINISH
@@ -176,6 +185,12 @@ Section "Desktop Icon"
 	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
+Section "Open Firewall (Port 8090)" Sec_Firewall_id
+	SectionIn 1
+	SetShellVarContext current
+	call OpenFirewall	
+SectionEnd
+
 /*
 Section "YaCy in Startup"
 	SetShellVarContext current
@@ -190,8 +205,9 @@ Section "Uninstall"
 	IfFileExists "$INSTDIR\DATA\yacy.running" 0 uninstall
 	MessageBox MB_ICONSTOP "$(stillRunning)" /SD IDOK
 	Goto nouninstall
-    
+
 	uninstall:
+	Call un.CloseFirewall
 	SetShellVarContext current
 
 	RMDir /r "$INSTDIR\addon"
@@ -231,6 +247,8 @@ Function .onInit
 		MessageBox MB_ICONSTOP "$(yacyNeedOs)" 
 		Abort 
 	${EndIf}		
+	
+	; init of JRE section
 	; detect JRE first
 	var /global InstalledJREVersion
 	${If} ${RunningX64}
@@ -242,21 +260,50 @@ Function .onInit
 		SectionSetText ${Sec_Java_id} ""
 		SectionSetFlags ${Sec_Java_id} 0
 	${EndIf}
+	
+	; init of Firewall section, only valid for WindowsXP SP2/SP3 and Vista/Win 7 with Admin 
+	var /global FirewallServiceStart 
+	IntOp $FirewallServiceStart 3 + 0
+
+	${If} ${IsWinVista} 
+	${OrIf} ${IsWin7}
+		StrCpy $WinAddFwRule '${WinVistaAddFwRule}'
+		StrCpy $WinDelFwRule '${WinVistaDelFwRule}'
+		ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\MpsSvc" "Start"
+	${EndIf}
+
+	${If} ${IsWinXP} 
+	${AndIf} ${AtLeastServicePack} 2
+		StrCpy $WinAddFwRule '${WinXPAddFwRule}'
+		StrCpy $WinDelFwRule '${WinXPDelFwRule}'
+		ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\SharedAccess" "Start"
+	${EndIf}
+	
+	;need Admin for firewall-config
+	${IfNot} $0 = "Admin" 
+		IntOp $FirewallServiceStart 3 + 0
+	${EndIf}
+
+	; hide and deselect Firewall if no proper configuration
+	${If} $FirewallServiceStart > 2 
+		SectionSetText ${Sec_Firewall_id} ""
+		SectionSetFlags ${Sec_Firewall_id} 0
+	${EndIf}
 FunctionEnd
 
 Function GetJRE
 ; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
     	${If} ${RunningX64}
-    		StrCpy $3 ${JRE_64}
+    		StrCpy $3 ${JRE_64} 
     	${Else}
     		StrCpy $3 ${JRE_32}
     	${EndIf}
 
-;check if admin before download, advise if non    
+	;check if admin before download, advise if non    
 	userInfo::getAccountType
 	Pop $0
 
-	${If} $0 != "Admin" 
+	${IfNot} $0 = "Admin" 
 		MessageBox MB_ICONEXCLAMATION "$(noAdminForJava)" /SD IDOK
 	${EndIf}
 
@@ -266,7 +313,7 @@ Function GetJRE
 	nsisdl::download /TIMEOUT=30000 $3 $2
 	Pop $R0 ;Get the return value
 	
-	${If} $R0 != "success" 
+	${IfNot} $R0 = "success" 
 		MessageBox MB_OK "Download failed: $R0" /SD IDOK
 		Return
 	${EndIf}
@@ -284,31 +331,31 @@ Function CheckDriveSpace
    	var /global TempDriveFree
    	var /global RootFolderType
 
-; If "\\Folder" it's a Network-Folder
+	; if "\\Folder" it's a Network-Folder
    	StrCpy $RootFolder $InstDir 2
    	StrCmp $RootFolder "\\" NetworkFolder Driveletter
 
    	Networkfolder:
-; prepare String for DriveSpace
+		; prepare String for DriveSpace
       		${GetRoot} $RootFolder $InstDir
       		goto NoHDD
 
-; Now check drive-letters
+	; now check drive-letters
    	Driveletter:
    		StrCpy $RootFolder $InstDir 3
 
-; prepare for {GetDrives-Loop}
+		; prepare for {GetDrives-Loop}
    		StrCpy $RootFolderType "invalid"
    		${GetDrives} "ALL" "CheckDriveType"
 
-; jump if error
+		; jump if error
    		StrCmp $RootFolderType "invalid" CheckSpace
 
-; jump if HDD
+		; jump if HDD
    		StrCmp $RootFolderType "HDD" CheckSpace
 
    	NoHDD:
-; Stay on folder-selection if user wants to give another folder, else check free space
+	; stay on folder-selection if user wants to give another folder, else check free space
       		MessageBox MB_ICONEXCLAMATION|MB_YESNO "$(yacyNoHd)" IDYES NextPage
       		Abort      
 
@@ -316,7 +363,7 @@ Function CheckDriveSpace
 
    	ClearErrors
    	${DriveSpace} $RootFolder "/D=F /S=G" $TempDriveFree
-; If DriveSpace fails for any reason -> jump ahead
+	; if DriveSpace fails for any reason -> jump ahead
    	IfErrors NextPage
 
    	${If} $TempDriveFree < ${RecommendSpace} 
@@ -334,4 +381,35 @@ Function CheckDriveType
    		StrCpy $0 StopGetDrives
 	${EndIf}
    	Push $0
+FunctionEnd
+
+Function OpenFirewall
+	var /global ExecErrorCode
+	; run netsh 
+	nsExec::ExecToStack '$WinAddFwRule'
+	pop $ExecErrorCode
+	; if run without error register for uninstall and clear finish page 
+	${If} $ExecErrorCode = "0"
+		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRule" '$WinDelFwRule'
+		IntOp $FirewallServiceStart 0 + 0
+	${Else}
+		IntOp $FirewallServiceStart 3 + 0
+	${EndIf}
+FunctionEnd
+
+Function SHOW_PageFinish_custom
+	; hide and disable firewall info from wiki if firewall is open
+	${If} $FirewallServiceStart = 0 
+		SendMessage $mui.FinishPage.ShowReadme ${BM_SETCHECK} 0 0
+	    	ShowWindow $mui.FinishPage.ShowReadme ${SW_HIDE}
+	${EndIf}
+FunctionEnd
+
+Function un.CloseFirewall
+	; get string for closing port from registy
+	ReadRegStr '$WinDelFwRule' HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRule"
+	; if found > run netsh to close port
+	${IfNot} '$WinDelFwRule' == '' 
+		nsExec::ExecToStack '$WinDelFwRule'
+	${EndIf}
 FunctionEnd
