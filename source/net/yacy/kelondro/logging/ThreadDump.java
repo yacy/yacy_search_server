@@ -121,7 +121,6 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
         byte[] b = new byte[(int) (sizeAfter - sizeBefore)];
         raf.readFully(b);
         raf.close();
-        System.out.println("dump size: " + b.length);
         
         // import the thread dump;
         importText(new ByteArrayInputStream(b));
