@@ -100,6 +100,7 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
         
         // try to get the thread dump from yacy.log which is available when YaCy is started with
         // startYACY.sh -l
+        if (!OS.canExecUnix) return;
         
         File logFile = new File("yacy.log");
         if (!logFile.exists()) return;
