@@ -185,7 +185,8 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
         return score.intValue();
     }
     
-    public SortedMap<E, IntScore> tailMap(E obj) {
+    @SuppressWarnings("unchecked")
+	public SortedMap<E, IntScore> tailMap(E obj) {
         if (this.map instanceof TreeMap) {
             return ((TreeMap<E, IntScore>) this.map).tailMap(obj);
         }
@@ -247,7 +248,8 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
         return map.toString();
     }
 
-    public Iterator<E> keys(boolean up) {
+    @SuppressWarnings("unchecked")
+	public Iterator<E> keys(boolean up) {
         synchronized (this) {
             // re-organize entries
             TreeMap<IntScore, Set<E>> m = new TreeMap<IntScore, Set<E>>();
