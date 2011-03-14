@@ -34,7 +34,6 @@ import java.util.ArrayList;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.ThreadDump;
-import net.yacy.kelondro.util.OS;
 
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -83,10 +82,17 @@ public class Threaddump_p {
             ThreadDump.appendStackTraceStats(appPath, buffer, traces, plain, null);
         } else {
             // write a thread dump to standard error output
+        	/*
             if (OS.canExecUnix) {
                 int pid = OS.getPID();
                 if (pid >= 0) try {OS.execSynchronous("kill -3 " + pid);} catch (IOException e) {}
             }
+            */
+            try {
+				new ThreadDump().appendBlockTraces(buffer, plain);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
             
             // generate a single thread dump
             final Map<Thread,StackTraceElement[]> stackTraces = ThreadDump.getAllStackTraces();

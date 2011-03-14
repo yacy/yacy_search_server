@@ -26,11 +26,13 @@
 package net.yacy.kelondro.logging;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,45 +94,38 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
     public static Map<java.lang.Thread, StackTraceElement[]> getAllStackTraces() {
         return java.lang.Thread.getAllStackTraces();
     }
-    /*
-    public ThreadDump() {
+    
+    public ThreadDump() throws IOException {
         super();
         
-        VirtualMachineManager manager = Bootstrap.virtualMachineManager();
-        AttachingConnector ac = manager.attachingConnectors().get(0);
-        Map<String, Connector.Argument> env = ac.defaultArguments();
-        env.get("port").setValue("8066");
-        env.get("hostname").setValue("localhost");
-        VirtualMachine vm = null;
-        try {
-            vm = ac.attach(env);
-        } catch (IOException e1) {
-            e1.printStackTrace();
-        } catch (IllegalConnectorArgumentsException e1) {
-            e1.printStackTrace();
-        }
-
-        Process proc = vm.process();
-        InputStream is = proc.getInputStream();
-
+        // try to get the thread dump from yacy.log which is available when YaCy is started with
+        // startYACY.sh -l
+        
+        File logFile = new File("yacy.log");
+        if (!logFile.exists()) return;
+        long sizeBefore = logFile.length();
+        
         // get the current process PID
         int pid = OS.getPID();
         
         // call kill -3 on the pid
         if (pid >= 0) try {OS.execSynchronous("kill -3 " + pid);} catch (IOException e) {}
-        
-        //byte[] b = os.toByteArray();
-        //System.err.println("dump size: " + b.length + ", log out lines = " + o.size());
+
+        // read the log from the dump
+        long sizeAfter = logFile.length();
+        if (sizeAfter <= sizeBefore) return;
+
+        RandomAccessFile raf = new RandomAccessFile(logFile, "r");
+        raf.seek(sizeBefore);
+        byte[] b = new byte[(int) (sizeAfter - sizeBefore)];
+        raf.readFully(b);
+        raf.close();
+        System.out.println("dump size: " + b.length);
         
         // import the thread dump;
-        try {
-            importText(is);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
+        importText(new ByteArrayInputStream(b));
     }
-    */
+    
     public ThreadDump(final File f) throws IOException {
         this(new FileInputStream(f));
     }
@@ -245,6 +240,29 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
         }
         bufferappend(buffer, plain, "");
     }
+
+    public void appendBlockTraces(
+            final StringBuilder buffer,
+            final boolean plain) {
+        bufferappend(buffer, plain, "THREADS WITH STATES: LOCK FOR OTHERS");
+        bufferappend(buffer, plain, "");
+        
+        Map<Thread, Integer> locks = this.countLocks();
+        for (int i = 0; i < this.size() + 10; i++) {
+            for (Map.Entry<Thread, Integer> entry: locks.entrySet()) {
+                if (entry.getValue().intValue() == i) {
+                	bufferappend(buffer, plain, "holds lock for " + i + " threads:");
+                	final List<String> list = this.get(entry.getKey());
+                    if (list == null) continue;
+                    bufferappend(buffer, plain, "Thread: " + entry.getKey());
+                    for (String s: list) bufferappend(buffer, plain, "  " + s);
+                    bufferappend(buffer, plain, "");
+                }
+            }
+        }
+        bufferappend(buffer, plain, "");
+    }
+    
     
     public static void appendStackTraceStats(
             final File rootPath,
