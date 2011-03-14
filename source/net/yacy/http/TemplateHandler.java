@@ -28,13 +28,12 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
 
-import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import de.anomic.data.MimeTable;
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.TemplateEngine;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverClassLoader;
@@ -44,8 +43,14 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.graphics.EncodedImage;
 
-public class TemplateHandler extends AbstractHandler {
+/**
+ * jetty http handler:
+ * 
+ * Handles classic yacy servlets with templates
+ */
+public class TemplateHandler extends AbstractHandler implements Handler {
 
 	private String htLocalePath = "DATA/LOCALE/htroot";
 	private String htDefaultPath = "htroot";
@@ -57,8 +62,6 @@ public class TemplateHandler extends AbstractHandler {
     private ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>> templateCache = null;
     private ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
     
-    private MimeTypes mimeTypes = new MimeTypes();
-
 	@Override
 	protected void doStart() throws Exception {
 		super.doStart();
@@ -132,10 +135,10 @@ public class TemplateHandler extends AbstractHandler {
             }
             
         } catch (final ClassNotFoundException e) {
-            Log.logSevere("HTTPDFileHandler", "class " + classFile + " is missing:" + e.getMessage());
+            Log.logSevere("TemplateHandler", "class " + classFile + " is missing:" + e.getMessage());
             throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
         } catch (final NoSuchMethodException e) {
-            Log.logSevere("HTTPDFileHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
+            Log.logSevere("TemplateHandler", "method 'respond' not found in class " + classFile + ": " + e.getMessage());
             throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
         }
         return m;
@@ -177,7 +180,6 @@ public class TemplateHandler extends AbstractHandler {
         String targetExt = target.substring(target.lastIndexOf('.') + 1, target.length());
         
         if ((targetClass != null)) {
-        	@SuppressWarnings("unchecked")
 			serverObjects args = new serverObjects();
         	@SuppressWarnings("unchecked")
 			Enumeration<String> argNames = request.getParameterNames();
@@ -204,36 +206,32 @@ public class TemplateHandler extends AbstractHandler {
 				throw new ServletException();
 			}
 			
-			if (tmp instanceof RasterPlotter) {
-                final RasterPlotter yp = (RasterPlotter) tmp;
-                // send an image to client
-                final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
-                final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), "png");
-                
-                response.setContentType(mimeType);
-                response.setContentLength(result.length());
-                response.setStatus(HttpServletResponse.SC_OK);
-                
-                result.writeTo(response.getOutputStream());
-                
-                // we handled this request, break out of handler chain
-        		Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
-        		base_request.setHandled(true);
-
-        		return;
-            }
+			if ( tmp instanceof RasterPlotter || tmp instanceof EncodedImage || tmp instanceof Image) {
+				
+				ByteBuffer result = null;
 			
-            if (tmp instanceof Image) {
-                final Image i = (Image) tmp;
-                final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
-
-                // generate an byte array from the generated image
-                int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
-                int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
-                final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-                bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
-                final ByteBuffer result = RasterPlotter.exportImage(bi, targetExt);
+				if (tmp instanceof RasterPlotter) {
+	                final RasterPlotter yp = (RasterPlotter) tmp;
+	                // send an image to client
+	                result = RasterPlotter.exportImage(yp.getImage(), "png");
+	            }
+				if (tmp instanceof EncodedImage) {
+					final EncodedImage yp = (EncodedImage) tmp;
+	                result = yp.getImage();
+				}
+				
+	            if (tmp instanceof Image) {
+	                final Image i = (Image) tmp;
+	
+	                // generate an byte array from the generated image
+	                int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
+	                int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
+	                final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+	                bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
+	                result = RasterPlotter.exportImage(bi, targetExt);
+	            }
                 
+                final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
                 response.setContentType(targetExt);
                 response.setContentLength(result.length());
                 response.setStatus(HttpServletResponse.SC_OK);
@@ -245,7 +243,7 @@ public class TemplateHandler extends AbstractHandler {
         		base_request.setHandled(true);
 
         		return;
-            }
+			}
 
 			
             servletProperties templatePatterns = null;

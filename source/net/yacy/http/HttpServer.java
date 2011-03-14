@@ -2,11 +2,15 @@ package net.yacy.http;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 
+/**
+ * interface to embedded jetty http server
+ */
 public class HttpServer {
 	
 	private Server server = new Server();
@@ -27,8 +31,12 @@ public class HttpServer {
  
         resource_handler.setResourceBase("htroot/");
         
+        ContextHandler context = new ContextHandler();
+        context.setContextPath("/");
+        context.setHandler(new SSIHandler(new TemplateHandler()));
+        
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] { new TemplateHandler(), resource_handler, new DefaultHandler() });
+        handlers.setHandlers(new Handler[] { context, resource_handler, new DefaultHandler() });
         server.setHandler(handlers);
 	}
 	
