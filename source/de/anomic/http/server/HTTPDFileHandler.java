@@ -1284,13 +1284,7 @@ public final class HTTPDFileHandler {
 		requestHeader.put(HeaderFramework.HOST, proxyurl.getHost());
 
 		ByteArrayOutputStream o = new ByteArrayOutputStream();
-
 		HTTPDProxyHandler.doGet(prop, requestHeader, o);
-		//System.err.println(prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS));
-		if (o == null) {
-			HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
-			return;
-		}
 
 		// reparse header to extract content-length and mimetype
 		final ResponseHeader outgoingHeader = new ResponseHeader();

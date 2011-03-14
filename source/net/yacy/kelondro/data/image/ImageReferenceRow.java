@@ -91,8 +91,8 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
     private static final int col_urlComps      = 11; // n  1 number of path components
 
     // dynamic properties
-    private static final int col_rgbaverage    = 12; // g  6 an average of the RGB values
-    private static final int col_typeofimage   = 12; // g  4 classification
+    //private static final int col_rgbaverage    = 12; // g  6 an average of the RGB values
+    //private static final int col_typeofimage   = 12; // g  4 classification
     private static final int col_flags         = 13; // z  4 b64-encoded appearance flags (24 bit, see definition below)
     private static final int col_hitcount      = 14; // c  1 number of occurrences of this word in text
     private static final int col_posintext     = 15; // t  2 first appearance of word in text

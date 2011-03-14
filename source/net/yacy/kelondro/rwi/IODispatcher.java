@@ -85,6 +85,7 @@ public class IODispatcher extends Thread {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
              if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize), true);
         } else {
+            @SuppressWarnings("rawtypes")
             DumpJob<? extends Reference> job = new DumpJob(cache, file, array);
             try {
                 // check if the dispatcher is running
@@ -214,7 +215,7 @@ public class IODispatcher extends Thread {
         }
     }
     
-    private class DumpJob <ReferenceType extends Reference> {
+    private class DumpJob<ReferenceType extends Reference> {
         private ReferenceContainerCache<ReferenceType> cache;
         private File file;
         private ReferenceContainerArray<ReferenceType> array;

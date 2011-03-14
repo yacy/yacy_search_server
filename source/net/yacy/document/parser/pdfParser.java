@@ -77,7 +77,6 @@ public class pdfParser extends AbstractParser implements Parser {
             //pdfParser.parse();
             //pdfDoc = pdfParser.getPDDocument();
         } catch (IOException e) {
-            if (pdfDoc != null) try {pdfDoc.close();} catch (IOException ee) {}
             throw new Parser.Failure(e.getMessage(), location);
         } finally {
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY);

@@ -1011,8 +1011,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             return (nextSeed != null);
         }
         
-        @SuppressWarnings("unchecked")
-		private yacySeed internalNext() {
+        private yacySeed internalNext() {
             if (it == null || !(it.hasNext())) return null;
             try {
                 Map<String, String> dna0;
