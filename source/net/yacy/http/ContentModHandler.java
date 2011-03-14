@@ -1,3 +1,27 @@
+//
+//  ContentModHandler
+//  Copyright 2011 by Florian Richter
+//  First released 13.04.2011 at http://yacy.net
+//  
+//  $LastChangedDate$
+//  $LastChangedRevision$
+//  $LastChangedBy$
+//
+//  This library is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU Lesser General Public
+//  License as published by the Free Software Foundation; either
+//  version 2.1 of the License, or (at your option) any later version.
+//  
+//  This library is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//  Lesser General Public License for more details.
+//  
+//  You should have received a copy of the GNU Lesser General Public License
+//  along with this program in the file lgpl21.txt
+//  If not, see <http://www.gnu.org/licenses/>.
+//
+
 package net.yacy.http;
 
 import java.io.ByteArrayOutputStream;
@@ -16,8 +40,8 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.HandlerWrapper;
 
 /**
- * jetty http handler:
- * Handles Server-side Includes, used for trickling display of search results
+ * abstract jetty http handler:
+ * used to change answer, provided by other handler
  */
 public abstract class ContentModHandler extends HandlerWrapper implements Handler, HandlerContainer {
 	
@@ -36,19 +60,28 @@ public abstract class ContentModHandler extends HandlerWrapper implements Handle
 		// wrap response
 		ContentModResponseWrapper wrapped_response = new ContentModResponseWrapper(response);
 		super.handle(target, baseRequest, request, wrapped_response);
-		wrapped_response.commit(this, request, response);
+		this.doContentMod(wrapped_response.getBuffer(), request, response);
 	}
 	
+	/**
+	 * method doing editing of answer, overwrite this!
+	 * @param in output of nested handler, to be processed
+	 * @param request original request
+	 * @param response original response object with outputstream to fill
+	 * @throws IOException
+	 * @throws ServletException
+	 */
 	protected abstract void doContentMod(byte[] in, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException ;
 	
+	/**
+	 * response object, which holds outputstream in bytearray back 
+	 */
 	private class ContentModResponseWrapper extends HttpServletResponseWrapper {
 		
-		private HttpServletResponse wrappedResponse;
 		private ByteArrayServletOutputStream wrappedOutputStream = new ByteArrayServletOutputStream();
 
 		public ContentModResponseWrapper(HttpServletResponse response) {
 			super(response);
-			wrappedResponse = response;
 		}
 		
 		@Override
@@ -56,11 +89,18 @@ public abstract class ContentModHandler extends HandlerWrapper implements Handle
 			return wrappedOutputStream;
 		}
 		
-		public void commit(ContentModHandler cmh, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-			cmh.doContentMod(wrappedOutputStream.getBuffer(), request, response);
+		/**
+		 * get bytearray hold back from outputstream
+		 * @return
+		 */
+		public byte[] getBuffer() {
+			return wrappedOutputStream.getBuffer();
 		}
 	}
 	
+	/**
+	 * ByteArrayOutputStream wrapped into a ServletOutputStream
+	 */
 	private class ByteArrayServletOutputStream extends ServletOutputStream {
 		
 		private ByteArrayOutputStream buffer = new ByteArrayOutputStream();
