@@ -55,9 +55,9 @@ public class CloneableMapIterator<E> implements CloneableIterator<E> {
 		this.last = null;
 	}
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-    public CloneableMapIterator<E> clone(final Object modifier) {
-		return new CloneableMapIterator(map, modifier);
+    @SuppressWarnings("unchecked")
+	public CloneableMapIterator<E> clone(final Object modifier) {
+		return new CloneableMapIterator<E>(map, (E) modifier);
 	}
 
 	public boolean hasNext() {

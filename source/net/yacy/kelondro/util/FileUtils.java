@@ -814,7 +814,8 @@ public final class FileUtils {
         }
     }    
 
-    public static final File createTempFile(@SuppressWarnings("rawtypes") Class classObj, final String name) throws IOException {
+    @SuppressWarnings("unchecked")
+	public static final File createTempFile(Class classObj, final String name) throws IOException {
         String parserClassName = classObj.getName();
         int idx = parserClassName.lastIndexOf('.');
         if (idx != -1) {
