@@ -36,13 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.jdi.Bootstrap;
-import com.sun.jdi.VirtualMachine;
-import com.sun.jdi.VirtualMachineManager;
-import com.sun.jdi.connect.AttachingConnector;
-import com.sun.jdi.connect.Connector;
-import com.sun.jdi.connect.IllegalConnectorArgumentsException;
-
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
@@ -99,7 +92,7 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
     public static Map<java.lang.Thread, StackTraceElement[]> getAllStackTraces() {
         return java.lang.Thread.getAllStackTraces();
     }
-    
+    /*
     public ThreadDump() {
         super();
         
@@ -137,7 +130,7 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
         }
         
     }
-    
+    */
     public ThreadDump(final File f) throws IOException {
         this(new FileInputStream(f));
     }
@@ -394,7 +387,7 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
     public static void main(String[] args) {
         ThreadDump dump = null;
         if (args.length == 0) {
-            dump = new ThreadDump();
+            //dump = new ThreadDump();
         }
         if (args.length == 2 && args[0].equals("-f")) {
             File dumpfile = new File(args[1]);
