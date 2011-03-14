@@ -27,13 +27,14 @@
 
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
 import java.util.ArrayList;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.ThreadDump;
-import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.OS;
 
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -73,27 +74,28 @@ public class Threaddump_p {
         	multipleCount = post.getInt("count", multipleCount);
             final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();
             for (int i = 0; i < multipleCount; i++) {
-                traces.add(Thread.getAllStackTraces());
-                if (MemoryControl.available() < 20 * 1024 * 1024) break;
+                try {
+                    traces.add(ThreadDump.getAllStackTraces());
+                } catch (OutOfMemoryError e) {
+                    break;
+                }
             }
             ThreadDump.appendStackTraceStats(appPath, buffer, traces, plain, null);
-            /*
-            ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.BLOCKED);
-            ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.RUNNABLE);
-            ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.TIMED_WAITING);
-            ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.WAITING);
-            ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.NEW);
-            ThreadDumpGenerator.appendStackTraceStats(appPath, buffer, traces, plain, Thread.State.TERMINATED);
-            */
         } else {
+            // write a thread dump to standard error output
+            if (OS.canExecUnix) {
+                int pid = OS.getPID();
+                if (pid >= 0) try {OS.execSynchronous("kill -3 " + pid);} catch (IOException e) {}
+            }
+            
             // generate a single thread dump
-            final Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
-            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.BLOCKED);
-            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.RUNNABLE);
-            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.TIMED_WAITING);
-            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.WAITING);
-            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.NEW);
-            ThreadDump.appendStackTraces(appPath, buffer, stackTraces, plain, Thread.State.TERMINATED);
+            final Map<Thread,StackTraceElement[]> stackTraces = ThreadDump.getAllStackTraces();
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.BLOCKED).appendStackTraces(buffer, plain, Thread.State.BLOCKED);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.RUNNABLE).appendStackTraces(buffer, plain, Thread.State.RUNNABLE);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.TIMED_WAITING).appendStackTraces(buffer, plain, Thread.State.TIMED_WAITING);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.WAITING).appendStackTraces(buffer, plain, Thread.State.WAITING);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.NEW).appendStackTraces(buffer, plain, Thread.State.NEW);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.TERMINATED).appendStackTraces(buffer, plain, Thread.State.TERMINATED);
         }
         
         ThreadDump.bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");

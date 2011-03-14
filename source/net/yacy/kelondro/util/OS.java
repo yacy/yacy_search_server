@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -161,6 +162,16 @@ public final class OS {
 		}
 	}
 
+	/**
+	 * use a hack to get the current process PID
+	 * @return the PID of the current java process or -1 if the PID cannot be obtained
+	 */
+	public static int getPID() {
+        String pids = ManagementFactory.getRuntimeMXBean().getName();
+        int p = pids.indexOf('@');
+        return p >= 0 ? Integer.parseInt(pids.substring(0, p)) : -1;
+	}
+	
 	public static void execAsynchronous(final File scriptFile) throws IOException {
 		// runs a script as separate thread
 		String starterFileExtension = null;
