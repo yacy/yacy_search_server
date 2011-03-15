@@ -38,6 +38,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import de.anomic.data.ListManager;
 import de.anomic.data.list.ListAccumulator;
@@ -115,12 +116,12 @@ public class sharedBlacklist_p {
                  * ====================================================== */
                 
                 // get the source peer hash
-                final String Hash = post.get("hash");
+                final String hash = post.get("hash");
                 
                 // generate the download URL
                 String downloadURLOld = null;
                 if( sb.peers != null ){ //no nullpointer error..
-                    final yacySeed seed = sb.peers.getConnected(Hash); 
+                    final yacySeed seed = sb.peers.getConnected(hash);
                     if (seed != null) {
                         final String IP = seed.getIP(); 
                         final String Port = seed.get(yacySeed.PORT, "8090");
@@ -129,12 +130,12 @@ public class sharedBlacklist_p {
                         downloadURLOld = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
                     } else {
                         prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
-                        prop.putHTML("status_name", Hash);
+                        prop.putHTML("status_name", hash);
                         prop.put("page", "1");
                     }
                 } else {
                     prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
-                    prop.putHTML("status_name", Hash);
+                    prop.putHTML("status_name", hash);
                     prop.put("page", "1");
                 }
                 
@@ -147,7 +148,7 @@ public class sharedBlacklist_p {
                         otherBlacklist = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
-                        prop.putHTML("status_name", Hash);
+                        prop.putHTML("status_name", hash);
                         prop.put("page", "1");
                     }
                 }
@@ -215,8 +216,8 @@ public class sharedBlacklist_p {
                     pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, selectedBlacklistName), true));
                     
                     // loop through the received entry list
-                    final int num = Integer.parseInt( post.get("num") );
-                    for(int i=0;i < num; i++){ 
+                    final int num = post.getInt("num", 0);
+                    for(int i = 0; i < num; i++){
                         if( post.containsKey("item" + i) ){
                             String newItem = post.get("item" + i);
                             
@@ -268,7 +269,7 @@ public class sharedBlacklist_p {
             // generate the html list
             if (otherBlacklist != null) {
                 // loading the current blacklist content
-                final HashSet<String> Blacklist = new HashSet<String>(FileUtils.getListArray(new File(ListManager.listsPath, selectedBlacklistName)));
+                final Set<String> Blacklist = new HashSet<String>(FileUtils.getListArray(new File(ListManager.listsPath, selectedBlacklistName)));
                 
                 int count = 0;
                 while (otherBlacklist.hasNext()) {

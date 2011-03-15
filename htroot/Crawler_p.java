@@ -164,18 +164,18 @@ public class Crawler_p {
                 }
                 
                 final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
-                env.setConfig("crawlOrder", (crawlOrder) ? "true" : "false");
+                env.setConfig("crawlOrder", crawlOrder);
                 
-                int newcrawlingdepth = Integer.parseInt(post.get("crawlingDepth", "8"));
+                int newcrawlingdepth = post.getInt("crawlingDepth", 8);
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
                 
                 // recrawl
                 final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
                 boolean crawlingIfOlderCheck = "on".equals(post.get("crawlingIfOlderCheck", "off"));
-                int crawlingIfOlderNumber = Integer.parseInt(post.get("crawlingIfOlderNumber", "-1"));
+                int crawlingIfOlderNumber = post.getInt("crawlingIfOlderNumber", -1);
                 String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year"); // year, month, day, hour
-                int repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
+                int repeat_time = post.getInt("repeat_time", -1);
                 final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
                 
                 if ("scheduler".equals(recrawl) && repeat_time > 0) {
@@ -210,33 +210,33 @@ public class Crawler_p {
                 }                    
                 
                 final boolean crawlingDomMaxCheck = "on".equals(post.get("crawlingDomMaxCheck", "off"));
-                final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? Integer.parseInt(post.get("crawlingDomMaxPages", "-1")) : -1;
+                final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? post.getInt("crawlingDomMaxPages", -1) : -1;
                 env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
                 
                 final boolean crawlingQ = "on".equals(post.get("crawlingQ", "off"));
-                env.setConfig("crawlingQ", (crawlingQ) ? "true" : "false");
+                env.setConfig("crawlingQ", crawlingQ);
                 
                 final boolean indexText = "on".equals(post.get("indexText", "on"));
-                env.setConfig("indexText", (indexText) ? "true" : "false");
+                env.setConfig("indexText", indexText);
                 
                 final boolean indexMedia = "on".equals(post.get("indexMedia", "on"));
-                env.setConfig("indexMedia", (indexMedia) ? "true" : "false");
+                env.setConfig("indexMedia", indexMedia);
                 
                 boolean storeHTCache = "on".equals(post.get("storeHTCache", "on"));
                 if (crawlingStartURL!= null &&(crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
-                env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
+                env.setConfig("storeHTCache", storeHTCache);
                 
                 CrawlProfile.CacheStrategy cachePolicy = CrawlProfile.CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
                 if (cachePolicy == null) cachePolicy = CrawlProfile.CacheStrategy.IFFRESH;
                 
                 final boolean xsstopw = "on".equals(post.get("xsstopw", "off"));
-                env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
+                env.setConfig("xsstopw", xsstopw);
                 
                 final boolean xdstopw = "on".equals(post.get("xdstopw", "off"));
-                env.setConfig("xdstopw", (xdstopw) ? "true" : "false");
+                env.setConfig("xdstopw", xdstopw);
                 
                 final boolean xpstopw = "on".equals(post.get("xpstopw", "off"));
-                env.setConfig("xpstopw", (xpstopw) ? "true" : "false");
+                env.setConfig("xpstopw", xpstopw);
                 
                 final String crawlingMode = post.get("crawlingMode","url");
                 if (crawlingStart != null && crawlingStart.startsWith("ftp")) {
@@ -555,7 +555,7 @@ public class Crawler_p {
         }
         
         // performance settings
-        final long LCbusySleep = Integer.parseInt(env.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "1000"));
+        final long LCbusySleep = env.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 1000L);
         final int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 30000) ? "1" : "0");
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 30000)) ? "1" : "0");
@@ -577,10 +577,10 @@ public class Crawler_p {
     
     private static void setPerformance(final Switchboard sb, final serverObjects post) {
         final String crawlingPerformance = post.get("crawlingPerformance", "custom");
-        final long LCbusySleep = Integer.parseInt(sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "1000"));
+        final long LCbusySleep = sb.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 1000L);
         int wantedPPM = (LCbusySleep == 0) ? 30000 : (int) (60000L / LCbusySleep);
         try {
-            wantedPPM = Integer.parseInt(post.get("customPPM", Integer.toString(wantedPPM)));
+            wantedPPM = post.getInt("customPPM", wantedPPM);
         } catch (final NumberFormatException e) {}
         if ("minimum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 10;
         if ("maximum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 30000;

@@ -281,13 +281,13 @@ public class IndexControlRWIs_p {
                 }
                 
                 // transport to other peer
-                final String gzipBody = sb.getConfig("indexControl.gzipBody","false");
-                final int timeout = (int) sb.getConfigLong("indexControl.timeout",60000);
+                final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
+                final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
                 final String error = yacyClient.transferIndex(
                              seed,
                              icc,
                              knownURLs,
-                             "true".equalsIgnoreCase(gzipBody),
+                             gzipBody,
                              timeout);
                 prop.put("result", (error == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries.size() + " URL not found") : "error: " + error);
                 index = null;

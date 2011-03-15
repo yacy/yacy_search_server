@@ -92,19 +92,13 @@ public class PerformanceQueues_p {
 	            prop.put("setStartupCommit", "1");
             }
             if(post.containsKey("diskFree")) {
-            	int diskFree = 3000; // default
-            	try { diskFree = Integer.parseInt(post.get("diskFree", Integer.toString(diskFree))); } catch (final NumberFormatException e){}
-            	sb.setConfig(SwitchboardConstants.DISK_FREE, diskFree);
+            	sb.setConfig(SwitchboardConstants.DISK_FREE, post.getInt("diskFree", 3000));
             }
             if(post.containsKey("diskFreeHardlimit")) {
-            	int diskFreeHardlimit = 1000; // default
-            	try { diskFreeHardlimit = Integer.parseInt(post.get("diskFreeHardlimit", Integer.toString(diskFreeHardlimit))); } catch (final NumberFormatException e){}
-            	sb.setConfig(SwitchboardConstants.DISK_FREE_HARDLIMIT, diskFreeHardlimit);
+            	sb.setConfig(SwitchboardConstants.DISK_FREE_HARDLIMIT, post.getInt("diskFreeHardlimit", 1000));
             }
             if(post.containsKey("memoryAcceptDHT")) {
-            	int memoryAcceptDHT = 50; // default
-            	try { memoryAcceptDHT = Integer.parseInt(post.get("memoryAcceptDHT", Integer.toString(memoryAcceptDHT))); } catch (final NumberFormatException e){}
-            	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, memoryAcceptDHT);
+            	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
             }
             if(post.containsKey("resetObserver")) {
             	MemoryControl.setDHTallowed();
@@ -248,7 +242,7 @@ public class PerformanceQueues_p {
         
         c = 0;
         final int[] speedValues = {200,150,100,50,25,10};
-        final int usedspeed = Integer.parseInt(sb.getConfig("performanceSpeed", "100"));
+        final int usedspeed = sb.getConfigInt("performanceSpeed", 100);
         for(final int speed: speedValues){
         	prop.put("speed_" + c + "_value", speed);
         	prop.put("speed_" + c + "_label", speed + " %");
@@ -269,7 +263,7 @@ public class PerformanceQueues_p {
              * configuring the crawler pool 
              */
             // get the current crawler pool configuration
-            int maxBusy = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
+            int maxBusy = post.getInt("Crawler Pool_maxActive", 8);
             
             // storing the new values into configfile
             sb.setConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
@@ -280,7 +274,7 @@ public class PerformanceQueues_p {
              */
             final WorkflowThread httpd = sb.getThread("10_httpd");
             try {
-                maxBusy = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
+                maxBusy = post.getInt("httpd Session Pool_maxActive", 8);
             } catch (final NumberFormatException e) {
                 maxBusy = 8;
             }
@@ -343,9 +337,9 @@ public class PerformanceQueues_p {
         prop.put("pool", "2");
         
         final long curr_prio = sb.getConfigLong("javastart_priority",0);
-        prop.put("priority_normal",(curr_prio==0) ? "1" : "0");
-        prop.put("priority_below",(curr_prio==10) ? "1" : "0");
-        prop.put("priority_low",(curr_prio==20) ? "1" : "0");
+        prop.put("priority_normal",(curr_prio == 0) ? "1" : "0");
+        prop.put("priority_below",(curr_prio == 10) ? "1" : "0");
+        prop.put("priority_low",(curr_prio == 20) ? "1" : "0");
         
         // parse initialization memory settings
         final String Xmx = sb.getConfig("javastart_Xmx", "Xmx500m").substring(3);
@@ -353,9 +347,9 @@ public class PerformanceQueues_p {
         final String Xms = sb.getConfig("javastart_Xms", "Xms500m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
         
-        final String diskFree = sb.getConfig(SwitchboardConstants.DISK_FREE, "3000");
-        final String diskFreeHardlimit = sb.getConfig(SwitchboardConstants.DISK_FREE_HARDLIMIT, "1000");
-        final String memoryAcceptDHT = sb.getConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, "50000");
+        final long diskFree = sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000L);
+        final long diskFreeHardlimit = sb.getConfigLong(SwitchboardConstants.DISK_FREE_HARDLIMIT, 1000L);
+        final long memoryAcceptDHT = sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 50000L);
         final boolean observerTrigger = !MemoryControl.getDHTallowed();
         prop.put("diskFree", diskFree);
         prop.put("diskFreeHardlimit", diskFreeHardlimit);

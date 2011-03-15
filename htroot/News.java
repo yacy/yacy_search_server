@@ -44,8 +44,8 @@ public class News {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
-        final int tableID = (overview) ? -1 : (post == null ? 0 : Integer.parseInt(post.get("page", "0"))) - 1;
+        final boolean overview = (post == null) || "0".equals(post.get("page", "0"));
+        final int tableID = (overview) ? -1 : (post == null ? 0 : post.getInt("page", 0)) - 1;
 
         // execute commands
         if (post != null) {
@@ -60,7 +60,7 @@ public class News {
                 String id;
                 while (e.hasNext()) {
                     check = e.next();
-                    if ((check.startsWith("del_")) && (post.get(check, "off").equals("on"))) {
+                    if ((check.startsWith("del_")) && "on".equals(post.get(check, "off"))) {
                         id = check.substring(4);
                         try {
                             sb.peers.newsPool.moveOff(tableID, id);
@@ -126,11 +126,11 @@ public class News {
                     prop.putHTML("table_list_" + i + "_att", attributeMap.toString());
                     int j = 0;
                     if (!attributeMap.isEmpty()) {
-	                    for (Entry<String, String> attribute: attributeMap.entrySet()) {
-	                    	prop.put("table_list_" + i + "_attributes_" + j + "_name", attribute.getKey());
-	                    	prop.putHTML("table_list_" + i + "_attributes_" + j + "_value", attribute.getValue());
-	                    	j++;
-	                    }
+                        for (final Entry<String, String> attribute: attributeMap.entrySet()) {
+                            prop.put("table_list_" + i + "_attributes_" + j + "_name", attribute.getKey());
+                            prop.putHTML("table_list_" + i + "_attributes_" + j + "_value", attribute.getValue());
+                            j++;
+                        }
                     }
                     prop.put("table_list_" + i + "_attributes", j);
                                         
@@ -138,7 +138,7 @@ public class News {
                     String link, title, description;
                     if (category.equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                     	link = record.attribute("startURL", "");
-                    	title = (record.attribute("intention", "").length() == 0) ? link : record.attribute("intention", "");
+                    	title = (record.attribute("intention", "").isEmpty()) ? link : record.attribute("intention", "");
                     	description = "Crawl Start Point";
                     } else if (category.equals(yacyNewsPool.CATEGORY_PROFILE_UPDATE)) {
                     	link = record.attribute("homepage", "");
@@ -157,11 +157,11 @@ public class News {
                     	title = record.attribute("title", "");
                     	description = record.attribute("url", "");
                     } else if (category.equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) {
-                    	link = (seed==null)?"":"http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
+                    	link = (seed == null)? "" : "http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Wiki Update: " + record.attribute("description", "");
                     } else if (category.equals(yacyNewsPool.CATEGORY_BLOG_ADD)) {
-                    	link = (seed==null)?"":"http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
+                    	link = (seed == null)? "" : "http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Blog Entry: " + record.attribute("subject", "");
                     } else {

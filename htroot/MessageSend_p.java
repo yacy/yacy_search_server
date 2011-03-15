@@ -51,12 +51,12 @@ public class MessageSend_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        if ((post == null) || (post.get("hash","").length() == 0)) {
+        if ((post == null) || (post.get("hash","").isEmpty())) {
             prop.put("mode", "2");
             return prop;
         }
 
-        final String hash    = post.get("hash", "");
+        final String hash = post.get("hash", "");
         String subject = post.get("subject", "");
         String message = post.get("message", "");
 
@@ -121,14 +121,13 @@ public class MessageSend_p {
             // send written message to peer
             try {
                 prop.put("mode_status", "0");
-                int messagesize = Integer.parseInt(post.get("messagesize", "0"));
+                int messagesize = post.getInt("messagesize", 0);
                 //int attachmentsize = Integer.parseInt(post.get("attachmentsize", "0"));
 
                 if (messagesize < 1000) messagesize = 1000; // debug
                 if (subject.length() > 100) subject = subject.substring(0, 100);
                 if (message.length() > messagesize) message = message.substring(0, messagesize);
-                byte[] mb;
-                mb = UTF8.getBytes(message);
+                final byte[] mb = UTF8.getBytes(message);
                 final Map<String, String> result = yacyClient.postMessage(sb.peers, hash, subject, mb);
 
                 //message has been sent

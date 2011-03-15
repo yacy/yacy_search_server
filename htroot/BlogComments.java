@@ -281,7 +281,7 @@ public class BlogComments {
 
     private static void messageForwardingViaEmail(final Switchboard sb, final MessageBoard.entry msgEntry) {
         try {
-            if (!Boolean.parseBoolean(sb.getConfig("msgForwardingEnabled","false"))) {
+            if (!sb.getConfigBool("msgForwardingEnabled",false)) {
                 return;
             }
 

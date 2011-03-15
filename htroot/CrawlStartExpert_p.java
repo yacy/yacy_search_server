@@ -51,28 +51,28 @@ public class CrawlStartExpert_p {
         prop.put("crawlingIfOlderUnitHourCheck", "0");
         prop.put("crawlingIfOlderNumber", "7");
         
-        final int crawlingDomFilterDepth = (int) env.getConfigLong("crawlingDomFilterDepth", -1);
+        final int crawlingDomFilterDepth = env.getConfigInt("crawlingDomFilterDepth", -1);
         prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? "0" : "1");
         prop.put("crawlingDomFilterDepth", (crawlingDomFilterDepth == -1) ? 1 : crawlingDomFilterDepth);
-        final int crawlingDomMaxPages = (int) env.getConfigLong("crawlingDomMaxPages", -1);
+        final int crawlingDomMaxPages = env.getConfigInt("crawlingDomMaxPages", -1);
         prop.put("crawlingDomMaxCheck", (crawlingDomMaxPages == -1) ? "0" : "1");
         prop.put("crawlingDomMaxPages", (crawlingDomMaxPages == -1) ? 10000 : crawlingDomMaxPages);
-        prop.put("crawlingQChecked", env.getConfig("crawlingQ", "").equals("true") ? "1" : "0");
-        prop.put("storeHTCacheChecked", env.getConfig("storeHTCache", "").equals("true") ? "1" : "0");
-        prop.put("indexingTextChecked", env.getConfig("indexText", "").equals("true") ? "1" : "0");
-        prop.put("indexingMediaChecked", env.getConfig("indexMedia", "").equals("true") ? "1" : "0");
-        prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? "1" : "0");
+        prop.put("crawlingQChecked", env.getConfigBool("crawlingQ", true) ? "1" : "0");
+        prop.put("storeHTCacheChecked", env.getConfigBool("storeHTCache", true) ? "1" : "0");
+        prop.put("indexingTextChecked", env.getConfigBool("indexText", true) ? "1" : "0");
+        prop.put("indexingMediaChecked", env.getConfigBool("indexMedia", true) ? "1" : "0");
+        prop.put("crawlOrderChecked", env.getConfigBool("crawlOrder", true) ? "1" : "0");
         
-        final long LCbusySleep = Integer.parseInt(env.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        final long LCbusySleep = env.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 100L);
         final int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", ((LCppm > 10) && (LCppm < 1000)) ? Integer.toString(LCppm) : "");
         
-        prop.put("xsstopwChecked", env.getConfig("xsstopw", "").equals("true") ? "1" : "0");
-        prop.put("xdstopwChecked", env.getConfig("xdstopw", "").equals("true") ? "1" : "0");
-        prop.put("xpstopwChecked", env.getConfig("xpstopw", "").equals("true") ? "1" : "0");
+        prop.put("xsstopwChecked", env.getConfigBool("xsstopw", true) ? "1" : "0");
+        prop.put("xdstopwChecked", env.getConfigBool("xdstopw", true) ? "1" : "0");
+        prop.put("xpstopwChecked", env.getConfigBool("xpstopw", true) ? "1" : "0");
         
         // return rewrite properties
         return prop;

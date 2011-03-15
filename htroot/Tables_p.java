@@ -50,7 +50,7 @@ public class Tables_p {
         
         // show table selection
         int count = 0;
-        Iterator<String> ti = sb.tables.tables();
+        final Iterator<String> ti = sb.tables.tables();
         String tablename;
         prop.put("showselection", 1);
         while (ti.hasNext()) {
@@ -64,10 +64,10 @@ public class Tables_p {
 
         if (post == null) return prop; // return rewrite properties
         
-        String counts = post.get("count", null);
-        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : Integer.parseInt(counts);
-        String pattern = post.get("search", "");
-        Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+        final String counts = post.get("count", null);
+        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
+        final String pattern = post.get("search", "");
+        final Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
         prop.put("pattern", pattern);
         
         List<String> columns = null;
@@ -86,7 +86,7 @@ public class Tables_p {
         }
         
         if (post.get("deleterows", "").length() > 0) {
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
                     sb.tables.delete(table, entry.getValue().substring(5).getBytes());
                 } catch (IOException e) {
@@ -96,9 +96,9 @@ public class Tables_p {
         }
         
         if (post.get("commitrow", "").length() > 0) {
-            String pk = post.get("pk");
-            Map<String, byte[]> map = new HashMap<String, byte[]>();
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+            final String pk = post.get("pk");
+            final Map<String, byte[]> map = new HashMap<String, byte[]>();
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("col_")) {
                     map.put(entry.getKey().substring(4), entry.getValue().getBytes());
                 }
@@ -119,7 +119,7 @@ public class Tables_p {
             if (post.containsKey("editrow")) {
                 // check if we can find a key
                 String pk = null;
-                for (Map.Entry<String, String> entry: post.entrySet()) {
+                for (final Map.Entry<String, String> entry: post.entrySet()) {
                     if (entry.getValue().startsWith("mark_")) {
                         pk = entry.getValue().substring(5);
                         break;
@@ -136,7 +136,7 @@ public class Tables_p {
                 }
             } else if (post.containsKey("addrow")) try {
                 // get a new key
-                String pk = UTF8.String(sb.tables.createRow(table));
+                final String pk = UTF8.String(sb.tables.createRow(table));
                 setEdit(sb, prop, table, pk, columns);
             } catch (IOException e) {
                 Log.logException(e);
@@ -202,11 +202,11 @@ public class Tables_p {
         prop.put("showedit", 1);
         prop.put("showedit_table", table);
         prop.put("showedit_pk", pk);
-        Tables.Row row = sb.tables.select(table, pk.getBytes());
+        final Tables.Row row = sb.tables.select(table, pk.getBytes());
         if (row == null) return;
         int count = 0;
         byte[] cell;
-        for (String col: columns) {
+        for (final String col: columns) {
             cell = row.get(col);
             prop.put("showedit_list_" + count + "_key", col);
             prop.put("showedit_list_" + count + "_value", cell == null ? "" : UTF8.String(cell));

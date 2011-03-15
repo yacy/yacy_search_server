@@ -99,20 +99,12 @@ public class Status {
                 ByteCount.resetCount();
                 redirect = true;
             } else if (post.containsKey("popup")) {
-                final String trigger_enabled = post.get("popup");
-                if ("false".equals(trigger_enabled)) {
-                    sb.setConfig("browserPopUpTrigger", "false");
-                } else if ("true".equals(trigger_enabled)){
-                    sb.setConfig("browserPopUpTrigger", "true");
-                }
+                final boolean trigger_enabled = post.getBoolean("popup", false);
+                sb.setConfig("browserPopUpTrigger", trigger_enabled);
                 redirect = true;
             } else if (post.containsKey("tray")) {
-                final String trigger_enabled = post.get("tray");
-                if ("false".equals(trigger_enabled)) {
-                    sb.setConfig("trayIcon", "false");
-                } else if ("true".equals(trigger_enabled)){
-                    sb.setConfig("trayIcon", "true");
-                }
+                final boolean trigger_enabled = post.getBoolean("tray", false);
+                sb.setConfig("trayIcon", trigger_enabled);
                 redirect = true;
             }
         	
@@ -192,11 +184,11 @@ public class Status {
         // ssl support
         prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
 
-        if ("true".equals(sb.getConfig("remoteProxyUse", "false"))) {
+        if (sb.getConfigBool("remoteProxyUse", false)) {
             prop.put("remoteProxy", "1");
             prop.putXML("remoteProxy_host", sb.getConfig("remoteProxyHost", "<unknown>"));
             prop.putXML("remoteProxy_port", sb.getConfig("remoteProxyPort", "<unknown>"));
-            prop.put("remoteProxy_4Yacy", "true".equalsIgnoreCase(sb.getConfig("remoteProxyUse4Yacy", "true")) ? "0" : "1");
+            prop.put("remoteProxy_4Yacy", sb.getConfigBool("remoteProxyUse4Yacy", true) ? "0" : "1");
         } else {
             prop.put("remoteProxy", "0"); // not used
         }
@@ -209,7 +201,7 @@ public class Status {
             prop.put("peerAddress", "0");    // not assigned
             prop.put("peerStatistics", "0"); // unknown
         } else {
-            final long uptime = 60000 * Long.parseLong(sb.peers.mySeed().get(yacySeed.UPTIME, "0"));
+            final long uptime = 60000 * sb.peers.mySeed().getLong(yacySeed.UPTIME, 0L);
             prop.put("peerStatistics", "1");
             prop.put("peerStatistics_uptime", yacyPeerActions.formatInterval(uptime));
             prop.putNum("peerStatistics_pagesperminute", sb.peers.mySeed().getPPM());
@@ -282,7 +274,7 @@ public class Status {
             prop.put("otherPeers", "0"); // not online
         }
 
-        if ("false".equals(sb.getConfig("browserPopUpTrigger", "false"))) {
+        if (!sb.getConfigBool("browserPopUpTrigger", false)) {
             prop.put("popup", "0");
         } else {
             prop.put("popup", "1");
@@ -290,7 +282,7 @@ public class Status {
         
         if (!OS.isWindows) {
         	prop.put("tray", "2");
-        } else if ("false".equals(sb.getConfig("trayIcon", "false"))) {
+        } else if (!sb.getConfigBool("trayIcon", false)) {
             prop.put("tray", "0");
         } else {
             prop.put("tray", "1");
@@ -314,8 +306,8 @@ public class Status {
         
         // Queue information
         final int loaderJobCount = sb.crawlQueues.workerSize();
-        final int loaderMaxCount = Integer.parseInt(sb.getConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, "10"));
-        final int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
+        final int loaderMaxCount = sb.getConfigInt(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10);
+        final int loaderPercent = (loaderMaxCount == 0) ? 0 : loaderJobCount * 100 / loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);
         prop.putNum("loaderQueueMax", loaderMaxCount);        
         prop.put("loaderQueuePercent", (loaderPercent>100) ? 100 : loaderPercent);

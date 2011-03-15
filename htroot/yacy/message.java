@@ -169,7 +169,7 @@ public final class message {
      */
     private static void messageForwardingViaEmail(final Switchboard sb, final MessageBoard.entry msgEntry) {
         try {
-            if (!Boolean.parseBoolean(sb.getConfig("msgForwardingEnabled","false"))) return;
+            if (!sb.getConfigBool("msgForwardingEnabled", false)) return;
 
             // get the recipient address
             final String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();

@@ -172,7 +172,7 @@ public class ConfigAccounts_p {
             final Map<String, String> rightsSet = new HashMap<String, String>();
 
             for(final String right : rights) {
-                rightsSet.put(right, post.containsKey(right)&&"on".equals(post.get(right)) ? "true" : "false");
+                rightsSet.put(right, post.containsKey(right) && "on".equals(post.get(right)) ? "true" : "false");
             }
             
             final Map<String, String> mem = new HashMap<String, String>();

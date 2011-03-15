@@ -61,7 +61,7 @@ public final class Connections_p {
         // determines if name lookup should be done or not 
         final boolean doNameLookup;
         if (post != null) {  
-            doNameLookup = (post.containsKey("nameLookup") && "true".equals(post.get("nameLookup","true")));
+            doNameLookup = (post.containsKey("nameLookup") && post.getBoolean("nameLookup", true));
             if (post.containsKey("closeServerSession")) {
                 final String sessionName = post.get("closeServerSession", null);
                 sb.closeSessions("10_httpd", sessionName);
@@ -83,7 +83,7 @@ public final class Connections_p {
             
             // get the request command line
             String commandLine = s.getCommandLine();
-            final boolean blockingRequest = (commandLine == null);;
+            final boolean blockingRequest = (commandLine == null);
             final int commandCount = s.getCommandCount();
             
             // get the source ip address and port

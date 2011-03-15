@@ -58,11 +58,7 @@ public class IndexCreateWWWGlobalQueue_p {
  
         int showLimit = 100;
         if (post != null) {
-            if (post.containsKey("limit")) {
-                try {
-                    showLimit = Integer.parseInt(post.get("limit"));
-                } catch (final NumberFormatException e) {}
-            }            
+            showLimit = post.getInt("limit", 100);
             
             if (post.containsKey("clearcrawlqueue")) {
                 final int c = sb.crawlQueues.noticeURL.stackSize(NoticedURL.StackType.LIMIT);

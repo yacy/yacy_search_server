@@ -50,6 +50,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -87,7 +88,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         super(input);
     }
     
-    private static final String removeBOM(String s) {
+    private static final String removeByteOrderMark(final String s) {
         if (s == null || s.length() == 0) return s;
         if (s.charAt(0) == BOM) return s.substring(1);
         return s;
@@ -133,10 +134,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return value as it was added to the map or <code>NaN</code> if an error occured.
      */
     public double put(final String key, final float value) {
-        if (null == this.put(key, Float.toString(value))) {
-            return Float.NaN;
-        }
-        return value;
+        return (null == this.put(key, Float.toString(value))) ? Float.NaN : value;
     }
 
     /**
@@ -144,10 +142,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return Returns 0 for the error case.
      */
     public long put(final String key, final long value) {
-        if (null == this.put(key, Long.toString(value))) {
-            return 0;
-        }
-        return value;
+        return (null == this.put(key, Long.toString(value))) ? 0 : value;
     }
 
     public String put(final String key, final java.util.Date value) {
@@ -157,6 +152,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public String put(final String key, final InetAddress value) {
         return this.put(key, value.toString());
     }
+    
     /**
      * Add a String to the map. The content of the String is escaped to be usable in JSON output.
      * @param key   key name as String.
@@ -174,6 +170,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         value = patternT.matcher(value).replaceAll("\\t");
     	return put(key, value);
     }
+    
     public String putJSON(final String key, final byte[] value) {
         return putJSON(key, UTF8.String(value));
     }
@@ -188,6 +185,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public String putHTML(final String key, final String value) {
         return put(key, CharacterCoding.unicode2html(value, true));
     }
+    
     public String putHTML(final String key, final byte[] value) {
         return putHTML(key, UTF8.String(value));
     }
@@ -234,6 +232,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public String putWiki(final String key, final String wikiCode){
         return this.put(key, Switchboard.wikiParser.transform(wikiCode));
     }
+    
     public String putWiki(final String key, final byte[] wikiCode) {
         try {
             return this.put(key, Switchboard.wikiParser.transform(wikiCode));
@@ -254,19 +253,17 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     // new get with default objects
     public Object get(final String key, final Object dflt) {
         final Object result = super.get(key);
-        if (result == null) return dflt;
-        return result;
+        return (result == null) ? dflt : result;
     }
 
     // string variant
     public String get(final String key, final String dflt) {
-        final String result = removeBOM(super.get(key));
-        if (result == null) return dflt;
-        return result;
+        final String result = removeByteOrderMark(super.get(key));
+        return (result == null) ? dflt : result;
     }
 
     public int getInt(final String key, final int dflt) {
-        final String s = removeBOM(super.get(key));
+        final String s = removeByteOrderMark(super.get(key));
         if (s == null) return dflt;
         try {
             return Integer.parseInt(s);
@@ -276,7 +273,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public long getLong(final String key, final long dflt) {
-        final String s = removeBOM(super.get(key));
+        final String s = removeByteOrderMark(super.get(key));
         if (s == null) return dflt;
         try {
             return Long.parseLong(s);
@@ -286,7 +283,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public float getFloat(final String key, final float dflt) {
-        final String s = removeBOM(super.get(key));
+        final String s = removeByteOrderMark(super.get(key));
         if (s == null) return dflt;
         try {
             return Float.parseFloat(s);
@@ -296,7 +293,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public boolean getBoolean(final String key, final boolean dflt) {
-        String s = removeBOM(super.get(key));
+        String s = removeByteOrderMark(super.get(key));
         if (s == null) return dflt;
         s = s.toLowerCase();
         return s.equals("true") || s.equals("on") || s.equals("1");
@@ -304,24 +301,21 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     
     public boolean hasValue(final String key) {
         final String s = super.get(key);
-        if (s == null || s.length() < 1) return false;
-        return true;
+        return (s != null && !s.isEmpty());
     }
 
     // returns a set of all values where their key mappes the keyMapper
     public String[] getAll(final String keyMapper) {
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
-        final ArrayList<String> v = new ArrayList<String>();
-        String key;
-        for (Map.Entry<String, String> entry: entrySet()) {
-            key = entry.getKey();
-            if (key.matches(keyMapper)) v.add(entry.getValue());
+        final List<String> v = new ArrayList<String>();
+        for (final Map.Entry<String, String> entry: entrySet()) {
+            if (entry.getKey().matches(keyMapper)) {
+                v.add(entry.getValue());
+            }
         }
-        // make a String[]
-        final String[] result = new String[v.size()];
-        for (int i = 0; i < v.size(); i++) result[i] = v.get(i);
-        return result;
+
+        return v.toArray(new String[0]);
     }
 
     // put all elements of another hashtable into the own table
@@ -336,11 +330,15 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         BufferedOutputStream fos = null;
         try {
             fos = new BufferedOutputStream(new FileOutputStream(f));
-            String key, value;
-            for (Map.Entry<String, String> entry: entrySet()) {
-                key = entry.getKey();
-                value = patternNewline.matcher(entry.getValue()).replaceAll("\\\\n");
-                fos.write(UTF8.getBytes(key + "=" + value + "\r\n"));
+            final StringBuilder line = new StringBuilder(64);
+            for (final Map.Entry<String, String> entry : entrySet()) {
+                line.delete(0, line.length());
+                line.append(entry.getKey());
+                line.append("=");
+                line.append(patternNewline.matcher(entry.getValue()).replaceAll("\\\\n"));
+                line.append("\r\n");
+
+                fos.write(UTF8.getBytes(line.toString()));
             }
         } finally {
             if (fos != null) {
@@ -371,10 +369,11 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     /**
      * output the objects in a HTTP GET syntax
      */
+    @Override
     public String toString() {
-        if (this.size() == 0) return "";
-        StringBuilder param = new StringBuilder(this.size() * 40);
-        for (Map.Entry<String, String> entry: this.entrySet()) {
+        if (this.isEmpty()) return "";
+        final StringBuilder param = new StringBuilder(this.size() * 40);
+        for (final Map.Entry<String, String> entry: this.entrySet()) {
             param.append(MultiProtocolURI.escape(entry.getKey()));
             param.append('=');
             param.append(MultiProtocolURI.escape(entry.getValue()));

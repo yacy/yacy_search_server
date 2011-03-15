@@ -72,11 +72,7 @@ public class IndexCreateWWWLocalQueue_p {
  
         int showLimit = 100;
         if (post != null) {
-            if (post.containsKey("limit")) {
-                try {
-                    showLimit = Integer.parseInt(post.get("limit"));
-                } catch (final NumberFormatException e) {}
-            }
+            showLimit = post.getInt("limit", 100);
             
             if (post.containsKey("deleteEntries")) {
                 int c = 0;

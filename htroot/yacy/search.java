@@ -254,7 +254,11 @@ public final class search {
                     wordhash = entry.getKey();
                     final ReferenceContainer<WordReference> container = entry.getValue();
                     indexabstractContainercount += container.size();
-                    indexabstract.append("indexabstract." + UTF8.String(wordhash) + "=").append(ReferenceContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
+                    indexabstract.append("indexabstract.");
+                    indexabstract.append(UTF8.String(wordhash));
+                    indexabstract.append("=");
+                    indexabstract.append(ReferenceContainer.compressIndex(container, null, 1000).toString());
+                    indexabstract.append(serverCore.CRLF_STRING);
                 }
             }
             
@@ -323,7 +327,7 @@ public final class search {
                     while (j.hasNext()) {
                         wordhash = j.next();
                         indexabstractContainercount += theSearch.abstractsCount(wordhash);
-                        indexabstract.append("indexabstract." + UTF8.String(wordhash) + "=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
+                        indexabstract.append("indexabstract.").append(UTF8.String(wordhash)).append("=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
@@ -336,11 +340,11 @@ public final class search {
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
                     indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsMaxCountHash());
-                    indexabstract.append("indexabstract." + UTF8.String(theSearch.getAbstractsMaxCountHash()) + "=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
+                    indexabstract.append("indexabstract.").append(UTF8.String(theSearch.getAbstractsMaxCountHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
                     if ((theSearch.getAbstractsNearDHTHash() != null) && (!(UTF8.String(theSearch.getAbstractsNearDHTHash()).equals(UTF8.String(theSearch.getAbstractsMaxCountHash()))))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
                         indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsNearDHTHash());
-                        indexabstract.append("indexabstract." + UTF8.String(theSearch.getAbstractsNearDHTHash()) + "=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
+                        indexabstract.append("indexabstract.").append(UTF8.String(theSearch.getAbstractsNearDHTHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);
@@ -367,7 +371,7 @@ public final class search {
         prop.put("indexabstract", indexabstract.toString());
         
         // prepare result
-        if (joincount == 0 || accu == null || accu.size() == 0) {
+        if (joincount == 0 || accu == null || accu.isEmpty()) {
             
             // no results
             prop.put("links", "");
@@ -423,7 +427,7 @@ public final class search {
  
         prop.put("searchtime", System.currentTimeMillis() - timestamp);
 
-        final int links = Integer.parseInt(prop.get("linkcount","0"));
+        final int links = prop.getInt("linkcount",0);
         sb.peers.mySeed().incSI(links);
         sb.peers.mySeed().incSU(links);
         return prop;

@@ -87,15 +87,14 @@ public class Table_YMark_p {
             Log.logException(e);
 		}
 		
-        String counts = post.get("count", null);
-        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : Integer.parseInt(counts);
+        final String counts = post.get("count", null);
+        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
         String pattern = post.get("search", "");
-        Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+        Pattern matcher = (pattern.isEmpty() || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
         prop.put("pattern", pattern);
         
-        List<String> columns = null;
-        columns = new ArrayList<String>();
-        for (Map.Entry<String, String> entry: post.entrySet()) {
+        List<String> columns = new ArrayList<String>();
+        for (final Map.Entry<String, String> entry: post.entrySet()) {
             if (entry.getKey().startsWith("col_")) {
             	columns.add(entry.getKey().substring(4));
             }
@@ -111,62 +110,62 @@ public class Table_YMark_p {
             Iterator<String> cit;
             String col;
             try {
-    			cit = sb.tables.columns(table).iterator();
+                cit = sb.tables.columns(table).iterator();
     	        while(cit.hasNext()) {
-    				col = cit.next();
-    	        	prop.put("showselection_columns_" + count + "_col", col);
-    				prop.put("showselection_columns_" + count + "_checked", columns.contains(col) ? 1 : 0);
-    				count++;	
+                    col = cit.next();
+                    prop.put("showselection_columns_" + count + "_col", col);
+                    prop.put("showselection_columns_" + count + "_checked", columns.contains(col) ? 1 : 0);
+                    count++;
     	        }
-    		} catch (IOException e) {
+            } catch (IOException e) {
                 Log.logException(e);
-    		}      	
+            }
         }
         prop.put("showselection_columns", count);
         
         // apply deletion requests
-        if (post.get("deletetable", "").length() > 0) try {            
-        	sb.tables.clear(table);
-        	sb.tables.clear(YMarkTables.TABLES.FOLDERS.tablename(bmk_user));
-        	sb.tables.clear(YMarkTables.TABLES.TAGS.tablename(bmk_user));
+        if (!post.get("deletetable", "").isEmpty()) try {
+            sb.tables.clear(table);
+            sb.tables.clear(YMarkTables.TABLES.FOLDERS.tablename(bmk_user));
+            sb.tables.clear(YMarkTables.TABLES.TAGS.tablename(bmk_user));
         } catch (IOException e) {
             Log.logException(e);
         }
         
         // apply rebuildIndex request
-        if (post.get("rebuildindex", "").length() > 0) try { 
-        	sb.tables.bookmarks.folders.rebuildIndex(bmk_user);
-        	sb.tables.bookmarks.tags.rebuildIndex(bmk_user);
+        if (!post.get("rebuildindex", "").isEmpty()) try {
+            sb.tables.bookmarks.folders.rebuildIndex(bmk_user);
+            sb.tables.bookmarks.tags.rebuildIndex(bmk_user);
         }  catch (IOException e) {
             Log.logException(e);
         }
         
-        if (post.get("deleterows", "").length() > 0) {
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+        if (!post.get("deleterows", "").isEmpty()) {
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
-                	sb.tables.bookmarks.deleteBookmark(bmk_user, entry.getValue().substring(5).getBytes());
+                    sb.tables.bookmarks.deleteBookmark(bmk_user, entry.getValue().substring(5).getBytes());
                 } catch (IOException e) {
                     Log.logException(e);
                 } catch (RowSpaceExceededException e) {
                     Log.logException(e);
-				}
+                }
             }
         }
         
-        if (post.get("commitrow", "").length() > 0) {
-        	final HashMap<String, String> bmk = new HashMap<String, String>();
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+        if (!post.get("commitrow", "").isEmpty()) {
+            final HashMap<String, String> bmk = new HashMap<String, String>();
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("col_")) {
                     bmk.put(entry.getKey().substring(4), entry.getValue());
                 }
             }
             try {
-				sb.tables.bookmarks.addBookmark(bmk_user, bmk, false);
-			} catch (IOException e) {
+                sb.tables.bookmarks.addBookmark(bmk_user, bmk, false);
+            } catch (IOException e) {
                 Log.logException(e);
-			} catch (RowSpaceExceededException e) {
+            } catch (RowSpaceExceededException e) {
                 Log.logException(e);
-			}
+            }
         }
         
         // generate table
@@ -178,7 +177,7 @@ public class Table_YMark_p {
             if (post.containsKey("editrow")) {
                 // check if we can find a key
                 String pk = null;
-                for (Map.Entry<String, String> entry: post.entrySet()) {
+                for (final Map.Entry<String, String> entry: post.entrySet()) {
                     if (entry.getValue().startsWith("mark_")) {
                         pk = entry.getValue().substring(5);
                         break;
@@ -195,7 +194,7 @@ public class Table_YMark_p {
                 }
             } else if (post.containsKey("addrow")) try {
                 // get a new key
-                String pk = UTF8.String(sb.tables.createRow(table));
+                final String pk = UTF8.String(sb.tables.createRow(table));
                 setEdit(sb, prop, table, pk, columns);
             } catch (IOException e) {
                 Log.logException(e);
@@ -207,15 +206,15 @@ public class Table_YMark_p {
                
                 
                 try {
-                	prop.put("showtable_bmksize", sb.tables.size(table));
-                	prop.put("showtable_tagsize", sb.tables.size(YMarkTables.TABLES.TAGS.tablename(bmk_user)));
-                	prop.put("showtable_foldersize", sb.tables.size(YMarkTables.TABLES.FOLDERS.tablename(bmk_user)));
-				} catch (IOException e) {
+                    prop.put("showtable_bmksize", sb.tables.size(table));
+                    prop.put("showtable_tagsize", sb.tables.size(YMarkTables.TABLES.TAGS.tablename(bmk_user)));
+                    prop.put("showtable_foldersize", sb.tables.size(YMarkTables.TABLES.FOLDERS.tablename(bmk_user)));
+                } catch (IOException e) {
                     Log.logException(e);
-                	prop.put("showtable_bmksize", 0);
-                	prop.put("showtable_tagsize", 0);
-                	prop.put("showtable_foldersize", 0);
-				}
+                    prop.put("showtable_bmksize", 0);
+                    prop.put("showtable_tagsize", 0);
+                    prop.put("showtable_foldersize", 0);
+                }
                 
                 // insert the columns
                 
@@ -233,9 +232,9 @@ public class Table_YMark_p {
                 }
                 count = 0;
                 try {
-                	Iterator<Tables.Row> mapIterator;
-                	if(post.containsKey("folders") && !post.get("folders").isEmpty()) {
-                    	mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.folders.getBookmarks(bmk_user, post.get("folders")), maxcount).iterator();
+                    Iterator<Tables.Row> mapIterator;
+                    if (post.containsKey("folders") && !post.get("folders").isEmpty()) {
+                        mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.folders.getBookmarks(bmk_user, post.get("folders")), maxcount).iterator();
                     } else if(post.containsKey("tags") && !post.get("tags").isEmpty()) {
                     	mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.tags.getBookmarks(bmk_user, post.get("tags")), maxcount).iterator();
                     } else {
@@ -286,7 +285,7 @@ public class Table_YMark_p {
         if (row == null) return;
         int count = 0;
         byte[] cell;
-        for (String col: columns) {
+        for (final String col: columns) {
             cell = row.get(col);
             prop.put("showedit_list_" + count + "_key", col);
             prop.put("showedit_list_" + count + "_value", cell == null ? "" : UTF8.String(cell));

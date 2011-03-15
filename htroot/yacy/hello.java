@@ -72,9 +72,7 @@ public final class hello {
 //      final String mytime   = (String) post.get(MYTIME, ""); //
         final String key      = post.get("key", "");      // transmission key for response
         final String seed     = post.get("seed", "");
-        final String countStr = post.get("count", "0");
-        int  count = 0;
-        try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (final NumberFormatException e) {count = 0;}
+        int  count            = post.getInt("count", 0);
 //      final Date remoteTime = yacyCore.parseUniversalDate(post.get(MYTIME)); // read remote time
         final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
         long time = System.currentTimeMillis();
@@ -147,21 +145,22 @@ public final class hello {
         // if the previous attempt (using the reported ip address) was not successful,
         // then try the ip where the request came from
         if (urls < 0) {
-        	boolean isNotLocal = true;
-        	
-        	// we are only allowed to connect to the client IP address if it's not our own address
-        	if (serverCore.useStaticIP) {
-        		isNotLocal = !ias.isSiteLocalAddress();
+            boolean isNotLocal = true;
+
+            // we are only allowed to connect to the client IP address if it's not our own address
+            if (serverCore.useStaticIP) {
+                    isNotLocal = !ias.isSiteLocalAddress();
             }
-        	if (isNotLocal) {
-        		serverCore.checkInterruption();
+
+            if (isNotLocal) {
+                serverCore.checkInterruption();
                 
                 prop.put("yourip", clientip);
                 remoteSeed.setIP(clientip);
                 urls = yacyClient.queryUrlCount(remoteSeed);
                 time_backping = System.currentTimeMillis() - time;
                 backping_method = "clientip=" + clientip;
-        	}
+            }
         }
 
 //      System.out.println("YACYHELLO: YOUR IP=" + clientip);

@@ -66,10 +66,10 @@ public class IndexShare_p {
         }
         
         if (post.containsKey("indexsharesetting")) {
-            sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
-            sb.setConfig("allowReceiveIndex", (post.containsKey("receive")) ? "true" : "false");
-            sb.setConfig("defaultLinkReceiveFrequency", post.get("linkfreq", "30"));
-            sb.setConfig("defaultWordReceiveFrequency", post.get("wordfreq", "10"));
+            sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, post.containsKey("distribute"));
+            sb.setConfig("allowReceiveIndex", post.containsKey("receive"));
+            sb.setConfig("defaultLinkReceiveFrequency", post.getInt("linkfreq", 30));
+            sb.setConfig("defaultWordReceiveFrequency", post.getInt("wordfreq", 10));
         }
 
         // insert constants

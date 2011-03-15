@@ -27,6 +27,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -69,7 +70,7 @@ public class ConfigUpdate_p {
         
         if (post != null) {
             // check if update is supposed to be installed and a release is defined
-            if (post.containsKey("update") && post.get("releaseinstall", "").length() > 0) {
+            if (post.containsKey("update") && !post.get("releaseinstall", "").isEmpty()) {
                 prop.put("forwardToSteering", "1");
                 prop.putHTML("forwardToSteering_release",post.get("releaseinstall", ""));
                 prop.put("deploys", "1");
@@ -80,7 +81,7 @@ public class ConfigUpdate_p {
             if (post.containsKey("downloadRelease")) {
                 // download a release
                 final String release = post.get("releasedownload", "");
-                if (release.length() > 0) {
+                if (!release.isEmpty()) {
                     try {
                 	yacyRelease versionToDownload = new yacyRelease(new DigestURI(release));
                 	
@@ -107,7 +108,7 @@ public class ConfigUpdate_p {
 
             if (post.containsKey("deleteRelease")) {
                 final String release = post.get("releaseinstall", "");
-                if (release.length() > 0) {
+                if (!release.isEmpty()) {
                     try {
                         FileUtils.deletedelete(new File(sb.releasePath, release));
                         FileUtils.deletedelete(new File(sb.releasePath, release + ".sig"));
@@ -148,7 +149,7 @@ public class ConfigUpdate_p {
                 sb.setConfig("update.cycle", Math.max(12, post.getLong("cycle", 168)));
                 sb.setConfig("update.blacklist", post.get("blacklist", ""));
                 sb.setConfig("update.concept", ("any".equals(post.get("releaseType", "any"))) ? "any" : "main");
-                sb.setConfig("update.onlySignedFiles", ("true".equals(post.get("onlySignedFiles", "false"))) ? "1" : "0");
+                sb.setConfig("update.onlySignedFiles", (post.getBoolean("onlySignedFiles", false)) ? "1" : "0");
             }
         }
         
@@ -168,7 +169,7 @@ public class ConfigUpdate_p {
             
         prop.put("candeploy_deployenabled", (downloadedFiles.length == 0) ? "0" : ((devenvironment) ? "1" : "2")); // prevent that a developer-version is over-deployed
           
-        final TreeSet<yacyRelease> downloadedReleases = new TreeSet<yacyRelease>();
+        final NavigableSet<yacyRelease> downloadedReleases = new TreeSet<yacyRelease>();
         for (final File downloaded : downloadedFiles) {
             try {
                 yacyRelease release = new yacyRelease(downloaded);

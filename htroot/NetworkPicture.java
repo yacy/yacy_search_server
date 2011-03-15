@@ -49,7 +49,7 @@ public class NetworkPicture {
         
         long timeSeconds = System.currentTimeMillis() / 1000;
         if (buffer != null && !authorized && timeSeconds - lastAccessSeconds < 2) {
-            Log.logInfo("NetworkPicture", "cache hit (1); authorized = " + (authorized ? "true" : "false") + ", timeSeconds - lastAccessSeconds = " + (timeSeconds - lastAccessSeconds));
+            Log.logInfo("NetworkPicture", "cache hit (1); authorized = " + authorized + ", timeSeconds - lastAccessSeconds = " + (timeSeconds - lastAccessSeconds));
             return buffer;
         }
         
@@ -57,7 +57,7 @@ public class NetworkPicture {
         sync.acquireUninterruptibly();
         
         if (buffer != null && !authorized  && timeSeconds - lastAccessSeconds < 2)  {
-            Log.logInfo("NetworkPicture", "cache hit (2); authorized = " + (authorized ? "true" : "false") + ", timeSeconds - lastAccessSeconds = " + (timeSeconds - lastAccessSeconds));
+            Log.logInfo("NetworkPicture", "cache hit (2); authorized = " + authorized + ", timeSeconds - lastAccessSeconds = " + (timeSeconds - lastAccessSeconds));
             sync.release();
             return buffer;
         }
@@ -78,7 +78,7 @@ public class NetworkPicture {
             passiveLimit = post.getInt("pal", passiveLimit);
             potentialLimit = post.getInt("pol", potentialLimit);
             maxCount = post.getInt("max", maxCount);
-            corona = post.get("corona", "true").equals("true");
+            corona = post.getBoolean("corona", true);
             coronaangle = (corona) ? post.getInt("coronaangle", 0) : -1;
             communicationTimeout = post.getLong("ct", -1);
             bgcolor = post.get("bgcolor", bgcolor);

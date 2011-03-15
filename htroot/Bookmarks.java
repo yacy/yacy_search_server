@@ -265,11 +265,11 @@ public class Bookmarks {
             }
 
             if (post.containsKey("start")) {
-                start = Integer.parseInt(post.get("start"));
+                start = post.getInt("start", 0);
             }
 
             if (post.containsKey("num")) {
-                max_count = Integer.parseInt(post.get("num"));
+                max_count = post.getInt("num", 10);
             }
     	} // END if(post != null)
     	

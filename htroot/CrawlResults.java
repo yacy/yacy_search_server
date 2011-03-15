@@ -70,7 +70,7 @@ public class CrawlResults {
         // find process number
         EventOrigin tabletype;
         try {
-            tabletype = EventOrigin.getEvent(Integer.parseInt(post.get("process", "0")));
+            tabletype = EventOrigin.getEvent(post.getInt("process", 0));
         } catch (final NumberFormatException e) {
             tabletype = EventOrigin.UNKNOWN;
         }
@@ -105,7 +105,7 @@ public class CrawlResults {
         if (post != null) {
             // custom number of lines
             if (post.containsKey("count")) {
-                lines = Integer.parseInt(post.get("count", "500"));
+                lines = post.getInt("count", 500);
             }
 
             // do the commands
@@ -134,7 +134,7 @@ public class CrawlResults {
             }
 
             if (post.containsKey("moreIndexed")) {
-                lines = Integer.parseInt(post.get("showIndexed", "500"));
+                lines = post.getInt("showIndexed", 500);
             }
 
             if (post.get("si") != null) showInit = !("0".equals(post.get("si")));

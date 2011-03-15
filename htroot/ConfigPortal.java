@@ -70,13 +70,13 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET, post.get("target", "_self"));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
                 HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
-                sb.setConfig("publicTopmenu", post.get("publicTopmenu", "true"));
-                sb.setConfig("search.options", post.getBoolean("search.options", false) ? "true" : "false");
-                sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date", false) ? "true" : "false");
-                sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size", false) ? "true" : "false");
-                sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false) ? "true" : "false");
-                sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false) ? "true" : "false");
-                sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false) ? "true" : "false");
+                sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu", true));
+                sb.setConfig("search.options", post.getBoolean("search.options", false));
+                sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date", false));
+                sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size", false));
+                sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
+                sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
+                sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
             }
             if (post.containsKey("searchpage_default")) {
                 sb.setConfig(SwitchboardConstants.GREETING, "P2P Web Search");
@@ -87,13 +87,13 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, "");
                 HTTPDFileHandler.indexForward = "";
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
-                sb.setConfig("publicTopmenu", "true");
-                sb.setConfig("search.options", "true");
-                sb.setConfig("search.result.show.date", "true");
-                sb.setConfig("search.result.show.size", "true");
-                sb.setConfig("search.result.show.metadata", "true");
-                sb.setConfig("search.result.show.parser", "true");
-                sb.setConfig("search.result.show.pictures", "true");
+                sb.setConfig("publicTopmenu", true);
+                sb.setConfig("search.options", true);
+                sb.setConfig("search.result.show.date", true);
+                sb.setConfig("search.result.show.size", true);
+                sb.setConfig("search.result.show.metadata", true);
+                sb.setConfig("search.result.show.parser", true);
+                sb.setConfig("search.result.show.pictures", true);
             }            
         }
 

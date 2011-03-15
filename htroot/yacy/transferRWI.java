@@ -84,8 +84,8 @@ public final class transferRWI {
         final int wordc       = post.getInt("wordc", 0);                  // number of different words
         final int entryc      = post.getInt("entryc", 0);                 // number of entries in indexes
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
-        boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
-        final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
+        boolean granted       = sb.getConfigBool("allowReceiveIndex", false);
+        final boolean blockBlacklist = sb.getConfigBool("indexReceiveBlockBlacklist", false);
         final long cachelimit = sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
         final yacySeed otherPeer = sb.peers.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                

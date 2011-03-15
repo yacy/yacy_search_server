@@ -81,8 +81,8 @@ public class get_bookmarks {
     	
         // check for GET parameters
         if (post != null){
-            itemsPerPage = (post.containsKey("rp")) ? Integer.parseInt(post.get("rp"), MAXRESULTS) : MAXRESULTS;
-            page = (post.containsKey("page")) ? Integer.parseInt(post.get("page", "1")): 1;
+            itemsPerPage = (post.containsKey("rp")) ? post.getInt("rp", MAXRESULTS) : MAXRESULTS;
+            page = (post.containsKey("page")) ? post.getInt("page", 1): 1;
             query = (post.containsKey("query")) ? post.get("query", "") : "";
             qtype = (post.containsKey("qtype")) ? post.get("qtype", "") : "";
             // if (post.containsKey("sortorder")) sortorder = post.get("sortorder");

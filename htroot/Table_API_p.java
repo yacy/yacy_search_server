@@ -24,6 +24,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -50,16 +51,15 @@ public class Table_API_p {
         
         int startRecord = 0;
         int maximumRecords = 25;
-        boolean inline = false;
         Pattern query = Pattern.compile(".*");
         if (post != null && post.containsKey("startRecord")) startRecord = post.getInt("startRecord", 0);
         if (post != null && post.containsKey("maximumRecords")) maximumRecords = post.getInt("maximumRecords", 0);
-        if (post != null && post.containsKey("query") && post.get("query", "").length() > 0) {
+        if (post != null && post.containsKey("query") && !post.get("query", "").isEmpty()) {
             query = Pattern.compile(".*" + post.get("query", "") + ".*");
             startRecord = 0;
             maximumRecords = 1000;
         }
-        if (post != null && post.get("inline","false").equals("true")) inline = true;
+        final boolean inline = (post != null && post.getBoolean("inline",false));
 
         prop.put("inline", (inline) ? 1 : 0);
         
@@ -70,7 +70,7 @@ public class Table_API_p {
         
         String pk;
         if (post != null && post.containsKey("repeat_select") && ((pk = post.get("pk")) != null)) try {
-            String action = post.get("repeat_select", "off");
+            final String action = post.get("repeat_select", "off");
             if (action.equals("on")) {
                 Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
                 if (row != null) {
@@ -87,10 +87,10 @@ public class Table_API_p {
         }
         
         if (post != null && post.containsKey("repeat_time") && ((pk = post.get("pk")) != null)) try {
-            String action = post.get("repeat_time", "off");
-            Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
+            final String action = post.get("repeat_time", "off");
+            final Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
             if (row != null) {
-                if (action.equals("off")) {
+                if ("off".equals(action)) {
                     row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
                 } else {
                     row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, Integer.parseInt(action));
@@ -105,8 +105,8 @@ public class Table_API_p {
         }
         
         if (post != null && post.containsKey("repeat_unit") && ((pk = post.get("pk")) != null)) try {
-            String action = post.get("repeat_unit", "seldays");
-            Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
+            final String action = post.get("repeat_unit", "seldays");
+            final Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
             if (row != null) {
                 int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 1);
                 row.put(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, action.substring(3));
@@ -123,8 +123,8 @@ public class Table_API_p {
             Log.logException(e);
         }
         
-        if (post != null && post.get("deleterows", "").length() > 0) {
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+        if (post != null && !post.get("deleterows", "").isEmpty()) {
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) {
                     try {
                         sb.tables.delete(WorkTables.TABLE_API_NAME, entry.getValue().substring(5).getBytes());
@@ -135,17 +135,17 @@ public class Table_API_p {
             }
         }
 
-        if (post != null && post.get("execrows", "").length() > 0) {
+        if (post != null && !post.get("execrows", "").isEmpty()) {
             // create a time-ordered list of events to execute
-            TreeSet<String> pks = new TreeSet<String>();
-            for (Map.Entry<String, String> entry: post.entrySet()) {
+            final Set<String> pks = new TreeSet<String>();
+            for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) {
                     pks.add(entry.getValue().substring(5));
                 }
             }
             
             // now call the api URLs and store the result status
-            Map<String, Integer> l = sb.tables.execAPICalls("localhost", (int) sb.getConfigLong("port", 8090), sb.getConfig("adminAccountBase64MD5", ""), pks);
+            final Map<String, Integer> l = sb.tables.execAPICalls("localhost", (int) sb.getConfigLong("port", 8090), sb.getConfig("adminAccountBase64MD5", ""), pks);
             
             // construct result table
             prop.put("showexec", l.size() > 0 ? 1 : 0);
@@ -170,7 +170,7 @@ public class Table_API_p {
         prop.put("showtable_inline", inline ? 1 : 0);
         
         // insert rows
-        List<Tables.Row> table = new ArrayList<Tables.Row>(maximumRecords);
+        final List<Tables.Row> table = new ArrayList<Tables.Row>(maximumRecords);
         int count = 0;
         int tablesize = 0;
         try {
@@ -195,15 +195,15 @@ public class Table_API_p {
                 if (table.size() >= maximumRecords) break;
             }
             // then work on the list
-            for (Tables.Row row: table) {
-                Date now = new Date();
-                Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, now) : null;
-                Date date_recording = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, date);
-                Date date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
-                Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
-                int callcount = row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1);
-                String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
-                int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
+            for (final Tables.Row row: table) {
+                final Date now = new Date();
+                final Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, now) : null;
+                final Date date_recording = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, date);
+                final Date date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
+                final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
+                final int callcount = row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1);
+                final String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
+                final int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
                 prop.put("showtable_list_" + count + "_inline", inline ? 1 : 0);
                 prop.put("showtable_list_" + count + "_dark", dark ? 1 : 0); dark=!dark;
                 prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));

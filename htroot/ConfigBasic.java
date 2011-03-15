@@ -95,7 +95,7 @@ public class ConfigBasic {
         
         // port settings
         final long port;
-        if (post != null && post.containsKey("port") && Integer.parseInt(post.get("port")) > 1023) {
+        if (post != null && post.getInt("port", 0) > 1023) {
             port = post.getLong("port", 8090);
         } else {
             port = env.getConfigLong("port", 8090); //this allows a low port, but it will only get one, if the user edits the config himself.
@@ -103,7 +103,7 @@ public class ConfigBasic {
 
         // check if peer name already exists
         final yacySeed oldSeed = sb.peers.lookupByName(peerName);
-        if (oldSeed == null && !sb.peers.mySeed().getName().equals(peerName)) {
+        if (oldSeed == null && !peerName.equals(sb.peers.mySeed().getName())) {
             // the name is new
             if (Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
                 sb.peers.mySeed().setName(peerName);
@@ -112,15 +112,15 @@ public class ConfigBasic {
         
         // UPnP config
         final boolean upnp;
-        if(post != null && post.containsKey("port")) { // hack to allow checkbox
-        	upnp = post.containsKey("enableUpnp");
-        	if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
-                    UPnP.addPortMapping();
-                }
-        	sb.setConfig(SwitchboardConstants.UPNP_ENABLED, upnp);
-        	if (!upnp) {
-                    UPnP.deletePortMapping();
-                }
+        if (post != null && post.containsKey("port")) { // hack to allow checkbox
+            upnp = post.containsKey("enableUpnp");
+            if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
+                UPnP.addPortMapping();
+            }
+            sb.setConfig(SwitchboardConstants.UPNP_ENABLED, upnp);
+            if (!upnp) {
+                UPnP.deletePortMapping();
+            }
         } else {
             upnp = false;
         }
@@ -223,9 +223,9 @@ public class ConfigBasic {
         final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
         
         if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
-        	env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
-        	env.setConfig("browserPopUpPage", "Status.html");
-        	HTTPDFileHandler.initDefaultPath();
+            env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
+            env.setConfig("browserPopUpPage", "Status.html");
+            HTTPDFileHandler.initDefaultPath();
         }
         
         prop.put("statusName", properName ? "1" : "0");

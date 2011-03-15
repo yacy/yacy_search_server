@@ -85,10 +85,10 @@ public final class Settings_p {
         prop.putHTML("peerLang", peerLang);
         
         // http networking settings
-        prop.put("isTransparentProxy", env.getConfig("isTransparentProxy", "false").equals("true") ? "1" : "0"); 
-        prop.put("connectionKeepAliveSupport", env.getConfig("connectionKeepAliveSupport", "false").equals("true") ? "1" : "0");
-        prop.put("proxy.sendViaHeader", env.getConfig("proxy.sendViaHeader", "false").equals("true") ? "1" : "0");
-        prop.put("proxy.sendXForwardedForHeader", env.getConfig("proxy.sendXForwardedForHeader", "true").equals("true") ? "1" : "0");
+        prop.put("isTransparentProxy", env.getConfigBool("isTransparentProxy", false) ? "1" : "0");
+        prop.put("connectionKeepAliveSupport", env.getConfigBool("connectionKeepAliveSupport", false) ? "1" : "0");
+        prop.put("proxy.sendViaHeader", env.getConfigBool("proxy.sendViaHeader", false) ? "1" : "0");
+        prop.put("proxy.sendXForwardedForHeader", env.getConfigBool("proxy.sendXForwardedForHeader", true) ? "1" : "0");
 
         // set values
         String s;
@@ -109,9 +109,9 @@ public final class Settings_p {
         }
         
         // remote proxy
-        prop.put("remoteProxyUseChecked", env.getConfig("remoteProxyUse", "false").equals("true") ? 1 : 0);
-        prop.put("remoteProxyUse4Yacy", env.getConfig("remoteProxyUse4Yacy", "true").equals("true") ? 1 : 0);
-        prop.put("remoteProxyUse4SSL", env.getConfig("remoteProxyUse4SSL", "true").equals("true") ? 1 : 0);
+        prop.put("remoteProxyUseChecked", env.getConfigBool("remoteProxyUse", false) ? 1 : 0);
+        prop.put("remoteProxyUse4Yacy", env.getConfigBool("remoteProxyUse4Yacy", true) ? 1 : 0);
+        prop.put("remoteProxyUse4SSL", env.getConfigBool("remoteProxyUse4SSL", true) ? 1 : 0);
         
         prop.putHTML("remoteProxyHost", env.getConfig("remoteProxyHost", ""));
         prop.putHTML("remoteProxyPort", env.getConfig("remoteProxyPort", ""));
@@ -125,7 +125,7 @@ public final class Settings_p {
         prop.putHTML("proxyfilter", env.getConfig("proxyClient", "*"));
         
         // proxy password
-        if ( env.getConfig("use_proxyAccounts", "false").equals("false") ) {
+        if (!env.getConfigBool("use_proxyAccounts", false)) {
             // no password has been specified
             prop.put("use_proxyAccounts", "0"); //unchecked
         } else {
@@ -194,7 +194,7 @@ public final class Settings_p {
         /*
          * Message forwarding configuration
          */
-        prop.put("msgForwardingEnabled",env.getConfig("msgForwardingEnabled","false").equals("true") ? "1" : "0");
+        prop.put("msgForwardingEnabled",env.getConfigBool("msgForwardingEnabled",false) ? "1" : "0");
         prop.putHTML("msgForwardingCmd",env.getConfig("msgForwardingCmd", ""));
         prop.putHTML("msgForwardingTo",env.getConfig("msgForwardingTo", ""));
 

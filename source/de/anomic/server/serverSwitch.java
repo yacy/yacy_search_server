@@ -34,9 +34,12 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -63,11 +66,11 @@ public class serverSwitch {
     protected       boolean firstInit;
     protected       Log     log;
     protected       int     serverJobs;
-    private         ConcurrentHashMap<String, String>      configProps;
-    private   final ConcurrentHashMap<String, String>      configRemoved;
-    private   final ConcurrentHashMap<InetAddress, String> authorization;
-    private   final TreeMap<String, BusyThread>            workerThreads;
-    private   final serverAccessTracker                    accessTracker;
+    private         ConcurrentMap<String, String>      configProps;
+    private   final ConcurrentMap<String, String>      configRemoved;
+    private   final ConcurrentMap<InetAddress, String> authorization;
+    private   final NavigableMap<String, BusyThread>   workerThreads;
+    private   final serverAccessTracker                accessTracker;
     
     public serverSwitch(final File dataPath, final File appPath, final String initPath, final String configPath) {
         // we initialize the switchboard with a property file,
@@ -85,7 +88,7 @@ public class serverSwitch {
         new File(configFile.getParent()).mkdir();
 
         // predefine init's
-        ConcurrentHashMap<String, String> initProps;
+        final ConcurrentMap<String, String> initProps;
         if (initFile.exists())
             initProps = FileUtils.loadMap(initFile);
         else
@@ -98,10 +101,10 @@ public class serverSwitch {
         // delete the 'pro' init settings
         i = initProps.keySet().iterator();
         while (i.hasNext()) {
-        	prop = i.next();
-        	if (prop.endsWith("__pro")) {
-        		i.remove();
-        	}
+            prop = i.next();
+            if (prop.endsWith("__pro")) {
+                i.remove();
+            }
         }
         
         // load config's from last save
@@ -207,8 +210,12 @@ public class serverSwitch {
     	configProps.remove(key);
     }
     
-    /* (non-Javadoc)
-     * @see de.anomic.server.serverSwitch#getConfig(java.lang.String, java.lang.String)
+    /**
+     * Gets a configuration parameter from the properties.
+     * @param key name of the configuration parameter
+     * @param dflt default value which will be used in case parameter can not be
+     * found or if it is invalid
+     * @return value if the parameter or default value
      */
     public String getConfig(final String key, final String dflt) {
         // get the value
@@ -218,7 +225,14 @@ public class serverSwitch {
         if (s == null) return dflt;
         return s;
     }
-    
+
+    /**
+     * Gets a configuration parameter from the properties.
+     * @param key name of the configuration parameter
+     * @param dflt default value which will be used in case parameter can not be
+     * found or if it is invalid
+     * @return value if the parameter or default value
+     */
     public long getConfigLong(final String key, final long dflt) {
         try {
             return Long.parseLong(getConfig(key, Long.toString(dflt)));
@@ -226,7 +240,14 @@ public class serverSwitch {
             return dflt;
         }
     }
-    
+
+    /**
+     * Gets a configuration parameter from the properties.
+     * @param key name of the configuration parameter
+     * @param dflt default value which will be used in case parameter can not be
+     * found or if it is invalid
+     * @return value if the parameter or default value
+     */
     public double getConfigFloat(final String key, final float dflt) {
         try {
             return Float.parseFloat(getConfig(key, Float.toString(dflt)));
@@ -234,7 +255,29 @@ public class serverSwitch {
             return dflt;
         }
     }
-    
+
+    /**
+     * Gets a configuration parameter from the properties.
+     * @param key name of the configuration parameter
+     * @param dflt default value which will be used in case parameter can not be
+     * found or if it is invalid
+     * @return value if the parameter or default value
+     */
+    public int getConfigInt(final String key, final int dflt) {
+        try {
+            return Integer.parseInt(getConfig(key, Integer.toString(dflt)));
+        } catch (final NumberFormatException e) {
+            return dflt;
+        }
+    }
+
+    /**
+     * Gets a configuration parameter from the properties.
+     * @param key name of the configuration parameter
+     * @param dflt default value which will be used in case parameter can not be
+     * found or if it is invalid
+     * @return value if the parameter or default value
+     */
     public boolean getConfigBool(final String key, final boolean dflt) {
         return Boolean.parseBoolean(getConfig(key, Boolean.toString(dflt)));
     }
@@ -270,7 +313,7 @@ public class serverSwitch {
 
     private void saveConfig() {
         try {
-            ConcurrentHashMap<String, String> configPropsCopy = new ConcurrentHashMap<String, String>();
+            ConcurrentMap<String, String> configPropsCopy = new ConcurrentHashMap<String, String>();
             configPropsCopy.putAll(configProps); // avoid concurrency problems
             FileUtils.saveMap(configFile, configPropsCopy, configComment);
         } catch (final IOException e) {
@@ -279,8 +322,11 @@ public class serverSwitch {
         }
     }
 
-    public ConcurrentHashMap<String, String> getRemoved() {
-        // returns configuration that had been removed during initialization
+    /**
+     * Gets configuration parameters which have been removed during initialization.
+     * @return contains parameter name as key and parameter value as value
+     */
+    public ConcurrentMap<String, String> getRemoved() {
         return configRemoved;
     }
 
@@ -381,10 +427,10 @@ public class serverSwitch {
     }
     
     public String[] sessionsOlderThan(String threadName, long timeout) {
-        ArrayList<String> list = new ArrayList<String>();
+        final List<String> list = new ArrayList<String>();
         final WorkflowThread st = getThread(threadName);
         
-        for (Session s: ((serverCore) st).getJobList()) {
+        for (final Session s: ((serverCore) st).getJobList()) {
             if (!s.isAlive()) continue;
             if (s.getTime() > timeout) {
                 list.add(s.getName());
@@ -397,7 +443,7 @@ public class serverSwitch {
         if (sessionName == null) return;
         final WorkflowThread st = getThread(threadName);
         
-        for (Session s: ((serverCore) st).getJobList()) {
+        for (final Session s: ((serverCore) st).getJobList()) {
             if (
                 (s.isAlive()) &&
                 (s.getName().equals(sessionName))
@@ -483,6 +529,7 @@ public class serverSwitch {
        return this.appPath;
     }
     
+    @Override
     public String toString() {
 	return configProps.toString();
     }
@@ -491,15 +538,15 @@ public class serverSwitch {
         serverJobs = jobs;
     }
     
-    public void track(String host, String accessPath) {
+    public void track(final String host, final String accessPath) {
         this.accessTracker.track(host, accessPath);
     }
     
-    public Collection<Track> accessTrack(String host) {
+    public Collection<Track> accessTrack(final String host) {
         return this.accessTracker.accessTrack(host);
     } 
 
-    public int latestAccessCount(final String host, long timedelta) {
+    public int latestAccessCount(final String host, final long timedelta) {
         return this.accessTracker.latestAccessCount(host, timedelta);
     } 
     
@@ -515,9 +562,10 @@ public class serverSwitch {
      * @param rootPath searchpath for file
      * @param file file to use when remote fetching fails (null if unused)
      */
-    public Reader getConfigFileFromWebOrLocally(String uri, String rootPath, File file) throws IOException, FileNotFoundException {
+    public Reader getConfigFileFromWebOrLocally(final String uri,
+            final String rootPath, final File file) throws IOException, FileNotFoundException {
     	if (uri.startsWith("http://") || uri.startsWith("https://")) {
-            String[] uris = uri.split(",");
+            final String[] uris = uri.split(",");
             for (String netdef: uris) {
                 netdef = netdef.trim();
                 try {
@@ -544,7 +592,7 @@ public class serverSwitch {
             	throw new FileNotFoundException();
             }
     	} else {
-            final File f = (uri.length() > 0 && uri.charAt(0) == '/') ? new File(uri) : new File(rootPath, uri);
+            final File f = (uri.length() > 0 && uri.startsWith("/")) ? new File(uri) : new File(rootPath, uri);
             if (f.exists()) {
             	return new FileReader(f);
             } else {
@@ -554,14 +602,21 @@ public class serverSwitch {
     }
     
     private static Random pwGenerator = new Random();
-    
+
     /**
-     * generates a random password
+     * Generates a random password.
+     * @return random password which is 20 characters long.
      */
     public String genRandomPassword() {
     	return genRandomPassword(20);
     }
-    public String genRandomPassword(int length) {
+
+    /**
+     * Generates a random password of a given length.
+     * @param length length o password
+     * @return password of given length
+     */
+    public String genRandomPassword(final int length) {
     	byte[] bytes = new byte[length];
     	pwGenerator.nextBytes(bytes);
     	return Digest.encodeMD5Hex(bytes);

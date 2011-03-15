@@ -145,23 +145,20 @@ public class ConfigNetwork_p {
         
         // write remote crawl request settings
         prop.put("crawlResponse", sb.getConfigBool("crawlResponse", false) ? "1" : "0");
-        long RTCbusySleep = 100;
-        try {
-            RTCbusySleep = Math.max(1, Integer.parseInt(env.getConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, "100")));
-        } catch (final NumberFormatException e) {}
+        final long RTCbusySleep = Math.max(1, env.getConfigInt(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 100));
         final int RTCppm = (int) (60000L / RTCbusySleep);
         prop.put("acceptCrawlLimit", RTCppm);
         
-        final boolean indexDistribute = "true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "true"));
-        final boolean indexReceive = "true".equals(sb.getConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, "true"));
+        final boolean indexDistribute = sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, true);
+        final boolean indexReceive = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
         prop.put("indexDistributeChecked", (indexDistribute) ? "1" : "0");
-        prop.put("indexDistributeWhileCrawling.on", ("true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true"))) ? "1" : "0");
-        prop.put("indexDistributeWhileCrawling.off", ("true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "true"))) ? "0" : "1");
-        prop.put("indexDistributeWhileIndexing.on", ("true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "true"))) ? "1" : "0");
-        prop.put("indexDistributeWhileIndexing.off", ("true".equals(sb.getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "true"))) ? "0" : "1");
+        prop.put("indexDistributeWhileCrawling.on", (sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true)) ? "1" : "0");
+        prop.put("indexDistributeWhileCrawling.off", (sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, true)) ? "0" : "1");
+        prop.put("indexDistributeWhileIndexing.on", (sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true)) ? "1" : "0");
+        prop.put("indexDistributeWhileIndexing.off", (sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, true)) ? "0" : "1");
         prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
-        prop.put("indexReceiveBlockBlacklistChecked.on", ("true".equals(sb.getConfig("indexReceiveBlockBlacklist", "true"))) ? "1" : "0");
-        prop.put("indexReceiveBlockBlacklistChecked.off", ("true".equals(sb.getConfig("indexReceiveBlockBlacklist", "true"))) ? "0" : "1");
+        prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfigBool("indexReceiveBlockBlacklist", true)) ? "1" : "0");
+        prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfigBool("indexReceiveBlockBlacklist", true)) ? "0" : "1");
         prop.putHTML("peertags", MapTools.set2string(sb.peers.mySeed().getPeerTags(), ",", false));
 
         // set seed information directly

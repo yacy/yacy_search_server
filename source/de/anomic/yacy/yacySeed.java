@@ -57,6 +57,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.AbstractFormatter;
@@ -173,14 +174,14 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     /** the peer-hash */
     public String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
-    private final ConcurrentHashMap<String, String> dna;
+    private final ConcurrentMap<String, String> dna;
     private String alternativeIP = null;
     private final long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
 
     // use our own formatter to prevent concurrency locks with other processes
     private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
 
-    public yacySeed(final String theHash, final ConcurrentHashMap<String, String> theDna) {
+    public yacySeed(final String theHash, final ConcurrentMap<String, String> theDna) {
         // create a seed with a pre-defined hash map
         assert theHash != null;
         this.hash = theHash;
@@ -331,6 +332,18 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         final Object o = this.dna.get(key);
         if (o == null) { return dflt; }
         return (String) o;
+    }
+
+    public final float getFloat(final String key, final float dflt) {
+        final Object o = this.dna.get(key);
+        if (o == null) { return dflt; }
+        if (o instanceof String) try {
+        	return Float.parseFloat((String) o);
+        } catch (final NumberFormatException e) {
+        	return dflt;
+        } else if (o instanceof Float) {
+            return ((Float) o).floatValue();
+        } else return dflt;
     }
     
     public final long getLong(final String key, final long dflt) {
@@ -834,6 +847,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         return null;
     }
 
+    @Override
     public final String toString() {
         HashMap<String, String> copymap = new HashMap<String, String>();
         copymap.putAll(this.dna);
@@ -872,6 +886,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         return mySeed;
     }
 
+    @Override
     public final yacySeed clone() {
         ConcurrentHashMap<String, String> ndna = new ConcurrentHashMap<String, String>();
         ndna.putAll(this.dna);
@@ -888,6 +903,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         return 0;
     }
     
+    @Override
     public int hashCode() {
         return (int) (Base64Order.enhancedCoder.cardinal(this.hash) & ((long) Integer.MAX_VALUE));
     }

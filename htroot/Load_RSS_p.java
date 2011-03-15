@@ -239,9 +239,9 @@ public class Load_RSS_p {
 
         prop.put("url", post.get("url", ""));
         
-        int repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
+        int repeat_time = post.getInt("repeat_time", -1);
         final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
-        if (!post.get("repeat", "off").equals("on") && repeat_time > 0) repeat_time = -1;
+        if (!"on".equals(post.get("repeat", "off")) && repeat_time > 0) repeat_time = -1;
         
         boolean record_api = false;
         
@@ -256,7 +256,7 @@ public class Load_RSS_p {
         RSSReader rss = null;
         if (url != null) try {
             prop.put("url", url.toNormalform(true, false));
-            Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
+            final Response response = sb.loader.load(sb.loader.request(url, true, false), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
             byte[] resource = response == null ? null : response.getContent();
             rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);
         } catch (IOException e) {
@@ -266,10 +266,10 @@ public class Load_RSS_p {
         // index all selected items: description only
         if (rss != null && post.containsKey("indexSelectedItemContent")) {
             RSSFeed feed = rss.getFeed();
-            loop: for (Map.Entry<String, String> entry: post.entrySet()) {
+            loop: for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
-                    RSSMessage message = feed.getMessage(entry.getValue().substring(5));
-                    DigestURI messageurl = new DigestURI(message.getLink());
+                    final RSSMessage message = feed.getMessage(entry.getValue().substring(5));
+                    final DigestURI messageurl = new DigestURI(message.getLink());
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
                     if (sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null) continue loop;
                     sb.addToIndex(messageurl, null, null);
@@ -284,7 +284,7 @@ public class Load_RSS_p {
         
         if (rss != null && post.containsKey("indexAllItemContent")) {
             record_api = true;
-            RSSFeed feed = rss.getFeed();
+            final RSSFeed feed = rss.getFeed();
             RSSLoader.indexAllRssFeed(sb, url, feed);
         }
         
@@ -296,8 +296,8 @@ public class Load_RSS_p {
         // show items from rss
         if (rss != null) {
             prop.put("showitems", 1);
-            RSSFeed feed = rss.getFeed();
-            RSSMessage channel = feed.getChannel();
+            final RSSFeed feed = rss.getFeed();
+            final RSSMessage channel = feed.getChannel();
             prop.putHTML("showitems_title", channel == null ? "" : channel.getTitle());
             String author = channel == null ? "" : channel.getAuthor();
             if (author == null || author.length() == 0) author = channel == null ? "" : channel.getCopyright();
@@ -312,7 +312,7 @@ public class Load_RSS_p {
             int i = 0;
             for (final Hit item: feed) {
                 try {
-                    DigestURI messageurl = new DigestURI(item.getLink());
+                    final DigestURI messageurl = new DigestURI(item.getLink());
                     author = item.getAuthor();
                     if (author == null) author = item.getCopyright();
                     pubDate = item.getPubDate();

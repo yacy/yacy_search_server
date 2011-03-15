@@ -553,19 +553,15 @@ public class yacysearch {
             AccessTracker.add(AccessTracker.Location.local, theQuery);
                         
             // check suggestions
-            int meanMax = 0;
-            if (post != null && post.containsKey("meanCount")) {
-            	try {
-            	    meanMax = Integer.parseInt(post.get("meanCount"));            	
-            	} catch (NumberFormatException e) {}
-            }
+            final int meanMax = (post != null) ? post.getInt("meanCount", 0) : 0;
+
             prop.put("meanCount", meanMax);
             if (meanMax > 0) {
                 final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
             	final Iterator<String> meanIt = didYouMean.getSuggestions(100, 5).iterator();
                 int meanCount = 0;
                 String suggestion;
-                while(meanCount<meanMax && meanIt.hasNext()) {
+                while( meanCount<meanMax && meanIt.hasNext()) {
                     suggestion = meanIt.next();
                     prop.put("didYouMean_suggestions_"+meanCount+"_word", suggestion);
                     prop.put("didYouMean_suggestions_"+meanCount+"_url",
@@ -582,12 +578,12 @@ public class yacysearch {
             }
             
             // find geographic info
-            SortedSet<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
+            final SortedSet<Location> coordinates = LibraryProvider.geoLoc.find(originalquerystring, false);
             if (coordinates == null || coordinates.isEmpty() || offset > 0) {
                 prop.put("geoinfo", "0");
             } else {
                 int i = 0;
-                for (Location c: coordinates) {
+                for (final Location c: coordinates) {
                     prop.put("geoinfo_loc_" + i + "_lon", Math.round(c.lon() * 10000.0f) / 10000.0f);
                     prop.put("geoinfo_loc_" + i + "_lat", Math.round(c.lat() * 10000.0f) / 10000.0f);
                     prop.put("geoinfo_loc_" + i + "_name", c.getName());

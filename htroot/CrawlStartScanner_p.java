@@ -84,7 +84,7 @@ public class CrawlStartScanner_p {
 
             // check scheduler
             if (post.get("rescan", "").equals("scheduler")) {
-                repeat_time = Integer.parseInt(post.get("repeat_time", "-1"));
+                repeat_time = post.getInt("repeat_time", -1);
                 repeat_unit = post.get("repeat_unit", "selminutes"); // selminutes, selhours, seldays
                 if (repeat_unit.equals("selminutes")) validTime = repeat_time * 60 * 1000;
                 if (repeat_unit.equals("selhours")) validTime = repeat_time * 60 * 60 * 1000;
@@ -92,9 +92,9 @@ public class CrawlStartScanner_p {
             }
             
             // case: an IP range was given; scan the range for services and display result
-            if (post.containsKey("scan") && post.get("source", "").equals("hosts")) {
-                Set<InetAddress> ia = new HashSet<InetAddress>();
-                for (String host: hosts.split(",")) {
+            if (post.containsKey("scan") && "hosts".equals(post.get("source", ""))) {
+                final Set<InetAddress> ia = new HashSet<InetAddress>();
+                for (String host : hosts.split(",")) {
                     if (host.startsWith("http://")) host = host.substring(7);
                     if (host.startsWith("https://")) host = host.substring(8);
                     if (host.startsWith("ftp://")) host = host.substring(6);
@@ -103,32 +103,40 @@ public class CrawlStartScanner_p {
                     if (p >= 0) host = host.substring(0, p);
                     ia.add(Domains.dnsResolve(host));
                 }
-                Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 1000 : 5000);
+                final Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 1000 : 5000);
                 if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
                 if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
                 if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(false);
                 if (post.get("scansmb", "").equals("on")) scanner.addSMB(false);
                 scanner.start();
                 scanner.terminate();
-                if (post.get("accumulatescancache", "").equals("on") && !post.get("rescan", "").equals("scheduler")) Scanner.scancacheExtend(scanner, validTime); else Scanner.scancacheReplace(scanner, validTime);
+                if ("on".equals(post.get("accumulatescancache", "")) && !"scheduler".equals(post.get("rescan", ""))) {
+                    Scanner.scancacheExtend(scanner, validTime);
+                } else {
+                    Scanner.scancacheReplace(scanner, validTime);
+                }
             }
             
-            if (post.containsKey("scan") && post.get("source", "").equals("intranet")) {
-                Scanner scanner = new Scanner(Domains.myIntranetIPs(), 100, sb.isIntranetMode() ? 100 : 3000);
-                if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
-                if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
-                if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(false);
-                if (post.get("scansmb", "").equals("on")) scanner.addSMB(false);
+            if (post.containsKey("scan") && "intranet".equals(post.get("source", ""))) {
+                final Scanner scanner = new Scanner(Domains.myIntranetIPs(), 100, sb.isIntranetMode() ? 100 : 3000);
+                if ("on".equals(post.get("scanftp", ""))) scanner.addFTP(false);
+                if ("on".equals(post.get("scanhttp", ""))) scanner.addHTTP(false);
+                if ("on".equals(post.get("scanhttps", ""))) scanner.addHTTPS(false);
+                if ("on".equals(post.get("scansmb", ""))) scanner.addSMB(false);
                 scanner.start();
                 scanner.terminate();
-                if (post.get("accumulatescancache", "").equals("on") && !post.get("rescan", "").equals("scheduler")) Scanner.scancacheExtend(scanner, validTime); else Scanner.scancacheReplace(scanner, validTime);
+                if ("on".equals(post.get("accumulatescancache", "")) && !"scheduler".equals(post.get("rescan", ""))) {
+                    Scanner.scancacheExtend(scanner, validTime);
+                } else {
+                    Scanner.scancacheReplace(scanner, validTime);
+                }
             }
             
             // check crawl request
             if (post.containsKey("crawl")) {
                 // make a pk/url mapping
-                Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
-                Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
+                final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
+                final Map<byte[], DigestURI> pkmap = new TreeMap<byte[], DigestURI>(Base64Order.enhancedCoder);
                 while (se.hasNext()) {
                     Scanner.Service u = se.next().getKey();
                     DigestURI uu;
@@ -140,7 +148,7 @@ public class CrawlStartScanner_p {
                     }
                 }
                 // search for crawl start requests in this mapping
-                for (Map.Entry<String, String> entry: post.entrySet()) {
+                for (final Map.Entry<String, String> entry: post.entrySet()) {
                     if (entry.getValue().startsWith("mark_")) {
                         byte [] pk = entry.getValue().substring(5).getBytes();
                         DigestURI url = pkmap.get(pk);
@@ -154,7 +162,7 @@ public class CrawlStartScanner_p {
             }
             
             // check scheduler
-            if (post.get("rescan", "").equals("scheduler")) {
+            if ("scheduler".equals(post.get("rescan", ""))) {
                 
                 // store this call as api call
                 if (repeat_time > 0) {
@@ -165,13 +173,13 @@ public class CrawlStartScanner_p {
                 // execute the scan results
                 if (Scanner.scancacheSize() > 0) {
                     // make a comment cache
-                    Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
+                    final Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
                     
                     String urlString;
                     DigestURI u;
                     try {
                         int i = 0;
-                        Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
+                        final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
                         Map.Entry<Scanner.Service, Scanner.Access> host;
                         while (se.hasNext()) {
                             host = se.next();
@@ -197,7 +205,7 @@ public class CrawlStartScanner_p {
         // write scan table
         if (Scanner.scancacheSize() > 0) {
             // make a comment cache
-            Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
+            final Map<byte[], String> apiCommentCache = WorkTables.commentCache(sb);
             
             // show scancache table
             prop.put("servertable", 1);
@@ -206,7 +214,7 @@ public class CrawlStartScanner_p {
             table: while (true) {
                 try {
                     int i = 0;
-                    Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
+                    final Iterator<Map.Entry<Scanner.Service, Scanner.Access>> se = Scanner.scancacheEntries();
                     Map.Entry<Scanner.Service, Scanner.Access> host;
                     while (se.hasNext()) {
                         host = se.next();

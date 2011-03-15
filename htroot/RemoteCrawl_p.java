@@ -57,14 +57,14 @@ public class RemoteCrawl_p {
                 boolean crawlResponse = post.get("crawlResponse", "off").equals("on");
                 
                 // read remote crawl request settings
-                sb.setConfig("crawlResponse", (crawlResponse) ? "true" : "false");
+                sb.setConfig("crawlResponse", crawlResponse);
             }
 
             if (post.containsKey("acceptCrawlLimit")) {
                 // read remote crawl request settings
                 int newppm = 1;
                 try {
-                    newppm = Math.max(1, Integer.parseInt(post.get("acceptCrawlLimit", "1")));
+                    newppm = Math.max(1, post.getInt("acceptCrawlLimit", 1));
                 } catch (final NumberFormatException e) {}
                 sb.setRemotecrawlPPM(newppm);
             }
@@ -119,7 +119,7 @@ public class RemoteCrawl_p {
                 prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
                 prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                 prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
-                prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
+                prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * seed.getLong(yacySeed.UPTIME, 0L)));
                 prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLinkCount());
                 prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getWordCount());
                 prop.putNum(STR_TABLE_LIST + conCount + "_RCount", rcount);

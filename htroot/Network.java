@@ -52,6 +52,7 @@ import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyPeerActions;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
+import java.util.concurrent.ConcurrentMap;
 
 public class Network {
 
@@ -98,14 +99,9 @@ public class Network {
                 // update seed info
                 sb.updateMySeed();
                 
-                long LCount;
-                long ICount;
-                long RCount;
-                try {
-                    LCount = seed.getLinkCount();
-                    ICount = seed.getWordCount();
-                    RCount = Long.parseLong(seed.get(yacySeed.RCOUNT, "0"));
-                } catch (final Exception e) {LCount = 0; ICount = 0; RCount = 0;}
+                final long LCount = seed.getLinkCount();
+                final long ICount = seed.getWordCount();
+                final long RCount = seed.getLong(yacySeed.RCOUNT, 0L);
 
                 // my-info
                 prop.putHTML("table_my-name", seed.get(yacySeed.NAME, "-") );
@@ -133,20 +129,20 @@ public class Network {
                 myqph = 60d * sb.averageQPM();
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
-                prop.put("table_my-uptime", yacyPeerActions.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
+                prop.put("table_my-uptime", yacyPeerActions.formatInterval(60000 * seed.getLong(yacySeed.UPTIME, 0)));
                 prop.putNum("table_my-LCount", LCount);
                 prop.putNum("table_my-ICount", ICount);
                 prop.putNum("table_my-RCount", RCount);
-                prop.putNum("table_my-sI", Long.parseLong(seed.get(yacySeed.INDEX_OUT, "0")));
-                prop.putNum("table_my-sU", Long.parseLong(seed.get(yacySeed.URL_OUT, "0")));
-                prop.putNum("table_my-rI", Long.parseLong(seed.get(yacySeed.INDEX_IN, "0")));
-                prop.putNum("table_my-rU", Long.parseLong(seed.get(yacySeed.URL_IN, "0")));
+                prop.putNum("table_my-sI", seed.getLong(yacySeed.INDEX_OUT, 0L));
+                prop.putNum("table_my-sU", seed.getLong(yacySeed.URL_OUT, 0L));
+                prop.putNum("table_my-rI", seed.getLong(yacySeed.INDEX_IN, 0L));
+                prop.putNum("table_my-rU", seed.getLong(yacySeed.URL_IN, 0L));
                 prop.putNum("table_my-ppm", myppm);
                 prop.putNum("table_my-qph", Math.round(100d * myqph) / 100d);
                 prop.putNum("table_my-qph-publocal", Math.round(6000d * sb.averageQPMPublicLocal()) / 100d);
                 prop.putNum("table_my-qph-pubremote", Math.round(6000d * sb.averageQPMGlobal()) / 100d);
-                prop.putNum("table_my-seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
-                prop.putNum("table_my-connects", Float.parseFloat(seed.get(yacySeed.CCOUNT, "0")));
+                prop.putNum("table_my-seeds", seed.getLong(yacySeed.SCOUNT, 0L));
+                prop.putNum("table_my-connects", seed.getFloat(yacySeed.CCOUNT, 0F));
                 prop.put("table_my-url", seed.get(yacySeed.SEEDLISTURL, ""));
                 
                 // generating the location string
@@ -183,7 +179,7 @@ public class Network {
             prop.putNum("table_gqph", Math.round(6000d * otherqpm + 100d * ((iAmActive) ? myqph : 0d)) / 100d);
             prop.put("table", 2); // triggers overview
             prop.put("page", 0);
-        } else if (post != null && Integer.parseInt(post.get("page", "1")) == 4) {
+        } else if (post != null && post.getInt("page", 1) == 4) {
             prop.put("table", 4); // triggers overview
             prop.put("page", 4);
             
@@ -201,7 +197,7 @@ public class Network {
                     return prop;
                 }
 
-                final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
+                final ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
                 map.put(yacySeed.IP, post.get("peerIP"));
                 map.put(yacySeed.PORT, post.get("peerPort"));
                 yacySeed peer = new yacySeed(post.get("peerHash"), map);
@@ -236,8 +232,8 @@ public class Network {
             }
         } else {
             // generate table
-            final int page = (post == null ? 1 : Integer.parseInt(post.get("page", "1")));
-            final int maxCount = (post == null ? 300 : Integer.parseInt(post.get("maxCount", "300")));
+            final int page = (post == null ? 1 : post.getInt("page", 1));
+            final int maxCount = (post == null ? 300 : post.getInt("maxCount", 300));
             int conCount = 0;            
             if (sb.peers == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
@@ -383,8 +379,8 @@ public class Network {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_port", seed.get(yacySeed.PORT, "-") );
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_hash", seed.hash);
                                 prop.put(STR_TABLE_LIST + conCount + "_complete_age", seed.getAge());
-                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
-                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", Float.parseFloat(seed.get(yacySeed.CCOUNT, "0")));
+                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_seeds", seed.getLong(yacySeed.SCOUNT, 0L));
+                                prop.putNum(STR_TABLE_LIST + conCount + "_complete_connects", seed.getFloat(yacySeed.CCOUNT, 0F));
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_complete_userAgent", userAgent);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_complete", 0);
@@ -437,7 +433,7 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
                             prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", yacyPeerActions.formatInterval(60000 * seed.getLong(yacySeed.UPTIME, 0)));
                             prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLinkCount());
                             prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getWordCount());
                             prop.putNum(STR_TABLE_LIST + conCount + "_RCount", seed.getLong(yacySeed.RCOUNT, 0));

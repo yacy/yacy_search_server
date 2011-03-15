@@ -54,7 +54,7 @@ public class ProxyIndexingMonitor_p {
 //      boolean se = false;
 
         String oldProxyCachePath, newProxyCachePath;
-        String oldProxyCacheSize, newProxyCacheSize;
+        long oldProxyCacheSize, newProxyCacheSize;
 
         prop.put("info", "0");
         prop.put("info_message", "");
@@ -64,19 +64,19 @@ public class ProxyIndexingMonitor_p {
             if (post.containsKey("proxyprofileset")) try {
                 // read values and put them in global settings
                 final boolean proxyYaCyOnly = post.containsKey("proxyYacyOnly");
-                env.setConfig(SwitchboardConstants.PROXY_YACY_ONLY, (proxyYaCyOnly) ? "true" : "false");
+                env.setConfig(SwitchboardConstants.PROXY_YACY_ONLY, (proxyYaCyOnly) ? true : false);
                 int newProxyPrefetchDepth = post.getInt("proxyPrefetchDepth", 0);
                 if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
                 if (newProxyPrefetchDepth > 20) newProxyPrefetchDepth = 20; // self protection ?
                 env.setConfig("proxyPrefetchDepth", Integer.toString(newProxyPrefetchDepth));
                 final boolean proxyStoreHTCache = post.containsKey("proxyStoreHTCache");
-                env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? "true" : "false");
+                env.setConfig("proxyStoreHTCache", (proxyStoreHTCache) ? true : false);
                 final boolean proxyIndexingRemote = post.containsKey("proxyIndexingRemote");
-                env.setConfig("proxyIndexingRemote", proxyIndexingRemote ? "true" : "false");
+                env.setConfig("proxyIndexingRemote", proxyIndexingRemote ? true : false);
                 final boolean proxyIndexingLocalText = post.containsKey("proxyIndexingLocalText");
-                env.setConfig("proxyIndexingLocalText", proxyIndexingLocalText ? "true" : "false");
+                env.setConfig("proxyIndexingLocalText", proxyIndexingLocalText ? true : false);
                 final boolean proxyIndexingLocalMedia = post.containsKey("proxyIndexingLocalMedia");
-                env.setConfig("proxyIndexingLocalMedia", proxyIndexingLocalMedia ? "true" : "false");
+                env.setConfig("proxyIndexingLocalMedia", proxyIndexingLocalMedia ? true : false);
                 
                 // added proxyCache, proxyCacheSize - Borg-0300
                 // proxyCache - check and create the directory
@@ -91,11 +91,11 @@ public class ProxyIndexingMonitor_p {
                 if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
 
                 // proxyCacheSize 
-                oldProxyCacheSize = getStringLong(env.getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "64"));
-                newProxyCacheSize = getStringLong(post.get(SwitchboardConstants.PROXY_CACHE_SIZE, "64"));
-                if (getLong(newProxyCacheSize) < 4) { newProxyCacheSize = "4"; }
+                oldProxyCacheSize = env.getConfigLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64L);
+                newProxyCacheSize = post.getLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64L);
+                if (newProxyCacheSize < 4) { newProxyCacheSize = 4; }
                 env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
-                Cache.setMaxCacheSize(Long.parseLong(newProxyCacheSize) * 1024 * 1024);                
+                Cache.setMaxCacheSize(newProxyCacheSize * 1024 * 1024);                
 
                 // implant these settings also into the crawling profile for the proxy
                 if (sb.crawler.defaultProxyProfile == null) {
@@ -103,10 +103,10 @@ public class ProxyIndexingMonitor_p {
                 } else {
                     assert sb.crawler.defaultProxyProfile.handle() != null;
                     sb.crawler.defaultProxyProfile.put("generalDepth", Integer.toString(newProxyPrefetchDepth));
-                    sb.crawler.defaultProxyProfile.put("storeHTCache", (proxyStoreHTCache) ? "true": "false");
-                    sb.crawler.defaultProxyProfile.put("remoteIndexing",proxyIndexingRemote ? "true":"false");
-                    sb.crawler.defaultProxyProfile.put("indexText",proxyIndexingLocalText ? "true":"false");
-                    sb.crawler.defaultProxyProfile.put("indexMedia",proxyIndexingLocalMedia ? "true":"false");
+                    sb.crawler.defaultProxyProfile.put("storeHTCache", proxyStoreHTCache);
+                    sb.crawler.defaultProxyProfile.put("remoteIndexing", proxyIndexingRemote);
+                    sb.crawler.defaultProxyProfile.put("indexText", proxyIndexingLocalText);
+                    sb.crawler.defaultProxyProfile.put("indexMedia", proxyIndexingLocalMedia);
                     sb.crawler.putActive(sb.crawler.defaultProxyProfile.handle().getBytes(), sb.crawler.defaultProxyProfile);
                     
                     prop.put("info", "2");//new proxyPrefetchdepth
@@ -125,7 +125,7 @@ public class ProxyIndexingMonitor_p {
                         prop.putHTML("info_path_return", newProxyCachePath);
                     }
                     // proxyCacheSize - only display on change
-                    if (oldProxyCacheSize.equals(newProxyCacheSize)) {
+                    if (oldProxyCacheSize == newProxyCacheSize) {
                         prop.put("info_size", "0");
                         prop.put("info_size_return", oldProxyCacheSize);
                     } else {
@@ -148,30 +148,14 @@ public class ProxyIndexingMonitor_p {
         final boolean yacyonly = env.getConfigBool(SwitchboardConstants.PROXY_YACY_ONLY, false);
         prop.put("proxyYacyOnly", yacyonly ? "1" : "0");
         prop.put("proxyPrefetchDepth", env.getConfigLong("proxyPrefetchDepth", 0));
-        prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? "1" : "0");
-        prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? "1" : "0");
-        prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? "1" : "0");
-        prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? "1" : "0");
+        prop.put("proxyStoreHTCacheChecked", env.getConfigBool("proxyStoreHTCache", false) ? "1" : "0");
+        prop.put("proxyIndexingRemote", env.getConfigBool("proxyIndexingRemote", false) ? "1" : "0");
+        prop.put("proxyIndexingLocalText", env.getConfigBool("proxyIndexingLocalText", false) ? "1" : "0");
+        prop.put("proxyIndexingLocalMedia", env.getConfigBool("proxyIndexingLocalMedia", false) ? "1" : "0");
         prop.put("proxyCache", env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT));
         prop.put("proxyCacheSize", env.getConfigLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64));
         // return rewrite properties
         return prop;
-    }
-
-    public static long getLong(final String value) {
-        try {
-            return Long.parseLong(value);
-        } catch (final Exception e) {
-            return 0;
-        }
-    }
-
-    public static String getStringLong(final String value) {
-        try {
-            return Long.toString(Long.parseLong(value));
-        } catch (final Exception e) {
-            return "0";
-        }
     }
 
 }

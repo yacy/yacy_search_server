@@ -130,15 +130,9 @@ public class SettingsAck_p {
             
             // read and process data
             String filter = (post.get("proxyfilter")).trim();
-			String use_proxyAccounts="";
-			if(post.containsKey("use_proxyaccounts")){
-				//needed? or set to true by default?
-	            use_proxyAccounts = ((post.get("use_proxyaccounts")).equals("on") ? "true" : "false" );
-			}else{
-				use_proxyAccounts = "false";
-			}
+            final boolean useProxyAccounts = post.containsKey("use_proxyaccounts") && post.get("use_proxyaccounts").equals("on");
             // do checks
-            if ((filter == null) || (use_proxyAccounts == null)) { 
+            if ((filter == null) || (!post.containsKey("use_proxyaccounts"))) {
                 prop.put("info", "1");//error with submitted information
                 return prop;
             }
@@ -175,8 +169,8 @@ public class SettingsAck_p {
             
             // check passed. set account:
             env.setConfig("proxyClient", filter);
-            env.setConfig("use_proxyAccounts", use_proxyAccounts);//"true" or "false"
-			if (use_proxyAccounts.equals("false")){
+            env.setConfig("use_proxyAccounts", useProxyAccounts);
+            if (!useProxyAccounts){
                 prop.put("info", "6");//proxy account has changed(no pw)
                 prop.putHTML("info_filter", filter);
 			} else {
@@ -192,20 +186,20 @@ public class SettingsAck_p {
             
             // set transparent proxy flag
             HTTPDProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
-            env.setConfig("isTransparentProxy", HTTPDProxyHandler.isTransparentProxy ? "true" : "false");
+            env.setConfig("isTransparentProxy", HTTPDProxyHandler.isTransparentProxy);
             prop.put("info_isTransparentProxy", HTTPDProxyHandler.isTransparentProxy ? "on" : "off");
             
             // setting the keep alive property
             HTTPDemon.keepAliveSupport = post.containsKey("connectionKeepAliveSupport");
-            env.setConfig("connectionKeepAliveSupport", HTTPDemon.keepAliveSupport ? "true" : "false");
+            env.setConfig("connectionKeepAliveSupport", HTTPDemon.keepAliveSupport);
             prop.put("info_connectionKeepAliveSupport", HTTPDemon.keepAliveSupport ? "on" : "off"); 
             
             // setting via header property
-            env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")?"true":"false");
+            env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader"));
             prop.put("info_proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")? "on" : "off");
             
             // setting X-Forwarded-for header property
-            env.setConfig("proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")?"true":"false");
+            env.setConfig("proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader"));
             prop.put("info_proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")? "on" : "off");            
             
             prop.put("info", "20");
@@ -294,13 +288,7 @@ public class SettingsAck_p {
             final boolean useRemoteProxy4SSL = post.containsKey("remoteProxyUse4SSL");
             
             final String remoteProxyHost = post.get("remoteProxyHost", "");
-            final String remoteProxyPortStr = post.get("remoteProxyPort", "");
-            int remoteProxyPort = 0;
-            try {
-                remoteProxyPort = Integer.parseInt(remoteProxyPortStr);
-            } catch (final NumberFormatException e) {
-                remoteProxyPort = 3128;
-            }
+            final int remoteProxyPort = post.getInt("remoteProxyPort", 3128);
             
             final String remoteProxyUser = post.get("remoteProxyUser", "");
             final String remoteProxyPwd = post.get("remoteProxyPwd", "");
@@ -316,9 +304,9 @@ public class SettingsAck_p {
             env.setConfig("remoteProxyUser", remoteProxyUser);
             env.setConfig("remoteProxyPwd", remoteProxyPwd);
             env.setConfig("remoteProxyNoProxy", remoteProxyNoProxyStr);
-            env.setConfig("remoteProxyUse", (useRemoteProxy) ? "true" : "false");
-            env.setConfig("remoteProxyUse4Yacy", (useRemoteProxy4Yacy) ? "true" : "false");
-            env.setConfig("remoteProxyUse4SSL", (useRemoteProxy4SSL) ? "true" : "false");
+            env.setConfig("remoteProxyUse", useRemoteProxy);
+            env.setConfig("remoteProxyUse4Yacy", useRemoteProxy4Yacy);
+            env.setConfig("remoteProxyUse4SSL", useRemoteProxy4SSL);
             
             /* ====================================================================
              * Enabling settings
@@ -436,9 +424,9 @@ public class SettingsAck_p {
          * Message forwarding configuration
          */
         if (post.containsKey("msgForwarding")) {
-            env.setConfig("msgForwardingEnabled",post.containsKey("msgForwardingEnabled")?"true":"false");
-            env.setConfig("msgForwardingCmd",post.get("msgForwardingCmd"));
-            env.setConfig("msgForwardingTo",post.get("msgForwardingTo"));
+            env.setConfig("msgForwardingEnabled", post.containsKey("msgForwardingEnabled"));
+            env.setConfig("msgForwardingCmd", post.get("msgForwardingCmd"));
+            env.setConfig("msgForwardingTo", post.get("msgForwardingTo"));
             
             prop.put("info", "21");
             prop.put("info_msgForwardingEnabled", post.containsKey("msgForwardingEnabled") ? "on" : "off");
