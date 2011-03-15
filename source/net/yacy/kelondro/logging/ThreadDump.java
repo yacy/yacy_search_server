@@ -28,7 +28,6 @@ package net.yacy.kelondro.logging;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -95,15 +94,26 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
         return java.lang.Thread.getAllStackTraces();
     }
     
-    public ThreadDump() throws IOException {
+    public static boolean canProduceLockedBy(File logFile) {
+
+        // check os version
+        if (!OS.canExecUnix) return false;
+        
+        // check if log file exists
+        if (!logFile.exists()) return false;
+        
+        // check last modification date of log file
+        if (System.currentTimeMillis() - logFile.lastModified() > 60000) return false;
+        
+        return true;
+    }
+    
+    public ThreadDump(File logFile) throws IOException {
         super();
         
         // try to get the thread dump from yacy.log which is available when YaCy is started with
         // startYACY.sh -l
-        if (!OS.canExecUnix) return;
-        
-        File logFile = new File("yacy.log");
-        if (!logFile.exists()) return;
+        if (!canProduceLockedBy(logFile)) return;
         long sizeBefore = logFile.length();
         
         // get the current process PID
@@ -124,10 +134,6 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
         
         // import the thread dump;
         importText(new ByteArrayInputStream(b));
-    }
-    
-    public ThreadDump(final File f) throws IOException {
-        this(new FileInputStream(f));
     }
     
     public ThreadDump(final InputStream is) throws IOException {
@@ -248,14 +254,14 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
         bufferappend(buffer, plain, "");
         
         Map<Thread, Integer> locks = this.countLocks();
-        for (int i = 0; i < this.size() + 10; i++) {
+        for (int i = this.size() + 10; i > 0; i--) {
             for (Map.Entry<Thread, Integer> entry: locks.entrySet()) {
                 if (entry.getValue().intValue() == i) {
                 	bufferappend(buffer, plain, "holds lock for " + i + " threads:");
                 	final List<String> list = this.get(entry.getKey());
                     if (list == null) continue;
-                    bufferappend(buffer, plain, "Thread: " + entry.getKey());
-                    for (String s: list) bufferappend(buffer, plain, "  " + s);
+                    bufferappend(buffer, plain, "Thread= " + entry.getKey());
+                    for (String s: list) bufferappend(buffer, plain, "  " + (plain ? s : s.replaceAll("<", "&lt;").replaceAll(">", "&gt;")));
                     bufferappend(buffer, plain, "");
                 }
             }
