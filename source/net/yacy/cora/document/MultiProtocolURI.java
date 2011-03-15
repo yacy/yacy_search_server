@@ -146,8 +146,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     }
     
     // class variables
-    protected String protocol, host, userInfo, path, quest, ref;
-    protected int port;
+    protected final String protocol, userInfo;
+    protected       String host, path, quest, ref;
+    protected       int port;
     
     /**
      * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
@@ -176,24 +177,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.port = url.port;
     }
     
-    public MultiProtocolURI(final String url) throws MalformedURLException {
+    public MultiProtocolURI(String url) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");
-        parseURLString(url);
-    }
-    
-    public static final boolean isHTTP(String s) { return s.startsWith("http://"); }
-    public static final boolean isHTTPS(String s) { return s.startsWith("https://"); }
-    public static final boolean isFTP(String s) { return s.startsWith("ftp://"); }
-    public static final boolean isFile(String s) { return s.startsWith("file://"); }
-    public static final boolean isSMB(String s) { return s.startsWith("smb://") || s.startsWith("\\\\"); }
-
-    public final boolean isHTTP()  { return this.protocol.equals("http"); }
-    public final boolean isHTTPS() { return this.protocol.equals("https"); }
-    public final boolean isFTP()   { return this.protocol.equals("ftp"); }
-    public final boolean isFile()  { return this.protocol.equals("file"); }
-    public final boolean isSMB()   { return this.protocol.equals("smb"); }
-
-    private void parseURLString(String url) throws MalformedURLException {
+        
         // identify protocol
         assert (url != null);
         url = url.trim();
@@ -263,7 +249,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 port = -1;
                 quest = null;
                 ref = null;
-            } if (protocol.equals("file")) {
+            } else if (protocol.equals("file")) {
                 // parse file url
                 String h = url.substring(p + 1);
                 if (h.startsWith("//")) {
@@ -301,19 +287,31 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
             StringBuilder buffer = new StringBuilder(80);
             // encode each domain-part separately
             for(int i = 0; i < domainParts.length; i++) {
-	            final String part = domainParts[i];
-	            if (!Punycode.isBasic(part)) {
-	                buffer.append("xn--").append(Punycode.encode(part));
-	            } else {
-	                buffer.append(part);
-	            }
-	            if (i != domainParts.length-1) {
-	                buffer.append('.');
-	            }
+                final String part = domainParts[i];
+                if (!Punycode.isBasic(part)) {
+                    buffer.append("xn--").append(Punycode.encode(part));
+                } else {
+                    buffer.append(part);
+                }
+                if (i != domainParts.length-1) {
+                    buffer.append('.');
+                }
             }
             host = buffer.toString();
         } catch (final PunycodeException e) {}
     }
+    
+    public static final boolean isHTTP(String s) { return s.startsWith("http://"); }
+    public static final boolean isHTTPS(String s) { return s.startsWith("https://"); }
+    public static final boolean isFTP(String s) { return s.startsWith("ftp://"); }
+    public static final boolean isFile(String s) { return s.startsWith("file://"); }
+    public static final boolean isSMB(String s) { return s.startsWith("smb://") || s.startsWith("\\\\"); }
+
+    public final boolean isHTTP()  { return this.protocol.equals("http"); }
+    public final boolean isHTTPS() { return this.protocol.equals("https"); }
+    public final boolean isFTP()   { return this.protocol.equals("ftp"); }
+    public final boolean isFile()  { return this.protocol.equals("file"); }
+    public final boolean isSMB()   { return this.protocol.equals("smb"); }
 
     public static MultiProtocolURI newURL(final String baseURL, final String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
@@ -399,6 +397,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.host = host;
         this.port = port;
         this.path = path;
+        this.quest = "";
+        this.userInfo = "";
+        this.ref = "";
         identRef();
         identQuest();
         escape();

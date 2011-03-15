@@ -154,7 +154,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         // in case that the object was initialized without a known url hash, compute it now
         if (this.hash == null) {
             // we check the this.hash value twice to avoid synchronization where possible
-            synchronized (this) {
+            synchronized (this.protocol) {
                 if (this.hash == null) this.hash = urlHashComputation();
             }
         }
@@ -322,7 +322,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     @Override
     public final boolean isLocal() {
         if (this.isFile()) return true;
-        if (this.hash == null) synchronized (this) {
+        if (this.hash == null) synchronized (this.protocol) {
             // this is synchronized because another thread may also call the same method in between
             // that is the reason that this.hash is checked again
             if (this.hash == null) this.hash = urlHashComputation();
