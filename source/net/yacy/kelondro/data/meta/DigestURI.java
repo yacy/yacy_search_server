@@ -152,8 +152,11 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      */
     public final byte[] hash() {
         // in case that the object was initialized without a known url hash, compute it now
-        synchronized (this) {
-            if (this.hash == null) this.hash = urlHashComputation();
+        if (this.hash == null) {
+            // we check the this.hash value twice to avoid synchronization where possible
+            synchronized (this) {
+                if (this.hash == null) this.hash = urlHashComputation();
+            }
         }
         return this.hash;
     }
