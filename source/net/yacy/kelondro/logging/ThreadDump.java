@@ -310,15 +310,13 @@ public class ThreadDump extends HashMap<ThreadDump.Thread, List<String>> impleme
             final java.lang.Thread.State stateIn) {
         final Map<String, Integer> result = new HashMap<String, Integer>();
         ThreadDump x;
-        int count;
         for (final Map<java.lang.Thread,StackTraceElement[]> trace: stackTraces) {
             x = new ThreadDump(rootPath, trace, plain, stateIn);
             for (final Entry<Thread, List<String>> e: x.entrySet()) {
-                Integer c = result.get(e.getKey());
-                count = e.getValue().size();
-                if (c == null) result.put(e.getKey().name, Integer.valueOf(count));
+                Integer c = result.get(e.getKey().name);
+                if (c == null) result.put(e.getKey().name, Integer.valueOf(1));
                 else {
-                    c = Integer.valueOf(c.intValue() + count);
+                    c = Integer.valueOf(c.intValue() + 1);
                     result.put(e.getKey().name, c);
                 }
             }
