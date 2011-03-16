@@ -59,6 +59,9 @@ public class HttpServer {
  
         resource_handler.setResourceBase("htroot/");
 
+        HandlerList handlers = new HandlerList();
+        handlers.setHandlers(new Handler[] {new SSIHandler(new TemplateHandler()), resource_handler, new DefaultHandler() });
+
         Constraint constraint = new Constraint();
         constraint.setName(Constraint.__BASIC_AUTH);;
         constraint.setRoles(new String[]{"admin"});
@@ -66,22 +69,19 @@ public class HttpServer {
 
         ConstraintMapping cm = new ConstraintMapping();
         cm.setConstraint(constraint);
-        cm.setPathSpec("/*");
+        cm.setPathSpec("/authenticate_me");
         
-        ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
+        YaCySecurityHandler securityHandler = new YaCySecurityHandler();
         securityHandler.setLoginService(new YaCyLoginService());
         securityHandler.setRealmName("YaCy Admin Interface");
-        securityHandler.setConstraintMappings(new ConstraintMapping[]{cm});
-        securityHandler.setHandler(new SSIHandler(new TemplateHandler()));
+        securityHandler.setHandler(handlers);
         
         // context handler for dispatcher and security
         ContextHandler context = new ContextHandler();
         context.setContextPath("/");
         context.setHandler(securityHandler);
         
-        HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] {context, resource_handler, new DefaultHandler() });
-        server.setHandler(handlers);
+        server.setHandler(context);
 	}
 	
 	/**

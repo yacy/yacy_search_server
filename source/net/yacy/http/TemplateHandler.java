@@ -40,6 +40,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -192,13 +193,14 @@ public class TemplateHandler extends AbstractHandler implements Handler {
     	
     	return legacyRequestHeader;
     }
-
+    
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
     	Switchboard sb = Switchboard.getSwitchboard();
-
+    	
 		System.err.println("Page: " + target);
+		
 		String localeSelection = "default";
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(new File(htDefaultPath, target));
