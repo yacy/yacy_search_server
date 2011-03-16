@@ -32,6 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -880,10 +881,12 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 u.append(this.userInfo);
                 u.append("@");
             }
+            String hl = this.getHost().toLowerCase();
             if (resolveHost) {
-                u.append(Domains.dnsResolve(this.getHost().toLowerCase()).getHostAddress());
+                InetAddress r = Domains.dnsResolve(hl);
+                u.append(r == null ? hl : r.getHostAddress());
             } else {
-                u.append(this.getHost().toLowerCase());
+                u.append(hl);
             }
             
         }
