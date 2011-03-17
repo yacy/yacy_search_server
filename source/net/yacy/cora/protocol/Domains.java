@@ -532,9 +532,11 @@ public class Domains {
         return null;
     }
     
+    private final static Pattern dotPattern = Pattern.compile("\\.");
+    
     private static final InetAddress parseInetAddress(final String ip) {
         if (ip == null || ip.length() < 8) return null;
-        final String[] ips = ip.split("\\.");
+        final String[] ips = dotPattern.split(ip);
         if (ips.length != 4) return null;
         final byte[] ipb = new byte[4];
         try {

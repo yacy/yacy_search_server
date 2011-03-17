@@ -47,7 +47,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
 
     private static final long serialVersionUID = -5587850671040354397L;
 
-    private static final String multiDumpFilter = ".*((java.net.DatagramSocket.receive)|(java.lang.Thread.getAllStackTraces)|(java.net.SocketInputStream.read)|(java.net.ServerSocket.accept)).*";
+    private static final String multiDumpFilter = ".*((java.net.DatagramSocket.receive)|(java.lang.Thread.getAllStackTraces)|(java.net.SocketInputStream.read)|(java.net.ServerSocket.accept)|(java.net.Socket.connect)).*";
     private static final Pattern multiDumpFilterPattern = Pattern.compile(multiDumpFilter);
     
     public static class StackTrace {
