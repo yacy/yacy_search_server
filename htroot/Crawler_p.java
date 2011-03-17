@@ -415,7 +415,7 @@ public class Crawler_p {
                             
                             // get links and generate filter
                             final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
-                            if (fullDomain) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                            if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
                             
                             final DigestURI crawlURL = new DigestURI("file://" + crawlingFile.toString());
                             final CrawlProfile profile = new CrawlProfile(
@@ -493,7 +493,7 @@ public class Crawler_p {
                         
                         // get links and generate filter
                         final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
-                        if (fullDomain) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
+                        if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
 
                         // put links onto crawl queue
                         final CrawlProfile profile = new CrawlProfile(
