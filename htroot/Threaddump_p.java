@@ -80,7 +80,7 @@ public class Threaddump_p {
                     break;
                 }
             }
-            ThreadDump.appendStackTraceStats(appPath, buffer, traces, plain, null);
+            ThreadDump.appendStackTraceStats(appPath, buffer, traces, plain);
         } else {
             // write a thread dump to standard error output
             File logFile = new File("yacy.log");
