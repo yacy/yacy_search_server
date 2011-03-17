@@ -26,10 +26,14 @@ package net.yacy.http;
 
 import java.io.IOException;
 
+import net.yacy.cora.protocol.Domains;
+
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.UserIdentity;
+
+import de.anomic.search.Switchboard;
 
 /**
  * jetty security handler
@@ -60,8 +64,18 @@ public class YaCySecurityHandler extends SecurityHandler {
 
 	@Override
 	protected Object prepareConstraintInfo(String pathInContext, Request request) {
-		// authentication mandatory as simple constraint info
-		return pathInContext.contains("_p.");
+		final Switchboard sb = Switchboard.getSwitchboard();
+        final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
+        final String adminAccountBase64MD5 = sb.getConfig(YaCyLegacyCredential.ADMIN_ACCOUNT_B64MD5, "");
+
+        final String refererHost = request.getHeader("Referer");
+        final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+        final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
+        final boolean protectedPage = pathInContext.indexOf("_p.") > 0;
+        final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
+        final boolean yacyBot = request.getHeader("User-Agent").startsWith("yacybot");
+        
+		return protectedPage && ((!grantedForLocalhost && !accountEmpty) || yacyBot);
 	}
 
 }

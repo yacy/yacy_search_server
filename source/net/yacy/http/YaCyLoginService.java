@@ -34,6 +34,8 @@ import org.eclipse.jetty.security.IdentityService;
 import org.eclipse.jetty.security.MappedLoginService;
 import org.eclipse.jetty.server.UserIdentity;
 
+import de.anomic.search.Switchboard;
+
 
 /**
  * jetty login service, provides one admin user
@@ -44,7 +46,9 @@ public class YaCyLoginService extends MappedLoginService {
 	protected UserIdentity loadUser(String username) {
 		if(username.equals("admin")) {
 			// TODO: implement legacy credentials
-			Credential credential = Credential.getCredential("admin");
+			final Switchboard sb = Switchboard.getSwitchboard();
+			final String adminAccountBase64MD5 = sb.getConfig(YaCyLegacyCredential.ADMIN_ACCOUNT_B64MD5, "");
+			Credential credential = YaCyLegacyCredential.getCredentialsFromConfig(adminAccountBase64MD5);
 			Principal userPrincipal = new MappedLoginService.KnownUser("admin", credential); 
 			Subject subject = new Subject();
 			subject.getPrincipals().add(userPrincipal);
@@ -55,7 +59,7 @@ public class YaCyLoginService extends MappedLoginService {
 		}
 		return null;
 	}
-
+	
 	@Override
 	protected void loadUsers() throws IOException {
 		// don't load any users into MappedLoginService on startup
