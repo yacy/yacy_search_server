@@ -157,9 +157,9 @@ public class HeapReader {
             Log.logSevere("HeapReader", "cannot generate a fingerprint for " + this.heapFile + ": null");
             return false;
         }
-        this.fingerprintFileIdx = fingerprintIndexFile(this.heapFile, fingerprint);
+        this.fingerprintFileIdx = HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint);
         if (!this.fingerprintFileIdx.exists()) this.fingerprintFileIdx = new File(this.fingerprintFileIdx.getAbsolutePath() + ".gz");
-        this.fingerprintFileGap = fingerprintGapFile(this.heapFile, fingerprint);
+        this.fingerprintFileGap = HeapWriter.fingerprintGapFile(this.heapFile, fingerprint);
         if (!this.fingerprintFileGap.exists()) this.fingerprintFileGap = new File(this.fingerprintFileGap.getAbsolutePath() + ".gz");
         if (!this.fingerprintFileIdx.exists() || !this.fingerprintFileGap.exists()) {
             deleteAllFingerprints(this.heapFile, this.fingerprintFileIdx.getName(), this.fingerprintFileGap.getName());
@@ -192,16 +192,6 @@ public class HeapReader {
         
         // everything is fine now
         return !this.index.isEmpty();
-    }
-    
-    protected static File fingerprintIndexFile(File f, String fingerprint) {
-        assert f != null;
-        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".idx");
-    }
-    
-    protected static File fingerprintGapFile(File f, String fingerprint) {
-        assert f != null;
-        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".gap");
     }
     
     /**
@@ -569,7 +559,7 @@ public class HeapReader {
                     if (fingerprint == null) {
                         Log.logSevere("HeapReader", "cannot write a dump for " + heapFile.getName()+ ": fingerprint is null");
                     } else {
-                        File newFingerprintFileGap = fingerprintGapFile(this.heapFile, fingerprint);
+                        File newFingerprintFileGap = HeapWriter.fingerprintGapFile(this.heapFile, fingerprint);
                         if (this.fingerprintFileGap != null &&
                             this.fingerprintFileGap.getName().equals(newFingerprintFileGap.getName()) &&
                             this.fingerprintFileGap.exists()) {
@@ -583,7 +573,7 @@ public class HeapReader {
                     free.clear();
                     free = null;
                     if (fingerprint != null) {
-                        File newFingerprintFileIdx = fingerprintIndexFile(this.heapFile, fingerprint);
+                        File newFingerprintFileIdx = HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint);
                         if (this.fingerprintFileIdx != null &&
                             this.fingerprintFileIdx.getName().equals(newFingerprintFileIdx.getName()) &&
                             this.fingerprintFileIdx.exists()) {

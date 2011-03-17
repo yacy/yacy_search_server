@@ -457,7 +457,7 @@ public class ArrayStack implements BLOB {
         for (blobItem bi: blobs) {
             bi.blob.clear();
             bi.blob.close(false);
-            FileUtils.deletedelete(bi.location);
+            HeapWriter.delete(bi.location);
         }
         blobs.clear();
     }
@@ -903,15 +903,15 @@ public class ArrayStack implements BLOB {
         }
         if (!i1.hasNext()) {
             if (i2.hasNext()) {
-                FileUtils.deletedelete(f1);
+                HeapWriter.delete(f1);
                 if (f2.renameTo(newFile)) return newFile;
                 return f2;
             }
-            FileUtils.deletedelete(f1);
-            FileUtils.deletedelete(f2);
+            HeapWriter.delete(f1);
+            HeapWriter.delete(f2);
             return null;
         } else if (!i2.hasNext()) {
-            FileUtils.deletedelete(f2);
+            HeapWriter.delete(f2);
             if (f1.renameTo(newFile)) return newFile;
             return f1;
         }
@@ -924,18 +924,18 @@ public class ArrayStack implements BLOB {
             writer.close(true);
         } catch (IOException e) {
             Log.logSevere("ArrayStack", "cannot writing or close writing merge, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
-            FileUtils.deletedelete(tmpFile);
-            FileUtils.deletedelete(newFile);
+            HeapWriter.delete(tmpFile);
+            HeapWriter.delete(newFile);
             return null;
         } catch (RowSpaceExceededException e) {
             Log.logSevere("ArrayStack", "cannot merge because of memory failure: " + e.getMessage(), e);
-            FileUtils.deletedelete(tmpFile);
-            FileUtils.deletedelete(newFile);
+            HeapWriter.delete(tmpFile);
+            HeapWriter.delete(newFile);
             return null;
         }
         // we don't need the old files any more
-        FileUtils.deletedelete(f1);
-        FileUtils.deletedelete(f2);
+        HeapWriter.delete(f1);
+        HeapWriter.delete(f2);
         return newFile;
     }
     
