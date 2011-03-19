@@ -543,7 +543,7 @@ public final class Switchboard extends serverSwitch {
         log.logConfig("Initializing Snippet Cache");
         
         // init the wiki
-        wikiParser = new WikiCode(this.peers.mySeed().getClusterAddress());
+        wikiParser = new WikiCode();
         
         // initializing the resourceObserver
         InstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", ResourceObserver.log, 0);
@@ -822,7 +822,8 @@ public final class Switchboard extends serverSwitch {
         SearchEventCache.cleanupEvents(true);
        
         // switch the networks
-        synchronized (this) {            
+        synchronized (this) {
+            
             // shut down
             this.crawler.close();
             this.dhtDispatcher.close();
@@ -859,10 +860,8 @@ public final class Switchboard extends serverSwitch {
             
             // relocate
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
-            final File mySeedFile = new File(this.networkRoot, yacySeedDB.DBFILE_OWN_SEED);
             peers.relocate(
                     this.networkRoot,
-                    mySeedFile,
                     redundancy,
                     partitionExponent,
                     this.useTailCache,

@@ -48,7 +48,6 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -59,6 +58,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.zip.GZIPInputStream;
 
 import de.anomic.data.wiki.WikiCode;
 import de.anomic.data.wiki.WikiParser;
@@ -81,24 +81,25 @@ public class MediawikiImporter extends Thread implements Importer {
     public static Importer job; // if started from a servlet, this object is used to store the thread
     
     protected WikiParser wparser;
-    protected String urlStub;
     public    File sourcefile;
     public    File targetdir;
     public    int count;
     private   long start;
     private   final long docsize;
     private   final int approxdocs;
+    private   String hostport, urlStub;
     
     
-    public MediawikiImporter(File sourcefile, File targetdir, String baseURL) throws MalformedURLException {
+    public MediawikiImporter(File sourcefile, File targetdir) throws MalformedURLException {
     	this.sourcefile = sourcefile;
     	this.docsize = sourcefile.length();
     	this.approxdocs = (int) (this.docsize * (long) docspermbinxmlbz2 / 1024L / 1024L);
     	this.targetdir = targetdir;
-        this.urlStub = baseURL;
-        this.wparser = new WikiCode(new URL(baseURL).getHost());
+        this.wparser = new WikiCode();
         this.count = 0;
         this.start = 0;
+        this.hostport = null;
+        this.urlStub = null;
     }
     
     public int count() {
@@ -138,14 +139,17 @@ public class MediawikiImporter extends Thread implements Importer {
         this.start = System.currentTimeMillis();
         try {
             String targetstub = sourcefile.getName();
-            targetstub = targetstub.substring(0, targetstub.length() - 8);
-            InputStream is = new BufferedInputStream(new FileInputStream(sourcefile), 1 * 1024 * 1024);
+            int p = targetstub.lastIndexOf("\\.");
+            if (p > 0) targetstub = targetstub.substring(0, p);
+            InputStream is = new BufferedInputStream(new FileInputStream(sourcefile), 1024 * 1024);
             if (sourcefile.getName().endsWith(".bz2")) {
                 int b = is.read();
                 if (b != 'B') throw new IOException("Invalid bz2 content.");
                 b = is.read();
                 if (b != 'Z') throw new IOException("Invalid bz2 content.");
                 is = new CBZip2InputStream(is);
+            } else if (sourcefile.getName().endsWith(".gz")) {
+                is = new GZIPInputStream(is);
             }
             BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"), 4 * 1024 * 1024);
             String t;
@@ -167,15 +171,27 @@ public class MediawikiImporter extends Thread implements Importer {
             Future<Integer> writerResult = service.submit(writer);
             
             wikiparserrecord record;
-            int p;
+            int q;
             while ((t = r.readLine()) != null) {
+                if ((p = t.indexOf("<base>")) >= 0 && (q = t.indexOf("</base>", p)) > 0) {
+                    //urlStub = "http://" + lang + ".wikipedia.org/wiki/";
+                    urlStub = t.substring(p + 6, q);
+                    if (!urlStub.endsWith("/")) {
+                        q = urlStub.lastIndexOf('/');
+                        if (q > 0) urlStub = urlStub.substring(0, q + 1);
+                    }
+                    DigestURI uri = new DigestURI(urlStub);
+                    hostport = uri.getHost();
+                    if (uri.getPort() != 80) hostport += ":" + uri.getPort();
+                    continue;
+                }
                 if (t.indexOf(pagestart) >= 0) {
                     page = true;
                     continue;
                 }
                 if ((p = t.indexOf(textstart)) >= 0) {
                     text = page;
-                    int q = t.indexOf('>', p + textstart.length());
+                    q = t.indexOf('>', p + textstart.length());
                     if (q > 0) {
                         int u = t.indexOf(textend, q + 1);
                         if (u > q) {
@@ -185,7 +201,7 @@ public class MediawikiImporter extends Thread implements Importer {
                                 Log.logInfo("WIKITRANSLATION", "ERROR: " + title + " has empty content");
                                 continue;
                             }
-                            record = newRecord(title, sb);
+                            record = newRecord(hostport, urlStub, title, sb);
                             try {
                                 in.put(record);
                                 this.count++;
@@ -207,7 +223,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         Log.logInfo("WIKITRANSLATION", "ERROR: " + title + " has empty content");
                         continue;
                     }
-                    record = newRecord(title, sb);
+                    record = newRecord(hostport, urlStub, title, sb);
                     try {
                         in.put(record);
                         this.count++;
@@ -223,7 +239,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 }
                 if ((p = t.indexOf("<title>")) >= 0) {
                     title = t.substring(p + 7);
-                    int q = title.indexOf("</title>");
+                    q = title.indexOf("</title>");
                     if (q >= 0) title = title.substring(0, q);
                     continue;
                 }
@@ -461,25 +477,26 @@ public class MediawikiImporter extends Thread implements Importer {
         }
     }
     public wikiparserrecord newRecord() {
-        return new wikiparserrecord(null, null);
+        return new wikiparserrecord(null, null, null, null);
     }
-    public wikiparserrecord newRecord(String title, StringBuilder sb) {
-        return new wikiparserrecord(title, sb);
+    public wikiparserrecord newRecord(String hostport, String urlStub, String title, StringBuilder sb) {
+        return new wikiparserrecord(hostport, urlStub, title, sb);
     }
     
     public class wikiparserrecord {
         public String title;
-        String source;
-        String html;
+        String source, html, hostport, urlStub;
         DigestURI url;
         Document document;
-        public wikiparserrecord(String title, StringBuilder sb) {
+        public wikiparserrecord(String hostport, String urlStub, String title, StringBuilder sb) {
             this.title = title;
+            this.hostport = hostport;
+            this.urlStub = urlStub;
             this.source = (sb == null) ? null : sb.toString();
         }
         public void genHTML() throws IOException {
             try {
-                html = wparser.transform(source);
+                html = wparser.transform(hostport, source);
             } catch (Exception e) {
                 Log.logException(e);
                 throw new IOException(e.getMessage());
@@ -734,13 +751,13 @@ public class MediawikiImporter extends Thread implements Importer {
         // example:
         // java -Xmx2000m -cp classes:lib/bzip2.jar de.anomic.tools.mediawikiIndex -convert DATA/HTCACHE/dewiki-20090311-pages-articles.xml.bz2 DATA/SURROGATES/in/ http://de.wikipedia.org/wiki/
 
-        if (s[0].equals("-convert") && s.length > 2 && s[1].endsWith(".xml.bz2") && s[3].startsWith("http://")) {
+        if (s[0].equals("-convert") && s.length > 2) {
             File sourcefile = new File(s[1]);
             File targetdir = new File(s[2]);
-            String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
+            //String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
             //String language = urlStub.substring(7,9);
             try {
-                MediawikiImporter mi = new MediawikiImporter(sourcefile, targetdir, urlStub);
+                MediawikiImporter mi = new MediawikiImporter(sourcefile, targetdir);
                 mi.start();
                 mi.join();
             } catch (InterruptedException e) {

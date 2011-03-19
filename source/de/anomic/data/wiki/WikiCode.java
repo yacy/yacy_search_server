@@ -190,8 +190,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * Constructor
      * @param address
      */
-    public WikiCode(final String address) {
-        super(address);
+    public WikiCode() {
+        super();
     }
 
     /**
@@ -201,12 +201,12 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @return HTML fragment.
      * @throws IOException in case input from reader can not be read.
      */
-    protected String transform(final BufferedReader reader, final int length)
+    protected String transform(String hostport, final BufferedReader reader, final int length)
             throws IOException {
         final StringBuilder out = new StringBuilder(length);
         String line;
         while ((line = reader.readLine()) != null) {
-            out.append(processLineOfWikiCode(line)).append(serverCore.CRLF_STRING);
+            out.append(processLineOfWikiCode(hostport, line)).append(serverCore.CRLF_STRING);
         }
         return out.insert(0, createTableOfContents()).toString();
     }
@@ -531,7 +531,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    private String processLinksAndImages(String line) {
+    private String processLinksAndImages(String hostport, String line) {
 
         // create links
         String kl, kv, alt, align;
@@ -586,7 +586,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
                 // you are free to use other sub-paths of DATA/HTDOCS
                 if (kl.indexOf("://") < 1) {
-                    kl = "http://" + super.address + "/" + kl;
+                    kl = "http://" + hostport + "/" + kl;
                 }
 
                 line = line.substring(0, positionOfOpeningTag) + "<img src=\"" + kl + "\"" + align + alt + ">" + line.substring(positionOfClosingTag + 2);
@@ -623,7 +623,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             // or a file DATA/HTDOCS/www/page.html with [www/page.html]
             // you are free to use other sub-paths of DATA/HTDOCS
             if (kl.indexOf("://") < 1) {
-                kl = "http://" + super.address + "/" + kl;
+                kl = "http://" + hostport + "/" + kl;
             }
             line = line.substring(0, positionOfOpeningTag) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_EXTERNAL_LINK);
         }
@@ -635,7 +635,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    private String processPreformattedText(String line) {
+    private String processPreformattedText(String hostport, String line) {
         if (!escaped) {
             final int positionOfOpeningTag = line.indexOf(WIKI_OPEN_PRE_ESCAPED);
             final int positionOfClosingTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED);
@@ -647,15 +647,15 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     preformattedText.append(line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_PRE_ESCAPED, positionOfClosingTag));
                     preformattedText.append("</pre>");
 
-                    line = processLineOfWikiCode(line.substring(0, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
+                    line = processLineOfWikiCode(hostport, line.substring(0, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
                     line = line.replaceAll("!pre!txt!", preformattedText.toString().replaceAll("!pre!", "!pre!!"));
                     line = line.replaceAll("!pre!!", "!pre!");
                 } //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
                 else {
                     processingPreformattedText = true;
-                    final String temp1 = processLineOfWikiCode(line.substring(0, positionOfOpeningTag - 1).replaceAll("!tmp!", "!tmp!!") + "!tmp!txt!");
+                    final String temp1 = processLineOfWikiCode(hostport, line.substring(0, positionOfOpeningTag - 1).replaceAll("!tmp!", "!tmp!!") + "!tmp!txt!");
                     noList = true;
-                    final String temp2 = processLineOfWikiCode(line.substring(positionOfOpeningTag));
+                    final String temp2 = processLineOfWikiCode(hostport, line.substring(positionOfOpeningTag));
                     noList = false;
                     line = temp1.replaceAll("!tmp!txt!", temp2);
                     line = line.replaceAll("!tmp!!", "!tmp!");
@@ -673,7 +673,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     preindented++;
                     openBlockQuoteTags.append(HTML_OPEN_BLOCKQUOTE);
                 }
-                line = processLineOfWikiCode(line.substring(preindented, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
+                line = processLineOfWikiCode(hostport, line.substring(preindented, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
                 line = openBlockQuoteTags + line.replaceAll("!pre!txt!", preformattedText);
                 line = line.replaceAll("!pre!!", "!pre!");
                 preformattedSpanning = true;
@@ -688,7 +688,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     endBlockQuoteTags.append(HTML_CLOSE_BLOCKQUOTE);
                     preindented--;
                 }
-                line = processLineOfWikiCode("!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
+                line = processLineOfWikiCode(hostport, "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
                 line = line.replaceAll("!pre!txt!", preformattedText) + endBlockQuoteTags;
                 line = line.replaceAll("!pre!!", "!pre!");
                 processingPreformattedText = false;
@@ -698,7 +698,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 while ((posTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED)) >= 0) {
                     line = line.substring(0, posTag) + line.substring(posTag + LEN_WIKI_CLOSE_PRE_ESCAPED);
                 }
-                line = processLineOfWikiCode(line);
+                line = processLineOfWikiCode(hostport, line);
             }
         }
         return line;
@@ -914,7 +914,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    public String processLineOfWikiCode(String line) {
+    public String processLineOfWikiCode(String hostport, String line) {
         //If HTML has not been replaced yet (can happen if method gets called in recursion), replace now!
         if ((!replacedHtmlAlready || preformattedSpanning) && line.indexOf(WIKI_CLOSE_PRE_ESCAPED) < 0) {
             line = CharacterCoding.unicode2html(line, true);
@@ -925,7 +925,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         if ((line.indexOf(WIKI_OPEN_PRE_ESCAPED) >= 0) ||
                 (line.indexOf(WIKI_CLOSE_PRE_ESCAPED) >= 0) ||
                 preformattedSpanning) {
-            line = processPreformattedText(line);
+            line = processPreformattedText(hostport, line);
         } else {
 
             //tables first -> wiki-tags in cells can be treated after that
@@ -970,7 +970,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             line = processOrderedList(line);
             line = processDefinitionList(line);
 
-            line = processLinksAndImages(line);
+            line = processLinksAndImages(hostport, line);
 
         }
 

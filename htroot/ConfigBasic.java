@@ -103,11 +103,11 @@ public class ConfigBasic {
 
         // check if peer name already exists
         final yacySeed oldSeed = sb.peers.lookupByName(peerName);
-        if (oldSeed == null && !peerName.equals(sb.peers.mySeed().getName())) {
-            // the name is new
-            if (Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
-                sb.peers.mySeed().setName(peerName);
-            }
+        if (oldSeed == null &&
+            !peerName.equals(sb.peers.mySeed().getName()) &&
+            Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
+            sb.peers.mySeed().setName(peerName);
+            sb.peers.saveMySeed();
         }
         
         // UPnP config

@@ -34,17 +34,12 @@ import java.io.UnsupportedEncodingException;
 
 abstract class AbstractWikiParser implements WikiParser {
     
-    final String address;
-    
-    public AbstractWikiParser(final String address) {
-        this.address = address;
-    }
-    
-    protected abstract String transform(BufferedReader reader, int length) throws IOException;
+    protected abstract String transform(String hostport, BufferedReader reader, int length) throws IOException;
 
-    public String transform(final String content) {
+    public String transform(String hostport, final String content) {
         try {
             return transform(
+                    hostport,
                     new BufferedReader(new StringReader(content)),
                     content.length());
         } catch (final IOException e) {
@@ -52,9 +47,10 @@ abstract class AbstractWikiParser implements WikiParser {
         }
     }
     
-    public String transform(final String content, final String publicAddress) {
+    public String transform(String hostport, final String content, final String publicAddress) {
         try {
             return transform(
+                    hostport, 
                     new BufferedReader(new StringReader(content)),
                     content.length());
         } catch (final IOException e) {
@@ -62,14 +58,15 @@ abstract class AbstractWikiParser implements WikiParser {
         }
     }
     
-    public String transform(final byte[] content) throws UnsupportedEncodingException {
-        return transform(content, "UTF-8");
+    public String transform(String hostport, final byte[] content) throws UnsupportedEncodingException {
+        return transform(hostport, content, "UTF-8");
     }
     
-    public String transform(final byte[] content, final String encoding, final String publicAddress) {
+    public String transform(String hostport, final byte[] content, final String encoding, final String publicAddress) {
         final ByteArrayInputStream bais = new ByteArrayInputStream(content);
         try {
             return transform(
+                    hostport, 
                     new BufferedReader(new InputStreamReader(bais, encoding)),
                     content.length);
         } catch (final IOException e) {
@@ -77,10 +74,11 @@ abstract class AbstractWikiParser implements WikiParser {
         }
     }
     
-    public String transform(final byte[] content, final String encoding) throws UnsupportedEncodingException {
+    public String transform(String hostport, final byte[] content, final String encoding) throws UnsupportedEncodingException {
         final ByteArrayInputStream bais = new ByteArrayInputStream(content);
         try {
             return transform(
+                    hostport,
                     new BufferedReader(new InputStreamReader(bais, encoding)),
                     content.length);
         } catch (final IOException e) {

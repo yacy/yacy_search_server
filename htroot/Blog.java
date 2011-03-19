@@ -191,7 +191,7 @@ public class Blog {
                 prop.putHTML("mode_author", UTF8.String(author));
                 prop.putHTML("mode_subject", post.get("subject",""));
                 prop.put("mode_date", dateString(new Date()));
-                prop.putWiki("mode_page", post.get("content", ""));
+                prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", post.get("content", ""));
                 prop.putHTML("mode_page-code", post.get("content", ""));
             }
             else {
@@ -234,7 +234,7 @@ public class Blog {
             else {
                 //only show 1 entry
                 prop.put("mode_entries", "1");
-                putBlogEntry(prop, page, address, 0, hasRights, xml);
+                putBlogEntry(sb, prop, page, address, 0, hasRights, xml);
             }
         }
 
@@ -263,6 +263,7 @@ public class Blog {
         while (i.hasNext() && (num == 0 || num > count)) {
             if(0 < start--) continue;
             putBlogEntry(
+                    switchboard,
                     prop,
                     switchboard.blogDB.readBlogEntry(i.next()),
                     address,
@@ -293,6 +294,7 @@ public class Blog {
     }
 
     private static serverObjects putBlogEntry(
+            final Switchboard sb,
             final serverObjects prop,
             final BlogBoard.BlogEntry entry,
             final String address,
@@ -324,7 +326,7 @@ public class Blog {
             prop.put("mode_entries_" + number + "_page", entry.getPage());
             prop.put("mode_entries_" + number + "_timestamp", entry.getTimestamp());
         } else {
-            prop.putWiki("mode_entries_" + number + "_page", entry.getPage());
+            prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_entries_" + number + "_page", entry.getPage());
         }
 
         if (hasRights) {

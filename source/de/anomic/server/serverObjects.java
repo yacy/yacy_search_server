@@ -229,13 +229,13 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     
-    public String putWiki(final String key, final String wikiCode){
-        return this.put(key, Switchboard.wikiParser.transform(wikiCode));
+    public String putWiki(String hostport, final String key, final String wikiCode){
+        return this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
     }
     
-    public String putWiki(final String key, final byte[] wikiCode) {
+    public String putWiki(String hostport, final String key, final byte[] wikiCode) {
         try {
-            return this.put(key, Switchboard.wikiParser.transform(wikiCode));
+            return this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
         } catch (final UnsupportedEncodingException e) {
             return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }

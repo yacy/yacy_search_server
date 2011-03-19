@@ -15,14 +15,14 @@
     <form action="IndexImportWikimedia_p.html" method="get" accept-charset="UTF-8">
         <!-- no post method here, we don't want to transmit the whole file, only the path-->
         <fieldset>
-          <legend>Wikimedia Dump File Selection: select a 'bz2' file</legend>
+          <legend>Wikimedia Dump File Selection: select a xml file (which may be bz2- or gz-encoded)</legend>
           You can import Wikipedia dumps here. An example is the file
           <a href="http://download.wikimedia.org/dewiki/20090311/dewiki-20090311-pages-articles.xml.bz2">
           http://download.wikimedia.org/dewiki/20090311/dewiki-20090311-pages-articles.xml.bz2</a>.
           <br />
-          Dumps must be in XML format and must be encoded in bz2. Do not decompress the file after downloading!
+          Dumps must be in XML format and may be compressed in gz or bz2. Uncompressed XML is also ok.
           <br />
-          <input name="file" type="text" value="DATA/HTCACHE/dewiki-20090311-pages-articles.xml.bz2" size="80" />
+          <input name="file" type="text" value="" size="80" />
           <input name="submit" type="submit" value="Import Wikimedia Dump" />
         </fieldset>
     </form>

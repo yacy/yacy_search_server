@@ -145,11 +145,11 @@ public final class yacySeedDB implements AlternativeDomainNames {
     
     public void relocate(
             File newNetworkRoot,
-            final File myOwnSeedFile, 
             final int redundancy,
             final int partitionExponent,
             final boolean useTailCache,
             final boolean exceed134217727) {
+        
         // close old databases
         this.seedActiveDB.close();
         this.seedPassiveDB.close();
@@ -161,8 +161,13 @@ public final class yacySeedDB implements AlternativeDomainNames {
         this.seedActiveDBFile = new File(newNetworkRoot, seedActiveDBFile.getName());
         this.seedPassiveDBFile = new File(newNetworkRoot, seedPassiveDBFile.getName());
         this.seedPotentialDBFile = new File(newNetworkRoot, seedPotentialDBFile.getName());
+        
+
+        // read current peer name
+        String peername = this.myName();
+        
         this.mySeed = null; // my own seed
-        this.myOwnSeedFile = myOwnSeedFile;
+        this.myOwnSeedFile = new File(newNetworkRoot, yacySeedDB.DBFILE_OWN_SEED);
         this.netRedundancy = redundancy;
         this.scheme = new VerticalWordPartitionScheme(partitionExponent);
         
@@ -275,7 +280,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not remove hash ("+ e.getClass() +"): "+ e.getMessage()); }
     }
     
-    protected void saveMySeed() {
+    public void saveMySeed() {
         try {
           this.mySeed().save(myOwnSeedFile);
         } catch (final IOException e) { Log.logWarning("yacySeedDB", "could not save mySeed '"+ myOwnSeedFile +"': "+ e.getMessage()); }
