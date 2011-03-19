@@ -404,6 +404,7 @@
         <include name="searchtest*"/>
         <include name="localsearch.sh"/>
         <include name="apicall.sh"/>
+        <include name="importmediawiki.sh"/>
         <include name="up.sh"/>
         <include name="down.sh"/>
       </fileset>
