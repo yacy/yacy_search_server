@@ -616,6 +616,7 @@ public final class yacyRelease extends yacyVersion {
                 if (now - downloadedFile.lastModified() > deleteAfterMillis) {
                     // delete file
                     FileUtils.deletedelete(downloadedFile);
+                    FileUtils.deletedelete(new File(downloadedFile.getAbsolutePath() + ".sig"));
                     if (downloadedFile.exists()) {
                         Log.logWarning("STARTUP", "cannot delete old release " + downloadedFile.getAbsolutePath());
                     }
