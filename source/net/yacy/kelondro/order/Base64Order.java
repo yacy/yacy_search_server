@@ -32,7 +32,6 @@ import java.util.Comparator;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.logging.Log;
 
 
 public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
@@ -52,8 +51,6 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             ahpla_enhanced[alpha_enhanced[i]] = (byte) i;
         }
     }
-
-    private final Log log;
 
     public static final Base64Order standardCoder = new Base64Order(true, true);
     public static final Base64Order enhancedCoder = new Base64Order(true, false);
@@ -85,7 +82,6 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
                 ab[(ac << 7) | bc] = c;
             }
         }
-        this.log = new Log("BASE64");
     }
     
     public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
@@ -301,8 +297,9 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             return out;
         } catch (final ArrayIndexOutOfBoundsException e) {
             // maybe the input was not base64
+            // TODO: Throw exception again
             // throw new RuntimeException("input probably not base64");
-            if (this.log.isFine()) this.log.logFine("wrong string receive: " + in);
+            System.err.println("wrong string receive: " + in);
             return new byte[0];
         }
     }

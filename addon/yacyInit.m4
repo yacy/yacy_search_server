@@ -100,7 +100,7 @@ fi
 cd $YACY_HOME
 
 #get javastart args
-if [ -f DATA/SETTINGS/yacy.conf ]
+if [ -s DATA/SETTINGS/yacy.conf ]
 then
 	# startup memory
 	for i in Xmx Xms; do
