@@ -131,7 +131,8 @@ public class yacysearch {
             prop.put("constraint", "");
             prop.put("cat", "href");
             prop.put("depth", "0");
-            prop.put("verify", (post == null) ? "true" : post.get("verify", "true"));
+            prop.put("search.verify", (post == null) ? sb.getConfig("search.verify", "iffresh") : post.get("verify", "iffresh"));
+            prop.put("search.navigation", (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
             prop.put("contentdom", "text");
             prop.put("contentdomCheckText", "1");
             prop.put("contentdomCheckAudio", "0");
@@ -403,7 +404,7 @@ public class yacysearch {
             }
             
             // navigation
-            final String navigation = (post == null) ? "" : post.get("nav", "");
+            final String navigation = (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "");
             
             // the query
             final TreeSet<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
@@ -707,7 +708,8 @@ public class yacysearch {
         prop.putHTML("prefermaskfilter", prefermask);
         prop.put("indexof", (indexof) ? "on" : "off");
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());
-        prop.put("verify", snippetFetchStrategy == null ? "false" : snippetFetchStrategy.toName());
+        prop.put("search.verify", snippetFetchStrategy == null ? sb.getConfig("search.verify", "iffresh") : snippetFetchStrategy.toName());
+        prop.put("search.navigation", (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
         prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);

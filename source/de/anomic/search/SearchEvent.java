@@ -91,7 +91,8 @@ public final class SearchEvent {
                              final int remote_maxcount,
                              final long remote_maxtime,
                              final int burstRobinsonPercent,
-                             final int burstMultiwordPercent) {
+                             final int burstMultiwordPercent,
+                             final boolean deleteIfSnippetFail) {
         if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
@@ -155,7 +156,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, this.peers, this.workTables, 3000);
+            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, this.peers, this.workTables, 3000, deleteIfSnippetFail);
         } else {
             // do a local search
             this.rankingProcess = new RankingProcess(this.query, this.order, max_results_preparation);
@@ -199,7 +200,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, this.peers, this.workTables, 500);
+            this.resultFetcher = new ResultFetcher(loader, this.rankingProcess, query, this.peers, this.workTables, 500, deleteIfSnippetFail);
         }
          
         // clean up events

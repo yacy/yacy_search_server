@@ -51,15 +51,12 @@ public class index {
         }
         
         // access control
-        boolean publicPage = sb.getConfigBool("publicSearchpage", true);
         final boolean authorizedAccess = sb.verifyAuthentication(header, false);
         if ((post != null) && (post.containsKey("publicPage"))) {
             if (!authorizedAccess) {
                 prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                 return prop;
             }
-            publicPage = post.get("publicPage", "0").equals("1");
-            sb.setConfig("publicSearchpage", publicPage);
         }
         
         final boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
@@ -114,7 +111,6 @@ public class index {
         prop.put("searchoptions_prefermaskoptions", "0");
         prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");
-        prop.put("searchoptions_publicSearchpage", (publicPage) ? "0" : "1");
         prop.put("results", "");
         prop.putHTML("cat", cat);
         prop.put("type", type);
@@ -132,6 +128,8 @@ public class index {
         prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
         prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
         prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
+        prop.put("search.navigation", sb.getConfig("search.navigation", "all") );
+        prop.put("search.verify", sb.getConfig("search.verify", "iffresh") );
         // online caution timing
         sb.localSearchLastAccess = System.currentTimeMillis();
         

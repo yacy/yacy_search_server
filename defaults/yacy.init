@@ -723,6 +723,30 @@ search.result.show.metadata = true
 search.result.show.parser = true
 search.result.show.pictures = true
 
+# search navigators: comma-separated list of default values for search navigation.
+# can be temporary different if search string is given with differen navigation values
+# assigning no value(s) means that no navigation is shown
+search.navigation=hosts,authors,namespace,topics
+
+# search result verification and snippet fetch caching rules
+# each search result can be verified byloading the link from the web
+# this can be enhanced using a cache. In some cases it may be appropriate
+# to not verify the link at all and do not compute a snippet
+# the possible cases are:
+# nocache:   no use of web cache, load all snippets online
+# iffresh:   use the cache if the cache exists and is fresh otherwise load online
+# ifexist:   use the cache if the cache exist or load online
+# cacheonly: never go online, use all content from cache. If no cache entry exist,
+#            consider content nevertheless as available and show result without snippet
+# false:     no link verification and not snippet generation:
+             all search results are valid without verification
+search.verify = iffresh
+
+# in case that a link verification fails then the corresponding index reference can be
+# deleted to clean up the index. If this property is set then failed index verification in
+# the cases of nocache, iffresh and ifexist causes an index deletion
+search.verify.delete = true
+
 # remote search details
 remotesearch.maxcount = 20
 remotesearch.maxtime = 1000

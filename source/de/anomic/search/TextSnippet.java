@@ -56,17 +56,6 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
     private static final int maxCache = 1000;
 
-    public static final int SOURCE_CACHE = 0;
-    public static final int SOURCE_FILE = 1;
-    public static final int SOURCE_WEB = 2;
-    public static final int SOURCE_METADATA = 3;
-    
-    public static final int ERROR_NO_HASH_GIVEN = 11;
-    public static final int ERROR_SOURCE_LOADING = 12;
-    public static final int ERROR_RESOURCE_LOADING = 13;
-    public static final int ERROR_PARSER_FAILED = 14;
-    public static final int ERROR_PARSER_NO_LINES = 15;
-    public static final int ERROR_NO_MATCH = 16;
 
     /**
      * <code>\\A[^\\p{L}\\p{N}].+</code>
@@ -118,12 +107,32 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     
     public static final Cache snippetsCache = new Cache();
     
+    public static enum ResultClass {
+        SOURCE_CACHE(false),
+        SOURCE_FILE(false),
+        SOURCE_WEB(false),
+        SOURCE_METADATA(false),
+        ERROR_NO_HASH_GIVEN(true),
+        ERROR_SOURCE_LOADING(true),
+        ERROR_RESOURCE_LOADING(true),
+        ERROR_PARSER_FAILED(true),
+        ERROR_PARSER_NO_LINES(true),
+        ERROR_NO_MATCH(true);
+        private final boolean fail;
+        private ResultClass(final boolean fail) {
+            this.fail = fail;
+        }
+        public boolean fail() {
+            return this.fail;
+        }
+    }
+    
     private byte[] urlhash;
     private String line;
     private String error;
-    private int errorCode;
+    private ResultClass resultStatus;
 
-    public TextSnippet(final byte[] urlhash, final String line, final int errorCode, final String errortext) {
+    public TextSnippet(final byte[] urlhash, final String line, final ResultClass errorCode, final String errortext) {
         init(urlhash, line, errorCode, errortext);
     }
 
@@ -132,12 +141,12 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         final DigestURI url = comp.url();
         if (queryhashes.isEmpty()) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
-            init(url.hash(), null, ERROR_NO_HASH_GIVEN, "no query hashes given");
+            init(url.hash(), null, ResultClass.ERROR_NO_HASH_GIVEN, "no query hashes given");
             return;
         }
         
         // try to get snippet from snippetCache
-        int source = SOURCE_CACHE;
+        ResultClass source = ResultClass.SOURCE_CACHE;
         final String wordhashes = yacySearch.set2string(queryhashes);
         final String urls = UTF8.String(url.hash());
         String snippetLine = snippetsCache.get(wordhashes, urls);
@@ -161,19 +170,19 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             boolean useMetadata = !objectWasInCache && !cacheStrategy.mustBeOffline();
             if (useMetadata && containsAllHashes(loc = comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
-                init(url.hash(), loc, SOURCE_METADATA, null);
+                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
                 return;
             } else if (useMetadata && containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
                 // try to create the snippet from information given in the creator metadata
-                init(url.hash(), loc, SOURCE_METADATA, null);
+                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
                 return;
             } else if (useMetadata && containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
-                init(url.hash(), loc, SOURCE_METADATA, null);
+                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
                 return;
             } else if (useMetadata && containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
                 // try to create the snippet from information given in the url
-                init(url.hash(), loc, SOURCE_METADATA, null);
+                init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
                 return;
             } else {
                 // try to load the resource from the cache
@@ -181,23 +190,23 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 if (response == null) {
                     // in case that we did not get any result we can still return a success when we are not allowed to go online
                     if (cacheStrategy.mustBeOffline()) {
-                        init(url.hash(), null, ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
+                        init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
                         return;
                     }
                     
                     // if it is still not available, report an error
-                    init(url.hash(), null, ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
+                    init(url.hash(), null, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
                     return;
                 }
                 if (!objectWasInCache) {
                     // place entry on indexing queue
                     Switchboard.getSwitchboard().toIndexer(response);
-                    source = SOURCE_WEB;
+                    source = ResultClass.SOURCE_WEB;
                 }
             }
         } catch (final Exception e) {
             //Log.logException(e);
-            init(url.hash(), null, ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
+            init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
             return;
         } 
         
@@ -208,11 +217,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         try {
             document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
         } catch (final Parser.Failure e) {
-            init(url.hash(), null, ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
+            init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, e.getMessage()); // cannot be parsed
             return;
         }
         if (document == null) {
-            init(url.hash(), null, ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
+            init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
             return;
         }
         
@@ -224,7 +233,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         // compute snippet from text
         final Collection<StringBuilder> sentences = document.getSentences(pre);
         if (sentences == null) {
-            init(url.hash(), null, ERROR_PARSER_NO_LINES, "parser returned no sentences");
+            init(url.hash(), null, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences");
             return;
         }
         final SnippetExtractor tsr;
@@ -235,7 +244,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             textline = tsr.getSnippet();
             remainingHashes =  tsr.getRemainingWords();
         } catch (UnsupportedOperationException e) {
-            init(url.hash(), null, ERROR_NO_MATCH, "no matching snippet found");
+            init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
             return;
         }
         
@@ -254,7 +263,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         if (textline  != null) snippetLine += (snippetLine.length() == 0) ? textline  : "<br />" + textline;
         
         if (snippetLine == null || !remainingHashes.isEmpty()) {
-            init(url.hash(), null, ERROR_NO_MATCH, "no matching snippet found");
+            init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
             return;
         }
         if (snippetLine.length() > snippetMaxLength) snippetLine = snippetLine.substring(0, snippetMaxLength);
@@ -266,10 +275,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         init(url.hash(), snippetLine, source, null);
     }
     
-    private void init(final byte[] urlhash, final String line, final int errorCode, final String errortext) {
+    private void init(final byte[] urlhash, final String line, final ResultClass errorCode, final String errortext) {
         this.urlhash = urlhash;
         this.line = line;
-        this.errorCode = errorCode;
+        this.resultStatus = errorCode;
         this.error = errortext;
     }
     
@@ -285,8 +294,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return (error == null) ? "" : error.trim();
     }
     
-    public int getErrorCode() {
-        return errorCode;
+    public ResultClass getErrorCode() {
+        return resultStatus;
     }
     
     public String getLineMarked(final HandleSet queryHashes) {

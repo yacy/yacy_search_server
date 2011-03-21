@@ -66,6 +66,7 @@ public class ResultFetcher {
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
     int taketimeout;
+    private final boolean deleteIfSnippetFail;
     
     public ResultFetcher(
             final LoaderDispatcher loader,
@@ -73,7 +74,8 @@ public class ResultFetcher {
             final QueryParams query,
             final yacySeedDB peers,
             final WorkTables workTables,
-            final int taketimeout) {
+            final int taketimeout,
+            final boolean deleteIfSnippetFail) {
     	assert query != null;
         this.loader = loader;
     	this.rankingProcess = rankedCache;
@@ -81,6 +83,7 @@ public class ResultFetcher {
         this.peers = peers;
         this.workTables = workTables;
         this.taketimeout = taketimeout;
+        this.deleteIfSnippetFail = deleteIfSnippetFail;
         
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
@@ -399,9 +402,9 @@ public class ResultFetcher {
                     Integer.MAX_VALUE,
                     !query.isLocal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            Log.logInfo("SEARCH", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + (!snippet.getErrorCode().fail() ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
-            if (snippet.getErrorCode() < 11) {
+            if (!snippet.getErrorCode().fail()) {
                 // we loaded the file and found the snippet
                 return new ResultEntry(page, query.getSegment(), peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
             } else if (cacheStrategy.mustBeOffline()) {
@@ -411,7 +414,7 @@ public class ResultFetcher {
             } else {
                 // problems with snippet fetch
                 String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
-                this.workTables.failURLsRegisterMissingWord(query.getSegment().termIndex(), metadata.url(), query.queryHashes, reason);
+                if (deleteIfSnippetFail) this.workTables.failURLsRegisterMissingWord(query.getSegment().termIndex(), metadata.url(), query.queryHashes, reason);
                 Log.logInfo("SEARCH", "sorted out url " + metadata.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }
@@ -430,7 +433,7 @@ public class ResultFetcher {
             } else {
                 // problems with snippet fetch
                 String reason = "no media snippet";
-                this.workTables.failURLsRegisterMissingWord(query.getSegment().termIndex(), metadata.url(), query.queryHashes, reason);
+                if (deleteIfSnippetFail) this.workTables.failURLsRegisterMissingWord(query.getSegment().termIndex(), metadata.url(), query.queryHashes, reason);
                 Log.logInfo("SEARCH", "sorted out url " + metadata.url().toNormalform(true, false) + " during search: " + reason);
                 return null;
             }

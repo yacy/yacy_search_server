@@ -174,7 +174,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return (WordReferenceVars) word;
     }
     public boolean hasTextSnippet() {
-        return (this.textSnippet != null) && (this.textSnippet.getErrorCode() < 11);
+        return (this.textSnippet != null) && (!this.textSnippet.getErrorCode().fail());
     }
     public boolean hasMediaSnippets() {
         return (this.mediaSnippets != null) && (!this.mediaSnippets.isEmpty());

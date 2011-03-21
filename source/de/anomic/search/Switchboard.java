@@ -1264,7 +1264,7 @@ public final class Switchboard extends serverSwitch {
         File infile = new File(this.surrogatesInPath, s);
         if (!infile.exists() || !infile.canWrite() || !infile.canRead()) return false;
         File outfile = new File(this.surrogatesOutPath, s);
-        if (outfile.exists()) return false;
+        //if (outfile.exists()) return false;
         boolean moved = false;
         if (s.endsWith("xml.zip")) {
             // open the zip file with all the xml files in it
@@ -1332,7 +1332,7 @@ public final class Switchboard extends serverSwitch {
             assert crawlStacker != null;
             final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.getIdentifier(true));
             if (urlRejectReason != null) {
-                if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.getIdentifier(true) + "': " + urlRejectReason);
+                this.log.logWarning("Rejected URL '" + surrogate.getIdentifier(true) + "': " + urlRejectReason);
                 continue;
             }
             

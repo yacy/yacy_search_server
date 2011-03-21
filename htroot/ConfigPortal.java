@@ -71,12 +71,23 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, post.get(SwitchboardConstants.INDEX_FORWARD, ""));
                 HTTPDFileHandler.indexForward = post.get(SwitchboardConstants.INDEX_FORWARD, "");
                 sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu", true));
+                sb.setConfig("publicSearchpage", post.getBoolean("publicSearchpage", true));
                 sb.setConfig("search.options", post.getBoolean("search.options", false));
                 sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date", false));
                 sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size", false));
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata", false));
                 sb.setConfig("search.result.show.parser", post.getBoolean("search.result.show.parser", false));
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures", false));
+                sb.setConfig("search.verify", post.get("search.verify", "ifexist"));
+                sb.setConfig("search.verify.delete", post.getBoolean("search.verify.delete", false));
+                // construct navigation String
+                String nav = "";
+                if (post.getBoolean("search.navigation.hosts", false)) nav += "hosts,";
+                if (post.getBoolean("search.navigation.authors", false)) nav += "authors,";
+                if (post.getBoolean("search.navigation.namespace", false)) nav += "namespace,";
+                if (post.getBoolean("search.navigation.topics", false)) nav += "topics,";
+                if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1);
+                 sb.setConfig("search.navigation", nav);
             }
             if (post.containsKey("searchpage_default")) {
                 sb.setConfig(SwitchboardConstants.GREETING, "P2P Web Search");
@@ -88,12 +99,16 @@ public class ConfigPortal {
                 HTTPDFileHandler.indexForward = "";
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
                 sb.setConfig("publicTopmenu", true);
+                sb.setConfig("publicSearchpage", true);
+                sb.setConfig("search.navigation", "hosts,authors,namespace,topics");
                 sb.setConfig("search.options", true);
                 sb.setConfig("search.result.show.date", true);
                 sb.setConfig("search.result.show.size", true);
                 sb.setConfig("search.result.show.metadata", true);
                 sb.setConfig("search.result.show.parser", true);
                 sb.setConfig("search.result.show.pictures", true);
+                sb.setConfig("search.verify", "iffresh");
+                sb.setConfig("search.verify.delete", "true");
             }            
         }
 
@@ -103,12 +118,26 @@ public class ConfigPortal {
         prop.putHTML(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
+        prop.put("publicSearchpage", sb.getConfigBool("publicSearchpage", false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
+        
         prop.put("search.result.show.date", sb.getConfigBool("search.result.show.date", false) ? 1 : 0);
         prop.put("search.result.show.size", sb.getConfigBool("search.result.show.size", false) ? 1 : 0);
         prop.put("search.result.show.metadata", sb.getConfigBool("search.result.show.metadata", false) ? 1 : 0);
         prop.put("search.result.show.parser", sb.getConfigBool("search.result.show.parser", false) ? 1 : 0);
         prop.put("search.result.show.pictures", sb.getConfigBool("search.result.show.pictures", false) ? 1 : 0);
+
+        prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts") >= 0 ? 1 : 0);
+        prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors") >= 0 ? 1 : 0);
+        prop.put("search.navigation.namespace", sb.getConfig("search.navigation", "").indexOf("namespace") >= 0 ? 1 : 0);
+        prop.put("search.navigation.topics", sb.getConfig("search.navigation", "").indexOf("topics") >= 0 ? 1 : 0);
+
+        prop.put("search.verify.nocache", sb.getConfig("search.verify", "").equals("nocache") ? 1 : 0);
+        prop.put("search.verify.iffresh", sb.getConfig("search.verify", "").equals("iffresh") ? 1 : 0);
+        prop.put("search.verify.ifexist", sb.getConfig("search.verify", "").equals("ifexist") ? 1 : 0);
+        prop.put("search.verify.cacheonly", sb.getConfig("search.verify", "").equals("cacheonly") ? 1 : 0);
+        prop.put("search.verify.false", sb.getConfig("search.verify", "").equals("false") ? 1 : 0);
+        prop.put("search.verify.delete", sb.getConfigBool("search.verify.delete", true) ? 1 : 0);
 
         final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
         prop.put("popupFront", 0);
