@@ -247,7 +247,7 @@ public class Segment {
                 try {
                     container = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhash, 1);
                     container.add(ientry);
-                    rankingProcess.add(container, true, sourceName, -1);
+                    rankingProcess.add(container, true, sourceName, -1, !i.hasNext());
                 } catch (RowSpaceExceededException e) {
                     continue;
                 }

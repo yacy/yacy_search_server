@@ -91,11 +91,13 @@ public final class RankingProcess extends Thread {
     private final ScoreMap<String> namespaceNavigator;
     private final ReferenceOrder order;
     private final long startTime;
+    private       boolean addRunning;
     
     public RankingProcess(final QueryParams query, final ReferenceOrder order, final int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
+        this.addRunning = true;
         this.localSearchInclusion = null;
         this.stack = new WeakPriorityBlockingQueue<WordReferenceVars>(maxentries);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
@@ -150,7 +152,7 @@ public final class RankingProcess extends Thread {
                 return;
             }
             
-            add(index, true, "local index: " + this.query.getSegment().getLocation(), -1);
+            add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true);
         } catch (final Exception e) {
             Log.logException(e);
         } finally {
@@ -158,10 +160,17 @@ public final class RankingProcess extends Thread {
         }
     }
     
-    public void add(final ReferenceContainer<WordReference> index, final boolean local, String resourceName, final int fullResource) {
+    public void add(
+            final ReferenceContainer<WordReference> index,
+            final boolean local,
+            String resourceName,
+            final int fullResource,
+            final boolean finalizeAddAtEnd) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
+        this.addRunning = true;
+        
         assert (index != null);
         if (index.isEmpty()) return;
         
@@ -245,7 +254,9 @@ public final class RankingProcess extends Thread {
                 }
             }
 
-        } catch (InterruptedException e) {}
+        } catch (InterruptedException e) {} finally {
+            if (finalizeAddAtEnd) this.addRunning = false;
+        }
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
@@ -297,11 +308,12 @@ public final class RankingProcess extends Thread {
         WeakPriorityBlockingQueue.Element<WordReferenceVars> rwi = null;
         
         // take one entry from the stack if there are entries on that stack or the feeding is not yet finished
-        if (!feedingIsFinished() || stack.sizeQueue() > 0) try {
+        try {
             //System.out.println("stack.poll: feeders = " + this.feeders + ", stack.sizeQueue = " + stack.sizeQueue());
             int loops = 0; // a loop counter to terminate the reading if all the results are from the same domain
             long timeout = System.currentTimeMillis() + waitingtime;
-            while (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage) {
+            while (((!feedingIsFinished() && this.addRunning) || stack.sizeQueue() > 0) &&
+                   (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage)) {
                 if (waitingtime <= 0) {
                     rwi = stack.poll();
                 } else timeoutloop:while (System.currentTimeMillis() < timeout) {

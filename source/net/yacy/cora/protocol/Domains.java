@@ -813,10 +813,15 @@ public class Domains {
             System.err.println(e);
         }
         */
+        InetAddress a;
+        a = dnsResolve("yacy.net"); System.out.println(a);
+        a = dnsResolve("kaskelix.de"); System.out.println(a);
+        a = dnsResolve("yacy.net"); System.out.println(a);
+        
         try { Thread.sleep(1000);} catch (InterruptedException e) {} // get time for class init
         System.out.println("myPublicLocalIP: " + myPublicLocalIP());
-        for (final InetAddress a : myIntranetIPs()) {
-            System.out.println("Intranet IP: " + a);
+        for (final InetAddress b : myIntranetIPs()) {
+            System.out.println("Intranet IP: " + b);
         }
     }
 }

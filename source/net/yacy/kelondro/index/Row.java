@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
@@ -48,7 +49,9 @@ import net.yacy.kelondro.util.kelondroException;
 
 
 public final class Row {
-   
+
+    private final static Pattern commaPattern = Pattern.compile(",");
+    
     protected final Column[]        row;
     public final int[]              colstart;
     public final ByteOrder          objectOrder;
@@ -281,7 +284,7 @@ public final class Row {
         public Entry(String external, final boolean decimalCardinal) {
             // parse external form
             if (external.length() > 0 && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
-            final String[] elts = external.split(",");
+            final String[] elts = commaPattern.split(external);
             if (nickref == null) genNickRef();
             String nick;
             int p;

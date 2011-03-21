@@ -319,13 +319,13 @@ public class ResultFetcher {
 
                     // check if we have enough
                     if (result.sizeAvailable() >= this.neededResults) {
-                        System.out.println(result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
+                        Log.logWarning("ResultFetcher", result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
                         break;
                     }
 
                     // check if we can succeed if we try to take another url
                     if (rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0) {
-                        System.out.println("rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
+                        Log.logWarning("ResultFetcher", "rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
                         break;
                     }
     

@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.swing.event.EventListenerList;
 
@@ -425,6 +426,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s == null) return "";
         return s;
     }
+
+    private final static Pattern commaSepPattern = Pattern.compile(" |,");
+    private final static Pattern semicSepPattern = Pattern.compile(" |;");
     
     public Set<String> getContentLanguages() {
         // i.e. <meta name="DC.language" content="en" scheme="DCTERMS.RFC3066">
@@ -433,7 +437,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s == null) s = metas.get("dc.language");
         if (s == null) return null;
         Set<String> hs = new HashSet<String>();
-        String[] cl = s.split(" |,");
+        String[] cl = commaSepPattern.split(s);
         int p;
         for (int i = 0; i < cl.length; i++) {
             cl[i] = cl[i].toLowerCase();
@@ -452,8 +456,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s.length() == 0) {
             return MultiProtocolURI.splitpattern.split(getTitle().toLowerCase());
         }
-        if (s.contains(",")) return s.split(" |,");
-        if (s.contains(";")) return s.split(" |;");
+        if (s.contains(",")) return commaSepPattern.split(s);
+        if (s.contains(";")) return semicSepPattern.split(s);
         return s.split("\\s");
     }
     
