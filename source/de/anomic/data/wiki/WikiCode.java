@@ -1,4 +1,4 @@
-// wikiCode.java
+// WikiCode.java
 // -------------------------------------
 // part of YACY
 //
@@ -547,7 +547,6 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             kl = line.substring(positionOfOpeningTag + LEN_WIKI_OPEN_LINK, positionOfClosingTag);
 
             // this is the part of the code that's responsible for images
-            // contributed by [MN]
             if (kl.startsWith(WIKI_IMAGE)) {
                 alt = EMPTY;
                 align = EMPTY;
@@ -590,7 +589,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 }
 
                 line = line.substring(0, positionOfOpeningTag) + "<img src=\"" + kl + "\"" + align + alt + ">" + line.substring(positionOfClosingTag + 2);
-            } // end contrib [MN]
+            }
             // if it's no image, it might be an internal link
             else {
                 if ((p = kl.indexOf(PIPE_ESCAPED)) > 0) {
@@ -648,7 +647,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     preformattedText.append("</pre>");
 
                     line = processLineOfWikiCode(hostport, line.substring(0, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
-                    line = line.replaceAll("!pre!txt!", preformattedText.toString().replaceAll("!pre!", "!pre!!"));
+                    line = line.replace("!pre!txt!", preformattedText.toString().replaceAll("!pre!", "!pre!!"));
                     line = line.replaceAll("!pre!!", "!pre!");
                 } //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
                 else {
@@ -674,7 +673,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     openBlockQuoteTags.append(HTML_OPEN_BLOCKQUOTE);
                 }
                 line = processLineOfWikiCode(hostport, line.substring(preindented, positionOfOpeningTag).replaceAll("!pre!", "!pre!!") + "!pre!txt!");
-                line = openBlockQuoteTags + line.replaceAll("!pre!txt!", preformattedText);
+                line = openBlockQuoteTags + line.replace("!pre!txt!", preformattedText);
                 line = line.replaceAll("!pre!!", "!pre!");
                 preformattedSpanning = true;
             } //end </pre>
@@ -689,7 +688,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     preindented--;
                 }
                 line = processLineOfWikiCode(hostport, "!pre!txt!" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_PRE_ESCAPED).replaceAll("!pre!", "!pre!!"));
-                line = line.replaceAll("!pre!txt!", preformattedText) + endBlockQuoteTags;
+                line = line.replace("!pre!txt!", preformattedText) + endBlockQuoteTags;
                 line = line.replaceAll("!pre!!", "!pre!");
                 processingPreformattedText = false;
             } //Getting rid of surplus </pre>
@@ -939,7 +938,6 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 line = "<hr />" + line.substring(LEN_WIKI_HR_LINE);
             }
 
-            // citings contributed by [MN]
             if (line.length() > 0 && line.charAt(0) == WIKI_INDENTION) {
                 final StringBuilder head = new StringBuilder();
                 final StringBuilder tail = new StringBuilder();
@@ -950,7 +948,6 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 }
                 line = head + line + tail;
             }
-            // end contrib [MN]
 
             // format headers
             line = tagReplace(line, Tags.HEADLINE_6);
