@@ -136,7 +136,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     /** List of properties which can be used in tables. */
     private final static String[] TABLE_PROPERTIES = {"rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border"};
 
-    /** Map which contains possible values for aeveral parameters. */
+    /** Map which contains possible values for several parameters. */
     private final static Map<String, String[]> PROPERTY_VALUES = new HashMap<String, String[]>();
 
     /** Tags for different types of headlines in wikiCode. */
