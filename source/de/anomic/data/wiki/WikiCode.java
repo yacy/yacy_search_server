@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -130,12 +131,12 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private static final int LEN_WIKI_HR_LINE = WIKI_HR_LINE.length();
     private static final int LEN_PIPE_ESCAPED = PIPE_ESCAPED.length();
 
-    private final List<String> tableOfContentElements = new ArrayList<String>();    //list of headlines used to create table of content of page
+    private final TableOfContent tableOfContent = new TableOfContent();
 
     /** List of properties which can be used in tables. */
     private final static String[] TABLE_PROPERTIES = {"rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border"};
 
-    /** Map which contains possible values for deveral parameters. */
+    /** Map which contains possible values for aeveral parameters. */
     private final static Map<String, String[]> PROPERTY_VALUES = new HashMap<String, String[]>();
 
     /** Tags for different types of headlines in wikiCode. */
@@ -393,14 +394,13 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 stringBuilder.append(HTML_CLOSE_LIST_ELEMENT);
                 ret = stringBuilder.toString();
                 listLevel += symbol;
-            } else if (listLevel.length() > 0 &&
-                    line.startsWith(listLevel)) {           //equal number of #
+            } else if (!listLevel.isEmpty() && line.startsWith(listLevel)) {           //equal number of #
                 final StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append(HTML_OPEN_LIST_ELEMENT);
                 stringBuilder.append(line.substring(listLevel.length()).trim());
                 stringBuilder.append(HTML_CLOSE_LIST_ELEMENT);
                 ret = stringBuilder.toString();
-            } else if (listLevel.length() > 0) {            //less #
+            } else if (!listLevel.isEmpty()) {            //less #
                 final StringBuilder stringBuilder = new StringBuilder();
                 final StringBuilder tmp = new StringBuilder();
 
@@ -467,7 +467,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     ret = line;
                 }
                 defListLevel += ";";
-            } else if (defListLevel.length() > 0 && line.startsWith(defListLevel)) { //equal number of semicolons
+            } else if (!defListLevel.isEmpty() && line.startsWith(defListLevel)) { //equal number of semicolons
                 final String copyOfLine = line.substring(defListLevel.length());
                 final int positionOfOpeningTag;
                 if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
@@ -484,7 +484,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 } else {
                     ret = line;
                 }
-            } else if (defListLevel.length() > 0) { //less semicolons
+            } else if (!defListLevel.isEmpty()) { //less semicolons
                 int i = defListLevel.length();
                 String tmp = EMPTY;
                 while (!line.startsWith(defListLevel.substring(0, i))) {
@@ -493,7 +493,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 }
                 defListLevel = defListLevel.substring(0, i);
                 int positionOfOpeningTag = defListLevel.length();
-                if (defListLevel.length() > 0) {
+                if (!defListLevel.isEmpty()) {
                     final String copyOfLine = line.substring(positionOfOpeningTag);
                     if ((positionOfOpeningTag = copyOfLine.indexOf(":")) > 0) {
                         final String definitionItem = copyOfLine.substring(0, positionOfOpeningTag);
@@ -719,24 +719,24 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         int level6 = 0;
         int doubles = 0;
         String anchorext = EMPTY;
-        if ((s = tableOfContentElements.size()) > 2) {
+        if ((s = tableOfContent.size()) > 2) {
             directory.append("<table><tr><td><div class=\"WikiTOCBox\">\n");
             for (int i = 0; i < s; i++) {
-                if (i >= tableOfContentElements.size()) {
+                if (i >= tableOfContent.size()) {
                     break;
                 }
-                element = tableOfContentElements.get(i);
+                element = tableOfContent.get(i);
                 if (element == null) {
                     continue;
                 }
                 //counting double headlines
                 doubles = 0;
                 for (int j = 0; j < i; j++) {
-                    if (j >= tableOfContentElements.size()) {
+                    if (j >= tableOfContent.size()) {
                         break;
                     }
-                    final String d = tableOfContentElements.get(j);
-                    if (d == null || d.length() < 1) {
+                    final String d = tableOfContent.get(j);
+                    if (d == null || d.isEmpty()) {
                         continue;
                     }
                     final String a = d.substring(1).replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY);
@@ -752,7 +752,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
                 final char l = element.charAt(0);
                 String temp = "";
-                if (Arrays.binarySearch(HEADLINE_LEVEL, l) >= 0 && element.length() > 0) {
+                if (Arrays.binarySearch(HEADLINE_LEVEL, l) >= 0 && !element.isEmpty()) {
                     
                     switch (l) {
 
@@ -838,6 +838,9 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                             directory.append("<a href=\"#");
                             break;
                         }
+                        default: {
+                            throw new IllegalArgumentException("illegal headline level: " + l);
+                        }
                     }
 
                     directory.append(temp.replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY));
@@ -850,9 +853,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             }
             directory.append("</div></td></tr></table>\n");
         }
-        if (!tableOfContentElements.isEmpty()) {
-            tableOfContentElements.clear();
-        }
+
         return directory;
     }
 
@@ -876,11 +877,15 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 if ((direlem = input.substring(firstPosition + tags.openWikiLength, secondPosition)) != null) {
                     //counting double headlines
                     int doubles = 0;
-                    for (final String tableOfContentElement : tableOfContentElements) {
-                        // no element with null value should ever be in directory
-                        assert (tableOfContentElement != null);
 
-                        if (tableOfContentElement.substring(1).equals(direlem)) {
+                    final Iterator<String> iterator = tableOfContent.iterator();
+                    String element;
+                    while (iterator.hasNext()) {
+                        element = iterator.next();
+                        // no element with null value should ever be in directory
+                        assert (element != null);
+
+                        if (element.substring(1).equals(direlem)) {
                             doubles++;
                         }
                     }
@@ -893,7 +898,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                             + direlem + tags.closeHTML + input.substring(secondPosition + tags.closeWikiLength);
                     //add headlines to list of headlines (so TOC can be created)
                     if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
-                        tableOfContentElements.add((tags.openWikiLength - 1) + direlem);
+                        tableOfContent.add((tags.openWikiLength - 1) + direlem);
                     }
                 }
             } else {
@@ -931,17 +936,17 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             line = processTable(line);
 
             // format lines
-            if (line.length() > 0 && line.charAt(0) == WIKI_FORMATTED) {
+            if (!line.isEmpty() && line.charAt(0) == WIKI_FORMATTED) {
                 line = "<tt>" + line.substring(1) + "</tt>";
             }
             if (line.startsWith(WIKI_HR_LINE)) {
                 line = "<hr />" + line.substring(LEN_WIKI_HR_LINE);
             }
 
-            if (line.length() > 0 && line.charAt(0) == WIKI_INDENTION) {
+            if (!line.isEmpty() && line.charAt(0) == WIKI_INDENTION) {
                 final StringBuilder head = new StringBuilder();
                 final StringBuilder tail = new StringBuilder();
-                while (line.length() > 0 && line.charAt(0) == WIKI_INDENTION) {
+                while (!line.isEmpty() && line.charAt(0) == WIKI_INDENTION) {
                     head.append(HTML_OPEN_BLOCKQUOTE);
                     tail.append(HTML_CLOSE_BLOCKQUOTE);
                     line = line.substring(1);
@@ -978,5 +983,28 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             line += "<br />";
         }
         return line;
+    }
+
+    private class TableOfContent {
+
+        private final List<String> toc = new ArrayList<String>();   // needs to be list which ensures order
+
+        int size() {
+            return toc.size();
+        }
+
+        String get(final int index) {
+            return toc.get(index);
+        }
+
+        synchronized boolean add(final String element) {
+            return toc.add(element);
+        }
+
+        Iterator<String> iterator() {
+            return toc.iterator();
+        }
+
+
     }
 }
