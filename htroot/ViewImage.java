@@ -28,14 +28,16 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.HashMap;
+import java.util.Map;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.Switchboard;
@@ -44,7 +46,7 @@ import de.anomic.server.serverSwitch;
 
 public class ViewImage {
 
-    private static HashMap<String, Image> iconcache = new HashMap<String, Image>();
+    private static Map<String, Image> iconcache = new ConcurrentARC<String, Image>(1000, Math.max(10, Math.min(32, Runtime.getRuntime().availableProcessors() * 2)));
     private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
     private static byte[] defaulticonb;
     static {
@@ -86,6 +88,7 @@ public class ViewImage {
         int maxheight = post.getInt("maxheight", 0);
         
         // get the image as stream
+        if (MemoryControl.shortStatus()) iconcache.clear();
         Image scaled = iconcache.get(urlString);
         if (scaled == null) {
             byte[] resourceb = null;
