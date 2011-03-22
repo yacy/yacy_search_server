@@ -23,11 +23,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
-import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.MediawikiImporter;
-import net.yacy.kelondro.logging.Log;
 
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -57,33 +55,17 @@ public class IndexImportWikimedia_p {
             } else {
                 if (post.containsKey("file")) {
                     final File sourcefile = new File(post.get("file"));
-                    //final String name = sourcefile.getName(); // i.e. dewiki-20090311-pages-articles.xml.bz2
-                    /*
-                    if (!name.endsWith("pages-articles.xml.bz2")) {
-                        prop.put("import", 0);
-                        prop.put("import_status", 1);
-                        prop.put("import_status_message", "file name must end with 'pages-articles.xml.bz2'");
-                        return prop;
-                    }
-                    */
-                    try {
-                        MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath);
-                        MediawikiImporter.job.start();
-                        prop.put("import", 1);
-                        prop.put("import_thread", "started");
-                        prop.put("import_dump", MediawikiImporter.job.source());
-                        prop.put("import_count", 0);
-                        prop.put("import_speed", 0);
-                        prop.put("import_runningHours", 0);
-                        prop.put("import_runningMinutes", 0);
-                        prop.put("import_remainingHours", 0);
-                        prop.put("import_remainingMinutes", 0);
-                    } catch (MalformedURLException e) {
-                        Log.logException(e);
-                        prop.put("import", 0);
-                        prop.put("import_status", 1);
-                        prop.put("import_status_message", e.getMessage());
-                    }
+                    MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath);
+                    MediawikiImporter.job.start();
+                    prop.put("import", 1);
+                    prop.put("import_thread", "started");
+                    prop.put("import_dump", MediawikiImporter.job.source());
+                    prop.put("import_count", 0);
+                    prop.put("import_speed", 0);
+                    prop.put("import_runningHours", 0);
+                    prop.put("import_runningMinutes", 0);
+                    prop.put("import_remainingHours", 0);
+                    prop.put("import_remainingMinutes", 0);
                 }
                 return prop;
             }

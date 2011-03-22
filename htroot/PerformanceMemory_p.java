@@ -196,7 +196,7 @@ public class PerformanceMemory_p {
         // other caching structures
         prop.putNum("namecacheHit.size", Domains.nameCacheHitSize());
         prop.putNum("namecacheMiss.size", Domains.nameCacheMissSize());
-        prop.putNum("namecache.noCache", Domains.nameCacheNoCachingListSize());
+        prop.putNum("namecache.noCache", 0);
         prop.putNum("blacklistcache.size", Switchboard.urlBlacklist.blacklistCacheSize());
         prop.putNum("searchevent.size", SearchEventCache.size());
         prop.putNum("searchevent.hit", SearchEventCache.cacheHit);

@@ -90,7 +90,7 @@ public class MediawikiImporter extends Thread implements Importer {
     private   String hostport, urlStub;
     
     
-    public MediawikiImporter(File sourcefile, File targetdir) throws MalformedURLException {
+    public MediawikiImporter(File sourcefile, File targetdir) {
     	this.sourcefile = sourcefile;
     	this.docsize = sourcefile.length();
     	this.approxdocs = (int) (this.docsize * (long) docspermbinxmlbz2 / 1024L / 1024L);
@@ -761,8 +761,6 @@ public class MediawikiImporter extends Thread implements Importer {
                 mi.start();
                 mi.join();
             } catch (InterruptedException e) {
-                Log.logException(e);
-            } catch (IOException e) {
                 Log.logException(e);
             }
         }

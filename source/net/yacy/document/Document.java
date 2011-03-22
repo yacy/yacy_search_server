@@ -481,7 +481,7 @@ dc_rights
         final Map<MultiProtocolURI, String> v = new HashMap<MultiProtocolURI, String>();
         final Iterator<?> i = links.iterator();
         Object o;
-        MultiProtocolURI url;
+        MultiProtocolURI url = null;
         String u;
         int pos;
         loop: while (i.hasNext())
@@ -495,8 +495,9 @@ dc_rights
                     url = ((ImageEntry) o).url();
                 else {
                     assert false;
-                    continue;
+                    continue loop;
                 }
+                if (url == null) continue loop;
                 u = url.toNormalform(true, true);
                 if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
                     i.remove();

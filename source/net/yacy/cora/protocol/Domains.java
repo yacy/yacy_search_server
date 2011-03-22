@@ -51,15 +51,14 @@ public class Domains {
     private static final String LOCAL_PATTERNS = "10\\..*,127\\..*,172\\.(1[6-9]|2[0-9]|3[0-1])\\..*,169\\.254\\..*,192\\.168\\..*,localhost";
     private static final int MAX_NAME_CACHE_HIT_SIZE = 20000;
     private static final int MAX_NAME_CACHE_MISS_SIZE = 20000;
-    private static final int MAX_NAME_NO_CACHING_LIST_SIZE = 20000;
     private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() + 1;
     
     // a dns cache
     private static final ARC<String, InetAddress> NAME_CACHE_HIT = new ConcurrentARC<String, InetAddress>(MAX_NAME_CACHE_HIT_SIZE, CONCURRENCY_LEVEL);
     private static final ARC<String, String> NAME_CACHE_MISS = new ConcurrentARC<String, String>(MAX_NAME_CACHE_MISS_SIZE, CONCURRENCY_LEVEL);
-    private static final ARC<String, String> NAME_CACHE_NO_CACHING_LIST = new ConcurrentARC<String, String>(MAX_NAME_NO_CACHING_LIST_SIZE, CONCURRENCY_LEVEL);
-    public  static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
-    public  static final List<Pattern> LOCALHOST_PATTERNS = makePatterns(LOCAL_PATTERNS);
+    private static final ConcurrentHashMap<String, Object> LOOKUP_SYNC = new ConcurrentHashMap<String, Object>();
+    private static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
+    private static final List<Pattern> LOCALHOST_PATTERNS = makePatterns(LOCAL_PATTERNS);
     
     /**
      * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
@@ -496,46 +495,59 @@ public class Domains {
         
         // try to resolve host by doing a name cache lookup
         ip = NAME_CACHE_HIT.get(host);
-        if (ip != null) return ip;
-        
-        if (NAME_CACHE_MISS.containsKey(host)) return null;
+        if (ip != null) {
+            //System.out.println("DNSLOOKUP-CACHE-HIT(CONC) " + host);
+            return ip;
+        }
+        if (NAME_CACHE_MISS.containsKey(host)) {
+            //System.out.println("DNSLOOKUP-CACHE-MISS(CONC) " + host);
+            return null;
+        }
         
         // call dnsResolveNetBased(host) using concurrency to interrupt execution in case of a time-out
-        try {
-            boolean doCaching = true;
-            ip = InetAddress.getByName(host); //TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
-            if ((ip == null) ||
-                (ip.isLoopbackAddress()) ||
-                (NAME_CACHE_NO_CACHING_LIST.containsKey(host))
-            ) {
-                doCaching = false;
-            } else {
-                if (matchesList(host, nameCacheNoCachingPatterns)) {
-                    NAME_CACHE_NO_CACHING_LIST.put(host, PRESENT);
-                    doCaching = false;
-                }
+        final Object sync_obj_new = new Object();
+        Object sync_obj = LOOKUP_SYNC.putIfAbsent(host, sync_obj_new);
+        if (sync_obj == null) sync_obj = sync_obj_new;
+        synchronized (sync_obj) {
+            // now look again if the host is in the cache where it may be meanwhile because of the synchronization
+            ip = NAME_CACHE_HIT.get(host);
+            if (ip != null) {
+                //System.out.println("DNSLOOKUP-CACHE-HIT(SYNC) " + host);
+                return ip;
+            }
+            if (NAME_CACHE_MISS.containsKey(host)) {
+                //System.out.println("DNSLOOKUP-CACHE-MISS(SYNC) " + host);
+                return null;
             }
             
-            if (doCaching && ip != null) {
-                
+            // do the dns lookup on the dns server
+            //if (!matchesList(host, nameCacheNoCachingPatterns)) System.out.println("DNSLOOKUP " + host);
+            try {
+                ip = InetAddress.getByName(host); //TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
+            } catch (final UnknownHostException e) {
+                // add new entries
+                NAME_CACHE_MISS.put(host, PRESENT);
+                LOOKUP_SYNC.remove(host);
+                return null;
+            }
+            
+            if ((ip != null) &&
+                (!ip.isLoopbackAddress()) &&
+                (!matchesList(host, nameCacheNoCachingPatterns))
+            ) {
                 // add new entries
                 NAME_CACHE_HIT.put(host, ip);
             }
+            LOOKUP_SYNC.remove(host);
             return ip;
-        } catch (final UnknownHostException e) {
-            // remove old entries
-            flushMissNameCache();
-            
-            // add new entries
-            NAME_CACHE_MISS.put(host, PRESENT);
         }
-        return null;
     }
     
     private final static Pattern dotPattern = Pattern.compile("\\.");
     
-    private static final InetAddress parseInetAddress(final String ip) {
+    private static final InetAddress parseInetAddress(String ip) {
         if (ip == null || ip.length() < 8) return null;
+        if (ip.equals("0:0:0:0:0:0:0:1%0")) ip = "127.0.0.1"; 
         final String[] ips = dotPattern.split(ip);
         if (ips.length != 4) return null;
         final byte[] ipb = new byte[4];
@@ -565,22 +577,6 @@ public class Domains {
 
     public static int nameCacheMissSize() {
         return NAME_CACHE_MISS.size();
-    }
-
-    /**
-    * Returns the number of entries in the nameCacheNoCachingList list
-    *
-    * @return int The number of entries in the nameCacheNoCachingList list
-    */
-    public static int nameCacheNoCachingListSize() {
-        return NAME_CACHE_NO_CACHING_LIST.size();
-    }
-
-    /**
-     * Removes old entries from the dns miss cache
-     */
-     public static void flushMissNameCache() {
-         if (NAME_CACHE_MISS.size() > MAX_NAME_CACHE_MISS_SIZE) NAME_CACHE_MISS.clear();
     }
 
     private static String localHostName = "127.0.0.1"; 

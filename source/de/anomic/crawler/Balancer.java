@@ -453,13 +453,13 @@ public class Balancer {
             Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta) + ", top.size() = " + top.size() + ", delayed.size() = " + delayed.size() + ", domainStacks.size() = " + domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
             long loops = sleeptime / 1000;
             long rest = sleeptime % 1000;
-            if (loops < 2) {
+            if (loops < 3) {
             	rest = rest + 1000 * loops;
             	loops = 0;
             }
             if (rest > 0) {try {this.wait(rest); } catch (final InterruptedException e) {}}
             for (int i = 0; i < loops; i++) {
-            	Log.logInfo("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + ((loops - i) * 3) + " seconds remaining...");
+            	Log.logInfo("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
                 try {this.wait(1000); } catch (final InterruptedException e) {}
             }
         }

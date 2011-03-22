@@ -201,9 +201,12 @@ public final class Condenser {
             // images
             final Iterator<ImageEntry> j = document.getImages().values().iterator();
             ImageEntry ientry;
+            MultiProtocolURI url;
             while (j.hasNext()) {
                 ientry = j.next();
-                insertTextToWords(ientry.url().toNormalform(false, false), 99, flag_cat_hasimage, RESULT_FLAGS, false, meaningLib);
+                url = ientry.url();
+                if (url == null) continue;
+                insertTextToWords(url.toNormalform(false, false), 99, flag_cat_hasimage, RESULT_FLAGS, false, meaningLib);
                 insertTextToWords(ientry.alt(), 99, flag_cat_hasimage, RESULT_FLAGS, true, meaningLib);
             }
         
