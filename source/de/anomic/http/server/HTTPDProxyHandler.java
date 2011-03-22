@@ -363,7 +363,7 @@ public final class HTTPDProxyHandler {
             // handle outgoing cookies
             handleOutgoingCookies(requestHeader, host, ip);
             prepareRequestHeader(conProp, requestHeader, hostlow);
-            ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url);
+            ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
             
             // why are files unzipped upon arrival? why not zip all files in cache?
             // This follows from the following premises
@@ -409,7 +409,7 @@ public final class HTTPDProxyHandler {
                         "200 OK",
                         sb.crawler.defaultProxyProfile
                 );
-                byte[] cacheContent = Cache.getContent(url);
+                byte[] cacheContent = Cache.getContent(url.hash());
                 if (cacheContent != null && response.isFreshForProxy()) {
                     if (log.isFinest()) log.logFinest(reqID + " fulfill request from cache");
                     fulfillRequestFromCache(conProp, url, requestHeader, cachedResponseHeader, cacheContent, countedRespond);
@@ -500,9 +500,9 @@ public final class HTTPDProxyHandler {
                 long sizeBeforeDelete = -1;
                 if (cachedResponseHeader != null) {
                     // delete the cache
-                    ResponseHeader rh = Cache.getResponseHeader(url);
+                    ResponseHeader rh = Cache.getResponseHeader(url.hash());
                     if (rh != null && (sizeBeforeDelete = rh.getContentLength()) == 0) {
-                        byte[] b = Cache.getContent(url);
+                        byte[] b = Cache.getContent(url.hash());
                         if (b != null) sizeBeforeDelete = b.length;
                     }
                     Cache.delete(url);

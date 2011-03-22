@@ -440,6 +440,7 @@ public class HeapReader {
      * @throws IOException
      */
     public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
+        if (this.index == null) return null;
         key = normalizeKey(key);
        
         synchronized (this.index) {

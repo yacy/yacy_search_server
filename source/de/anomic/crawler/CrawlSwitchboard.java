@@ -225,7 +225,7 @@ public final class CrawlSwitchboard {
         if (this.defaultTextSnippetLocalProfile == null) {
             // generate new default entry for snippet fetch and optional crawling
             this.defaultTextSnippetLocalProfile = new CrawlProfile(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT, null, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
-                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE), -1, true, false, false, true, false, true, true, false, CrawlProfile.CacheStrategy.IFFRESH);
+                    CrawlProfile.getRecrawlDate(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE), -1, true, false, false, true, false, true, true, false, CrawlProfile.CacheStrategy.IFEXIST);
             this.profilesActiveCrawls.put(this.defaultTextSnippetLocalProfile.handle().getBytes(), this.defaultTextSnippetLocalProfile);
         }
         if (this.defaultTextSnippetGlobalProfile == null) {

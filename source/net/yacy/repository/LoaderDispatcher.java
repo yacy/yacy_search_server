@@ -191,8 +191,8 @@ public final class LoaderDispatcher {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry
         
-            ResponseHeader cachedResponse = (url.isLocal()) ? null : Cache.getResponseHeader(url);
-            byte[] content = (cachedResponse == null) ? null : Cache.getContent(url);
+            ResponseHeader cachedResponse = (url.isLocal()) ? null : Cache.getResponseHeader(url.hash());
+            byte[] content = (cachedResponse == null) ? null : Cache.getContent(url.hash());
             if (cachedResponse != null && content != null) {
                 // yes we have the content
                 
@@ -226,6 +226,10 @@ public final class LoaderDispatcher {
                 } else {
                     log.logInfo("cache hit/stale for: " + url.toNormalform(true, false));
                 }
+            } else if (cachedResponse != null) {
+                log.logWarning("HTCACHE contained response header, but not content for url " + url.toNormalform(true, false));
+            } else if (content != null) {
+                log.logWarning("HTCACHE contained content, but not response header for url " + url.toNormalform(true, false));
             }
         }
         

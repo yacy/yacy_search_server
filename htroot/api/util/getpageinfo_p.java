@@ -56,7 +56,7 @@ public class getpageinfo_p {
                 }
                 ContentScraper scraper = null;
                 if (u != null) try {
-                    scraper = sb.loader.parseResource(u, CrawlProfile.CacheStrategy.IFFRESH);
+                    scraper = sb.loader.parseResource(u, CrawlProfile.CacheStrategy.IFEXIST);
                 } catch (final IOException e) {
                     // now thats a fail, do nothing      
                 }  

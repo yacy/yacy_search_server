@@ -159,12 +159,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
     public CacheStrategy cacheStrategy() {
         final String r = get(CACHE_STRAGEGY);
-        if (r == null) return CacheStrategy.IFFRESH;
+        if (r == null) return CacheStrategy.IFEXIST;
         try {
             return CacheStrategy.decode(Integer.parseInt(r));
         } catch (final NumberFormatException e) {
             Log.logException(e);
-            return CacheStrategy.IFFRESH;
+            return CacheStrategy.IFEXIST;
         }
     }
     public void setCacheStrategy(CacheStrategy newStrategy) {
@@ -260,7 +260,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             if (name.equals("iffresh")) return IFFRESH;
             if (name.equals("ifexist")) return IFEXIST;
             if (name.equals("cacheonly")) return CACHEONLY;
-            if (name.equals("true")) return IFFRESH;
+            if (name.equals("true")) return IFEXIST;
             if (name.equals("false")) return null; // if this cache strategy is assigned as query attribute, null means "do not create a snippet"
             return null;
         }

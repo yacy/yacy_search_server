@@ -54,7 +54,7 @@ public class CacheResource_p {
         }
         
         byte[] resource = null;
-        resource = Cache.getContent(url);
+        resource = Cache.getContent(url.hash());
         if (resource == null) return prop;
         
         // check request type
@@ -63,7 +63,7 @@ public class CacheResource_p {
             return ImageParser.parse(u, resource);
         } else {
             // get response header and set mime type
-            ResponseHeader responseHeader = Cache.getResponseHeader(url);
+            ResponseHeader responseHeader = Cache.getResponseHeader(url.hash());
             String resMime = responseHeader == null ? null : responseHeader.mime();
             if (resMime != null) {
                 final ResponseHeader outgoingHeader = new ResponseHeader();

@@ -740,7 +740,7 @@ search.navigation=hosts,authors,namespace,topics
 #            consider content nevertheless as available and show result without snippet
 # false:     no link verification and not snippet generation:
              all search results are valid without verification
-search.verify = iffresh
+search.verify = ifexist
 
 # in case that a link verification fails then the corresponding index reference can be
 # deleted to clean up the index. If this property is set then failed index verification in

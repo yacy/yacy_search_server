@@ -1755,7 +1755,7 @@ public final class Switchboard extends serverSwitch {
         byte[] b = response.getContent();
         if (b == null) {
             // fetch the document from cache
-            b = Cache.getContent(response.url());
+            b = Cache.getContent(response.url().hash());
             if (b == null) {
                 this.log.logWarning("the resource '" + response.url() + "' is missing in the cache.");
                 addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), "missing in cache");

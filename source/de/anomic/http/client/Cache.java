@@ -202,11 +202,11 @@ public final class Cache {
      * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
      * info object couldn't be created
      */
-    public static ResponseHeader getResponseHeader(final DigestURI url) {    
+    public static ResponseHeader getResponseHeader(final byte[] hash) {    
         
         // loading data from database
         Map<String, String> hdb;
-        hdb = responseHeaderDB.get(url.hash());
+        hdb = responseHeaderDB.get(hash);
         if (hdb == null) return null;
         
         return new ResponseHeader(null, hdb);
@@ -221,12 +221,11 @@ public final class Cache {
      * is returned.
      * @throws IOException 
      */
-    public static byte[] getContent(final DigestURI url) {
+    public static byte[] getContent(final byte[] hash) {
         // load the url as resource from the cache
         try {
-            byte[] b = fileDB.get(url.hash());
+            byte[] b = fileDB.get(hash);
             if (b == null) return null;
-            log.logInfo("cache hit for url " + url.toString() + ", " + b.length + " bytes");
             return b;
         } catch (UnsupportedEncodingException e) {
             Log.logException(e);
