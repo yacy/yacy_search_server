@@ -1,5 +1,6 @@
 /*
  * jQuery Autocomplete plugin 1.1
+ * + YACY FIX: do not select on mouseover (tagged: YACY FIX)
  *
  * Copyright (c) 2009 JÃ¶rn Zaefferer
  *
@@ -595,10 +596,10 @@ $.Autocompleter.Select = function (options, input, select, config) {
 		.appendTo(document.body);
 	
 		list = $("<ul/>").appendTo(element).mouseover( function(event) {
-			if(target(event).nodeName && target(event).nodeName.toUpperCase() == 'LI') {
+			/*if(target(event).nodeName && target(event).nodeName.toUpperCase() == 'LI') {
 	            active = $("li", list).removeClass(CLASSES.ACTIVE).index(target(event));
 			    $(target(event)).addClass(CLASSES.ACTIVE);            
-	        }
+	        }*/ YACY FIX: do not select on mouseover
 		}).click(function(event) {
 			$(target(event)).addClass(CLASSES.ACTIVE);
 			select();
