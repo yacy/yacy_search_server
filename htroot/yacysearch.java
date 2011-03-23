@@ -33,6 +33,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
@@ -191,11 +193,11 @@ public class yacysearch {
         }
 
         String prefermask = (post == null) ? "" : post.get("prefermaskfilter", "");
-        if (prefermask.length() > 0 && prefermask.indexOf(".*") < 0) {
+        if (!prefermask.isEmpty() && prefermask.indexOf(".*") < 0) {
             prefermask = ".*" + prefermask + ".*";
         }
 
-        Bitfield constraint = (post != null && post.containsKey("constraint") && post.get("constraint", "").length() > 0) ? new Bitfield(4, post.get("constraint", "______")) : null;
+        Bitfield constraint = (post != null && post.containsKey("constraint") && !post.get("constraint", "").isEmpty()) ? new Bitfield(4, post.get("constraint", "______")) : null;
         if (indexof) {
             constraint = new Bitfield(4);
             constraint.set(Condenser.flag_cat_indexof, true);
@@ -475,6 +477,26 @@ public class yacysearch {
         
             // do the search
             final HandleSet queryHashes = Word.words2hashesHandles(query[0]);
+
+            // check filters
+            try {
+                Pattern.compile(urlmask);
+            } catch (final PatternSyntaxException ex) {
+                Log.logWarning("SEARCH", "Illegal URL mask, not a valid regex: " + urlmask);
+                prop.put("urlmaskerror", 1);
+                prop.putHTML("urlmaskerror_urlmask", urlmask);
+                urlmask = ".*";
+            }
+
+            try {
+                Pattern.compile(prefermask);
+            } catch (final PatternSyntaxException ex) {
+                Log.logWarning("SEARCH", "Illegal prefer mask, not a valid regex: " + prefermask);
+                prop.put("prefermaskerror", 1);
+                prop.putHTML("prefermaskerror_prefermask", prefermask);
+                prefermask = "";
+            }
+
             final QueryParams theQuery = new QueryParams(
                     originalquerystring,
                     queryHashes,

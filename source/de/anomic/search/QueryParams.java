@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
@@ -191,9 +192,17 @@ public final class QueryParams {
         this.contentdom = contentdom;
         this.itemsPerPage = Math.min((specialRights) ? 1000 : 100, itemsPerPage);
         this.offset = Math.min((specialRights) ? 10000 : 1000, offset);
-        this.urlMask = Pattern.compile(urlMask.toLowerCase());
+        try {
+            this.urlMask = Pattern.compile(urlMask.toLowerCase());
+        } catch (final PatternSyntaxException ex) {
+            throw new IllegalArgumentException("Not a valid regular expression: " + urlMask, ex);
+        }
         this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
-        this.prefer = Pattern.compile(prefer);
+        try {
+            this.prefer = Pattern.compile(prefer);
+        } catch (final PatternSyntaxException ex) {
+            throw new IllegalArgumentException("Not a valid regular expression: " + prefer, ex);
+        }
         this.prefer_isMatchnothing = this.prefer.toString().equals(matchnothing_pattern.toString());
         assert language != null;
         this.targetlang = language;
@@ -204,7 +213,7 @@ public final class QueryParams {
         this.constraint = constraint;
         this.allofconstraint = allofconstraint;
         this.sitehash = site; assert site == null || site.length() == 6;
-        this.authorhash = authorhash; assert authorhash == null || authorhash.length() > 0;
+        this.authorhash = authorhash; assert authorhash == null || !authorhash.isEmpty();
         this.snippetCacheStrategy = snippetCacheStrategy;
         this.host = host;
         this.remotepeer = null;
@@ -326,7 +335,7 @@ public final class QueryParams {
         final TreeSet<String> exclude = new TreeSet<String>(NaturalOrder.naturalComparator);
         final TreeSet<String> fullquery = new TreeSet<String>(NaturalOrder.naturalComparator);
         
-        if ((querystring != null) && (querystring.length() > 0)) {
+        if ((querystring != null) && (!querystring.isEmpty())) {
         
             // convert Umlaute
             querystring = AbstractScraper.stripAll(querystring.toCharArray()).toLowerCase().trim();
@@ -341,20 +350,20 @@ public final class QueryParams {
             int l;
             // the string is clean now, but we must generate a set out of it
             final String[] queries = querystring.split(" ");
-            for (int i = 0; i < queries.length; i++) {
-                if (queries[i].startsWith("-")) {
-                    exclude.add(queries[i].substring(1));
+            for (String quer : queries) {
+                if (quer.startsWith("-")) {
+                    exclude.add(quer.substring(1));
                 } else {
-                    while ((c = queries[i].indexOf('-')) >= 0) {
-                        s = queries[i].substring(0, c);
+                    while ((c = quer.indexOf('-')) >= 0) {
+                        s = quer.substring(0, c);
                         l = s.length();
                         if (l >= Condenser.wordminsize) {query.add(s);}
                         if (l > 0) {fullquery.add(s);}
-                        queries[i] = queries[i].substring(c + 1);
+                        quer = quer.substring(c + 1);
                     }
-                    l = queries[i].length();
-                    if (l >= Condenser.wordminsize) {query.add(queries[i]);}
-                    if (l > 0) {fullquery.add(queries[i]);}
+                    l = quer.length();
+                    if (l >= Condenser.wordminsize) {query.add(quer);}
+                    if (l > 0) {fullquery.add(quer);}
                 }
             }
         }
@@ -364,7 +373,7 @@ public final class QueryParams {
     public String queryString(final boolean encodeHTML) {
         final String ret;
     	if (encodeHTML){
-            ret =CharacterCoding.unicode2html(this.queryString, true);
+            ret = CharacterCoding.unicode2html(this.queryString, true);
     	} else {
             ret = this.queryString;
         }
@@ -375,7 +384,7 @@ public final class QueryParams {
     	try {
             return URLEncoder.encode(this.queryString, "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return this.queryString;
         }
     }
@@ -388,7 +397,7 @@ public final class QueryParams {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
     	final HandleSet blues = Word.words2hashesHandles(blueList);
-    	for (byte[] b: blues) queryHashes.remove(b);
+    	for (final byte[] b: blues) queryHashes.remove(b);
     }
 
 
