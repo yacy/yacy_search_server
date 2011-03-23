@@ -144,8 +144,8 @@ public final class SearchEvent {
                     (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes,
                     burstRobinsonPercent,
                     burstMultiwordPercent);
-            Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + remote_maxcount + " URLs");
             if (this.primarySearchThreads != null) {
+                Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + remote_maxcount + " URLs");
                 this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
                 // finished searching
