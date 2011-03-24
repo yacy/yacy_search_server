@@ -599,7 +599,7 @@ $.Autocompleter.Select = function (options, input, select, config) {
 			/*if(target(event).nodeName && target(event).nodeName.toUpperCase() == 'LI') {
 	            active = $("li", list).removeClass(CLASSES.ACTIVE).index(target(event));
 			    $(target(event)).addClass(CLASSES.ACTIVE);            
-	        }*/ YACY FIX: do not select on mouseover
+	        } YACY FIX: do not select on mouseover */
 		}).click(function(event) {
 			$(target(event)).addClass(CLASSES.ACTIVE);
 			select();
