@@ -259,7 +259,7 @@ public class TemplateHandler extends AbstractHandler implements Handler {
 	            }
                 
                 final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
-                response.setContentType(targetExt);
+                response.setContentType(mimeType);
                 response.setContentLength(result.length());
                 response.setStatus(HttpServletResponse.SC_OK);
                 

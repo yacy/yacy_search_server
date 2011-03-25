@@ -49,5 +49,7 @@
 	<classpathentry kind="lib" path="lib/jetty-io-7.3.0.v20110203.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-continuation-7.3.0.v20110203.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-security-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-7.3.0.v20110203.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlets-7.3.0.v20110203.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

@@ -35,6 +35,11 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.servlets.ProxyServlet;
+
+import de.anomic.search.Switchboard;
 
 /**
  * class to embedded jetty http server into YaCy
@@ -47,11 +52,19 @@ public class HttpServer {
 	 * @param port TCP Port to listen for http requests
 	 */
 	public HttpServer(int port) {
+		Switchboard sb = Switchboard.getSwitchboard();
         server = new Server();
         SelectChannelConnector connector = new SelectChannelConnector();
         connector.setPort(port);
         //connector.setThreadPool(new QueuedThreadPool(20));
         server.addConnector(connector);
+        
+        YacyDomainHandler domainHandler = new YacyDomainHandler();
+        domainHandler.setAlternativeResolver(sb.peers);
+        
+        ServletContextHandler proxyContext = new ServletContextHandler();
+        proxyContext.setContextPath("/");
+        proxyContext.addServlet(new ServletHolder(new ProxyServlet()), "/*");
         
         ResourceHandler resource_handler = new ResourceHandler();
         resource_handler.setDirectoriesListed(true);
@@ -60,16 +73,10 @@ public class HttpServer {
         resource_handler.setResourceBase("htroot/");
 
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[] {new SSIHandler(new TemplateHandler()), resource_handler, new DefaultHandler() });
-
-        Constraint constraint = new Constraint();
-        constraint.setName(Constraint.__BASIC_AUTH);;
-        constraint.setRoles(new String[]{"admin"});
-        constraint.setAuthenticate(true);
-
-        ConstraintMapping cm = new ConstraintMapping();
-        cm.setConstraint(constraint);
-        cm.setPathSpec("/authenticate_me");
+        handlers.setHandlers(new Handler[]
+                {	domainHandler, new RewriteHandler(),
+        			new SSIHandler(new TemplateHandler()),
+        			resource_handler, new DefaultHandler() });
         
         YaCySecurityHandler securityHandler = new YaCySecurityHandler();
         securityHandler.setLoginService(new YaCyLoginService());

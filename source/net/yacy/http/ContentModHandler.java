@@ -35,6 +35,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.HandlerContainer;
+import org.eclipse.jetty.server.HttpConnection;
 import org.eclipse.jetty.server.Request;
 
 import org.eclipse.jetty.server.handler.HandlerWrapper;
@@ -60,7 +61,11 @@ public abstract class ContentModHandler extends HandlerWrapper implements Handle
 		// wrap response
 		ContentModResponseWrapper wrapped_response = new ContentModResponseWrapper(response);
 		super.handle(target, baseRequest, request, wrapped_response);
-		this.doContentMod(wrapped_response.getBuffer(), request, response);
+		if(baseRequest.isHandled()) {
+			//baseRequest.setHandled(false);
+			this.doContentMod(wrapped_response.getBuffer(), request, response);
+			//baseRequest.setHandled(true);
+		}
 	}
 	
 	/**
@@ -95,6 +100,10 @@ public abstract class ContentModHandler extends HandlerWrapper implements Handle
 		 */
 		public byte[] getBuffer() {
 			return wrappedOutputStream.getBuffer();
+		}
+		
+		public void setContentType(String mime) {
+			super.setContentType(mime);
 		}
 	}
 	

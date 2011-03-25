@@ -198,6 +198,8 @@
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
         <pathelement location="${lib}/jetty-continuation-7.3.0.v20110203.jar" />
 	<pathelement location="${lib}/jetty-server-7.3.0.v20110203.jar" />
+	<pathelement location="${lib}/jetty-servlet-7.3.0.v20110203.jar" />
+	<pathelement location="${lib}/jetty-servlets-7.3.0.v20110203.jar" />
 	<pathelement location="${lib}/jetty-http-7.3.0.v20110203.jar" />
 	<pathelement location="${lib}/jetty-util-7.3.0.v20110203.jar" />
 	<pathelement location="${lib}/jetty-io-7.3.0.v20110203.jar" />
