@@ -203,6 +203,7 @@ public final class yacy {
             }
             if(!f.createNewFile())
                 Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
+            try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (Exception e) { } // write PID
             f.deleteOnExit();
             
             final String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
