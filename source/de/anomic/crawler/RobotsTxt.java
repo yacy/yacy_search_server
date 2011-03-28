@@ -357,7 +357,7 @@ public class RobotsTxt {
             if (code > 199 && code < 300) {
             	if (!header.mime().startsWith("text/plain")) {
                     robotsTxt = null;
-                    if (log.isDebugEnabled()) log.debug("Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + header.mime() + "'.");
+                    log.info("Robots.txt from URL '" + robotsURL + "' has wrong mimetype '" + header.mime() + "'.");
                 } else {
 
                     // getting some metadata
