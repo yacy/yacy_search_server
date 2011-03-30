@@ -191,8 +191,8 @@ public class URIMetadataRow implements URIMetadata {
         final CharBuffer s = new CharBuffer(360);
         s.append(url.toNormalform(false, true)).append(10);
         s.append(dc_title).append(10);
-        s.append(dc_creator).append(10);
-        s.append(dc_subject).append(10);
+        s.append(dc_creator.length() > 80 ? dc_creator.substring(0, 80) : dc_creator).append(10);
+        s.append(dc_subject.length() > 120 ? dc_subject.substring(0, 120) : dc_subject).append(10);
         s.append(dc_publisher).append(10);
         if (lon == 0.0f && lat == 0.0f) s.append(10); else s.append(Float.toString(lat)).append(',').append(Float.toString(lon)).append(10);
 		return UTF8.getBytes(s.toString());

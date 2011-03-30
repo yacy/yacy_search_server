@@ -246,6 +246,36 @@ public final class CharBuffer extends Writer {
         }
         return -1;
     }
+    
+    public static int indexOf(final char[] b, final char c) {
+        return indexOf(b, 0, c);
+    }
+
+    public static int indexOf(final char[] b, final int offset, final char c) {
+        for (int i = offset; i < b.length; i++) if (b[i] == c) return i;
+        return -1;
+    }
+    
+    public static int indexOf(final char[] b, final char[] s) {
+        return indexOf(b, 0, s);
+    }
+
+    public static int indexOf(final char[] b, final int start, final char[] bs) {
+        if (start + bs.length > b.length) return -1;
+        loop: for (int i = start; i <= b.length - bs.length; i++) {
+            // first test only first char
+            if (b[i] != bs[0]) continue loop;
+            
+            // then test all remaining char
+            for (int j = 1; j < bs.length; j++) {
+                if (b[i + j] != bs[j]) continue loop;
+            }
+            
+            // found hit
+            return i;
+        }
+        return -1;
+    }
 
     public int lastIndexOf(final char b) {
         for (int i = length - 1; i >= 0; i--) if (buffer[offset + i] == b) return i;

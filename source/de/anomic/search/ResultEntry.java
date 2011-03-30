@@ -168,6 +168,12 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public int lapp() {
         return urlentry.lapp();
     }
+    public float lat() {
+        return urlentry.metadata().lat();
+    }
+    public float lon() {
+        return urlentry.metadata().lon();
+    }
     public WordReferenceVars word() {
         final Reference word = urlentry.word();
         assert word instanceof WordReferenceVars;

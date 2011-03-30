@@ -193,6 +193,13 @@ public class yacysearchitem {
             } else {
                 prop.put("content_code", "");
             }
+            if (result.lat() == 0.0f || result.lon() == 0.0f) {
+                prop.put("content_loc", 0);
+            } else {
+                prop.put("content_loc", 1);
+                prop.put("content_loc_lat", result.lat());
+                prop.put("content_loc_lon", result.lon());
+            }
             theQuery.transmitcount = item + 1;
             return prop;
         }

@@ -6,6 +6,7 @@
     xmlns:media="http://search.yahoo.com/mrss/"
     xmlns:atom="http://www.w3.org/2005/Atom"
     xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
 >
 	<!-- YaCy Search Engine; http://yacy.net -->
 	<channel>

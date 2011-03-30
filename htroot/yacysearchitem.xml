@@ -12,6 +12,7 @@
 <yacy:path>#[path]#</yacy:path>
 <yacy:file>#[file]#</yacy:file>
 <guid isPermaLink="false">#[urlhash]#</guid>
+#(loc)#::<geo:lat>#[lat]#</geo:lat><geo:long>#[lon]#</geo:long>#(/loc)#
 </item>::
 #(item)#::<item>
 <title>#[name]#</title>

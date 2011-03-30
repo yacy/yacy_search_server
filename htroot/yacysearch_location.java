@@ -55,13 +55,13 @@ public class yacysearch_location {
             prop.put("kml", 1);
             if (post == null) return prop;
             String query = post.get("query", "");
-            boolean search_all = !post.containsKey("dom") || post.get("dom", "").equals("all");
-            boolean search_query = search_all || post.get("dom", "").indexOf("query") >= 0;
-            boolean search_mdall = search_all || post.get("dom", "").indexOf("mdall") >= 0;
-            boolean search_title = search_mdall || post.get("dom", "").indexOf("title") >= 0;
-            boolean search_publisher = search_mdall || post.get("dom", "").indexOf("publisher") >= 0;
-            boolean search_creator = search_mdall || post.get("dom", "").indexOf("creator") >= 0;
-            boolean search_subject = search_mdall || post.get("dom", "").indexOf("subject") >= 0;
+            boolean search_query = post.get("dom", "").indexOf("query") >= 0;
+            boolean metatag = post.get("dom", "").indexOf("metatag") >= 0;
+            boolean alltext = post.get("dom", "").indexOf("alltext") >= 0;
+            boolean search_title = alltext || post.get("dom", "").indexOf("title") >= 0;
+            boolean search_publisher = alltext || post.get("dom", "").indexOf("publisher") >= 0;
+            boolean search_creator = alltext || post.get("dom", "").indexOf("creator") >= 0;
+            boolean search_subject = alltext || post.get("dom", "").indexOf("subject") >= 0;
             long maximumTime = post.getLong("maximumTime", 3000);
             int maximumRecords = post.getInt("maximumRecords", 200);
             //i.e. http://localhost:8090/yacysearch_location.kml?query=berlin&maximumTime=2000&maximumRecords=100
@@ -89,7 +89,7 @@ public class yacysearch_location {
                 }
             }
             
-            if (search_title || search_publisher || search_creator || search_subject) try {
+            if (metatag || search_title || search_publisher || search_creator || search_subject) try {
                 // get a queue of search results
                 String rssSearchServiceURL = "http://127.0.0.1:" + sb.getConfig("port", "8090") + "/yacysearch.rss";
                 BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
@@ -98,6 +98,7 @@ public class yacysearch_location {
                 // take the results and compute some locations
                 RSSMessage message;
                 loop: while ((message = results.poll(maximumTime, TimeUnit.MILLISECONDS)) != RSSMessage.POISON) {
+
                     // find all associated locations
                     Set<Location> locations = new HashSet<Location>();
                     StringBuilder words = new StringBuilder(120);
@@ -111,6 +112,13 @@ public class yacysearch_location {
                     for (String word: wordlist) if (word.length() >= 3) locations.addAll(LibraryProvider.geoLoc.find(word, true));
                     for (int i = 0; i < wordlist.length - 1; i++) locations.addAll(LibraryProvider.geoLoc.find(wordlist[i] + space + wordlist[i + 1], true));
                     for (int i = 0; i < wordlist.length - 2; i++) locations.addAll(LibraryProvider.geoLoc.find(wordlist[i] + space + wordlist[i + 1] + space + wordlist[i + 2], true));
+                    
+                    // add locations from metatag
+                    if (metatag) {
+                        if (message.getLat() != 0.0f && message.getLon() != 0.0f) {
+                            locations.add(new Location(message.getLon(), message.getLat(), message.getTitle().trim()));
+                        }
+                    }
                     
                     for (Location location: locations) {
                         // write for all locations a point to this message

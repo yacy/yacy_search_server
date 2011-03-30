@@ -9,11 +9,11 @@
     var map;
     var searchLayer_md = null;
     var searchLayer_co = null;
-    var path_mdsearch = 'yacysearch_location.rss?dom=title,publisher,creator,subject&query=';
+    var path_mdsearch = 'yacysearch_location.rss?dom=metatag&query=';
     var path_cosearch = 'yacysearch_location.rss?dom=query&query=';
     var marker_md = new OpenLayers.Icon("/env/grafics/marker_red.png", new OpenLayers.Size(11,16));
     var marker_co = new OpenLayers.Icon("/env/grafics/star_yellow.png", new OpenLayers.Size(25,25));
-    // possible values for dom: query,mdall,title,publisher,creator,subject
+    // possible values for dom: query,metatag,alltext,title,publisher,creator,subject
     
     function init() {
         map = new OpenLayers.Map('map', {

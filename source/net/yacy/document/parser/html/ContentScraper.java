@@ -54,6 +54,9 @@ import net.yacy.kelondro.util.ISO639;
 
 public class ContentScraper extends AbstractScraper implements Scraper {
 
+    private final char degree = '\u00B0';
+    private final char[] minuteCharsHTML = "&#039;".toCharArray();
+    
     // statics: for initialization of the HTMLFilterAbstractScraper
     private static final Set<String> linkTags0 = new HashSet<String>(9,0.99f);
     private static final Set<String> linkTags1 = new HashSet<String>(7,0.99f);
@@ -121,6 +124,55 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + UTF8.String(newtext));
+        int p, q, s = 0;
+
+        // try to find location information in text
+        location: while (s < newtext.length) {
+            p = CharBuffer.indexOf(newtext, s, degree);
+            if (p < 0) break location;
+            // try to find a coordinate
+            // <nobr>N 50o 05.453&#039;</nobr><nobr>E 008o 30.191&#039;</nobr>
+            // N 52o 28.025 E 013o 20.299
+            q = CharBuffer.indexOf(newtext, p, minuteCharsHTML);
+            if (q < 0) q = CharBuffer.indexOf(newtext, p, " E".toCharArray());
+            if (q < 0) q = CharBuffer.indexOf(newtext, p, " W".toCharArray());
+            if (q < 0 && newtext.length - p == 8) q = newtext.length; 
+            if (q < 0) break location;
+            int r = p;
+            while (r-- > 1) {
+                if (newtext[r] == ' ') {
+                    r--;
+                    if (newtext[r] == 'N') {
+                        this.lat =  Float.parseFloat(new String(newtext, r + 2, p - r - 2)) +
+                                    Float.parseFloat(new String(newtext, p + 2, q - p - 2)) / 60.0f;
+                        s = q + 6;
+                        continue location;
+                    }
+                    if (newtext[r] == 'S') {
+                        this.lat = -Float.parseFloat(new String(newtext, r + 2, p - r - 2)) -
+                                    Float.parseFloat(new String(newtext, p + 2, q - p - 2)) / 60.0f;
+                        s = q + 6;
+                        continue location;
+                    }
+                    if (newtext[r] == 'E') {
+                        this.lon =  Float.parseFloat(new String(newtext, r + 2, p - r - 2)) +
+                                    Float.parseFloat(new String(newtext, p + 2, q - p - 2)) / 60.0f;
+                        s = q + 6;
+                        continue location;
+                    }
+                    if (newtext[r] == 'W') {
+                        this.lon = -Float.parseFloat(new String(newtext, r + 2, p - r - 2)) -
+                                    Float.parseFloat(new String(newtext, p + 2, q - p - 2)) / 60.0f;
+                        s = q + 6;
+                        continue location;
+                    }
+                    break location;
+                }
+            }
+            break location;
+        }
+        
+        // find tags inside text
         String b = cleanLine(super.stripAll(newtext));
         if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
@@ -132,7 +184,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             //System.out.println("*** Appended dot: " + b.toString());
         }
         // find http links inside text
-        int p, q, s = 0;
+        s = 0;
         String u;
         MultiProtocolURI url;
         while (s < b.length()) {
