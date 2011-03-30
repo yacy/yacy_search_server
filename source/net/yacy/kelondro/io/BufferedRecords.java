@@ -98,9 +98,9 @@ public final class BufferedRecords {
         final byte[] bb;
         synchronized (this) {
             assert b.length - start >= efs.recordsize;
-            if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
             bb = buffer.get(idx);
             if (bb == null) {
+                if (index >= size()) throw new IndexOutOfBoundsException("kelondroBufferedEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
                 efs.get(index, b, start);
                 return;
             }
