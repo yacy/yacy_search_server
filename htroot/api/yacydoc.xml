@@ -6,7 +6,8 @@ this is a xml file with embedded dublin core properties
 you can validate it with http://www.stg.brown.edu/service/xmlvalid/
 -->
 
-<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:yacy="http://yacy.net/">
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:yacy="http://yacy.net/" xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#">
+  <record>
   <dc:title LANG="#[dc_language]#">#[dc_title]#</dc:title>
   <dc:creator>#[dc_creator]#</dc:creator>
   <dc:contributor>#[dc_contributor]#</dc:contributor>
@@ -19,8 +20,14 @@ you can validate it with http://www.stg.brown.edu/service/xmlvalid/
   <dc:identifier SCHEME="URL">#[dc_identifier]#</dc:identifier>
   <dc:format.extent>#[yacy_size]#</dc:format.extent>
   <dc:language SCHEME="ISO639-2">#[dc_language]#</dc:language>
+  <geo:Point>
+    <geo:long>#[geo_long]#</geo:long>
+    <geo:lat>#[geo_lat]#</geo:lat>
+  </geo:Point>
+  
   <yacy:loaddate>#[yacy_loaddate]#</yacy:loaddate>
   <yacy:referrer.hash>yacy:urlhash:#[yacy_referrer_hash]#</yacy:referrer.hash>
   <yacy:referrer.url>#[yacy_referrer_url]#</yacy:referrer.url>
   <yacy:words>#[yacy_words]#</yacy:words>
+  </record>
 </metadata>

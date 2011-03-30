@@ -211,6 +211,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     "",                         // the publisher
                     sections,                   // an array of section headlines
                     "vCard",                    // an abstract
+                    0.0f, 0.0f, 
                     text,                       // the parsed document text
                     anchors,                    // a map of extracted anchors
                     null,

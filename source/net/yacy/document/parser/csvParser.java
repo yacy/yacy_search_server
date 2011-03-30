@@ -71,6 +71,7 @@ public class csvParser extends AbstractParser implements Parser {
                     "",
                     null,
                     null,
+                    0.0f, 0.0f, 
                     sb.toString().getBytes(charset),
                     null,
                     null,

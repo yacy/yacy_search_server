@@ -109,7 +109,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         } else if ("value".equals(tag)) {
             this.buffer.setLength(0);
             this.parsingValue = true;
-        } else if (tag.startsWith("dc:")) {
+        } else if (tag.startsWith("dc:") || tag.startsWith("geo:")) {
             // parse dublin core attribute
             this.elementName = tag;
             this.parsingValue = true;
@@ -142,7 +142,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             }
             this.buffer.setLength(0);
             this.parsingValue = false;
-        } else if (tag.startsWith("dc:")) {
+        } else if (tag.startsWith("dc:") || tag.startsWith("geo:")) {
             final String value = buffer.toString().trim();
             if (this.elementName != null && tag.equals(this.elementName)) {
                 value.replaceAll(";", ",");

@@ -113,6 +113,7 @@ public class vsdParser extends AbstractParser implements Parser {
                     "",
                     null,         // an array of section headlines
                     abstrct,      // an abstract
+                    0.0f, 0.0f, 
                     UTF8.getBytes(contents),     // the parsed document text
                     null,         // a map of extracted anchors
                     null,

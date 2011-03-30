@@ -88,6 +88,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private List<String>[] headlines;
     private CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
+    private float lon, lat;
     
     /**
      * {@link MultiProtocolURI} to the favicon that belongs to the document
@@ -114,6 +115,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         for (int i = 0; i < 4; i++) headlines[i] = new ArrayList<String>();
         this.content = new CharBuffer(1024);
         this.htmlFilterEventListeners = new EventListenerList();
+        this.lon = 0.0f;
+        this.lat = 0.0f;
     }
     
     public void scrapeText(final char[] newtext, final String insideTag) {
@@ -485,6 +488,42 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return "";
     }
 
+    // parse location
+    // <meta NAME="ICBM" CONTENT="38.90551492, 1.454004505" />
+    // <meta NAME="geo.position" CONTENT="38.90551492;1.454004505" />
+    
+    public float getLon() {
+        if (this.lon != 0.0f) return this.lon;
+        String s = metas.get("ICBM"); // InterContinental Ballistic Missile (abbrev. supposed to be a joke: http://www.jargon.net/jargonfile/i/ICBMaddress.html), see http://geourl.org/add.html#icbm
+        if (s != null) {
+            int p = s.indexOf(';');
+            if (p < 0) p = s.indexOf(',');
+            if (p < 0) p = s.indexOf(' ');
+            if (p > 0) {
+                this.lat = Float.parseFloat(s.substring(0, p).trim());
+                this.lon = Float.parseFloat(s.substring(p + 1).trim());
+            }
+        }
+        if (this.lon != 0.0f) return this.lon;
+        s = metas.get("geo.position"); // http://geotags.com/geobot/add-tags.html
+        if (s != null) {
+            int p = s.indexOf(';');
+            if (p < 0) p = s.indexOf(',');
+            if (p < 0) p = s.indexOf(' ');
+            if (p > 0) {
+                this.lat = Float.parseFloat(s.substring(0, p).trim());
+                this.lon = Float.parseFloat(s.substring(p + 1).trim());
+            }
+        }
+        return this.lon;
+    }
+    
+    public float getLat() {
+        if (this.lat != 0.0f) return this.lat;
+        getLon(); // parse with getLon() method which creates also the lat value
+        return this.lat;
+    }
+    
     /*
      *  (non-Javadoc)
      * @see de.anomic.htmlFilter.htmlFilterScraper#close()

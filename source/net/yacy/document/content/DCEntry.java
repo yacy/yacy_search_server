@@ -63,7 +63,9 @@ public class DCEntry extends TreeMap<String, String> {
             Date date,
             String title,
             String author,
-            String body
+            String body,
+            float lat,
+            float lon
             ) {
         super((Collator) insensitiveCollator.clone());
         this.put("dc:identifier", url.toNormalform(true, false));
@@ -71,6 +73,8 @@ public class DCEntry extends TreeMap<String, String> {
         this.put("dc:title", title);
         this.put("dc:creator", author);
         this.put("dc:description", body);
+        this.put("geo:lat", Float.toString(lat));
+        this.put("geo:long", Float.toString(lon));
     }
     
     /*
@@ -231,6 +235,22 @@ public class DCEntry extends TreeMap<String, String> {
         return t.split(";");
     }
     
+    public float getLon() {
+        String t = this.get("geo:long");
+        if (t == null) this.get("geo:lon");
+        t = stripCDATA(t);
+        if (t == null) return 0.0f;
+        return Float.parseFloat(t);
+    }
+    
+    public float getLat() {
+        String t = this.get("geo:lat");
+        if (t == null) this.get("geo:lat");
+        t = stripCDATA(t);
+        if (t == null) return 0.0f;
+        return Float.parseFloat(t);
+    }
+    
     private String stripCDATA(String s) {
         if (s == null) return null;
         s = s.trim();
@@ -254,6 +274,7 @@ public class DCEntry extends TreeMap<String, String> {
             getPublisher(),
             null,
             "",
+            getLon(), getLat(),
             UTF8.getBytes(getDescription()),
             null,
             null,

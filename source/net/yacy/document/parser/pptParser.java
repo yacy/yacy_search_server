@@ -93,6 +93,7 @@ public class pptParser extends AbstractParser implements Parser {
                     pptExtractor.getDocSummaryInformation().getCompany(),
                     null,
                     null,
+                    0.0f, 0.0f, 
                     UTF8.getBytes(contents),
                     null,
                     null,

@@ -95,6 +95,7 @@ public class docParser extends AbstractParser implements Parser {
                   extractor.getDocSummaryInformation().getCompany(), // publisher
                   null,
                   null,
+                  0.0f, 0.0f, 
                   UTF8.getBytes(contents.toString()),
                   null,
                   null,

@@ -78,7 +78,8 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         throw new Parser.Failure("Unable to parse SID file, unexpected version: " + version, location);
                 }
 
-                return new Document[]{new Document(location,
+                return new Document[]{new Document(
+                        location,
                         mimeType,
                         "UTF-8",
                         null,
@@ -88,6 +89,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
                         header.get("publisher"),
                         null,
                         null,
+                        0.0f, 0.0f, 
                         null,
                         null,
                         null,

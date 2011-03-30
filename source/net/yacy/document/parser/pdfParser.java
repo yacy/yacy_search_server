@@ -172,6 +172,7 @@ public class pdfParser extends AbstractParser implements Parser {
                 docPublisher,
                 null,
                 null,
+                0.0f, 0.0f, 
                 contentBytes,
                 null,
                 null,

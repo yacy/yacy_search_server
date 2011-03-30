@@ -39,7 +39,7 @@ public class SearchHub {
 
     private static final String[] SRURSSServicesList = {
         //"http://192.168.1.51:8000/yacysearch.rss"//,
-        "http://localhost:8008/yacysearch.rss"//,
+        "http://127.0.0.1:8008/yacysearch.rss"//,
         /*
         "http://yacy.dyndns.org:8000/yacysearch.rss",
         "http://yacy.caloulinux.net:8085/yacysearch.rss",

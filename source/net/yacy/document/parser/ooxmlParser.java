@@ -154,6 +154,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     "",
                     null,
                     docDescription,
+                    0.0f, 0.0f, 
                     contentBytes,
                     null,
                     null,

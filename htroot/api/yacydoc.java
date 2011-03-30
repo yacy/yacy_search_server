@@ -27,6 +27,7 @@
 
 import java.net.MalformedURLException;
 
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -99,10 +100,12 @@ public class yacydoc {
         prop.putXML("dc_subject", metadata.dc_subject());
         prop.putXML("dc_publisher", metadata.dc_publisher());
         prop.putXML("dc_contributor", "");
-        prop.putXML("dc_date", entry.moddate().toString());
+        prop.putXML("dc_date", ISO8601Formatter.FORMATTER.format(entry.moddate()));
         prop.putXML("dc_type", String.valueOf(entry.doctype()));
         prop.putXML("dc_identifier", metadata.url().toNormalform(false, true));
         prop.putXML("dc_language", UTF8.String(entry.language()));
+        prop.put("geo_lat", metadata.lat());
+        prop.put("geo_long", metadata.lon());
 
         prop.put("yacy_urlhash", metadata.url().hash());
         prop.putXML("yacy_loaddate", entry.loaddate().toString());

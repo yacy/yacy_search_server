@@ -82,4 +82,7 @@ public interface Hit {
     
     public long getSize();
 
+    public float getLon();
+    
+    public float getLat();
 }

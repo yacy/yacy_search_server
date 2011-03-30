@@ -85,10 +85,12 @@ public class Document {
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     private Set<String> languages;
     private boolean indexingDenied;
+    private float lon, lat;
 
     public Document(final MultiProtocolURI location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author, final String publisher,
                     final String[] sections, final String abstrct,
+                    final float lon, final float lat,
                     final Object text,
                     final Map<MultiProtocolURI, String> anchors,
                     final Map<MultiProtocolURI, String> rss,
@@ -102,6 +104,8 @@ public class Document {
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
         this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
+        this.lon = lon;
+        this.lat = lat;
         this.anchors = (anchors == null) ? new HashMap<MultiProtocolURI, String>(0) : anchors;
         this.rss = (rss == null) ? new HashMap<MultiProtocolURI, String>(0) : rss;
         this.images =  (images == null) ? new HashMap<MultiProtocolURI, ImageEntry>() : images;
@@ -357,6 +361,14 @@ dc_rights
         // this is part of the getAnchor-set: only links to email addresses
         if (!resorted) resortLinks();
         return emaillinks;
+    }
+    
+    public float lon() {
+        return this.lon;
+    }
+    
+    public float lat() {
+        return this.lat;
     }
     
     private synchronized void resortLinks() {
@@ -655,6 +667,7 @@ dc_rights
         final Map<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
         final Map<MultiProtocolURI, String> rss = new HashMap<MultiProtocolURI, String>();
         final Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
+        float lon = 0.0f, lat = 0.0f;
         
         for (Document doc: docs) {
             
@@ -695,6 +708,7 @@ dc_rights
             anchors.putAll(doc.getAnchors());
             rss.putAll(doc.getRSS());
             ContentScraper.addAllImages(images, doc.getImages());
+            if (doc.lon() != 0.0f && doc.lat() != 0.0f) { lon = doc.lon(); lat = doc.lat(); }
         }
         return new Document(
                 location,
@@ -707,6 +721,7 @@ dc_rights
                 publishers.toString(),
                 sectionTitles.toArray(new String[sectionTitles.size()]),
                 description.toString(),
+                lon, lat,
                 content.getBytes(),
                 anchors,
                 rss,

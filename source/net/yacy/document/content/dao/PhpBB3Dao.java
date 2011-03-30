@@ -205,7 +205,7 @@ public class PhpBB3Dao implements Dao {
         String text = xmlCleaner(rs.getString("post_text"));
         String user = getUser(rs.getInt("poster_id"));
         Date date = new Date(rs.getLong("post_time") * 1000L);
-        return new DCEntry(url, date, subject, user, text);
+        return new DCEntry(url, date, subject, user, text, 0.0f, 0.0f);
     }
     
     public static String xmlCleaner(String s) {

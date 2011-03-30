@@ -78,6 +78,7 @@ public class rtfParser extends AbstractParser implements Parser {
                     "", // TODO: publisher
                     null,
                     null,
+                    0.0f, 0.0f, 
                     UTF8.getBytes(bodyText),
                     null,
                     null,

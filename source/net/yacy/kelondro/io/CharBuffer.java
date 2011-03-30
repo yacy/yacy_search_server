@@ -173,6 +173,11 @@ public final class CharBuffer extends Writer {
         return this;
     }
 
+    public CharBuffer append(final char c) {
+        write(c);     
+        return this;
+    }
+    
     public CharBuffer append(final String s) {
         final char[] temp = new char[s.length()];
         s.getChars(0, temp.length, temp, 0);        

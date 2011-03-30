@@ -117,6 +117,7 @@ public class swfParser extends AbstractParser implements Parser {
                     "",
                     sections,     // an array of section headlines
                     abstrct,     // an abstract
+                    0.0f, 0.0f, 
                     UTF8.getBytes(contents),     // the parsed document text
                     anchors,      // a map of extracted anchors
                     null,

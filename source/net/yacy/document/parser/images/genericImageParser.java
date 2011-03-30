@@ -199,6 +199,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              location.getHost(), // Publisher
              new String[]{}, // sections
              description == null ? "" : description, // description
+             0.0f, 0.0f, // TODO parse location
              UTF8.getBytes(infoString), // content text
              anchors, // anchors
              null,

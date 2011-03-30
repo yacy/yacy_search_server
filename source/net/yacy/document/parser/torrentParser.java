@@ -105,6 +105,7 @@ public class torrentParser extends AbstractParser implements Parser {
                     location.getHost(),
                     null,
                     null,
+                    0.0f, 0.0f, 
                     filenames.toString().getBytes(charset),
                     null,
                     null,

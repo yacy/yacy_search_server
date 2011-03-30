@@ -54,7 +54,10 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         guid("guid"),
         ttl("ttl"),
         docs("docs"),
-        size("size,length");
+        size("size,length"),
+        lon("geo:long,geo:lon"),
+        lat("geo:lat");
+        //point("gml:pos,georss:point,coordinates");
         
         private Set<String> keys;
         
@@ -209,6 +212,14 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         StringBuilder sb = new StringBuilder(300);
         for (String s: map.values()) sb.append(s).append(' ');
         return sb.toString();
+    }
+
+    public float getLon() {
+        return Float.parseFloat(Token.lon.valueFrom(this.map, "0.0"));
+    }
+
+    public float getLat() {
+        return Float.parseFloat(Token.lat.valueFrom(this.map, "0.0"));
     }
     
     @Override

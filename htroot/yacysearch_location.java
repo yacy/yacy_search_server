@@ -91,7 +91,7 @@ public class yacysearch_location {
             
             if (search_title || search_publisher || search_creator || search_subject) try {
                 // get a queue of search results
-                String rssSearchServiceURL = "http://localhost:" + sb.getConfig("port", "8090") + "/yacysearch.rss";
+                String rssSearchServiceURL = "http://127.0.0.1:" + sb.getConfig("port", "8090") + "/yacysearch.rss";
                 BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
                 SearchSRURSS.searchSRURSS(results, rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, false, false, null);
                 

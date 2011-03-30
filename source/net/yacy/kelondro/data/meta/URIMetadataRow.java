@@ -121,6 +121,7 @@ public class URIMetadataRow implements URIMetadata {
             final String dc_creator,
             final String dc_subject,
             final String dc_publisher,
+            final float lon, final float lat, // decimal degrees as in WGS84; if unknown both values may be 0.0f; 
             final Date mod,
             final Date load,
             final Date fresh,
@@ -140,7 +141,7 @@ public class URIMetadataRow implements URIMetadata {
         // create new entry
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash());
-        this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, dc_publisher));
+        this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, dc_publisher, lat, lon));
         encodeDate(col_mod, mod);
         encodeDate(col_load, load);
         encodeDate(col_fresh, fresh);
@@ -179,13 +180,21 @@ public class URIMetadataRow implements URIMetadata {
         */
     }
     
-    public static byte[] encodeComp(final DigestURI url, final String dc_title, final String dc_creator, final String dc_subject, final String dc_publisher) {
+    public static byte[] encodeComp(
+            final DigestURI url,
+            final String dc_title,
+            final String dc_creator,
+            final String dc_subject,
+            final String dc_publisher,
+            final float lat,
+            final float lon) {
         final CharBuffer s = new CharBuffer(360);
         s.append(url.toNormalform(false, true)).append(10);
         s.append(dc_title).append(10);
         s.append(dc_creator).append(10);
         s.append(dc_subject).append(10);
         s.append(dc_publisher).append(10);
+        if (lon == 0.0f && lat == 0.0f) s.append(10); else s.append(Float.toString(lat)).append(',').append(Float.toString(lon)).append(10);
 		return UTF8.getBytes(s.toString());
     }
     
@@ -211,10 +220,12 @@ public class URIMetadataRow implements URIMetadata {
         String dc_creator = crypt.simpleDecode(prop.getProperty("author", ""), null); if (dc_creator == null) dc_creator = "";
         String tags = crypt.simpleDecode(prop.getProperty("tags", ""), null); if (tags == null) tags = "";
         String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", ""), null); if (dc_publisher == null) dc_publisher = "";
+        String lons = crypt.simpleDecode(prop.getProperty("lon", "0.0"), null); if (lons == null) lons = "0.0";
+        String lats = crypt.simpleDecode(prop.getProperty("lat", "0.0"), null); if (lats == null) lats = "0.0";
         
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
-        this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher));
+        this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, dc_publisher, Float.parseFloat(lats), Float.parseFloat(lons)));
 
         // create new formatters to make concurrency possible
         GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
@@ -294,6 +305,10 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",publisher=").append(crypt.simpleEncode(metadata.dc_publisher()));
             assert (s.toString().indexOf(0) < 0);
+            s.append(",lat=").append(metadata.lat());
+            assert (s.toString().indexOf(0) < 0);
+            s.append(",lon=").append(metadata.lon());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",mod=").append(formatter.format(moddate()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",load=").append(formatter.format(loaddate()));
@@ -371,7 +386,8 @@ public class URIMetadataRow implements URIMetadata {
                     (cl.size() > 1) ? UTF8.String(cl.get(1)) : "",
                     (cl.size() > 2) ? UTF8.String(cl.get(2)) : "",
                     (cl.size() > 3) ? UTF8.String(cl.get(3)) : "",
-                    (cl.size() > 4) ? UTF8.String(cl.get(4)) : "");
+                    (cl.size() > 4) ? UTF8.String(cl.get(4)) : "",
+                    (cl.size() > 5) ? UTF8.String(cl.get(5)) : "");
         return this.comp;
     }
     
@@ -524,8 +540,16 @@ public class URIMetadataRow implements URIMetadata {
         private String urlRaw;
         private byte[] urlHash;
         private final String dc_title, dc_creator, dc_subject, dc_publisher;
+        private final String latlon; // a comma-separated tuple as "<latitude>,<longitude>" where the coordinates are given as WGS84 spatial coordinates in decimal degrees
         
-        public Components(final String urlRaw, final byte[] urlhash, final String title, final String author, final String tags, final String publisher) {
+        public Components(
+                final String urlRaw,
+                final byte[] urlhash,
+                final String title,
+                final String author,
+                final String tags,
+                final String publisher,
+                final String latlon) {
             this.url = null;
             this.urlRaw = urlRaw;
             this.urlHash = urlhash;
@@ -533,6 +557,7 @@ public class URIMetadataRow implements URIMetadata {
             this.dc_creator = author;
             this.dc_subject = tags;
             this.dc_publisher = publisher;
+            this.latlon = latlon;
         }
         public boolean matches(Pattern matcher) {
             if (this.urlRaw != null) return matcher.matcher(this.urlRaw.toLowerCase()).matches();
@@ -555,6 +580,15 @@ public class URIMetadataRow implements URIMetadata {
         public String  dc_creator() { return this.dc_creator; }
         public String  dc_publisher() { return this.dc_publisher; }
         public String  dc_subject()   { return this.dc_subject; }
-        
+        public float lat() {
+            if (latlon == null || latlon.length() == 0) return 0.0f;
+            int p = latlon.indexOf(',');
+            return p < 0 ? 0.0f : Float.parseFloat(latlon.substring(0, p));
+        }
+        public float lon() {
+            if (latlon == null || latlon.length() == 0) return 0.0f;
+            int p = latlon.indexOf(',');
+            return p < 0 ? 0.0f : Float.parseFloat(latlon.substring(p + 1));
+        }
     }
 }

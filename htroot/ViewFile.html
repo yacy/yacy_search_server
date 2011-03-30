@@ -4,6 +4,7 @@
   <head>
     <title>YaCy '#[clientname]#': View URL Content</title>
     #%env/templates/metas.template%#
+  <script type="text/javascript" src="/js/highslide/highslide.js"></script>
   </head>
   <body>
     #(display)#
@@ -91,6 +92,7 @@
 	  <dt>dc:format</dt><dd>#[format]#</dd>
 	  <dt>dc:identifier</dt><dd>#[identifier]#</dd>
 	  <dt>dc:source</dt><dd>#[source]#</dd>
+	  <dt>geo:lat &amp; geo:long</dt><dd><a href="osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" onclick="return hs.expand(this)">lat=#[lat]#, lon=#[lon]#</a></dd>
 	  </dl>
 	  <p class="tt">#[parsedText]#</p>
           </fieldset>

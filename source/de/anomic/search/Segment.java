@@ -330,6 +330,8 @@ public class Segment {
                 document.dc_creator(),                     // author
                 document.dc_subject(' '),                  // tags
                 document.dc_publisher(),                   // publisher (may be important to get location data)
+                document.lon(),                            // decimal degrees as in WGS84;  
+                document.lat(),                            // if unknown both values may be 0.0f;
                 modDate,                                   // modification date
                 loadDate,                                  // loaded date
                 new Date(loadDate.getTime() + Math.max(0, loadDate.getTime() - modDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 

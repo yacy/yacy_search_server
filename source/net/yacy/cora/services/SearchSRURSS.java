@@ -189,6 +189,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
         }
         
         // send request
+        byte[] result = new byte[0];
         try {
             final LinkedHashMap<String,ContentBody> parts = new LinkedHashMap<String,ContentBody>();
             parts.put("query", UTF8.StringBody(query));
@@ -197,8 +198,8 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             parts.put("verify", UTF8.StringBody(verify ? "true" : "false"));
             parts.put("resource", UTF8.StringBody(global ? "global" : "local"));
             parts.put("nav", UTF8.StringBody("none"));
-            final byte[] result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
-            String debug = UTF8.String(result); System.out.println("*** DEBUG: " + debug);
+            result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
+            
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {
                 throw new IOException("cora.Search failed asking peer '" + uri.getHost() + "': probably bad response from remote peer (1), reader == null");
@@ -210,6 +211,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             }
             return feed;
         } catch (final IOException e) {
+            String debug = UTF8.String(result); System.out.println("*** DEBUG: " + debug);
             throw new IOException("cora.Search error asking peer '" + uri.getHost() + "':" + e.toString());
         }
     }

@@ -109,6 +109,7 @@ public class psParser extends AbstractParser implements Parser {
                     "",       // publisher
                     null,     // sections
                     null,     // abstract
+                    0.0f, 0.0f, 
                     outputFile, // fulltext
                     null,     // anchors
                     null,     // rss

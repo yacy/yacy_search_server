@@ -123,6 +123,7 @@ public class xlsParser extends AbstractParser implements Parser {
                         "", // TODO: publisher
                         null,
                         null,
+                        0.0f, 0.0f, 
                         UTF8.getBytes(contents),
                         null,
                         null,
