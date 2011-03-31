@@ -136,7 +136,7 @@ public class Crawler_p {
 
                 // normalize URL
                 DigestURI crawlingStartURL = null;
-                try {crawlingStartURL = new DigestURI(crawlingStart);} catch (final MalformedURLException e1) {}
+                try {crawlingStartURL = new DigestURI(crawlingStart);} catch (final MalformedURLException e1) {Log.logException(e1);}
                 crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                
                 // set new properties

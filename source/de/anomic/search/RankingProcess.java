@@ -441,7 +441,7 @@ public final class RankingProcess extends Thread {
                 (QueryParams.anymatch(pageauthor.toLowerCase(), query.excludeHashes))) {
                 continue;
             }
-            
+
             // check index-of constraint
             if ((query.constraint != null) &&
                 (query.constraint.get(Condenser.flag_cat_indexof)) &&
@@ -450,6 +450,13 @@ public final class RankingProcess extends Thread {
                 while (wi.hasNext()) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }
+                continue;
+            }
+
+            // check location constraint
+            if ((query.constraint != null) &&
+                (query.constraint.get(Condenser.flag_cat_haslocation)) &&
+                (metadata.lat() == 0.0f || metadata.lon() == 0.0f)) {
                 continue;
             }
             

@@ -76,7 +76,7 @@ public final class Condenser {
     public  static final int flag_cat_linux         = 16; // pages about linux software
     public  static final int flag_cat_macos         = 17; // pages about macintosh, apple computers and the mac os
     public  static final int flag_cat_windows       = 18; // pages about windows os and software
-    public  static final int flag_cat_osreserve     = 19; // reserve
+    public  static final int flag_cat_haslocation   = 19; // the page has a location metadata attached
     public  static final int flag_cat_hasimage      = 20; // the page refers to (at least one) images
     public  static final int flag_cat_hasaudio      = 21; // the page refers to (at least one) audio file
     public  static final int flag_cat_hasvideo      = 22; // the page refers to (at least one) videos
@@ -116,6 +116,7 @@ public final class Condenser {
         if (!document.getAudiolinks().isEmpty()) RESULT_FLAGS.set(flag_cat_hasaudio, true);
         if (!document.getVideolinks().isEmpty()) RESULT_FLAGS.set(flag_cat_hasvideo, true);
         if (!document.getApplinks().isEmpty())   RESULT_FLAGS.set(flag_cat_hasapp,   true);
+        if (document.lat() != 0.0f && document.lon() != 0.0f) RESULT_FLAGS.set(flag_cat_haslocation, true);
         
         this.languageIdentificator = new Identificator();
         

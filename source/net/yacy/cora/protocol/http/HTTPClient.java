@@ -266,7 +266,8 @@ public class HTTPClient {
     public byte[] GETbytes(final String uri, long maxBytes) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
         boolean localhost = url.getHost().equals("localhost");
-    	final HttpGet httpGet = new HttpGet(url.toNormalform(true, false, !localhost, false));
+        String urix = url.toNormalform(true, false, !localhost, false);
+    	final HttpGet httpGet = new HttpGet(urix);
     	if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	return getContentBytes(httpGet, maxBytes);
     }

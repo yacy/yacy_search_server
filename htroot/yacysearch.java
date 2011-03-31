@@ -289,8 +289,13 @@ public class yacysearch {
             	ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
             }
             if (querystring.indexOf("/date") >= 0) {
-            	querystring = querystring.replace("/date", "");
+                querystring = querystring.replace("/date", "");
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
+            }
+            if (querystring.indexOf("/location") >= 0) {
+                querystring = querystring.replace("/location", "");
+                if (constraint == null) constraint = new Bitfield(4);
+                constraint.set(Condenser.flag_cat_haslocation, true);
             }
             int lrp = querystring.indexOf("/language/");
             String lr = "";
