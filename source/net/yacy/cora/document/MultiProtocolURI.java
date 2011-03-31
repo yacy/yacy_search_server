@@ -64,6 +64,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
+    private static final Pattern patternQuestion = Pattern.compile("\\?");
     private static final Pattern patternDot = Pattern.compile("\\.");
     private static final Pattern patternSlash = Pattern.compile("/");
     private static final Pattern patternBackSlash = Pattern.compile("\\\\");
@@ -410,8 +411,11 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
     public static final String resolveBackpath(final String path) {
         String p = path;
         if (p.length() == 0 || p.charAt(0) != '/') { p = "/" + p; }
+        Matcher qm = patternQuestion.matcher(p); // do not resolve backpaths in the post values
+        int end = qm.find() ? qm.start() : p.length();
         final Matcher matcher = backPathPattern.matcher(p);
         while (matcher.find()) {
+            if (matcher.start() > end) break;
             p = matcher.replaceAll("");
             matcher.reset(p);
         }
