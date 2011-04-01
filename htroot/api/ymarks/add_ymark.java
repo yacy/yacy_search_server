@@ -19,7 +19,7 @@ public class add_ymark {
         
         final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
-        final boolean isAuthUser = user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT);
+        final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
         
         if(isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);

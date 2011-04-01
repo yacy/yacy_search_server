@@ -38,10 +38,12 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 
 import de.anomic.data.UserDB;
+import de.anomic.data.UserDB.AccessRight;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import java.util.EnumMap;
 import java.util.Map;
 
 public class ConfigAccounts_p {
@@ -103,12 +105,12 @@ public class ConfigAccounts_p {
         prop.put("address", "");
         prop.put("timelimit", "");
         prop.put("timeused", "");
-        final String[] rightNames = UserDB.Entry.RIGHT_NAMES.split(",");
-        final String[] rights = UserDB.Entry.RIGHT_TYPES.split(",");
+
+        final AccessRight[] rights = AccessRight.values();
         int c = 0;
-        for (final String right : rights) {
-            prop.put("rights_" + c + "_name", right);
-            prop.put("rights_" + c +"_friendlyName", rightNames[c]);
+        for (final AccessRight right : rights) {
+            prop.put("rights_" + c + "_name", right.toString());
+            prop.put("rights_" + c +"_friendlyName", right.getFriendlyName());
             prop.put("rights_" + c + "_set", "0");
             c++;
         }
@@ -142,7 +144,7 @@ public class ConfigAccounts_p {
                     prop.put("timelimit", entry.getTimeLimit());
                     prop.put("timeused", entry.getTimeUsed());
                     int count = 0;
-                    for (final String right : rights){
+                    for (final AccessRight right : rights){
                         prop.put("rights_" + count + "_set", entry.hasRight(right) ? "1" : "0");
                         count++;
                     }
@@ -169,10 +171,10 @@ public class ConfigAccounts_p {
             final String address = post.get("address");
             final String timeLimit = post.get("timelimit");
             final String timeUsed = post.get("timeused");
-            final Map<String, String> rightsSet = new HashMap<String, String>();
+            final Map<AccessRight, String> rightsSet = new EnumMap<AccessRight, String>(AccessRight.class);
 
-            for(final String right : rights) {
-                rightsSet.put(right, post.containsKey(right) && "on".equals(post.get(right)) ? "true" : "false");
+            for(final AccessRight right : rights) {
+                rightsSet.put(right, post.containsKey(right.toString()) && "on".equals(post.get(right.toString())) ? "true" : "false");
             }
             
             final Map<String, String> mem = new HashMap<String, String>();
@@ -188,8 +190,8 @@ public class ConfigAccounts_p {
                 mem.put(UserDB.Entry.TIME_LIMIT, timeLimit);
                 mem.put(UserDB.Entry.TIME_USED, timeUsed);
 
-                for (final String right : rights) {
-                    mem.put(right, rightsSet.get(right));
+                for (final AccessRight right : rights) {
+                    mem.put(right.toString(), rightsSet.get(right));
                 }
 
                 try {
@@ -217,8 +219,8 @@ public class ConfigAccounts_p {
                         entry.setProperty(UserDB.Entry.TIME_LIMIT, timeLimit);
                         entry.setProperty(UserDB.Entry.TIME_USED, timeUsed);
 
-                        for(final String right : rights) {
-                            entry.setProperty(right, rightsSet.get(right));
+                        for(final AccessRight right : rights) {
+                            entry.setProperty(right.toString(), rightsSet.get(right));
                         }
 
                     } catch (final Exception e) {

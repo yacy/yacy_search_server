@@ -33,7 +33,7 @@ public class Asset<
     private final SpecificModel model;
     private final SpecificFinding finding;
 
-    public Asset(SpecificModel model, SpecificFinding finding) {
+    public Asset(final SpecificModel model, final SpecificFinding finding) {
         this.model = model;
         this.finding = finding;
     }

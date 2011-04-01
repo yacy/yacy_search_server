@@ -58,7 +58,7 @@ public class get_bookmarks {
         prop.clear();
         sb = (Switchboard) env;
         user = sb.userDB.getUser(header);
-        isAdmin = (sb.verifyAuthentication(header, true) || user != null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT));
+        isAdmin = (sb.verifyAuthentication(header, true) || user != null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
 
         // set user name
         final String username;
@@ -239,7 +239,9 @@ public class get_bookmarks {
                 count++;
             }
             root = root.replaceAll("(/.[^/]*$)", "");
-            if ("".equals(root)) root = "/";
+            if ("".equals(root)) {
+                root = "/";
+            }
             count = recurseFolders(it, root, count, false, fn);
     	} 
     	return count;

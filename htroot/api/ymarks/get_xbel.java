@@ -26,7 +26,7 @@ public class get_xbel {
 		final StringBuilder buffer = new StringBuilder(250);
 		final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
-        final boolean isAuthUser = user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT);
+        final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
 		final String bmk_user;
         
         if(isAdmin || isAuthUser) {

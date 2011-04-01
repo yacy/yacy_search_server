@@ -85,7 +85,7 @@ public class Bookmarks {
     	prop.clear();
     	sb = (Switchboard) env;
     	user = sb.userDB.getUser(header);   
-    	isAdmin = (sb.verifyAuthentication(header, true) || user!= null && user.hasRight(UserDB.Entry.BOOKMARK_RIGHT));
+    	isAdmin = (sb.verifyAuthentication(header, true) || user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
     
     	// set user name
     	if (user != null) {
