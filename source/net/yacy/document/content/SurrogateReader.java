@@ -25,10 +25,13 @@
 package net.yacy.document.content;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.zip.GZIPInputStream;
@@ -41,6 +44,7 @@ import javax.xml.parsers.SAXParserFactory;
 import net.yacy.kelondro.logging.Log;
 
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -55,7 +59,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private String elementName;
     private final BlockingQueue<DCEntry> surrogates;
     private SAXParser saxParser;
-    private final InputStream stream;
+    private final InputSource inputSource;
+    private final InputStream inputStream;
     
     public SurrogateReader(final InputStream stream, int queueSize) throws IOException {
         this.buffer = new StringBuilder(300);
@@ -63,7 +68,12 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         this.surrogate = null;
         this.elementName = null;
         this.surrogates = new ArrayBlockingQueue<DCEntry>(queueSize);
-        this.stream = stream;
+        
+        Reader reader = new BufferedReader(new InputStreamReader(stream, "UTF-8"));
+        this.inputSource = new InputSource(reader);
+        this.inputSource.setEncoding("UTF-8");
+        this.inputStream = stream;
+        
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
             this.saxParser = factory.newSAXParser();
@@ -78,7 +88,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     
     public void run() {
         try {
-            this.saxParser.parse(this.stream, this);
+            this.saxParser.parse(this.inputSource, this);
         } catch (SAXParseException e) {
             Log.logException(e);
         } catch (SAXException e) {
@@ -92,7 +102,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
 			    Log.logException(e1);
 			}
 			try {
-        		this.stream.close();
+        		this.inputStream.close();
 			} catch (IOException e) {
 			    Log.logException(e);
 			}

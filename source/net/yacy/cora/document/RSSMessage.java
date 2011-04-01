@@ -164,7 +164,6 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         String subject = Token.subject.valueFrom(this.map, "");
         if (subject.indexOf(',') >= 0) return subject.split(",");
         if (subject.indexOf(';') >= 0) return subject.split(";");
-        if (subject.indexOf('|') >= 0) return subject.split("|");
         return subject.split(" ");
     }
     
