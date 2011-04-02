@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.crawler.CrawlProfile;
+
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.ConcurrentScoreMap;
@@ -145,7 +147,7 @@ public class SearchHub {
      * @param verify
      * @param global
      */
-    public static void addSRURSSServices(SearchHub search, String[] rssServices, int count, boolean verify, boolean global, String userAgent) {
+    public static void addSRURSSServices(SearchHub search, String[] rssServices, int count, CrawlProfile.CacheStrategy verify, boolean global, String userAgent) {
         for (String service: rssServices) {
             SearchSRURSS accumulator = new SearchSRURSS(search, service, count, verify, global, userAgent);
             accumulator.start();
@@ -161,7 +163,7 @@ public class SearchHub {
         for (String s: args) sb.append(s).append(' ');
         String query = sb.toString().trim();
         SearchHub search = new SearchHub(query, 10000);
-        addSRURSSServices(search, SRURSSServicesList, 100, false, false, "searchhub");
+        addSRURSSServices(search, SRURSSServicesList, 100, CrawlProfile.CacheStrategy.CACHEONLY, false, "searchhub");
         try {Thread.sleep(100);} catch (InterruptedException e1) {}
         search.waitTermination();
         ScoreMap<String> result = search.getResults();

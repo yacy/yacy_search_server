@@ -80,6 +80,7 @@ import net.yacy.repository.Blacklist;
 
 import org.apache.http.entity.mime.content.ContentBody;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.search.ContentDomain;
@@ -369,7 +370,7 @@ public final class yacyClient {
         }
     }
     
-    public static RSSFeed search(final yacySeed targetSeed, String query, boolean verify, boolean global, long timeout, int startRecord, int maximumRecords) throws IOException {
+    public static RSSFeed search(final yacySeed targetSeed, String query, CrawlProfile.CacheStrategy verify, boolean global, long timeout, int startRecord, int maximumRecords) throws IOException {
         String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8090") : targetSeed.getClusterAddress();
         String urlBase = "http://" + address + "/yacysearch.rss";
         return SearchSRURSS.loadSRURSS(urlBase, query, timeout, startRecord, maximumRecords, verify, global, null);

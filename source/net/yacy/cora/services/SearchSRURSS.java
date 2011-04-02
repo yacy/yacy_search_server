@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.http.entity.mime.content.ContentBody;
 
+import de.anomic.crawler.CrawlProfile;
+
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -45,13 +47,13 @@ import net.yacy.cora.protocol.http.HTTPConnector;
 
 public class SearchSRURSS extends Thread implements SearchAccumulator {
 
-    private final static int recordsPerSession = 10;
+    private final static int recordsPerSession = 100;
     
     final String urlBase;
     final String query;
     final long timeoutInit;
     final int maximumRecordsInit;
-    final boolean verify;
+    final CrawlProfile.CacheStrategy verify;
     final boolean global;
     final Map<RSSMessage, List<Integer>> result;
     final String userAgent;
@@ -64,7 +66,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             final long timeoutInit,
             final String urlBase,
             final int maximumRecordsInit,
-            final boolean verify,
+            final CrawlProfile.CacheStrategy verify,
             final boolean global,
             final String userAgent) {
         this.results = new LinkedBlockingQueue<RSSMessage>();
@@ -82,7 +84,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             final SearchHub search,
             final String urlBase,
             final int maximumRecordsInit,
-            final boolean verify,
+            final CrawlProfile.CacheStrategy verify,
             final boolean global,
             final String userAgent) {
         this.results = new LinkedBlockingQueue<RSSMessage>();
@@ -120,7 +122,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             final String query,
             final long timeoutInit,
             final int maximumRecordsInit,
-            final boolean verify,
+            final CrawlProfile.CacheStrategy verify,
             final boolean global,
             final String userAgent) {
         Thread job = new Thread() {
@@ -178,7 +180,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             long timeout,
             int startRecord,
             int maximumRecords,
-            boolean verify,
+            CrawlProfile.CacheStrategy cacheStrategy,
             boolean global,
             String userAgent) throws IOException {
         MultiProtocolURI uri = null;
@@ -195,7 +197,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
             parts.put("query", UTF8.StringBody(query));
             parts.put("startRecord", UTF8.StringBody(Integer.toString(startRecord)));
             parts.put("maximumRecords", UTF8.StringBody(Long.toString(maximumRecords)));
-            parts.put("verify", UTF8.StringBody(verify ? "true" : "false"));
+            parts.put("verify", UTF8.StringBody(cacheStrategy.toName()));
             parts.put("resource", UTF8.StringBody(global ? "global" : "local"));
             parts.put("nav", UTF8.StringBody("none"));
             result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);

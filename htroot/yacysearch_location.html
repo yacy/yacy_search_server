@@ -6,6 +6,12 @@
   <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
   <script type="text/javascript" src="http://www.openstreetmap.org/openlayers/OpenStreetMap.js"></script>
   <script type="text/javascript">
+    function adaptHeight() {
+      document.getElementById('map').style.height = (document.documentElement.clientHeight - 130) + "px";
+    }
+    window.onresize = adaptHeight;
+  </script>
+  <script type="text/javascript">
     var map;
     var searchLayer_md = null;
     var searchLayer_co = null;
@@ -21,10 +27,11 @@
 				controls:[
 					new OpenLayers.Control.Navigation(),
 					new OpenLayers.Control.PanZoomBar(),
+					new OpenLayers.Control.ZoomBox(),
 					new OpenLayers.Control.LayerSwitcher(),
 					new OpenLayers.Control.Attribution()]
         });
-        
+    
 		//layerMaplint = new OpenLayers.Layer.OSM.Maplint("Maplint");
 		layerWMS = new OpenLayers.Layer.WMS( "OpenLayers WMS", "http://labs.metacarta.com/wms/vmap0", {layers: 'basic'} );
         layerMapnik = new OpenLayers.Layer.OSM.Mapnik("Mapnik");
@@ -35,12 +42,13 @@
 		map.addLayer(layerCycleMap);
 		//map.addLayer(layerMaplint);
 		map.addLayer(layerWMS);
+		    
         map.addControl(new OpenLayers.Control.LayerSwitcher());
-        map.setCenter(new OpenLayers.LonLat(15,30) // Center of the map
+        map.setCenter(new OpenLayers.LonLat(9,48) // Center of the map
           .transform(
             new OpenLayers.Projection("EPSG:4326"), // transform from WGS 1984
             new OpenLayers.Projection("EPSG:900913") // to Spherical Mercator Projection
-          ), 2 // Zoom level
+          ), 5 // Zoom level
         );
         
         #(initsearch)#::
@@ -56,10 +64,15 @@
         var query = document.getElementById('query').value.replace(' ', '+');
         if (searchLayer_md != null) searchLayer_md.destroy();
         if (searchLayer_co != null) searchLayer_co.destroy();
-        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_cosearch + query, {'icon':marker_co});
+        var center = map.getCenter().transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+        searchLayer_co = new OpenLayers.Layer.GeoRSS('GeoRSS', path_cosearch + query + '&lon=' + center.lon + '&lat=' + center.lat + '&zoom=' + map.getZoom(), {'icon':marker_co});
         map.addLayer(searchLayer_co);
         searchLayer_md = new OpenLayers.Layer.GeoRSS('GeoRSS', path_mdsearch + query, {'icon':marker_md});
         map.addLayer(searchLayer_md);
+        //map.zoomToExtent(searchLayer_co.getExtent());
+        //map.panTo(searchLayer_co.getExtent().getCenterLonLat());
+        //map.setCenter(searchLayer_co.getExtent().getLonLatFromViewPortPx, 5);
+        //map.setCenter(searchLayer_co.getExtent().getCenterLonLat(), map.getZoomForExtent(searchLayer_co.getExtent(), true));
         document.getElementById('apilink').setAttribute('href', 'yacysearch_location.rss?query=' + query);
     }
   </script>
@@ -92,6 +105,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
      <input type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;" />
   </fieldset>
 </form><br/>
-<div id="map" style="width:800px; height:600px"></div>
+<div id="map" style="clear:both; width:100%; height:720px"></div>
+<script type="text/javascript">
+adaptHeight();
+</script>
 </body>
 </html>

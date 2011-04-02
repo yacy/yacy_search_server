@@ -319,7 +319,7 @@ public class ResultFetcher {
 
                     // check if we have enough
                     if (result.sizeAvailable() >= this.neededResults) {
-                        Log.logWarning("ResultFetcher", result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
+                        //Log.logWarning("ResultFetcher", result.sizeAvailable() + " = result.sizeAvailable() >= this.neededResults = " + this.neededResults);
                         break;
                     }
 

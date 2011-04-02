@@ -1345,7 +1345,7 @@ public final class Switchboard extends serverSwitch {
     }
     
     public void processSurrogate(final InputStream is, String name) throws IOException {
-        SurrogateReader reader = new SurrogateReader(is, 3);
+        SurrogateReader reader = new SurrogateReader(is, 100);
         Thread readerThread = new Thread(reader, name);
         readerThread.start();
         DCEntry surrogate;
