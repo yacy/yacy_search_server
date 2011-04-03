@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -56,14 +57,15 @@ public class NoticedURL {
     
     public NoticedURL(
             final File cachePath,
+            final Set<String> myAgentIDs,
             final boolean useTailCache,
             final boolean exceed134217727) {
         Log.logInfo("NoticedURL", "CREATING STACKS at " + cachePath.toString());
-        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, useTailCache, exceed134217727);
-        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, useTailCache, exceed134217727);
+        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
+        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, useTailCache, exceed134217727);
-        this.noloadStack = new Balancer(cachePath, "urlNoticeNoLoadStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, useTailCache, exceed134217727);
+        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
+        this.noloadStack = new Balancer(cachePath, "urlNoticeNoLoadStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, myAgentIDs, useTailCache, exceed134217727);
     }
 
     public long getMinimumLocalDelta() {

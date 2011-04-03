@@ -78,7 +78,7 @@ public class CrawlQueues {
         
         // start crawling management
         log.logConfig("Starting Crawling Management");
-        noticeURL = new NoticedURL(queuePath, sb.useTailCache, sb.exceed134217727);
+        noticeURL = new NoticedURL(queuePath, sb.peers.myBotIDs(), sb.useTailCache, sb.exceed134217727);
         FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
         errorURL = new ZURL(queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
         delegatedURL = new ZURL(queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
@@ -90,7 +90,7 @@ public class CrawlQueues {
         this.workers = new ConcurrentHashMap<Integer, Loader>();
         this.remoteCrawlProviderHashes.clear();
         
-        noticeURL = new NoticedURL(newQueuePath, sb.useTailCache, sb.exceed134217727);
+        noticeURL = new NoticedURL(newQueuePath, sb.peers.myBotIDs(), sb.useTailCache, sb.exceed134217727);
         FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
         errorURL = new ZURL(newQueuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
         delegatedURL = new ZURL(newQueuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
@@ -571,7 +571,10 @@ public class CrawlQueues {
             try {
                 // checking robots.txt for http(s) resources
                 this.request.setStatus("worker-checkingrobots", WorkflowJob.STATUS_STARTED);
-                if ((request.url().getProtocol().equals("http") || request.url().getProtocol().equals("https")) && sb.robots.isDisallowed(request.url())) {
+                RobotsEntry robotsEntry;
+                if ((request.url().getProtocol().equals("http") || request.url().getProtocol().equals("https")) &&
+                    (robotsEntry = sb.robots.getEntry(request.url(), sb.peers.myBotIDs())) != null &&
+                    robotsEntry.isDisallowed(request.url())) {
                     //if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     errorURL.push(
                             this.request,

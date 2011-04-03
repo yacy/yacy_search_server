@@ -1,29 +1,33 @@
-//robotsParser.java 
-//-------------------------------------
-//part of YACY
-//
-//(C) 2005, 2006 by Alexander Schier
-//                  Martin Thelian
-//
-//last change: $LastChangedDate$ by $LastChangedBy$
-//Revision: $LastChangedRevision$
-//
-//This program is free software; you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
-//the Free Software Foundation; either version 2 of the License, or
-//(at your option) any later version.
-//
-//This program is distributed in the hope that it will be useful,
-//but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
-//
-//You should have received a copy of the GNU General Public License
-//along with this program; if not, write to the Free Software
-//Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+/*
+  robotsParser.java 
+  -------------------------------------
+  part of YACY
+  
+  (C) 2005, 2006 by Alexander Schier
+                    Martin Thelian
+  
+  last change: $LastChangedDate$LastChangedBy: orbiter $
+  Revision: $LastChangedRevision$
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-// extended to return structured objects instead of a Object[] and
-// extended to return a Allow-List by Michael Christen, 21.07.2008
+   extended to return structured objects instead of a Object[] and
+   extended to return a Allow-List by Michael Christen, 21.07.2008
+   extended to allow multiple user agents given by definition and
+   returning the used user agent my Michael Christen 3.4.2011
+*/
 
 package de.anomic.crawler;
 
@@ -33,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /*
@@ -65,48 +70,48 @@ public final class robotsParser {
     public static final String ROBOTS_SITEMAP = "Sitemap:".toUpperCase();
     public static final String ROBOTS_CRAWL_DELAY = "Crawl-delay:".toUpperCase();
     
-    private ArrayList<String> allowList;
-    private ArrayList<String> denyList;
-    private String sitemap;
-    private long crawlDelayMillis;
+    private final ArrayList<String> allowList;
+    private final ArrayList<String> denyList;
+    private       String sitemap;
+    private       long crawlDelayMillis;
+    private final Set<String> myNames; // a list of own name lists
+    private       String agentName; // the name of the agent that was used to return the result
     
-    public robotsParser(final byte[] robotsTxt) {
-        if ((robotsTxt == null)||(robotsTxt.length == 0)) {
-            allowList = new ArrayList<String>(0);
-            denyList = new ArrayList<String>(0);
-            sitemap = "";
-            crawlDelayMillis = 0;
-        } else {
+    public robotsParser(final byte[] robotsTxt, final Set<String> myNames) {
+        this.allowList = new ArrayList<String>(0);
+        this.denyList = new ArrayList<String>(0);
+        this.sitemap = "";
+        this.crawlDelayMillis = 0;
+        this.myNames = myNames;
+        this.agentName = null;
+        if (robotsTxt != null && robotsTxt.length != 0) {
             final ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
             final BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
             parse(reader);
         }
     }
     
-    public robotsParser(final BufferedReader reader) {
-        if (reader == null) {
-            allowList = new ArrayList<String>(0);
-            denyList = new ArrayList<String>(0);
-            sitemap = "";
-            crawlDelayMillis = 0;
-        } else {
-            parse(reader);
-        }
+    public robotsParser(final BufferedReader reader, final Set<String> myNames) {
+        this.allowList = new ArrayList<String>(0);
+        this.denyList = new ArrayList<String>(0);
+        this.sitemap = "";
+        this.crawlDelayMillis = 0;
+        this.myNames = myNames;
+        this.agentName = null;
+        if (reader != null) parse(reader);
     }
     
     private void parse(final BufferedReader reader) {
         final ArrayList<String> deny4AllAgents = new ArrayList<String>();
-        final ArrayList<String> deny4YaCyAgent = new ArrayList<String>();
+        final ArrayList<String> deny4ThisAgents = new ArrayList<String>();
         final ArrayList<String> allow4AllAgents = new ArrayList<String>();
-        final ArrayList<String> allow4YaCyAgent = new ArrayList<String>();
+        final ArrayList<String> allow4ThisAgents = new ArrayList<String>();
         
         int pos;
         String line = null, lineUpper = null;
-        sitemap = null;
-        crawlDelayMillis = 0;
         boolean isRule4AllAgents = false,
-                isRule4YaCyAgent = false,
-                rule4YaCyFound = false,
+                isRule4ThisAgents = false,
+                rule4ThisAgentsFound = false,
                 inBlock = false;        
         
         try {
@@ -118,7 +123,7 @@ public final class robotsParser {
                 // parse empty line
                 if (line.length() == 0) {
                     // we have reached the end of the rule block
-                    if (rule4YaCyFound) {
+                    if (rule4ThisAgentsFound) {
                         // stop here because other robot blocks are either not for YaCy
                         // or global settings which shall not overwrite YaCys settings.
                         break lineparser;
@@ -147,7 +152,7 @@ public final class robotsParser {
                     
                     if (inBlock) {
                         // we have detected the start of a new block
-                        if (rule4YaCyFound) {
+                        if (rule4ThisAgentsFound) {
                             // stop here because other robot blocks are either not for YaCy
                             // or global settings which shall not overwrite YaCys settings.
                             break lineparser;
@@ -155,7 +160,7 @@ public final class robotsParser {
                         
                         inBlock = false;
                         isRule4AllAgents = false;
-                        isRule4YaCyAgent = false;
+                        isRule4ThisAgents = false;
                         crawlDelayMillis = 0; // each block has a separate delay
                     }
                     
@@ -168,9 +173,14 @@ public final class robotsParser {
                     if (pos != -1) {
                         final String userAgent = line.substring(pos).trim();
                         isRule4AllAgents |= userAgent.equals("*");
-                        isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
-                        isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacybot") >=0;
-                        if (isRule4YaCyAgent) rule4YaCyFound = true;
+                        for (String agent: this.myNames) {
+                            if (userAgent.toLowerCase().indexOf(agent) >= 0) {
+                                this.agentName = agent;
+                                isRule4ThisAgents = true;
+                                break;
+                            }
+                        }
+                        if (isRule4ThisAgents) rule4ThisAgentsFound = true;
                     }
                     continue lineparser;
                 }
@@ -178,7 +188,7 @@ public final class robotsParser {
                 // parse crawl delay
                 if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
                     inBlock = true;
-                	if (isRule4YaCyAgent || isRule4AllAgents) {
+                	if (isRule4ThisAgents || isRule4AllAgents) {
                 		pos = line.indexOf(' ');
                 		if (pos != -1) {
                 			try {
@@ -197,7 +207,7 @@ public final class robotsParser {
                     inBlock = true;
                     final boolean isDisallowRule = lineUpper.startsWith(ROBOTS_DISALLOW);
                     
-                    if (isRule4YaCyAgent || isRule4AllAgents) {
+                    if (isRule4ThisAgents || isRule4AllAgents) {
                         // cutting off comments at the line end
                         pos = line.indexOf(ROBOTS_COMMENT);
                         if (pos != -1) line = line.substring(0,pos).trim();
@@ -227,10 +237,10 @@ public final class robotsParser {
                             // adding it to the pathlist
                             if (isDisallowRule) {
                                 if (isRule4AllAgents) deny4AllAgents.add(path);
-                                if (isRule4YaCyAgent) deny4YaCyAgent.add(path);
+                                if (isRule4ThisAgents) deny4ThisAgents.add(path);
                             } else {
                                 if (isRule4AllAgents) allow4AllAgents.add(path);
-                                if (isRule4YaCyAgent) allow4YaCyAgent.add(path);
+                                if (isRule4ThisAgents) allow4ThisAgents.add(path);
                             }
                         }
                     }
@@ -239,12 +249,30 @@ public final class robotsParser {
             }
         } catch (final IOException e) {}
         
-        allowList = (rule4YaCyFound) ? allow4YaCyAgent : allow4AllAgents;
-        denyList = (rule4YaCyFound) ? deny4YaCyAgent : deny4AllAgents;
+        allowList.addAll(rule4ThisAgentsFound ? allow4ThisAgents : allow4AllAgents);
+        denyList.addAll(rule4ThisAgentsFound ? deny4ThisAgents : deny4AllAgents);
     }
     
+    /**
+     * a crawl delay can be assigned to every agent or for all agents
+     * a special case is where the user agent of this yacy peer is given explicitely
+     * using the peer name and then if the crawl delay is given as '0' the crawler
+     * does not make any no-DOS-forced crawl pause.
+     * @return the crawl delay between two crawl access times in milliseconds
+     */
     public long crawlDelayMillis() {
         return this.crawlDelayMillis;
+    }
+    
+    /**
+     * the user agent that was applied to get the crawl properties is recorded
+     * because it is possible that this robots.txt parser applies to several user agents
+     * which may be i.e. 'yacy', 'yacybot', <peer-name>'.yacy' or <peer-hash>'.yacyh'
+     * Effects: see also comment to crawlDelayMillis()
+     * @return the name of the user agent that was used for the result properties or null if no user agent name was used to identify the agent
+     */
+    public String agentName() {
+        return this.agentName;
     }
     
     public String sitemap() {

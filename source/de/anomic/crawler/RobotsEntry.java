@@ -28,6 +28,7 @@
 
 package de.anomic.crawler;
 
+import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -53,9 +54,9 @@ public class RobotsEntry {
     public static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
     
     // this is a simple record structure that holds all properties of a single crawl start
-    private Map<String, byte[]> mem;
-    private List<String> allowPathList, denyPathList;
-    String hostName;
+    private final Map<String, byte[]> mem;
+    private final List<String> allowPathList, denyPathList;
+    private final String hostName;
     
     public RobotsEntry(final String hostName, final Map<String, byte[]> mem) {
         this.hostName = hostName.toLowerCase();
@@ -134,6 +135,10 @@ public class RobotsEntry {
         }
     }
     
+    public String getHostName() {
+        return this.hostName;
+    }
+    
     public Map<String, byte[]> getMem() {
         if (!this.mem.containsKey(HOST_NAME)) this.mem.put(HOST_NAME, this.hostName.getBytes());
         return this.mem;
@@ -147,8 +152,18 @@ public class RobotsEntry {
         return str.toString();
     }    
     
-    public String getSitemap() {
-        return this.mem.containsKey(SITEMAP)? UTF8.String(this.mem.get(SITEMAP)): null;
+    /**
+     * get the sitemap url
+     * @return the sitemap url or null if no sitemap url is given
+     */
+    public MultiProtocolURI getSitemap() {
+        String url = this.mem.containsKey(SITEMAP)? UTF8.String(this.mem.get(SITEMAP)): null;
+        if (url == null) return null;
+        try {
+            return new MultiProtocolURI(url);
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
     
     public Date getLoadedDate() {
@@ -192,7 +207,8 @@ public class RobotsEntry {
         return 0;           
     }
     
-    public boolean isDisallowed(String path) {
+    public boolean isDisallowed(MultiProtocolURI subpathURL) {
+        String path = subpathURL.getFile();
         if ((this.mem == null) || (this.denyPathList.isEmpty())) return false;   
         
         // if the path is null or empty we set it to /

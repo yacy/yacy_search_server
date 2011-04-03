@@ -106,7 +106,7 @@ public class ConfigBasic {
         if (oldSeed == null &&
             !peerName.equals(sb.peers.mySeed().getName()) &&
             Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
-            sb.peers.mySeed().setName(peerName);
+            sb.peers.setMyName(peerName);
             sb.peers.saveMySeed();
         }
         

@@ -32,9 +32,11 @@ import java.io.PrintWriter;
 import java.lang.ref.SoftReference;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -95,7 +97,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     public  PartitionScheme scheme;
     
     private yacySeed mySeed; // my own seed
-    
+    private Set<String> myBotIDs; // list of id's that this bot accepts as robots.txt identification
     private final Hashtable<String, String> nameLookupCache; // a name-to-hash relation
     private final Hashtable<InetAddress, SoftReference<yacySeed>> ipLookupCache;
     
@@ -114,6 +116,9 @@ public final class yacySeedDB implements AlternativeDomainNames {
         this.seedPotentialDBFile = new File(networkRoot, seedPotentialDBFileName);
         this.mySeed = null; // my own seed
         this.myOwnSeedFile = myOwnSeedFile;
+        this.myBotIDs = new HashSet<String>();
+        this.myBotIDs.add("yacy");
+        this.myBotIDs.add("yacybot");
         this.netRedundancy = redundancy;
         this.scheme = new VerticalWordPartitionScheme(partitionExponent);
         
@@ -161,13 +166,15 @@ public final class yacySeedDB implements AlternativeDomainNames {
         this.seedActiveDBFile = new File(newNetworkRoot, seedActiveDBFile.getName());
         this.seedPassiveDBFile = new File(newNetworkRoot, seedPassiveDBFile.getName());
         this.seedPotentialDBFile = new File(newNetworkRoot, seedPotentialDBFile.getName());
-        
 
-        // read current peer name
-        String peername = this.myName();
-        
+        // replace my (old) seed with new seed definition from other network
+        // but keep the seed name
+        String peername = this.myName();        
         this.mySeed = null; // my own seed
         this.myOwnSeedFile = new File(newNetworkRoot, yacySeedDB.DBFILE_OWN_SEED);
+        initMySeed();
+        this.mySeed.setName(peername);
+        
         this.netRedundancy = redundancy;
         this.scheme = new VerticalWordPartitionScheme(partitionExponent);
         
@@ -228,11 +235,16 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 System.exit(-1);
             }
         }
-        
+        this.myBotIDs.add(this.mySeed.getName() + ".yacy");
+        this.myBotIDs.add(this.mySeed.hash + ".yacyh");
         mySeed.setIP("");       // we delete the old information to see what we have now
         mySeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN); // markup startup condition
     }
 
+    public Set<String> myBotIDs() {
+        return this.myBotIDs;
+    }
+    
     public int redundancy() {
         if (this.mySeed.isJunior()) return 1;
         return this.netRedundancy;
@@ -248,6 +260,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
             initMySeed();
         }
         return this.mySeed;
+    }
+    
+    public void setMyName(String name) {
+        this.myBotIDs.remove(this.mySeed.getName() + ".yacy");
+        this.mySeed.setName(name);
+        this.myBotIDs.add(name + ".yacy");
     }
     
     public String myAlternativeAddress() {

@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,12 +74,14 @@ public class Balancer {
     private long         minimumGlobalDelta;
     private long         lastDomainStackFill;
     private int          domStackInitSize;
+    private Set<String>  myAgentIDs;
     
     public Balancer(
             final File cachePath,
             final String stackname,
             final long minimumLocalDelta,
             final long minimumGlobalDelta,
+            final Set<String> myAgentIDs,
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.cacheStacksPath = cachePath;
@@ -87,6 +90,7 @@ public class Balancer {
         this.delayed = new TreeMap<Long, byte[]>();
         this.minimumLocalDelta = minimumLocalDelta;
         this.minimumGlobalDelta = minimumGlobalDelta;
+        this.myAgentIDs = myAgentIDs;
         this.domStackInitSize = Integer.MAX_VALUE;
         this.ddc = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         this.double_push_check = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
@@ -411,7 +415,7 @@ public class Balancer {
 		        sleeptime = (
 		                profileEntry.cacheStrategy() == CrawlProfile.CacheStrategy.CACHEONLY ||
 		                (profileEntry.cacheStrategy() == CrawlProfile.CacheStrategy.IFEXIST && Cache.has(crawlEntry.url()))
-		                ) ? 0 : Latency.waitingRemaining(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+		                ) ? 0 : Latency.waitingRemaining(crawlEntry.url(), myAgentIDs, minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
 		        
 		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + UTF8.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + UTF8.String(rowEntry.getPrimaryKeyBytes());
 		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + UTF8.String(nexthash) + ", crawlEntry.url().hash() = " + UTF8.String(crawlEntry.url().hash());
@@ -450,7 +454,7 @@ public class Balancer {
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta) + ", top.size() = " + top.size() + ", delayed.size() = " + delayed.size() + ", domainStacks.size() = " + domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
+            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), myAgentIDs, minimumLocalDelta, minimumGlobalDelta) + ", top.size() = " + top.size() + ", delayed.size() = " + delayed.size() + ", domainStacks.size() = " + domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
             long loops = sleeptime / 1000;
             long rest = sleeptime % 1000;
             if (loops < 3) {

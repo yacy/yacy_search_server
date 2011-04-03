@@ -23,8 +23,10 @@
 
 package de.anomic.crawler;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -159,7 +161,7 @@ public class Latency {
      * @param minimumGlobalDelta
      * @return the remaining waiting time in milliseconds
      */
-    public static long waitingRemaining(MultiProtocolURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static long waitingRemaining(MultiProtocolURI url, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
         Host host = host(url);
@@ -171,7 +173,7 @@ public class Latency {
         long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
         
         // the time since last access to the domain is the basis of the remaining calculation
-        final long timeSinceLastAccess = (host == null) ? 0 : System.currentTimeMillis() - host.lastacc();
+        final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
         
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
@@ -182,13 +184,23 @@ public class Latency {
         if (!local && host != null) waiting += host.flux(waiting);
         
         // find the delay as given by robots.txt on target site
-        long robotsDelay = (local) ? 0 : Switchboard.getSwitchboard().robots.getCrawlDelayMillis(url);
+        long robotsDelay = 0;
+        if (!local) {
+            RobotsEntry robotsEntry;
+            try {
+                robotsEntry = Switchboard.getSwitchboard().robots.getEntry(url, thisAgents);
+            } catch (IOException e) {
+                robotsEntry = null;
+            }
+            robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
+            if (robotsEntry != null && robotsDelay == 0) return 0; // no limits if granted exclusively for this peer
+        }
         waiting = Math.max(waiting, robotsDelay);
         
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
-        if (host != null) waiting = Math.max(waiting, (local) ? host.average() / 2 : host.average() * 2);
+        waiting = Math.max(waiting, (local) ? host.average() / 2 : host.average() * 2);
         
         // prevent that that a robots file can stop our indexer completely
         waiting = Math.min(60000, waiting);
@@ -199,7 +211,7 @@ public class Latency {
     }
     
     
-    public static String waitingRemainingExplain(MultiProtocolURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static String waitingRemainingExplain(MultiProtocolURI url, final Set<String> thisAgents, final long minimumLocalDelta, final long minimumGlobalDelta) {
         
         // first check if the domain was _ever_ accessed before
         Host host = host(url);
@@ -225,7 +237,17 @@ public class Latency {
         if (!local && host != null) s.append(", flux = ").append(host.flux(waiting));
         
         // find the delay as given by robots.txt on target site
-        long robotsDelay = (local) ? 0 : Switchboard.getSwitchboard().robots.getCrawlDelayMillis(url);
+        long robotsDelay = 0;
+        if (!local) {
+            RobotsEntry robotsEntry;
+            try {
+                robotsEntry = Switchboard.getSwitchboard().robots.getEntry(url, thisAgents);
+            } catch (IOException e) {
+                robotsEntry = null;
+            }
+            robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
+            if (robotsEntry != null && robotsDelay == 0) return "no waiting for exclusive granted peer"; // no limits if granted exclusively for this peer
+        }
         s.append(", robots.delay = ").append(robotsDelay);
         
         // use the access latency as rule how fast we can access the server

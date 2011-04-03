@@ -99,7 +99,7 @@ import de.anomic.server.serverObjects;
 public final class HTTPDProxyHandler {
     
 
-    public  static final String yacyUserAgent = "yacy (" + MultiProtocolURI.systemOST +") yacy.net";
+    public  static final String yacyUserAgent = "yacyproxy (" + MultiProtocolURI.systemOST +") http://yacy.net/bot.html";
     
     // static variables
     // can only be instantiated upon first instantiation of this class object

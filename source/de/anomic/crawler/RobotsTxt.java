@@ -31,6 +31,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -76,8 +77,14 @@ public class RobotsTxt {
         return this.robotsTable.size();
     }
     
-    private RobotsEntry getEntry(final MultiProtocolURI theURL, final boolean fetchOnlineIfNotAvailableOrNotFresh) throws IOException {
-        // this method will always return a non-null value
+    public RobotsEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents) throws IOException {
+        if (theURL == null) throw new IllegalArgumentException();
+        if (!theURL.getProtocol().startsWith("http")) return null;
+        return getEntry(theURL, thisAgents, true);
+    }
+    
+    private RobotsEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) throws IOException {
+            // this method will always return a non-null value
         String urlHostPort = getHostPort(theURL);
         RobotsEntry robotsTxt4Host = null;
         Map<String, byte[]> record;
@@ -174,7 +181,7 @@ public class RobotsTxt {
                     	addEntry(robotsTxt4Host);
                     }
                 } else {
-                    final robotsParser parserResult = new robotsParser((byte[]) result[DOWNLOAD_ROBOTS_TXT]);
+                    final robotsParser parserResult = new robotsParser((byte[]) result[DOWNLOAD_ROBOTS_TXT], thisAgents);
                     ArrayList<String> denyPath = parserResult.denyList();
                     if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {
                         denyPath = new ArrayList<String>();
@@ -219,8 +226,8 @@ public class RobotsTxt {
     private String addEntry(final RobotsEntry entry) {
         // writes a new page and returns key
         try {
-            this.robotsTable.insert(this.robotsTable.encodedKey(entry.hostName), entry.getMem());
-            return entry.hostName;
+            this.robotsTable.insert(this.robotsTable.encodedKey(entry.getHostName()), entry.getMem());
+            return entry.getHostName();
         } catch (final Exception e) {
             log.warn("cannot write robots.txt entry", e);
             return null;
@@ -255,57 +262,7 @@ public class RobotsTxt {
         }
         return port;
     }
-   
-    public MultiProtocolURI getSitemapURL(final MultiProtocolURI theURL) {
-        if (theURL == null) throw new IllegalArgumentException();
-        if (!theURL.getProtocol().startsWith("http")) return null;
-        MultiProtocolURI sitemapURL = null;
-        
-        // generating the hostname:poart string needed to do a DB lookup
-        RobotsEntry robotsTxt4Host;
-        try {
-            robotsTxt4Host = this.getEntry(theURL, true);
-        } catch (IOException e1) {
-            return null;
-        }
-                       
-        try {
-            final String sitemapUrlStr = robotsTxt4Host.getSitemap();
-            if (sitemapUrlStr != null) sitemapURL = new MultiProtocolURI(sitemapUrlStr);
-        } catch (final MalformedURLException e) {/* ignore this */}
-        
-        return sitemapURL;
-    }
-    
-    public long getCrawlDelayMillis(final MultiProtocolURI theURL) {
-        if (theURL == null) throw new IllegalArgumentException();
-        if (!theURL.getProtocol().startsWith("http")) return 0;
-        
-        RobotsEntry robotsEntry;
-        try {
-            robotsEntry = getEntry(theURL, true);
-        } catch (IOException e) {
-            log.warn("cannot load robots.txt entry", e);
-            return 0;
-        }
-        return robotsEntry.getCrawlDelayMillis();
-    }
-    
-    public boolean isDisallowed(final MultiProtocolURI nexturl) {
-        if (nexturl == null) throw new IllegalArgumentException();
-        if (!nexturl.getProtocol().startsWith("http")) return false;
-        
-        // generating the hostname:port string needed to do a DB lookup
-        RobotsEntry robotsTxt4Host = null;
-        try {
-            robotsTxt4Host = getEntry(nexturl, true);
-        } catch (IOException e) {
-            log.warn("cannot load robots.txt entry", e);
-            return false;
-        }
-        return robotsTxt4Host.isDisallowed(nexturl.getFile());
-    }
-    
+
     private static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsEntry entry) throws Exception {
         if (robotsURL == null || !robotsURL.getProtocol().startsWith("http")) return null;
         

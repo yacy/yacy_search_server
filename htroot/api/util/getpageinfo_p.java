@@ -9,6 +9,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.RobotsEntry;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -105,11 +106,17 @@ public class getpageinfo_p {
                     final DigestURI theURL = new DigestURI(url);
                     
                 	// determine if crawling of the current URL is allowed
-                	prop.put("robots-allowed", sb.robots.isDisallowed(theURL) ? "0" : "1");
-                    
+                    RobotsEntry robotsEntry;
+                    try {
+                        robotsEntry = sb.robots.getEntry(theURL, sb.peers.myBotIDs());
+                    } catch (IOException e) {
+                        robotsEntry = null;
+                    }
+                	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
+
                     // get the sitemap URL of the domain
-                    final MultiProtocolURI sitemapURL = sb.robots.getSitemapURL(theURL);
-                    prop.putXML("sitemap", (sitemapURL==null) ? "" : sitemapURL.toString());
+                    final MultiProtocolURI sitemapURL = robotsEntry == null ? null : robotsEntry.getSitemap();
+                    prop.putXML("sitemap", sitemapURL == null ? "" : sitemapURL.toString());
                 } catch (final MalformedURLException e) {}
             }
             
