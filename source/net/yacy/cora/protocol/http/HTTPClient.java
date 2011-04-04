@@ -487,15 +487,20 @@ public class HTTPClient {
 	        assert !hrequest.expectContinue();
 	    }
 
-	    synchronized (httpClient) {
-	        // without synchronization we get an interruptedException here very often
-            try {
-    			httpResponse = httpClient.execute(httpUriRequest, httpContext);
-            } catch (IOException e) {
-                ConnectionInfo.removeConnection(httpUriRequest.hashCode());
-                httpUriRequest.abort();
-                throw new IOException("Client can't execute: " + e.getMessage());
-            }
+	    try {
+            httpResponse = httpClient.execute(httpUriRequest, httpContext);
+	    } catch (Exception ee) {
+	        // try again synchronized
+	        synchronized (httpClient) {
+	            // without synchronization we get an InterruptedException here very often
+	            try {
+	                httpResponse = httpClient.execute(httpUriRequest, httpContext);
+	            } catch (IOException e) {
+	                ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+	                httpUriRequest.abort();
+	                throw new IOException("Client can't execute: " + e.getMessage());
+	            }
+	        }
 	    }
     }
     
