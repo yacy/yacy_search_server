@@ -489,19 +489,11 @@ public class HTTPClient {
 
 	    try {
             httpResponse = httpClient.execute(httpUriRequest, httpContext);
-	    } catch (Exception ee) {
-	        // try again synchronized
-	        synchronized (httpClient) {
-	            // without synchronization we get an InterruptedException here very often
-	            try {
-	                httpResponse = httpClient.execute(httpUriRequest, httpContext);
-	            } catch (IOException e) {
-	                ConnectionInfo.removeConnection(httpUriRequest.hashCode());
-	                httpUriRequest.abort();
-	                throw new IOException("Client can't execute: " + e.getMessage());
-	            }
-	        }
-	    }
+        } catch (IOException e) {
+            ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+            httpUriRequest.abort();
+            throw new IOException("Client can't execute: " + e.getMessage());
+        }
     }
     
     private void setHeaders(final HttpUriRequest httpUriRequest) {
