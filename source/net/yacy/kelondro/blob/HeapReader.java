@@ -590,13 +590,11 @@ public class HeapReader {
                 } catch (IOException e) {
                     Log.logException(e);
                 }
-            } else {
-                // this is small.. just free resources, do not write index
-                if (free != null) free.clear();
-                free = null;
-                if (index != null) index.close();
-                index = null;
             }
+            if (free != null) free.clear();
+            free = null;
+            if (index != null) index.close();
+            index = null;
         }
     }
     

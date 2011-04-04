@@ -246,7 +246,7 @@ public class Latency {
                 robotsEntry = null;
             }
             robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
-            if (robotsEntry != null && robotsDelay == 0) return "no waiting for exclusive granted peer"; // no limits if granted exclusively for this peer
+            if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null)  return "no waiting for exclusive granted peer"; // no limits if granted exclusively for this peer
         }
         s.append(", robots.delay = ").append(robotsDelay);
         

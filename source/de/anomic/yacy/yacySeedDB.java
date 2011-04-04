@@ -119,6 +119,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         this.myBotIDs = new HashSet<String>();
         this.myBotIDs.add("yacy");
         this.myBotIDs.add("yacybot");
+        this.myBotIDs.add("yacyproxy");
         this.netRedundancy = redundancy;
         this.scheme = new VerticalWordPartitionScheme(partitionExponent);
         

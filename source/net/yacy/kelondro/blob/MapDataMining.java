@@ -65,7 +65,7 @@ public class MapDataMining extends MapHeap {
             final String[] longaccfields,
             final String[] floataccfields,
             final Object externalHandler) throws IOException {
-        super(heapFile, keylength, ordering, buffermax, cachesize, '_');
+        super(heapFile, keylength, ordering, buffermax, cachesize, ' ');
         
         // create fast ordering clusters and acc fields
         this.sortfields = sortfields;

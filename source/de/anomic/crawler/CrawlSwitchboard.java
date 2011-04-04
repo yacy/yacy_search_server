@@ -87,12 +87,12 @@ public final class CrawlSwitchboard {
         
         final File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         try {
-            this.profilesActiveCrawls = new MapHeap(profilesActiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+            this.profilesActiveCrawls = new MapHeap(profilesActiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
         } catch (IOException e) {
             Log.logException(e);Log.logException(e);
             FileUtils.deletedelete(profilesActiveFile);
             try {
-                this.profilesActiveCrawls = new MapHeap(profilesActiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+                this.profilesActiveCrawls = new MapHeap(profilesActiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
             } catch (IOException e1) {
                 Log.logException(e1);
                 this.profilesActiveCrawls = null;
@@ -107,12 +107,12 @@ public final class CrawlSwitchboard {
         
         final File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
         try {
-            this.profilesPassiveCrawls = new MapHeap(profilesPassiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+            this.profilesPassiveCrawls = new MapHeap(profilesPassiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
         } catch (IOException e) {
             Log.logException(e);Log.logException(e);
             FileUtils.deletedelete(profilesActiveFile);
             try {
-                this.profilesPassiveCrawls = new MapHeap(profilesPassiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+                this.profilesPassiveCrawls = new MapHeap(profilesPassiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
             } catch (IOException e1) {
                 Log.logException(e1);
                 this.profilesPassiveCrawls = null;
@@ -259,7 +259,7 @@ public final class CrawlSwitchboard {
         final File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
         if (pdb.exists()) FileUtils.deletedelete(pdb);
         try {
-            this.profilesActiveCrawls = new MapHeap(pdb, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
+            this.profilesActiveCrawls = new MapHeap(pdb, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
         } catch (IOException e1) {
             Log.logException(e1);
             this.profilesActiveCrawls = null;

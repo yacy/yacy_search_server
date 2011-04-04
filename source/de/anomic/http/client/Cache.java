@@ -79,7 +79,7 @@ public final class Cache {
         // open the response header database
         final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
         try {
-            responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024, 100, '_');
+            responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024, 100, ' ');
         } catch (final IOException e) {
             Log.logException(e);
         }

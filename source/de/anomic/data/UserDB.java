@@ -72,7 +72,7 @@ public final class UserDB {
         FileUtils.deletedelete(userTableFile);
         userTableFile.getParentFile().mkdirs();
         try {
-            userTable = new MapHeap(userTableFile, 256, NaturalOrder.naturalOrder, 1024 * 64, 10, '_');
+            userTable = new MapHeap(userTableFile, 128, NaturalOrder.naturalOrder, 1024 * 64, 10, '_');
         } catch (IOException e) {
             Log.logException(e);
         }
@@ -390,9 +390,10 @@ public final class UserDB {
         
         public long getTimeUsed() {
             long ret = 0L;
-            if (this.mem.containsKey(TIME_USED)) {
+            String s = this.mem.get(TIME_USED);
+            if (s != null && s.length() > 0) {
                 try{
-                    ret = Long.parseLong(this.mem.get(TIME_USED));
+                    ret = Long.parseLong(s);
                 } catch (final NumberFormatException e){
                     Log.logException(e);
                 }
@@ -408,15 +409,16 @@ public final class UserDB {
         
         public long getTimeLimit() {
             long ret = 0L;
-            if (this.mem.containsKey(TIME_LIMIT)) {
+            String s = this.mem.get(TIME_LIMIT);
+            if (s != null && s.length() > 0) {
                 try {
-                    ret =  Long.parseLong(this.mem.get(TIME_LIMIT));
+                    ret =  Long.parseLong(s);
                 } catch (final NumberFormatException e){
                     Log.logException(e);
                 }
             } else {
                 try {
-                    this.setProperty(TIME_LIMIT,"0");
+                    this.setProperty(TIME_LIMIT, "0");
                 } catch (final Exception e) {
                     Log.logException(e);
                 }
@@ -426,15 +428,16 @@ public final class UserDB {
         
         public long getTrafficSize() {
             long ret = 0L;
-            if (this.mem.containsKey(TRAFFIC_SIZE)) {
+            String s = this.mem.get(TRAFFIC_SIZE);
+            if (s != null && s.length() > 0) {
                 try {
-                    ret = Long.parseLong(this.mem.get(TRAFFIC_SIZE));
+                    ret = Long.parseLong(s);
                 } catch (final NumberFormatException e) {
                     Log.logException(e);
                 }
             } else {
                 try {
-                    this.setProperty(TRAFFIC_SIZE,"0");
+                    this.setProperty(TRAFFIC_SIZE, "0");
                 } catch (final Exception e) {
                     Log.logException(e);
                 }

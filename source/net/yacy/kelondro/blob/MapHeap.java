@@ -267,6 +267,17 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
         return key;
     }
+    
+    private byte[] removeFillchar(byte[] key) {
+        if (key == null) return key;
+        int p = key.length - 1;
+        while (p >= 0 && key[p] == fillchar) p--;
+        if (p == key.length - 1) return key;
+        // copy part of key into new byte[]
+        byte[] k = new byte[p + 1];
+        System.arraycopy(key, 0, k, 0, k.length);
+        return k;
+    }
 
     protected Map<String, String> get(byte[] key, final boolean storeCache) throws IOException, RowSpaceExceededException {
         // load map from cache
@@ -324,27 +335,62 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
      */
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         // simple enumeration of key names without special ordering
-        return blob.keys(up, rotating);
+        return new KeyIterator(up, rotating, null, null);
     }
     
     /**
-     * iterate over all keys
+     * return an iteration of the keys in the map
+     * the keys in the map are de-normalized which means that the fill-character is removed
      * @param up
+     * @param rotating
      * @param firstKey
+     * @param secondKey
      * @return
      * @throws IOException
      */
-    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        return keys(up, false, firstKey, null);
-    }
-    
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
-        // simple enumeration of key names without special ordering
-        final CloneableIterator<byte[]> i = blob.keys(up, firstKey);
-        if (rotating) return new RotateIterator<byte[]>(i, secondKey, blob.size());
-        return i;
+        return new KeyIterator(up, rotating, firstKey, secondKey);
     }
 
+    public class KeyIterator implements CloneableIterator<byte[]>, Iterator<byte[]> {
+
+        final boolean up, rotating;
+        final byte[] firstKey, secondKey;
+        Iterator<byte[]> iterator;
+        
+        public KeyIterator(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
+            this.up = up;
+            this.rotating = rotating;
+            this.firstKey = firstKey;
+            this.secondKey = secondKey;
+            final CloneableIterator<byte[]> i = blob.keys(up, firstKey);
+            iterator = (rotating) ? new RotateIterator<byte[]>(i, secondKey, blob.size()) : i;
+        }
+        
+        public byte[] next() {
+            return removeFillchar(iterator.next());
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public void remove() {
+            iterator.remove();
+        }
+
+        @Override
+        public CloneableIterator<byte[]> clone(Object modifier) {
+            try {
+                return new KeyIterator(this.up, this.rotating, this.firstKey, this.secondKey);
+            } catch (IOException e) {
+                return null;
+            }
+        }
+        
+    }
 
     public synchronized MapIterator entries(final boolean up, final boolean rotating) throws IOException {
         return new MapIterator(keys(up, rotating));
@@ -399,11 +445,12 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         }
 
         public Map<String, String> next() {
-            final byte[] nextKey = keyIterator.next();
+            byte[] nextKey = keyIterator.next();
             if (nextKey == null) {
                 finish = true;
                 return null;
             }
+            nextKey = normalizeKey(nextKey); // the key must be normalized because the keyIterator may iterate over not-normalized keys
             try {
                 final Map<String, String> obj = get(nextKey, false);
                 if (obj == null) throw new kelondroException("no more elements available");
