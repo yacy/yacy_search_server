@@ -167,7 +167,8 @@ public class RobotsTxt {
                                 new Date(),
                                 null,
                                 null,
-                                Integer.valueOf(0));
+                                Integer.valueOf(0),
+                                null);
                     } else {
                         robotsTxt4Host.setLoadedDate(new Date());
                     }
@@ -197,7 +198,8 @@ public class RobotsTxt {
                             (Date) result[DOWNLOAD_MODDATE],
                             (String) result[DOWNLOAD_ETAG],
                             parserResult.sitemap(),
-                            parserResult.crawlDelayMillis());
+                            parserResult.crawlDelayMillis(),
+                            parserResult.agentName());
                 }
             }
         }
@@ -213,12 +215,13 @@ public class RobotsTxt {
     		final Date modDate, 
     		final String eTag, 
     		final String sitemap,
-    		final long crawlDelayMillis
+    		final long crawlDelayMillis,
+    		final String agentName
     ) {
         final RobotsEntry entry = new RobotsEntry(
                                 theURL, allowPathList, denyPathList,
                                 loadedDate, modDate,
-                                eTag, sitemap, crawlDelayMillis);
+                                eTag, sitemap, crawlDelayMillis, agentName);
         addEntry(entry);
         return entry;
     }

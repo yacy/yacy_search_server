@@ -174,7 +174,7 @@ public final class robotsParser {
                         final String userAgent = line.substring(pos).trim();
                         isRule4AllAgents |= userAgent.equals("*");
                         for (String agent: this.myNames) {
-                            if (userAgent.toLowerCase().indexOf(agent) >= 0) {
+                            if (userAgent.toLowerCase().equals(agent)) {
                                 this.agentName = agent;
                                 isRule4ThisAgents = true;
                                 break;

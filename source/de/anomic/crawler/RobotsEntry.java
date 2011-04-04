@@ -52,11 +52,12 @@ public class RobotsEntry {
     public static final String SITEMAP            = "sitemap";
     public static final String CRAWL_DELAY        = "crawlDelay";
     public static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
+    public static final String AGENT_NAME         = "agentname";
     
     // this is a simple record structure that holds all properties of a single crawl start
     private final Map<String, byte[]> mem;
     private final List<String> allowPathList, denyPathList;
-    private final String hostName;
+    private final String hostName, agentName;
     
     public RobotsEntry(final String hostName, final Map<String, byte[]> mem) {
         this.hostName = hostName.toLowerCase();
@@ -86,6 +87,7 @@ public class RobotsEntry {
         } else {
             this.allowPathList = new LinkedList<String>();
         }
+        this.agentName = this.mem.containsKey(AGENT_NAME) ? UTF8.String(this.mem.get(AGENT_NAME)) : null;
     }  
     
     public RobotsEntry(
@@ -96,21 +98,24 @@ public class RobotsEntry {
             final Date modDate,
             final String eTag,
             final String sitemap,
-            final long crawlDelayMillis
+            final long crawlDelayMillis,
+            final String agentName
     ) {
         if (theURL == null) throw new IllegalArgumentException("The url is missing");
         
         this.hostName = RobotsTxt.getHostPort(theURL).toLowerCase();
         this.allowPathList = new LinkedList<String>();
         this.denyPathList = new LinkedList<String>();
+        this.agentName = agentName;
         
         this.mem = new LinkedHashMap<String, byte[]>(10);
-        this.mem.put(HOST_NAME, this.hostName.getBytes());
-        if (loadedDate != null) this.mem.put(LOADED_DATE, Long.toString(loadedDate.getTime()).getBytes());
-        if (modDate != null) this.mem.put(MOD_DATE, Long.toString(modDate.getTime()).getBytes());
-        if (eTag != null) this.mem.put(ETAG, eTag.getBytes());
-        if (sitemap != null) this.mem.put(SITEMAP, sitemap.getBytes());
-        if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, Long.toString(crawlDelayMillis).getBytes());
+        this.mem.put(HOST_NAME, UTF8.getBytes(this.hostName));
+        if (loadedDate != null) this.mem.put(LOADED_DATE, UTF8.getBytes(Long.toString(loadedDate.getTime())));
+        if (modDate != null) this.mem.put(MOD_DATE, UTF8.getBytes(Long.toString(modDate.getTime())));
+        if (eTag != null) this.mem.put(ETAG, UTF8.getBytes(eTag));
+        if (sitemap != null) this.mem.put(SITEMAP, UTF8.getBytes(sitemap));
+        if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, UTF8.getBytes(Long.toString(crawlDelayMillis)));
+        if (agentName != null) this.mem.put(AGENT_NAME, UTF8.getBytes(agentName));
         
         if (allowPathList != null && !allowPathList.isEmpty()) {
             this.allowPathList.addAll(allowPathList);
@@ -137,6 +142,10 @@ public class RobotsEntry {
     
     public String getHostName() {
         return this.hostName;
+    }
+    
+    public String getAgentName() {
+        return this.agentName;
     }
     
     public Map<String, byte[]> getMem() {

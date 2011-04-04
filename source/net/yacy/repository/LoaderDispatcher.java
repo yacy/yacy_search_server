@@ -157,16 +157,16 @@ public final class LoaderDispatcher {
             // which may be successful faster because of a cache hit
         }
         
+        this.loaderSteering.put(url, new Semaphore(0));
         try {
-            this.loaderSteering.put(url, new Semaphore(0));
-            Response response = loadInternal(request, cacheStrategy, maxFileSize, checkBlacklist);
-            check = this.loaderSteering.remove(url);
+            Response response = loadInternal(request, cacheStrategy, maxFileSize, checkBlacklist);check = this.loaderSteering.remove(url);
             if (check != null) check.release(1000);
             return response;
-        } catch (Exception e) {
+        } catch (IOException e) {
             // release the semaphore anyway
             check = this.loaderSteering.remove(url);
             if (check != null) check.release(1000);
+            //Log.logException(e);
             throw new IOException(e);
         }
     }

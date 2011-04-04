@@ -193,7 +193,7 @@ public class Latency {
                 robotsEntry = null;
             }
             robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
-            if (robotsEntry != null && robotsDelay == 0) return 0; // no limits if granted exclusively for this peer
+            if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return 0; // no limits if granted exclusively for this peer
         }
         waiting = Math.max(waiting, robotsDelay);
         

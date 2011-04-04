@@ -477,23 +477,26 @@ public class HTTPClient {
     	setProxy(httpUriRequest.getParams());
     	// statistics
     	storeConnectionInfo(httpUriRequest);
-    	try {
-        	// execute the method; some asserts confirm that that the request can be send with Content-Length and is therefore not terminated by EOF
-    	    if (httpUriRequest instanceof HttpEntityEnclosingRequest) {
-    	        HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) httpUriRequest;
-    	        HttpEntity entity = hrequest.getEntity();
-    	        assert entity != null;
-    	        //assert !entity.isChunked();
-    	        //assert entity.getContentLength() >= 0;
-    	        assert !hrequest.expectContinue();
-    	    }
-    	    
-			httpResponse = httpClient.execute(httpUriRequest, httpContext);
-        } catch (Exception e) {
+    	// execute the method; some asserts confirm that that the request can be send with Content-Length and is therefore not terminated by EOF
+	    if (httpUriRequest instanceof HttpEntityEnclosingRequest) {
+	        HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) httpUriRequest;
+	        HttpEntity entity = hrequest.getEntity();
+	        assert entity != null;
+	        //assert !entity.isChunked();
+	        //assert entity.getContentLength() >= 0;
+	        assert !hrequest.expectContinue();
+	    }
+
+	    synchronized (httpClient) {
+	        // without synchronization we get an interruptedException here very often
+            try {
+    			httpResponse = httpClient.execute(httpUriRequest, httpContext);
+            } catch (IOException e) {
                 ConnectionInfo.removeConnection(httpUriRequest.hashCode());
                 httpUriRequest.abort();
                 throw new IOException("Client can't execute: " + e.getMessage());
-        }
+            }
+	    }
     }
     
     private void setHeaders(final HttpUriRequest httpUriRequest) {

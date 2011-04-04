@@ -171,7 +171,7 @@ public final class HTTPLoader {
                 }
             } else if (responseBody == null) {
         	    // no response, reject file
-                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no response body (you may increase the maxmimum file size)");
+                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no response body (code = " + code + ")");
                 throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
         	} else if (code == 200 || code == 203) {
                 // the transfer is ok
