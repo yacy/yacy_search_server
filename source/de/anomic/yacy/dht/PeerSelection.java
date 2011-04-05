@@ -122,8 +122,9 @@ public class PeerSelection {
         while (dhtEnum.hasNext()) {
             seed = dhtEnum.next();
             if (seed == null) continue;
+            if (seed.getFlagAcceptRemoteIndex()) continue;
             if (seed.isLastSeenTimeout(3600000)) continue;
-            if (!seed.getFlagAcceptRemoteIndex()) robinson.add(seed);
+            robinson.add(seed);
         }
 
         // add robinson peers according to robinson burst rate
@@ -150,7 +151,11 @@ public class PeerSelection {
             if (seed.matchPeerTags(wordhashes)) {
                 // peer tags match
                 String specialized = seed.getPeerTags().toString();
-                if (!specialized.equals("[*]")) Log.logInfo("DHT", "selectPeers/PeerTags: " + seed.hash + ":" + seed.getName() + ", is specialized peer for " + specialized);
+                if (specialized.equals("[*]")) {
+                    Log.logInfo("DHT", "selectPeers/RobinsonTag: " + seed.hash + ":" + seed.getName() + " grants search for all");
+                } else {
+                    Log.logInfo("DHT", "selectPeers/RobinsonTag " + seed.hash + ":" + seed.getName() + " is specialized peer for " + specialized);
+                }
                 regularSeeds.put(seed.hash, seed);
             }
         }

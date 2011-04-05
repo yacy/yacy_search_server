@@ -553,7 +553,8 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      * @return true, if the time between the last-seen time and now is greater then the given time-out
      */
     public final boolean isLastSeenTimeout(long milliseconds) {
-        return Math.abs(System.currentTimeMillis() - this.getLastSeenUTC()) > milliseconds;
+        long d = Math.abs(System.currentTimeMillis() - this.getLastSeenUTC());
+        return d > milliseconds;
     }
 
     /** @return the age of the seed in number of days */
