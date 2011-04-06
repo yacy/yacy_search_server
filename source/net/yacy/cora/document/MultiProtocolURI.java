@@ -399,9 +399,9 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         this.host = host;
         this.port = port;
         this.path = path;
-        this.quest = "";
-        this.userInfo = "";
-        this.ref = "";
+        this.quest = null;
+        this.userInfo = null;
+        this.ref = null;
         identRef();
         identQuest();
         escape();
