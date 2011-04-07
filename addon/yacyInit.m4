@@ -270,7 +270,7 @@ ifdef(`ArchLinux', `
 		# dont forget to kill shutdown process if necessary
 		shutdown_pid=$( ps ax | grep $shutdown_pid | awk '{ print $1 }' | grep $shutdown_pid )
 		if [ -n "$shutdown_pid" ] ; then
-			kill -9 $shutdown_pid
+			kill -9 $shutdown_pid &>/dev/null
 		fi
 
 		if [ "$2" != "--leave-pidfile" ]; then

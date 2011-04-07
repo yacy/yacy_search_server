@@ -537,6 +537,7 @@
         <include name="*"/>
       </fileset>
     </copy>
+    <chmod dir="${DESTDIR}/usr/share/yacy/bin/" perm="755" includes="*"/>
 
     <!-- copy documentation -->
     <copy todir="${DESTDIR}/usr/share/doc/yacy">
