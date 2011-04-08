@@ -3,8 +3,9 @@ import java.io.IOException;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.data.YMarkTables;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -29,7 +30,7 @@ public class delete_ymark {
 	        	if(post.containsKey(YMarkTables.BOOKMARKS_ID)) {
 	        		urlHash = post.get(YMarkTables.BOOKMARKS_ID).getBytes();
 	        	} else if(post.containsKey(YMarkTables.BOOKMARK.URL.key())) {
-					urlHash = YMarkTables.getBookmarkId(post.get(YMarkTables.BOOKMARK.URL.key()));
+					urlHash = YMarkUtil.getBookmarkId(post.get(YMarkTables.BOOKMARK.URL.key()));
 	        	} else {
 	        		prop.put("result", "0");
 	        		return prop;

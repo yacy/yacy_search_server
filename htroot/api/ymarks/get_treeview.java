@@ -9,19 +9,17 @@ import java.util.TreeMap;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.UserDB;
-import de.anomic.data.YMarkTables;
-import de.anomic.data.YMarkTables.METADATA;
-import de.anomic.search.Segments;
+import de.anomic.data.ymark.YMarkCrawlStart;
+import de.anomic.data.ymark.YMarkMetadata;
+import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -49,6 +47,8 @@ public class get_treeview {
         	boolean isFolder = true;
         	boolean isBookmark = false;
         	boolean isMetadata = false;
+        	boolean isURLdb = false;
+        	boolean isCrawlStart = false;
         	boolean isWordCount = false;
 
         	if (post != null){
@@ -63,29 +63,37 @@ public class get_treeview {
             		} else if (post.get(ROOT).startsWith("m:")) {
             			isMetadata = true;
             			isFolder = false;
+            		} else if (post.get(ROOT).startsWith("u:")) {
+            			isURLdb = true;
+            			isFolder = false;
             		} else if (post.get(ROOT).startsWith("w:")) {
             			isWordCount = true;
+            			isFolder = false;
+            		} else if (post.get(ROOT).startsWith("c:")) {
+            			isCrawlStart = true;
             			isFolder = false;
             		}
         		}
         	}
         	
         	Iterator<String> it = null;
+        	Iterator<Tables.Row> bit = null;
         	Tables.Row bmk_row = null;
         	int count = 0;
         	
         	if(isFolder) {
 	        	// loop through folderList  	
-	        	try {
-					it = sb.tables.bookmarks.folders.getFolders(bmk_user, root);
+	        	try {					
+	        		// it = sb.tables.bookmarks.folders.getFolders(bmk_user, root);
+	        		it = sb.tables.bookmarks.getFolders(bmk_user, root).iterator();
 				} catch (IOException e) {
 					Log.logException(e);
 				}
-	        	int n = root.split(YMarkTables.FOLDERS_SEPARATOR).length;
+	        	int n = root.split(YMarkUtil.FOLDERS_SEPARATOR).length;
 	        	if (n == 0) n = 1;
 	        	while (it.hasNext()) {    		   		
 	        		String folder = it.next();
-	        		foldername = folder.split(YMarkTables.FOLDERS_SEPARATOR);
+	        		foldername = folder.split(YMarkUtil.FOLDERS_SEPARATOR);
 	        		if (foldername.length == n+1) {
 	        			prop.put("folders_"+count+"_foldername", foldername[n]);
 	    	    		prop.put("folders_"+count+"_expanded", "false");
@@ -99,41 +107,39 @@ public class get_treeview {
 	        	}
 	        	// loop through bookmarkList
 	        	try {
-					it = sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, root).iterator();
-		        	while (it.hasNext()) {
-		        		final String urlHash = it.next();
-		        		bmk_row = sb.tables.select(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user), urlHash.getBytes());
-			        	if(bmk_row != null) {
-			        		final String url = UTF8.String(bmk_row.get(YMarkTables.BOOKMARK.URL.key()));
-			        		final String title = bmk_row.get(YMarkTables.BOOKMARK.TITLE.key(), YMarkTables.BOOKMARK.TITLE.deflt());
-			        			
-			        		// TODO: get_treeview - get rid of bmtype
-			        		if (post.containsKey("bmtype")) {    			 
-			        			if (post.get("bmtype").equals("title")) {
-			        				prop.put("folders_"+count+"_foldername", title);
-			        			} else if (post.get("bmtype").equals("href")) {
-			        				prop.put("folders_"+count+"_foldername", 
-			        						"<a href='"+url+" 'target='_blank'>"+title+"</a>");
-			        			} 
-			        		} else {
-			        				prop.put("folders_"+count+"_foldername", url);
-		        			}
-			        		prop.put("folders_"+count+"_expanded", "false");
-			        		prop.put("folders_"+count+"_url", url);
-			        		prop.put("folders_"+count+"_type", "file");
-			        		prop.put("folders_"+count+"_hash", "b:"+urlHash);
-			        		prop.put("folders_"+count+"_hasChildren", "true");
-			        		prop.put("folders_"+count+"_comma", ",");
-			        		count++;   
-			        	}
-		        	} 
+	        		if(!root.isEmpty()) {
+	        			bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, root);
+			        	while (bit.hasNext()) {
+			        		bmk_row = bit.next();
+			        		if(bmk_row != null) {			        		
+			        			final String url = UTF8.String(bmk_row.get(YMarkTables.BOOKMARK.URL.key()));
+			        			final String title = bmk_row.get(YMarkTables.BOOKMARK.TITLE.key(), YMarkTables.BOOKMARK.TITLE.deflt());
+				        			
+				        		// TODO: get_treeview - get rid of bmtype
+				        		if (post.containsKey("bmtype")) {    			 
+				        			if (post.get("bmtype").equals("title")) {
+				        				prop.putJSON("folders_"+count+"_foldername", title);
+				        			} else if (post.get("bmtype").equals("href")) {
+				        				prop.putJSON("folders_"+count+"_foldername", "<a href='"+url+"' target='_blank'>"+title+"</a>");
+				        			} 
+				        		} else {
+				        				prop.putJSON("folders_"+count+"_foldername", url);
+			        			}
+				        		prop.put("folders_"+count+"_expanded", "false");
+				        		prop.put("folders_"+count+"_url", url);
+				        		prop.put("folders_"+count+"_type", "file");
+				        		prop.put("folders_"+count+"_hash", "b:"+new String(bmk_row.getPK()));
+				        		prop.put("folders_"+count+"_hasChildren", "true");
+				        		prop.put("folders_"+count+"_comma", ",");
+				        		count++;   
+				        	}
+			        	} 
+	        		}
 		        	count--;
 		        	prop.put("folders_"+count+"_comma", "");
 		        	count++;
 		        	prop.put("folders", count);
 				} catch (IOException e) {
-					Log.logException(e);
-				} catch (RowSpaceExceededException e) {
 					Log.logException(e);
 				}
 	        } else if(isBookmark) {
@@ -170,6 +176,16 @@ public class get_treeview {
 			            prop.put("folders_"+count+"_hash", "m:"+url);
 			    		prop.put("folders_"+count+"_hasChildren", "true");
 			            count++;
+			            prop.put("folders_"+count+"_foldername","<small><b>URLdb</b></small>");
+			            putProp(count, "meta");
+			            prop.put("folders_"+count+"_hash", "u:"+url);
+			    		prop.put("folders_"+count+"_hasChildren", "true");
+			            count++;
+			            prop.put("folders_"+count+"_foldername","<small><b>CrawlStart</b></small>");
+			            putProp(count, "meta");
+			            prop.put("folders_"+count+"_hash", "c:"+url);
+			    		prop.put("folders_"+count+"_hasChildren", "true");
+			            count++;
 			            prop.put("folders_"+count+"_foldername","<small><b>WordCounts</b></small>");
 			            putProp(count, "meta");
 			            prop.put("folders_"+count+"_hash", "w:"+url);
@@ -183,46 +199,42 @@ public class get_treeview {
 				} catch (RowSpaceExceededException e) {
 					Log.logException(e);
 				}
-	        } else if (isWordCount || isMetadata) {
+	        } else if (isWordCount || isMetadata || isURLdb || isCrawlStart) {
 	        	try {
-	                final DigestURI u = new DigestURI(post.get(ROOT).substring(2));
-	                Response response = null;
-        			response = sb.loader.load(sb.loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
-        			final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-        			if(document != null) {
-    	        		if(isWordCount)  {
-            				final TreeMap<String,Word> words = YMarkTables.getWordCounts(document);
-        					final ArrayList<String> topwords = new ArrayList<String>(words.descendingKeySet());
-        					for(int i = 0; i < 20 && i < topwords.size(); i++) {
-        						String word = topwords.get(i);
-        						int occur = words.get(word).occurrences();
-        						prop.put("folders_"+count+"_foldername","<small><b>"+word+":</b> [" + occur + "]</small>");
-            					putProp(count, "meta");
-            					count++;
-        					}
-        					count--;
-        					prop.put("folders_"+count+"_comma", "");
+	                final YMarkMetadata meta = new YMarkMetadata(new DigestURI(post.get(ROOT).substring(2)), sb.indexSegments);
+        			meta.loadDocument(sb.loader);
+	        		if(isWordCount)  {
+        				final TreeMap<String,Word> words = meta.getWordCounts();
+    					final ArrayList<String> topwords = new ArrayList<String>(words.descendingKeySet());
+    					for(int i = 0; i < 20 && i < topwords.size(); i++) {
+    						String word = topwords.get(i);
+    						int occur = words.get(word).occurrences();
+    						prop.put("folders_"+count+"_foldername","<small><b>"+word+":</b> [" + occur + "]</small>");
+        					putProp(count, "meta");
         					count++;
-        	        		prop.put("folders", count);
-    	        		} else if(isMetadata) {
-    						EnumMap<METADATA, String> metadata;
-    						metadata = YMarkTables.getMetadata(YMarkTables.getBookmarkId(post.get(ROOT).substring(2)), sb.indexSegments.segment(Segments.Process.PUBLIC));
-    						if (metadata.isEmpty())
-    							metadata = YMarkTables.getMetadata(document);
-    						final Iterator<METADATA> iter = metadata.keySet().iterator();
-    						while (iter.hasNext()) {
-    							final METADATA key = iter.next();
-    							final String value = metadata.get(key);
-    							prop.put("folders_"+count+"_foldername","<small><b>"+key.toString().toLowerCase()+":</b> " + value + "</small>");
-    							putProp(count, "meta");
-    							count++;
-    						}
-    						prop.put("folders_"+count+"_foldername","<small><b>autotag:</b> " + sb.tables.bookmarks.autoTag(document, bmk_user, 5) + "</small>");
-    						putProp(count, "meta");
-    						count++;
-    		        		prop.put("folders", count);
-    	        		}
-        			}
+    					}
+    					count--;
+    					prop.put("folders_"+count+"_comma", "");
+    					count++;
+    	        		prop.put("folders", count);
+	        		} else if(isMetadata) {
+	        			count = putMeta(count, meta.loadMetadata());
+	        		} else if(isURLdb) {
+						count = putMeta(count, meta.getMetadata());
+	        		} else if(isCrawlStart) {
+	        			Log.logInfo("YMark", "I am looking for CrawlStart: "+post.get(ROOT).substring(2));
+	        			final YMarkCrawlStart crawlStart = new YMarkCrawlStart(sb.tables, post.get(ROOT).substring(2));
+	        			final Iterator<String> iter = crawlStart.keySet().iterator();
+	        			String key;
+	        			while(iter.hasNext()) {
+	        				key = iter.next();
+	        				prop.put("folders_"+count+"_foldername","<small><b>"+key.toLowerCase()+":</b> " + crawlStart.get(key) + "</small>");
+	        				putProp(count, "meta");
+	        				count++;
+	        			}
+	        			prop.put("folders", count);
+	        		}
+
 				} catch (MalformedURLException e) {
 					Log.logException(e);
 				} catch (IOException e) {
@@ -244,5 +256,17 @@ public class get_treeview {
 		prop.put("folders_"+count+"_hash", "");
 		prop.put("folders_"+count+"_hasChildren", "false");
 		prop.put("folders_"+count+"_comma", ",");
+	}
+	public static int putMeta(int count, final EnumMap<YMarkMetadata.METADATA, String> metadata) {
+		final Iterator<YMarkMetadata.METADATA> iter = metadata.keySet().iterator();
+		while (iter.hasNext()) {
+			final YMarkMetadata.METADATA key = iter.next();
+			final String value = metadata.get(key);
+			prop.put("folders_"+count+"_foldername","<small><b>"+key.toString().toLowerCase()+":</b> " + value + "</small>");
+			putProp(count, "meta");
+			count++;
+		}
+		prop.put("folders", count);
+		return count;
 	}
 }

@@ -1,4 +1,4 @@
-// Work.java
+// WorkTables.java
 // (C) 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 04.02.2010 on http://yacy.net
 //
@@ -47,6 +47,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.IndexCell;
+import de.anomic.data.ymark.YMarkTables;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 
@@ -85,12 +86,6 @@ public class WorkTables extends Tables {
     public WorkTables(final File workPath) {
         super(workPath, 12);
         this.bookmarks = new YMarkTables(this);
-    }
-    
-    @Override
-    public void clear(final String tablename) throws IOException {
-    	super.clear(tablename);
-    	this.bookmarks.clearIndex(tablename);
     }
     
     /**

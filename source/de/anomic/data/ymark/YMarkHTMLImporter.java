@@ -1,4 +1,30 @@
-package de.anomic.data;
+// YMarkHTMLImporter.java
+// (C) 2011 by Stefan Förster, sof@gmx.de, Norderstedt, Germany
+// first published 2010 on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
+// LICENSE
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+package de.anomic.data.ymark;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +40,7 @@ import javax.swing.text.html.parser.ParserDelegator;
 
 import net.yacy.kelondro.logging.Log;
 
-public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements Runnable {
+public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements Runnable {
     
     public static enum STATE {
     	NOTHING,
@@ -35,7 +61,7 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 	private final BlockingQueue<HashMap<String,String>> bookmarks;
 	private final ParserDelegator htmlParser;
 	
-	public YMarksHTMLImporter(final InputStream input, int queueSize) {		
+	public YMarkHTMLImporter(final InputStream input, int queueSize) {		
 		this.state = STATE.NOTHING;
 		this.prevTag = null;
 		this.bmk = new HashMap<String,String>();
@@ -76,7 +102,7 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 				this.bmk.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.deflt());
 				break;
     		case FOLDER:
-    			this.folder.append(YMarkTables.FOLDERS_SEPARATOR);
+    			this.folder.append(YMarkUtil.FOLDERS_SEPARATOR);
     			this.folder.append(data);
     			break;
     		case FOLDER_DESC:
@@ -109,7 +135,7 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 	    			switch(bmk) {	    					
 	    				case TAGS:
 	    					// mozilla shortcuturl
-	    					this.bmk.put(bmk.key(), YMarkTables.cleanTagsString(s));
+	    					this.bmk.put(bmk.key(), YMarkUtil.cleanTagsString(s));
 	    	    			break;
 	    				case DATE_ADDED:
 	    				case DATE_MODIFIED:
@@ -138,7 +164,7 @@ public class YMarksHTMLImporter extends HTMLEditorKit.ParserCallback implements 
 	    } else if (t == HTML.Tag.DL) {
             //TODO: get rid of .toString.equals()
         	if(!this.folder.toString().equals(YMarkTables.FOLDERS_IMPORTED)) {
-	    		folder.setLength(folder.lastIndexOf(YMarkTables.FOLDERS_SEPARATOR));
+	    		folder.setLength(folder.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
         	}
 	    } else {
 	    	state = STATE.NOTHING;

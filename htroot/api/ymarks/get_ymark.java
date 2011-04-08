@@ -1,14 +1,13 @@
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.TreeSet;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.data.YMarkTables;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -28,22 +27,21 @@ public class get_ymark {
         final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
         final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
-    	final TreeSet<String> bookmarks = new TreeSet<String>();
+    	Iterator<Tables.Row> bookmarks = null;
         
         if(isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
         	
 	    	if(post.containsKey(YMarkTables.BOOKMARK.TAGS.key())) {
 	    		tags = true;
-	    		final String[] tagArray = YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkTables.TAGS_SEPARATOR);
+	    		final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR);
 	    		try {
-					bookmarks.addAll(sb.tables.bookmarks.tags.getBookmarkIds(bmk_user, tagArray));
+	    			bookmarks = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
 				} catch (IOException e) {
-					Log.logException(e);
-				} catch (RowSpaceExceededException e) {
 					Log.logException(e);
 				}
 	    	}
+	    	/*
 	    	if(post.containsKey(YMarkTables.BOOKMARK.FOLDERS.key())) {
 	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key())).split(YMarkTables.TAGS_SEPARATOR);
                 try {                	
@@ -57,7 +55,8 @@ public class get_ymark {
 					Log.logException(e);
 				}
 	    	}
-	    	putBookmarks(bookmarks, YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user));
+	    	*/
+	    	putBookmarks(bookmarks);
 	    	
         } else {
         	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
@@ -66,25 +65,16 @@ public class get_ymark {
         return prop;
 	}
 	
-	private static void putBookmarks(final TreeSet<String> urlSet, final String bmk_table) {
-		final Iterator<String>urlIter = urlSet.iterator();
+	private static void putBookmarks(final Iterator<Tables.Row> bit) {		
 		int count = 0;
-		while(urlIter.hasNext()) {
-			final byte[] urlHash = urlIter.next().getBytes();
-			Tables.Row bmk_row = null;
-            try {
-				bmk_row = sb.tables.select(bmk_table, urlHash);
-	            if (bmk_row != null) {
-            		prop.putXML("bookmarks_"+count+"_id", UTF8.String(urlHash));
-	            	for (YMarkTables.BOOKMARK bmk : YMarkTables.BOOKMARK.values()) {
-	            		prop.putXML("bookmarks_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()));
-	            	}
-		            count++;
-	            }
-			} catch (IOException e) {
-                Log.logException(e);
-			} catch (RowSpaceExceededException e) {
-                Log.logException(e);
+		while(bit.hasNext()) {
+			Tables.Row bmk_row = bit.next();
+            if (bmk_row != null) {
+				prop.putXML("bookmarks_"+count+"_id", UTF8.String(bmk_row.getPK()));
+				for (YMarkTables.BOOKMARK bmk : YMarkTables.BOOKMARK.values()) {
+					prop.putXML("bookmarks_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()));
+				}
+			    count++;
 			}
 		}
 		prop.put("bookmarks", count);

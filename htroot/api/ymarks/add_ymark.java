@@ -4,8 +4,9 @@ import java.util.HashMap;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.data.YMarkTables;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -39,8 +40,8 @@ public class add_ymark {
             data.put(YMarkTables.BOOKMARK.TITLE.key(), post.get(YMarkTables.BOOKMARK.TITLE.key(),YMarkTables.BOOKMARK.TITLE.deflt()));
             data.put(YMarkTables.BOOKMARK.DESC.key(), post.get(YMarkTables.BOOKMARK.DESC.key(),YMarkTables.BOOKMARK.DESC.deflt()));
             data.put(YMarkTables.BOOKMARK.PUBLIC.key(), post.get(YMarkTables.BOOKMARK.PUBLIC.key(),YMarkTables.BOOKMARK.PUBLIC.deflt()));
-            data.put(YMarkTables.BOOKMARK.TAGS.key(), YMarkTables.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt())));
-            data.put(YMarkTables.BOOKMARK.FOLDERS.key(), YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.FOLDERS_UNSORTED)));
+            data.put(YMarkTables.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt())));
+            data.put(YMarkTables.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.FOLDERS_UNSORTED)));
             
             try {
 				sb.tables.bookmarks.addBookmark(bmk_user, data, false);

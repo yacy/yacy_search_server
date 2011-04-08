@@ -1,4 +1,30 @@
-package de.anomic.data;
+// YMarkXBELImporter.java
+// (C) 2011 by Stefan Förster, sof@gmx.de, Norderstedt, Germany
+// first published 2010 on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
+// LICENSE
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+package de.anomic.data.ymark;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,7 +43,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-public class YMarksXBELImporter extends DefaultHandler implements Runnable {
+public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 
 	public static enum XBEL {
 		NOTHING			(""),
@@ -76,7 +102,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 	private final XMLReader xmlReader;
 	private final String RootFolder;
     
-    public YMarksXBELImporter (final InputStream input, int queueSize, String root) throws SAXException {
+    public YMarkXBELImporter (final InputStream input, int queueSize, String root) throws SAXException {
         this.bmk = 				null;
         this.RootFolder =		root;
         
@@ -126,30 +152,30 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
     }
     
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
-        String date;
+        YMarkDate date = new YMarkDate();
         if (tag == null) return;
         tag = tag.toLowerCase();              
         if (XBEL.BOOKMARK.tag().equals(tag)) {
             this.bmk = new HashMap<String,String>();            
             this.bmk.put(YMarkTables.BOOKMARK.URL.key(), atts.getValue(uri, YMarkTables.BOOKMARK.URL.xbel_attrb()));
             try {
-				date = String.valueOf(YMarkTables.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_ADDED.xbel_attrb())).getTime());
+				date.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_ADDED.xbel_attrb()));
 			} catch (ParseException e) {
-				date = String.valueOf(System.currentTimeMillis());
+				// TODO: exception handling
 			}
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), date);
+            this.bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), date.toString());
             try {
-				date = String.valueOf(YMarkTables.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_VISITED.xbel_attrb())).getTime());
+				date.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_VISITED.xbel_attrb()));
             } catch (ParseException e) {
-            	date = YMarkTables.BOOKMARK.DATE_VISITED.deflt();
+            	// TODO: exception handling
             }
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_VISITED.key(), date);
+            this.bmk.put(YMarkTables.BOOKMARK.DATE_VISITED.key(), date.toString());
             try {
-				date = String.valueOf(YMarkTables.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_MODIFIED.xbel_attrb())).getTime());
+				date.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_MODIFIED.xbel_attrb()));
 			} catch (ParseException e) {
-				date = String.valueOf(System.currentTimeMillis());
+				// TODO: exception handling
 			}
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date);
+            this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date.toString());
             UpdateBmkRef(atts.getValue(uri, "id"), true);
             outer_state = XBEL.BOOKMARK;
             inner_state = XBEL.NOTHING;
@@ -201,7 +227,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
         	// go up one folder
             //TODO: get rid of .toString.equals()
         	if(!this.folder.toString().equals(this.RootFolder)) {
-        		folder.setLength(folder.lastIndexOf(YMarkTables.FOLDERS_SEPARATOR));
+        		folder.setLength(folder.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
         	}
         	this.outer_state = XBEL.FOLDER;
         } else if (XBEL.INFO.tag().equals(tag)) {
@@ -213,15 +239,15 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 
     public void characters(final char ch[], final int start, final int length) {
         if (parse_value) {
-        	buffer.append(ch, start, length);
-            switch(outer_state) {
+        	buffer.append(ch, start, length);      	
+        	switch(outer_state) {
             	case BOOKMARK:
             		switch(inner_state) {
-            			case DESC:
-            				this.bmk.put(YMarkTables.BOOKMARK.DESC.key(), this.buffer.toString());
+            			case DESC:            				
+            				this.bmk.put(YMarkTables.BOOKMARK.DESC.key(), buffer.toString());
             				break;
             			case TITLE:
-            				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), this.buffer.toString());
+            				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), buffer.toString());
             				break;
         				case METADATA:	
         					// TODO: handle xbel bookmark metadata
@@ -235,7 +261,7 @@ public class YMarksXBELImporter extends DefaultHandler implements Runnable {
 	        			case DESC:
 	        				break;
 	        			case TITLE:
-	        				this.folder.append(YMarkTables.FOLDERS_SEPARATOR);
+	        				this.folder.append(YMarkUtil.FOLDERS_SEPARATOR);
 	        				this.folder.append(this.buffer);
 	        				break;
 	        			case METADATA:

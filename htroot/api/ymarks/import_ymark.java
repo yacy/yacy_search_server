@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.document.Document;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -12,12 +11,11 @@ import net.yacy.kelondro.logging.Log;
 
 import org.xml.sax.SAXException;
 
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.UserDB;
-import de.anomic.data.YMarkTables;
-import de.anomic.data.YMarksHTMLImporter;
-import de.anomic.data.YMarksXBELImporter;
+import de.anomic.data.ymark.YMarkHTMLImporter;
+import de.anomic.data.ymark.YMarkMetadata;
+import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkXBELImporter;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -44,7 +42,7 @@ public class import_ymark {
         	if(post.containsKey("bmkfile") && post.containsKey("importer")){
         		byteIn = new ByteArrayInputStream(UTF8.getBytes(post.get("bmkfile$file")));
         		if(post.get("importer").equals("html") && byteIn != null) {
-					final YMarksHTMLImporter htmlImporter = new YMarksHTMLImporter(byteIn, 100);
+					final YMarkHTMLImporter htmlImporter = new YMarkHTMLImporter(byteIn, 10);
 		            t = new Thread(htmlImporter, "YMarks - HTML Importer");
 		            t.start();
 		            while ((bmk = htmlImporter.take()) != YMarkTables.POISON) {
@@ -52,10 +50,10 @@ public class import_ymark {
 		            }
             		prop.put("result", "1");        			
         		} else if(post.get("importer").equals("xbel") && byteIn != null) {
-        			final YMarksXBELImporter xbelImporter;	
+        			final YMarkXBELImporter xbelImporter;	
     				try {
 						//TODO: make RootFold 
-    					xbelImporter = new YMarksXBELImporter(byteIn, 100, YMarkTables.FOLDERS_IMPORTED);
+    					xbelImporter = new YMarkXBELImporter(byteIn, 100, YMarkTables.FOLDERS_IMPORTED);
 					} catch (SAXException e) {
 						//TODO: display an error message
 						Log.logException(e);
@@ -84,12 +82,9 @@ public class import_ymark {
 	public static void putBookmark(final Switchboard sb, final String bmk_user, final HashMap<String, String> bmk) {
 		try {
 			if(!bmk.containsKey(YMarkTables.BOOKMARK.TAGS.key()) || bmk.get(YMarkTables.BOOKMARK.TAGS.key()).equals(YMarkTables.BOOKMARK.TAGS.deflt())) {
-	            final DigestURI u = new DigestURI(bmk.get(YMarkTables.BOOKMARK.URL.key()));
-	            Response response = sb.loader.load(sb.loader.request(u, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
-				final Document document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-				if(document != null) {
-					bmk.put(YMarkTables.BOOKMARK.TAGS.key(), sb.tables.bookmarks.autoTag(document, bmk_user, 3));
-				}
+	            final YMarkMetadata meta = new YMarkMetadata(new DigestURI(bmk.get(YMarkTables.BOOKMARK.URL.key())));
+	            meta.loadDocument(sb.loader);
+				bmk.put(YMarkTables.BOOKMARK.TAGS.key(), meta.autoTag(3));
 			}
 			sb.tables.bookmarks.addBookmark(bmk_user, bmk, true);
 		} catch (IOException e) {

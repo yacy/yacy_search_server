@@ -11,7 +11,8 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import de.anomic.data.YMarkTables;
+import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -59,6 +60,7 @@ public class Table_YMark_p {
         count = 0;
         byte[] key;
         String name;
+        /*
         try {
 			Iterator<byte[]> iter = sb.tables.keys(YMarkTables.TABLES.TAGS.tablename(bmk_user));
 			while(iter.hasNext()) {
@@ -86,6 +88,7 @@ public class Table_YMark_p {
 		} catch (RowSpaceExceededException e) {
             Log.logException(e);
 		}
+		*/
 		
         final String counts = post.get("count", null);
         int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : post.getInt("count", 10);
@@ -132,13 +135,16 @@ public class Table_YMark_p {
             Log.logException(e);
         }
         
+        
         // apply rebuildIndex request
+        /*
         if (!post.get("rebuildindex", "").isEmpty()) try {
             sb.tables.bookmarks.folders.rebuildIndex(bmk_user);
             sb.tables.bookmarks.tags.rebuildIndex(bmk_user);
         }  catch (IOException e) {
             Log.logException(e);
         }
+        */
         
         if (!post.get("deleterows", "").isEmpty()) {
             for (final Map.Entry<String, String> entry: post.entrySet()) {
@@ -234,9 +240,12 @@ public class Table_YMark_p {
                 try {
                     Iterator<Tables.Row> mapIterator;
                     if (post.containsKey("folders") && !post.get("folders").isEmpty()) {
-                        mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.folders.getBookmarks(bmk_user, post.get("folders")), maxcount).iterator();
+                        // mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.folders.getBookmarks(bmk_user, post.get("folders")), maxcount).iterator();
+                    	mapIterator = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, post.get("folders"));
                     } else if(post.containsKey("tags") && !post.get("tags").isEmpty()) {
-                    	mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.tags.getBookmarks(bmk_user, post.get("tags")), maxcount).iterator();
+                    	// mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.tags.getBookmarks(bmk_user, post.get("tags")), maxcount).iterator();
+                    	final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR); 
+                    	mapIterator = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
                     } else {
                     	mapIterator = sb.tables.orderByPK(sb.tables.iterator(table, matcher), maxcount).iterator();
                     }
@@ -261,9 +270,7 @@ public class Table_YMark_p {
                     }
                 } catch (IOException e) {
                     Log.logException(e);
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-				}
+                }
                 prop.put("showtable_list", count);
                 prop.put("showtable_num", count);
             }
