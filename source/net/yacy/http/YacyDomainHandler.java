@@ -26,6 +26,8 @@
 package net.yacy.http;
 
 import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -82,8 +84,28 @@ public class YacyDomainHandler extends AbstractHandler implements Handler {
 			return newServerName;
 		}
 		
+		@Override
 		public int getServerPort() {
 			return newServerPort;
+		}
+		
+		@Override
+		public String getHeader(String name) {
+			if(name.equals("Host")) {
+				return newServerName + (newServerPort!=80 ? ":"+newServerPort : "");
+			}
+			return super.getHeader(name);
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public Enumeration<String> getHeaders(String name) {
+			if(name.equals("Host")) {
+				Vector<String> header = new Vector<String>();
+				header.add(newServerName + (newServerPort!=80 ? ":"+newServerPort : ""));
+				return header.elements();
+			}
+			return super.getHeaders(name);
 		}
 		
 	}

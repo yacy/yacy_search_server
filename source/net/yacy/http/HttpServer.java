@@ -74,7 +74,7 @@ public class HttpServer {
 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]
-                {	domainHandler, new RewriteHandler(),
+                {	domainHandler, new ProxyHandler(), new RewriteHandler(),
         			new SSIHandler(new TemplateHandler()),
         			resource_handler, new DefaultHandler() });
         
