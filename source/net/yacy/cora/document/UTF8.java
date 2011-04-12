@@ -71,6 +71,83 @@ public class UTF8 {
         return new String(bytes, offset, length, charset);
     }
     
+    /**
+     * getBytes() as method for String synchronizes during the look-up for the
+     * Charset object for the default charset as given with a default charset name.
+     * This is the normal process:
+    
+    public byte[] getBytes() {
+    return StringCoding.encode(value, offset, count);
+    }
+    
+    static byte[] encode(char[] ca, int off, int len) {
+    String csn = Charset.defaultCharset().name();
+    try {
+        return encode(csn, ca, off, len);
+        ...
+    
+    static byte[] encode(String charsetName, char[] ca, int off, int len)
+    throws UnsupportedEncodingException
+    {
+    StringEncoder se = (StringEncoder)deref(encoder);
+    String csn = (charsetName == null) ? "ISO-8859-1" : charsetName;
+    if ((se == null) || !(csn.equals(se.requestedCharsetName())
+                  || csn.equals(se.charsetName()))) {
+        se = null;
+        try {
+        Charset cs = lookupCharset(csn);
+        ....
+    
+    private static Charset lookupCharset(String csn) {
+    if (Charset.isSupported(csn)) {
+        try {
+        return Charset.forName(csn);
+        ....
+    
+    public static Charset forName(String charsetName) {
+    Charset cs = lookup(charsetName);
+    ....
+    
+    private static Charset lookup(String charsetName) {
+    if (charsetName == null)
+        throw new IllegalArgumentException("Null charset name");
+
+    Object[] a;
+    if ((a = cache1) != null && charsetName.equals(a[0]))
+        return (Charset)a[1];
+    // We expect most programs to use one Charset repeatedly.
+    // We convey a hint to this effect to the VM by putting the
+    // level 1 cache miss code in a separate method.
+    return lookup2(charsetName);
+    }
+
+    private static Charset lookup2(String charsetName) {
+    Object[] a;
+    if ((a = cache2) != null && charsetName.equals(a[0])) {
+        cache2 = cache1;
+        cache1 = a;
+        return (Charset)a[1];
+    }
+
+    Charset cs;
+    if ((cs = standardProvider.charsetForName(charsetName)) != null ||
+        (cs = lookupExtendedCharset(charsetName))           != null ||
+        (cs = lookupViaProviders(charsetName))              != null)
+    {
+        cache(charsetName, cs);
+        ....
+        
+    At this point the getBytes() call synchronizes at one of the methods
+    standardProvider.charsetForName
+    lookupExtendedCharset
+    lookupViaProviders
+
+     * with our call using a given charset object, the call is much easier to perform
+     * and it omits the synchronization for the charset lookup.
+     *
+     * @param s
+     * @return
+     */
     public final static byte[] getBytes(final String s) {
         if (s == null) return null;
         return s.getBytes(charset);

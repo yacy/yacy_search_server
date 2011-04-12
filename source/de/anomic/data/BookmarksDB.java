@@ -132,7 +132,7 @@ public class BookmarksDB {
     // adding a bookmark to the bookmarksDB
     public void saveBookmark(final Bookmark bookmark){
     	try {
-            bookmarks.insert(bookmark.getUrlHash().getBytes(), bookmark.entry);
+            bookmarks.insert(UTF8.getBytes(bookmark.getUrlHash()), bookmark.entry);
         } catch (final Exception e) {
             Log.logException(e);
         }
@@ -145,7 +145,7 @@ public class BookmarksDB {
     
     public Bookmark getBookmark(final String urlHash){
         try {
-            final Map<String, String> map = bookmarks.get(urlHash.getBytes());
+            final Map<String, String> map = bookmarks.get(UTF8.getBytes(urlHash));
             return (map == null) ? null : new Bookmark(map);
         } catch (final IOException e) {
             Log.logException(e);
@@ -172,7 +172,7 @@ public class BookmarksDB {
         Bookmark b;
         try {
             b = getBookmark(urlHash);
-            bookmarks.delete(urlHash.getBytes());
+            bookmarks.delete(UTF8.getBytes(urlHash));
         } catch (final IOException e) {
             b = null;
         }

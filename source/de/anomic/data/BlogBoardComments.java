@@ -116,7 +116,7 @@ public class BlogBoardComments {
     public String write(final CommentEntry page) {
         // writes a new page and returns key
     	try {
-    	    database.insert(page.key.getBytes(), page.record);
+    	    database.insert(UTF8.getBytes(page.key), page.record);
     	    return page.key;
     	} catch (final Exception e) {
     	    Log.logException(e);
@@ -133,7 +133,7 @@ public class BlogBoardComments {
         copyOfKey = copyOfKey.substring(0, Math.min(copyOfKey.length(), KEY_LENGTH));
         Map<String, String> record;
         try {
-            record = base.get(copyOfKey.getBytes());
+            record = base.get(UTF8.getBytes(copyOfKey));
         } catch (final IOException e) {
             Log.logException(e);
             record = null;
@@ -142,7 +142,7 @@ public class BlogBoardComments {
             record = null;
         }
         return (record == null) ?
-            newEntry(copyOfKey, new byte[0], "anonymous".getBytes(), "127.0.0.1", new Date(), new byte[0]) :
+            newEntry(copyOfKey, new byte[0], UTF8.getBytes("anonymous"), "127.0.0.1", new Date(), new byte[0]) :
             new CommentEntry(copyOfKey, record);
     }
 
@@ -151,7 +151,7 @@ public class BlogBoardComments {
     	final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     	try {
             final DocumentBuilder builder = factory.newDocumentBuilder();
-            final Document doc = builder.parse(new ByteArrayInputStream(input.getBytes()));
+            final Document doc = builder.parse(new ByteArrayInputStream(UTF8.getBytes(input)));
             ret = parseXMLimport(doc);
         }
         catch (final ParserConfigurationException e) {}
@@ -219,7 +219,7 @@ public class BlogBoardComments {
 
     public void delete(final String key) {
     	try {
-            database.delete(normalize(key).getBytes());
+            database.delete(UTF8.getBytes(normalize(key)));
         }
         catch (final IOException e) { }
     }

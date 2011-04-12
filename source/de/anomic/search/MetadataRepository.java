@@ -213,7 +213,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
 
         public kiter(final boolean up, final String firstHash) throws IOException {
             this.up = up;
-            this.iter = urlIndexFile.rows(up, (firstHash == null) ? null : firstHash.getBytes());
+            this.iter = urlIndexFile.rows(up, (firstHash == null) ? null : UTF8.getBytes(firstHash));
             this.error = false;
         }
 
@@ -274,7 +274,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             final Iterator<String> eiter2 = damagedURLS.iterator();
             byte[] urlHashBytes;
             while (eiter2.hasNext()) {
-                urlHashBytes = eiter2.next().getBytes();
+                urlHashBytes = UTF8.getBytes(eiter2.next());
 
                 // trying to fix the invalid URL
                 String oldUrlStr = null;
@@ -293,7 +293,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
 
                         if (client.HEADResponse(newUrl.toString()) != null
                         		&& client.getHttpResponse().getStatusLine().getStatusCode() == 200) {
-                            entry.setCol(1, newUrl.toString().getBytes());
+                            entry.setCol(1, UTF8.getBytes(newUrl.toString()));
                             urlIndexFile.put(entry);
                             if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + UTF8.String(urlHashBytes) + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
@@ -585,7 +585,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         TreeSet<String> set = new TreeSet<String>();
         for (hashStat hs: map.values()) {
             if (hs == null) continue;
-            urlref = this.load(hs.urlhash.getBytes(), null, 0);
+            urlref = this.load(UTF8.getBytes(hs.urlhash), null, 0);
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
             set.add(urlref.metadata().url().getHost());
             count--;
@@ -619,7 +619,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;
-            urlref = this.load(urlhash.getBytes(), null, 0);
+            urlref = this.load(UTF8.getBytes(urlhash), null, 0);
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
             if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
             comps = urlref.metadata();
@@ -675,7 +675,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         // then delete the urls using this list
         int cnt = 0;
         for (String h: l) {
-            if (urlIndexFile.delete(h.getBytes())) cnt++;
+            if (urlIndexFile.delete(UTF8.getBytes(h))) cnt++;
         }
         
         // finally remove the line with statistics

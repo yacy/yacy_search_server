@@ -401,9 +401,9 @@ public final class TemplateEngine {
                             if (br != null) try { br.close(); br=null; } catch (final Exception e) {}
                         }
                         final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
-                        structure.append("<fileinclude file=\"".getBytes()).append(filename).append(">\n".getBytes());
+                        structure.append(UTF8.getBytes("<fileinclude file=\"")).append(filename).append(UTF8.getBytes(">\n"));
                         structure.append(writeTemplate(pis2, out, pattern, dflt, prefix));
-                        structure.append("</fileinclude>\n".getBytes());
+                        structure.append(UTF8.getBytes("</fileinclude>\n"));
                     }
                 }
                 
@@ -450,7 +450,7 @@ public final class TemplateEngine {
 
     private final static byte[] newPrefix(final byte[] oldPrefix, final byte[] multi_key, final int i) {
         final ByteBuffer newPrefix = new ByteBuffer(oldPrefix.length + multi_key.length + 8);
-        newPrefix.append(oldPrefix).append(multi_key).append(ul).append(Integer.toString(i).getBytes()).append(ul);
+        newPrefix.append(oldPrefix).append(multi_key).append(ul).append(UTF8.getBytes(Integer.toString(i))).append(ul);
         try {
             newPrefix.close();
         } catch (IOException e) {

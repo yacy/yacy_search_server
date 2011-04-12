@@ -1045,7 +1045,7 @@ public final class Switchboard extends serverSwitch {
             return network.indexOf(peer) >= 0;
         } else if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
             // check if we got the request from a peer in the public cluster
-            return this.clusterhashes.containsKey(peer.getBytes());
+            return this.clusterhashes.containsKey(UTF8.getBytes(peer));
         } else {
             return false;
         }
@@ -1063,7 +1063,7 @@ public final class Switchboard extends serverSwitch {
             return network.indexOf(seed.getPublicAddress()) >= 0;
         } else if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
             // check if we got the request from a peer in the public cluster
-            return this.clusterhashes.containsKey(seed.hash.getBytes());
+            return this.clusterhashes.containsKey(UTF8.getBytes(seed.hash));
         } else {
             return false;
         }
@@ -1363,7 +1363,7 @@ public final class Switchboard extends serverSwitch {
             // create a queue entry
             Document document = surrogate.document();
             Request request = new Request(
-                    peers.mySeed().hash.getBytes(), 
+                    UTF8.getBytes(peers.mySeed().hash), 
                     surrogate.getIdentifier(true), 
                     null, 
                     "", 
@@ -1525,7 +1525,7 @@ public final class Switchboard extends serverSwitch {
                                 Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
                         insert = true;
                     }
-                    if (insert) crawler.putActive(selentry.handle().getBytes(), selentry);
+                    if (insert) crawler.putActive(UTF8.getBytes(selentry.handle()), selentry);
                 }
             } catch (final Exception e) {
                 Log.logException(e);
@@ -1550,7 +1550,7 @@ public final class Switchboard extends serverSwitch {
                 Log.logException(e);
             }
             for (final String pk: pks) try {
-                row = this.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
+                row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
                 WorkTables.calculateAPIScheduler(row, true); // calculate next update time  
                 this.tables.update(WorkTables.TABLE_API_NAME, row);
             } catch (IOException e) {
@@ -1976,7 +1976,7 @@ public final class Switchboard extends serverSwitch {
                     condenser,
                     searchEvent,
                     sourceName);
-            yacyChannel.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
+            yacyChannel.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), UTF8.getBytes(peers.mySeed().hash)) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase + ", error = " + e.getMessage());
@@ -1987,8 +1987,8 @@ public final class Switchboard extends serverSwitch {
         for (final Map.Entry<MultiProtocolURI, String> rssEntry : document.getRSS().entrySet()) {
             final Tables.Data rssRow = new Tables.Data();
             rssRow.put("referrer", queueEntry.url().hash());
-            rssRow.put("url", rssEntry.getKey().toNormalform(true, false).getBytes());
-            rssRow.put("title", rssEntry.getValue().getBytes());
+            rssRow.put("url", UTF8.getBytes(rssEntry.getKey().toNormalform(true, false)));
+            rssRow.put("title", UTF8.getBytes(rssEntry.getValue()));
             rssRow.put("recording_date", new Date());
             try {
                 this.tables.update("rss", new DigestURI(rssEntry.getKey()).hash(), rssRow);
@@ -2001,7 +2001,7 @@ public final class Switchboard extends serverSwitch {
         ResultURLs.stack(
                 newEntry,                            // loaded url db entry
                 queueEntry.initiator(),              // initiator peer hash
-                this.peers.mySeed().hash.getBytes(), // executor peer hash
+                UTF8.getBytes(this.peers.mySeed().hash), // executor peer hash
                 processCase                          // process case
         );
         
@@ -2079,7 +2079,7 @@ public final class Switchboard extends serverSwitch {
         }
         if (indexSegments.segment(process).urlMetadata.exists(url.hash())) return; // don't do double-work
         final Request request = loader.request(url, true, true);
-        final CrawlProfile profile = sb.crawler.getActive(request.profileHandle().getBytes());
+        final CrawlProfile profile = sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
         String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
         if (acceptedError != null) {
             log.logWarning("addToIndex: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);

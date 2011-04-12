@@ -201,7 +201,7 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                nextQueue.errorURL.push(entry, peers.mySeed().hash.getBytes(), new Date(), 1, rejectReason);
+                nextQueue.errorURL.push(entry, UTF8.getBytes(peers.mySeed().hash), new Date(), 1, rejectReason);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
@@ -327,7 +327,7 @@ public final class CrawlStacker {
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
        
-        final CrawlProfile profile = crawler.getActive(entry.profileHandle().getBytes());
+        final CrawlProfile profile = crawler.getActive(UTF8.getBytes(entry.profileHandle()));
         String error;
         if (profile == null) {
             error = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
@@ -339,7 +339,7 @@ public final class CrawlStacker {
         if (error != null) return error;
         
         // store information
-        final boolean local = Base64Order.enhancedCoder.equal(entry.initiator(), peers.mySeed().hash.getBytes());
+        final boolean local = Base64Order.enhancedCoder.equal(entry.initiator(), UTF8.getBytes(peers.mySeed().hash));
         final boolean proxy = (entry.initiator() == null || entry.initiator().length == 0 || UTF8.String(entry.initiator()).equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
         final boolean remote = profile.handle().equals(crawler.defaultRemoteProfile.handle());
         final boolean global =

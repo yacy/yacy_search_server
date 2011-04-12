@@ -437,7 +437,7 @@ public final class yacyClient {
         final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
         for (int i = 0; i < words; i++) {
             try {
-                container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes(), count);
+                container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, UTF8.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)), count);
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
                 return -1;
@@ -479,7 +479,7 @@ public final class yacyClient {
             // passed all checks, store url
             try {
                 indexSegment.urlMetadata().store(urlEntry);
-                ResultURLs.stack(urlEntry, mySeed.hash.getBytes(), target.hash.getBytes(), EventOrigin.QUERIES);
+                ResultURLs.stack(urlEntry, mySeed.hash.getBytes(), UTF8.getBytes(target.hash), EventOrigin.QUERIES);
             } catch (final IOException e) {
                 yacyCore.log.logWarning("could not store search result", e);
                 continue; // db-error
@@ -672,10 +672,10 @@ public final class yacyClient {
             indexabstract = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
             for (Map.Entry<String, String> entry: resultMap.entrySet()) {
                 if (entry.getKey().startsWith("indexcount.")) {
-                    indexcount.put(entry.getKey().substring(11).getBytes(), Integer.parseInt(entry.getValue()));
+                    indexcount.put(UTF8.getBytes(entry.getKey().substring(11)), Integer.parseInt(entry.getValue()));
                 }
                 if (entry.getKey().startsWith("indexabstract.")) {
-                    indexabstract.put(entry.getKey().substring(14).getBytes(), entry.getValue());
+                    indexabstract.put(UTF8.getBytes(entry.getKey().substring(14)), entry.getValue());
                 }
             }
             references = resultMap.get("references").split(",");
@@ -862,7 +862,7 @@ public final class yacyClient {
         // extract the urlCache from the result
         final URIMetadataRow[] urls = new URIMetadataRow[uhs.length];
         for (int i = 0; i < uhs.length; i++) {
-            urls[i] = urlCache.get(uhs[i].getBytes());
+            urls[i] = urlCache.get(UTF8.getBytes(uhs[i]));
             if (urls[i] == null) {
                 if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
             }
@@ -1027,7 +1027,7 @@ public final class yacyClient {
                     searchlines.add(args[2]);
                 }
                 for (final String line: searchlines) {
-                    final byte[] wordhashe = QueryParams.hashSet2hashString(Word.words2hashesHandles(QueryParams.cleanQuery(line)[0])).getBytes();
+                    final byte[] wordhashe = UTF8.getBytes(QueryParams.hashSet2hashString(Word.words2hashesHandles(QueryParams.cleanQuery(line)[0])));
                     long time = System.currentTimeMillis();
                     SearchResult result;
                     try {

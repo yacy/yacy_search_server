@@ -191,7 +191,7 @@ public class PeerSelection {
     }
 
     public static byte[] selectTransferStart() {
-        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + Word.commonHashLength).getBytes();
+        return UTF8.getBytes(Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + Word.commonHashLength));
     }
     
     public static byte[] limitOver(final yacySeedDB seedDB, final byte[] startHash) {

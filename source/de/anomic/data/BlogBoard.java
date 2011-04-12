@@ -85,7 +85,7 @@ public class BlogBoard {
      * @return true if the database contains the element, else false
      */
     public boolean contains(final String key) {
-        return database.containsKey(key.getBytes());
+        return database.containsKey(UTF8.getBytes(key));
     }
     
     public void close() {
@@ -126,7 +126,7 @@ public class BlogBoard {
     public String writeBlogEntry(final BlogEntry page) {
         String ret = null;
         try {
-            database.insert(page.key.getBytes(), page.record);
+            database.insert(UTF8.getBytes(page.key), page.record);
             ret = page.key;
         } catch (IOException ex) {
             Log.logException(ex);
@@ -144,7 +144,7 @@ public class BlogBoard {
         final String normalized = normalize(key);
         Map<String, String> record;
         try {
-            record = base.get(normalized.substring(0, Math.min(normalized.length(), KEY_LENGTH)).getBytes());
+            record = base.get(UTF8.getBytes(normalized.substring(0, Math.min(normalized.length(), KEY_LENGTH))));
         } catch (final IOException e) {
             Log.logException(e);
             record = null;
@@ -153,7 +153,7 @@ public class BlogBoard {
             record = null;
         }
         return (record == null) ?
-            newEntry(key, new byte[0], "anonymous".getBytes(), "127.0.0.1", new Date(), new byte[0], null, null) :
+            newEntry(key, new byte[0], UTF8.getBytes("anonymous"), "127.0.0.1", new Date(), new byte[0], null, null) :
             new BlogEntry(key, record);
     }
     
@@ -229,7 +229,7 @@ public class BlogBoard {
     
     public void deleteBlogEntry(final String key) {
     	try {
-            database.delete(normalize(key).getBytes());
+            database.delete(UTF8.getBytes(normalize(key)));
         } catch (final IOException e) { }
     }
     

@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -199,7 +200,7 @@ public class vcfParser extends AbstractParser implements Parser {
             }
 
             final String[] sections = parsedNames.toArray(new String[parsedNames.size()]);
-            final byte[] text = parsedDataText.toString().getBytes();
+            final byte[] text = UTF8.getBytes(parsedDataText.toString());
             return new Document[]{new Document(
                     url,                        // url of the source document
                     mimeType,                   // the documents mime type
@@ -227,7 +228,7 @@ public class vcfParser extends AbstractParser implements Parser {
     
     private String decodeQuotedPrintable(final String s) {
         if (s == null) return null;
-        final byte[] b = s.getBytes();
+        final byte[] b = UTF8.getBytes(s);
         final StringBuilder sb = new StringBuilder();
         for (int i = 0; i < b.length; i++) {
             final int c = b[i];

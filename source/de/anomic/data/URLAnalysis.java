@@ -50,6 +50,7 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
@@ -240,9 +241,9 @@ public class URLAnalysis {
             if (gz) os = new GZIPOutputStream(os);
             count = 0;
             for (final Map.Entry<String, Integer> e: results.entrySet()) {
-                os.write(e.getKey().getBytes());
+                os.write(UTF8.getBytes(e.getKey()));
                 os.write(new byte[]{'\t'});
-                os.write(Integer.toString(e.getValue()).getBytes());
+                os.write(UTF8.getBytes(Integer.toString(e.getValue())));
                 os.write(new byte[]{'\n'});
                 count++;
                 if (System.currentTimeMillis() - time > 10000) {
@@ -330,7 +331,7 @@ public class URLAnalysis {
             if (gz) os = new GZIPOutputStream(os);
             int count = 0;
             for (final String h: set) {
-                os.write(h.getBytes());
+                os.write(UTF8.getBytes(h));
                 os.write(new byte[]{'\n'});
                 count++;
                 if (System.currentTimeMillis() - time > 10000) {

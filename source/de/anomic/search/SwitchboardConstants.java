@@ -351,7 +351,6 @@ public final class SwitchboardConstants {
      * whole database of known RWIs and URLs as well as dumps of the DHT-In and DHT-Out caches are stored</p>
      */
     public static final String INDEX_PRIMARY_PATH       = "indexPrimaryPath"; // this is a relative path to the data root
-    public static final String INDEX_SECONDARY_PATH     = "indexSecondaryPath"; // this is a absolute path to any location
     public static final String INDEX_PATH_DEFAULT       = "DATA/INDEX";
     /**
      * <p><code>public static final String <strong>LISTS_PATH</strong> = "listsPath"</code></p>

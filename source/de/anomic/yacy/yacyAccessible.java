@@ -30,6 +30,7 @@ package de.anomic.yacy;
 
 import java.io.File;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.search.Switchboard;
@@ -47,7 +48,7 @@ public class yacyAccessible {
         	final Switchboard sb = Switchboard.getSwitchboard();
         	final File shortcut = new File(sb.getAppPath() + "/addon/YaCy-Search.html".replace("/", File.separator));
         	final String content = "<meta http-equiv=\"refresh\" content=\"0;url=http://localhost:" + newPort + "/\">";
-        	FileUtils.copy(content.getBytes(), shortcut);
+        	FileUtils.copy(UTF8.getBytes(content), shortcut);
 		} catch (final Exception e) {
 			return;
 		}
@@ -62,7 +63,7 @@ public class yacyAccessible {
         	final Switchboard sb = Switchboard.getSwitchboard();
         	final File shortcut = new File(sb.getAppPath() + "/addon/YaCy-Search.bat".replace("/", File.separator));
         	final String content = "rundll32 url.dll,FileProtocolHandler \"http://localhost:" + newPort + "\"";
-        	FileUtils.copy(content.getBytes(), shortcut);
+        	FileUtils.copy(UTF8.getBytes(content), shortcut);
 		} catch (final Exception e) {
 			return;
 		}

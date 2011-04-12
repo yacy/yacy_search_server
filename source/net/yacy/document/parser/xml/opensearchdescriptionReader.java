@@ -146,7 +146,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             Log.logWarning("opensearchdescriptionReader", "response=" + UTF8.String(a));
             return null;
         }
-        if (!ByteBuffer.equals(a, "<?xml".getBytes())) {
+        if (!ByteBuffer.equals(a, UTF8.getBytes("<?xml"))) {
             Log.logWarning("opensearchdescriptionReader", "response does not contain valid xml");
             return null;
         }

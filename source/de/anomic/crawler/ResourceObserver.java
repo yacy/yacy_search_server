@@ -38,19 +38,20 @@ public class ResourceObserver {
     public static final Log log = new Log("RESOURCE OBSERVER");
     
     // return values for available disk/memory
-    private static final int LOW = 0;
-    private static final int MEDIUM = 1;
-    private static final int HIGH = 2;
+    public enum Space implements Comparable<Space> {
+        LOW, MEDIUM, HIGH; // according to the order of the definition, LOW is smaller than MEDIUM and MEDIUM is smaller than HIGH
+    }
     
     private final Switchboard sb;
     private final File path; // path to check
     
-    private int normalizedDiskFree = HIGH;
-    private int normalizedMemoryFree = HIGH;
+    private Space normalizedDiskFree = Space.HIGH;
+    private Space normalizedMemoryFree = Space.HIGH;
     
     public ResourceObserver(final Switchboard sb) {
         this.sb = sb;
         this.path = sb.getDataPath(SwitchboardConstants.INDEX_PRIMARY_PATH, "");
+        log.logInfo("path for disc space measurement: " + this.path);
     }
     
     public static void initThread() {
@@ -68,9 +69,9 @@ public class ResourceObserver {
     	normalizedDiskFree = getNormalizedDiskFree();
     	normalizedMemoryFree = getNormalizedMemoryFree();
 
-    	if (normalizedDiskFree < HIGH || normalizedMemoryFree < HIGH) {
+    	if (normalizedDiskFree.compareTo(Space.HIGH) < 0 || normalizedMemoryFree.compareTo(Space.HIGH) < 0 ) {
 
-    		if (normalizedDiskFree < HIGH) { // pause crawls
+    		if (normalizedDiskFree.compareTo(Space.HIGH) < 0 ) { // pause crawls
     			if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
     				log.logInfo("pausing local crawls");
     				sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
@@ -81,7 +82,7 @@ public class ResourceObserver {
     			}
     		}
 
-    		if ((normalizedDiskFree == LOW || normalizedMemoryFree < HIGH) && sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
+    		if ((normalizedDiskFree == Space.LOW || normalizedMemoryFree.compareTo(Space.HIGH) < 0) && sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
     			log.logInfo("disabling index receive");
     			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
     			sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
@@ -108,38 +109,38 @@ public class ResourceObserver {
      * <li><code>LOW</code> if lower than hardlimit disk space is available</li>
      * </ul>
      */
-    private int getNormalizedDiskFree() {
+    private Space getNormalizedDiskFree() {
     	final long currentSpace = getUsableSpace(this.path);
-    	if(currentSpace < 1L) return HIGH;
-    	int ret = HIGH;
+    	if (currentSpace < 1L) return Space.HIGH;
+    	Space ret = Space.HIGH;
     	
     	if (currentSpace < getMinFreeDiskSpace()) {
     		log.logWarning("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
-    		ret = MEDIUM;
+    		ret = Space.MEDIUM;
     	}
     	if (currentSpace < getMinFreeDiskSpace_hardlimit()) {
-    		ret = LOW;
+    		ret = Space.LOW;
     	}
     	return ret;
     }
     
-    private int getNormalizedMemoryFree() {
-    	if(!MemoryControl.getDHTallowed()) return LOW;
-        return HIGH;
+    private Space getNormalizedMemoryFree() {
+    	if(!MemoryControl.getDHTallowed()) return Space.LOW;
+        return Space.HIGH;
     }
     
     /**
      * @return <code>true</code> if disk space is available
      */
     public boolean getDiskAvailable() {
-        return normalizedDiskFree == HIGH;
+        return normalizedDiskFree == Space.HIGH;
     }
     
     /**
      * @return <code>true</code> if memory is available
      */
     public boolean getMemoryAvailable() {
-        return normalizedMemoryFree == HIGH;
+        return normalizedMemoryFree == Space.HIGH;
     }
     
     /**

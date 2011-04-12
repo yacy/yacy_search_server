@@ -1325,17 +1325,19 @@ public final class HTTPDFileHandler {
 			sbuffer = sbuffer.replaceAll("(href|src)='([^:\"]+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2'");
 			sbuffer = sbuffer.replaceAll("url\\(", "url(/proxy.html?url=http://"+proxyurl.getHost()+proxyurl.getPath());
 			
+			byte[] sbb = UTF8.getBytes(sbuffer);
+			
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
 				
 				out = new ChunkedOutputStream(out);
 			} else {
-				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(sbuffer.getBytes().length));
+				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(sbb.length));
 				
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
 			}
 
-			out.write(UTF8.getBytes(sbuffer));
+			out.write(sbb);
 		} else {
 			if (!outgoingHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
 				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));

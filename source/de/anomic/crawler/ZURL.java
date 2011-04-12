@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
@@ -198,7 +199,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         newrow.setCol(1, entry.executor);
         newrow.setCol(2, entry.workdate.getTime());
         newrow.setCol(3, entry.workcount);
-        newrow.setCol(4, entry.anycause.getBytes());
+        newrow.setCol(4, UTF8.getBytes(entry.anycause));
         newrow.setCol(5, entry.bentry.toRow().bytes());
         try {
             if (urlIndex != null) urlIndex.put(newrow);
@@ -295,7 +296,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         private boolean error = false;
         
         private kiter(final boolean up, final String firstHash) throws IOException {
-            i = urlIndex.rows(up, (firstHash == null) ? null : firstHash.getBytes());
+            i = urlIndex.rows(up, (firstHash == null) ? null : UTF8.getBytes(firstHash));
             error = false;
         }
 

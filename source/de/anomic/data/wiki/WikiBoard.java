@@ -321,7 +321,7 @@ public class WikiBoard {
          * @param subject subject of child of current Entry.
          */
         void setChild(final String subject) {
-            record.put("child", Base64Order.enhancedCoder.encode(subject.getBytes()));
+            record.put("child", Base64Order.enhancedCoder.encode(UTF8.getBytes(subject)));
         }
 
         /**
@@ -369,9 +369,9 @@ public class WikiBoard {
             entry.setAncestorDate(oldDate);
             oldEntry.setChild(entry.subject());
             // write the backup
-            bkpbase.insert((entry.key + dateString(oldDate)).getBytes(), oldEntry.record);
+            bkpbase.insert(UTF8.getBytes(entry.key + dateString(oldDate)), oldEntry.record);
             // write the new page
-            datbase.insert(entry.key.getBytes(), entry.record);
+            datbase.insert(UTF8.getBytes(entry.key), entry.record);
             key = entry.key;
         } catch (final Exception e) {
             Log.logException(e);
@@ -401,8 +401,8 @@ public class WikiBoard {
             if (copyOfKey.length() > keyLength) {
                 copyOfKey = copyOfKey.substring(0, keyLength);
             }
-            final Map<String, String> record = base.get(copyOfKey.getBytes());
-            ret = (record == null) ? newEntry(copyOfKey, ANONYMOUS, "127.0.0.1", "New Page", "".getBytes()) : new Entry(copyOfKey, record);
+            final Map<String, String> record = base.get(UTF8.getBytes(copyOfKey));
+            ret = (record == null) ? newEntry(copyOfKey, ANONYMOUS, "127.0.0.1", "New Page", UTF8.getBytes("")) : new Entry(copyOfKey, record);
         } catch (final IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {

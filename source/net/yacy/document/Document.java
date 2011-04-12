@@ -235,7 +235,7 @@ dc_rights
 
     public InputStream getText() {
         try {
-            if (this.text == null) return new ByteArrayInputStream("".getBytes());
+            if (this.text == null) return new ByteArrayInputStream(UTF8.getBytes(""));
             if (this.text instanceof String) {
                 return new ByteArrayInputStream(UTF8.getBytes(((String) this.text)));
             } else if (this.text instanceof InputStream) {
@@ -252,7 +252,7 @@ dc_rights
         } catch (final Exception e) {
             Log.logException(e);
         }
-        return new ByteArrayInputStream("".getBytes());
+        return new ByteArrayInputStream(UTF8.getBytes(""));
     }
     
     public byte[] getTextBytes() {

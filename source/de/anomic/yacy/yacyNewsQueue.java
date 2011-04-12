@@ -50,6 +50,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -146,7 +147,7 @@ public class yacyNewsQueue {
             record = i.next();
             if ((record != null) && (record.id().equals(id))) {
                 try {
-                    this.queueStack.remove(id.getBytes());
+                    this.queueStack.remove(UTF8.getBytes(id));
                 } catch (IOException e) {
                     Log.logException(e);
                 }
@@ -167,8 +168,8 @@ public class yacyNewsQueue {
         if (r == null) return null;
         newsDB.put(r);
         final Row.Entry b = queueStack.row().newEntry(new byte[][]{
-                r.id().getBytes(),
-                GenericFormatter.SHORT_SECOND_FORMATTER.format().getBytes()});
+                UTF8.getBytes(r.id()),
+                        UTF8.getBytes(GenericFormatter.SHORT_SECOND_FORMATTER.format())});
         return b;
     }
     

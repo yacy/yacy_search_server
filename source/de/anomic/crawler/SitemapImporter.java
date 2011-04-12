@@ -28,6 +28,7 @@ package de.anomic.crawler;
 import java.net.MalformedURLException;
 import java.util.Date;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.document.parser.sitemapParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -89,7 +90,7 @@ public class SitemapImporter extends Thread {
 
         // URL needs to crawled
         this.sb.crawlStacker.enqueueEntry(new Request(
-                this.sb.peers.mySeed().hash.getBytes(),
+                UTF8.getBytes(this.sb.peers.mySeed().hash),
                 url,
                 null, // this.siteMapURL.toString(),
                 entry.url(),

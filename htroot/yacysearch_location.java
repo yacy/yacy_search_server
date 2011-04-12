@@ -107,6 +107,8 @@ public class yacysearch_location {
                     if (search_publisher) words.append(message.getCopyright().trim()).append(space);
                     if (search_creator) words.append(message.getAuthor().trim()).append(space);
                     String subject = "";
+                    assert message != null;
+                    assert message.getSubject() != null;
                     for (String s: message.getSubject()) subject += s.trim() + space;
                     if (search_subject) words.append(subject).append(space);
                     String[] wordlist = words.toString().trim().split(space);

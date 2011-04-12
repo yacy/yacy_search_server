@@ -31,6 +31,7 @@ import java.util.Date;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ComparableARC;
 import net.yacy.document.Parser.Failure;
@@ -108,7 +109,7 @@ public class RSSLoader extends Thread {
             int lastAvg = rssRow.get("avg_upd_per_day", 0);
             long thisAvg = 1000 * 60 * 60 * 24 / deltaTime * loadCount;
             long nextAvg = lastAvg == 0 ? thisAvg : (thisAvg + lastAvg * 2) / 3;
-            rssRow.put("url", url.toNormalform(true, false).getBytes());
+            rssRow.put("url", UTF8.getBytes(url.toNormalform(true, false)));
             rssRow.put("title", feed.getChannel().getTitle());
             rssRow.put("last_load_date", new Date());
             rssRow.put("last_load_count", loadCount);
@@ -140,7 +141,7 @@ public class RSSLoader extends Thread {
         // store pk of api table into rss table to show that the entry has been recorded
         assert pk != null;            
         Tables.Data rssRow = new Tables.Data();
-        rssRow.put("url", url.toNormalform(true, false).getBytes());
+        rssRow.put("url", UTF8.getBytes(url.toNormalform(true, false)));
         rssRow.put("title", feed.getChannel().getTitle());
         rssRow.put("api_pk", pk);
         try {

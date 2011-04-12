@@ -125,7 +125,7 @@ public class RobotsEntry {
                 pathListStr.append(element)
                            .append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
             }
-            this.mem.put(ALLOW_PATH_LIST, pathListStr.substring(0,pathListStr.length()-1).getBytes());
+            this.mem.put(ALLOW_PATH_LIST, UTF8.getBytes(pathListStr.substring(0,pathListStr.length()-1)));
         }
         
         if (disallowPathList != null && !disallowPathList.isEmpty()) {
@@ -136,7 +136,7 @@ public class RobotsEntry {
                 pathListStr.append(element)
                            .append(RobotsTxt.ROBOTS_DB_PATH_SEPARATOR);
             }
-            this.mem.put(DISALLOW_PATH_LIST,pathListStr.substring(0, pathListStr.length()-1).getBytes());
+            this.mem.put(DISALLOW_PATH_LIST, UTF8.getBytes(pathListStr.substring(0, pathListStr.length()-1)));
         }
     }
     
@@ -149,7 +149,7 @@ public class RobotsEntry {
     }
     
     public Map<String, byte[]> getMem() {
-        if (!this.mem.containsKey(HOST_NAME)) this.mem.put(HOST_NAME, this.hostName.getBytes());
+        if (!this.mem.containsKey(HOST_NAME)) this.mem.put(HOST_NAME, UTF8.getBytes(this.hostName));
         return this.mem;
     }
     
@@ -184,7 +184,7 @@ public class RobotsEntry {
     
     public void setLoadedDate(final Date newLoadedDate) {
         if (newLoadedDate != null) {
-            this.mem.put(LOADED_DATE, Long.toString(newLoadedDate.getTime()).getBytes());
+            this.mem.put(LOADED_DATE, UTF8.getBytes(Long.toString(newLoadedDate.getTime())));
         }
     }
     

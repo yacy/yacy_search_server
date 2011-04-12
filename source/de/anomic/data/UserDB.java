@@ -88,7 +88,7 @@ public final class UserDB {
     
     public void removeEntry(final String hostName) {
         try {
-            userTable.delete(hostName.toLowerCase().getBytes());
+            userTable.delete(UTF8.getBytes(hostName.toLowerCase()));
         } catch (final IOException e) {
             Log.logException(e);
         }
@@ -100,7 +100,7 @@ public final class UserDB {
         }
         Map<String, String> record = null;
         try {
-            record = userTable.get(userName.getBytes());
+            record = userTable.get(UTF8.getBytes(userName));
         } catch (final IOException e) {
             Log.logException(e);
         } catch (RowSpaceExceededException e) {
@@ -117,7 +117,7 @@ public final class UserDB {
     
     public String addEntry(final Entry entry) {
         try {
-            userTable.insert(entry.userName.getBytes(), entry.mem);
+            userTable.insert(UTF8.getBytes(entry.userName), entry.mem);
             return entry.userName;
         } catch (final Exception e) {
             Log.logException(e);
@@ -522,7 +522,7 @@ public final class UserDB {
             }
             
             try {
-                UserDB.this.userTable.insert(getUserName().getBytes(), this.mem);
+                UserDB.this.userTable.insert(UTF8.getBytes(getUserName()), this.mem);
             } catch(final Exception e){
                 Log.logException(e);
             }
@@ -539,7 +539,7 @@ public final class UserDB {
         
         public void setProperty(final String propName, final String newValue) throws IOException, RowSpaceExceededException {
             this.mem.put(propName,  newValue);
-            UserDB.this.userTable.insert(getUserName().getBytes(), this.mem);
+            UserDB.this.userTable.insert(UTF8.getBytes(getUserName()), this.mem);
         }
         
         public String getProperty(final String propName, final String defaultValue) {
@@ -550,62 +550,6 @@ public final class UserDB {
             return (this.mem.containsKey(accessRight.toString())) ? this.mem.get(accessRight.toString()).equals("true") : false;
         }
         
-        /**
-         * @deprecated use hasRight(UPLOAD_RIGHT) instead
-         */
-        @Deprecated
-        public boolean hasUploadRight() {
-            return this.hasRight(AccessRight.UPLOAD_RIGHT);
-        }
-
-        /**
-         * @deprecated use hasRight(DOWNLOAD_RIGHT) instead
-         */
-        @Deprecated
-        public boolean hasDownloadRight() {
-            return this.hasRight(AccessRight.DOWNLOAD_RIGHT);
-        }
-        
-        /**
-         * @deprecated use hasRight(PROXY_RIGHT) instead
-         */
-        @Deprecated
-        public boolean hasProxyRight() {
-            return this.hasRight(AccessRight.PROXY_RIGHT);
-        }
-
-        /**
-         * @deprecated use hasRight(ADMIN_RIGHT) instead
-         */
-        @Deprecated
-        public boolean hasAdminRight() {
-            return this.hasRight(AccessRight.ADMIN_RIGHT);
-        }
-
-        /**
-         * @deprecated use hasRight(BLOG_RIGHT) instead
-         */
-        @Deprecated
-        public boolean hasBlogRight() {
-            return this.hasRight(AccessRight.BLOG_RIGHT);
-        }
-
-        /**
-         * @deprecated use hasRight(WIKIADMIN_RIGHT) instead
-         */
-        @Deprecated
-        public boolean hasWikiAdminRight() {
-            return this.hasRight(AccessRight.WIKIADMIN_RIGHT);
-        }
-
-        /**
-         * @deprecated use hasRight(BOOKMARK_RIGHT) instead
-         */
-        @Deprecated
-        public boolean hasBookmarkRight() {
-            return this.hasRight(AccessRight.BOOKMARK_RIGHT);
-        }
-
         public boolean isLoggedOut(){
             return (this.mem.containsKey(LOGGED_OUT) ? this.mem.get(LOGGED_OUT).equals("true") : false);
         }

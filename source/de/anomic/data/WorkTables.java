@@ -99,7 +99,7 @@ public class WorkTables extends Tables {
     public byte[] recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
         // remove the apicall attributes from the post object
         String pks = post.remove(TABLE_API_COL_APICALL_PK);
-        byte[] pk = pks == null ? null : pks.getBytes();
+        byte[] pk = pks == null ? null : UTF8.getBytes(pks);
         
         // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8090") +*/ "/" + servletName + "?" + post.toString();
@@ -119,12 +119,12 @@ public class WorkTables extends Tables {
             if (row == null) {
                 // create and insert new entry
                 Data data = new Data();
-                data.put(TABLE_API_COL_TYPE, type.getBytes());
-                data.put(TABLE_API_COL_COMMENT, comment.getBytes());
-                byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format().getBytes();
+                data.put(TABLE_API_COL_TYPE, UTF8.getBytes(type));
+                data.put(TABLE_API_COL_COMMENT, UTF8.getBytes(comment));
+                byte[] date = UTF8.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format());
                 data.put(TABLE_API_COL_DATE_RECORDING, date);
                 data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
-                data.put(TABLE_API_COL_URL, apiurl.getBytes());
+                data.put(TABLE_API_COL_URL, UTF8.getBytes(apiurl));
                 
                 // insert APICALL attributes 
                 data.put(TABLE_API_COL_APICALL_COUNT, "1");
@@ -133,7 +133,7 @@ public class WorkTables extends Tables {
                 // modify and update existing entry
 
                 // modify date attributes and patch old values
-                row.put(TABLE_API_COL_DATE_LAST_EXEC, GenericFormatter.SHORT_MILSEC_FORMATTER.format().getBytes());
+                row.put(TABLE_API_COL_DATE_LAST_EXEC, UTF8.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format()));
                 if (!row.containsKey(TABLE_API_COL_DATE_RECORDING)) row.put(TABLE_API_COL_DATE_RECORDING, row.get(TABLE_API_COL_DATE));
                 row.remove(TABLE_API_COL_DATE);
                 
@@ -180,17 +180,17 @@ public class WorkTables extends Tables {
         try {
             // create and insert new entry
             Data data = new Data();
-            data.put(TABLE_API_COL_TYPE, type.getBytes());
-            data.put(TABLE_API_COL_COMMENT, comment.getBytes());
-            byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format().getBytes();
+            data.put(TABLE_API_COL_TYPE, UTF8.getBytes(type));
+            data.put(TABLE_API_COL_COMMENT, UTF8.getBytes(comment));
+            byte[] date = UTF8.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format());
             data.put(TABLE_API_COL_DATE_RECORDING, date);
             data.put(TABLE_API_COL_DATE_LAST_EXEC, date);
-            data.put(TABLE_API_COL_URL, apiurl.getBytes());
+            data.put(TABLE_API_COL_URL, UTF8.getBytes(apiurl));
             
             // insert APICALL attributes 
-            data.put(TABLE_API_COL_APICALL_COUNT, "1".getBytes());
-            data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, Integer.toString(time).getBytes());
-            data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, unit.getBytes());
+            data.put(TABLE_API_COL_APICALL_COUNT, UTF8.getBytes("1"));
+            data.put(TABLE_API_COL_APICALL_SCHEDULE_TIME, UTF8.getBytes(Integer.toString(time)));
+            data.put(TABLE_API_COL_APICALL_SCHEDULE_UNIT, UTF8.getBytes(unit));
             calculateAPIScheduler(data, false); // set next execution time
             pk = super.insert(TABLE_API_NAME, data);
         } catch (IOException e) {
@@ -220,7 +220,7 @@ public class WorkTables extends Tables {
         for (String pk: pks) {
             Tables.Row row = null;
             try {
-                row = select(WorkTables.TABLE_API_NAME, pk.getBytes());
+                row = select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
             } catch (IOException e) {
                 Log.logException(e);
             } catch (RowSpaceExceededException e) {
@@ -307,11 +307,11 @@ public class WorkTables extends Tables {
         try {
             // create and insert new entry
             Data data = new Data();
-            byte[] date = GenericFormatter.SHORT_MILSEC_FORMATTER.format().getBytes();
+            byte[] date = UTF8.getBytes(GenericFormatter.SHORT_MILSEC_FORMATTER.format());
             data.put(TABLE_SEARCH_FAILURE_COL_URL, url.toNormalform(true, false));
             data.put(TABLE_SEARCH_FAILURE_COL_DATE, date);
             data.put(TABLE_SEARCH_FAILURE_COL_WORDS, queryHashes.export());
-            data.put(TABLE_SEARCH_FAILURE_COL_COMMENT, reason.getBytes());
+            data.put(TABLE_SEARCH_FAILURE_COL_COMMENT, UTF8.getBytes(reason));
             super.insert(TABLE_SEARCH_FAILURE_NAME, url.hash(),  data);
         } catch (IOException e) {
             Log.logException(e);

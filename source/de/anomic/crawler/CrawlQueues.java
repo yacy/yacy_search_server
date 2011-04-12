@@ -242,7 +242,7 @@ public class CrawlQueues {
                         log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
                     }
-                    CrawlProfile profile = sb.crawler.getActive(profileHandle.getBytes());
+                    CrawlProfile profile = sb.crawler.getActive(UTF8.getBytes(profileHandle));
                     if (profile == null) {
                         log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
@@ -284,7 +284,7 @@ public class CrawlQueues {
      * @return
      */
     private void load(Request urlEntry, final String stats, final String profileHandle) {
-        final CrawlProfile profile = sb.crawler.getActive(profileHandle.getBytes());
+        final CrawlProfile profile = sb.crawler.getActive(UTF8.getBytes(profileHandle));
         if (profile != null) {
 
             // check if the protocol is supported
@@ -467,7 +467,7 @@ public class CrawlQueues {
                 // stack url
                 if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
                 sb.crawlStacker.enqueueEntry(new Request(
-                        hash.getBytes(),
+                        UTF8.getBytes(hash),
                         url,
                         (referrer == null) ? null : referrer.hash(),
                         item.getDescription(),
@@ -578,7 +578,7 @@ public class CrawlQueues {
                     //if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     errorURL.push(
                             this.request,
-                            sb.peers.mySeed().hash.getBytes(),
+                            UTF8.getBytes(sb.peers.mySeed().hash),
                             new Date(),
                             1,
                             "denied by robots.txt");
@@ -593,7 +593,7 @@ public class CrawlQueues {
                     try {
                         request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-                        final CrawlProfile e = sb.crawler.getActive(request.profileHandle().getBytes());
+                        final CrawlProfile e = sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
                         Response response = sb.loader.load(request, e == null ? CrawlProfile.CacheStrategy.IFEXIST : e.cacheStrategy(), maxFileSize, true);
                         if (response == null) {
                             request.setStatus("error", WorkflowJob.STATUS_FINISHED);
@@ -614,7 +614,7 @@ public class CrawlQueues {
                     if (result != null) {
                         errorURL.push(
                                 this.request,
-                                sb.peers.mySeed().hash.getBytes(),
+                                UTF8.getBytes(sb.peers.mySeed().hash),
                                 new Date(),
                                 1,
                                 "cannot load: " + result);
@@ -626,7 +626,7 @@ public class CrawlQueues {
             } catch (final Exception e) {
                 errorURL.push(
                         this.request,
-                        sb.peers.mySeed().hash.getBytes(),
+                        UTF8.getBytes(sb.peers.mySeed().hash),
                         new Date(),
                         1,
                         e.getMessage() + " - in worker");

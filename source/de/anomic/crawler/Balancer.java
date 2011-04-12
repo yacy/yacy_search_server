@@ -406,7 +406,7 @@ public class Balancer {
 		        
 		        // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
 		        // if not: return null. A calling method must handle the null value and try again
-		        final CrawlProfile profileEntry = cs.getActive(crawlEntry.profileHandle().getBytes());
+		        final CrawlProfile profileEntry = cs.getActive(UTF8.getBytes(crawlEntry.profileHandle()));
 		        if (profileEntry == null) {
 		        	Log.logWarning("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
 		        	return null;

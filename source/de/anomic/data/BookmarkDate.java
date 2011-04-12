@@ -39,6 +39,7 @@ import java.util.Map;
 
 import de.anomic.data.BookmarksDB.Bookmark;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -60,7 +61,7 @@ public class BookmarkDate {
     public Entry getDate(final String date) {
         Map<String, String> map;
         try {
-            map = datesTable.get(date.getBytes());
+            map = datesTable.get(UTF8.getBytes(date));
         } catch (final IOException e) {
             map = null;
         } catch (RowSpaceExceededException e) {
@@ -146,13 +147,13 @@ public class BookmarkDate {
         public void setDatesTable() {
             if (this.size() >0) {
                 try {
-                    datesTable.insert(getDateString().getBytes(), mem);
+                    datesTable.insert(UTF8.getBytes(getDateString()), mem);
                 } catch (Exception e) {
                     Log.logException(e);
                 }
             } else {
                 try {
-                    datesTable.delete(getDateString().getBytes());
+                    datesTable.delete(UTF8.getBytes(getDateString()));
                 } catch (IOException e) {
                     Log.logException(e);
                 }

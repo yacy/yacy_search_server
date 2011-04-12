@@ -587,7 +587,7 @@ public final class RankingProcess extends Thread {
             domhash = domhashs.next();
             if (domhash == null) continue;
             urlhash = this.hostResolver.get(domhash);
-            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(urlhash.getBytes(), null, 0);
+            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(UTF8.getBytes(urlhash), null, 0);
             hostname = row == null ? null : row.metadata().url().getHost();
             if (hostname != null) {
                 result.set(hostname, this.hostNavigator.get(domhash));

@@ -137,7 +137,7 @@ public class yacyNewsDB {
     }
 
     public void remove(final String id) throws IOException {
-        news.delete(id.getBytes());
+        news.delete(UTF8.getBytes(id));
     }
 
     public synchronized Record put(final Record record) throws IOException, RowSpaceExceededException {
@@ -151,7 +151,7 @@ public class yacyNewsDB {
 
     public synchronized Record get(final String id) throws IOException {
         try {
-            return b2r(news.get(id.getBytes()));
+            return b2r(news.get(UTF8.getBytes(id)));
         } catch (final kelondroException e) {
             resetDB();
             return null;
@@ -180,9 +180,9 @@ public class yacyNewsDB {
             attributes = new HashMap<String, String>().toString();
         }
         final Row.Entry entry = this.news.row().newEntry();
-        entry.setCol(0, r.id().getBytes());
+        entry.setCol(0, UTF8.getBytes(r.id()));
         entry.setCol(1, UTF8.getBytes(r.category()));
-        entry.setCol(2, (r.received() == null) ? null : my_SHORT_SECOND_FORMATTER.format(r.received()).getBytes());
+        entry.setCol(2, (r.received() == null) ? null : UTF8.getBytes(my_SHORT_SECOND_FORMATTER.format(r.received())));
         entry.setCol(3, Base64Order.enhancedCoder.encodeLongBA(r.distributed(), 2));
         entry.setCol(4, UTF8.getBytes(attributes));
         return entry;

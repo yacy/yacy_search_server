@@ -107,19 +107,20 @@ public final class QueryParams {
     public final String userAgent;
     public boolean filterfailurls;
     
-    public QueryParams(final String queryString,
+    public QueryParams(
+            final String queryString,
             final int itemsPerPage,
             final Bitfield constraint,
             final Segment indexSegment,
             final RankingProfile ranking,
             final String userAgent) {
 
-    	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
+    	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(UTF8.getBytes(queryString)))) {
             this.queryString = null;
             this.queryHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.excludeHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {
-                this.queryHashes.put(queryString.getBytes());
+                this.queryHashes.put(UTF8.getBytes(queryString));
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
             }
@@ -255,7 +256,7 @@ public final class QueryParams {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
-                keyhashes.put(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
+                keyhashes.put(UTF8.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
             }
@@ -267,7 +268,7 @@ public final class QueryParams {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
-                keyhashes.put(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
+                keyhashes.put(UTF8.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
             }

@@ -455,8 +455,8 @@
 
       <!-- packing all files into a gzipped tar -->
       <tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
-        <include name="**/*.sh"/>
-        <include name="**/*.command"/>
+      	<include name="**/*.sh"/>
+      	<include name="**/*.command"/>
       </tarfileset>
       <tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
         <include name="**/*"/>
@@ -529,7 +529,7 @@
       </fileset>
     </copy>
 
-    <!-- copy language statistics files -->
+    <!-- copy shell scripts from bin/ -->
     <!-- i'm not sure, if this is consistent with the debian policy -->
     <!-- but for /usr/bin or /usr/lib we need an extra environment variable -->
     <copy todir="${DESTDIR}/usr/share/yacy/bin">
