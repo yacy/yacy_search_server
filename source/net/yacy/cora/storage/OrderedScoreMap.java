@@ -35,25 +35,23 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class OrderedScoreMap<E> implements ScoreMap<E> {
 
-    protected final Map<E, IntScore> map; // a mapping from a reference to the cluster key
-    private long gcount;
+    protected final Map<E, AtomicInteger> map; // a mapping from a reference to the cluster key
     
     public OrderedScoreMap(Comparator<? super E> comparator)  {
         if (comparator == null) {
-            map = new HashMap<E, IntScore>();
+            map = new HashMap<E, AtomicInteger>();
         } else {
-            map = new TreeMap<E, IntScore>(comparator);
+            map = new TreeMap<E, AtomicInteger>(comparator);
         }
-        gcount = 0;
     }
     
     public synchronized void clear() {
         map.clear();
-        gcount = 0;
     }
     
     /**
@@ -74,18 +72,14 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
      * @param minScore
      */
     public void shrinkToMinScore(int minScore) {
-        synchronized (this) {
-            Iterator<Map.Entry<E, IntScore>> i = this.map.entrySet().iterator();
-            Map.Entry<E, IntScore> entry;
+        synchronized (map) {
+            Iterator<Map.Entry<E, AtomicInteger>> i = this.map.entrySet().iterator();
+            Map.Entry<E, AtomicInteger> entry;
             while (i.hasNext()) {
                 entry = i.next();
                 if (entry.getValue().intValue() < minScore) i.remove();
             }
         }
-    }
-    
-    public synchronized long totalCount() {
-        return gcount;
     }
     
     public synchronized int size() {
@@ -98,59 +92,53 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
     
     public void inc(final E obj) {
         if (obj == null) return;
-        synchronized (this) {
-            IntScore score = this.map.get(obj);
+        AtomicInteger score;
+        synchronized (map) {
+            score = this.map.get(obj);
             if (score == null) {
-                this.map.put(obj, new IntScore(1));
-            } else {
-                score.inc();
+                this.map.put(obj, new AtomicInteger(1));
+                return;
             }
-        }        
-        // increase overall counter
-        gcount++;
+        }
+        score.incrementAndGet();
     }
     
     public void dec(final E obj) {
         if (obj == null) return;
-        synchronized (this) {
-            IntScore score = this.map.get(obj);
+        AtomicInteger score;
+        synchronized (map) {
+            score = this.map.get(obj);
             if (score == null) {
-                this.map.put(obj, IntScore.valueOf(-1));
-            } else {
-                score.dec();
+                this.map.put(obj, new AtomicInteger(-1));
+                return;
             }
-        }        
-        // increase overall counter
-        gcount--;
+        }
+        score.decrementAndGet();
     }
     
     public void set(final E obj, final int newScore) {
         if (obj == null) return;
-        synchronized (this) {
-            IntScore score = this.map.get(obj);
+        AtomicInteger score;
+        synchronized (map) {
+            score = this.map.get(obj);
             if (score == null) {
-                this.map.put(obj, new IntScore(1));
-            } else {
-                gcount -= score.intValue();
-                score.set(newScore);
+                this.map.put(obj, new AtomicInteger(newScore));
+                return;
             }
-        }        
-        // increase overall counter
-        gcount += newScore;
+        }       
+        score.getAndSet(newScore);
     }
     
     public void inc(final E obj, final int incrementScore) {
         if (obj == null) return;
-        synchronized (this) {
-            IntScore score = this.map.get(obj);
+        AtomicInteger score;
+        synchronized (map) {
+            score = this.map.get(obj);
             if (score == null) {
-                this.map.put(obj, IntScore.valueOf(incrementScore));
-            } else {
-                score.inc(incrementScore);
+                this.map.put(obj, new AtomicInteger(incrementScore));
             }
-        }        
-        // increase overall counter
-        gcount += incrementScore;
+        }
+        score.addAndGet(incrementScore);
     }
     
     public void dec(final E obj, final int incrementScore) {
@@ -160,14 +148,11 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
     public int delete(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
-        final IntScore score;
-        synchronized (this) {
+        final AtomicInteger score;
+        synchronized (map) {
             score = map.remove(obj);
             if (score == null) return 0;
         }
-
-        // decrease overall counter
-        gcount -= score.intValue();
         return score.intValue();
     }
 
@@ -177,17 +162,17 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
     
     public int get(final E obj) {
         if (obj == null) return 0;
-        final IntScore score;
-        synchronized (this) {
+        final AtomicInteger score;
+        synchronized (map) {
             score = map.get(obj);
         }
         if (score == null) return 0;
         return score.intValue();
     }
     
-    public SortedMap<E, IntScore> tailMap(E obj) {
+    public SortedMap<E, AtomicInteger> tailMap(E obj) {
         if (this.map instanceof TreeMap) {
-            return ((TreeMap<E, IntScore>) this.map).tailMap(obj);
+            return ((TreeMap<E, AtomicInteger>) this.map).tailMap(obj);
         }
         throw new UnsupportedOperationException("map must have comparator");
     }
@@ -195,69 +180,30 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
     private int getMinScore() {
         if (map.isEmpty()) return -1;
         int minScore = Integer.MAX_VALUE;
-        synchronized (this) {
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) if (entry.getValue().intValue() < minScore) {
+        synchronized (map) {
+            for (Map.Entry<E, AtomicInteger> entry: this.map.entrySet()) if (entry.getValue().intValue() < minScore) {
                 minScore = entry.getValue().intValue();
             }
         }
         return minScore;
     }
 
-    /*
-    public int getMaxScore() {
-        if (map.isEmpty()) return -1;
-        int maxScore = Integer.MIN_VALUE;
-        synchronized (this) {
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) if (entry.getValue().intValue() > maxScore) {
-                maxScore = entry.getValue().intValue();
-            }
-        }
-        return maxScore;
-    }
-
-    public E getMaxKey() {
-        if (map.isEmpty()) return null;
-        E maxObject = null;
-        int maxScore = Integer.MIN_VALUE;
-        synchronized (this) {
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) if (entry.getValue().intValue() > maxScore) {
-                maxScore = entry.getValue().intValue();
-                maxObject = entry.getKey();
-            }
-        }
-        return maxObject;
-    }
-    
-    public E getMinKey() {
-        if (map.isEmpty()) return null;
-        E minObject = null;
-        int minScore = Integer.MAX_VALUE;
-        synchronized (this) {
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) if (entry.getValue().intValue() < minScore) {
-                minScore = entry.getValue().intValue();
-                minObject = entry.getKey();
-            }
-        }
-        return minObject;
-    }
-    */
-    
     @Override
     public String toString() {
         return map.toString();
     }
 
     public Iterator<E> keys(boolean up) {
-        synchronized (this) {
+        synchronized (map) {
             // re-organize entries
-            TreeMap<IntScore, Set<E>> m = new TreeMap<IntScore, Set<E>>();
+            TreeMap<Integer, Set<E>> m = new TreeMap<Integer, Set<E>>();
             Set<E> s;
-            for (Map.Entry<E, IntScore> entry: this.map.entrySet()) {
-                s = m.get(entry.getValue());
+            for (Map.Entry<E, AtomicInteger> entry: this.map.entrySet()) {
+                s = m.get(entry.getValue().intValue());
                 if (s == null) {
-                    s = this.map instanceof TreeMap ? new TreeSet<E>(((TreeMap<E, IntScore>) this.map).comparator()) : new HashSet<E>();
+                    s = this.map instanceof TreeMap ? new TreeSet<E>(((TreeMap<E, AtomicInteger>) this.map).comparator()) : new HashSet<E>();
                     s.add(entry.getKey());
-                    m.put(entry.getValue(), s);
+                    m.put(entry.getValue().intValue(), s);
                 } else {
                     s.add(entry.getKey());
                 }

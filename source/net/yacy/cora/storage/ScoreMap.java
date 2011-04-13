@@ -42,8 +42,6 @@ public interface ScoreMap<E> {
      */
     public void shrinkToMinScore(int minScore);
     
-    public long totalCount();
-    
     public int size();
     
     public boolean isEmpty();

@@ -174,11 +174,11 @@ public class ConcurrentScoreMap<E> implements ScoreMap<E> {
 
     public Iterator<E> keys(boolean up) {
         // re-organize entries
-        TreeMap<IntScore, Set<E>> m = new TreeMap<IntScore, Set<E>>();
+        TreeMap<Integer, Set<E>> m = new TreeMap<Integer, Set<E>>();
         Set<E> s;
-        IntScore is;
+        Integer is;
         for (Map.Entry<E, AtomicLong> entry: this.map.entrySet()) {
-            is = new IntScore(entry.getValue().intValue());
+            is = new Integer(entry.getValue().intValue());
             s = m.get(is);
             if (s == null) {
                 s = new HashSet<E>();

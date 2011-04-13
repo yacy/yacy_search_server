@@ -33,9 +33,9 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 
-import net.yacy.cora.storage.IntScore;
 import net.yacy.cora.storage.OrderedScoreMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
@@ -138,10 +138,10 @@ public class WordCache {
         for (final String r: t) {
             if (r.startsWith(string) && r.length() > string.length()) ret.add(r); else break;
         }
-        SortedMap<String, IntScore> u = this.commonWords.tailMap(string);
+        SortedMap<String, AtomicInteger> u = this.commonWords.tailMap(string);
         String vv;
         try {
-            for (final Map.Entry<String, IntScore> v: u.entrySet()) {
+            for (final Map.Entry<String, AtomicInteger> v: u.entrySet()) {
                 vv = v.getKey();
                 if (vv.startsWith(string) && vv.length() > string.length()) ret.add(vv); else break;
             }
