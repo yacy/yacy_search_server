@@ -84,6 +84,10 @@ public class ConcurrentScoreMap<E> implements ScoreMap<E> {
         return map.size();
     }
     
+    public boolean sizeSmaller(int size) {
+        return map.size() < size;
+    }
+    
     public boolean isEmpty() {
         return map.isEmpty();
     }

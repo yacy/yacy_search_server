@@ -572,7 +572,7 @@ public final class RankingProcess extends Thread {
     
     public ScoreMap<String> getNamespaceNavigator() {
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ClusteredScoreMap<String>();
-        if (this.namespaceNavigator.size() < 2) this.namespaceNavigator.clear(); // navigators with one entry are not useful
+        if (this.namespaceNavigator.sizeSmaller(2)) this.namespaceNavigator.clear(); // navigators with one entry are not useful
         return this.namespaceNavigator;
     }
     
@@ -583,7 +583,7 @@ public final class RankingProcess extends Thread {
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
         URIMetadataRow row;
         String domhash, urlhash, hostname;
-        if (this.hostResolver != null) while (domhashs.hasNext() && result.size() < 30) {
+        if (this.hostResolver != null) while (domhashs.hasNext() && result.sizeSmaller(30)) {
             domhash = domhashs.next();
             if (domhash == null) continue;
             urlhash = this.hostResolver.get(domhash);
@@ -593,7 +593,7 @@ public final class RankingProcess extends Thread {
                 result.set(hostname, this.hostNavigator.get(domhash));
             }
         }
-        if (result.size() < 2) result.clear(); // navigators with one entry are not useful
+        if (result.sizeSmaller(2)) result.clear(); // navigators with one entry are not useful
         return result;
     }
 
@@ -610,7 +610,7 @@ public final class RankingProcess extends Thread {
         // words that appeared in the url or the description of all urls
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return result;
-        if (this.ref.size() < 2) this.ref.clear(); // navigators with one entry are not useful
+        if (this.ref.sizeSmaller(2)) this.ref.clear(); // navigators with one entry are not useful
         final Map<String, Float> counts = new HashMap<String, Float>();
         final Iterator<String> i = this.ref.keys(false);
         String word;
@@ -666,7 +666,7 @@ public final class RankingProcess extends Thread {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ConcurrentScoreMap<String>();
-        if (this.authorNavigator.size() < 2) this.authorNavigator.clear(); // navigators with one entry are not useful
+        if (this.authorNavigator.sizeSmaller(2)) this.authorNavigator.clear(); // navigators with one entry are not useful
         return this.authorNavigator;
     }
     

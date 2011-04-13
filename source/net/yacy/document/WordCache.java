@@ -77,7 +77,7 @@ public class WordCache {
         if (word.length() < commonWordsMinLength) return;
         if (MemoryControl.shortStatus()) commonWords.clear();
         commonWords.inc(word);
-        if (commonWords.size() > commonWordsMaxSize) {
+        if (!(commonWords.sizeSmaller(commonWordsMaxSize))) {
             commonWords.shrinkToMaxSize(commonWordsMaxSize / 2);
         }
     }

@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class OrderedScoreMap<E> implements ScoreMap<E> {
-
+    
     protected final Map<E, AtomicInteger> map; // a mapping from a reference to the cluster key
     
     public OrderedScoreMap(Comparator<? super E> comparator)  {
@@ -82,17 +82,38 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
         }
     }
     
-    public synchronized int size() {
-        return map.size();
+    public int size() {
+        synchronized (map) {
+            return map.size();
+        }
     }
     
-    public synchronized boolean isEmpty() {
-        return map.isEmpty();
+    /**
+     * return true if the size of the score map is smaller then the given size
+     * @param size
+     * @return
+     */
+    public boolean sizeSmaller(int size) {
+        if (map.size() < size) return true;
+        synchronized (map) {
+            return map.size() < size;
+        }
+    }
+    
+    public boolean isEmpty() {
+        if (map.isEmpty()) return true;
+        synchronized (map) {
+            return map.isEmpty();
+        }
     }
     
     public void inc(final E obj) {
         if (obj == null) return;
-        AtomicInteger score;
+        AtomicInteger score = this.map.get(obj);
+        if (score != null) {
+            score.incrementAndGet();
+            return;
+        }
         synchronized (map) {
             score = this.map.get(obj);
             if (score == null) {
@@ -156,8 +177,10 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
         return score.intValue();
     }
 
-    public synchronized boolean containsKey(final E obj) {
-        return map.containsKey(obj);
+    public boolean containsKey(final E obj) {
+        synchronized (map) {
+            return map.containsKey(obj);
+        }
     }
     
     public int get(final E obj) {

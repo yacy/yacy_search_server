@@ -43,7 +43,7 @@ public interface ScoreMap<E> {
     public void shrinkToMinScore(int minScore);
     
     public int size();
-    
+    public boolean sizeSmaller(int size);    
     public boolean isEmpty();
     
     public void set(final E obj, final int newScore);

@@ -83,11 +83,6 @@ public final class Condenser {
     public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
     
     private final static int numlength = 5;
-    private final static NumberFormat intStringFormatter = NumberFormat.getIntegerInstance();
-    static {
-        intStringFormatter.setMinimumIntegerDigits(numlength);
-        intStringFormatter.setMaximumIntegerDigits(numlength);
-    }
     
     //private Properties analysis;
     private Map<String, Word> words; // a string (the words) to (indexWord) - relation
@@ -99,6 +94,7 @@ public final class Condenser {
     public int RESULT_DIFF_SENTENCES = -1;
     public Bitfield RESULT_FLAGS = new Bitfield(4);
     private Identificator languageIdentificator;
+    private final NumberFormat intStringFormatter = NumberFormat.getIntegerInstance(); // use a new instance for each object for a better concurrency
     
     public Condenser(
             final Document document,
@@ -108,6 +104,8 @@ public final class Condenser {
             ) {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
+        this.intStringFormatter.setMinimumIntegerDigits(numlength);
+        this.intStringFormatter.setMaximumIntegerDigits(numlength);
         this.words = new HashMap<String, Word>();
         this.RESULT_FLAGS = new Bitfield(4);
 

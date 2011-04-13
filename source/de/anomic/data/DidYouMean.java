@@ -138,12 +138,12 @@ public class DidYouMean {
         final ReversibleScoreMap<String> scored = new ClusteredScoreMap<String>();
         for (final String s: preSorted) {
             if (System.currentTimeMillis() > timelimit) break;
-            if (scored.size() >= 2 * preSortSelection) break;
+            if (!(scored.sizeSmaller(2 * preSortSelection))) break;
             scored.inc(s, index.count(Word.word2hash(s)));
         }
         final SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new headMatchingComparator(this.word, this.INDEX_SIZE_COMPARATOR)));
         final int wc = index.count(Word.word2hash(this.word)); // all counts must be greater than this
-        while (scored.size() > 0 && countSorted.size() < preSortSelection) {
+        while (!scored.isEmpty() && countSorted.size() < preSortSelection) {
             final String s = scored.getMaxKey();
             int score = scored.delete(s);
             if (s.length() >= MinimumOutputWordLength && score > wc) countSorted.add(s);

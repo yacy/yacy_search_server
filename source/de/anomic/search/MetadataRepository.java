@@ -612,7 +612,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         URIMetadataRow urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
-        if (count < 0 || count > s.size()) count = s.size();
+        if (count < 0 || s.sizeSmaller(count)) count = s.size();
         statsDump = new ArrayList<hostStat>();
         URIMetadataRow.Components comps;
         DigestURI url;
