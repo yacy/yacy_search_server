@@ -80,7 +80,6 @@ public class MediawikiImporter extends Thread implements Importer {
     
     public static Importer job; // if started from a servlet, this object is used to store the thread
     
-    protected WikiParser wparser;
     public    File sourcefile;
     public    File targetdir;
     public    int count;
@@ -95,7 +94,6 @@ public class MediawikiImporter extends Thread implements Importer {
     	this.docsize = sourcefile.length();
     	this.approxdocs = (int) (this.docsize * (long) docspermbinxmlbz2 / 1024L / 1024L);
     	this.targetdir = targetdir;
-        this.wparser = new WikiCode();
         this.count = 0;
         this.start = 0;
         this.hostport = null;
@@ -496,6 +494,7 @@ public class MediawikiImporter extends Thread implements Importer {
         }
         public void genHTML() throws IOException {
             try {
+                WikiParser wparser = new WikiCode();
                 html = wparser.transform(hostport, source);
             } catch (Exception e) {
                 Log.logException(e);

@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.yacy.document.parser.html.CharacterCoding;
 
@@ -45,7 +46,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     
     private static final String EMPTY = "";
     private static final String PIPE_ESCAPED = "&#124;";
-    private static final String REGEX_NOT_CHAR_NUM_OR_UNDERSCORE = "[^a-zA-Z0-9_]";
+    private static final Pattern REGEX_NOT_CHAR_NUM_OR_UNDERSCORE_PATTERN = Pattern.compile("[^a-zA-Z0-9_]");
+    private static final Pattern SPACE_PATTERN = Pattern.compile(" ");
 
     private static enum Tags {
         HEADLINE_1("=", "<h1>", "</h1>"),
@@ -131,8 +133,6 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private static final int LEN_WIKI_HR_LINE = WIKI_HR_LINE.length();
     private static final int LEN_PIPE_ESCAPED = PIPE_ESCAPED.length();
 
-    private final TableOfContent tableOfContent = new TableOfContent();
-
     /** List of properties which can be used in tables. */
     private final static String[] TABLE_PROPERTIES = {"rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border"};
 
@@ -149,21 +149,6 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                          Tags.HEADLINE_1.openWiki};
 
     private final static char[] HEADLINE_LEVEL = new char[]{ONE, TWO, THREE, FOUR, FIVE, SIX};
-
-    private String orderedListLevel = EMPTY;
-    private String unorderedListLevel = EMPTY;
-    private String defListLevel = EMPTY;
-    private boolean processingCell = false;             //needed for prevention of double-execution of replaceHTML
-    private boolean processingDefList = false;          //needed for definition lists
-    private boolean escape = false;                     //needed for escape
-    private boolean escaped = false;                    //needed for <pre> not getting in the way
-    private boolean newRowStart = false;                //needed for the first row not to be empty
-    private boolean noList = false;                     //needed for handling of [= and <pre> in lists
-    private boolean processingPreformattedText = false; //needed for preformatted text
-    private boolean preformattedSpanning = false;       //needed for <pre> and </pre> spanning over several lines
-    private boolean replacedHtmlAlready = false;        //indicates if method replaceHTML has been used with line already
-    private boolean processingTable = false;            //needed for tables, because they reach over several lines
-    private int preindented = 0;                        //needed for indented <pre>s
 
     static {
         /* Arrays must be sorted since Arrays.searchBinary() is used later. For more info go to
@@ -187,6 +172,24 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         ORDERED, UNORDERED;
     }
 
+    
+    private String orderedListLevel = EMPTY;
+    private String unorderedListLevel = EMPTY;
+    private String defListLevel = EMPTY;
+    private boolean processingCell = false;             //needed for prevention of double-execution of replaceHTML
+    private boolean processingDefList = false;          //needed for definition lists
+    private boolean escape = false;                     //needed for escape
+    private boolean escaped = false;                    //needed for <pre> not getting in the way
+    private boolean newRowStart = false;                //needed for the first row not to be empty
+    private boolean noList = false;                     //needed for handling of [= and <pre> in lists
+    private boolean processingPreformattedText = false; //needed for preformatted text
+    private boolean preformattedSpanning = false;       //needed for <pre> and </pre> spanning over several lines
+    private boolean replacedHtmlAlready = false;        //indicates if method replaceHTML has been used with line already
+    private boolean processingTable = false;            //needed for tables, because they reach over several lines
+    private int preindented = 0;                        //needed for indented <pre>s
+
+    private final TableOfContent tableOfContent = new TableOfContent();
+    
     /**
      * Constructor
      * @param address
@@ -739,8 +742,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     if (d == null || d.isEmpty()) {
                         continue;
                     }
-                    final String a = d.substring(1).replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY);
-                    final String b = element.substring(1).replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY);
+                    final String a = REGEX_NOT_CHAR_NUM_OR_UNDERSCORE_PATTERN.matcher(SPACE_PATTERN.matcher(d.substring(1)).replaceAll("_")).replaceAll(EMPTY);
+                    final String b = REGEX_NOT_CHAR_NUM_OR_UNDERSCORE_PATTERN.matcher(SPACE_PATTERN.matcher(element.substring(1)).replaceAll("_")).replaceAll(EMPTY);
                     if (a.equals(b)) {
                         doubles++;
                     }
@@ -842,8 +845,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                             throw new IllegalArgumentException("illegal headline level: " + l);
                         }
                     }
-
-                    directory.append(temp.replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY));
+                    directory.append(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE_PATTERN.matcher(SPACE_PATTERN.matcher(temp).replaceAll("_")).replaceAll(EMPTY));
                     directory.append(anchorext);
                     directory.append("\" class=\"WikiTOC\">");
                     directory.append(element);
@@ -889,7 +891,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                             doubles++;
                         }
                     }
-                    String anchor = direlem.replaceAll(" ", "_").replaceAll(REGEX_NOT_CHAR_NUM_OR_UNDERSCORE, EMPTY); //replace blanks with underscores and delete everything thats not a regular character, a number or _
+                    String anchor = REGEX_NOT_CHAR_NUM_OR_UNDERSCORE_PATTERN.matcher(SPACE_PATTERN.matcher(direlem).replaceAll("_")).replaceAll(EMPTY);; //replace blanks with underscores and delete everything thats not a regular character, a number or _
                     //if there are doubles, add underscore and number of doubles plus one
                     if (doubles > 0) {
                         anchor = anchor + "_" + (doubles + 1);
@@ -907,11 +909,15 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                         + input.substring(secondPosition + tags.closeWikiLength);
             }
         }
+        return input;
+        // commented out the following lines because they caused an endless recursion here
+        /*
         //recursion if another pair of the pattern can still be found in the line
         if (((firstPosition = input.indexOf(tags.openWiki)) >= 0) && (input.indexOf(tags.closeWiki, firstPosition + tags.openWikiLength) >= 0)) {
             input = tagReplace(input, tags);
         }
         return input;
+        */
     }
 
     /** Replaces wiki tags with HTML tags in one line of text.
