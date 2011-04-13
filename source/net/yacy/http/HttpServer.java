@@ -24,10 +24,6 @@
 
 package net.yacy.http;
 
-import org.eclipse.jetty.http.security.Constraint;
-import org.eclipse.jetty.security.ConstraintMapping;
-import org.eclipse.jetty.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
@@ -35,9 +31,6 @@ import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.servlets.ProxyServlet;
 
 import de.anomic.search.Switchboard;
 
@@ -62,10 +55,6 @@ public class HttpServer {
         YacyDomainHandler domainHandler = new YacyDomainHandler();
         domainHandler.setAlternativeResolver(sb.peers);
         
-        ServletContextHandler proxyContext = new ServletContextHandler();
-        proxyContext.setContextPath("/");
-        proxyContext.addServlet(new ServletHolder(new ProxyServlet()), "/*");
-        
         ResourceHandler resource_handler = new ResourceHandler();
         resource_handler.setDirectoriesListed(true);
         resource_handler.setWelcomeFiles(new String[]{ "index.html" });
@@ -74,7 +63,7 @@ public class HttpServer {
 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]
-                {	domainHandler, new ProxyHandler(), new RewriteHandler(),
+                {	domainHandler, new ProxyCacheHandler(), new ProxyHandler(), new RewriteHandler(),
         			new SSIHandler(new TemplateHandler()),
         			resource_handler, new DefaultHandler() });
         

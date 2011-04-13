@@ -25,8 +25,10 @@
 package net.yacy.http;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import net.yacy.cora.protocol.Domains;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.server.Request;
@@ -68,7 +70,12 @@ public class YaCySecurityHandler extends SecurityHandler {
         final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
         final String adminAccountBase64MD5 = sb.getConfig(YaCyLegacyCredential.ADMIN_ACCOUNT_B64MD5, "");
 
-        final String refererHost = request.getHeader("Referer");
+        String refererHost;
+		try {
+			refererHost = new DigestURI(request.getHeader("Referer")).getHost();
+		} catch (MalformedURLException e) {
+			refererHost = null;
+		}
         final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
         final boolean protectedPage = pathInContext.indexOf("_p.") > 0;
