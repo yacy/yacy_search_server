@@ -37,6 +37,9 @@
 		<key>ClassPath</key>
 			<array>
 			<string>$JAVAROOT/htroot</string>
+			<string>$JAVAROOT/lib/activation.jar</string>
+			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
+			<string>$JAVAROOT/lib/apache-solr-solrj-3.1.0.jar</string>
 			<string>$JAVAROOT/lib/bcmail-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/bcprov-jdk15-145.jar</string>
 			<string>$JAVAROOT/lib/bzip2.jar</string>
@@ -46,13 +49,11 @@
 			<string>$JAVAROOT/lib/commons-jxpath-1.3.jar</string>
 			<string>$JAVAROOT/lib/commons-logging-1.1.1.jar</string>
 			<string>$JAVAROOT/lib/fontbox-1.2.1.jar</string>
-			<string>$JAVAROOT/lib/activation.jar</string>
-			<string>$JAVAROOT/lib/apache-mime4j-0.6.jar</string>
-			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
 			<string>$JAVAROOT/lib/httpclient-4.1.jar</string>
 			<string>$JAVAROOT/lib/httpcore-4.1.jar</string>
 			<string>$JAVAROOT/lib/httpmime-4.1.jar</string>
 			<string>$JAVAROOT/lib/icu4j-core.jar</string>
+			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
 			<string>$JAVAROOT/lib/jakarta-oro-2.0.8.jar</string>
 			<string>$JAVAROOT/lib/jcifs-1.3.15.jar</string>
 			<string>$JAVAROOT/lib/jsch-0.1.42.jar</string>
@@ -63,6 +64,8 @@
 			<string>$JAVAROOT/lib/poi-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/poi-scratchpad-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/servlet-api.jar</string>
+			<string>$JAVAROOT/lib/slf4j-api-1.5.5.jar</string>
+			<string>$JAVAROOT/lib/slf4j-jdk14-1.5.5.jar</string>
 			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>
 			<string>$JAVAROOT/lib/xerces.jar</string>
 			<string>$JAVAROOT/lib/yacycore.jar</string>

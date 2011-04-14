@@ -50,6 +50,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String RECRAWL_IF_OLDER = "recrawlIfOlder";
     public static final String DOM_MAX_PAGES    = "domMaxPages";
     public static final String CRAWLING_Q       = "crawlingQ";
+    public static final String PUSH_SOLR        = "pushSolr";
     public static final String INDEX_TEXT       = "indexText";
     public static final String INDEX_MEDIA      = "indexMedia";
     public static final String STORE_HTCACHE    = "storeHTCache";
@@ -200,6 +201,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public boolean crawlingQ() {
         final String r = get(CRAWLING_Q);
         if (r == null) return false;
+        return (r.equals(Boolean.TRUE.toString()));
+    }
+    public boolean pushSolr() {
+        final String r = get(PUSH_SOLR);
+        if (r == null) return true;
         return (r.equals(Boolean.TRUE.toString()));
     }
     public boolean indexText() {

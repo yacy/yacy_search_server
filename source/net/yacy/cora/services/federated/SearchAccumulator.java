@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services;
+package net.yacy.cora.services.federated;
 
 /**
  * place-holder class to provide a object declaration for threads in Search object

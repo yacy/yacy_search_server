@@ -24,8 +24,9 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package de.anomic.search;
+package net.yacy.cora.services.federated;
 
+import de.anomic.search.ResultEntry;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 
 public class SearchResult extends WeakPriorityBlockingQueue<ResultEntry> {

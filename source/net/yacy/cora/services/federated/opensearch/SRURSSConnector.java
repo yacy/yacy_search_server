@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services;
+package net.yacy.cora.services.federated.opensearch;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -44,8 +44,10 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPConnector;
+import net.yacy.cora.services.federated.SearchAccumulator;
+import net.yacy.cora.services.federated.SearchHub;
 
-public class SearchSRURSS extends Thread implements SearchAccumulator {
+public class SRURSSConnector extends Thread implements SearchAccumulator {
 
     private final static int recordsPerSession = 100;
     
@@ -60,7 +62,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
 
     private final BlockingQueue<RSSMessage> results;
     
-    public SearchSRURSS(
+    public SRURSSConnector(
             final Map<RSSMessage, List<Integer>> result,
             final String query,
             final long timeoutInit,
@@ -80,7 +82,7 @@ public class SearchSRURSS extends Thread implements SearchAccumulator {
         this.userAgent = userAgent;
     }
     
-    public SearchSRURSS(
+    public SRURSSConnector(
             final SearchHub search,
             final String urlBase,
             final int maximumRecordsInit,

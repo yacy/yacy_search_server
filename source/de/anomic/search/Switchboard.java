@@ -87,6 +87,8 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
+import net.yacy.cora.services.federated.solr.SolrScheme;
+import net.yacy.cora.services.federated.solr.SolrSingleConnector;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -238,6 +240,7 @@ public final class Switchboard extends serverSwitch {
     
     private final Semaphore shutdownSync = new Semaphore(0);
     private boolean terminate = false;
+    private SolrSingleConnector solrConnector = null;
     
     //private Object  crawlingPausedSync = new Object();
     //private boolean crawlingIsPaused = false;    
@@ -580,6 +583,11 @@ public final class Switchboard extends serverSwitch {
                 log.logInfo("RANDOM PASSWORD REMOVED! User must set a new password");
             }
         }
+        
+        // set up the solr interface
+        String solrurl = this.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
+        boolean usesolr = this.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurl.length() > 0;
+        this.solrConnector = (usesolr) ? new SolrSingleConnector("http://127.0.0.1:8983/solr", SolrScheme.SolrCell) : null;
         
         // initializing dht chunk generation
         this.dhtMaxReferenceCount = (int) getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
@@ -1874,6 +1882,23 @@ public final class Switchboard extends serverSwitch {
     
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
+        if (this.solrConnector != null /*in.queueEntry.profile().pushSolr()*/) {
+            // send the documents to solr
+            for (Document doc: in.documents) {
+                try {
+                    String id = UTF8.String(new DigestURI(doc.dc_identifier(), null).hash());
+                    assert id.equals(UTF8.String(in.queueEntry.url().hash()));
+                    try {
+                        this.solrConnector.add(id, doc);
+                    } catch (IOException e) {
+                        Log.logWarning("SOLR", "failed to send " + in.queueEntry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
+                    }
+                } catch (MalformedURLException e) {
+                    Log.logException(e);
+                    continue;
+                }
+            }
+        }
         if (!in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia()) {
             if (log.isInfo()) {
                 log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': indexing not wanted by crawl profile");

@@ -181,6 +181,7 @@
         <pathelement location="${htroot}" />
     	<pathelement location="${lib}/activation.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
+        <pathelement location="${lib}/apache-solr-solrj-3.1.0.jar" />
     	<pathelement location="${lib}/bcmail-jdk15-145.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-145.jar" />
     	<pathelement location="${lib}/bzip2.jar" />
@@ -205,6 +206,8 @@
     	<pathelement location="${lib}/poi-3.6-20091214.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.6-20091214.jar" />
         <pathelement location="${lib}/servlet-api.jar" />
+        <pathelement location="${lib}/slf4j-api-1.5.5.jar" />
+        <pathelement location="${lib}/slf4j-jdk14-1.5.5.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
     	<pathelement location="${lib}/xerces.jar" />
     </path>

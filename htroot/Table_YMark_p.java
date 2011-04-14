@@ -58,9 +58,9 @@ public class Table_YMark_p {
         
         // get available tags and folders
         count = 0;
+        /*
         byte[] key;
         String name;
-        /*
         try {
 			Iterator<byte[]> iter = sb.tables.keys(YMarkTables.TABLES.TAGS.tablename(bmk_user));
 			while(iter.hasNext()) {

@@ -63,7 +63,7 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPConnector;
-import net.yacy.cora.services.SearchSRURSS;
+import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -373,7 +373,7 @@ public final class yacyClient {
     public static RSSFeed search(final yacySeed targetSeed, String query, CrawlProfile.CacheStrategy verify, boolean global, long timeout, int startRecord, int maximumRecords) throws IOException {
         String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8090") : targetSeed.getClusterAddress();
         String urlBase = "http://" + address + "/yacysearch.rss";
-        return SearchSRURSS.loadSRURSS(urlBase, query, timeout, startRecord, maximumRecords, verify, global, null);
+        return SRURSSConnector.loadSRURSS(urlBase, query, timeout, startRecord, maximumRecords, verify, global, null);
     }
 
     @SuppressWarnings("unchecked")

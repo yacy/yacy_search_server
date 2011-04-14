@@ -22,7 +22,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.yacy.cora.services;
+package net.yacy.cora.services.federated;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -34,6 +34,7 @@ import de.anomic.crawler.CrawlProfile;
 
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.cora.storage.ScoreMap;
 
@@ -149,7 +150,7 @@ public class SearchHub {
      */
     public static void addSRURSSServices(SearchHub search, String[] rssServices, int count, CrawlProfile.CacheStrategy verify, boolean global, String userAgent) {
         for (String service: rssServices) {
-            SearchSRURSS accumulator = new SearchSRURSS(search, service, count, verify, global, userAgent);
+            SRURSSConnector accumulator = new SRURSSConnector(search, service, count, verify, global, userAgent);
             accumulator.start();
             search.addAccumulator(accumulator);
         }

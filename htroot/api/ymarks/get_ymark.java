@@ -22,7 +22,7 @@ public class get_ymark {
         sb = (Switchboard) env;
         prop = new serverObjects();
         
-        boolean tags = false;
+        //boolean tags = false;
         
         final UserDB.Entry user = sb.userDB.getUser(header);
         final boolean isAdmin = (sb.verifyAuthentication(header, true));
@@ -33,7 +33,7 @@ public class get_ymark {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
         	
 	    	if(post.containsKey(YMarkTables.BOOKMARK.TAGS.key())) {
-	    		tags = true;
+	    		//tags = true;
 	    		final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR);
 	    		try {
 	    			bookmarks = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);

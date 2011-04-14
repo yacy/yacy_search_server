@@ -57,24 +57,26 @@ import java.util.concurrent.ConcurrentMap;
 
 public class Balancer {
     
-    private static final String indexSuffix = "9.db";
-    private static final int EcoFSBufferSize = 1000;
-    private static final int objectIndexBufferSize = 1000;
-    private static final String localhost = "localhost";
+    private static final String indexSuffix           = "9.db";
+    private static final int    EcoFSBufferSize       = 1000;
+    private static final int    objectIndexBufferSize = 1000;
+    private static final String localhost             = "localhost";
 
-    // class variables
+    // class variables filled with external values
+    private final File                 cacheStacksPath;
+    private       long                 minimumLocalDelta;
+    private       long                 minimumGlobalDelta;
+    private final Set<String>          myAgentIDs;
+    private       BufferedObjectIndex  urlFileIndex;
+    
+    // class variables computed during operation
     private final ConcurrentMap<String, HandleSet> domainStacks; // a map from host name to lists with url hashs
-    private final ConcurrentLinkedQueue<byte[]> top; // a list of url-hashes that shall be taken next
-    private final SortedMap<Long, byte[]> delayed;
-    private final HandleSet ddc;
-    private final HandleSet double_push_check; // for debugging
-    private BufferedObjectIndex  urlFileIndex;
-    private final File   cacheStacksPath;
-    private long         minimumLocalDelta;
-    private long         minimumGlobalDelta;
-    private long         lastDomainStackFill;
-    private int          domStackInitSize;
-    private Set<String>  myAgentIDs;
+    private final ConcurrentLinkedQueue<byte[]>    top; // a list of url-hashes that shall be taken next
+    private final SortedMap<Long, byte[]>          delayed;
+    private final HandleSet                        ddc;
+    private final HandleSet                        double_push_check; // for debugging
+    private long                                   lastDomainStackFill;
+    private int                                    domStackInitSize;
     
     public Balancer(
             final File cachePath,
