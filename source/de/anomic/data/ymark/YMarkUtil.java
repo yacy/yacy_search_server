@@ -37,12 +37,25 @@ public class YMarkUtil {
     public final static String TAGS_SEPARATOR = ",";
     public final static String FOLDERS_SEPARATOR = "/";
     
+    /**
+     * conveniance function to generate url hashes for YMark bookmarks
+     * @param url a string representation of a valid url
+     * @return a byte[] hash for the input URL string
+     * @throws MalformedURLException
+     * @see net.yacy.kelondro.data.meta.DigestURI.DigestURI(String url, byte[] hash).hash() 
+     */
     public final static byte[] getBookmarkId(String url) throws MalformedURLException {
 		return (new DigestURI(url, null)).hash();
     }
     
-    public final static byte[] getKeyId(final String tag) {
-        return Word.word2hash(tag.toLowerCase());
+    /**
+     * conveniance function to generate word hashes for YMark tags and folders
+     * @param key a tag or folder name 
+     * @return a byte[] hash for the input string
+     * @see net.yacy.kelondro.data.word.Word.word2hash(final String word)
+     */
+    public final static byte[] getKeyId(final String key) {
+        return Word.word2hash(key.toLowerCase());
     }
     
     public final static byte[] keySetToBytes(final HashSet<String> urlSet) {

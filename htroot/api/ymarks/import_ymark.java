@@ -13,6 +13,7 @@ import org.xml.sax.SAXException;
 
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkHTMLImporter;
+import de.anomic.data.ymark.YMarkJSONImporter;
 import de.anomic.data.ymark.YMarkMetadata;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkXBELImporter;
@@ -66,6 +67,14 @@ public class import_ymark {
 						putBookmark(sb, bmk_user, bmk);
 		            }
     				prop.put("result", "1");
+            	} else if(post.get("importer").equals("json") && byteIn != null) {
+            		final YMarkJSONImporter jsonImporter = new YMarkJSONImporter(byteIn, 10);
+		            t = new Thread(jsonImporter, "YMarks - JSON Importer");
+		            t.start();
+		            while ((bmk = jsonImporter.take()) != YMarkTables.POISON) {
+						putBookmark(sb, bmk_user, bmk);
+		            }
+		            prop.put("result", "1");
             	}
         	}
         }  else {
@@ -92,7 +101,7 @@ public class import_ymark {
 		} catch (RowSpaceExceededException e) {
 			Log.logException(e);
 		} catch (Failure e) {
-			Log.logWarning(YMarkTables.BOOKMARKS_LOG.toString(), "Importer - Failure for URL: "+bmk.get(YMarkTables.BOOKMARK.URL.key()));
+			Log.logException(e);
 		}
 	}
 }

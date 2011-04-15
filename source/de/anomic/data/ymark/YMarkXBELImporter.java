@@ -240,6 +240,12 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
     public void characters(final char ch[], final int start, final int length) {
         if (parse_value) {
         	buffer.append(ch, start, length);      	
+        	for (int i = 0; i < buffer.length()-1; i++) {
+        		if(buffer.charAt(i) == '\n' | buffer.charAt(i) == '\t') {
+        			buffer.deleteCharAt(i);
+        			i--;
+        		}
+        	}
         	switch(outer_state) {
             	case BOOKMARK:
             		switch(inner_state) {
