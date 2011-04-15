@@ -124,19 +124,22 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + UTF8.String(newtext));
-        int p, q, s = 0;
+        int p, pl, q, s = 0;
 
         // try to find location information in text
+        // Opencaching:
+        // <nobr>N 50o 05.453&#039;</nobr><nobr>E 008o 30.191&#039;</nobr>
+        // N 52o 28.025 E 013o 20.299
         location: while (s < newtext.length) {
+            pl = 1;
             p = CharBuffer.indexOf(newtext, s, degree);
+            if (p < 0) {p = CharBuffer.indexOf(newtext, s, "&deg;".toCharArray()); if (p >= 0) pl = 5;}
             if (p < 0) break location;
-            // try to find a coordinate
-            // <nobr>N 50o 05.453&#039;</nobr><nobr>E 008o 30.191&#039;</nobr>
-            // N 52o 28.025 E 013o 20.299
-            q = CharBuffer.indexOf(newtext, p, minuteCharsHTML);
-            if (q < 0) q = CharBuffer.indexOf(newtext, p, " E".toCharArray());
-            if (q < 0) q = CharBuffer.indexOf(newtext, p, " W".toCharArray());
-            if (q < 0 && newtext.length - p == 8) q = newtext.length; 
+            q = CharBuffer.indexOf(newtext, p + pl, minuteCharsHTML);
+            if (q < 0) q = CharBuffer.indexOf(newtext, p + pl, "'".toCharArray());
+            if (q < 0) q = CharBuffer.indexOf(newtext, p + pl, " E".toCharArray());
+            if (q < 0) q = CharBuffer.indexOf(newtext, p + pl, " W".toCharArray());
+            if (q < 0 && newtext.length - p == 7 + pl) q = newtext.length; 
             if (q < 0) break location;
             int r = p;
             while (r-- > 1) {
@@ -144,25 +147,29 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     r--;
                     if (newtext[r] == 'N') {
                         this.lat =  Float.parseFloat(new String(newtext, r + 2, p - r - 2)) +
-                                    Float.parseFloat(new String(newtext, p + 2, q - p - 2)) / 60.0f;
+                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0f;
+                        if (this.lon != 0.0f) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'S') {
                         this.lat = -Float.parseFloat(new String(newtext, r + 2, p - r - 2)) -
-                                    Float.parseFloat(new String(newtext, p + 2, q - p - 2)) / 60.0f;
+                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0f;
+                        if (this.lon != 0.0f) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'E') {
                         this.lon =  Float.parseFloat(new String(newtext, r + 2, p - r - 2)) +
-                                    Float.parseFloat(new String(newtext, p + 2, q - p - 2)) / 60.0f;
+                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0f;
+                        if (this.lat != 0.0f) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'W') {
                         this.lon = -Float.parseFloat(new String(newtext, r + 2, p - r - 2)) -
-                                    Float.parseFloat(new String(newtext, p + 2, q - p - 2)) / 60.0f;
+                                    Float.parseFloat(new String(newtext, p + 2, q - p - pl - 1)) / 60.0f;
+                        if (this.lat != 0.0f) break location;
                         s = q + 6;
                         continue location;
                     }

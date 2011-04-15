@@ -29,7 +29,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.geolocalization.Location;
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -94,7 +93,7 @@ public class yacysearch_location {
                 // get a queue of search results
                 String rssSearchServiceURL = "http://127.0.0.1:" + sb.getConfig("port", "8090") + "/yacysearch.rss";
                 BlockingQueue<RSSMessage> results = new LinkedBlockingQueue<RSSMessage>();
-                SRURSSConnector.searchSRURSS(results, rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, CrawlProfile.CacheStrategy.NOCACHE, false, null);
+                SRURSSConnector.searchSRURSS(results, rssSearchServiceURL, query, maximumTime, Integer.MAX_VALUE, null, false, null);
                 
                 // take the results and compute some locations
                 RSSMessage message;
@@ -164,10 +163,7 @@ public class yacysearch_location {
 
         }
         if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("html")) {
-            final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-            int display = (post == null) ? 0 : post.getInt("display", 0);
-            if (!authenticated) display = 2;
-            prop.put("display", display);
+            prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
             prop.put("promoteSearchPageGreeting", sb.getConfig(SwitchboardConstants.GREETING, ""));
             prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
             prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));

@@ -167,7 +167,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             String loc;
             boolean noCacheUsage = url.isFile() || url.isSMB();
             boolean objectWasInCache = (noCacheUsage) ? false : de.anomic.http.client.Cache.has(url);
-            boolean useMetadata = !objectWasInCache && !cacheStrategy.mustBeOffline();
+            boolean useMetadata = !objectWasInCache && (cacheStrategy == null || !cacheStrategy.mustBeOffline());
             if (useMetadata && containsAllHashes(loc = comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
                 init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
@@ -186,10 +186,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 return;
             } else {
                 // try to load the resource from the cache
-                response = loader.load(loader.request(url, true, reindexing), noCacheUsage ? CrawlProfile.CacheStrategy.NOCACHE : cacheStrategy, Long.MAX_VALUE, true);
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), noCacheUsage ? CrawlProfile.CacheStrategy.NOCACHE : cacheStrategy, Long.MAX_VALUE, true);
                 if (response == null) {
                     // in case that we did not get any result we can still return a success when we are not allowed to go online
-                    if (cacheStrategy.mustBeOffline()) {
+                    if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
                         init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
                         return;
                     }

@@ -385,7 +385,16 @@ public class ResultFetcher {
         final long dbRetrievalTime = System.currentTimeMillis() - startTime;
         
         if (cacheStrategy == null) {
-            return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, 0); // result without snippet
+            final TextSnippet snippet = new TextSnippet(
+                    null,
+                    metadata,
+                    snippetFetchWordHashes,
+                    null,
+                    ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))),
+                    180,
+                    Integer.MAX_VALUE,
+                    !query.isLocal());
+            return new ResultEntry(page, query.getSegment(), peers, snippet, null, dbRetrievalTime, 0); // result without snippet
         }
         
         // load snippet

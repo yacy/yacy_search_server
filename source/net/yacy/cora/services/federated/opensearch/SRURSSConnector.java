@@ -199,7 +199,7 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
             parts.put("query", UTF8.StringBody(query));
             parts.put("startRecord", UTF8.StringBody(Integer.toString(startRecord)));
             parts.put("maximumRecords", UTF8.StringBody(Long.toString(maximumRecords)));
-            parts.put("verify", UTF8.StringBody(cacheStrategy.toName()));
+            parts.put("verify", cacheStrategy == null ? UTF8.StringBody("false") : UTF8.StringBody(cacheStrategy.toName()));
             parts.put("resource", UTF8.StringBody(global ? "global" : "local"));
             parts.put("nav", UTF8.StringBody("none"));
             result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);

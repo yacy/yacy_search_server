@@ -107,6 +107,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
     private static final String WIKI_CLOSE_LINK = "]]";
     private static final String WIKI_OPEN_LINK = "[[";
+    private static final String WIKI_CLOSE_METADATA = "}}";
+    private static final String WIKI_OPEN_METADATA = "{{";
     private static final String WIKI_CLOSE_EXTERNAL_LINK = "]";
     private static final String WIKI_OPEN_EXTERNAL_LINK = "[";
     private static final String WIKI_CLOSE_PRE_ESCAPED = "&lt;/pre&gt;";
@@ -926,6 +928,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      */
     public String processLineOfWikiCode(String hostport, String line) {
         //If HTML has not been replaced yet (can happen if method gets called in recursion), replace now!
+        line = processMetadata(line);
         if ((!replacedHtmlAlready || preformattedSpanning) && line.indexOf(WIKI_CLOSE_PRE_ESCAPED) < 0) {
             line = CharacterCoding.unicode2html(line, true);
             replacedHtmlAlready = true;
@@ -974,6 +977,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
             line = tagReplace(line, Tags.STRIKE);
 
+            
             line = processUnorderedList(line);
             line = processOrderedList(line);
             line = processDefinitionList(line);
@@ -991,6 +995,58 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         return line;
     }
 
+
+    public String processMetadata(String line) {
+        int p, q, s = 0;
+        while ((p = line.indexOf(WIKI_OPEN_METADATA, s)) >= 0 && (q = line.indexOf(WIKI_CLOSE_METADATA, p + 1)) >= 0) {
+            s = q; // continue with next position
+            String a = line.substring(p + 2, q);
+            if (a.toLowerCase().startsWith("coordinate")) {
+                // parse Geographical Coordinates as described in
+                // http://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style_%28dates_and_numbers%29#Geographical_coordinates
+                // looks like:
+                // {{Coord|57|18|22.5|N|4|27|32.7|W|display=title}}
+                // however, such information does not appear as defined above but as:
+                // {{coordinate|NS=52.205944|EW=0.117593|region=GB-CAM|type=landmark}}
+                // {{coordinate|NS=43/50/29/N|EW=73/23/17/W|type=landmark|region=US-NY}}
+                // and if passed through this parser:
+                // {{Coordinate |NS 45/37/43.0/N |EW. 07/58/41.0/E |type=landmark |region=IT-BI}} ## means: degree/minute/second
+                // {{Coordinate |NS 51.48994 |EW. 7.33249 |type=landmark |region=DE-NW}}
+                String b[] = a.split("\\|");
+                float lon = 0.0f, lat = 0.0f;
+                float lonm = 0.0f, latm = 0.0f;
+                String lono = "E", lato = "N";
+                String name = "";
+                for (String c: b) {
+                    if (c.toLowerCase().startsWith("name=")) {
+                        name = c.substring(5);
+                    }
+                    if (c.toUpperCase().startsWith("NS=")) {
+                        String d[] = c.substring(3).split("/");
+                        if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lato = "S"; l = -l;} lat = (float) Math.floor(l); latm = 60.0f * (l - lat);}
+                        else if (d.length == 2) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]);}
+                        else if (d.length == 3) {lat = Float.parseFloat(d[0]); latm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
+                        if (d[d.length-1].toUpperCase().equals("S")) {}
+                    }
+                    if (c.toUpperCase().startsWith("EW=")) {
+                        String d[] = c.substring(3).split("/");
+                        if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lono = "W"; l = -l;} lon = (float) Math.floor(l); lonm = 60.0f * (l - lon);}
+                        else if (d.length == 2) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]);}
+                        else if (d.length == 3) {lon = Float.parseFloat(d[0]); lonm = Float.parseFloat(d[1]) + Float.parseFloat(d[2]) / 60.0f;}
+                        if (d[d.length-1].toUpperCase().equals("w")) {lon = -lon; lonm = -lonm;}
+                    }
+                }
+                if (lon != 0.0f && lat != 0.0f) {
+                    // replace this with a format that the html parser can understand
+                    line = line.substring(0, p) + (name.length() > 0 ? (" " + name) : "") + " <nobr> " + lato + " " + lat + "\u00B0 " + latm + "'</nobr><nobr>" + lono + " " + lon + "\u00B0 " + lonm + "'</nobr> " + line.substring(q + WIKI_CLOSE_METADATA.length());
+                    s = p;
+                    continue;
+                }
+            }
+        }
+        return line;
+    }
+    
     private class TableOfContent {
 
         private final List<String> toc = new ArrayList<String>();   // needs to be list which ensures order

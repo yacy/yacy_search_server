@@ -608,6 +608,7 @@ dc_rights
         String language = this.dc_language();
         if (language != null && language.length() > 0) os.write("<dc:language>" + this.dc_language() + "</dc:language>\n");
         os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(date) + "</dc:date>\n");
+        if (this.lon != 0.0f && this.lat != 0.0f) os.write("<geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat>\n");
         os.write("</record>\n");
     }
     
