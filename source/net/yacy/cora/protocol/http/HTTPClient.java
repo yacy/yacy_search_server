@@ -150,17 +150,17 @@ public class HTTPClient {
 		 * HTTP connection settings
 		 */
 		// timeout in milliseconds until a connection is established in milliseconds
-		HttpConnectionParams.setConnectionTimeout(httpParams, 9500);
+		HttpConnectionParams.setConnectionTimeout(httpParams, 6000);
 		// SO_LINGER affects the socket close operation in seconds
 		// HttpConnectionParams.setLinger(httpParams, 6);
 		// HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
 		// SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
-		HttpConnectionParams.setSoTimeout(httpParams, 9900);
+		HttpConnectionParams.setSoTimeout(httpParams, 1000);
 		// getting an I/O error when executing a request over a connection that has been closed at the server side
 		HttpConnectionParams.setStaleCheckingEnabled(httpParams, true);
 		// conserve bandwidth by minimizing the number of segments that are sent
 		HttpConnectionParams.setTcpNoDelay(httpParams, false);
-		// TODO: testing reuse of socket - there will be HttpConnectionParams.setSoReuseaddr(HttpParams params, boolean reuseaddr) in core-4.1
+		// Defines whether the socket can be bound even though a previous connection is still in a timeout state.
 		HttpConnectionParams.setSoReuseaddr(httpParams, true);
 		
 		httpClient = new DefaultHttpClient(clientConnectionManager, httpParams);
@@ -193,6 +193,16 @@ public class HTTPClient {
 			httpClient.getConnectionManager().shutdown();
 		}
     	
+    }
+    
+    /**
+     * this method sets a host on which more than the default of 2 router per host are allowed
+     * 
+     * @param the host to be raised in 'route per host'
+     */
+    public static void setMaxRouteHost(final String host) {
+    	HttpHost mHost = new HttpHost(host);
+    	((ThreadSafeClientConnManager) httpClient.getConnectionManager()).setMaxForRoute(new HttpRoute(mHost), 50);
     }
     
     /**
@@ -337,7 +347,7 @@ public class HTTPClient {
     }
     
     /**
-     * This method POSTs a page from the server.
+     * send data to the server named by uri
      * 
      * @param uri the url to post
      * @param parts to post
@@ -346,39 +356,7 @@ public class HTTPClient {
      */
     public byte[] POSTbytes(final String uri, final Map<String, ContentBody> parts, final boolean usegzip) throws IOException {
         final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
-        String host = url.getHost();
-        if (host == null) host = "127.0.0.1";
-        setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-
-        final MultipartEntity multipartEntity = new MultipartEntity();
-        for (final Entry<String,ContentBody> part : parts.entrySet())
-            multipartEntity.addPart(part.getKey(), part.getValue());
-        // statistics
-        upbytes = multipartEntity.getContentLength();
-
-        if (usegzip) {
-            httpPost.setEntity(new GzipCompressingEntity(multipartEntity));
-        } else {
-            httpPost.setEntity(multipartEntity);
-        }
-        
-        return getContentBytes(httpPost, Long.MAX_VALUE);
-    }
-    
-    public byte[] POSTbytes(final String uri, final InputStream instream, long length) throws IOException {
-        final MultiProtocolURI url = new MultiProtocolURI(uri);
-        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
-        String host = url.getHost();
-        if (host == null) host = "127.0.0.1";
-        setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-
-        final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
-        // statistics
-        upbytes = length;
-        httpPost.setEntity(inputStreamEntity);
-        currentRequest = httpPost;
-        return getContentBytes(httpPost, Long.MAX_VALUE);
+        return POSTbytes(url, url.getHost(), parts, usegzip);
     }
 
     /**
@@ -392,14 +370,48 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] POSTbytes(final MultiProtocolURI url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
-        this.setHost(vhost);
-        byte[] b;
-        try {
-            b = this.POSTbytes(url.toNormalform(true, false, true, false), post, usegzip);
-        } finally {
-            this.finish();
+    	final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
+        
+        setHost(vhost); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+    	if (vhost == null) setHost("127.0.0.1");
+
+        final MultipartEntity multipartEntity = new MultipartEntity();
+        for (final Entry<String,ContentBody> part : post.entrySet())
+            multipartEntity.addPart(part.getKey(), part.getValue());
+        // statistics
+        upbytes = multipartEntity.getContentLength();
+
+        if (usegzip) {
+            httpPost.setEntity(new GzipCompressingEntity(multipartEntity));
+        } else {
+            httpPost.setEntity(multipartEntity);
         }
-        return b;
+        
+        return getContentBytes(httpPost, Long.MAX_VALUE);
+    }
+    
+    /**
+     * send stream-data to the server named by uri
+     * 
+     * @param uri the url to post
+     * @param instream the stream to send
+     * @param length the length of the stream
+     * @return content bytes
+     * @throws IOException
+     */
+    public byte[] POSTbytes(final String uri, final InputStream instream, long length) throws IOException {
+        final MultiProtocolURI url = new MultiProtocolURI(uri);
+        final HttpPost httpPost = new HttpPost(url.toNormalform(true, false, true, false));
+        String host = url.getHost();
+        if (host == null) host = "127.0.0.1";
+        setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+
+        final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
+        // statistics
+        upbytes = length;
+        httpPost.setEntity(inputStreamEntity);
+        currentRequest = httpPost;
+        return getContentBytes(httpPost, Long.MAX_VALUE);
     }
 	
 	/**
