@@ -9,15 +9,31 @@
 				<legend>Import Bookmarks</legend>
 				<dl>
 					<dt>
-						<label for="importer">Importer:</label>
+						<label for="importer">Bookmark File Format:</label>
 					</dt>
 					<dd>
-						<select name="importer" id="importer">
-							<option value="xbel">XBEL Importer</option>
-							<option value="html">Netscape HTML Importer</option>
-							<option value="json">Firefox JSON Importer</option>
-						</select>
+					    <input type="radio" name="importer" value="html" /> Netscape HTML,
+					    <small>
+					    bookmark.htm (Firefox, IE, Safari, Opera) 
+					    </small>
+					    <br />
+					    <input type="radio" name="importer" value="json" /> Firefox JSON
+					    <br />
+					    <input type="radio" name="importer" value="xbel" /> XBEL, 
+					    <small>
+					    <a href="http://pyxml.sourceforge.net/topics/xbel/">
+					    XML Bookmark Exchange Language
+					    </a>
+					    </small>
 					</dd>
+					<br />
+					<dt>
+						<label for="root">Target Folder:</label>
+					</dt>
+					<dd>
+						<input type="text" name="root" id="root" value="/Imported Bookmarks" />
+					</dd>
+					<br />
 					<dt>
 						<label for="file">File:</label>
 					</dt>

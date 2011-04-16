@@ -1,5 +1,6 @@
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
@@ -33,29 +34,43 @@ public class import_ymark {
         final boolean isAuthUser = user!= null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
         Thread t;
         HashMap<String,String> bmk;
-		ByteArrayInputStream byteIn = null;
-        
+        String root = YMarkTables.FOLDERS_IMPORTED;
+        InputStreamReader reader = null;
+		
         if(isAdmin || isAuthUser) {
         	String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);        	
         	if(isAdmin && post.containsKey("table") && post.get("table").length() > 0) {
         		bmk_user = post.get("table").substring(0, post.get("table").indexOf('_'));
         	}
-        	
+            if(post.containsKey("redirect") && post.get("redirect").length() > 0) {
+                prop.put("redirect_url", post.get("redirect"));
+                prop.put("redirect", "1");
+            }
+            if(post.containsKey("root") && post.get("root").length() > 0) {
+                root = post.get("root");
+            }
         	if(post.containsKey("bmkfile") && post.containsKey("importer")){
-        		byteIn = new ByteArrayInputStream(UTF8.getBytes(post.get("bmkfile$file")));
-        		if(post.get("importer").equals("html") && byteIn != null) {
-					final YMarkHTMLImporter htmlImporter = new YMarkHTMLImporter(byteIn, 10);
+        		try {
+                    reader = new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(post.get("bmkfile$file"))),"UTF-8");
+                } catch (UnsupportedEncodingException e1) {
+                    Log.logException(e1);
+                    // return rewrite properties
+                    prop.put("result", "0");
+                    return prop;
+                }
+        		if(post.get("importer").equals("html") && reader != null) {
+					final YMarkHTMLImporter htmlImporter = new YMarkHTMLImporter(reader, 10, root);
 		            t = new Thread(htmlImporter, "YMarks - HTML Importer");
 		            t.start();
 		            while ((bmk = htmlImporter.take()) != YMarkTables.POISON) {
 						putBookmark(sb, bmk_user, bmk);
 		            }
             		prop.put("result", "1");        			
-        		} else if(post.get("importer").equals("xbel") && byteIn != null) {
+        		} else if(post.get("importer").equals("xbel") && reader != null) {
         			final YMarkXBELImporter xbelImporter;	
     				try {
 						//TODO: make RootFold 
-    					xbelImporter = new YMarkXBELImporter(byteIn, 100, YMarkTables.FOLDERS_IMPORTED);
+    					xbelImporter = new YMarkXBELImporter(reader, 10, root);
 					} catch (SAXException e) {
 						//TODO: display an error message
 						Log.logException(e);
@@ -68,14 +83,9 @@ public class import_ymark {
 						putBookmark(sb, bmk_user, bmk);
 		            }
     				prop.put("result", "1");
-            	} else if(post.get("importer").equals("json") && byteIn != null) {
+            	} else if(post.get("importer").equals("json") && reader != null) {
             		YMarkJSONImporter jsonImporter;
-                    try {
-                        jsonImporter = new YMarkJSONImporter(byteIn, 10);
-                    } catch (UnsupportedEncodingException e) {
-                        prop.put("result", "1");
-                        return prop;
-                    }
+                    jsonImporter = new YMarkJSONImporter(reader, 10, root);
 		            t = new Thread(jsonImporter, "YMarks - JSON Importer");
 		            t.start();
 		            while ((bmk = jsonImporter.take()) != YMarkTables.POISON) {
@@ -87,10 +97,6 @@ public class import_ymark {
         }  else {
         	prop.put(YMarkTables.USER_AUTHENTICATE,YMarkTables.USER_AUTHENTICATE_MSG);
         }
-		if(post.containsKey("redirect") && post.get("redirect").length() > 0) {
-			prop.put("redirect_url", post.get("redirect"));
-			prop.put("redirect", "1");
-		}
         // return rewrite properties
         return prop;
 	}

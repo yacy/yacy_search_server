@@ -1,10 +1,7 @@
 package de.anomic.data.ymark;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -15,38 +12,48 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 public class YMarkJSONImporter implements Runnable, ContentHandler{
-
-	public final static String FOLDER = "text/x-moz-place-container";
-	public final static String BOOKMARK = "text/x-moz-place";
-	public final static String ANNOS = "annos";
-	public final static String TYPE = "type";
-	public final static String CHILDREN = "children";
-	private final static String MILLIS = "000";
 		
-	private final JSONParser parser;
+	// Importer Variables
+	private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;	
+    private final Reader bmk_file;
+    private final String RootFolder;
+    private final StringBuilder folderstring;
+    private HashMap<String,String> bmk;
+    private final JSONParser parser;
 
-	private final Reader json;
-	private final StringBuilder folderstring;
+    // Statics
+    public final static String FOLDER = "text/x-moz-place-container";
+    public final static String BOOKMARK = "text/x-moz-place";
+    public final static String ANNOS = "annos";
+    public final static String TYPE = "type";
+    public final static String CHILDREN = "children";
+    public final static String MILLIS = "000";
+    
+    // Parser Variables
 	private final StringBuilder value;
 	private final StringBuilder key;
 	private final HashMap<String,String> obj;
-	private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;
-	private HashMap<String,String> bmk;
 	private int depth;
+	
 	private Boolean isFolder;
 	private Boolean isBookmark;
 	private Boolean isAnnos;	
 	
-	public YMarkJSONImporter(final InputStream input, int queueSize) throws UnsupportedEncodingException {
-		this.parser = new JSONParser();
-		this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
-		this.json = new InputStreamReader(input, "UTF-8");
-		this.folderstring = new StringBuilder(256);
-		this.key = new StringBuilder(16);
-		this.value = new StringBuilder(128);
+	public YMarkJSONImporter(final Reader bmk_file, final int queueSize, final String root) {
+        this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);		
+        this.bmk_file = bmk_file;
+        this.RootFolder = root;
+        this.folderstring = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+        this.folderstring.append(this.RootFolder);
+        this.bmk = new HashMap<String,String>();
+	    
+        this.parser = new JSONParser();
+		
+	    this.value = new StringBuilder(128);
+	    this.key = new StringBuilder(16);
 		this.obj = new HashMap<String,String>();
-		this.bmk = new HashMap<String,String>();
 		this.depth = 0;
+		
 		this.isAnnos = false;
 		this.isBookmark = false;
 		this.isFolder = true;
@@ -154,7 +161,7 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 	public void run() {
 		try {
 			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "JSON Importer run()");
-			this.parser.parse(json, this, true);
+			this.parser.parse(this.bmk_file, this, true);
 		} catch (IOException e) {
 			Log.logException(e);
 		} catch (ParseException e) {

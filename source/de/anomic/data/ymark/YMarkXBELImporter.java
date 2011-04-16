@@ -27,7 +27,7 @@
 package de.anomic.data.ymark;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +45,16 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 
-	public static enum XBEL {
+    // Importer Variables
+    private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;
+    private final Reader bmk_file;
+    private final String RootFolder;
+    private final StringBuilder folderstring;
+    private HashMap<String,String> bmk;
+    private final XMLReader xmlReader;
+    
+    // Statics
+    public static enum XBEL {
 		NOTHING			(""),
 		XBEL			("<xbel"),
 		TITLE			("<title"),
@@ -86,47 +95,41 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 		}
 	}
 
-	private HashMap<String,String> ref;
-	private HashMap<String,String> bmk;
-	private XBEL outer_state;					// BOOKMARK, FOLDER, NOTHING
-    private XBEL inner_state;					// DESC, TITLE, INFO, ALIAS, (METADATA), NOTHING
-    private boolean parse_value;
-   
+	// Parser Variables
 	private final HashMap<String,HashMap<String,String>> bmkRef;
 	private final HashSet<HashMap<String,String>> aliasRef;
     private final StringBuilder buffer;
-	private final StringBuilder folder;
-	private final StringBuilder foldersString;
-	private final InputSource input;
-	private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;
-	private final XMLReader xmlReader;
-	private final String RootFolder;
+    private final StringBuilder folder;
+		
+    private HashMap<String,String> ref;
+    private XBEL outer_state;                   // BOOKMARK, FOLDER, NOTHING
+    private XBEL inner_state;                   // DESC, TITLE, INFO, ALIAS, (METADATA), NOTHING
+    private boolean parse_value;
     
-    public YMarkXBELImporter (final InputStream input, int queueSize, String root) throws SAXException {
-        this.bmk = 				null;
-        this.RootFolder =		root;
-        
-        this.buffer = 			new StringBuilder();
-    	this.foldersString = 	new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
-    	this.folder = 			new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
-        
-        this.folder.append(this.RootFolder);
-        
-        this.input = 			new InputSource(input);
-        this.bmkRef = 			new HashMap<String,HashMap<String,String>>();
-    	this.aliasRef = 		new HashSet<HashMap<String,String>>();
-        this.bookmarks = 		new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
-        
-        this.xmlReader = 		XMLReaderFactory.createXMLReader();
+    public YMarkXBELImporter (final Reader bmk_file, final int queueSize, final String root) throws SAXException {
+        this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
+        this.bmk_file = bmk_file;
+        this.RootFolder = root;
+        this.folderstring = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+        this.folderstring.append(this.RootFolder);
+        this.bmk = new HashMap<String,String>();
+
+        this.xmlReader = XMLReaderFactory.createXMLReader();
         this.xmlReader.setContentHandler(this);
         this.xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
         this.xmlReader.setFeature("http://xml.org/sax/features/namespaces", false);
         this.xmlReader.setFeature("http://xml.org/sax/features/validation", false);
+        
+        this.bmkRef = new HashMap<String,HashMap<String,String>>();
+        this.aliasRef = new HashSet<HashMap<String,String>>();
+        this.buffer = new StringBuilder();
+        this.folder = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+        this.folder.append(this.RootFolder);
     }
     
     public void run() {
     	try {
-        	this.xmlReader.parse(this.input);
+        	this.xmlReader.parse(new InputSource(this.bmk_file));
         } catch (SAXParseException e) {
             Log.logException(e);	
         } catch (SAXException e) {
@@ -295,19 +298,19 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
     }
     
     private void UpdateBmkRef(final String id, final boolean url) {
-    	this.foldersString.setLength(0);
+    	this.folderstring.setLength(0);
     	
     	if(this.bmkRef.containsKey(id)) {
-        	this.foldersString.append(this.bmkRef.get(id).get(YMarkTables.BOOKMARK.FOLDERS.key()));
-        	this.foldersString.append(',');
+        	this.folderstring.append(this.bmkRef.get(id).get(YMarkTables.BOOKMARK.FOLDERS.key()));
+        	this.folderstring.append(',');
         	this.ref = this.bmkRef.get(id);
         } else {
             this.ref = new HashMap<String,String>();
         }
-    	this.foldersString.append(this.folder);
+    	this.folderstring.append(this.folder);
         if(url)
         	this.ref.put(YMarkTables.BOOKMARK.URL.key(), this.bmk.get(YMarkTables.BOOKMARK.URL.key()));
-        this.ref.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.foldersString.toString());
+        this.ref.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folderstring.toString());
         this.bmkRef.put(id, ref);
     }
 }

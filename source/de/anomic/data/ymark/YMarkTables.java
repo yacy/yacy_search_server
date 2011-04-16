@@ -202,24 +202,26 @@ public class YMarkTables {
     	this.patternBuilder.append(root);
     	this.patternBuilder.append(p7);
     	this.patternBuilder.append(p8);
+    	
     	final Pattern r = Pattern.compile(this.patternBuilder.toString());
     	final Iterator<Tables.Row> bit = this.worktables.iterator(bmk_table, YMarkTables.BOOKMARK.FOLDERS.key(), r);
     	final TreeSet<String> folders = new TreeSet<String>();
     	final StringBuilder path = new StringBuilder(200);
     	Tables.Row bmk_row = null;
+    	
     	while(bit.hasNext()) {
     		bmk_row = bit.next();
     		if(bmk_row.containsKey(BOOKMARK.FOLDERS.key())) {    	    	
     			final String[] folderArray = (new String(bmk_row.get(BOOKMARK.FOLDERS.key()),"UTF8")).split(YMarkUtil.TAGS_SEPARATOR);                    
     	        for (final String folder : folderArray) {
-    	        	if(folder.startsWith(root)) {
-    	        		if(!folders.contains(folder)) {
+    	            if(folder.substring(0, root.length()+1).equals(root+'/')) {
+    	                if(!folders.contains(folder)) {
         	        		path.setLength(0);
         	                path.append(folder);
         	                //TODO: get rid of .toString.equals()
         	                while(path.length() > 0 && !path.toString().equals(root)){
         	                	folders.add(path.toString());                  
-        	                    path.setLength(path.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
+        	                	path.setLength(path.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
         	                }	
     	        		}
     	        	}    	        	

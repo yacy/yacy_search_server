@@ -27,11 +27,9 @@
 package de.anomic.data.ymark;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
 
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
@@ -41,40 +39,46 @@ import javax.swing.text.html.parser.ParserDelegator;
 import net.yacy.kelondro.logging.Log;
 
 public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements Runnable {
+        
+    // Importer Variables
+    private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;
+    private final Reader bmk_file;
+    private final String RootFolder;
+    private final StringBuilder folderstring;
+    private HashMap<String,String> bmk;
+    private final ParserDelegator htmlParser;
     
+    // Statics
     public static enum STATE {
-    	NOTHING,
-    	BOOKMARK,
-    	FOLDER,
-    	BMK_DESC,
-    	FOLDER_DESC
+        NOTHING,
+        BOOKMARK,
+        FOLDER,
+        BMK_DESC,
+        FOLDER_DESC
     }
+    public static final String MILLIS = "000";
     
-    private static final String MILLIS = "000";
-		
-	private STATE state;
+    // Parser variables    
+    private STATE state;
 	private HTML.Tag prevTag;
-	private HashMap<String,String> bmk;
-	private StringBuilder folder;
 	
-    private final InputStream input;
-	private final BlockingQueue<HashMap<String,String>> bookmarks;
-	private final ParserDelegator htmlParser;
-	
-	public YMarkHTMLImporter(final InputStream input, int queueSize) {		
-		this.state = STATE.NOTHING;
+	public YMarkHTMLImporter(final Reader bmk_file, final int queueSize, final String root) {		
+        this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
+        this.bmk_file = bmk_file;
+        this.RootFolder = root;
+        this.folderstring = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+        this.folderstring.append(this.RootFolder);        
+        this.bmk = new HashMap<String,String>();
+        
+        this.htmlParser = new ParserDelegator();
+        
+	    this.state = STATE.NOTHING;
 		this.prevTag = null;
-		this.bmk = new HashMap<String,String>();
-		this.folder = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
-		this.folder.append(YMarkTables.FOLDERS_IMPORTED);
-		this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
-		this.input = input;
-		this.htmlParser = new ParserDelegator();
 	}
 
 	public void run() {
 		try {
-			this.htmlParser.parse(new InputStreamReader(this.input,"UTF-8"), this, true);
+			this.htmlParser.parse(this.bmk_file, this, true);
 		} catch (IOException e) {
 			Log.logException(e);
 		} finally {
@@ -84,7 +88,7 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 				Log.logException(e);
 			}
 			try {
-        		this.input.close();
+        		this.bmk_file.close();
 			} catch (IOException e) {
 			    Log.logException(e);
 			}
@@ -97,16 +101,16 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
     			break;
     		case BOOKMARK:
 				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), new String(data));
-				this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folder.toString());
+				this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folderstring.toString());
 				this.bmk.put(YMarkTables.BOOKMARK.PUBLIC.key(), YMarkTables.BOOKMARK.PUBLIC.deflt());
 				this.bmk.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.deflt());
 				break;
     		case FOLDER:
-    			this.folder.append(YMarkUtil.FOLDERS_SEPARATOR);
-    			this.folder.append(data);
+    			this.folderstring.append(YMarkUtil.FOLDERS_SEPARATOR);
+    			this.folderstring.append(data);
     			break;
     		case FOLDER_DESC:
-    			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folder+" desc: " + new String(data));
+    			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folderstring+" desc: " + new String(data));
     			break;
     		case BMK_DESC:
     			this.bmk.put(YMarkTables.BOOKMARK.DESC.key(), new String(data));
@@ -163,8 +167,8 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 			state = STATE.FOLDER_DESC;
 	    } else if (t == HTML.Tag.DL) {
             //TODO: get rid of .toString.equals()
-        	if(!this.folder.toString().equals(YMarkTables.FOLDERS_IMPORTED)) {
-	    		folder.setLength(folder.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
+        	if(!this.folderstring.toString().equals(YMarkTables.FOLDERS_IMPORTED)) {
+	    		folderstring.setLength(folderstring.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
         	}
 	    } else {
 	    	state = STATE.NOTHING;
