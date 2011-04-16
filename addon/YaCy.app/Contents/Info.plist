@@ -64,6 +64,7 @@
 			<string>$JAVAROOT/lib/poi-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/poi-scratchpad-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/servlet-api.jar</string>
+			<string>$JAVAROOT/lib/json-simple-1.1.jar</string>
 			<string>$JAVAROOT/lib/slf4j-api-1.5.5.jar</string>
 			<string>$JAVAROOT/lib/slf4j-jdk14-1.5.5.jar</string>
 			<string>$JAVAROOT/lib/webcat-0.1-swf.jar</string>

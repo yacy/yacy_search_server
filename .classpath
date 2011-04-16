@@ -41,13 +41,10 @@
 	<classpathentry kind="lib" path="lib/pdfbox-1.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
-<<<<<<< .mine
 	<classpathentry kind="lib" path="lib/json-simple-1.1.jar"/>
-=======
 	<classpathentry kind="lib" path="lib/slf4j-api-1.5.5.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.5.5.jar"/>
 	<classpathentry kind="lib" path="lib/apache-solr-solrj-3.1.0.jar"/>
->>>>>>> .r7657
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="output" path="gen"/>
