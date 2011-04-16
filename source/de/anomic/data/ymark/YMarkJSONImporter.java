@@ -27,11 +27,11 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
     public final static String ANNOS = "annos";
     public final static String TYPE = "type";
     public final static String CHILDREN = "children";
-    public final static String MILLIS = "000";
     
     // Parser Variables
 	private final StringBuilder value;
 	private final StringBuilder key;
+	private final StringBuilder date;
 	private final HashMap<String,String> obj;
 	private int depth;
 	
@@ -51,7 +51,8 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		
 	    this.value = new StringBuilder(128);
 	    this.key = new StringBuilder(16);
-		this.obj = new HashMap<String,String>();
+		this.date = new StringBuilder(32);
+	    this.obj = new HashMap<String,String>();
 		this.depth = 0;
 		
 		this.isAnnos = false;
@@ -103,8 +104,14 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		if(this.isBookmark) {
 			this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(),obj.get(YMarkTables.BOOKMARK.TITLE.json_attrb()));
 			this.bmk.put(YMarkTables.BOOKMARK.URL.key(),obj.get(YMarkTables.BOOKMARK.URL.json_attrb()));
-			this.bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(),obj.get(YMarkTables.BOOKMARK.DATE_ADDED.json_attrb())+MILLIS);
-			this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(),obj.get(YMarkTables.BOOKMARK.DATE_MODIFIED.json_attrb())+MILLIS);
+			date.setLength(0);
+			date.append(obj.get(YMarkTables.BOOKMARK.DATE_ADDED.json_attrb()));
+			date.setLength(date.length()-3);
+			this.bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), date.toString());
+			date.setLength(0);
+			date.append(obj.get(YMarkTables.BOOKMARK.DATE_MODIFIED.json_attrb()));
+			date.setLength(date.length()-3);
+			this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date.toString());
 			this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(),this.folderstring.toString());
 			if(this.obj.containsKey(YMarkTables.BOOKMARK.TAGS.json_attrb())) {
 				this.bmk.put(YMarkTables.BOOKMARK.TAGS.key(),obj.get(YMarkTables.BOOKMARK.TAGS.json_attrb()));

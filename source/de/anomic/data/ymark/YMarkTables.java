@@ -214,7 +214,7 @@ public class YMarkTables {
     		if(bmk_row.containsKey(BOOKMARK.FOLDERS.key())) {    	    	
     			final String[] folderArray = (new String(bmk_row.get(BOOKMARK.FOLDERS.key()),"UTF8")).split(YMarkUtil.TAGS_SEPARATOR);                    
     	        for (final String folder : folderArray) {
-    	            if(folder.substring(0, root.length()+1).equals(root+'/')) {
+    	            if(folder.length() > root.length() && folder.substring(0, root.length()+1).equals(root+'/')) {
     	                if(!folders.contains(folder)) {
         	        		path.setLength(0);
         	                path.append(folder);

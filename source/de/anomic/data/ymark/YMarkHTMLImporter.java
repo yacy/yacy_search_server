@@ -167,7 +167,7 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 			state = STATE.FOLDER_DESC;
 	    } else if (t == HTML.Tag.DL) {
             //TODO: get rid of .toString.equals()
-        	if(!this.folderstring.toString().equals(YMarkTables.FOLDERS_IMPORTED)) {
+        	if(!this.folderstring.toString().equals(this.RootFolder)) {
 	    		folderstring.setLength(folderstring.lastIndexOf(YMarkUtil.FOLDERS_SEPARATOR));
         	}
 	    } else {
