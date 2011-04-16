@@ -1,5 +1,6 @@
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
@@ -68,7 +69,13 @@ public class import_ymark {
 		            }
     				prop.put("result", "1");
             	} else if(post.get("importer").equals("json") && byteIn != null) {
-            		final YMarkJSONImporter jsonImporter = new YMarkJSONImporter(byteIn, 10);
+            		YMarkJSONImporter jsonImporter;
+                    try {
+                        jsonImporter = new YMarkJSONImporter(byteIn, 10);
+                    } catch (UnsupportedEncodingException e) {
+                        prop.put("result", "1");
+                        return prop;
+                    }
 		            t = new Thread(jsonImporter, "YMarks - JSON Importer");
 		            t.start();
 		            while ((bmk = jsonImporter.take()) != YMarkTables.POISON) {

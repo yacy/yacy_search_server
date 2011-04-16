@@ -43,7 +43,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 
 public class YMarkTables {
     
-	public static enum TABLES {
+    public static enum TABLES {
 		BOOKMARKS ("_bookmarks"),
 		TAGS ("_tags"),
 		FOLDERS ("_folders");
@@ -77,24 +77,25 @@ public class YMarkTables {
     		return this.protocol+s;
     	}
     }
-	
+		
     public static enum BOOKMARK {
-    	//				key					dflt			html_attrb				xbel_attrb		type
-    	URL 			("url",				"",				"href",					"href",			"link"),
-    	TITLE 			("title",			"",				"",						"",				"meta"),
-    	DESC 			("desc",			"",				"",						"",				"comment"),
-    	DATE_ADDED 		("date_added",		"",				"add_date",				"added",		"date"),
-    	DATE_MODIFIED 	("date_modified",	"",				"last_modified",		"modified",		"date"),
-    	DATE_VISITED 	("date_visited",	"",				"last_visited",			"visited",		"date"),
-    	PUBLIC 			("public",			"flase",		"",						"yacy:public",	"lock"),
-    	TAGS 			("tags",			"unsorted",		"shortcuturl",			"yacy:tags",	"tag"),
-    	VISITS 			("visits",			"0",			"",						"yacy:visits",	"stat"),
-    	FOLDERS 		("folders",			"/unsorted",	"",						"",				"folder");
+    	//             key                 dflt            html_attrb          xbel_attrb      json_attrb      type
+    	URL            ("url",             "",             "href",             "href",         "uri",          "link"),
+    	TITLE          ("title",           "",             "",                 "",             "title",        "meta"),
+    	DESC           ("desc",            "",             "",                 "",             "",             "comment"),
+    	DATE_ADDED     ("date_added",      "",             "add_date",         "added",        "dateAdded",    "date"),
+    	DATE_MODIFIED  ("date_modified",   "",             "last_modified",    "modified",     "lastModified", "date"),
+    	DATE_VISITED   ("date_visited",    "",             "last_visited",     "visited",      "",             "date"),
+    	PUBLIC         ("public",          "flase",        "",                 "yacy:public",  "",             "lock"),
+    	TAGS           ("tags",            "unsorted",     "shortcuturl",      "yacy:tags",    "keyword",      "tag"),
+    	VISITS         ("visits",          "0",            "",                 "yacy:visits",  "",             "stat"),
+    	FOLDERS        ("folders",         "/unsorted",    "",                 "",             "",             "folder");
     	    	
     	private String key;
     	private String dflt;
     	private String html_attrb;
     	private String xbel_attrb;
+    	private String json_attrb;
     	private String type;
 
         private static final Map<String,BOOKMARK> lookup = new HashMap<String,BOOKMARK>();
@@ -105,11 +106,12 @@ public class YMarkTables {
     	
         private static StringBuilder buffer = new StringBuilder(25);;
         
-    	private BOOKMARK(String k, String s, String a, String x, String t) {
+    	private BOOKMARK(String k, String s, String a, String x, String j, String t) {
     		this.key = k;
     		this.dflt = s;
     		this.html_attrb = a;
     		this.xbel_attrb = x;
+    		this.json_attrb = j;
     		this.type = t;
     	}
     	public static BOOKMARK get(String key) { 
@@ -130,6 +132,9 @@ public class YMarkTables {
     	public String xbel_attrb() {
     		return this.xbel_attrb;
     	}
+        public String json_attrb() {
+            return this.json_attrb;
+        }
     	public String xbel() {
     		buffer.setLength(0);
     		buffer.append('"');
@@ -159,10 +164,21 @@ public class YMarkTables {
 	public final static String USER_AUTHENTICATE = "AUTHENTICATE";
 	public final static String USER_AUTHENTICATE_MSG = "Authentication required!";
 	
-    private WorkTables worktables;
+    public final static String p1 = "(?:^|.*,)";
+    public final static String p2 = "\\Q";
+    public final static String p3 = "\\E";
+    public final static String p4 = "(?:,.*|$)";
+    public final static String p5 = "((?:";
+    public final static String p6 = "),*.*){";
+    public final static String p7 = "/.*)";
+    public final static String p8 = "(?:,|$)";
+	
+    private final WorkTables worktables;
+    private final StringBuffer patternBuilder;
     
     public YMarkTables(final Tables wt) {
     	this.worktables = (WorkTables)wt;
+    	this.patternBuilder = new StringBuffer(512);
     }
    
     public void deleteBookmark(final String bmk_user, final byte[] urlHash) throws IOException, RowSpaceExceededException {
@@ -180,7 +196,13 @@ public class YMarkTables {
     
     public TreeSet<String> getFolders(final String bmk_user, final String root) throws IOException {
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-    	final Pattern r = Pattern.compile("(?:^|.*,)("+root+"/.*)(?:,|$)");
+    	this.patternBuilder.setLength(0);
+    	this.patternBuilder.append(p1);
+    	this.patternBuilder.append('(');
+    	this.patternBuilder.append(root);
+    	this.patternBuilder.append(p7);
+    	this.patternBuilder.append(p8);
+    	final Pattern r = Pattern.compile(this.patternBuilder.toString());
     	final Iterator<Tables.Row> bit = this.worktables.iterator(bmk_table, YMarkTables.BOOKMARK.FOLDERS.key(), r);
     	final TreeSet<String> folders = new TreeSet<String>();
     	final StringBuilder path = new StringBuilder(200);
@@ -210,30 +232,34 @@ public class YMarkTables {
     
     public Iterator<Tables.Row> getBookmarksByFolder(final String bmk_user, final String folder) throws IOException {    	
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-    	final StringBuffer buffer = new StringBuffer(folder.length()+30);
-    	buffer.append("(?:^|.*,)(\\Q");
-		buffer.append(folder);
-		buffer.append("\\E)(?:,|$)");
-    	final Pattern p = Pattern.compile(buffer.toString());
+    	this.patternBuilder.setLength(0);
+    	this.patternBuilder.append(p1);
+    	this.patternBuilder.append('(');
+    	this.patternBuilder.append(p2);
+		this.patternBuilder.append(folder);
+		this.patternBuilder.append(p3);
+		this.patternBuilder.append(')');
+		this.patternBuilder.append(p4);
+    	final Pattern p = Pattern.compile(this.patternBuilder.toString());
     	return this.worktables.iterator(bmk_table, YMarkTables.BOOKMARK.FOLDERS.key(), p);
     }
     
     public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, final String[] tagArray) throws IOException {    	
-    	// "(?:^|.*,)((?:tag4|tag2|tag5),*.*){3}"
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-    	final StringBuffer buffer = new StringBuffer((tagArray.length * 25)+25);
-    	buffer.append("(?:^|.*,)((?:");
+        this.patternBuilder.setLength(0);
+    	this.patternBuilder.append(p1);
+    	this.patternBuilder.append(p5);
     	for (final String tag : tagArray) {
-        	buffer.append("\\Q");
-    		buffer.append(tag);
-    		buffer.append("\\E");
-        	buffer.append("|");
+        	this.patternBuilder.append(p2);
+    		this.patternBuilder.append(tag);
+    		this.patternBuilder.append(p3);
+        	this.patternBuilder.append('|');
 		}
-    	buffer.deleteCharAt(buffer.length()-1);
-    	buffer.append("),*.*){");
-    	buffer.append(tagArray.length);
-    	buffer.append("}");
-    	final Pattern p = Pattern.compile(buffer.toString());
+    	this.patternBuilder.deleteCharAt(this.patternBuilder.length()-1);
+    	this.patternBuilder.append(p6);
+    	this.patternBuilder.append(tagArray.length);
+    	this.patternBuilder.append('}');
+    	final Pattern p = Pattern.compile(this.patternBuilder.toString());
     	return this.worktables.iterator(bmk_table, YMarkTables.BOOKMARK.TAGS.key(), p);
     }
     
