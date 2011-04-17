@@ -170,6 +170,56 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         PROPERTY_VALUES.put("align", array);
     }
 
+    private final String tableStart = "&#123;" + PIPE_ESCAPED;        // {|
+    private final String newLine = PIPE_ESCAPED + "-";                // |-
+    private final String cellDivider = PIPE_ESCAPED + PIPE_ESCAPED;   // ||
+    private final String tableEnd = PIPE_ESCAPED + "&#125;";          // |}
+    private final String attribDivider = PIPE_ESCAPED;                // |
+    private final int lenTableStart = tableStart.length();
+    private final int lenCellDivider = cellDivider.length();
+    private final int lenTableEnd = tableEnd.length();
+    private final int lenAttribDivider = attribDivider.length();
+
+    private void processHeadline(StringBuilder input, int firstPosition, final Tags tags, int secondPosition, String direlem) {
+        //add anchor and create headline
+        if ((direlem = input.substring(firstPosition + tags.openWikiLength, secondPosition)) != null) {
+            //counting double headlines
+            int doubles = 0;
+            final Iterator<String> iterator = tableOfContent.iterator();
+            String element;
+            while (iterator.hasNext()) {
+                element = iterator.next();
+                // no element with null value should ever be in directory
+                assert (element != null);
+                if (element.substring(1).equals(direlem)) {
+                    doubles++;
+                }
+            }
+            String anchor = REGEX_NOT_CHAR_NUM_OR_UNDERSCORE_PATTERN.matcher(SPACE_PATTERN.matcher(direlem).replaceAll("_")).replaceAll(EMPTY); //replace blanks with underscores and delete everything thats not a regular character, a number or _
+            //if there are doubles, add underscore and number of doubles plus one
+            if (doubles > 0) {
+                anchor = anchor + "_" + (doubles + 1);
+            }
+            final StringBuilder link = new StringBuilder();
+            link.append("<a name=\"");
+            link.append(anchor);
+            link.append("\"></a>");
+            link.append(tags.openHTML);
+            link.append(direlem);
+            link.append(tags.closeHTML);
+            
+            input.replace(firstPosition, secondPosition + tags.closeWikiLength, link.toString());
+            /*
+            input = input.substring(0, firstPosition) + "<a name=\"" + anchor + "\"></a>" + tags.openHTML
+            + direlem + tags.closeHTML + input.substring(secondPosition + tags.closeWikiLength);
+             */
+            //add headlines to list of headlines (so TOC can be created)
+            if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
+                tableOfContent.add((tags.openWikiLength - 1) + direlem);
+            }
+        }
+    }
+
     private enum ListType {
         ORDERED, UNORDERED;
     }
@@ -207,14 +257,16 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @return HTML fragment.
      * @throws IOException in case input from reader can not be read.
      */
-    protected String transform(String hostport, final BufferedReader reader, final int length)
+    protected String transform(final String hostport, final BufferedReader reader, final int length)
             throws IOException {
         final StringBuilder out = new StringBuilder(length);
         String line;
         while ((line = reader.readLine()) != null) {
             out.append(processLineOfWikiCode(hostport, line)).append(serverCore.CRLF_STRING);
         }
-        return out.insert(0, createTableOfContents()).toString();
+        out.insert(0, createTableOfContents());
+        tableOfContent.clear();
+        return out.toString();
     }
 
     // contributed by [FB], changes by [MN]
@@ -224,17 +276,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @return HTML fragment
      */
     private String processTable(final String line) {
-        //some variables that make it easier to change codes for the table
+
         final StringBuilder out = new StringBuilder();
-        final String tableStart = "&#123;" + PIPE_ESCAPED;        // {|
-        final String newLine = PIPE_ESCAPED + "-";                // |-
-        final String cellDivider = PIPE_ESCAPED + PIPE_ESCAPED;   // ||
-        final String tableEnd = PIPE_ESCAPED + "&#125;";          // |}
-        final String attribDivider = PIPE_ESCAPED;                // |
-        final int lenTableStart = tableStart.length();
-        final int lenCellDivider = cellDivider.length();
-        final int lenTableEnd = tableEnd.length();
-        final int lenAttribDivider = attribDivider.length();
 
         if (line.startsWith(tableStart) && !processingTable) {
             processingTable = true;
@@ -639,7 +682,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    private String processPreformattedText(String hostport, String line) {
+    private String processPreformattedText(final String hostport, String line) {
         if (!escaped) {
             final int positionOfOpeningTag = line.indexOf(WIKI_OPEN_PRE_ESCAPED);
             final int positionOfClosingTag = line.indexOf(WIKI_CLOSE_PRE_ESCAPED);
@@ -865,61 +908,29 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * Replaces the wiki representation of tags with the HTML representation.
      * @param input String which potentially contains tags to be replaced.
      * @param tags tags to be replaced.
-     * @return input String with replaced tags.
+     * @return String with replaced tags.
      */
-    private String tagReplace(String input, final Tags tags) {
+    private String tagReplace(final String input, final Tags tags) {
         String direlem = null;    //string to keep headlines until they get added to List dirElements
 
-        int firstPosition;
-        final int secondPosition;
+        final StringBuilder stringBuilder = new StringBuilder(input);
+
+        int firstPosition = 0;
+        int secondPosition = 0;
         //replace pattern if a pair of the pattern can be found in the line
-        if (((firstPosition = input.indexOf(tags.openWiki)) >= 0) &&
-                ((secondPosition = input.indexOf(tags.closeWiki, firstPosition + tags.openWikiLength)) >= 0)) {
+        while (((firstPosition = stringBuilder.indexOf(tags.openWiki, secondPosition)) >= 0) &&
+                ((secondPosition = stringBuilder.indexOf(tags.closeWiki, firstPosition + tags.openWikiLength)) >= 0)) {
+            
             //extra treatment for headlines
             if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
-                //add anchor and create headline
-                if ((direlem = input.substring(firstPosition + tags.openWikiLength, secondPosition)) != null) {
-                    //counting double headlines
-                    int doubles = 0;
-
-                    final Iterator<String> iterator = tableOfContent.iterator();
-                    String element;
-                    while (iterator.hasNext()) {
-                        element = iterator.next();
-                        // no element with null value should ever be in directory
-                        assert (element != null);
-
-                        if (element.substring(1).equals(direlem)) {
-                            doubles++;
-                        }
-                    }
-                    String anchor = REGEX_NOT_CHAR_NUM_OR_UNDERSCORE_PATTERN.matcher(SPACE_PATTERN.matcher(direlem).replaceAll("_")).replaceAll(EMPTY);; //replace blanks with underscores and delete everything thats not a regular character, a number or _
-                    //if there are doubles, add underscore and number of doubles plus one
-                    if (doubles > 0) {
-                        anchor = anchor + "_" + (doubles + 1);
-                    }
-                    input = input.substring(0, firstPosition) + "<a name=\"" + anchor + "\"></a>" + tags.openHTML
-                            + direlem + tags.closeHTML + input.substring(secondPosition + tags.closeWikiLength);
-                    //add headlines to list of headlines (so TOC can be created)
-                    if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
-                        tableOfContent.add((tags.openWikiLength - 1) + direlem);
-                    }
-                }
+                processHeadline(stringBuilder, firstPosition, tags, secondPosition, direlem);
             } else {
-                input = input.substring(0, firstPosition) + tags.openHTML
-                        + (input.substring(firstPosition + tags.openWikiLength, secondPosition)) + tags.closeHTML
-                        + input.substring(secondPosition + tags.closeWikiLength);
+                stringBuilder.replace(firstPosition, firstPosition + tags.openWikiLength, tags.openHTML);
+                stringBuilder.replace(secondPosition, secondPosition + tags.closeWikiLength, tags.closeHTML);
             }
         }
-        return input;
-        // commented out the following lines because they caused an endless recursion here
-        /*
-        //recursion if another pair of the pattern can still be found in the line
-        if (((firstPosition = input.indexOf(tags.openWiki)) >= 0) && (input.indexOf(tags.closeWiki, firstPosition + tags.openWikiLength) >= 0)) {
-            input = tagReplace(input, tags);
-        }
-        return input;
-        */
+
+        return stringBuilder.toString();
     }
 
     /** Replaces wiki tags with HTML tags in one line of text.
@@ -1067,6 +1078,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             return toc.iterator();
         }
 
-
+        void clear() {
+            toc.clear();
+        }
     }
 }
