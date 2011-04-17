@@ -139,7 +139,8 @@ public class WebStructureGraph {
         int LCount = 0;
         while (it.hasNext()) {
             u = it.next();
-            if (u.getHost().equals(refhost)) {
+            if (u == null) continue;
+            if (refhost != null && u.getHost() != null && u.getHost().equals(refhost)) {
                 // this is a local link
                 LCount++;
             } else {
