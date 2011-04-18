@@ -134,9 +134,16 @@ public class Crawler_p {
                     if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart;
                 }
 
+                // remove crawlingFileContent before we record the call
+                final String crawlingFileName = post.get("crawlingFile");
+                final File crawlingFile = (crawlingFileName != null && crawlingFileName.length() > 0) ? new File(crawlingFileName) : null;
+                if (crawlingFile != null && crawlingFile.exists()) {
+                    post.remove("crawlingFile$file");
+                }
+                
                 // normalize URL
                 DigestURI crawlingStartURL = null;
-                try {crawlingStartURL = new DigestURI(crawlingStart);} catch (final MalformedURLException e1) {Log.logException(e1);}
+                if (crawlingFile == null) try {crawlingStartURL = new DigestURI(crawlingStart);} catch (final MalformedURLException e1) {Log.logException(e1);}
                 crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                
                 // set new properties
@@ -193,13 +200,6 @@ public class Crawler_p {
                 long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);
                 env.setConfig("crawlingIfOlder", crawlingIfOlder);
 
-                // remove crawlingFileContent before we record the call
-                final String crawlingFileName = post.get("crawlingFile");
-                final File crawlingFile = (crawlingFileName != null && crawlingFileName.length() > 0) ? new File(crawlingFileName) : null;
-                if (crawlingFile != null && crawlingFile.exists()) {
-                    post.remove("crawlingFile$file");
-                }
-                
                 // store this call as api call
                 if (repeat_time > 0) {
                     // store as scheduled api call
@@ -437,7 +437,7 @@ public class Crawler_p {
                                     cachePolicy);
                             sb.crawler.putActive(profile.handle().getBytes(), profile);
                             sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                            sb.crawlStacker.enqueueEntries(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
+                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks, true);
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);

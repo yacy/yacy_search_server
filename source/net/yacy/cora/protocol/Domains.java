@@ -24,6 +24,8 @@
 
 package net.yacy.cora.protocol;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -43,6 +45,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
+import net.yacy.cora.storage.KeyList;
 import net.yacy.kelondro.util.MemoryControl;
 
 public class Domains {
@@ -422,7 +425,23 @@ public class Domains {
         insertTLDProps(TLD_Generic,             TLD_Generic_ID);
         // the id=7 is used to flag local addresses
     }
+    
+    private static KeyList globalHosts;
 
+    public static void init(File globalHostsnameCache) {
+        if (globalHostsnameCache == null) {
+            globalHosts = null;
+        } else try {
+            globalHosts = new KeyList(globalHostsnameCache);
+        } catch (IOException e) {
+            globalHosts = null;
+        }
+    }
+
+    public static void close() {
+        if (globalHosts != null) try {globalHosts.close();} catch (IOException e) {}
+    }
+    
     /**
     * Does an DNS-Check to resolve a hostname to an IP.
     *
@@ -531,14 +550,20 @@ public class Domains {
                 return null;
             }
             
-            if ((ip != null) &&
-                (!ip.isLoopbackAddress()) &&
-                (!matchesList(host, nameCacheNoCachingPatterns))
-            ) {
-                // add new entries
+            if (ip != null && !ip.isLoopbackAddress() && !matchesList(host, nameCacheNoCachingPatterns)) {
+                // add new ip cache entries
                 NAME_CACHE_HIT.put(host, ip);
+                
+                // add also the isLocal host name caches
+                boolean localp = ip.isAnyLocalAddress() || ip.isLinkLocalAddress() || ip.isSiteLocalAddress();
+                if (localp) {
+                    localHostNames.add(host);
+                } else {
+                    if (globalHosts != null) try {globalHosts.add(host);} catch (IOException e) {}
+                }
             }
             LOOKUP_SYNC.remove(host);
+            
             return ip;
         }
     }
@@ -772,26 +797,16 @@ public class Domains {
         // check if there are other local IP addresses that are not in
         // the standard IP range
         if (localHostNames.contains(host)) return true;
-        /*
-        for (InetAddress a: localHostAddresses) {
-            String hostname = getHostName(a);
-            if (hostname != null && hostname.equals(host)) return true;
-            if (a.getHostAddress().equals(host)) return true;
-        }
-        */
+        if (globalHosts != null && globalHosts.contains(host)) return false;
         
         // check dns lookup: may be a local address even if the domain name looks global
         if (!recursive) return false;
         final InetAddress a = dnsResolve(host);
-        /*
-        if (a == null) {
-            // unknown if this is a local address. Could also be a timeout.
-            // It would be harmful to declare any public address as local, therefore return false
-            return false;
-        }
-        */
-        return a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress() || isLocal(a.getHostAddress(), false);
+        boolean localp = a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress() || isLocal(a.getHostAddress(), false);
+        return localp;
     }
+    
+    
     
     public static void main(final String[] args) {
         /*

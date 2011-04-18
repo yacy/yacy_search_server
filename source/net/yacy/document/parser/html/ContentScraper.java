@@ -178,9 +178,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             }
             break location;
         }
-        
         // find tags inside text
-        String b = cleanLine(super.stripAll(newtext));
+        String b = cleanLine(super.stripAllTags(newtext));
         if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
             // this is bad for the text semantics, because it is not possible for the

@@ -231,6 +231,13 @@ public final class CrawlStacker {
             }
         }
     }
+    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, String> hyperlinks, boolean replace) {
+        new Thread() {
+            public void run() {
+                enqueueEntries(initiator, profileHandle, hyperlinks, true);
+            }
+        }.start();
+    }
 
     public void enqueueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, String> hyperlinks, boolean replace) {
         for (Map.Entry<MultiProtocolURI, String> e: hyperlinks.entrySet()) {

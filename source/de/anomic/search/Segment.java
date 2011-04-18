@@ -300,10 +300,10 @@ public class Segment {
                     if (!u.contains("/" + language + "/") && !u.contains("/" + ISO639.country(language).toLowerCase() + "/")) {
                         // no confirmation using the url, use the TLD
                         language = url.language();
-                        log.logWarning(error + ", corrected using the TLD");
+                        if (log.isFine()) log.logFine(error + ", corrected using the TLD");
                     } else {
                         // this is a strong hint that the statistics was in fact correct
-                        log.logWarning(error + ", but the url proves that the statistic is correct");
+                        if (log.isFine()) log.logFine(error + ", but the url proves that the statistic is correct");
                     }
                 }
             } else {

@@ -30,6 +30,8 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -40,6 +42,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.document.Document;
+import net.yacy.kelondro.logging.Log;
 
 
 public class SolrSingleConnector {
@@ -48,13 +51,73 @@ public class SolrSingleConnector {
     private SolrServer server;
     private SolrScheme scheme;
     
+    private final static int transmissionQueueCount = 4; // allow concurrent http sessions to solr
+    private final static int transmissionQueueSize = 50; // number of documents that are collected until a commit is sent
+    private Worker[] transmissionWorker; // the transmission workers to solr
+    private BlockingQueue<SolrInputDocument>[] transmissionQueue; // the queues quere documents are collected
+    private int transmissionRoundRobinCounter; // a rount robin counter for the transmission queues
+    
+    @SuppressWarnings("unchecked")
     public SolrSingleConnector(String url, SolrScheme scheme) throws IOException {
         this.solrurl = url;
         this.scheme = scheme;
+        transmissionRoundRobinCounter = 0;
+        this.transmissionQueue = new ArrayBlockingQueue[transmissionQueueCount];
+        for (int i = 0; i < transmissionQueueCount; i++) {
+            this.transmissionQueue[i] = new ArrayBlockingQueue<SolrInputDocument>(transmissionQueueSize);
+        }
         try {
             this.server = new SolrHTTPClient(this.solrurl);
         } catch (MalformedURLException e) {
             throw new IOException("bad connector url: " + this.solrurl);
+        }
+        this.transmissionWorker = new Worker[transmissionQueueCount];
+        for (int i = 0; i < transmissionQueueCount; i++) {
+            this.transmissionWorker[i] = new Worker(i);
+            this.transmissionWorker[i].start();
+        }
+    }
+
+    private class Worker extends Thread {
+        boolean shallRun;
+        int idx;
+        public Worker(int i) {
+            this.idx = i;
+            this.shallRun = true;
+        }
+        public void pleaseStop() {
+            this.shallRun = false;
+        }
+        public void run() {
+            while (this.shallRun) {
+                if (transmissionQueue[idx].size() > 0) {
+                    try {
+                        flushTransmissionQueue(idx);
+                    } catch (IOException e) {
+                        Log.logSevere("SolrSingleConnector", "flush Transmission failed in worker", e);
+                        continue;
+                    }
+                } else {
+                    try {Thread.sleep(1000);} catch (InterruptedException e) {}
+                }
+            }
+            try {
+                flushTransmissionQueue(idx);
+            } catch (IOException e) {}
+        }
+    }
+    
+    public void close() {
+        for (int i = 0; i < transmissionQueueCount; i++) {
+            if (this.transmissionWorker[i].isAlive()) {
+                this.transmissionWorker[i].pleaseStop();
+                try {this.transmissionWorker[i].join();} catch (InterruptedException e) {}
+            }
+        }
+        for (int i = 0; i < transmissionQueueCount; i++) {
+            try {
+                flushTransmissionQueue(i);
+            } catch (IOException e) {}
         }
     }
     
@@ -65,6 +128,7 @@ public class SolrSingleConnector {
     public void clear() throws IOException {
         try {
             server.deleteByQuery("*:*");
+            server.commit();
         } catch (SolrServerException e) {
             throw new IOException(e);
         }
@@ -128,13 +192,19 @@ public class SolrSingleConnector {
     }
     
     public void add(String id, Document doc, SolrScheme tempScheme) throws IOException {
-        addSolr(tempScheme.yacy2solr(id, doc));
-    }
-    
-    protected void addSolr(SolrInputDocument doc) throws IOException {
-        Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
-        docs.add(doc);
-        addSolr(docs);
+        SolrInputDocument solrdoc = tempScheme.yacy2solr(id, doc);
+        int thisrrc = this.transmissionRoundRobinCounter;
+        int nextrrc = thisrrc++;
+        if (nextrrc >= transmissionQueueCount) nextrrc = 0;
+        this.transmissionRoundRobinCounter = nextrrc;
+        if (this.transmissionWorker[thisrrc].isAlive()) {
+            this.transmissionQueue[thisrrc].offer(solrdoc);
+        } else {
+            if (this.transmissionQueue[thisrrc].size() > 0) flushTransmissionQueue(thisrrc);
+            Collection<SolrInputDocument> docs = new ArrayList<SolrInputDocument>();
+            docs.add(solrdoc);
+            addSolr(docs);
+        }
     }
     
     protected void addSolr(Collection<SolrInputDocument> docs) throws IOException {
@@ -151,6 +221,19 @@ public class SolrSingleConnector {
             throw new IOException(e);
         }
     }
+    
+    private void flushTransmissionQueue(int idx) throws IOException {
+        Collection<SolrInputDocument> c = new ArrayList<SolrInputDocument>();
+        while (this.transmissionQueue[idx].size() > 0) {
+            try {
+                c.add(this.transmissionQueue[idx].take());
+            } catch (InterruptedException e) {
+                continue;
+            }
+        }
+        addSolr(c);
+    }
+    
     
     /**
      * get a query result from solr

@@ -63,6 +63,7 @@ public class ResultImages {
         final Map<MultiProtocolURI, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
+            if (image == null || image.url() == null) continue;
             if (doubleCheck.containsKey(image.url())) continue;
             doubleCheck.put(image.url(), System.currentTimeMillis());
             

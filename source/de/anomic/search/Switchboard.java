@@ -240,7 +240,7 @@ public final class Switchboard extends serverSwitch {
     
     private final Semaphore shutdownSync = new Semaphore(0);
     private boolean terminate = false;
-    private SolrSingleConnector solrConnector = null;
+    public SolrSingleConnector solrConnector = null;
     
     //private Object  crawlingPausedSync = new Object();
     //private boolean crawlingIsPaused = false;    
@@ -293,6 +293,10 @@ public final class Switchboard extends serverSwitch {
         this.dictionariesPath = getDataPath(SwitchboardConstants.DICTIONARY_SOURCE_PATH, SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
         this.log.logConfig("Dictionaries Path:" + this.dictionariesPath.toString());
 
+        // init global host name cache
+        this.workPath.mkdirs();
+        Domains.init(new File(workPath, "globalhosts.list"));
+        
         // init sessionid name file
         final String sessionidNamesFile = getConfig("sessionidNamesFile","defaults/sessionid.names");
         this.log.logConfig("Loading sessionid file " + sessionidNamesFile);
@@ -587,7 +591,7 @@ public final class Switchboard extends serverSwitch {
         // set up the solr interface
         String solrurl = this.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         boolean usesolr = this.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurl.length() > 0;
-        this.solrConnector = (usesolr) ? new SolrSingleConnector("http://127.0.0.1:8983/solr", SolrScheme.SolrCell) : null;
+        this.solrConnector = (usesolr) ? new SolrSingleConnector(solrurl, SolrScheme.SolrCell) : null;
         
         // initializing dht chunk generation
         this.dhtMaxReferenceCount = (int) getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
@@ -1207,6 +1211,8 @@ public final class Switchboard extends serverSwitch {
         peers.close();
         Cache.close();
         tables.close();
+        Domains.close();
+        if (solrConnector != null) solrConnector.close();
         AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
         UPnP.deletePortMapping();
         Tray.removeTray();

@@ -196,7 +196,6 @@ public class SolrHTTPClient extends SolrServer {
     HTTPClient client = new HTTPClient();
     if (SolrRequest.METHOD.POST == request.getMethod()) {
         boolean isMultipart = ( streams != null && streams.size() > 1 );
-
         if (streams == null || isMultipart) {
             String url = _baseURL + path;
             
@@ -228,6 +227,7 @@ public class SolrHTTPClient extends SolrServer {
                 client.finish();
             }
         } else {
+            // It has one stream, this is the post body, put the params in the URL
             String pstr = ClientUtils.toQueryString(params, false);
             String url = _baseURL + path + pstr;
             
