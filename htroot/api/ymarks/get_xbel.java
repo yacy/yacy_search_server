@@ -9,6 +9,7 @@ import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkDate;
+import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.data.ymark.YMarkXBELImporter;
@@ -63,8 +64,6 @@ public class get_xbel {
 			} catch (IOException e) {
 				Log.logException(e);
 			}
-
-			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "root: "+root+" root_deph: "+root_depth);
 			
 			while (fit.hasNext()) {    		   		
         		String folder = fit.next();
@@ -114,29 +113,29 @@ public class get_xbel {
 					    		buffer.append(" id=\"b:");
 					    		buffer.append(urlHash);
 					    		
-					    		buffer.append(YMarkTables.BOOKMARK.URL.xbel());
-					    		buffer.append(CharacterCoding.unicode2xml(bmk_row.get(YMarkTables.BOOKMARK.URL.key(), YMarkTables.BOOKMARK.URL.deflt()), true));
+					    		buffer.append(YMarkEntry.BOOKMARK.URL.xbel());
+					    		buffer.append(CharacterCoding.unicode2xml(bmk_row.get(YMarkEntry.BOOKMARK.URL.key(), YMarkEntry.BOOKMARK.URL.deflt()), true));
 					    		
-					    		buffer.append(YMarkTables.BOOKMARK.DATE_ADDED.xbel());
-					    		date.set(bmk_row.get(YMarkTables.BOOKMARK.DATE_ADDED.key()));
+					    		buffer.append(YMarkEntry.BOOKMARK.DATE_ADDED.xbel());
+					    		date.set(bmk_row.get(YMarkEntry.BOOKMARK.DATE_ADDED.key()));
 					    		buffer.append(CharacterCoding.unicode2xml(date.toISO8601(), true));
 					    		
-					    		buffer.append(YMarkTables.BOOKMARK.DATE_MODIFIED.xbel());
-					    		date.set(bmk_row.get(YMarkTables.BOOKMARK.DATE_MODIFIED.key()));
+					    		buffer.append(YMarkEntry.BOOKMARK.DATE_MODIFIED.xbel());
+					    		date.set(bmk_row.get(YMarkEntry.BOOKMARK.DATE_MODIFIED.key()));
 					    		buffer.append(CharacterCoding.unicode2xml(date.toISO8601(), true));
 					    		
-					    		buffer.append(YMarkTables.BOOKMARK.DATE_VISITED.xbel());
-					    		date.set(bmk_row.get(YMarkTables.BOOKMARK.DATE_VISITED.key()));
+					    		buffer.append(YMarkEntry.BOOKMARK.DATE_VISITED.xbel());
+					    		date.set(bmk_row.get(YMarkEntry.BOOKMARK.DATE_VISITED.key()));
 					    		buffer.append(CharacterCoding.unicode2xml(date.toISO8601(), true));
 					    		
-					    		buffer.append(YMarkTables.BOOKMARK.TAGS.xbel());
-					    		buffer.append(bmk_row.get(YMarkTables.BOOKMARK.TAGS.key(), YMarkTables.BOOKMARK.TAGS.deflt()));
+					    		buffer.append(YMarkEntry.BOOKMARK.TAGS.xbel());
+					    		buffer.append(bmk_row.get(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.deflt()));
 					    		
-					    		buffer.append(YMarkTables.BOOKMARK.PUBLIC.xbel());
-					    		buffer.append(bmk_row.get(YMarkTables.BOOKMARK.PUBLIC.key(), YMarkTables.BOOKMARK.PUBLIC.deflt()));
+					    		buffer.append(YMarkEntry.BOOKMARK.PUBLIC.xbel());
+					    		buffer.append(bmk_row.get(YMarkEntry.BOOKMARK.PUBLIC.key(), YMarkEntry.BOOKMARK.PUBLIC.deflt()));
 					    		
-					    		buffer.append(YMarkTables.BOOKMARK.VISITS.xbel());
-					    		buffer.append(bmk_row.get(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.deflt()));
+					    		buffer.append(YMarkEntry.BOOKMARK.VISITS.xbel());
+					    		buffer.append(bmk_row.get(YMarkEntry.BOOKMARK.VISITS.key(), YMarkEntry.BOOKMARK.VISITS.deflt()));
 					    		
 					    		buffer.append("\"\n>");
 					    		prop.put("xbel_"+count+"_elements", buffer.toString());
@@ -144,14 +143,14 @@ public class get_xbel {
 					    		
 					    		buffer.setLength(0);
 					    		buffer.append(YMarkXBELImporter.XBEL.TITLE.startTag(false));
-					    		buffer.append(CharacterCoding.unicode2xml(bmk_row.get(YMarkTables.BOOKMARK.TITLE.key(), YMarkTables.BOOKMARK.TITLE.deflt()), true));
+					    		buffer.append(CharacterCoding.unicode2xml(bmk_row.get(YMarkEntry.BOOKMARK.TITLE.key(), YMarkEntry.BOOKMARK.TITLE.deflt()), true));
 					    		buffer.append(YMarkXBELImporter.XBEL.TITLE.endTag(false));
 					    		prop.put("xbel_"+count+"_elements", buffer.toString());
 					    		count++;
 
 					    		buffer.setLength(0);
 					    		buffer.append(YMarkXBELImporter.XBEL.DESC.startTag(false));
-					    		buffer.append(CharacterCoding.unicode2xml(bmk_row.get(YMarkTables.BOOKMARK.DESC.key(), YMarkTables.BOOKMARK.DESC.deflt()), true));
+					    		buffer.append(CharacterCoding.unicode2xml(bmk_row.get(YMarkEntry.BOOKMARK.DESC.key(), YMarkEntry.BOOKMARK.DESC.deflt()), true));
 					    		buffer.append(YMarkXBELImporter.XBEL.DESC.endTag(false));
 					    		prop.put("xbel_"+count+"_elements", buffer.toString());
 					    		count++;
@@ -163,11 +162,14 @@ public class get_xbel {
 					}
         		}
         	}
+			if(root_depth < 3)
+			    n--;
 			while(n > root_depth) {
 				prop.put("xbel_"+count+"_elements", YMarkXBELImporter.XBEL.FOLDER.endTag(false));
 	    		count++;
 	    		n--;
 			}
+			prop.put("root", root);
     		prop.put("user", bmk_user.substring(0,1).toUpperCase() + bmk_user.substring(1));
     		prop.put("xbel", count);
     		

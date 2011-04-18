@@ -14,11 +14,11 @@ import org.json.simple.parser.ParseException;
 public class YMarkJSONImporter implements Runnable, ContentHandler{
 		
 	// Importer Variables
-	private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;	
+	private final ArrayBlockingQueue<YMarkEntry> bookmarks;	
     private final Reader bmk_file;
     private final String RootFolder;
     private final StringBuilder folderstring;
-    private HashMap<String,String> bmk;
+    private YMarkEntry bmk;
     private final JSONParser parser;
 
     // Statics
@@ -40,12 +40,12 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 	private Boolean isAnnos;	
 	
 	public YMarkJSONImporter(final Reader bmk_file, final int queueSize, final String root) {
-        this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);		
+        this.bookmarks = new ArrayBlockingQueue<YMarkEntry>(queueSize);		
         this.bmk_file = bmk_file;
         this.RootFolder = root;
         this.folderstring = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
         this.folderstring.append(this.RootFolder);
-        this.bmk = new HashMap<String,String>();
+        this.bmk = new YMarkEntry();
 	    
         this.parser = new JSONParser();
 		
@@ -71,7 +71,7 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		if(key.equals(CHILDREN) && this.isFolder) {
 			if(this.depth > 0) {
 				this.folderstring.append(YMarkUtil.FOLDERS_SEPARATOR);
-				this.folderstring.append(this.obj.get(YMarkTables.BOOKMARK.TITLE.json_attrb()));
+				this.folderstring.append(this.obj.get(YMarkEntry.BOOKMARK.TITLE.json_attrb()));
 			}
 			this.depth++;
 		} else if(key.equals(ANNOS)) {
@@ -102,26 +102,26 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 	
 	public boolean endObject() throws ParseException, IOException {
 		if(this.isBookmark) {
-			this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(),obj.get(YMarkTables.BOOKMARK.TITLE.json_attrb()));
-			this.bmk.put(YMarkTables.BOOKMARK.URL.key(),obj.get(YMarkTables.BOOKMARK.URL.json_attrb()));
+			this.bmk.put(YMarkEntry.BOOKMARK.TITLE.key(),obj.get(YMarkEntry.BOOKMARK.TITLE.json_attrb()));
+			this.bmk.put(YMarkEntry.BOOKMARK.URL.key(),obj.get(YMarkEntry.BOOKMARK.URL.json_attrb()));
 			date.setLength(0);
-			date.append(obj.get(YMarkTables.BOOKMARK.DATE_ADDED.json_attrb()));
+			date.append(obj.get(YMarkEntry.BOOKMARK.DATE_ADDED.json_attrb()));
 			date.setLength(date.length()-3);
-			this.bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), date.toString());
+			this.bmk.put(YMarkEntry.BOOKMARK.DATE_ADDED.key(), date.toString());
 			date.setLength(0);
-			date.append(obj.get(YMarkTables.BOOKMARK.DATE_MODIFIED.json_attrb()));
+			date.append(obj.get(YMarkEntry.BOOKMARK.DATE_MODIFIED.json_attrb()));
 			date.setLength(date.length()-3);
-			this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date.toString());
-			this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(),this.folderstring.toString());
-			if(this.obj.containsKey(YMarkTables.BOOKMARK.TAGS.json_attrb())) {
-				this.bmk.put(YMarkTables.BOOKMARK.TAGS.key(),obj.get(YMarkTables.BOOKMARK.TAGS.json_attrb()));
+			this.bmk.put(YMarkEntry.BOOKMARK.DATE_MODIFIED.key(), date.toString());
+			this.bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(),this.folderstring.toString());
+			if(this.obj.containsKey(YMarkEntry.BOOKMARK.TAGS.json_attrb())) {
+				this.bmk.put(YMarkEntry.BOOKMARK.TAGS.key(),obj.get(YMarkEntry.BOOKMARK.TAGS.json_attrb()));
 			}
 			try {
 				this.bookmarks.put(this.bmk);
 			} catch (InterruptedException e) {
 				Log.logException(e);
 			}
-			this.bmk = new HashMap<String,String>();	
+			this.bmk = new YMarkEntry();	
 		}
 		this.isBookmark = false;
 		return true;
@@ -176,14 +176,14 @@ public class YMarkJSONImporter implements Runnable, ContentHandler{
 		} finally {			
 			try {
 				Log.logInfo(YMarkTables.BOOKMARKS_LOG, "JSON Importer inserted poison pill in queue");
-				this.bookmarks.put(YMarkTables.POISON);
+				this.bookmarks.put(YMarkEntry.POISON);
 			} catch (InterruptedException e) {
 				Log.logException(e);
 			}
 		}
 	}
 	
-    public HashMap<String,String> take() {
+    public YMarkEntry take() {
         try {
             return this.bookmarks.take();
         } catch (InterruptedException e) {

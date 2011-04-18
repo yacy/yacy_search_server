@@ -46,11 +46,11 @@ import org.xml.sax.helpers.XMLReaderFactory;
 public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 
     // Importer Variables
-    private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;
+    private final ArrayBlockingQueue<YMarkEntry> bookmarks;
     private final Reader bmk_file;
     private final String RootFolder;
     private final StringBuilder folderstring;
-    private HashMap<String,String> bmk;
+    private YMarkEntry bmk;
     private final XMLReader xmlReader;
     
     // Statics
@@ -96,23 +96,23 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 	}
 
 	// Parser Variables
-	private final HashMap<String,HashMap<String,String>> bmkRef;
-	private final HashSet<HashMap<String,String>> aliasRef;
+	private final HashMap<String,YMarkEntry> bmkRef;
+	private final HashSet<YMarkEntry> aliasRef;
     private final StringBuilder buffer;
     private final StringBuilder folder;
 		
-    private HashMap<String,String> ref;
+    private YMarkEntry ref;
     private XBEL outer_state;                   // BOOKMARK, FOLDER, NOTHING
     private XBEL inner_state;                   // DESC, TITLE, INFO, ALIAS, (METADATA), NOTHING
     private boolean parse_value;
     
     public YMarkXBELImporter (final Reader bmk_file, final int queueSize, final String root) throws SAXException {
-        this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
+        this.bookmarks = new ArrayBlockingQueue<YMarkEntry>(queueSize);
         this.bmk_file = bmk_file;
         this.RootFolder = root;
         this.folderstring = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
         this.folderstring.append(this.RootFolder);
-        this.bmk = new HashMap<String,String>();
+        this.bmk = new YMarkEntry();
 
         this.xmlReader = XMLReaderFactory.createXMLReader();
         this.xmlReader.setContentHandler(this);
@@ -120,8 +120,8 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         this.xmlReader.setFeature("http://xml.org/sax/features/namespaces", false);
         this.xmlReader.setFeature("http://xml.org/sax/features/validation", false);
         
-        this.bmkRef = new HashMap<String,HashMap<String,String>>();
-        this.aliasRef = new HashSet<HashMap<String,String>>();
+        this.bmkRef = new HashMap<String,YMarkEntry>();
+        this.aliasRef = new HashSet<YMarkEntry>();
         this.buffer = new StringBuilder();
         this.folder = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
         this.folder.append(this.RootFolder);
@@ -139,7 +139,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         } finally {
         	try {
         		Log.logInfo(YMarkTables.BOOKMARKS_LOG, "XBEL Importer inserted poison pill in queue");
-				this.bookmarks.put(YMarkTables.POISON);
+				this.bookmarks.put(YMarkEntry.POISON);
 			} catch (InterruptedException e1) {
 			    Log.logException(e1);
 			}
@@ -159,27 +159,27 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         if (tag == null) return;
         tag = tag.toLowerCase();              
         if (XBEL.BOOKMARK.tag().equals(tag)) {
-            this.bmk = new HashMap<String,String>();            
-            this.bmk.put(YMarkTables.BOOKMARK.URL.key(), atts.getValue(uri, YMarkTables.BOOKMARK.URL.xbel_attrb()));
+            this.bmk = new YMarkEntry();            
+            this.bmk.put(YMarkEntry.BOOKMARK.URL.key(), atts.getValue(uri, YMarkEntry.BOOKMARK.URL.xbel_attrb()));
             try {
-				date.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_ADDED.xbel_attrb()));
+				date.parseISO8601(atts.getValue(uri, YMarkEntry.BOOKMARK.DATE_ADDED.xbel_attrb()));
 			} catch (ParseException e) {
 				// TODO: exception handling
 			}
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_ADDED.key(), date.toString());
+            this.bmk.put(YMarkEntry.BOOKMARK.DATE_ADDED.key(), date.toString());
             try {
-				date.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_VISITED.xbel_attrb()));
+				date.parseISO8601(atts.getValue(uri, YMarkEntry.BOOKMARK.DATE_VISITED.xbel_attrb()));
             } catch (ParseException e) {
             	// TODO: exception handling
             }
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_VISITED.key(), date.toString());
+            this.bmk.put(YMarkEntry.BOOKMARK.DATE_VISITED.key(), date.toString());
             try {
-				date.parseISO8601(atts.getValue(uri, YMarkTables.BOOKMARK.DATE_MODIFIED.xbel_attrb()));
+				date.parseISO8601(atts.getValue(uri, YMarkEntry.BOOKMARK.DATE_MODIFIED.xbel_attrb()));
 			} catch (ParseException e) {
 				// TODO: exception handling
 			}
-            this.bmk.put(YMarkTables.BOOKMARK.DATE_MODIFIED.key(), date.toString());
-            UpdateBmkRef(atts.getValue(uri, "id"), true);
+            this.bmk.put(YMarkEntry.BOOKMARK.DATE_MODIFIED.key(), date.toString());
+            UpdateBmkRef(atts.getValue(uri, YMarkEntry.BOOKMARKS_ID), true);
             outer_state = XBEL.BOOKMARK;
             inner_state = XBEL.NOTHING;
             this.parse_value = false;            
@@ -200,7 +200,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         	atts.getValue(uri, "owner");
         	*/
         } else if (XBEL.ALIAS.tag().equals(tag)) {
-        	final String r = atts.getValue(uri, "ref");
+        	final String r = atts.getValue(uri, YMarkEntry.BOOKMARKS_REF);
         	UpdateBmkRef(r, false);
         	this.aliasRef.add(this.bmkRef.get(r));
         }
@@ -217,10 +217,10 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         if(XBEL.BOOKMARK.tag().equals(tag)) {
 			// write bookmark
         	if (!this.bmk.isEmpty()) {				
-        		this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folder.toString());
+        		this.bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), this.folder.toString());
         		try {
 					this.bookmarks.put(this.bmk);
-					bmk = new HashMap<String,String>();
+					bmk = new YMarkEntry();
 				} catch (InterruptedException e) {
 					Log.logException(e);
 				}
@@ -253,10 +253,10 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
             	case BOOKMARK:
             		switch(inner_state) {
             			case DESC:            				
-            				this.bmk.put(YMarkTables.BOOKMARK.DESC.key(), buffer.toString());
+            				this.bmk.put(YMarkEntry.BOOKMARK.DESC.key(), buffer.toString());
             				break;
             			case TITLE:
-            				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), buffer.toString());
+            				this.bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), buffer.toString());
             				break;
         				case METADATA:	
         					// TODO: handle xbel bookmark metadata
@@ -288,7 +288,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         }
     }
 
-    public HashMap<String,String> take() {
+    public YMarkEntry take() {
         try {
             return this.bookmarks.take();
         } catch (InterruptedException e) {
@@ -301,16 +301,16 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
     	this.folderstring.setLength(0);
     	
     	if(this.bmkRef.containsKey(id)) {
-        	this.folderstring.append(this.bmkRef.get(id).get(YMarkTables.BOOKMARK.FOLDERS.key()));
+        	this.folderstring.append(this.bmkRef.get(id).get(YMarkEntry.BOOKMARK.FOLDERS.key()));
         	this.folderstring.append(',');
         	this.ref = this.bmkRef.get(id);
         } else {
-            this.ref = new HashMap<String,String>();
+            this.ref = new YMarkEntry();
         }
     	this.folderstring.append(this.folder);
         if(url)
-        	this.ref.put(YMarkTables.BOOKMARK.URL.key(), this.bmk.get(YMarkTables.BOOKMARK.URL.key()));
-        this.ref.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folderstring.toString());
+        	this.ref.put(YMarkEntry.BOOKMARK.URL.key(), this.bmk.get(YMarkEntry.BOOKMARK.URL.key()));
+        this.ref.put(YMarkEntry.BOOKMARK.FOLDERS.key(), this.folderstring.toString());
         this.bmkRef.put(id, ref);
     }
 }

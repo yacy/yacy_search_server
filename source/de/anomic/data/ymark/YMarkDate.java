@@ -67,7 +67,11 @@ public class YMarkDate {
     }
     
     public String toISO8601() {
-    	return ISO8601Formatter.FORMATTER.format(new Date(this.date));    	
+    	if(this.date == 0) {
+    	    return YMarkEntry.BOOKMARK.DATE_MODIFIED.deflt();
+    	} else {
+    	    return ISO8601Formatter.FORMATTER.format(new Date(this.date));   
+    	}	
     }
     
     public byte[] toBytes() {
@@ -87,6 +91,11 @@ public class YMarkDate {
     }
     
     public void set(byte[] date) {
-    	this.date = Long.parseLong(UTF8.String(date));
+        final String s = UTF8.String(date);
+        if(!s.isEmpty()) {
+            this.date = Long.parseLong(s);  
+        } else {
+            this.date = 0;    
+        }
     }
 }

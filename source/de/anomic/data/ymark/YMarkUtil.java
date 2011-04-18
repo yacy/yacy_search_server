@@ -86,7 +86,7 @@ public class YMarkUtil {
     public final static String cleanTagsString(final String tagsString) {        
     	StringBuilder ts = new StringBuilder(tagsString);    	
     	if(ts.length() == 0)
-    		return YMarkTables.BOOKMARK.TAGS.deflt();
+    		return YMarkEntry.BOOKMARK.TAGS.deflt();
     	// get rid of double commas and space characters following a comma
     	for (int i = 0; i < ts.length()-1; i++) {
     		if (ts.charAt(i) == TAGS_SEPARATOR.charAt(0)) {
@@ -107,7 +107,7 @@ public class YMarkUtil {
     public final static String cleanFoldersString(final String foldersString) {        
     	StringBuilder fs = new StringBuilder(cleanTagsString(foldersString));    	
     	if(fs.length() == 0)
-    		return YMarkTables.BOOKMARK.FOLDERS.deflt();
+    		return YMarkEntry.BOOKMARK.FOLDERS.deflt();
     	for (int i = 0; i < fs.length()-1; i++) {
     		if (fs.charAt(i) == FOLDERS_SEPARATOR.charAt(0)) {
     			if (fs.charAt(i+1) == TAGS_SEPARATOR.charAt(0) || fs.charAt(i+1) == FOLDERS_SEPARATOR.charAt(0)) {

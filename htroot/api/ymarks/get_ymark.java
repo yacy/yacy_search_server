@@ -6,6 +6,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
@@ -32,9 +33,9 @@ public class get_ymark {
         if(isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
         	
-	    	if(post.containsKey(YMarkTables.BOOKMARK.TAGS.key())) {
+	    	if(post.containsKey(YMarkEntry.BOOKMARK.TAGS.key())) {
 	    		//tags = true;
-	    		final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR);
+	    		final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR);
 	    		try {
 	    			bookmarks = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
 				} catch (IOException e) {
@@ -71,7 +72,7 @@ public class get_ymark {
 			Tables.Row bmk_row = bit.next();
             if (bmk_row != null) {
 				prop.putXML("bookmarks_"+count+"_id", UTF8.String(bmk_row.getPK()));
-				for (YMarkTables.BOOKMARK bmk : YMarkTables.BOOKMARK.values()) {
+				for (YMarkEntry.BOOKMARK bmk : YMarkEntry.BOOKMARK.values()) {
 					prop.putXML("bookmarks_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()));
 				}
 			    count++;

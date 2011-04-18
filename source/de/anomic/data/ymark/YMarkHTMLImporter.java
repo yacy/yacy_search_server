@@ -28,7 +28,6 @@ package de.anomic.data.ymark;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import javax.swing.text.MutableAttributeSet;
@@ -41,11 +40,11 @@ import net.yacy.kelondro.logging.Log;
 public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements Runnable {
         
     // Importer Variables
-    private final ArrayBlockingQueue<HashMap<String,String>> bookmarks;
+    private final ArrayBlockingQueue<YMarkEntry> bookmarks;
     private final Reader bmk_file;
     private final String RootFolder;
     private final StringBuilder folderstring;
-    private HashMap<String,String> bmk;
+    private YMarkEntry bmk;
     private final ParserDelegator htmlParser;
     
     // Statics
@@ -63,12 +62,12 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 	private HTML.Tag prevTag;
 	
 	public YMarkHTMLImporter(final Reader bmk_file, final int queueSize, final String root) {		
-        this.bookmarks = new ArrayBlockingQueue<HashMap<String,String>>(queueSize);
+        this.bookmarks = new ArrayBlockingQueue<YMarkEntry>(queueSize);
         this.bmk_file = bmk_file;
         this.RootFolder = root;
         this.folderstring = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
         this.folderstring.append(this.RootFolder);        
-        this.bmk = new HashMap<String,String>();
+        this.bmk = new YMarkEntry();
         
         this.htmlParser = new ParserDelegator();
         
@@ -83,7 +82,7 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 			Log.logException(e);
 		} finally {
 			try {
-				this.bookmarks.put(YMarkTables.POISON);
+				this.bookmarks.put(YMarkEntry.POISON);
 			} catch (InterruptedException e) {
 				Log.logException(e);
 			}
@@ -100,10 +99,10 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
     		case NOTHING:
     			break;
     		case BOOKMARK:
-				this.bmk.put(YMarkTables.BOOKMARK.TITLE.key(), new String(data));
-				this.bmk.put(YMarkTables.BOOKMARK.FOLDERS.key(), this.folderstring.toString());
-				this.bmk.put(YMarkTables.BOOKMARK.PUBLIC.key(), YMarkTables.BOOKMARK.PUBLIC.deflt());
-				this.bmk.put(YMarkTables.BOOKMARK.VISITS.key(), YMarkTables.BOOKMARK.VISITS.deflt());
+				this.bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), new String(data));
+				this.bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), this.folderstring.toString());
+				this.bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), YMarkEntry.BOOKMARK.PUBLIC.deflt());
+				this.bmk.put(YMarkEntry.BOOKMARK.VISITS.key(), YMarkEntry.BOOKMARK.VISITS.deflt());
 				break;
     		case FOLDER:
     			this.folderstring.append(YMarkUtil.FOLDERS_SEPARATOR);
@@ -113,7 +112,7 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
     			Log.logInfo(YMarkTables.BOOKMARKS_LOG, "YMarksHTMLImporter - folder: "+this.folderstring+" desc: " + new String(data));
     			break;
     		case BMK_DESC:
-    			this.bmk.put(YMarkTables.BOOKMARK.DESC.key(), new String(data));
+    			this.bmk.put(YMarkEntry.BOOKMARK.DESC.key(), new String(data));
     			break;    			
     		default:
     			break;
@@ -125,15 +124,15 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 			if (!this.bmk.isEmpty()) {
 				try {
 					this.bookmarks.put(this.bmk);
-					bmk = new HashMap<String,String>();
+					bmk = new YMarkEntry();
 				} catch (InterruptedException e) {
 					Log.logException(e);
 				}
 			}
 	    	final String url = (String)a.getAttribute(HTML.Attribute.HREF);
-			this.bmk.put(YMarkTables.BOOKMARK.URL.key(), url);
+			this.bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);
 	    	
-			for (YMarkTables.BOOKMARK bmk : YMarkTables.BOOKMARK.values()) {    
+			for (YMarkEntry.BOOKMARK bmk : YMarkEntry.BOOKMARK.values()) {    
 				final String s = (String)a.getAttribute(bmk.html_attrb());    			
     			if(s != null) {
 	    			switch(bmk) {	    					
@@ -175,7 +174,7 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
 	    }
 	}
 	
-    public HashMap<String,String> take() {
+    public YMarkEntry take() {
         try {
             return this.bookmarks.take();
         } catch (InterruptedException e) {

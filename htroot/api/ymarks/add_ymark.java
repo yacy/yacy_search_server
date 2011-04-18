@@ -1,10 +1,9 @@
 import java.io.IOException;
-import java.util.HashMap;
-
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
@@ -25,7 +24,7 @@ public class add_ymark {
         if(isAdmin || isAuthUser) {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
 
-            String url = post.get(YMarkTables.BOOKMARK.URL.key(),YMarkTables.BOOKMARK.URL.deflt());
+            String url = post.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt());
 			boolean hasProtocol = false;
 			for (YMarkTables.PROTOCOLS p : YMarkTables.PROTOCOLS.values()) {
 				hasProtocol = url.toLowerCase().startsWith(p.protocol());
@@ -34,17 +33,17 @@ public class add_ymark {
 			    url=YMarkTables.PROTOCOLS.HTTP.protocol(url);
 			}
     		
-        	final HashMap<String,String> data = new HashMap<String,String>();        
+        	final YMarkEntry bmk = new YMarkEntry();        
             
-            data.put(YMarkTables.BOOKMARK.URL.key(), url);
-            data.put(YMarkTables.BOOKMARK.TITLE.key(), post.get(YMarkTables.BOOKMARK.TITLE.key(),YMarkTables.BOOKMARK.TITLE.deflt()));
-            data.put(YMarkTables.BOOKMARK.DESC.key(), post.get(YMarkTables.BOOKMARK.DESC.key(),YMarkTables.BOOKMARK.DESC.deflt()));
-            data.put(YMarkTables.BOOKMARK.PUBLIC.key(), post.get(YMarkTables.BOOKMARK.PUBLIC.key(),YMarkTables.BOOKMARK.PUBLIC.deflt()));
-            data.put(YMarkTables.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key(),YMarkTables.BOOKMARK.TAGS.deflt())));
-            data.put(YMarkTables.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key(),YMarkTables.FOLDERS_UNSORTED)));
+        	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);
+        	bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), post.get(YMarkEntry.BOOKMARK.TITLE.key(),YMarkEntry.BOOKMARK.TITLE.deflt()));
+        	bmk.put(YMarkEntry.BOOKMARK.DESC.key(), post.get(YMarkEntry.BOOKMARK.DESC.key(),YMarkEntry.BOOKMARK.DESC.deflt()));
+        	bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), post.get(YMarkEntry.BOOKMARK.PUBLIC.key(),YMarkEntry.BOOKMARK.PUBLIC.deflt()));
+        	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key(),YMarkEntry.BOOKMARK.TAGS.deflt())));
+        	bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), YMarkUtil.cleanFoldersString(post.get(YMarkEntry.BOOKMARK.FOLDERS.key(),YMarkEntry.FOLDERS_UNSORTED)));
             
             try {
-				sb.tables.bookmarks.addBookmark(bmk_user, data, false);
+				sb.tables.bookmarks.addBookmark(bmk_user, bmk, false);
 				} catch (IOException e) {
 				    Log.logException(e);
 				} catch (RowSpaceExceededException e) {

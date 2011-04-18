@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +10,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
@@ -159,7 +159,7 @@ public class Table_YMark_p {
         }
         
         if (!post.get("commitrow", "").isEmpty()) {
-            final HashMap<String, String> bmk = new HashMap<String, String>();
+            final YMarkEntry bmk = new YMarkEntry();
             for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("col_")) {
                     bmk.put(entry.getKey().substring(4), entry.getValue());
@@ -244,7 +244,7 @@ public class Table_YMark_p {
                     	mapIterator = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, post.get("folders"));
                     } else if(post.containsKey("tags") && !post.get("tags").isEmpty()) {
                     	// mapIterator = sb.tables.orderByPK(sb.tables.bookmarks.tags.getBookmarks(bmk_user, post.get("tags")), maxcount).iterator();
-                    	final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkTables.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR); 
+                    	final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR); 
                     	mapIterator = sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray);
                     } else {
                     	mapIterator = sb.tables.orderByPK(sb.tables.iterator(table, matcher), maxcount).iterator();

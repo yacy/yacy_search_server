@@ -4,6 +4,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.search.Switchboard;
@@ -27,10 +28,10 @@ public class delete_ymark {
         	final String bmk_user = (isAuthUser ? user.getUserName() : YMarkTables.USER_ADMIN);
             byte[] urlHash = null;
             try {
-	        	if(post.containsKey(YMarkTables.BOOKMARKS_ID)) {
-	        		urlHash = post.get(YMarkTables.BOOKMARKS_ID).getBytes();
-	        	} else if(post.containsKey(YMarkTables.BOOKMARK.URL.key())) {
-					urlHash = YMarkUtil.getBookmarkId(post.get(YMarkTables.BOOKMARK.URL.key()));
+	        	if(post.containsKey(YMarkEntry.BOOKMARKS_ID)) {
+	        		urlHash = post.get(YMarkEntry.BOOKMARKS_ID).getBytes();
+	        	} else if(post.containsKey(YMarkEntry.BOOKMARK.URL.key())) {
+					urlHash = YMarkUtil.getBookmarkId(post.get(YMarkEntry.BOOKMARK.URL.key()));
 	        	} else {
 	        		prop.put("result", "0");
 	        		return prop;

@@ -17,6 +17,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.UserDB;
 import de.anomic.data.ymark.YMarkCrawlStart;
+import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkMetadata;
 import de.anomic.data.ymark.YMarkTables;
 import de.anomic.data.ymark.YMarkUtil;
@@ -112,8 +113,8 @@ public class get_treeview {
 			        	while (bit.hasNext()) {
 			        		bmk_row = bit.next();
 			        		if(bmk_row != null) {			        		
-			        			final String url = UTF8.String(bmk_row.get(YMarkTables.BOOKMARK.URL.key()));
-			        			final String title = bmk_row.get(YMarkTables.BOOKMARK.TITLE.key(), YMarkTables.BOOKMARK.TITLE.deflt());
+			        			final String url = UTF8.String(bmk_row.get(YMarkEntry.BOOKMARK.URL.key()));
+			        			final String title = bmk_row.get(YMarkEntry.BOOKMARK.TITLE.key(), YMarkEntry.BOOKMARK.TITLE.deflt());
 				        			
 				        		// TODO: get_treeview - get rid of bmtype
 				        		if (post.containsKey("bmtype")) {    			 
@@ -164,8 +165,8 @@ public class get_treeview {
 								if (key.equals("url"))
 									url = value;
 								prop.put("folders_"+count+"_foldername","<small><b>"+key+":</b> " + value + "</small>");								
-								if(YMarkTables.BOOKMARK.contains(key))
-									putProp(count, YMarkTables.BOOKMARK.get(key).type());
+								if(YMarkEntry.BOOKMARK.contains(key))
+									putProp(count, YMarkEntry.BOOKMARK.get(key).type());
 								else
 									putProp(count, "meta");
 								count++;	

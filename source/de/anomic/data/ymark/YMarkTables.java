@@ -27,18 +27,14 @@
 package de.anomic.data.ymark;
 
 import java.io.IOException;
-import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import de.anomic.data.WorkTables;
 
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.blob.Tables.Data;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 
 public class YMarkTables {
@@ -78,88 +74,9 @@ public class YMarkTables {
     	}
     }
 		
-    public static enum BOOKMARK {
-    	//             key                 dflt            html_attrb          xbel_attrb      json_attrb      type
-    	URL            ("url",             "",             "href",             "href",         "uri",          "link"),
-    	TITLE          ("title",           "",             "",                 "",             "title",        "meta"),
-    	DESC           ("desc",            "",             "",                 "",             "",             "comment"),
-    	DATE_ADDED     ("date_added",      "",             "add_date",         "added",        "dateAdded",    "date"),
-    	DATE_MODIFIED  ("date_modified",   "",             "last_modified",    "modified",     "lastModified", "date"),
-    	DATE_VISITED   ("date_visited",    "",             "last_visited",     "visited",      "",             "date"),
-    	PUBLIC         ("public",          "flase",        "",                 "yacy:public",  "",             "lock"),
-    	TAGS           ("tags",            "unsorted",     "shortcuturl",      "yacy:tags",    "keyword",      "tag"),
-    	VISITS         ("visits",          "0",            "",                 "yacy:visits",  "",             "stat"),
-    	FOLDERS        ("folders",         "/unsorted",    "",                 "",             "",             "folder");
-    	    	
-    	private String key;
-    	private String dflt;
-    	private String html_attrb;
-    	private String xbel_attrb;
-    	private String json_attrb;
-    	private String type;
-
-        private static final Map<String,BOOKMARK> lookup = new HashMap<String,BOOKMARK>();
-        static {
-        	for(BOOKMARK b : EnumSet.allOf(BOOKMARK.class))
-        		lookup.put(b.key(), b);
-        }
-    	
-        private static StringBuilder buffer = new StringBuilder(25);;
-        
-    	private BOOKMARK(String k, String s, String a, String x, String j, String t) {
-    		this.key = k;
-    		this.dflt = s;
-    		this.html_attrb = a;
-    		this.xbel_attrb = x;
-    		this.json_attrb = j;
-    		this.type = t;
-    	}
-    	public static BOOKMARK get(String key) { 
-            return lookup.get(key); 
-    	}
-    	public static boolean contains(String key) {
-    		return lookup.containsKey(key);
-    	}
-    	public String key() {
-    		return this.key;
-    	}    	
-    	public String deflt() {
-    		return  this.dflt;
-    	}
-    	public String html_attrb() {
-    		return this.html_attrb;
-    	}
-    	public String xbel_attrb() {
-    		return this.xbel_attrb;
-    	}
-        public String json_attrb() {
-            return this.json_attrb;
-        }
-    	public String xbel() {
-    		buffer.setLength(0);
-    		buffer.append('"');
-    		buffer.append('\n');
-    		buffer.append(' ');
-    		buffer.append(this.xbel_attrb);
-    		buffer.append('=');
-    		buffer.append('"');
-    		return buffer.toString();
-    	}
-    	public String type() {
-    		return this.type;
-    	}
-    }
-    
-    public final static HashMap<String,String> POISON = new HashMap<String,String>();
-
     public final static String FOLDERS_ROOT = "/"; 
-    public final static String FOLDERS_UNSORTED = "/unsorted";
-    public final static String FOLDERS_IMPORTED = "/imported";
-	public static final int FOLDER_BUFFER_SIZE = 100;    
-    
+    public final static int FOLDER_BUFFER_SIZE = 100;    
     public final static String BOOKMARKS_LOG = "BOOKMARKS";
-    public final static String BOOKMARKS_ID = "id";
-	
     public final static String USER_ADMIN = "admin";
 	public final static String USER_AUTHENTICATE = "AUTHENTICATE";
 	public final static String USER_AUTHENTICATE_MSG = "Authentication required!";
@@ -204,15 +121,15 @@ public class YMarkTables {
     	this.patternBuilder.append(p8);
     	
     	final Pattern r = Pattern.compile(this.patternBuilder.toString());
-    	final Iterator<Tables.Row> bit = this.worktables.iterator(bmk_table, YMarkTables.BOOKMARK.FOLDERS.key(), r);
+    	final Iterator<Tables.Row> bit = this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), r);
     	final TreeSet<String> folders = new TreeSet<String>();
     	final StringBuilder path = new StringBuilder(200);
     	Tables.Row bmk_row = null;
     	
     	while(bit.hasNext()) {
     		bmk_row = bit.next();
-    		if(bmk_row.containsKey(BOOKMARK.FOLDERS.key())) {    	    	
-    			final String[] folderArray = (new String(bmk_row.get(BOOKMARK.FOLDERS.key()),"UTF8")).split(YMarkUtil.TAGS_SEPARATOR);                    
+    		if(bmk_row.containsKey(YMarkEntry.BOOKMARK.FOLDERS.key())) {    	    	
+    			final String[] folderArray = (new String(bmk_row.get(YMarkEntry.BOOKMARK.FOLDERS.key()),"UTF8")).split(YMarkUtil.TAGS_SEPARATOR);                    
     	        for (final String folder : folderArray) {
     	            if(folder.length() > root.length() && folder.substring(0, root.length()+1).equals(root+'/')) {
     	                if(!folders.contains(folder)) {
@@ -243,7 +160,7 @@ public class YMarkTables {
 		this.patternBuilder.append(')');
 		this.patternBuilder.append(p4);
     	final Pattern p = Pattern.compile(this.patternBuilder.toString());
-    	return this.worktables.iterator(bmk_table, YMarkTables.BOOKMARK.FOLDERS.key(), p);
+    	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), p);
     }
     
     public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, final String[] tagArray) throws IOException {    	
@@ -262,59 +179,28 @@ public class YMarkTables {
     	this.patternBuilder.append(tagArray.length);
     	this.patternBuilder.append('}');
     	final Pattern p = Pattern.compile(this.patternBuilder.toString());
-    	return this.worktables.iterator(bmk_table, YMarkTables.BOOKMARK.TAGS.key(), p);
+    	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
     
-	public void addBookmark(final String bmk_user, final HashMap<String,String> bmk, final boolean importer) throws IOException, RowSpaceExceededException {
+	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean importer) throws IOException, RowSpaceExceededException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());
-		final byte[] urlHash = YMarkUtil.getBookmarkId(bmk.get(BOOKMARK.URL.key()));
+		final byte[] urlHash = YMarkUtil.getBookmarkId(bmk.get(YMarkEntry.BOOKMARK.URL.key()));
 		Tables.Row bmk_row = null;
 
 		if (urlHash != null) {
 			bmk_row = this.worktables.select(bmk_table, urlHash);
 	        if (bmk_row == null) {
 	        	// create and insert new entry
-	        	final Data data = new Data();
-	            for (BOOKMARK b : BOOKMARK.values()) {
-	            	switch(b) {
-	    				case DATE_ADDED:
-	    				case DATE_MODIFIED:
-	    					if(bmk.containsKey(b.key()) && bmk.get(b.key()) != null) {
-	    						data.put(b.key(), bmk.get(b.key()));
-	    					} else {
-	    						data.put(b.key(), String.valueOf(System.currentTimeMillis()).getBytes());
-	    					}
-	    					break;
-	    				case TAGS:
-	    					if(bmk.containsKey(b.key()) && bmk.get(b.key()) != null) {
-	    						data.put(b.key(), bmk.get(b.key()));
-	    					} else {
-	    						data.put(b.key(), b.deflt());	
-	    					}
-	    					break;
-	    				case FOLDERS:
-	    					if(bmk.containsKey(b.key()) && bmk.get(b.key()) != null) {
-	    						data.put(b.key(), bmk.get(b.key()));
-	    					} else {
-	    						data.put(b.key(), b.deflt());	
-	    					}
-	    					break;	
-	    				default:
-	    					if(bmk.containsKey(b.key()) && bmk.get(b.key()) != null) {
-	    						data.put(b.key(), bmk.get(b.key()));
-	    					}
-	            	 }
-	             }
-            	 this.worktables.insert(bmk_table, urlHash, data);
+            	 this.worktables.insert(bmk_table, urlHash, bmk.getData());
 	        } else {	
             	// modify and update existing entry
                 HashSet<String> oldSet;
                 HashSet<String> newSet;
-	        	for (BOOKMARK b : BOOKMARK.values()) {
+	        	for (YMarkEntry.BOOKMARK b : YMarkEntry.BOOKMARK.values()) {
 	            	switch(b) {
 	    				case DATE_ADDED:
-	    					if(!bmk_row.containsKey(b.key))
+	    					if(!bmk_row.containsKey(b.key()))
 	    						bmk_row.put(b.key(), date); 
 	    					break;
 	    				case DATE_MODIFIED:
@@ -329,11 +215,11 @@ public class YMarkTables {
 		    	            		bmk_row.put(b.key(), YMarkUtil.keySetToString(newSet));
 		    	            		oldSet.clear();
 	    	            		} else {
-	    	            			bmk_row.put(b.key, bmk.get(b.key()));
+	    	            			bmk_row.put(b.key(), bmk.get(b.key()));
 	    	            		}
 	    	            	} else {
 	    	            		newSet = new HashSet<String>();
-	    	            		bmk_row.put(b.key, bmk_row.get(b.key(), b.deflt()));
+	    	            		bmk_row.put(b.key(), bmk_row.get(b.key(), b.deflt()));
 	    	            	}				
 	    	            	break;
 	    				case FOLDERS:
@@ -345,18 +231,18 @@ public class YMarkTables {
 		    	            		bmk_row.put(b.key(), YMarkUtil.keySetToString(newSet));
 		    	            		oldSet.clear();
 	    	            		} else {
-	    	            			bmk_row.put(b.key, bmk.get(b.key()));
+	    	            			bmk_row.put(b.key(), bmk.get(b.key()));
 	    	            		}
 	    	            	} else {
 	    	            		newSet = new HashSet<String>();
-	    	            		bmk_row.put(b.key, bmk_row.get(b.key(), b.deflt()));
+	    	            		bmk_row.put(b.key(), bmk_row.get(b.key(), b.deflt()));
 	    	            	}
 	    					break;	
 	    				default:
 	    					if(bmk.containsKey(b.key())) {
-	    						bmk_row.put(b.key, bmk.get(b.key()));
+	    						bmk_row.put(b.key(), bmk.get(b.key()));
 	    					} else {
-	    						bmk_row.put(b.key, bmk_row.get(b.key(), b.deflt()));
+	    						bmk_row.put(b.key(), bmk_row.get(b.key(), b.deflt()));
 	    					}
 	            	 }
 	             }
