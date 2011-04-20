@@ -925,7 +925,10 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
                 processHeadline(stringBuilder, firstPosition, tags, secondPosition, direlem);
             } else {
+                int delta = stringBuilder.length();
                 stringBuilder.replace(firstPosition, firstPosition + tags.openWikiLength, tags.openHTML);
+                delta = (delta - stringBuilder.length()) * -1;
+                secondPosition += delta;
                 stringBuilder.replace(secondPosition, secondPosition + tags.closeWikiLength, tags.closeHTML);
             }
         }
