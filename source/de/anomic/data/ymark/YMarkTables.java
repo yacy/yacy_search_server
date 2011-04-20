@@ -29,13 +29,14 @@ package de.anomic.data.ymark;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
-import de.anomic.data.WorkTables;
-
 import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
+import de.anomic.data.WorkTables;
 
 public class YMarkTables {
     
@@ -182,6 +183,19 @@ public class YMarkTables {
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
     
+    public SortedSet<Row> orderBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
+        TreeSet<Row> sortTree = new TreeSet<Tables.Row>(new TablesRowComparator(sortname));
+        Row row;
+        while (rowIterator.hasNext()) {
+            row = rowIterator.next();
+            if(row != null)
+                sortTree.add(row);
+        }
+        if(sortorder.equals("desc"))
+            return sortTree.descendingSet();
+        return sortTree;
+    }
+    
 	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean importer) throws IOException, RowSpaceExceededException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());
@@ -252,3 +266,4 @@ public class YMarkTables {
 		}
 	}
 }
+

@@ -1,0 +1,15 @@
+{
+page: #[page]#,
+total: #[total]#,
+rows: [
+#{json}#
+{id:"#[id]#",cell:[
+"#[hash]#",
+#(public)#"<img src='img-2/world2.png' alt='public' title='public bookmark'/>"::"<img src='img-2/lock.png' alt='private' title='private bookmark'/>"#(/public)#,
+"<h3 class='linktitle'>#[title]#</h3><p class='desc'>#[desc]#</p><p class='url'><a href='#[url]#'>#[url]#</a>",
+"<p class='tags'>#[tags]#</p>",
+"<p class='folders'>#[folders]#</p>",
+"<p class='date'>#[date_added]#</p>"]}#[comma]#
+#{/json}#
+]
+}

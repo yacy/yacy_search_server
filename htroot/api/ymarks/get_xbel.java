@@ -162,8 +162,6 @@ public class get_xbel {
 					}
         		}
         	}
-			if(root_depth < 3)
-			    n--;
 			while(n > root_depth) {
 				prop.put("xbel_"+count+"_elements", YMarkXBELImporter.XBEL.FOLDER.endTag(false));
 	    		count++;
