@@ -61,7 +61,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         EMPHASIZE_2("\'\'\'", "<b>", "</b>"),
         EMPHASIZE_3("\'\'\'\'\'", "<b><i>", "</i></b>"),
 
-        STRIKE("&lt;s&gt;", "&lt;/s&gt;", "<span class=\"strike\">", "</span>");
+        STRIKE("&lt;s&gt;", "&lt;/s&gt;", "<span class=\"strike\">", "</span>"),
+        UNDERLINE("&lt;u&gt;", "&lt;/u&gt;", "<span class=\"underline\">", "</span>");
 
         final String openHTML;
         final String closeHTML;
@@ -129,11 +130,13 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private static final int LEN_WIKI_CLOSE_PRE_ESCAPED = WIKI_CLOSE_PRE_ESCAPED.length();
     private static final int LEN_WIKI_OPEN_PRE_ESCAPED = WIKI_OPEN_PRE_ESCAPED.length();
     private static final int LEN_WIKI_OPEN_LINK = WIKI_OPEN_LINK.length();
+    private static final int LEN_WIKI_CLOSE_LINK = WIKI_CLOSE_LINK.length();
     private static final int LEN_WIKI_IMAGE = WIKI_IMAGE.length();
     private static final int LEN_WIKI_OPEN_EXTERNAL_LINK = WIKI_OPEN_EXTERNAL_LINK.length();
     private static final int LEN_WIKI_CLOSE_EXTERNAL_LINK = WIKI_CLOSE_EXTERNAL_LINK.length();
     private static final int LEN_WIKI_HR_LINE = WIKI_HR_LINE.length();
     private static final int LEN_PIPE_ESCAPED = PIPE_ESCAPED.length();
+    private static final int LEN_WIKI_OPEN_METADATA = WIKI_OPEN_METADATA.length();
 
     /** List of properties which can be used in tables. */
     private final static String[] TABLE_PROPERTIES = {"rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border"};
@@ -180,12 +183,59 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private final int lenTableEnd = tableEnd.length();
     private final int lenAttribDivider = attribDivider.length();
 
-    private void processHeadline(StringBuilder input, int firstPosition, final Tags tags, int secondPosition, String direlem) {
+    private enum ListType {
+        ORDERED, UNORDERED;
+    }
+
+    private String orderedListLevel = EMPTY;
+    private String unorderedListLevel = EMPTY;
+    private String defListLevel = EMPTY;
+    private boolean processingCell = false;             //needed for prevention of double-execution of replaceHTML
+    private boolean processingDefList = false;          //needed for definition lists
+    private boolean escape = false;                     //needed for escape
+    private boolean escaped = false;                    //needed for <pre> not getting in the way
+    private boolean newRowStart = false;                //needed for the first row not to be empty
+    private boolean noList = false;                     //needed for handling of [= and <pre> in lists
+    private boolean processingPreformattedText = false; //needed for preformatted text
+    private boolean preformattedSpanning = false;       //needed for <pre> and </pre> spanning over several lines
+    private boolean replacedHtmlAlready = false;        //indicates if method replaceHTML has been used with line already
+    private boolean processingTable = false;            //needed for tables, because they reach over several lines
+    private int preindented = 0;                        //needed for indented <pre>s
+
+    private final TableOfContent tableOfContents = new TableOfContent();
+
+    /**
+     * Transforms a text which contains wiki code to HTML fragment.
+     * @param hostport
+     * @param reader contains the text to be transformed.
+     * @param length expected length of text, used to create buffer with right size.
+     * @return HTML fragment.
+     * @throws IOException in case input from reader can not be read.
+     */
+    protected String transform(final String hostport, final BufferedReader reader, final int length)
+            throws IOException {
+        final StringBuilder out = new StringBuilder(length);
+        String line;
+        while ((line = reader.readLine()) != null) {
+            out.append(processLineOfWikiCode(hostport, line)).append(serverCore.CRLF_STRING);
+        }
+        out.insert(0, createTableOfContents());
+        tableOfContents.clear();
+        return out.toString();
+    }
+
+    private void processHeadline(
+            final StringBuilder input,
+            final int firstPosition,
+            final Tags tags,
+            final int secondPosition,
+            String direlem)
+    {
         //add anchor and create headline
         if ((direlem = input.substring(firstPosition + tags.openWikiLength, secondPosition)) != null) {
             //counting double headlines
             int doubles = 0;
-            final Iterator<String> iterator = tableOfContent.iterator();
+            final Iterator<String> iterator = tableOfContents.iterator();
             String element;
             while (iterator.hasNext()) {
                 element = iterator.next();
@@ -207,66 +257,14 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             link.append(tags.openHTML);
             link.append(direlem);
             link.append(tags.closeHTML);
-            
+
             input.replace(firstPosition, secondPosition + tags.closeWikiLength, link.toString());
-            /*
-            input = input.substring(0, firstPosition) + "<a name=\"" + anchor + "\"></a>" + tags.openHTML
-            + direlem + tags.closeHTML + input.substring(secondPosition + tags.closeWikiLength);
-             */
+
             //add headlines to list of headlines (so TOC can be created)
             if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
-                tableOfContent.add((tags.openWikiLength - 1) + direlem);
+                tableOfContents.add((tags.openWikiLength - 1) + direlem);
             }
         }
-    }
-
-    private enum ListType {
-        ORDERED, UNORDERED;
-    }
-
-    
-    private String orderedListLevel = EMPTY;
-    private String unorderedListLevel = EMPTY;
-    private String defListLevel = EMPTY;
-    private boolean processingCell = false;             //needed for prevention of double-execution of replaceHTML
-    private boolean processingDefList = false;          //needed for definition lists
-    private boolean escape = false;                     //needed for escape
-    private boolean escaped = false;                    //needed for <pre> not getting in the way
-    private boolean newRowStart = false;                //needed for the first row not to be empty
-    private boolean noList = false;                     //needed for handling of [= and <pre> in lists
-    private boolean processingPreformattedText = false; //needed for preformatted text
-    private boolean preformattedSpanning = false;       //needed for <pre> and </pre> spanning over several lines
-    private boolean replacedHtmlAlready = false;        //indicates if method replaceHTML has been used with line already
-    private boolean processingTable = false;            //needed for tables, because they reach over several lines
-    private int preindented = 0;                        //needed for indented <pre>s
-
-    private final TableOfContent tableOfContent = new TableOfContent();
-    
-    /**
-     * Constructor
-     * @param address
-     */
-    public WikiCode() {
-        super();
-    }
-
-    /**
-     * Transforms a text which contains wiki code to HTML fragment.
-     * @param reader contains the text to be transformed.
-     * @param length expected length of text, used to create buffer with right size.
-     * @return HTML fragment.
-     * @throws IOException in case input from reader can not be read.
-     */
-    protected String transform(final String hostport, final BufferedReader reader, final int length)
-            throws IOException {
-        final StringBuilder out = new StringBuilder(length);
-        String line;
-        while ((line = reader.readLine()) != null) {
-            out.append(processLineOfWikiCode(hostport, line)).append(serverCore.CRLF_STRING);
-        }
-        out.insert(0, createTableOfContents());
-        tableOfContent.clear();
-        return out.toString();
     }
 
     // contributed by [FB], changes by [MN]
@@ -576,10 +574,11 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     /**
      * Processes tags which are connected to links and images.
      * @author [AS], [MN]
+     * @param hostport
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    private String processLinksAndImages(String hostport, String line) {
+    private String processLinksAndImages(final String hostport, String line) {
 
         // create links
         String kl, kv, alt, align;
@@ -636,7 +635,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     kl = "http://" + hostport + "/" + kl;
                 }
 
-                line = line.substring(0, positionOfOpeningTag) + "<img src=\"" + kl + "\"" + align + alt + ">" + line.substring(positionOfClosingTag + 2);
+                line = line.substring(0, positionOfOpeningTag) + "<img src=\"" + kl + "\"" + align + alt + ">" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_LINK);
             }
             // if it's no image, it might be an internal link
             else {
@@ -646,7 +645,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 } else {
                     kv = kl;
                 }
-                line = line.substring(0, positionOfOpeningTag) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + 2); // oob exception in append() !
+                line = line.substring(0, positionOfOpeningTag) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_LINK); // oob exception in append() !
             }
         }
 
@@ -679,6 +678,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
     /**
      * Processes tags which are connected preformatted text (&lt;pre&gt; &lt;/pre&gt;).
+     * @param hostport
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
@@ -767,23 +767,23 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         int level6 = 0;
         int doubles = 0;
         String anchorext = EMPTY;
-        if ((s = tableOfContent.size()) > 2) {
+        if ((s = tableOfContents.size()) > 2) {
             directory.append("<table><tr><td><div class=\"WikiTOCBox\">\n");
             for (int i = 0; i < s; i++) {
-                if (i >= tableOfContent.size()) {
+                if (i >= tableOfContents.size()) {
                     break;
                 }
-                element = tableOfContent.get(i);
+                element = tableOfContents.get(i);
                 if (element == null) {
                     continue;
                 }
                 //counting double headlines
                 doubles = 0;
                 for (int j = 0; j < i; j++) {
-                    if (j >= tableOfContent.size()) {
+                    if (j >= tableOfContents.size()) {
                         break;
                     }
-                    final String d = tableOfContent.get(j);
+                    final String d = tableOfContents.get(j);
                     if (d == null || d.isEmpty()) {
                         continue;
                     }
@@ -925,10 +925,9 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             if (Arrays.binarySearch(HEADLINE_TAGS, tags.openWiki) >= 0) {
                 processHeadline(stringBuilder, firstPosition, tags, secondPosition, direlem);
             } else {
-                int delta = stringBuilder.length();
+                int oldLength = stringBuilder.length();
                 stringBuilder.replace(firstPosition, firstPosition + tags.openWikiLength, tags.openHTML);
-                delta = (delta - stringBuilder.length()) * -1;
-                secondPosition += delta;
+                secondPosition += stringBuilder.length() - oldLength;
                 stringBuilder.replace(secondPosition, secondPosition + tags.closeWikiLength, tags.closeHTML);
             }
         }
@@ -937,10 +936,11 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     }
 
     /** Replaces wiki tags with HTML tags in one line of text.
+     * @param hostport
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
-    public String processLineOfWikiCode(String hostport, String line) {
+    private String processLineOfWikiCode(final String hostport, String line) {
         //If HTML has not been replaced yet (can happen if method gets called in recursion), replace now!
         line = processMetadata(line);
         if ((!replacedHtmlAlready || preformattedSpanning) && line.indexOf(WIKI_CLOSE_PRE_ESCAPED) < 0) {
@@ -990,7 +990,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             line = tagReplace(line, Tags.EMPHASIZE_1);
 
             line = tagReplace(line, Tags.STRIKE);
-
+            line = tagReplace(line, Tags.UNDERLINE);
             
             line = processUnorderedList(line);
             line = processOrderedList(line);
@@ -1010,11 +1010,11 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     }
 
 
-    public String processMetadata(String line) {
+    private String processMetadata(String line) {
         int p, q, s = 0;
         while ((p = line.indexOf(WIKI_OPEN_METADATA, s)) >= 0 && (q = line.indexOf(WIKI_CLOSE_METADATA, p + 1)) >= 0) {
             s = q; // continue with next position
-            String a = line.substring(p + 2, q);
+            String a = line.substring(p + LEN_WIKI_OPEN_METADATA, q);
             if (a.toLowerCase().startsWith("coordinate")) {
                 // parse Geographical Coordinates as described in
                 // http://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style_%28dates_and_numbers%29#Geographical_coordinates

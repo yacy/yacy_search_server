@@ -171,6 +171,10 @@ tt, *.tt {
   text-decoration: line-through;
 }
 
+.underline {
+  text-decoration: underline;
+}
+
 .Headline {
   font-weight: bold;
   font-size: 160%;

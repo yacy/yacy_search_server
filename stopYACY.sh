@@ -12,7 +12,7 @@ then
             kill -9 "$PID" 2> /dev/null
             if [ $? -ne 0 ]
             then
-                echo "Unable to force closed YaCy, daemon seems to have terminated already."
+                echo "Unable to force close YaCy, daemon seems to have terminated already."
             else
                 echo "Force closed YaCy (process ID was $PID)."
             fi
