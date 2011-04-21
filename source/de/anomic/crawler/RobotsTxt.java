@@ -305,7 +305,7 @@ public class RobotsTxt {
             if (Thread.currentThread().isInterrupted()) throw new InterruptedException("Shutdown in progress.");
             
             // sending the get request
-            robotsTxt = client.GETbytes(robotsURL.toString());
+            robotsTxt = client.GETbytes(robotsURL);
             // statistics:
             if (robotsTxt != null) {
             	ByteCount.addAccountCount(ByteCount.CRAWLER, robotsTxt.length);

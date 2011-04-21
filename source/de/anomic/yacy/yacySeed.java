@@ -71,6 +71,7 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.OS;
 
+import de.anomic.search.Switchboard;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
@@ -844,8 +845,9 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (ipString.length() > 0 && ipString.length() < 8) return ipString + " -> IP is too short: ";
         InetAddress ip = Domains.dnsResolve(ipString);
         if (ip == null) return ipString + " -> IP is not proper"; //this does not work with staticIP
-        if (ipString.equals("localhost") || ipString.startsWith("127.") || ipString.startsWith("0:0:0:0:0:0:0:1")) return ipString + " - IP for localhost rejected";
-        return null;
+        if (Switchboard.getSwitchboard().isAllIPMode()) return null;
+        boolean islocal = Domains.isLocal(ip);
+        return (!islocal && Switchboard.getSwitchboard().isGlobalMode() || (islocal && Switchboard.getSwitchboard().isIntranetMode())) ? null : ipString + " - IP for localhost rejected";
     }
 
     @Override

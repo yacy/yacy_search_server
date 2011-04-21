@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -72,18 +73,21 @@ public class rssParser extends AbstractParser implements Parser {
         final List<Document> docs = new ArrayList<Document>();
         MultiProtocolURI uri;
         Set<String> languages;
-        Map<MultiProtocolURI, String> anchors;
+        Map<MultiProtocolURI, Properties> anchors;
         Document doc;
         for (final Hit item: feed) try {
             uri = new MultiProtocolURI(item.getLink());
             languages = new HashSet<String>();
             languages.add(item.getLanguage());
-            anchors = new HashMap<MultiProtocolURI, String>();
-            anchors.put(uri, item.getTitle());
+            anchors = new HashMap<MultiProtocolURI, Properties>();
+            Properties p = new Properties();
+            p.put("name", item.getTitle());
+            anchors.put(uri, p);
             doc = new Document(
                     uri,
                     TextParser.mimeOf(url),
                     charset,
+                    this,
                     languages,
                     item.getSubject(),
                     item.getTitle(),

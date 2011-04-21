@@ -1142,7 +1142,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 client.setTimout(timeout);
                 client.setUserAgent(userAgent);
                 client.setHost(this.getHost());
-                return new ByteArrayInputStream(client.GETbytes(this.toNormalform(false, false)));
+                return new ByteArrayInputStream(client.GETbytes(this));
         }
         
         return null;
@@ -1163,7 +1163,7 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
                 client.setTimout(timeout);
                 client.setUserAgent(userAgent);
                 client.setHost(this.getHost());
-                return client.GETbytes(this.toNormalform(false, false));
+                return client.GETbytes(this);
         }
         
         return null;

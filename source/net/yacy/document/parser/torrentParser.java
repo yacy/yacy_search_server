@@ -98,6 +98,7 @@ public class torrentParser extends AbstractParser implements Parser {
                     location,
                     mimeType,
                     charset,
+                    this,
                     null,
                     null,
                     title, // title

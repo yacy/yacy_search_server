@@ -184,20 +184,20 @@ public final class HandleMap implements Iterable<Row.Entry> {
         index.clear();
     }
     
-    public final synchronized byte[] smallestKey() {
+    public final byte[] smallestKey() {
         return index.smallestKey();
     }
     
-    public final synchronized byte[] largestKey() {
+    public final byte[] largestKey() {
         return index.largestKey();
     }
     
-    public final synchronized boolean has(final byte[] key) {
+    public final boolean has(final byte[] key) {
         assert (key != null);
         return index.has(key);
     }
     
-    public final synchronized long get(final byte[] key) {
+    public final long get(final byte[] key) {
         assert (key != null);
         final Row.Entry indexentry = index.get(key);
         if (indexentry == null) return -1;
@@ -212,10 +212,10 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @throws IOException
      * @throws RowSpaceExceededException
      */
-    public final synchronized long put(final byte[] key, final long l) throws RowSpaceExceededException {
+    public final long put(final byte[] key, final long l) throws RowSpaceExceededException {
         assert l >= 0 : "l = " + l;
         assert (key != null);
-        final Row.Entry newentry = index.row().newEntry();
+        final Row.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, l);
         final Row.Entry oldentry = index.replace(newentry);
@@ -223,7 +223,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return oldentry.getColLong(1);
     }
     
-    public final synchronized void putUnique(final byte[] key, final long l) throws RowSpaceExceededException {
+    public final void putUnique(final byte[] key, final long l) throws RowSpaceExceededException {
         assert l >= 0 : "l = " + l;
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
@@ -232,39 +232,41 @@ public final class HandleMap implements Iterable<Row.Entry> {
         index.addUnique(newentry);
     }
     
-    public final synchronized long add(final byte[] key, final long a) throws RowSpaceExceededException {
+    public final long add(final byte[] key, final long a) throws RowSpaceExceededException {
         assert key != null;
         assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
-
-        final Row.Entry indexentry = index.get(key);
-        if (indexentry == null) {
-            final Row.Entry newentry = this.rowdef.newEntry();
-            newentry.setCol(0, key);
-            newentry.setCol(1, a);
-            index.addUnique(newentry);
-            return 1;
+        synchronized (index) {
+            final Row.Entry indexentry = index.get(key);
+            if (indexentry == null) {
+                final Row.Entry newentry = this.rowdef.newEntry();
+                newentry.setCol(0, key);
+                newentry.setCol(1, a);
+                index.addUnique(newentry);
+                return 1;
+            }
+            final long i = indexentry.getColLong(1) + a;
+            indexentry.setCol(1, i);
+            index.put(indexentry);
+            return i;
         }
-        final long i = indexentry.getColLong(1) + a;
-        indexentry.setCol(1, i);
-        index.put(indexentry);
-        return i;
     }
     
-    public final synchronized long inc(final byte[] key) throws RowSpaceExceededException {
+    public final long inc(final byte[] key) throws RowSpaceExceededException {
         return add(key, 1);
     }
     
-    public final synchronized long dec(final byte[] key) throws RowSpaceExceededException {
+    public final long dec(final byte[] key) throws RowSpaceExceededException {
         return add(key, -1);
     }
     
-    public final synchronized ArrayList<long[]> removeDoubles() throws RowSpaceExceededException {
+    public final ArrayList<long[]> removeDoubles() throws RowSpaceExceededException {
         final ArrayList<long[]> report = new ArrayList<long[]>();
         long[] is;
         int c;
         long l;
         final int initialSize = this.size();
-        for (final RowCollection rowset: index.removeDoubles()) {
+        ArrayList<RowCollection> rd = index.removeDoubles();
+        for (final RowCollection rowset: rd) {
             is = new long[rowset.size()];
             c = 0;
             for (Row.Entry e: rowset) {
@@ -277,7 +279,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return report;
     }
     
-    public final synchronized ArrayList<byte[]> top(int count) {
+    public final ArrayList<byte[]> top(int count) {
         List<Row.Entry> list0 = index.top(count);
         ArrayList<byte[]> list = new ArrayList<byte[]>();
         for (Row.Entry entry: list0) {
@@ -288,41 +290,44 @@ public final class HandleMap implements Iterable<Row.Entry> {
     
     public final synchronized long remove(final byte[] key) {
         assert (key != null);
-        final boolean exist = index.has(key);
-        if (!exist) return -1;
-        final int s = index.size();
-        final long m = index.mem();
-        final Row.Entry indexentry = index.remove(key);
-        assert (indexentry != null);
-        assert index.size() < s : "s = " + s + ", index.size() = " + index.size();
-        assert index.mem() <= m : "m = " + m + ", index.mem() = " + index.mem();
+        final Row.Entry indexentry;
+        synchronized (index) {
+            final boolean exist = index.has(key);
+            if (!exist) return -1;
+            final int s = index.size();
+            final long m = index.mem();
+            indexentry = index.remove(key);
+            assert (indexentry != null);
+            assert index.size() < s : "s = " + s + ", index.size() = " + index.size();
+            assert index.mem() <= m : "m = " + m + ", index.mem() = " + index.mem();
+        }
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }
 
-    public final synchronized long removeone() {
+    public final long removeone() {
         final Row.Entry indexentry = index.removeOne();
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }
     
-    public final synchronized int size() {
+    public final int size() {
         return index.size();
     }
     
-    public final synchronized boolean isEmpty() {
+    public final boolean isEmpty() {
         return index.isEmpty();
     }
     
-    public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
+    public final CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         return index.keys(up, firstKey);
     }
 
-    public final synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
+    public final CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
         return index.rows(up, firstKey);
     }
     
-    public final synchronized void close() {
+    public final void close() {
         index.close();
         index = null;
     }

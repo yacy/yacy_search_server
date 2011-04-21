@@ -25,10 +25,20 @@
 package net.yacy.cora.services.federated.solr;
 
 
-import net.yacy.cora.document.UTF8;
-import net.yacy.document.Document;
-import net.yacy.kelondro.data.meta.DigestURI;
+import java.net.InetAddress;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.document.Document;
+import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.cora.document.MultiProtocolURI;
 import org.apache.solr.common.SolrInputDocument;
 
 public enum SolrScheme {
@@ -37,21 +47,21 @@ public enum SolrScheme {
     DublinCore;
 
     
-    public SolrInputDocument yacy2solr(String id, Document document) {
-        if (this == SolrCell) return yacy2solrSolrCell(id, document);
+    public SolrInputDocument yacy2solr(String id, ResponseHeader header, Document document) {
+        if (this == SolrCell) return yacy2solrSolrCell(id, header, document);
         return null;
     }
     
-    public static SolrInputDocument yacy2solrSolrCell(String id, Document yacydoc) {
+    public static SolrInputDocument yacy2solrSolrCell(String id, ResponseHeader header, Document yacydoc) {
         // we user the SolrCell design as index scheme
         SolrInputDocument solrdoc = new SolrInputDocument();
         DigestURI digestURI = new DigestURI(yacydoc.dc_source());
         solrdoc.addField("id", id);
         solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
+        InetAddress address = Domains.dnsResolve(digestURI.getHost());
+        if (address != null) solrdoc.addField("attr_ip", address.getHostAddress());
+        if (digestURI.getHost() != null) solrdoc.addField("attr_host", digestURI.getHost());
         /*
-         *
-    private final MultiProtocolURI source;      // the source url
-    private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
     private       StringBuilder title;          // a document title, taken from title or h1 tag; shall appear as headline of search result
@@ -73,14 +83,149 @@ public enum SolrScheme {
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     private Set<String> languages;
     private boolean indexingDenied;
-    private float lon, lat;
          */
         solrdoc.addField("title", yacydoc.dc_title());
         solrdoc.addField("author", yacydoc.dc_creator());
         solrdoc.addField("description", yacydoc.dc_description());
         solrdoc.addField("content_type", yacydoc.dc_format());
-        solrdoc.addField("subject", yacydoc.dc_subject(' '));
-        solrdoc.addField("text", UTF8.String(yacydoc.getTextBytes()));
+        solrdoc.addField("last_modified", header.lastModified());
+        solrdoc.addField("keywords", yacydoc.dc_subject(' '));
+        String content = UTF8.String(yacydoc.getTextBytes());
+        solrdoc.addField("attr_text", content);
+        int contentwc = content.split(" ").length;
+        solrdoc.addField("wordcount_i", contentwc);
+
+        // path elements of link
+        String path = digestURI.getPath();
+        if (path != null) {
+            String[] paths = path.split("/");
+            if (paths.length > 0) solrdoc.addField("attr_paths", paths);
+        }
+        
+        // list all links
+        Map<MultiProtocolURI, Properties> alllinks = yacydoc.getAnchors();        
+        int c = 0;
+        String[] inboundlinks = new String[yacydoc.inboundLinkCount()];
+        solrdoc.addField("inboundlinkscount_i", inboundlinks.length);
+        for (MultiProtocolURI url: yacydoc.inboundLinks()) {
+            Properties p = alllinks.get(url);
+            String name = p.getProperty("name", "");
+            String rel = p.getProperty("rel", "");
+            inboundlinks[c++] =
+                "<a href=\"" + url.toNormalform(false, false) + "\"" +
+                ((rel.toLowerCase().equals("nofollow")) ? " rel=\"nofollow\"" : "") +
+                ">" +
+                ((name.length() > 0) ? name : "") + "</a>";
+        }
+        solrdoc.addField("attr_inboundlinks", inboundlinks);
+        c = 0;
+        String[] outboundlinks = new String[yacydoc.outboundLinkCount()];
+        solrdoc.addField("outboundlinkscount_i", outboundlinks.length);
+        for (MultiProtocolURI url: yacydoc.outboundLinks()) {
+            Properties p = alllinks.get(url);
+            String name = p.getProperty("name", "");
+            String rel = p.getProperty("rel", "");
+            outboundlinks[c++] =
+                "<a href=\"" + url.toNormalform(false, false) + "\"" +
+                ((rel.toLowerCase().equals("nofollow")) ? " rel=\"nofollow\"" : "") +
+                ">" +
+                ((name.length() > 0) ? name : "") + "</a>";
+        }
+        solrdoc.addField("attr_outboundlinks", yacydoc.outboundLinks().toArray());
+        
+        // charset
+        solrdoc.addField("attr_charset", yacydoc.getCharset());
+
+        // coordinates
+        if (yacydoc.lat() != 0.0f && yacydoc.lon() != 0.0f) {
+            solrdoc.addField("lon_coordinate", yacydoc.lon());
+            solrdoc.addField("lat_coordinate", yacydoc.lat());
+        }
+        solrdoc.addField("attr_httpstatus", "200");
+        Object parser = yacydoc.getParserObject();
+        if (parser instanceof ContentScraper) {
+            ContentScraper html = (ContentScraper) parser;
+            
+            // header tags
+            int h = 0;
+            int f = 1;
+            for (int i = 1; i <= 6; i++) {
+                String[] hs = html.getHeadlines(i);
+                h = h | (hs.length > 0 ? f : 0);
+                f = f * 2;
+                solrdoc.addField("attr_h" + i, hs);
+            }
+            solrdoc.addField("htags_i", h);
+
+            // meta tags
+            Map<String, String> metas = html.getMetas();
+            String robots = metas.get("robots");
+            if (robots != null) solrdoc.addField("attr_meta_robots", robots);
+            String generator = metas.get("generator");
+            if (generator != null) solrdoc.addField("attr_meta_generator", generator);
+            
+            // bold, italic
+            String[] bold = html.getBold();
+            if (bold.length > 0) solrdoc.addField("attr_bold", bold);
+            String[] italic = html.getItalic();
+            if (bold.length > 0) solrdoc.addField("attr_italic", italic);
+            String[] li = html.getLi();
+            solrdoc.addField("licount_i", li.length);
+            if (li.length > 0) solrdoc.addField("attr_li", li);
+            
+            // images
+            Collection<ImageEntry> imagesc = html.getImages().values();
+            String[] images = new String[imagesc.size()];
+            c = 0;
+            for (ImageEntry ie: imagesc) images[c++] = ie.toString();
+            solrdoc.addField("imagescount_i", images.length);
+            if (images.length > 0) solrdoc.addField("attr_images", images);
+
+            // style sheets
+            Map<MultiProtocolURI, String> csss = html.getCSS();
+            String[] css = new String[csss.size()];
+            c = 0;
+            for (Map.Entry<MultiProtocolURI, String> entry: csss.entrySet()) {
+                css[c++] =
+                    "<link rel=\"stylesheet\" type=\"text/css\" media=\"" + entry.getValue() + "\"" +
+                    " href=\""+ entry.getKey().toNormalform(false, false, false, false) + "\" />";
+            }
+            solrdoc.addField("csscount_i", css.length);
+            if (css.length > 0) solrdoc.addField("attr_css", css);
+            
+            // Scripts
+            Set<MultiProtocolURI> scriptss = html.getScript();
+            String[] scripts = new String[scriptss.size()];
+            c = 0;
+            for (MultiProtocolURI url: scriptss) {
+                scripts[c++] = url.toNormalform(false, false, false, false);
+            }
+            solrdoc.addField("scriptscount_i", scripts.length);
+            if (scripts.length > 0) solrdoc.addField("attr_scripts", scripts);
+            
+            // Frames
+            Set<MultiProtocolURI> framess = html.getFrames();
+            String[] frames = new String[framess.size()];
+            c = 0;
+            for (MultiProtocolURI entry: framess) {
+                frames[c++] = entry.toNormalform(false, false, false, false);
+            }
+            solrdoc.addField("framesscount_i", frames.length);
+            if (frames.length > 0) solrdoc.addField("attr_frames", frames);
+            
+            // IFrames
+            Set<MultiProtocolURI> iframess = html.getFrames();
+            String[] iframes = new String[iframess.size()];
+            c = 0;
+            for (MultiProtocolURI entry: iframess) {
+                iframes[c++] = entry.toNormalform(false, false, false, false);
+            }
+            solrdoc.addField("iframesscount_i", iframes.length);
+            if (iframes.length > 0) solrdoc.addField("attr_iframes", iframes);
+            
+            // flash embedded
+            solrdoc.addField("flash_b", html.containsFlash());
+        }
         return solrdoc;
     }
     
@@ -88,11 +233,7 @@ public enum SolrScheme {
     /*
      * standard solr scheme
 
-   <field name="id" type="string" indexed="true" stored="true" required="true" /> 
-   <field name="sku" type="textTight" indexed="true" stored="true" omitNorms="true"/>
    <field name="name" type="textgen" indexed="true" stored="true"/>
-   <field name="alphaNameSort" type="alphaOnlySort" indexed="true" stored="false"/>
-   <field name="manu" type="textgen" indexed="true" stored="true" omitNorms="true"/>
    <field name="cat" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="features" type="text" indexed="true" stored="true" multiValued="true"/>
    <field name="includes" type="text" indexed="true" stored="true" termVectors="true" termPositions="true" termOffsets="true" />
@@ -100,7 +241,6 @@ public enum SolrScheme {
    <field name="weight" type="float" indexed="true" stored="true"/>
    <field name="price"  type="float" indexed="true" stored="true"/>
    <field name="popularity" type="int" indexed="true" stored="true" />
-   <field name="inStock" type="boolean" indexed="true" stored="true" />
 
    <!-- Common metadata fields, named specifically to match up with
      SolrCell metadata when parsing rich documents such as Word, PDF.
@@ -117,14 +257,6 @@ public enum SolrScheme {
    <field name="content_type" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="last_modified" type="date" indexed="true" stored="true"/>
    <field name="links" type="string" indexed="true" stored="true" multiValued="true"/>
-
-   <!-- catchall field, containing all other searchable text fields (implemented
-        via copyField further on in this schema  -->
-   <field name="text" type="text" indexed="true" stored="false" multiValued="true"/>
-
-   <!-- catchall text field that indexes tokens both normally and in reverse for efficient
-        leading wildcard queries. -->
-   <field name="text_rev" type="text_rev" indexed="true" stored="false" multiValued="true"/>
 
      */
 }

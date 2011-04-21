@@ -98,6 +98,13 @@ filesize.max.other = 8589934591
 network.unit.definition = defaults/yacy.network.freeworld.unit
 #network.unit.definition = defaults/yacy.network.intranet.unit
 
+# distinguish intranet/internet IPs:
+# if this setting is set to true, then only URL-Hashes with 'intranet'-Flag is created, even if the
+# url is in the internet. This can be done to enhance the crawling speed dramatically since a DNS-lookup
+# to check if a host is in the internet oder an intranet can be omited.
+# This option is only valid if the network.unit.domain property is set to 'any'
+network.unit.domain.nocheck = false
+
 # Update process properties
 # The update server location is given in the network.unit.definition,
 # but the settings for update processing and cycles are individual.

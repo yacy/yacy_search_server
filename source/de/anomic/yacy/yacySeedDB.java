@@ -892,7 +892,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         byte[] content = null;
         try {
             // send request
-        	content = client.GETbytes(seedURL.toString());
+        	content = client.GETbytes(seedURL);
         } catch (final Exception e) {
         	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
         }

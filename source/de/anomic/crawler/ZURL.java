@@ -53,7 +53,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     private static final int EcoFSBufferSize = 2000;
     private static final int maxStackSize    = 1000;
     
-    public final static Row rowdef = new Row(
+    private final static Row rowdef = new Row(
             "String urlhash-"   + Word.commonHashLength + ", " + // the url's hash
             "String executor-"  + Word.commonHashLength + ", " + // the crawling executor
             "Cardinal workdate-8 {b256}, " +                           // the time when the url was last time tried to load
@@ -64,8 +64,8 @@ public class ZURL implements Iterable<ZURL.Entry> {
     );
 
     // the class object
-    protected Index urlIndex;
-    protected final ConcurrentLinkedQueue<byte[]> stack;
+    private Index urlIndex;
+    private final ConcurrentLinkedQueue<byte[]> stack;
     
     public ZURL(
     		final File cachePath,

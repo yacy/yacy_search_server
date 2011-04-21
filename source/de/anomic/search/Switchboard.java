@@ -574,6 +574,9 @@ public final class Switchboard extends serverSwitch {
                 isGlobalMode(),
                 this.domainList); // Intranet and Global mode may be both true!
         
+        // possibly switch off localIP check
+        Domains.setNoLocalCheck(this.isAllIPMode()); 
+        
         // check status of account configuration: when local url crawling is allowed, it is not allowed
         // that an automatic authorization of localhost is done, because in this case crawls from local
         // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
@@ -828,7 +831,7 @@ public final class Switchboard extends serverSwitch {
             setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
         }
         */
-        MultiProtocolURI.addBotInfo(getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig("network.unit.domain", "global"));
+        MultiProtocolURI.addBotInfo(getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global"));
 
     }
     
@@ -941,11 +944,13 @@ public final class Switchboard extends serverSwitch {
                     this.crawler,
                     this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
                     this.peers,
-                    "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
-                    "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
+                    "local.any".indexOf(getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0,
+                    "global.any".indexOf(getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0,
                     this.domainList);
 
         }
+        Domains.setNoLocalCheck(this.isAllIPMode()); // possibly switch off localIP check
+        
         // start up crawl jobs
         continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
         continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
@@ -1022,12 +1027,24 @@ public final class Switchboard extends serverSwitch {
     }
 
     public boolean isIntranetMode() {
-        return "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
+        return "local.any".indexOf(getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0;
     }
     
     public boolean isGlobalMode() {
-        return "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0;
+        return "global.any".indexOf(getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0;
     }    
+    
+    public boolean isAllIPMode() {
+        return "any".indexOf(getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global")) >= 0;
+    }
+    
+    /**
+     * in nocheck mode the isLocal property is not checked to omit DNS lookup. Can only be done in allip mode
+     * @return
+     */
+    public boolean isIPNoCheckMode() {
+        return isAllIPMode() && getConfigBool(SwitchboardConstants.NETWORK_DOMAIN_NOCHECK, false);
+    }
     
     public boolean isRobinsonMode() {
         // we are in robinson mode, if we do not exchange index by dht distribution
@@ -1893,9 +1910,13 @@ public final class Switchboard extends serverSwitch {
             for (Document doc: in.documents) {
                 try {
                     String id = UTF8.String(new DigestURI(doc.dc_identifier(), null).hash());
-                    assert id.equals(UTF8.String(in.queueEntry.url().hash()));
+                    String iquh = UTF8.String(in.queueEntry.url().hash());
+                    if (!id.equals(iquh)) {
+                        log.logWarning("doc=" + id + ":" + doc.dc_identifier() + ", query=" + iquh  + ":" + in.queueEntry.url());
+                        // in case that this happens it appears that the doc id is the right one
+                    }
                     try {
-                        this.solrConnector.add(id, doc);
+                        this.solrConnector.add(id, in.queueEntry.getResponseHeader(), doc);
                     } catch (IOException e) {
                         Log.logWarning("SOLR", "failed to send " + in.queueEntry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
                     }
@@ -1951,9 +1972,7 @@ public final class Switchboard extends serverSwitch {
             assert in.queueEntry != null;
             assert in.documents != null;
             assert in.queueEntry != null;
-            final Integer[] ioLinks = webStructure.generateCitationReference(in.queueEntry.url(), in.documents[i], (in.condenser == null) ? null : in.condenser[i], in.queueEntry.lastModified()); // [outlinksSame, outlinksOther]
-            in.documents[i].setInboundLinks(ioLinks[0].intValue());
-            in.documents[i].setOutboundLinks(ioLinks[1].intValue());
+            webStructure.generateCitationReference(in.queueEntry.url(), in.documents[i], (in.condenser == null) ? null : in.condenser[i], in.queueEntry.lastModified()); // [outlinksSame, outlinksOther]
         }
         return in;
     }
@@ -2621,7 +2640,7 @@ public final class Switchboard extends serverSwitch {
                         yacyCore.log.logInfo("BOOTSTRAP: seed-list URL " + seedListFileURL + " too old (" + (header.age() / 86400000) + " days)");
                     } else {
                         ssc++;
-                        final byte[] content = client.GETbytes(url.toString());
+                        final byte[] content = client.GETbytes(url);
                         enu = FileUtils.strings(content);
                         lc = 0;
                         while (enu.hasNext()) {
@@ -2746,7 +2765,7 @@ public final class Switchboard extends serverSwitch {
         client.setHeader(reqHeader.entrySet());
         try {
             // sending request
-            final Map<String, String> result = FileUtils.table(client.GETbytes(url.toString()));
+            final Map<String, String> result = FileUtils.table(client.GETbytes(url));
             return (result == null) ? new HashMap<String, String>() : result;
         } catch (final Exception e) {
             Log.logException(e);

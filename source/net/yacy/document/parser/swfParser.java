@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
@@ -80,7 +81,7 @@ public class swfParser extends AbstractParser implements Parser {
             final String[] sections =  null;
             final String abstrct = null;
             //TreeSet images = null;
-            final Map<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
+            final Map<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
@@ -97,7 +98,9 @@ public class swfParser extends AbstractParser implements Parser {
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
                 urlnr = Integer.toString(++urls).toString();
-                anchors.put(new MultiProtocolURI(url), urlnr);
+                Properties p = new Properties();
+                p.put("name", urlnr);
+                anchors.put(new MultiProtocolURI(url), p);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
 
@@ -106,6 +109,7 @@ public class swfParser extends AbstractParser implements Parser {
                     location,     // url of the source document
                     mimeType,     // the documents mime type
                     "UTF-8",      // charset of the document text
+                    this,
                     null,
                     null,          //keywords
                       ((contents.length() > 80)? contents.substring(0, 80):contents.trim()).

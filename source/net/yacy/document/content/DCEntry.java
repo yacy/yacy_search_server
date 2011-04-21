@@ -267,6 +267,7 @@ public class DCEntry extends TreeMap<String, String> {
             getIdentifier(true),
             "text/html",
             "UTF-8",
+            this,
             languages,
             getSubject(),
             getTitle(),

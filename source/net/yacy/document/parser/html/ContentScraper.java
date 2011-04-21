@@ -70,6 +70,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         linkTags0.add("meta");
         linkTags0.add("area");
         linkTags0.add("link");
+        linkTags0.add("script");
         linkTags0.add("embed");     //added by [MN]
         linkTags0.add("param");     //added by [MN]
 
@@ -78,17 +79,27 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         linkTags1.add("h2");
         linkTags1.add("h3");
         linkTags1.add("h4");
+        linkTags1.add("h5");
+        linkTags1.add("h6");
         linkTags1.add("title");
+        linkTags1.add("b");
+        linkTags1.add("strong");
+        linkTags1.add("i");
+        linkTags1.add("li");
+        linkTags1.add("iframe");
+        //<iframe src="../../../index.htm" name="SELFHTML_in_a_box" width="90%" height="400">
     }
 
     // class variables: collectors for links
-    private Map<MultiProtocolURI, String> rss;
-    private Map<MultiProtocolURI, String> anchors;
+    private Map<MultiProtocolURI, Properties> anchors;
+    private Map<MultiProtocolURI, String> rss, css;
+    private Set<MultiProtocolURI> script, frames, iframes;
     private Map<MultiProtocolURI, ImageEntry> images; // urlhash/image relation
     private final Map<String, String> metas;
     private String title;
     //private String headline;
     private List<String>[] headlines;
+    private List<String> bold, italic, li;
     private CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
     private float lon, lat;
@@ -110,12 +121,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         super(linkTags0, linkTags1);
         this.root = root;
         this.rss = new HashMap<MultiProtocolURI, String>();
-        this.anchors = new HashMap<MultiProtocolURI, String>();
+        this.css = new HashMap<MultiProtocolURI, String>();
+        this.anchors = new HashMap<MultiProtocolURI, Properties>();
         this.images = new HashMap<MultiProtocolURI, ImageEntry>();
+        this.frames = new HashSet<MultiProtocolURI>();
+        this.iframes = new HashSet<MultiProtocolURI>();
         this.metas = new HashMap<String, String>();
+        this.script = new HashSet<MultiProtocolURI>();
         this.title = "";
-        this.headlines = new ArrayList[4];
-        for (int i = 0; i < 4; i++) headlines[i] = new ArrayList<String>();
+        this.headlines = new ArrayList[6];
+        for (int i = 0; i < this.headlines.length; i++) headlines[i] = new ArrayList<String>();
+        this.bold = new ArrayList<String>();
+        this.italic = new ArrayList<String>();
+        this.li = new ArrayList<String>();
         this.content = new CharBuffer(1024);
         this.htmlFilterEventListeners = new EventListenerList();
         this.lon = 0.0f;
@@ -202,7 +220,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             s = p + 1;
             try {
                 url = new MultiProtocolURI(u);
-                anchors.put(url, u);
+                anchors.put(url, new Properties());
                 continue;
             } catch (MalformedURLException e) {}
         }
@@ -228,26 +246,24 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             try {
                 final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                 final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
-                if (width > 15 && height > 15) {
-                    final float ratio = (float) Math.min(width, height) / Math.max(width, height);
-                    if (ratio > 0.4) {
-                        final MultiProtocolURI url = absolutePath(tagopts.getProperty("src", ""));
-                        final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", ""), width, height, -1);
-                        addImage(images, ie);
-                    }
-// i think that real pictures have witdth & height tags - thq
-//                } else if (width < 0 && height < 0) { // add or to ignore !?
-//                    final yacyURL url = absolutePath(tagopts.getProperty("src", ""));
-//                    final htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt", ""), width, height);
-//                    addImage(images, ie);
-                }
+                //if (width > 15 && height > 15) {
+                    final MultiProtocolURI url = absolutePath(tagopts.getProperty("src", ""));
+                    final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", ""), width, height, -1);
+                    addImage(images, ie);
+                //}
             } catch (final NumberFormatException e) {}
         } else if(tagname.equalsIgnoreCase("base")) {
             try {
                 root = new MultiProtocolURI(tagopts.getProperty("href", ""));
             } catch (final MalformedURLException e) {}
         } else if (tagname.equalsIgnoreCase("frame")) {
-            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
+            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
+            frames.add(absolutePath(tagopts.getProperty("src", "")));
+        } else if (tagname.equalsIgnoreCase("iframe")) {
+            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
+            iframes.add(absolutePath(tagopts.getProperty("src", "")));
+        } else if (tagname.equalsIgnoreCase("script")) {
+            script.add(absolutePath(tagopts.getProperty("src", "")));
         } else if (tagname.equalsIgnoreCase("meta")) {
             String name = tagopts.getProperty("name", "");
             if (name.length() > 0) {
@@ -262,7 +278,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String areatitle = cleanLine(tagopts.getProperty("title",""));
             //String alt   = tagopts.getProperty("alt","");
             final String href  = tagopts.getProperty("href", "");
-            if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
+            Properties p = new Properties(); p.put("name", areatitle);
+            if (href.length() > 0) anchors.put(absolutePath(href), p);
         } else if (tagname.equalsIgnoreCase("link")) {
             final MultiProtocolURI newLink = absolutePath(tagopts.getProperty("href", ""));
 
@@ -277,16 +294,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     this.favicon = newLink;
                 } else if (rel.equalsIgnoreCase("alternate") && type.equalsIgnoreCase("application/rss+xml")) {
                     rss.put(newLink, linktitle);
+                } else if (rel.equalsIgnoreCase("stylesheet") && type.equalsIgnoreCase("text/css")) {
+                    css.put(newLink, rel);
                 } else if (!rel.equalsIgnoreCase("stylesheet") && !rel.equalsIgnoreCase("alternate stylesheet")) {
-                    anchors.put(newLink, linktitle);
+                    Properties p = new Properties(); p.put("name", linktitle);
+                    anchors.put(newLink, p);
                 }
             }
         } else if(tagname.equalsIgnoreCase("embed")) {
-            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
+            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
         } else if(tagname.equalsIgnoreCase("param")) {
             final String name = tagopts.getProperty("name", "");
             if (name.equalsIgnoreCase("movie")) {
-                anchors.put(absolutePath(tagopts.getProperty("value", "")),name);
+                anchors.put(absolutePath(tagopts.getProperty("value", "")), tagopts /* with property "name" */);
             }
         }
 
@@ -308,7 +328,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     final ImageEntry ie = new ImageEntry(url, recursiveParse(text), -1, -1, -1);
                     addImage(images, ie);
                 } else {
-                    anchors.put(url, recursiveParse(text));
+                    tagopts.put("name", recursiveParse(text));
+                    anchors.put(url, tagopts);
                 }
             }
         }
@@ -325,8 +346,26 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) headlines[3].add(h);
+        } else if ((tagname.equalsIgnoreCase("h5")) && (text.length < 1024)) {
+            h = recursiveParse(text);
+            if (h.length() > 0) headlines[4].add(h);
+        } else if ((tagname.equalsIgnoreCase("h6")) && (text.length < 1024)) {
+            h = recursiveParse(text);
+            if (h.length() > 0) headlines[5].add(h);
         } else if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
             title = recursiveParse(text);
+        } else if ((tagname.equalsIgnoreCase("b")) && (text.length < 1024)) {
+            h = recursiveParse(text);
+            if (h.length() > 0) bold.add(h);
+        } else if ((tagname.equalsIgnoreCase("strong")) && (text.length < 1024)) {
+            h = recursiveParse(text);
+            if (h.length() > 0) bold.add(h);
+        } else if ((tagname.equalsIgnoreCase("i")) && (text.length < 1024)) {
+            h = recursiveParse(text);
+            if (h.length() > 0) italic.add(h);
+        } else if ((tagname.equalsIgnoreCase("li")) && (text.length < 1024)) {
+            h = recursiveParse(text);
+            if (h.length() > 0) li.add(h);
         }
 
         // fire event
@@ -389,8 +428,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         
         // otherwise take any headline
-        for (int i = 0; i < 4; i++) {
-            if (!headlines[i].isEmpty()) return headlines[i].get(0);
+        for (int i = 0; i < this.headlines.length; i++) {
+            if (!this.headlines[i].isEmpty()) return this.headlines[i].get(0);
         }
         
         // take description tag
@@ -402,8 +441,31 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public String[] getHeadlines(final int i) {
-        assert ((i >= 1) && (i <= 4));
-        return headlines[i - 1].toArray(new String[headlines.length]);
+        assert ((i >= 1) && (i <= this.headlines.length));
+        return this.headlines[i - 1].toArray(new String[this.headlines[i - 1].size()]);
+    }
+    
+    public String[] getBold() {
+        return this.bold.toArray(new String[this.bold.size()]);
+    }
+    
+    public String[] getItalic() {
+        return this.italic.toArray(new String[this.italic.size()]);
+    }
+    
+    public String[] getLi() {
+        return this.li.toArray(new String[this.li.size()]);
+    }
+    
+    public boolean containsFlash() {
+        this.anchors = new HashMap<MultiProtocolURI, Properties>();
+        String ext;
+        for (MultiProtocolURI url: this.anchors.keySet()) {
+            ext = url.getFileExtension();
+            if (ext == null) continue;
+            if (ext.equals("swf")) return true;
+        }
+        return false;
     }
     
     public byte[] getText() {
@@ -415,7 +477,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
-    public Map<MultiProtocolURI, String> getAnchors() {
+    public Map<MultiProtocolURI, Properties> getAnchors() {
         // returns a url (String) / name (String) relation
         return anchors;
     }
@@ -423,6 +485,25 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public Map<MultiProtocolURI, String> getRSS() {
         // returns a url (String) / name (String) relation
         return rss;
+    }
+
+    public Map<MultiProtocolURI, String> getCSS() {
+        // returns a url (String) / name (String) relation
+        return css;
+    }
+
+    public Set<MultiProtocolURI> getFrames() {
+        // returns a url (String) / name (String) relation
+        return frames;
+    }
+
+    public Set<MultiProtocolURI> getIFrames() {
+        // returns a url (String) / name (String) relation
+        return iframes;
+    }
+
+    public Set<MultiProtocolURI> getScript() {
+        return script;
     }
 
     /**

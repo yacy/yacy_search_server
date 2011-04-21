@@ -162,9 +162,15 @@ public class htmlParser extends AbstractParser implements Parser {
     }
 
     private static Document[] transformScraper(final MultiProtocolURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
-        final String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
+        final String[] sections = new String[
+                 scraper.getHeadlines(1).length +
+                 scraper.getHeadlines(2).length +
+                 scraper.getHeadlines(3).length +
+                 scraper.getHeadlines(4).length +
+                 scraper.getHeadlines(5).length +
+                 scraper.getHeadlines(6).length];
         int p = 0;
-        for (int i = 1; i <= 4; i++) {
+        for (int i = 1; i <= 6; i++) {
             for (final String headline : scraper.getHeadlines(i)) {
                 sections[p++] = headline;
             }
@@ -173,6 +179,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 location,
                 mimeType,
                 charSet,
+                scraper,
                 scraper.getContentLanguages(),
                 scraper.getKeywords(),
                 scraper.getTitle(),

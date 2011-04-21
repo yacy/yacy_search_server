@@ -65,7 +65,11 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
 
     @Override
     public String toString() {
-        return "{" + url.toString() + ", " + alt + ", " + width + "/" + height + "}";
+        return "<img url=\"" + url.toNormalform(false, false, false, false) + "\"" +
+               (alt != null && alt.length() > 0 ? " alt=\"" + alt + "\"" : "") +
+               (width >= 0 ? " width=\"" + width + "\"" : "") +
+               (height >= 0 ? " height=\"" + height + "\"" : "") +
+               ">";
     }
 
     @Override

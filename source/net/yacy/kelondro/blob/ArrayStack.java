@@ -216,7 +216,7 @@ public class ArrayStack implements BLOB {
     
     public long mem() {
         long m = 0;
-        for (blobItem b: this.blobs) m += b.blob.mem();
+        if (this.blobs != null) for (blobItem b: this.blobs) m += b.blob.mem();
         return m;
     }
     

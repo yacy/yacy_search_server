@@ -102,6 +102,7 @@ public class psParser extends AbstractParser implements Parser {
                     location, // url
                     mimeType, // mime
                     "UTF-8",  // charset
+                    this,
                     null,     // languages
                     null,     // keywords
                     null,     // title

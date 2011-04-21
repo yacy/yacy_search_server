@@ -69,7 +69,7 @@ public class ResponseHeader extends HeaderFramework {
     
     public Date lastModified() {
         Date d = headerDate(LAST_MODIFIED);
-        if (d == null) return new Date(); else return d;
+        if (d == null) return date(); else return d;
     }
     
     public long age() {

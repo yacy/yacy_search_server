@@ -106,6 +106,7 @@ public class vsdParser extends AbstractParser implements Parser {
                     location,     // url of the source document
                     mimeType,     // the documents mime type
                     "UTF-8",      // charset of the document text
+                    this,
                     null,         // language
                     keywords,
                     title,

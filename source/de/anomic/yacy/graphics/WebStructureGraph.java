@@ -128,39 +128,31 @@ public class WebStructureGraph {
         }
     }
     
-    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final DigestURI url, final Document document, final Condenser condenser, final Date docDate) {
+    public void generateCitationReference(final DigestURI url, final Document document, final Condenser condenser, final Date docDate) {
         // generate citation reference
         final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
         final Iterator<MultiProtocolURI> it = hl.keySet().iterator();
         final HashSet<MultiProtocolURI> globalRefURLs = new HashSet<MultiProtocolURI>();
         final String refhost = url.getHost();
         MultiProtocolURI u;
-        int GCount = 0;
-        int LCount = 0;
         while (it.hasNext()) {
             u = it.next();
             if (u == null) continue;
-            if (refhost != null && u.getHost() != null && u.getHost().equals(refhost)) {
-                // this is a local link
-                LCount++;
-            } else {
+            if (refhost != null && u.getHost() != null && !u.getHost().equals(refhost)) {
                 // this is a global link
-                GCount++;
                 globalRefURLs.add(u);
             }
         }
-        
+        leanrefObject lro = new leanrefObject(url, globalRefURLs);
         if (globalRefURLs.size() > 0) try {
             if (this.publicRefDNSResolvingWorker.isAlive()) {
-                this.publicRefDNSResolvingQueue.put(new leanrefObject(url, globalRefURLs));
+                this.publicRefDNSResolvingQueue.put(lro);
             } else {
-                this.learnrefs(new leanrefObject(url, globalRefURLs));
+                this.learnrefs(lro);
             }
         } catch (InterruptedException e) {
-            this.learnrefs(new leanrefObject(url, globalRefURLs));
+            this.learnrefs(lro);
         }
-        
-        return new Integer[] {Integer.valueOf(LCount), Integer.valueOf(GCount)};
     }
     
     public void learnrefs(final leanrefObject lro) {

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -414,7 +415,7 @@ public class Crawler_p {
                             writer.close();
                             
                             // get links and generate filter
-                            final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
+                            final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
                             if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
                             
                             final DigestURI crawlURL = new DigestURI("file://" + crawlingFile.toString());
@@ -492,7 +493,7 @@ public class Crawler_p {
                         // String description = scraper.getDescription();
                         
                         // get links and generate filter
-                        final Map<MultiProtocolURI, String> hyperlinks = scraper.getAnchors();
+                        final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
                         if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
 
                         // put links onto crawl queue
@@ -515,10 +516,10 @@ public class Crawler_p {
                                 cachePolicy);
                         sb.crawler.putActive(profile.handle().getBytes(), profile);
                         sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                        final Iterator<Map.Entry<MultiProtocolURI, String>> linkiterator = hyperlinks.entrySet().iterator();
+                        final Iterator<Map.Entry<MultiProtocolURI, Properties>> linkiterator = hyperlinks.entrySet().iterator();
                         DigestURI nexturl;
                         while (linkiterator.hasNext()) {
-                            final Map.Entry<MultiProtocolURI, String> e = linkiterator.next();
+                            final Map.Entry<MultiProtocolURI, Properties> e = linkiterator.next();
                             if (e.getKey() == null) continue;
                             nexturl = new DigestURI(e.getKey());
                             // remove the url from the database to be prepared to crawl them again
@@ -530,7 +531,7 @@ public class Crawler_p {
                                     sb.peers.mySeed().hash.getBytes(), 
                                     nexturl, 
                                     null, 
-                                    e.getValue(), 
+                                    e.getValue().getProperty("name", ""), 
                                     new Date(),
                                     profile.handle(),
                                     0,

@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Map.Entry;
@@ -130,7 +131,7 @@ public class BookmarkHelper {
             
         int importCount = 0;
         
-        Map<MultiProtocolURI, String> links = new HashMap<MultiProtocolURI, String>();
+        Map<MultiProtocolURI, Properties> links = new HashMap<MultiProtocolURI, Properties>();
         String title;
         MultiProtocolURI url;
         Bookmark bm;
@@ -144,9 +145,9 @@ public class BookmarkHelper {
             writer.close();
             links = scraper.getAnchors();           
         } catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-        for (final Entry<MultiProtocolURI, String> link: links.entrySet()) {
+        for (final Entry<MultiProtocolURI, Properties> link: links.entrySet()) {
             url = link.getKey();
-            title = link.getValue();
+            title = link.getValue().getProperty("name", "");
             Log.logInfo("BOOKMARKS", "links.get(url)");
             if ("".equals(title)) {//cannot be displayed
                 title = url.toString();

@@ -88,6 +88,7 @@ public class mmParser extends AbstractParser implements Parser {
             location,
             mimeType,
             "UTF-8",
+            this,
             null,
             null,
             rootElementText,

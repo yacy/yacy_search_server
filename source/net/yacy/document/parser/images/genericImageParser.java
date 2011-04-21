@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -180,7 +181,7 @@ public class genericImageParser extends AbstractParser implements Parser {
         }        
         
         final HashSet<String> languages = new HashSet<String>();
-        final HashMap<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
+        final HashMap<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
         final HashMap<MultiProtocolURI, ImageEntry> images  = new HashMap<MultiProtocolURI, ImageEntry>();
         // add this image to the map of images
         String infoString = ii.info.toString();
@@ -192,6 +193,7 @@ public class genericImageParser extends AbstractParser implements Parser {
              location,
              mimeType,
              "UTF-8",
+             this,
              languages,
              keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords
              title, // title

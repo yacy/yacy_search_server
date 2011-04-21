@@ -140,6 +140,15 @@ public final class Cache {
         if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
         if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");
         log.logInfo("storing content of url " + url.toString() + ", " + file.length + " bytes");
+
+        // store the file
+        try {
+            fileDB.insert(url.hash(), file);
+        } catch (UnsupportedEncodingException e) {
+            throw new IOException("Cache.store: cannot write to fileDB (1): " + e.getMessage());
+        } catch (IOException e) {
+            throw new IOException("Cache.store: cannot write to fileDB (2): " + e.getMessage());
+        }
         
         // store the response header into the header database
         final HashMap<String, String> hm = new HashMap<String, String>();
@@ -154,15 +163,6 @@ public final class Cache {
         } catch (Exception e) {
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
-        
-        // store the file
-        try {
-            fileDB.insert(url.hash(), file);
-        } catch (UnsupportedEncodingException e) {
-            throw new IOException("Cache.store: cannot write to fileDB (1): " + e.getMessage());
-        } catch (IOException e) {
-            throw new IOException("Cache.store: cannot write to fileDB (2): " + e.getMessage());
-        }
         if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true, false));
     }
     
@@ -173,8 +173,11 @@ public final class Cache {
      */
     public static boolean has(final DigestURI url) {
         boolean headerExists;
-        headerExists = responseHeaderDB.containsKey(url.hash());
-        boolean fileExists = fileDB.containsKey(url.hash());
+        boolean fileExists;
+        //synchronized (responseHeaderDB) {
+            headerExists = responseHeaderDB.containsKey(url.hash());
+            fileExists = fileDB.containsKey(url.hash());
+        //}
         if (headerExists && fileExists) return true;
         if (!headerExists && !fileExists) return false;
         // if not both is there then we do a clean-up

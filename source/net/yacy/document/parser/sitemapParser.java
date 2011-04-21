@@ -87,6 +87,7 @@ public class sitemapParser extends AbstractParser implements Parser {
                     uri,
                     TextParser.mimeOf(url),
                     charset,
+                    this,
                     null,
                     null,
                     "",

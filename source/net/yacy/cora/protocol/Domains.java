@@ -426,7 +426,8 @@ public class Domains {
         // the id=7 is used to flag local addresses
     }
     
-    private static KeyList globalHosts;
+    private static KeyList globalHosts = null;
+    private static boolean noLocalCheck = false;
 
     public static void init(File globalHostsnameCache) {
         if (globalHostsnameCache == null) {
@@ -436,6 +437,10 @@ public class Domains {
         } catch (IOException e) {
             globalHosts = null;
         }
+    }
+    
+    public static void setNoLocalCheck(boolean v) {
+        noLocalCheck = v;
     }
 
     public static void close() {
@@ -532,10 +537,12 @@ public class Domains {
             ip = NAME_CACHE_HIT.get(host);
             if (ip != null) {
                 //System.out.println("DNSLOOKUP-CACHE-HIT(SYNC) " + host);
+                LOOKUP_SYNC.remove(host);
                 return ip;
             }
             if (NAME_CACHE_MISS.containsKey(host)) {
                 //System.out.println("DNSLOOKUP-CACHE-MISS(SYNC) " + host);
+                LOOKUP_SYNC.remove(host);
                 return null;
             }
             
@@ -563,14 +570,13 @@ public class Domains {
                 }
             }
             LOOKUP_SYNC.remove(host);
-            
             return ip;
         }
     }
     
     private final static Pattern dotPattern = Pattern.compile("\\.");
     
-    private static final InetAddress parseInetAddress(String ip) {
+    public static final InetAddress parseInetAddress(String ip) {
         if (ip == null || ip.length() < 8) return null;
         if (ip.equals("0:0:0:0:0:0:0:1%0")) ip = "127.0.0.1"; 
         final String[] ips = dotPattern.split(ip);
@@ -776,7 +782,8 @@ public class Domains {
     }
     
     public static boolean isLocalhost(final String host) {
-        return ("127.0.0.1".equals(host) ||
+        return (noLocalCheck ||
+                "127.0.0.1".equals(host) ||
                 "localhost".equals(host) ||
                 host.startsWith("0:0:0:0:0:0:0:1")
                 );
@@ -787,7 +794,8 @@ public class Domains {
     }
     
     private static boolean isLocal(final String host, boolean recursive) {
-        if (host == null || host.length() == 0) return true;
+        
+        if (noLocalCheck || host == null || host.length() == 0) return true;
 
         // FIXME IPv4 only
         // check local ip addresses
@@ -802,11 +810,13 @@ public class Domains {
         // check dns lookup: may be a local address even if the domain name looks global
         if (!recursive) return false;
         final InetAddress a = dnsResolve(host);
-        boolean localp = a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress() || isLocal(a.getHostAddress(), false);
-        return localp;
+        return isLocal(a);
     }
     
-    
+    public static boolean isLocal(InetAddress a) {
+        boolean localp = noLocalCheck || a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress() || isLocal(a.getHostAddress(), false);
+        return localp;
+    }
     
     public static void main(final String[] args) {
         /*

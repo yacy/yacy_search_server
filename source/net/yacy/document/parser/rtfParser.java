@@ -67,6 +67,7 @@ public class rtfParser extends AbstractParser implements Parser {
                     location,
                     mimeType,
                     "UTF-8",
+                    this,
                     null,
                     null,
                     ((bodyText.length() > 80)? bodyText.substring(0, 80):bodyText.trim()).

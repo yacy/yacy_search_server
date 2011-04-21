@@ -35,6 +35,7 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -231,7 +232,7 @@ public final class CrawlStacker {
             }
         }
     }
-    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, String> hyperlinks, boolean replace) {
+    public void enqueueEntriesAsynchronous(final byte[] initiator, final String profileHandle, final Map<MultiProtocolURI, Properties> hyperlinks, boolean replace) {
         new Thread() {
             public void run() {
                 enqueueEntries(initiator, profileHandle, hyperlinks, true);
@@ -239,8 +240,8 @@ public final class CrawlStacker {
         }.start();
     }
 
-    public void enqueueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, String> hyperlinks, boolean replace) {
-        for (Map.Entry<MultiProtocolURI, String> e: hyperlinks.entrySet()) {
+    public void enqueueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, Properties> hyperlinks, boolean replace) {
+        for (Map.Entry<MultiProtocolURI, Properties> e: hyperlinks.entrySet()) {
             if (e.getKey() == null) continue;
             
             // delete old entry, if exists to force a re-load of the url (thats wanted here)
@@ -272,7 +273,7 @@ public final class CrawlStacker {
                         initiator, 
                         url, 
                         null, 
-                        e.getValue(), 
+                        e.getValue().getProperty("name", ""), 
                         new Date(),
                         profileHandle,
                         0,

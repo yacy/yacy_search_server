@@ -60,6 +60,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                 location,
                 mimeType,
                 charset,
+                this,
                 null,
                 null,
                 null,

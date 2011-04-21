@@ -125,7 +125,7 @@ public final class HTTPLoader {
         client.setTimout(socketTimeout);
         client.setHeader(requestHeader.entrySet());
             // send request
-        	final byte[] responseBody = client.GETbytes(url.toString(), maxFileSize);
+        	final byte[] responseBody = client.GETbytes(url, maxFileSize);
         	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
         	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
 
@@ -241,7 +241,7 @@ public final class HTTPLoader {
         final HTTPClient client = new HTTPClient();
         client.setTimout(20000);
         client.setHeader(requestHeader.entrySet());
-        	final byte[] responseBody = client.GETbytes(request.url().toString(), Long.MAX_VALUE);
+        	final byte[] responseBody = client.GETbytes(request.url(), Long.MAX_VALUE);
         	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
         	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
             // FIXME: 30*-handling (bottom) is never reached

@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -72,33 +73,36 @@ public class Document {
     private final List<String>  sections;       // if present: more titles/headlines appearing in the document
     private final StringBuilder description;    // an abstract, if present: short content description
     private Object text;                        // the clear text, all that is visible
-    private final Map<MultiProtocolURI, String> anchors; // all links embedded as clickeable entities (anchor tags)
+    private final Map<MultiProtocolURI, Properties> anchors; // all links embedded as clickeable entities (anchor tags)
     private final Map<MultiProtocolURI, String> rss; // all embedded rss feeds
     private final Map<MultiProtocolURI, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private Map<MultiProtocolURI, String> hyperlinks, audiolinks, videolinks, applinks;
+    private Map<MultiProtocolURI, String> hyperlinks, audiolinks, videolinks, applinks, inboundlinks, outboundlinks;
     private Map<String, String> emaillinks;
     private MultiProtocolURI favicon;
     private boolean resorted;
-    private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     private Set<String> languages;
     private boolean indexingDenied;
     private float lon, lat;
+    private Object parserObject; // the source object that was used to create the Document
 
-    public Document(final MultiProtocolURI location, final String mimeType, final String charset, final Set<String> languages,
+    public Document(final MultiProtocolURI location, final String mimeType, final String charset,
+                    final Object parserObject,
+                    final Set<String> languages,
                     final String[] keywords, final String title, final String author, final String publisher,
                     final String[] sections, final String abstrct,
                     final float lon, final float lat,
                     final Object text,
-                    final Map<MultiProtocolURI, String> anchors,
+                    final Map<MultiProtocolURI, Properties> anchors,
                     final Map<MultiProtocolURI, String> rss,
                     final Map<MultiProtocolURI, ImageEntry> images,
                     boolean indexingDenied) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
+        this.parserObject = parserObject;
         this.keywords = (keywords == null) ? new LinkedList<String>() : Arrays.asList(keywords);
         this.title = (title == null) ? new StringBuilder(0) : new StringBuilder(title);
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
@@ -106,7 +110,7 @@ public class Document {
         this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
         this.lon = lon;
         this.lat = lat;
-        this.anchors = (anchors == null) ? new HashMap<MultiProtocolURI, String>(0) : anchors;
+        this.anchors = (anchors == null) ? new HashMap<MultiProtocolURI, Properties>(0) : anchors;
         this.rss = (rss == null) ? new HashMap<MultiProtocolURI, String>(0) : rss;
         this.images =  (images == null) ? new HashMap<MultiProtocolURI, ImageEntry>() : images;
         this.publisher = publisher;
@@ -116,19 +120,15 @@ public class Document {
         this.applinks = null;
         this.emaillinks = null;
         this.resorted = false;
-        this.inboundLinks = -1;
-        this.outboundLinks = -1;
+        this.inboundlinks = null;
+        this.outboundlinks = null;
         this.languages = languages;
         this.indexingDenied = indexingDenied;
         this.text = text == null ? new ByteArrayOutputStream() : text;
     }
     
-    public void setInboundLinks(int il) {
-        this.inboundLinks = il;
-    }
-    
-    public void setOutboundLinks(int ol) {
-        this.outboundLinks = ol;
+    public Object getParserObject() {
+        return this.parserObject;
     }
     
     /**
@@ -179,8 +179,8 @@ dc_rights
     public String dc_creator() {
         return (creator == null) ? "" : creator.toString();
     }
-    
-    public String dc_subject(final char separator) {
+
+    public String[] dc_subject() {
         // sort out doubles and empty words
         final TreeSet<String> hs = new TreeSet<String>();
         String s;
@@ -189,11 +189,18 @@ dc_rights
             s = (this.keywords.get(i)).trim();
             if (s.length() > 0) hs.add(s.toLowerCase());
         }
-        if (hs.isEmpty()) return "";
+        String[] t = new String[hs.size()];
+        int i = 0;
+        for (String u: hs) t[i++] = u;
+        return t;
+    }
+    
+    public String dc_subject(final char separator) {
+        String[] t = dc_subject();
+        if (t.length == 0) return "";
         // generate a new list
-        final StringBuilder sb = new StringBuilder(this.keywords.size() * 6);
-        final Iterator<String> i = hs.iterator();
-        while (i.hasNext()) sb.append(i.next()).append(separator);
+        final StringBuilder sb = new StringBuilder(t.length * 8);
+        for (String s: t) sb.append(s).append(separator);
         return sb.substring(0, sb.length() - 1);
     }
     
@@ -314,7 +321,7 @@ dc_rights
         return this.keywords;
     }
     
-    public Map<MultiProtocolURI, String> getAnchors() {
+    public Map<MultiProtocolURI, Properties> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return anchors;
@@ -371,72 +378,79 @@ dc_rights
         return this.lat;
     }
     
-    private synchronized void resortLinks() {
+    private void resortLinks() {
         if (this.resorted) return;
-        
-        // extract hyperlinks, medialinks and emaillinks from anchorlinks
-        MultiProtocolURI url;
-        String u;
-        int extpos, qpos;
-        String ext = null;
-        final Iterator<Map.Entry<MultiProtocolURI, String>> i = anchors.entrySet().iterator();
-        hyperlinks = new HashMap<MultiProtocolURI, String>();
-        videolinks = new HashMap<MultiProtocolURI, String>();
-        audiolinks = new HashMap<MultiProtocolURI, String>();
-        applinks   = new HashMap<MultiProtocolURI, String>();
-        emaillinks = new HashMap<String, String>();
-        final Map<MultiProtocolURI, ImageEntry> collectedImages = new HashMap<MultiProtocolURI, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-        Map.Entry<MultiProtocolURI, String> entry;
-        while (i.hasNext()) {
-            entry = i.next();
-            url = entry.getKey();
-            if (url == null) continue;
-            u = url.toNormalform(true, false);
-            if (u.startsWith("mailto:")) {
-                emaillinks.put(u.substring(7), entry.getValue());
-            } else {
-                extpos = u.lastIndexOf('.');
-                if (extpos > 0) {
-                    if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
-                        ext = u.substring(extpos + 1, qpos).toLowerCase();
-                    } else {
-                        ext = u.substring(extpos + 1).toLowerCase();
-                    }
-                    if (Classification.isMediaExtension(ext)) {
-                        // this is not a normal anchor, its a media link
-                        if (Classification.isImageExtension(ext)) {
-                            ContentScraper.addImage(collectedImages, new ImageEntry(url, entry.getValue(), -1, -1, -1));
-                        }
-                        else if (Classification.isAudioExtension(ext)) audiolinks.put(url, entry.getValue());
-                        else if (Classification.isVideoExtension(ext)) videolinks.put(url, entry.getValue());
-                        else if (Classification.isApplicationExtension(ext)) applinks.put(url, entry.getValue());
-                    }
-                }
-                // in any case we consider this as a link and let the parser decide if that link can be followed
-                hyperlinks.put(url, entry.getValue());
+        synchronized (this) {
+            if (this.resorted) return;
+            // extract hyperlinks, medialinks and emaillinks from anchorlinks
+            MultiProtocolURI url;
+            String u;
+            int extpos, qpos;
+            String ext = null;
+            String thishost = this.source.getHost();
+            this.inboundlinks = new HashMap<MultiProtocolURI, String>();
+            this.outboundlinks = new HashMap<MultiProtocolURI, String>();
+            this.hyperlinks = new HashMap<MultiProtocolURI, String>();
+            this.videolinks = new HashMap<MultiProtocolURI, String>();
+            this.audiolinks = new HashMap<MultiProtocolURI, String>();
+            this.applinks   = new HashMap<MultiProtocolURI, String>();
+            this.emaillinks = new HashMap<String, String>();
+            final Map<MultiProtocolURI, ImageEntry> collectedImages = new HashMap<MultiProtocolURI, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
+            for (Map.Entry<MultiProtocolURI, ImageEntry> entry: collectedImages.entrySet()) {
+                if (entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
             }
+            for (Map.Entry<MultiProtocolURI, Properties> entry: anchors.entrySet()) {
+                url = entry.getKey();
+                if (url == null) continue;
+                if (url.getHost() != null && thishost != null && url.getHost().equals(thishost)) this.inboundlinks.put(url, "anchor"); else this.outboundlinks.put(url, "anchor");
+                u = url.toNormalform(true, false);
+                String name = entry.getValue().getProperty("name", "");
+                if (u.startsWith("mailto:")) {
+                    emaillinks.put(u.substring(7), name);
+                } else {
+                    extpos = u.lastIndexOf('.');
+                    if (extpos > 0) {
+                        if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
+                            ext = u.substring(extpos + 1, qpos).toLowerCase();
+                        } else {
+                            ext = u.substring(extpos + 1).toLowerCase();
+                        }
+                        if (Classification.isMediaExtension(ext)) {
+                            // this is not a normal anchor, its a media link
+                            if (Classification.isImageExtension(ext)) {
+                                ContentScraper.addImage(collectedImages, new ImageEntry(url, name, -1, -1, -1));
+                            }
+                            else if (Classification.isAudioExtension(ext)) audiolinks.put(url, name);
+                            else if (Classification.isVideoExtension(ext)) videolinks.put(url, name);
+                            else if (Classification.isApplicationExtension(ext)) applinks.put(url, name);
+                        }
+                    }
+                    // in any case we consider this as a link and let the parser decide if that link can be followed
+                    hyperlinks.put(url, name);
+                }
+            }
+            
+            // add image links that we collected from the anchors to the image map
+            ContentScraper.addAllImages(images, collectedImages);
+           
+            // expand the hyperlinks:
+            // we add artificial hyperlinks to the hyperlink set
+            // that can be calculated from given hyperlinks and imagelinks
+            
+            hyperlinks.putAll(allReflinks(images.values()));
+            hyperlinks.putAll(allReflinks(audiolinks.keySet()));
+            hyperlinks.putAll(allReflinks(videolinks.keySet()));
+            hyperlinks.putAll(allReflinks(applinks.keySet()));
+            /*
+            hyperlinks.putAll(allSubpaths(hyperlinks.keySet()));
+            hyperlinks.putAll(allSubpaths(images.values()));
+            hyperlinks.putAll(allSubpaths(audiolinks.keySet()));
+            hyperlinks.putAll(allSubpaths(videolinks.keySet()));
+            hyperlinks.putAll(allSubpaths(applinks.keySet()));
+             */        
+            // don't do this again
+            this.resorted = true;
         }
-        
-        // add image links that we collected from the anchors to the image map
-        ContentScraper.addAllImages(images, collectedImages);
-       
-        // expand the hyperlinks:
-        // we add artificial hyperlinks to the hyperlink set
-        // that can be calculated from given hyperlinks and imagelinks
-        
-        hyperlinks.putAll(allReflinks(images.values()));
-        hyperlinks.putAll(allReflinks(audiolinks.keySet()));
-        hyperlinks.putAll(allReflinks(videolinks.keySet()));
-        hyperlinks.putAll(allReflinks(applinks.keySet()));
-        /*
-        hyperlinks.putAll(allSubpaths(hyperlinks.keySet()));
-        hyperlinks.putAll(allSubpaths(images.values()));
-        hyperlinks.putAll(allSubpaths(audiolinks.keySet()));
-        hyperlinks.putAll(allSubpaths(videolinks.keySet()));
-        hyperlinks.putAll(allSubpaths(applinks.keySet()));
-         */        
-        // don't do this again
-        this.resorted = true;
     }
     
     public static Map<MultiProtocolURI, String> allSubpaths(final Collection<?> links) {
@@ -573,12 +587,24 @@ dc_rights
     	this.favicon = faviconURL;
     }
     
-    public int inboundLinks() {
-        return (this.inboundLinks < 0) ? 0 : this.inboundLinks;
+    public int inboundLinkCount() {
+        if (this.inboundlinks == null) resortLinks();
+        return (this.inboundlinks == null) ? 0 : this.inboundlinks.size();
     }
     
-    public int outboundLinks() {
-        return (this.outboundLinks < 0) ? 0 : this.outboundLinks;
+    public int outboundLinkCount() {
+        if (this.outboundlinks == null) resortLinks();
+        return (this.outboundlinks == null) ? 0 : this.outboundlinks.size();
+    }
+    
+    public Set<MultiProtocolURI> inboundLinks() {
+        if (this.inboundlinks == null) resortLinks();
+        return (this.inboundlinks == null) ? null : this.inboundlinks.keySet();
+    }
+    
+    public Set<MultiProtocolURI> outboundLinks() {
+        if (this.outboundlinks == null) resortLinks();
+        return (this.outboundlinks == null) ? null : this.outboundlinks.keySet();
     }
     
     public boolean indexingDenied() {
@@ -608,7 +634,7 @@ dc_rights
         String language = this.dc_language();
         if (language != null && language.length() > 0) os.write("<dc:language>" + this.dc_language() + "</dc:language>\n");
         os.write("<dc:date>" + ISO8601Formatter.FORMATTER.format(date) + "</dc:date>\n");
-        if (this.lon != 0.0f && this.lat != 0.0f) os.write("<geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat>\n");
+        if (this.lon != 0.0f && this.lat != 0.0f) os.write("<geo:Point><geo:long>" + this.lon +"</geo:long><geo:lat>" + this.lat + "</geo:lat></geo:Point>\n");
         os.write("</record>\n");
     }
     
@@ -665,7 +691,7 @@ dc_rights
         final StringBuilder      description   = new StringBuilder(80);
         final LinkedList<String> sectionTitles = new LinkedList<String>();
 
-        final Map<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
+        final Map<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
         final Map<MultiProtocolURI, String> rss = new HashMap<MultiProtocolURI, String>();
         final Map<MultiProtocolURI, ImageEntry> images = new HashMap<MultiProtocolURI, ImageEntry>();
         float lon = 0.0f, lat = 0.0f;
@@ -714,6 +740,7 @@ dc_rights
         return new Document(
                 location,
                 globalMime,
+                null,
                 null,
                 null,
                 subjects.toString().split(" |,"),

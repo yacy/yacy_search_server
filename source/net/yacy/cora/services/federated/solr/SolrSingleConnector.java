@@ -41,6 +41,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
 import net.yacy.kelondro.logging.Log;
 
@@ -187,12 +188,12 @@ public class SolrSingleConnector {
     }
     */
     
-    public void add(String id, Document doc) throws IOException {
-        add(id, doc, this.scheme);
+    public void add(String id, ResponseHeader header, Document doc) throws IOException {
+        add(id, header, doc, this.scheme);
     }
     
-    public void add(String id, Document doc, SolrScheme tempScheme) throws IOException {
-        SolrInputDocument solrdoc = tempScheme.yacy2solr(id, doc);
+    public void add(String id, ResponseHeader header, Document doc, SolrScheme tempScheme) throws IOException {
+        SolrInputDocument solrdoc = tempScheme.yacy2solr(id, header, doc);
         int thisrrc = this.transmissionRoundRobinCounter;
         int nextrrc = thisrrc++;
         if (nextrrc >= transmissionQueueCount) nextrrc = 0;

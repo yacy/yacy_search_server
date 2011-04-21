@@ -147,6 +147,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     location,
                     mimeType,
                     "UTF-8",
+                    this,
                     languages,
                     docKeywords,
                     docLongTitle,

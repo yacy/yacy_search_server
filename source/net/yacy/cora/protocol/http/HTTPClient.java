@@ -267,7 +267,10 @@ public class HTTPClient {
      * @throws IOException 
      */
     public byte[] GETbytes(final String uri) throws IOException {
-    	return GETbytes(uri, Long.MAX_VALUE);
+        return GETbytes(uri, Long.MAX_VALUE);
+    }
+    public byte[] GETbytes(final MultiProtocolURI url) throws IOException {
+        return GETbytes(url, Long.MAX_VALUE);
     }
     
     /**
@@ -279,12 +282,15 @@ public class HTTPClient {
      * @throws IOException 
      */
     public byte[] GETbytes(final String uri, long maxBytes) throws IOException {
-        final MultiProtocolURI url = new MultiProtocolURI(uri);
+        return GETbytes(new MultiProtocolURI(uri), maxBytes);
+    }
+    
+    public byte[] GETbytes(final MultiProtocolURI url, long maxBytes) throws IOException {
         boolean localhost = url.getHost().equals("localhost");
         String urix = url.toNormalform(true, false, !localhost, false);
-    	final HttpGet httpGet = new HttpGet(urix);
-    	if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-    	return getContentBytes(httpGet, maxBytes);
+        final HttpGet httpGet = new HttpGet(urix);
+        if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
+        return getContentBytes(httpGet, maxBytes);
     }
     
     /**

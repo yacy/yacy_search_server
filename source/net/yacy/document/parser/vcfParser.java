@@ -34,6 +34,7 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Properties;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
@@ -66,7 +67,7 @@ public class vcfParser extends AbstractParser implements Parser {
             final StringBuilder parsedTitle = new StringBuilder();
             final StringBuilder parsedDataText = new StringBuilder();
             final HashMap<String, String> parsedData = new HashMap<String, String>();
-            final HashMap<MultiProtocolURI, String> anchors = new HashMap<MultiProtocolURI, String>();
+            final HashMap<MultiProtocolURI, Properties> anchors = new HashMap<MultiProtocolURI, Properties>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
             
             boolean useLastLine = false;
@@ -174,7 +175,9 @@ public class vcfParser extends AbstractParser implements Parser {
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
                             final MultiProtocolURI newURL = new MultiProtocolURI(value);
-                            anchors.put(newURL, newURL.toString());   
+                            Properties p = new Properties();
+                            p.put("name", newURL.toString());
+                            anchors.put(newURL, p);   
                             //parsedData.put(key,value);
                         } catch (final MalformedURLException ex) {/* ignore this */}                                                
                     } else if (
@@ -205,6 +208,7 @@ public class vcfParser extends AbstractParser implements Parser {
                     url,                        // url of the source document
                     mimeType,                   // the documents mime type
                     null,                       // charset
+                    this,
                     null,                       // set of languages
                     null,                       // a list of extracted keywords
                     parsedTitle.toString(),     // a long document title

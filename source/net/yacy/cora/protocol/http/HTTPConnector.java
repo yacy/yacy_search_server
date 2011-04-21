@@ -85,7 +85,7 @@ public class HTTPConnector {
 		client.setHost(vhost);
 		byte[] b;
 		try {
-		    b = client.POSTbytes(url.toNormalform(true, false, true, false), post, usegzip);
+		    b = client.POSTbytes(url, url.getHost(), post, usegzip);
 		} finally {
 		    client.finish();
 		}

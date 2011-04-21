@@ -342,8 +342,8 @@ public class Segment {
                 Response.docType(document.dc_format()), // doctype
                 condenser.RESULT_FLAGS,                    // flags
                 UTF8.getBytes(language),                   // language
-                document.inboundLinks(),                   // inbound links
-                document.outboundLinks(),                  // outbound links
+                document.inboundLinkCount(),                   // inbound links
+                document.outboundLinkCount(),                  // outbound links
                 document.getAudiolinks().size(),           // laudio
                 document.getImages().size(),               // limage
                 document.getVideolinks().size(),           // lvideo
@@ -363,8 +363,8 @@ public class Segment {
                 condenser,                                    // document condenser
                 language,                                     // document language
                 Response.docType(document.dc_format()),       // document type
-                document.inboundLinks(),                      // inbound links
-                document.outboundLinks(),                     // outbound links
+                document.inboundLinkCount(),                      // inbound links
+                document.outboundLinkCount(),                     // outbound links
                 searchEvent,                                  // a search event that can have results directly
                 sourceName                                    // the name of the source where the index was created
         );

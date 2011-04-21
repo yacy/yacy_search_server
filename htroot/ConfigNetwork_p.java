@@ -190,7 +190,7 @@ public class ConfigNetwork_p {
         prop.putHTML("network.unit.definition", sb.getConfig("network.unit.definition", ""));
         prop.putHTML("network.unit.name", sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""));
         prop.putHTML("network.unit.description", sb.getConfig("network.unit.description", ""));
-        prop.putHTML("network.unit.domain", sb.getConfig("network.unit.domain", ""));
+        prop.putHTML("network.unit.domain", sb.getConfig(SwitchboardConstants.NETWORK_DOMAIN, ""));
         prop.putHTML("network.unit.dht", sb.getConfig("network.unit.dht", ""));
         networkBootstrapLocations.remove(sb.getConfig("network.unit.definition", ""));
         int c = 0;

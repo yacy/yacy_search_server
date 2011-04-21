@@ -50,6 +50,7 @@ public class genericParser extends AbstractParser implements Parser {
                 location,
                 mimeType,
                 charset,
+                this,
                 null,
                 null,
                 location.getFileName().length() == 0 ? location.toTokens() : MultiProtocolURI.unescape(location.getFileName()), // title
