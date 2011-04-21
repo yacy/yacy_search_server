@@ -439,6 +439,14 @@ public class Domains {
         }
     }
     
+    /**
+     * the isLocal check can be switched off to gain a better crawling speed.
+     * however, if the check is switched off, then ALL urls are considered as local
+     * this will create url-hashes for global domains which do not fit in environments
+     * where the isLocal switch is not de-activated. Please handle this method with great care
+     * Bad usage will make peers inoperable.
+     * @param v
+     */
     public static void setNoLocalCheck(boolean v) {
         noLocalCheck = v;
     }
@@ -781,8 +789,17 @@ public class Domains {
         return (i == null) ? TLD_Generic_ID : i.intValue();
     }
     
+    /**
+     * check if a given host is the name for a local host address
+     * this method will return true if noLocalCheck is switched on. This means that
+     * not only local and global addresses are then not distinguished but also that
+     * global address hashes do not fit any more to previously stored address hashes since
+     * local/global is marked in the hash.
+     * @param host
+     * @return
+     */
     public static boolean isLocalhost(final String host) {
-        return (noLocalCheck ||
+        return (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
                 "127.0.0.1".equals(host) ||
                 "localhost".equals(host) ||
                 host.startsWith("0:0:0:0:0:0:0:1")
@@ -795,7 +812,9 @@ public class Domains {
     
     private static boolean isLocal(final String host, boolean recursive) {
         
-        if (noLocalCheck || host == null || host.length() == 0) return true;
+        if (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
+            host == null ||
+            host.length() == 0) return true;
 
         // FIXME IPv4 only
         // check local ip addresses
@@ -814,7 +833,14 @@ public class Domains {
     }
     
     public static boolean isLocal(InetAddress a) {
-        boolean localp = noLocalCheck || a == null || a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress() || isLocal(a.getHostAddress(), false);
+        boolean
+            localp = noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
+            a == null ||
+            a.isAnyLocalAddress() ||
+            a.isLinkLocalAddress() |
+            a.isLoopbackAddress() ||
+            a.isSiteLocalAddress() ||
+            isLocal(a.getHostAddress(), false);
         return localp;
     }
     
