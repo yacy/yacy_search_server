@@ -43,7 +43,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.protocol.http.HTTPConnector;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.SearchAccumulator;
 import net.yacy.cora.services.federated.SearchHub;
 
@@ -202,7 +202,9 @@ public class SRURSSConnector extends Thread implements SearchAccumulator {
             parts.put("verify", cacheStrategy == null ? UTF8.StringBody("false") : UTF8.StringBody(cacheStrategy.toName()));
             parts.put("resource", UTF8.StringBody(global ? "global" : "local"));
             parts.put("nav", UTF8.StringBody("none"));
-            result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
+            // result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
+            final HTTPClient httpClient = new HTTPClient(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent, (int) timeout);
+            result = httpClient.POSTbytes(new MultiProtocolURI(rssSearchServiceURL), uri.getHost(), parts, false);
             
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {

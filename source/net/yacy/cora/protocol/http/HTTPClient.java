@@ -113,6 +113,12 @@ public class HTTPClient {
         HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
     }
     
+	public HTTPClient(final String defaultAgent, final int timeout) {
+        super();
+        HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
+        this.timeout = timeout;
+    }
+    
     public static void setDefaultUserAgent(final String defaultAgent) {
     	HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
     }
@@ -269,6 +275,14 @@ public class HTTPClient {
     public byte[] GETbytes(final String uri) throws IOException {
         return GETbytes(uri, Long.MAX_VALUE);
     }
+
+    /**
+     * This method GETs a page from the server.
+     * 
+     * @param uri the url to get
+     * @return content bytes
+     * @throws IOException 
+     */
     public byte[] GETbytes(final MultiProtocolURI url) throws IOException {
         return GETbytes(url, Long.MAX_VALUE);
     }
@@ -284,7 +298,16 @@ public class HTTPClient {
     public byte[] GETbytes(final String uri, long maxBytes) throws IOException {
         return GETbytes(new MultiProtocolURI(uri), maxBytes);
     }
+
     
+    /**
+     * This method GETs a page from the server.
+     * 
+     * @param uri the url to get
+     * @param maxBytes to get
+     * @return content bytes
+     * @throws IOException 
+     */
     public byte[] GETbytes(final MultiProtocolURI url, long maxBytes) throws IOException {
         boolean localhost = url.getHost().equals("localhost");
         String urix = url.toNormalform(true, false, !localhost, false);

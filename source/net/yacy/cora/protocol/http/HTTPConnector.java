@@ -36,6 +36,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 
 /**
  * This Connector is a convenience class to access the protocol-specific http client class.
+ * @deprecated this class is not used anymore
  */
 public class HTTPConnector {
     
@@ -79,17 +80,9 @@ public class HTTPConnector {
      * @throws IOException
      */
     public byte[] post(final MultiProtocolURI url, final int timeout, final String vhost, final Map<String, ContentBody> post, final boolean usegzip) throws IOException {
-		final HTTPClient client = new HTTPClient();
+		final HTTPClient client = new HTTPClient(this.userAgent);
 		client.setTimout(timeout);
-		client.setUserAgent(this.userAgent);
-		client.setHost(vhost);
-		byte[] b;
-		try {
-		    b = client.POSTbytes(url, url.getHost(), post, usegzip);
-		} finally {
-		    client.finish();
-		}
-		return b;
+		return client.POSTbytes(url, vhost, post, usegzip);
 	}
 
 }
