@@ -109,14 +109,14 @@ public class HTTPClient {
         super();
     }
     
-	public HTTPClient(final String defaultAgent) {
+	public HTTPClient(final String userAgent) {
         super();
-        HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
+        this.userAgent = userAgent;
     }
     
-	public HTTPClient(final String defaultAgent, final int timeout) {
+	public HTTPClient(final String userAgent, final int timeout) {
         super();
-        HttpProtocolParams.setUserAgent(httpClient.getParams(), defaultAgent);
+        this.userAgent = userAgent;
         this.timeout = timeout;
     }
     
