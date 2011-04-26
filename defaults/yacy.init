@@ -105,6 +105,11 @@ network.unit.definition = defaults/yacy.network.freeworld.unit
 # This option is only valid if the network.unit.domain property is set to 'any'
 network.unit.domain.nocheck = false
 
+# in addition to non-dht networks a client may have its own agent name
+# this option is only used if the value is non-empty and network.unit.dht = false
+# that means it is not usable in YaCy p2p-configurations, only in private portal configurations
+network.unit.tenant.agent =
+
 # Update process properties
 # The update server location is given in the network.unit.definition,
 # but the settings for update processing and cycles are individual.

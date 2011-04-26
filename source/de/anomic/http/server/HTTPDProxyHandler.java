@@ -70,8 +70,8 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -99,7 +99,7 @@ import de.anomic.server.serverObjects;
 public final class HTTPDProxyHandler {
     
 
-    public  static final String yacyUserAgent = "yacyproxy (" + MultiProtocolURI.systemOST +") http://yacy.net/bot.html";
+    private static final String yacyProxyUserAgent = "yacyproxy (" + ClientIdentification.yacySystem +") http://yacy.net/bot.html";
     
     // static variables
     // can only be instantiated upon first instantiation of this class object
@@ -1529,7 +1529,7 @@ public final class HTTPDProxyHandler {
     private static synchronized String generateUserAgent(final HeaderFramework requestHeaders) {
         userAgentStr.setLength(0);
         
-        final String browserUserAgent = requestHeaders.get(HeaderFramework.USER_AGENT, yacyUserAgent);
+        final String browserUserAgent = requestHeaders.get(HeaderFramework.USER_AGENT, yacyProxyUserAgent);
         final int pos = browserUserAgent.lastIndexOf(')');
         if (pos >= 0) {
             userAgentStr

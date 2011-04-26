@@ -45,6 +45,7 @@ import javax.net.ssl.X509TrustManager;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 
 import org.apache.http.Header;
@@ -150,7 +151,7 @@ public class HTTPClient {
 		 */
 		HttpProtocolParams.setVersion(httpParams, HttpVersion.HTTP_1_1);
 		// UserAgent
-		HttpProtocolParams.setUserAgent(httpParams, MultiProtocolURI.yacybotUserAgent);
+		HttpProtocolParams.setUserAgent(httpParams, ClientIdentification.getUserAgent());
 		HttpProtocolParams.setUseExpectContinue(httpParams, false); // IMPORTANT - if not set to 'false' then servers do not process the request until a time-out of 2 seconds
 		/**
 		 * HTTP connection settings

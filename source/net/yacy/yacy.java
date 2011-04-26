@@ -47,8 +47,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.OrderedScoreMap;
@@ -286,9 +286,7 @@ public final class yacy {
             yacyRelease.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
             
             // set user-agent
-            final String userAgent = "yacy/" + Float.toString(version) + " (www.yacy.net; "
-                    + MultiProtocolURI.systemOST + ")";
-            HTTPClient.setDefaultUserAgent(userAgent);
+            HTTPClient.setDefaultUserAgent(ClientIdentification.getUserAgent());
             
             // start main threads
             final String port = sb.getConfig("port", "8090");

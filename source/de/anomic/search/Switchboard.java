@@ -80,6 +80,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -831,8 +832,10 @@ public final class Switchboard extends serverSwitch {
             setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
         }
         */
-        MultiProtocolURI.addBotInfo(getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global"));
-
+        // write the YaCy network identification inside the yacybot client user agent to distinguish networks
+        String newagent = ClientIdentification.generateYaCyBot(getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global"));
+        if (!this.getConfigBool("network.unit.dht", false) && this.getConfig("network.unit.tenant.agent", "").length() > 0) newagent = this.getConfig("network.unit.tenant.agent", "");
+        ClientIdentification.setUserAgent(newagent);
     }
     
     public void switchNetwork(final String networkDefinition) throws FileNotFoundException, IOException {
@@ -2598,7 +2601,7 @@ public final class Switchboard extends serverSwitch {
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
         reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
-        reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
         client.setTimout((int) getConfigLong("bootstrapLoadTimeout", 20000));
@@ -2760,7 +2763,7 @@ public final class Switchboard extends serverSwitch {
      */
     public static Map<String, String> loadFileAsMap(final DigestURI url) {
         final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         final HTTPClient client = new HTTPClient();
         client.setHeader(reqHeader.entrySet());
         try {

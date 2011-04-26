@@ -42,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -199,7 +200,7 @@ public final class LoaderDispatcher {
                 // create request header values and a response object because we need that
                 // in case that we want to return the cached content in the next step
                 final RequestHeader requestHeader = new RequestHeader();
-                requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+                requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
                 DigestURI refererURL = null;
                 if (request.referrerhash() != null) refererURL = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
                 if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));

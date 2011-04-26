@@ -26,7 +26,7 @@ package de.anomic.tools;
 
 import java.util.Hashtable;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.kelondro.data.meta.DigestURI;
 
@@ -118,7 +118,7 @@ public class loaderThreads {
 
         public void run() {
             try {
-                page = url.get(MultiProtocolURI.yacybotUserAgent, timeout);
+                page = url.get(ClientIdentification.getUserAgent(), timeout);
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {

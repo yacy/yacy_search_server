@@ -46,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -283,7 +284,7 @@ public final class yacyRelease extends yacyVersion {
         File download = null;
         // setup httpClient
         final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+        reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         
         final String name = this.getUrl().getFileName();
         byte[] signatureBytes = null;

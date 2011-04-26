@@ -62,6 +62,7 @@ import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -99,12 +100,12 @@ public final class yacyClient {
 
     private static byte[] postToFile(final yacySeed target, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
         // return HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/" + filename), timeout, target.getHexHash() + ".yacyh", parts);
-        final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, timeout);
+        final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
         return httpClient.POSTbytes(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/" + filename), target.getHexHash() + ".yacyh", parts, false);
     }
     private static byte[] postToFile(final yacySeedDB seedDB, final String targetHash, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
         // return HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename), timeout, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", parts);
-    	final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, timeout);
+    	final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
     	return httpClient.POSTbytes(new MultiProtocolURI("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename), yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", parts, false);
     }
     
@@ -142,7 +143,7 @@ public final class yacyClient {
             // send request
             final long start = System.currentTimeMillis();
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/hello.html"), 30000, yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, 30000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 30000);
             final byte[] content = httpClient.POSTbytes(new MultiProtocolURI("http://" + address + "/yacy/hello.html"), yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts, false);
             yacyCore.log.logInfo("yacyClient.hello thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = FileUtils.table(content);
@@ -348,7 +349,7 @@ public final class yacyClient {
             parts.put("count", UTF8.StringBody(Integer.toString(maxCount)));
             parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
             // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts); 
-            final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, (int) maxTime);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), (int) maxTime);
             final byte[] result = httpClient.POSTbytes(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {
@@ -655,7 +656,7 @@ public final class yacyClient {
             // resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), 60000, hostname, parts));
             //resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
 
-            final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, 60000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 60000);
             resultMap = FileUtils.table(httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false));
             
             // evaluate request result
@@ -803,7 +804,7 @@ public final class yacyClient {
             parts.put("lurlEntry", UTF8.StringBody(((entry == null) ? "" : crypt.simpleEncode(entry.toString(), salt))));
             // send request
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/crawlReceipt.html"), 10000, target.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, 10000);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 10000);
             final byte[] content = httpClient.POSTbytes(new MultiProtocolURI("http://" + address + "/yacy/crawlReceipt.html"), target.getHexHash() + ".yacyh", parts, false);
             return FileUtils.table(content);
         } catch (final Exception e) {
@@ -944,7 +945,7 @@ public final class yacyClient {
             parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
             parts.put("indexes", UTF8.StringBody(entrypost.toString()));
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, timeout);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
             final byte[] content = httpClient.POSTbytes(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
             final Iterator<String> v = FileUtils.strings(content);
             // this should return a list of urlhashes that are unknown
@@ -990,7 +991,7 @@ public final class yacyClient {
         try {
             parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, timeout);
+            final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
             final byte[] content = httpClient.POSTbytes(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
             final Iterator<String> v = FileUtils.strings(content);
             
@@ -1014,7 +1015,7 @@ public final class yacyClient {
         try {
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), 5000, targetSeed.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpclient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, 5000);
+            final HTTPClient httpclient = new HTTPClient(ClientIdentification.getUserAgent(), 5000);
             final byte[] content = httpclient.POSTbytes(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), targetSeed.getHexHash() + ".yacyh", parts, false);
             return FileUtils.table(content);
         } catch (final Exception e) {
@@ -1104,7 +1105,7 @@ public final class yacyClient {
 			byte[] res;
 			try {
 				// res = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(url, timeout, vhost, newpost, true);
-				final HTTPClient httpClient = new HTTPClient(MultiProtocolURI.yacybotUserAgent, timeout);
+				final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
 				res = httpClient.POSTbytes(url, vhost, newpost, true);
 				System.out.println(UTF8.String(res));
 			} catch (IOException e1) {

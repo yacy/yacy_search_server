@@ -84,69 +84,6 @@ public class MultiProtocolURI implements Serializable, Comparable<MultiProtocolU
         }
     }
     
-    /**
-     * provide system information for client identification
-     */
-    public static final String systemOST = System.getProperty("os.arch", "no-os-arch") + " " +
-            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
-            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
-    public static String yacybotUserAgent = "yacybot (" + systemOST + ") http://yacy.net/bot.html";
-    
-    public static void addBotInfo(String addinfo) {
-        yacybotUserAgent = "yacybot (" + addinfo + "; " + systemOST  + ") http://yacy.net/bot.html";
-    }
-
-    /**
-     * gets the location out of the user agent
-     * 
-     * location must be after last ; and before first )
-     * 
-     * @param userAgent in form "useragentinfo (some params; _location_) additional info"
-     * @return
-     */
-    public static String parseLocationInUserAgent(final String userAgent) {
-        final String location;
-
-        final int firstOpenParenthesis = userAgent.indexOf('(');
-        final int lastSemicolon = userAgent.lastIndexOf(';');
-        final int firstClosedParenthesis = userAgent.indexOf(')');
-
-        if (lastSemicolon < firstClosedParenthesis) {
-            // ; Location )
-            location = (firstClosedParenthesis > 0) ? userAgent.substring(lastSemicolon + 1, firstClosedParenthesis)
-                    .trim() : userAgent.substring(lastSemicolon + 1).trim();
-        } else {
-            if (firstOpenParenthesis < userAgent.length()) {
-                if (firstClosedParenthesis > firstOpenParenthesis) {
-                    // ( Location )
-                    location = userAgent.substring(firstOpenParenthesis + 1, firstClosedParenthesis).trim();
-                } else {
-                    // ( Location <end>
-                    location = userAgent.substring(firstOpenParenthesis + 1).trim();
-                }
-            } else {
-                location = "";
-            }
-        }
-
-        return location;
-    }
-    
-    /**
-     * generating the location string
-     * 
-     * @return
-     */
-    public static String generateLocation() {
-        String loc = System.getProperty("user.timezone", "nowhere");
-        final int p = loc.indexOf('/');
-        if (p > 0) {
-            loc = loc.substring(0, p);
-        }
-        loc = loc + "/" + System.getProperty("user.language", "dumb");
-        return loc;
-    }
-    
     // class variables
     protected final String protocol, userInfo;
     protected       String host, path, quest, ref;

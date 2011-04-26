@@ -47,6 +47,7 @@ import org.xml.sax.SAXParseException;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -114,7 +115,7 @@ public class sitemapParser extends AbstractParser implements Parser {
     public static SitemapReader parse(final DigestURI sitemapURL) throws IOException {
         // download document
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+        requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         final HTTPClient client = new HTTPClient();
         client.setTimout(5000);
         client.setHeader(requestHeader.entrySet());

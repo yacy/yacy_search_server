@@ -48,8 +48,8 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
-import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -145,7 +145,7 @@ public class sharedBlacklist_p {
                         // get List
                         DigestURI u = new DigestURI(downloadURLOld);
 
-                        otherBlacklist = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
+                        otherBlacklist = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", hash);
@@ -162,7 +162,7 @@ public class sharedBlacklist_p {
 
                 try {
                     final DigestURI u = new DigestURI(downloadURL);
-                    otherBlacklist = FileUtils.strings(u.get(MultiProtocolURI.yacybotUserAgent, 10000));
+                    otherBlacklist = FileUtils.strings(u.get(ClientIdentification.getUserAgent(), 10000));
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);

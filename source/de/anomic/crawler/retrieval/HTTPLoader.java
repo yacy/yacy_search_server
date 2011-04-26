@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -111,7 +112,7 @@ public final class HTTPLoader {
         
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+        requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         DigestURI refererURL = null;
         if (request.referrerhash() != null) refererURL = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
         if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
@@ -233,7 +234,7 @@ public final class HTTPLoader {
         
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
-        requestHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+        requestHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, DEFAULT_LANGUAGE);
         requestHeader.put(HeaderFramework.ACCEPT_CHARSET, DEFAULT_CHARSET);
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);

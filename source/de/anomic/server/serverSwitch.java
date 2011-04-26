@@ -42,7 +42,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -570,7 +570,7 @@ public class serverSwitch {
                 netdef = netdef.trim();
                 try {
                     final RequestHeader reqHeader = new RequestHeader();
-                    reqHeader.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+                    reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
                     final HTTPClient client = new HTTPClient();
                     client.setHeader(reqHeader.entrySet());
                     byte[] data = client.GETbytes(uri);

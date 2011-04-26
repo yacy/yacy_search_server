@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -283,7 +284,7 @@ public class RobotsTxt {
         RequestHeader reqHeaders = new RequestHeader();
         
         // add yacybot user agent
-        reqHeaders.put(HeaderFramework.USER_AGENT, MultiProtocolURI.yacybotUserAgent);
+        reqHeaders.put(HeaderFramework.USER_AGENT, ClientIdentification.getUserAgent());
         
         // adding referer
         reqHeaders.put(RequestHeader.REFERER, (MultiProtocolURI.newURL(robotsURL,"/")).toNormalform(true, true));
