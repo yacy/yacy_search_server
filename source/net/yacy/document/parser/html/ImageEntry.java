@@ -36,6 +36,7 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
     private final long fileSize;
     
     public ImageEntry(final MultiProtocolURI url, final String alt, final int width, final int height, long fileSize) {
+        assert url != null;
         this.url = url;
         this.alt = alt;
         this.width = width;

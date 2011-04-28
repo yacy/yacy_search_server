@@ -405,13 +405,20 @@
     <!-- copy searchtest -->
     <copy todir="${release_main}/bin">
       <fileset dir="bin">
-        <include name="searchtest*"/>
-        <include name="localsearch.sh"/>
         <include name="apicall.sh"/>
-        <include name="importmediawiki.sh"/>
         <include name="clearall.sh"/>
-        <include name="up.sh"/>
+        <include name="clearcache.sh"/>
+        <include name="clearindex.sh"/>
         <include name="down.sh"/>
+        <include name="importmediawiki.sh"/>
+        <include name="importOAIList.sh"/>
+        <include name="localsearch.sh"/>
+        <include name="searchtest*"/>
+        <include name="surrogateCleanOut.sh"/>
+        <include name="surrogateMVin.sh"/>
+        <include name="surrogateMVtmp.sh"/>
+        <include name="surrogateRefeed.sh"/>
+        <include name="up.sh"/>
       </fileset>
     </copy>
 

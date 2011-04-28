@@ -26,7 +26,7 @@ package net.yacy.cora.storage;
 
 import java.util.Iterator;
 
-public interface ScoreMap<E> {
+public interface ScoreMap<E> extends Iterable<E> {
 
     public void clear();
     
@@ -65,4 +65,5 @@ public interface ScoreMap<E> {
     public void dec(final E obj);
     public void dec(final E obj, final int incrementScore);
 
+    public void inc(ScoreMap<E> map);
 }

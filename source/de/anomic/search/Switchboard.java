@@ -98,6 +98,7 @@ import net.yacy.document.TextParser;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
+import net.yacy.document.parser.html.Evaluation;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -485,7 +486,7 @@ public final class Switchboard extends serverSwitch {
         //starting blog
         initBlog();
         
-        // Init User DB
+        // init User DB
         this.log.logConfig("Loading User DB");
         final File userDbFile = new File(getDataPath(), "DATA/SETTINGS/user.heap");
         this.userDB = new UserDB(userDbFile);
@@ -493,7 +494,19 @@ public final class Switchboard extends serverSwitch {
         ", " + this.userDB.size() + " entries" +
         ", " + ppRamString(userDbFile.length()/1024));
         
-        // Init bookmarks DB: needs more time since this does a DNS lookup for each Bookmark.
+        // init html parser evaluation scheme
+        File parserPropertiesPath = new File("defaults/");
+        String[] settingsList = parserPropertiesPath.list();
+        for (String l: settingsList) {
+            if (l.startsWith("parser.") && l.endsWith(".properties")) Evaluation.add(new File(parserPropertiesPath, l));
+        }
+        parserPropertiesPath = new File(getDataPath(), "DATA/SETTINGS/");
+        settingsList = parserPropertiesPath.list();
+        for (String l: settingsList) {
+            if (l.startsWith("parser.") && l.endsWith(".properties")) Evaluation.add(new File(parserPropertiesPath, l));
+        }
+        
+        // init bookmarks DB: needs more time since this does a DNS lookup for each Bookmark.
         // Can be started concurrently
         new Thread(){
             @Override

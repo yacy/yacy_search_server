@@ -395,7 +395,9 @@ public final class TransformerWriter extends Writer {
                     buffer.charAt(buffer.length() - 3) == dash) {
                     // comment is at end
                     inComment = false;
-                    if (out != null) out.write(buffer.getChars());
+                    char[] comment = buffer.getChars();
+                    if (scraper != null) scraper.scrapeComment(comment);
+                    if (out != null) out.write(comment);
                     // buffer = new serverByteBuffer();
                     buffer.reset();
                 }

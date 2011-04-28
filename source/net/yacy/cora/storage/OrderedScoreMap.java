@@ -38,7 +38,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class OrderedScoreMap<E> implements ScoreMap<E> {
+public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<E> {
     
     protected final Map<E, AtomicInteger> map; // a mapping from a reference to the cluster key
     
@@ -48,6 +48,10 @@ public class OrderedScoreMap<E> implements ScoreMap<E> {
         } else {
             map = new TreeMap<E, AtomicInteger>(comparator);
         }
+    }
+
+    public Iterator<E> iterator() {
+        return map.keySet().iterator();
     }
     
     public synchronized void clear() {

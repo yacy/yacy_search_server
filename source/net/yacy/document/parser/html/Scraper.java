@@ -37,6 +37,8 @@ public interface Scraper {
     public void scrapeTag0(String tagname, Properties tagopts);
 
     public void scrapeTag1(String tagname, Properties tagopts, char[] text);
+
+    public void scrapeComment(final char[] comment);
     
     public void close();
     

@@ -44,8 +44,10 @@ import java.util.regex.Pattern;
 import javax.swing.event.EventListenerList;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.storage.ClusteredScoreMap;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.parser.htmlParser;
+import net.yacy.document.parser.html.Evaluation.Element;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -60,33 +62,51 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     // statics: for initialization of the HTMLFilterAbstractScraper
     private static final Set<String> linkTags0 = new HashSet<String>(9,0.99f);
     private static final Set<String> linkTags1 = new HashSet<String>(7,0.99f);
+    
+    public enum TagType {
+        singleton, pair;
+    }
+    
+    public enum Tag {
+        html(TagType.singleton), // scraped as singleton to get attached properties like 'lang'
+        body(TagType.singleton), // scraped as singleton to get attached properties like 'class'
+        div(TagType.singleton),  // scraped as singleton to get attached properties like 'id'
+        img(TagType.singleton),
+        base(TagType.singleton),
+        frame(TagType.singleton),
+        meta(TagType.singleton),
+        area(TagType.singleton),
+        link(TagType.singleton),
+        embed(TagType.singleton), //added by [MN]
+        param(TagType.singleton), //added by [MN]
 
+        a(TagType.pair),
+        h1(TagType.pair),
+        h2(TagType.pair),
+        h3(TagType.pair),
+        h4(TagType.pair),
+        h5(TagType.pair),
+        h6(TagType.pair),
+        title(TagType.pair),
+        b(TagType.pair),
+        strong(TagType.pair),
+        i(TagType.pair),
+        li(TagType.pair),
+        iframe(TagType.pair),
+        script(TagType.pair);
+
+        public TagType type;
+        private Tag(TagType type) {
+            this.type = type;
+        }
+    }
+    
     // all these tags must be given in lowercase, because the tags from the files are compared in lowercase
     static {
-        linkTags0.add("html");      // scraped as tag 0 to get attached properties like 'lang'
-        linkTags0.add("img");
-        linkTags0.add("base");
-        linkTags0.add("frame");
-        linkTags0.add("meta");
-        linkTags0.add("area");
-        linkTags0.add("link");
-        linkTags0.add("script");
-        linkTags0.add("embed");     //added by [MN]
-        linkTags0.add("param");     //added by [MN]
-
-        linkTags1.add("a");
-        linkTags1.add("h1");
-        linkTags1.add("h2");
-        linkTags1.add("h3");
-        linkTags1.add("h4");
-        linkTags1.add("h5");
-        linkTags1.add("h6");
-        linkTags1.add("title");
-        linkTags1.add("b");
-        linkTags1.add("strong");
-        linkTags1.add("i");
-        linkTags1.add("li");
-        linkTags1.add("iframe");
+        for (Tag tag: Tag.values()) {
+            if (tag.type == TagType.singleton) linkTags0.add(tag.name());
+            if (tag.type == TagType.pair) linkTags1.add(tag.name());
+        }
         //<iframe src="../../../index.htm" name="SELFHTML_in_a_box" width="90%" height="400">
     }
 
@@ -99,7 +119,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private String title;
     //private String headline;
     private List<String>[] headlines;
-    private List<String> bold, italic, li;
+    private ClusteredScoreMap<String> bold, italic;
+    private List<String> li;
     private CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
     private float lon, lat;
@@ -113,6 +134,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * The document root {@link MultiProtocolURI} 
      */
     private MultiProtocolURI root;
+    
+    /**
+     * evaluation scores: count appearance of specific attributes
+     */
+    private Evaluation.Scores evaluationScores;
 
     @SuppressWarnings("unchecked")
     public ContentScraper(final MultiProtocolURI root) {
@@ -120,6 +146,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         this.root = root;
+        this.evaluationScores = new Evaluation.Scores();
         this.rss = new HashMap<MultiProtocolURI, String>();
         this.css = new HashMap<MultiProtocolURI, String>();
         this.anchors = new HashMap<MultiProtocolURI, Properties>();
@@ -131,19 +158,23 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.title = "";
         this.headlines = new ArrayList[6];
         for (int i = 0; i < this.headlines.length; i++) headlines[i] = new ArrayList<String>();
-        this.bold = new ArrayList<String>();
-        this.italic = new ArrayList<String>();
+        this.bold = new ClusteredScoreMap<String>();
+        this.italic = new ClusteredScoreMap<String>();
         this.li = new ArrayList<String>();
         this.content = new CharBuffer(1024);
         this.htmlFilterEventListeners = new EventListenerList();
         this.lon = 0.0f;
         this.lat = 0.0f;
+        Evaluation.match(Element.url, root.toNormalform(false, false), this.evaluationScores);
     }
     
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + UTF8.String(newtext));
         int p, pl, q, s = 0;
 
+        // match evaluation pattern
+        Evaluation.match(Element.text, newtext, this.evaluationScores);
+        
         // try to find location information in text
         // Opencaching:
         // <nobr>N 50o 05.453&#039;</nobr><nobr>E 008o 30.191&#039;</nobr>
@@ -246,11 +277,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             try {
                 final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                 final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
-                //if (width > 15 && height > 15) {
-                    final MultiProtocolURI url = absolutePath(tagopts.getProperty("src", ""));
-                    final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", ""), width, height, -1);
-                    addImage(images, ie);
-                //}
+                String src = tagopts.getProperty("src", "");
+                if (src.length() > 0) {
+                    final MultiProtocolURI url = absolutePath(src);
+                    if (url != null) {
+                        final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", ""), width, height, -1);
+                        addImage(images, ie);
+                    }
+                }
             } catch (final NumberFormatException e) {}
         } else if(tagname.equalsIgnoreCase("base")) {
             try {
@@ -262,16 +296,24 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if (tagname.equalsIgnoreCase("iframe")) {
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
             iframes.add(absolutePath(tagopts.getProperty("src", "")));
-        } else if (tagname.equalsIgnoreCase("script")) {
-            script.add(absolutePath(tagopts.getProperty("src", "")));
+        } else if (tagname.equalsIgnoreCase("body")) {
+            String c = tagopts.getProperty("class", "");
+            Evaluation.match(Element.bodyclass, c, this.evaluationScores);
+        } else if (tagname.equalsIgnoreCase("div")) {
+            String id = tagopts.getProperty("id", "");
+            Evaluation.match(Element.divid, id, this.evaluationScores);
         } else if (tagname.equalsIgnoreCase("meta")) {
             String name = tagopts.getProperty("name", "");
+            String content = tagopts.getProperty("content","");
             if (name.length() > 0) {
-                metas.put(name.toLowerCase(), CharacterCoding.html2unicode(tagopts.getProperty("content","")));
+                metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
+                if (name.equals("generator")) {
+                    Evaluation.match(Element.metagenerator, content, this.evaluationScores);
+                }
             } else {
                 name = tagopts.getProperty("http-equiv", "");
                 if (name.length() > 0) {
-                    metas.put(name.toLowerCase(), CharacterCoding.html2unicode(tagopts.getProperty("content","")));
+                    metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
                 }
             }
         } else if (tagname.equalsIgnoreCase("area")) {
@@ -281,7 +323,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             Properties p = new Properties(); p.put("name", areatitle);
             if (href.length() > 0) anchors.put(absolutePath(href), p);
         } else if (tagname.equalsIgnoreCase("link")) {
-            final MultiProtocolURI newLink = absolutePath(tagopts.getProperty("href", ""));
+            String href = tagopts.getProperty("href", "");
+            final MultiProtocolURI newLink = absolutePath(href);
 
             if (newLink != null) {
                 final String rel = tagopts.getProperty("rel", "");
@@ -296,6 +339,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     rss.put(newLink, linktitle);
                 } else if (rel.equalsIgnoreCase("stylesheet") && type.equalsIgnoreCase("text/css")) {
                     css.put(newLink, rel);
+                    Evaluation.match(Element.csspath, href, this.evaluationScores);
                 } else if (!rel.equalsIgnoreCase("stylesheet") && !rel.equalsIgnoreCase("alternate stylesheet")) {
                     Properties p = new Properties(); p.put("name", linktitle);
                     anchors.put(newLink, p);
@@ -356,20 +400,33 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             title = recursiveParse(text);
         } else if ((tagname.equalsIgnoreCase("b")) && (text.length < 1024)) {
             h = recursiveParse(text);
-            if (h.length() > 0) bold.add(h);
+            if (h.length() > 0) bold.inc(h);
         } else if ((tagname.equalsIgnoreCase("strong")) && (text.length < 1024)) {
             h = recursiveParse(text);
-            if (h.length() > 0) bold.add(h);
+            if (h.length() > 0) bold.inc(h);
         } else if ((tagname.equalsIgnoreCase("i")) && (text.length < 1024)) {
             h = recursiveParse(text);
-            if (h.length() > 0) italic.add(h);
+            if (h.length() > 0) italic.inc(h);
         } else if ((tagname.equalsIgnoreCase("li")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) li.add(h);
+        } else if (tagname.equalsIgnoreCase("script")) {
+            String src = tagopts.getProperty("src", "");
+            if (src.length() > 0) {
+                script.add(absolutePath(src));
+                Evaluation.match(Element.scriptpath, src, this.evaluationScores);
+            } else {
+                Evaluation.match(Element.scriptcode, text, this.evaluationScores);
+            }
         }
 
         // fire event
         fireScrapeTag1(tagname, tagopts, text);
+    }
+    
+
+    public void scrapeComment(final char[] comment) {
+        Evaluation.match(Element.comment, comment, this.evaluationScores);
     }
 
     private String recursiveParse(final char[] inlineHtml) {
@@ -446,11 +503,29 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public String[] getBold() {
-        return this.bold.toArray(new String[this.bold.size()]);
+        List<String> a = new ArrayList<String>();
+        Iterator<String> i = this.bold.keys(false);
+        while (i.hasNext()) a.add(i.next());        
+        return a.toArray(new String[a.size()]);
+    }
+    
+    public String[] getBoldCount(String[] a) {
+        String[] counter = new String[a.length];
+        for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(this.bold.get(a[i]));
+        return counter;
     }
     
     public String[] getItalic() {
-        return this.italic.toArray(new String[this.italic.size()]);
+        List<String> a = new ArrayList<String>();
+        Iterator<String> i = this.italic.keys(false);
+        while (i.hasNext()) a.add(i.next());        
+        return a.toArray(new String[a.size()]);
+    }
+    
+    public String[] getItalicCount(String[] a) {
+        String[] counter = new String[a.length];
+        for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(this.italic.get(a[i]));
+        return counter;
     }
     
     public String[] getLi() {
@@ -661,6 +736,33 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (this.lat != 0.0f) return this.lat;
         getLon(); // parse with getLon() method which creates also the lat value
         return this.lat;
+    }
+    
+    /**
+     * produce all model names
+     * @return a set of model names
+     */
+    public Set<String> getEvaluationModelNames() {
+        return this.evaluationScores.getModelNames();
+    }
+    
+    public String[] getEvaluationModelScoreNames(String modelName) {
+        List<String> a = new ArrayList<String>();
+        ClusteredScoreMap<String> scores = this.evaluationScores.getScores(modelName);
+        if (scores != null) {
+            Iterator<String> i = scores.keys(false);
+            while (i.hasNext()) a.add(i.next());
+        }
+        return a.toArray(new String[a.size()]);
+    }
+    
+    public String[] getEvaluationModelScoreCounts(String modelName, String[] a) {
+        ClusteredScoreMap<String> scores = this.evaluationScores.getScores(modelName);
+        String[] counter = new String[a.length];
+        if (scores != null) {
+            for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(scores.get(a[i]));
+        }
+        return counter;
     }
     
     /*

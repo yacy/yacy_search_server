@@ -61,29 +61,6 @@ public enum SolrScheme {
         InetAddress address = Domains.dnsResolve(digestURI.getHost());
         if (address != null) solrdoc.addField("attr_ip", address.getHostAddress());
         if (digestURI.getHost() != null) solrdoc.addField("attr_host", digestURI.getHost());
-        /*
-    private final String charset;               // the charset of the document
-    private final List<String> keywords;        // most resources provide a keyword field
-    private       StringBuilder title;          // a document title, taken from title or h1 tag; shall appear as headline of search result
-    private final StringBuilder creator;        // author or copyright
-    private final String publisher;             // publisher
-    private final List<String>  sections;       // if present: more titles/headlines appearing in the document
-    private final StringBuilder description;    // an abstract, if present: short content description
-    private Object text;                        // the clear text, all that is visible
-    private final Map<MultiProtocolURI, String> anchors; // all links embedded as clickeable entities (anchor tags)
-    private final Map<MultiProtocolURI, String> rss; // all embedded rss feeds
-    private final Map<MultiProtocolURI, ImageEntry> images; // all visible pictures in document
-    // the anchors and images - Maps are URL-to-EntityDescription mappings.
-    // The EntityDescription appear either as visible text in anchors or as alternative
-    // text in image tags.
-    private Map<MultiProtocolURI, String> hyperlinks, audiolinks, videolinks, applinks;
-    private Map<String, String> emaillinks;
-    private MultiProtocolURI favicon;
-    private boolean resorted;
-    private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
-    private Set<String> languages;
-    private boolean indexingDenied;
-         */
         solrdoc.addField("title", yacydoc.dc_title());
         solrdoc.addField("author", yacydoc.dc_creator());
         solrdoc.addField("description", yacydoc.dc_description());
@@ -166,9 +143,17 @@ public enum SolrScheme {
             
             // bold, italic
             String[] bold = html.getBold();
-            if (bold.length > 0) solrdoc.addField("attr_bold", bold);
+            solrdoc.addField("boldcount_i", bold.length);
+            if (bold.length > 0) {
+                solrdoc.addField("attr_bold", bold);
+                solrdoc.addField("attr_boldcount", html.getBoldCount(bold));
+            }
             String[] italic = html.getItalic();
-            if (bold.length > 0) solrdoc.addField("attr_italic", italic);
+            solrdoc.addField("italiccount_i", italic.length);
+            if (italic.length > 0) {
+                solrdoc.addField("attr_italic", italic);
+                solrdoc.addField("attr_italiccount", html.getItalicCount(italic));
+            }
             String[] li = html.getLi();
             solrdoc.addField("licount_i", li.length);
             if (li.length > 0) solrdoc.addField("attr_li", li);
@@ -225,6 +210,15 @@ public enum SolrScheme {
             
             // flash embedded
             solrdoc.addField("flash_b", html.containsFlash());
+            
+            // generic evaluation pattern
+            for (String model: html.getEvaluationModelNames()) {
+                String[] scorenames = html.getEvaluationModelScoreNames(model);
+                if (scorenames.length > 0) {
+                    solrdoc.addField("attr_" + model, scorenames);
+                    solrdoc.addField("attr_" + model + "count", html.getEvaluationModelScoreCounts(model, scorenames));
+                }
+            }
         }
         return solrdoc;
     }

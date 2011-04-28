@@ -112,7 +112,7 @@ public class WebStructurePicture_p {
             
             // recursively find domains, up to a specific depth
             final GraphPlotter graph = new GraphPlotter();
-            if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
+            if (host != null && hash != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
             //graph.print();
             
             graphPicture = graph.draw(width, height, 40, 40, 16, 16, color_back, color_dot, color_line, color_lineend, color_text);

@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 
-public class ConcurrentScoreMap<E> implements ScoreMap<E> {
+public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<E> {
 
     protected final ConcurrentHashMap<E, AtomicLong> map; // a mapping from a reference to the cluster key
     private long gcount;
@@ -43,6 +43,10 @@ public class ConcurrentScoreMap<E> implements ScoreMap<E> {
     public ConcurrentScoreMap()  {
         map = new ConcurrentHashMap<E, AtomicLong>();
         gcount = 0;
+    }
+
+    public Iterator<E> iterator() {
+        return map.keySet().iterator();
     }
     
     public synchronized void clear() {
