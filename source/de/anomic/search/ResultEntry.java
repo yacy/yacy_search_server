@@ -57,7 +57,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     private final List<MediaSnippet> mediaSnippets;
     
     // statistic objects
-    public long dbRetrievalTime, snippetComputationTime;
+    public long dbRetrievalTime, snippetComputationTime, ranking;
     
     public ResultEntry(final URIMetadataRow urlentry,
                        final Segment indexSegment,

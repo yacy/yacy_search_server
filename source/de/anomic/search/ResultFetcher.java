@@ -351,6 +351,7 @@ public class ResultFetcher {
                     // apply post-ranking
                     long ranking = Long.valueOf(rankingProcess.getOrder().cardinal(resultEntry.word()));
                     ranking += postRanking(resultEntry, rankingProcess.getTopicNavigator(10));
+                    resultEntry.ranking = ranking;
                     result.put(new ReverseElement<ResultEntry>(resultEntry, ranking)); // remove smallest in case of overflow
                     if (nav_topics) rankingProcess.addTopics(resultEntry);
                 }

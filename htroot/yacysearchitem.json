@@ -11,7 +11,9 @@
       "faviconCode": "#[faviconCode]#",
       "host": "#[host]#",
       "path": "#[path]#",
-      "file": "#[file]#"
+      "file": "#[file]#",
+      "urlhash": "#[urlhash]#",
+      "ranking": "#[ranking]#"
     }::#(item)#::#(nl)#::    ,#(/nl)#
     {
       "title": "#[name]#",

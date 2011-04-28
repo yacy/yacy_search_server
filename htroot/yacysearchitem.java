@@ -142,6 +142,7 @@ public class yacysearchitem {
             if (faviconURL != null && isHtml) sb.loader.loadIfNotExistBackground(faviconURL.toNormalform(true, false), 1024 * 1024 * 10);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // acquire license for favicon url loading
             prop.put("content_urlhash", resulthashString);
+            prop.put("content_ranking", result.ranking);
             prop.put("content_showMetadata_urlhash", resulthashString);
             prop.put("content_showParser_urlhash", resulthashString);
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(resulthashString));
