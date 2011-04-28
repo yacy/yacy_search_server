@@ -317,8 +317,8 @@ public class serverSwitch {
             configPropsCopy.putAll(configProps); // avoid concurrency problems
             FileUtils.saveMap(configFile, configPropsCopy, configComment);
         } catch (final IOException e) {
-        	log.logSevere("CONFIG: Cannot write config file " + configFile.toString() + ": " + e.getMessage());
-            System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
+        	log.logSevere("CONFIG: Cannot write config file " + configFile.toString() + ": " + e.getMessage(), e);
+            //System.out.println("ERROR: cannot write config file " + configFile.toString() + ": " + e.getMessage());
         }
     }
 
