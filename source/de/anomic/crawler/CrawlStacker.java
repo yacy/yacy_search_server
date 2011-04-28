@@ -330,9 +330,33 @@ public final class CrawlStacker {
         }.start();
     }
     
+    /**
+     * simple method to add one url as crawljob
+     * @param url
+     * @return null if successfull, a reason string if not successful
+     */
+    public String stackSimpleCrawl(final DigestURI url) {
+    	CrawlProfile pe = this.crawler.defaultSurrogateProfile;
+    	return stackCrawl(new Request(
+                peers.mySeed().hash.getBytes(),
+                url,
+                null,
+                "CRAWLING-ROOT",
+                new Date(),
+                pe.handle(),
+                0,
+                0,
+                0,
+                0
+                ));
+    }
+    
+    /**
+     * stacks a crawl item. The position can also be remote
+     * @param entry
+     * @return null if successful, a reason string if not successful
+     */
     public String stackCrawl(final Request entry) {
-        // stacks a crawl item. The position can also be remote
-        // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
        
         final CrawlProfile profile = crawler.getActive(UTF8.getBytes(entry.profileHandle()));
