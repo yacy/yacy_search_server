@@ -412,6 +412,7 @@
         <include name="down.sh"/>
         <include name="importmediawiki.sh"/>
         <include name="importOAIList.sh"/>
+        <include name="importurllist.sh"/>
         <include name="localsearch.sh"/>
         <include name="searchtest*"/>
         <include name="surrogateCleanOut.sh"/>
