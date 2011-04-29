@@ -139,6 +139,7 @@ public final class yacyClient {
             // generate request
         	final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
             parts.put("count", UTF8.StringBody("20"));
+            parts.put("magic", UTF8.StringBody(Long.toString(yacyCore.speedKey)));
             parts.put("seed", UTF8.StringBody(mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
@@ -299,8 +300,13 @@ public final class yacyClient {
         }
     }
 
-    public static int queryUrlCount(final yacySeed target) {        
-        if (target == null) { return -1; }
+    /**
+     * check the status of a remote peer
+     * @param target
+     * @return an array of two long: [0] is the count of urls, [1] is a magic
+     */
+    public static long[] queryUrlCount(final yacySeed target) {        
+        if (target == null) return new long[]{-1, -1};
         
         // prepare request
         final String salt = crypt.randomSalt();
@@ -314,19 +320,18 @@ public final class yacyClient {
             final byte[] content = postToFile(target, "query.html", parts, 5000);
             final Map<String, String> result = FileUtils.table(content);
             
-            if (result == null || result.isEmpty()) return -1;
+            if (result == null || result.isEmpty()) return new long[]{-1, -1};
             final String resp = result.get("response");
-            if (resp == null) {
-                return -1;
-            }
+            if (resp == null) return new long[]{-1, -1};
+            String magic = result.get("magic"); if (magic == null) magic = "0";
             try {
-                return Integer.parseInt(resp);
+                return new long[]{Long.parseLong(resp), Long.parseLong(magic)};
             } catch (final NumberFormatException e) {
-                return -1;
+                return new long[]{-1, -1};
             }
         } catch (final IOException e) {
             if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
-            return -1;
+            return new long[]{-1, -1};
         }
     }
 

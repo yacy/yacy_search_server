@@ -70,7 +70,7 @@ public class yacyCore {
     public static final Log log = new Log("YACY");
     public static long lastOnlineTime = 0;
     /** pseudo-random key derived from a time-interval while YaCy startup*/
-    public static long speedKey = 0;
+    public static long speedKey = System.currentTimeMillis();
     public static final Map<String, yacyAccessible> amIAccessibleDB = new ConcurrentHashMap<String, yacyAccessible>(); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behavior
     private static final int PING_INITIAL = 10;
@@ -201,8 +201,8 @@ public class yacyCore {
     private boolean canReachMyself() { // TODO: check if this method is necessary - depending on the used router it will not work
         // returns true if we can reach ourself under our known peer address
         // if we cannot reach ourself, we call a forced publishMySeed and return false
-    	final int urlc = yacyClient.queryUrlCount(sb.peers.mySeed());
-        if (urlc >= 0) {
+    	final long[] callback = yacyClient.queryUrlCount(sb.peers.mySeed());
+        if (callback[0] >= 0 && callback[1] == speedKey) {
             sb.peers.mySeed().setLastSeenUTC();
             return true;
         }

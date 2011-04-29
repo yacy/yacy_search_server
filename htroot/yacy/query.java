@@ -36,6 +36,7 @@ import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 
 public final class query {
@@ -49,6 +50,9 @@ public final class query {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) ss;
         final serverObjects prop = new serverObjects();
+
+        prop.put("magic", yacyCore.speedKey);
+        
         if ((post == null) || (ss == null) || !yacyNetwork.authentifyRequest(post, ss)) {
             prop.put("response", "-1"); // request rejected
             return prop;

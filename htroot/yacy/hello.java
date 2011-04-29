@@ -73,6 +73,7 @@ public final class hello {
         final String key      = post.get("key", "");      // transmission key for response
         final String seed     = post.get("seed", "");
         int  count            = post.getInt("count", 0);
+        long  magic           = post.getLong("magic", 0);
 //      final Date remoteTime = yacyCore.parseUniversalDate(post.get(MYTIME)); // read remote time
         final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
         long time = System.currentTimeMillis();
@@ -119,7 +120,7 @@ public final class hello {
             return prop;
         }
         
-        int urls = -1;
+        long[] callback = new long[]{-1, -1};
         if (sb.clusterhashes != null) remoteSeed.setAlternativeAddress(sb.clusterhashes.get(remoteSeed.hash.getBytes()));
         
         // if the remote client has reported its own IP address and the client supports
@@ -128,13 +129,16 @@ public final class hello {
         time = System.currentTimeMillis();
         long time_backping = 0;
         String backping_method = "none";
-        if (reportedip.length() > 0 && !clientip.equals(reportedip) && clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING) {            
+        if (reportedip.length() > 0 &&
+            !clientip.equals(reportedip) &&
+            clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING &&
+            magic != 0) {            
             serverCore.checkInterruption();
             
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put("yourip", reportedip);
             remoteSeed.setIP(reportedip);
-            urls = yacyClient.queryUrlCount(remoteSeed);
+            callback = yacyClient.queryUrlCount(remoteSeed);
             time_backping = System.currentTimeMillis() - time;
             backping_method = "reportedip=" + reportedip;
         } else {
@@ -144,7 +148,7 @@ public final class hello {
 
         // if the previous attempt (using the reported ip address) was not successful,
         // then try the ip where the request came from
-        if (urls < 0) {
+        if (callback[0] < 0 || (magic != 0 && magic != callback[1])) {
             boolean isNotLocal = true;
 
             // we are only allowed to connect to the client IP address if it's not our own address
@@ -157,7 +161,7 @@ public final class hello {
                 
                 prop.put("yourip", clientip);
                 remoteSeed.setIP(clientip);
-                urls = yacyClient.queryUrlCount(remoteSeed);
+                callback = yacyClient.queryUrlCount(remoteSeed);
                 time_backping = System.currentTimeMillis() - time;
                 backping_method = "clientip=" + clientip;
             }
@@ -168,7 +172,7 @@ public final class hello {
         remoteSeed.setLastSeenUTC();
         
         // assign status
-        if (urls >= 0) {
+        if (callback[0] >= 0) {
             if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) == null) {
                 prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
@@ -179,12 +183,12 @@ public final class hello {
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             }
             // connect the seed
-            yacyCore.log.logInfo("hello/server: responded remote senior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + urls);
+            yacyCore.log.logInfo("hello/server: responded remote senior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
             sb.peers.peerActions.peerArrival(remoteSeed, true);
         } else {
             prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
-            yacyCore.log.logInfo("hello/server: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + urls);
+            yacyCore.log.logInfo("hello/server: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip + ", time_dnsResolve=" + time_dnsResolve + ", time_backping=" + time_backping + ", method=" + backping_method + ", urls=" + callback[0]);
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper(false) == null)) {
                 sb.peers.peerActions.peerPing(remoteSeed);
