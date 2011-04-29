@@ -847,7 +847,9 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (ip == null) return ipString + " -> IP is not proper"; //this does not work with staticIP
         if (Switchboard.getSwitchboard().isAllIPMode()) return null;
         boolean islocal = Domains.isLocal(ip);
-        return (!islocal && Switchboard.getSwitchboard().isGlobalMode() || (islocal && Switchboard.getSwitchboard().isIntranetMode())) ? null : ipString + " - IP for localhost rejected";
+        if (islocal && Switchboard.getSwitchboard().isGlobalMode()) return ipString + " - local IP for global mode rejected";
+        if (!islocal && Switchboard.getSwitchboard().isIntranetMode()) return ipString + " - global IP for intranet mode rejected";
+        return null;
     }
 
     @Override
