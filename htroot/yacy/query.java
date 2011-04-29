@@ -51,7 +51,7 @@ public final class query {
         final Switchboard sb = (Switchboard) ss;
         final serverObjects prop = new serverObjects();
 
-        prop.put("magic", yacyCore.speedKey);
+        prop.put("magic", yacyCore.magic);
         
         if ((post == null) || (ss == null) || !yacyNetwork.authentifyRequest(post, ss)) {
             prop.put("response", "-1"); // request rejected

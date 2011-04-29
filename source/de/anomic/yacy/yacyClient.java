@@ -139,7 +139,7 @@ public final class yacyClient {
             // generate request
         	final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), null, salt);
             parts.put("count", UTF8.StringBody("20"));
-            parts.put("magic", UTF8.StringBody(Long.toString(yacyCore.speedKey)));
+            parts.put("magic", UTF8.StringBody(Long.toString(yacyCore.magic)));
             parts.put("seed", UTF8.StringBody(mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
