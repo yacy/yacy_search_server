@@ -63,6 +63,7 @@ import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.RSSReader;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -174,7 +175,10 @@ public final class yacyClient {
             	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             } else {
             	try {
-                    otherPeer = yacySeed.genRemoteSeed(seed, salt, false);
+            	    int p = address.indexOf(':');
+            	    if (p < 0) return -1;
+            	    String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
+                    otherPeer = yacySeed.genRemoteSeed(seed, salt, false, host);
                     if (!otherPeer.hash.equals(otherHash)) {
                         yacyCore.log.logInfo("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + otherHash);
                         return -1; // no success
@@ -248,7 +252,14 @@ public final class yacyClient {
             	yacyCore.log.logInfo("hello/client: rejected contacting seed; too large (" + seedStr.length() + " > " + yacySeed.maxsize + ")");
             } else {
                 try {
-                    s = yacySeed.genRemoteSeed(seedStr, salt, false);
+                    if (i == 1) {
+                        int p = address.indexOf(':');
+                        if (p < 0) return -1;
+                        String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
+                        s = yacySeed.genRemoteSeed(seedStr, salt, false, host);
+                    } else {
+                        s = yacySeed.genRemoteSeed(seedStr, salt, false, null);
+                    }
                     if (peerActions.peerArrival(s, (i == 1))) count++;
                 } catch (IOException e) {
                     yacyCore.log.logInfo("hello/client: rejected contacting seed; bad (" + e.getMessage() + ")");
@@ -272,7 +283,7 @@ public final class yacyClient {
             
             if (result == null || result.isEmpty()) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return yacySeed.genRemoteSeed(result.get("response"), salt, false);
+            return yacySeed.genRemoteSeed(result.get("response"), salt, false, target.getIP());
         } catch (final Exception e) {
             yacyCore.log.logWarning("yacyClient.querySeed error:" + e.getMessage());
             return null;

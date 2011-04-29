@@ -2661,7 +2661,7 @@ public final class Switchboard extends serverSwitch {
                         lc = 0;
                         while (enu.hasNext()) {
                             try {
-                                ys = yacySeed.genRemoteSeed(enu.next(), null, false);
+                                ys = yacySeed.genRemoteSeed(enu.next(), null, false, null);
                                 if ((ys != null) &&
                                     (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash))) {
                                         final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);

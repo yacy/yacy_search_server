@@ -30,11 +30,13 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
@@ -67,7 +69,9 @@ public final class message {
 
         final String process = post.get("process", "permission");
         final String key =  post.get("key", "");
-
+        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final InetAddress ias = Domains.dnsResolve(clientip);
+        
         final int messagesize = 10240;
         final int attachmentsize = 0;
 
@@ -110,7 +114,7 @@ public final class message {
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
             yacySeed otherSeed;
             try {
-                otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, false);
+                otherSeed = yacySeed.genRemoteSeed(otherSeedString, key, false, ias.getHostAddress());
             } catch (IOException e) {
                 prop.put("response", "-1"); // don't accept messages for bad seeds
                 return prop;

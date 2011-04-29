@@ -180,7 +180,7 @@ public final class search {
         // store accessing peer
         yacySeed remoteSeed;
         try {
-            remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
+            remoteSeed = yacySeed.genRemoteSeed(oseed, key, false, client);
         } catch (IOException e) {
             yacyCore.log.logInfo("yacy.search: access with bad seed: " + e.getMessage());
             remoteSeed = null;

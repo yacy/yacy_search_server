@@ -94,8 +94,6 @@ public class Status {
                 }
                 redirect = true;
             } else if (post.containsKey("ResetTraffic")) {
-//              ByteCountInputStream.resetCount();
-//              ByteCountOutputStream.resetCount();
                 ByteCount.resetCount();
                 redirect = true;
             } else if (post.containsKey("popup")) {
@@ -152,7 +150,6 @@ public class Status {
             }
 	        
         }
-        
         
         // version information
         //final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));

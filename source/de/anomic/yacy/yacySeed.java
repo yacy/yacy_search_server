@@ -295,8 +295,8 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      * @return the IP or null
      */
     public final String getIP() {
-        String ip = get(yacySeed.IP, "localhost");
-        return (ip == null || ip.length() == 0) ? "localhost" : ip;
+        String ip = get(yacySeed.IP, "127.0.0.1");
+        return (ip == null || ip.length() == 0) ? "127.0.0.1" : ip;
     }
     /**
      * try to get the peertype<br>
@@ -475,7 +475,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
      */
     public final String getPublicAddress() {
         String ip = this.getIP();
-        if (ip == null || ip.length() < 8 || ip.length() > 60) ip = "localhost";
+        if (ip == null || ip.length() < 8 || ip.length() > 60) ip = "127.0.0.1";
         
         final String port = this.dna.get(yacySeed.PORT);
         if (port == null || port.length() < 2 || port.length() > 5) return null;
@@ -772,7 +772,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         return UTF8.getBytes(hash);
     }
 
-    public static yacySeed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed) throws IOException {
+    public static yacySeed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed, String patchIP) throws IOException {
         // this method is used to convert the external representation of a seed into a seed object
         // yacyCore.log.logFinest("genRemoteSeed: seedStr=" + seedStr + " key=" + key);
 
@@ -790,7 +790,14 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         final yacySeed resultSeed = new yacySeed(hash, dna);
 
         // check semantics of content
-        final String testResult = resultSeed.isProper(ownSeed);
+        String testResult = resultSeed.isProper(ownSeed);
+        if (testResult != null && patchIP != null) {
+            // in case that this proper-Test fails and a patchIP is given
+            // then replace the given IP in the resultSeed with given patchIP
+            // this is done if a remote peer reports its IP in a wrong way (maybe fraud attempt)
+            resultSeed.setIP(patchIP);
+            testResult = resultSeed.isProper(ownSeed);
+        }
         if (testResult != null) throw new IOException("seed is not proper (" + testResult + "): " + resultSeed);
         
         // seed ok
@@ -883,7 +890,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         final char[] b = new char[(int) f.length()];
         fr.read(b, 0, b.length);
         fr.close();
-        final yacySeed mySeed = genRemoteSeed(new String(b), null, true);
+        final yacySeed mySeed = genRemoteSeed(new String(b), null, true, null);
         assert mySeed != null; // in case of an error, an IOException is thrown
         mySeed.dna.put(yacySeed.IP, ""); // set own IP as unknown
         return mySeed;

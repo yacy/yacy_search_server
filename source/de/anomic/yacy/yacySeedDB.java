@@ -260,6 +260,10 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (this.mySeed == null) {
             if (this.sizeConnected() == 0) try {Thread.sleep(5000);} catch (final InterruptedException e) {} // wait for init
             initMySeed();
+            // check if my seed has an IP assigned
+            if (this.myIP() == null || this.myIP().length() == 0) {
+                this.mySeed.setIP(Domains.myPublicLocalIP().getHostAddress());
+            }
         }
         return this.mySeed;
     }

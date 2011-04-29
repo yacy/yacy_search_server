@@ -91,7 +91,7 @@ public final class hello {
         }
         yacySeed remoteSeed;
         try {
-            remoteSeed = yacySeed.genRemoteSeed(seed, key, true);
+            remoteSeed = yacySeed.genRemoteSeed(seed, key, true, ias.getHostAddress());
         } catch (IOException e) {
             yacyCore.log.logInfo("hello/server: bad seed: " + e.getMessage() + ", time_dnsResolve=" + time_dnsResolve);
             prop.put("message", "bad seed: " + e.getMessage());
