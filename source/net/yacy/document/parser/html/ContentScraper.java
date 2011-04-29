@@ -274,10 +274,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     public void scrapeTag0(final String tagname, final Properties tagopts) {
         if (tagname.equalsIgnoreCase("img")) {
+            String src = tagopts.getProperty("src", "");
             try {
                 final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
                 final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
-                String src = tagopts.getProperty("src", "");
                 if (src.length() > 0) {
                     final MultiProtocolURI url = absolutePath(src);
                     if (url != null) {
@@ -286,6 +286,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     }
                 }
             } catch (final NumberFormatException e) {}
+            Evaluation.match(Element.imgpath, src, this.evaluationScores);
         } else if(tagname.equalsIgnoreCase("base")) {
             try {
                 root = new MultiProtocolURI(tagopts.getProperty("href", ""));
@@ -293,9 +294,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if (tagname.equalsIgnoreCase("frame")) {
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
             frames.add(absolutePath(tagopts.getProperty("src", "")));
-        } else if (tagname.equalsIgnoreCase("iframe")) {
-            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
-            iframes.add(absolutePath(tagopts.getProperty("src", "")));
         } else if (tagname.equalsIgnoreCase("body")) {
             String c = tagopts.getProperty("class", "");
             Evaluation.match(Element.bodyclass, c, this.evaluationScores);
@@ -376,6 +374,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     anchors.put(url, tagopts);
                 }
             }
+            Evaluation.match(Element.apath, href, this.evaluationScores);
         }
         final String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
@@ -410,6 +409,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if ((tagname.equalsIgnoreCase("li")) && (text.length < 1024)) {
             h = recursiveParse(text);
             if (h.length() > 0) li.add(h);
+        } else if (tagname.equalsIgnoreCase("iframe")) {
+            String src = tagopts.getProperty("src", "");
+            anchors.put(absolutePath(src), tagopts /* with property "name" */);
+            iframes.add(absolutePath(src));
+            Evaluation.match(Element.iframepath, src, this.evaluationScores);
         } else if (tagname.equalsIgnoreCase("script")) {
             String src = tagopts.getProperty("src", "");
             if (src.length() > 0) {

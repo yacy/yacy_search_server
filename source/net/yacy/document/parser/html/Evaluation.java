@@ -68,6 +68,9 @@ public class Evaluation {
         url,
         scriptpath,
         scriptcode,
+        iframepath,
+        imgpath,
+        apath,
         comment;
     }
     
