@@ -2,6 +2,7 @@
 ; ----------------------------------------
 ;(C) 2004-2006 by Alexander Schier
 ;(C) 2008-2010 by David Wieditz
+;(C) 2011-     by Rene Kluge
 /*----------------------------------------
 MANUALS
 http://nsis.sourceforge.net/Docs/
@@ -41,12 +42,12 @@ InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
 !define RecommendSpace "30"
 
 ; some string for Firewall
-!define WinXPAddFwRule 'netsh firewall add portopening protocol=tcp port=8090 name=YaCy mode=enable'
-!define WinXPDelFwRule 'netsh firewall del portopening protocol=tcp port=8090'
-!define WinVistaAddFwRule 'netsh advfirewall firewall add rule name="YaCy" dir=in action=allow protocol=tcp localport=8090'
-!define WinVistaDelFwRule 'netsh advfirewall firewall del rule name="YaCy"'
-var WinAddFwRule
-var WinDelFwRule
+!define WinXPAddFwRulePort 'netsh firewall add portopening protocol=tcp port=8090 name=YaCy mode=enable'
+!define WinXPDelFwRulePort 'netsh firewall del portopening protocol=tcp port=8090'
+!define WinVistaAddFwRulePort 'netsh advfirewall firewall add rule name="YaCy" program="%SystemRoot%\System32\javaw.exe" dir=in action=allow protocol=tcp localport=8090'
+!define WinVistaDelFwRulePort 'netsh advfirewall firewall del rule name="YaCy"'
+var WinAddFwRulePort
+var WinDelFwRulePort
 
 
 ;requested execution level on Vista / 7
@@ -164,7 +165,7 @@ Section "YaCy"
 	WriteUninstaller "uninstall.exe"
 SectionEnd
 
-Section "Sun Java" Sec_Java_id
+Section "Java (Oracle JRE)" Sec_Java_id
     	SectionIn 1 RO
     	SetShellVarContext current
     	Call GetJRE
@@ -267,15 +268,15 @@ Function .onInit
 
 	${If} ${IsWinVista} 
 	${OrIf} ${IsWin7}
-		StrCpy $WinAddFwRule '${WinVistaAddFwRule}'
-		StrCpy $WinDelFwRule '${WinVistaDelFwRule}'
+		StrCpy $WinAddFwRulePort '${WinVistaAddFwRulePort}'
+		StrCpy $WinDelFwRulePort '${WinVistaDelFwRulePort}'
 		ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\MpsSvc" "Start"
 	${EndIf}
 
 	${If} ${IsWinXP} 
 	${AndIf} ${AtLeastServicePack} 2
-		StrCpy $WinAddFwRule '${WinXPAddFwRule}'
-		StrCpy $WinDelFwRule '${WinXPDelFwRule}'
+		StrCpy $WinAddFwRulePort '${WinXPAddFwRulePort}'
+		StrCpy $WinDelFwRulePort '${WinXPDelFwRulePort}'
 		ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\SharedAccess" "Start"
 	${EndIf}
 	
@@ -386,11 +387,11 @@ FunctionEnd
 Function OpenFirewall
 	var /global ExecErrorCode
 	; run netsh 
-	nsExec::ExecToStack '$WinAddFwRule'
+	nsExec::ExecToStack '$WinAddFwRulePort'
 	pop $ExecErrorCode
 	; if run without error register for uninstall and clear finish page 
 	${If} $ExecErrorCode = "0"
-		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRule" '$WinDelFwRule'
+		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRulePort" '$WinDelFwRulePort'
 		IntOp $FirewallServiceStart 0 + 0
 	${Else}
 		IntOp $FirewallServiceStart 3 + 0
@@ -407,9 +408,9 @@ FunctionEnd
 
 Function un.CloseFirewall
 	; get string for closing port from registy
-	ReadRegStr '$WinDelFwRule' HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRule"
+	ReadRegStr '$WinDelFwRulePort' HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRulePort"
 	; if found > run netsh to close port
-	${IfNot} '$WinDelFwRule' == '' 
-		nsExec::ExecToStack '$WinDelFwRule'
+	${IfNot} '$WinDelFwRulePort' == '' 
+		nsExec::ExecToStack '$WinDelFwRulePort'
 	${EndIf}
 FunctionEnd
