@@ -402,10 +402,14 @@ dc_rights
             for (Map.Entry<MultiProtocolURI, Properties> entry: anchors.entrySet()) {
                 url = entry.getKey();
                 if (url == null) continue;
-                if (url.getHost() != null && thishost != null &&
-                    url.getHost().endsWith(thishost) ||
-                    (thishost.startsWith("www.") && url.getHost().endsWith(thishost.substring(4)))
-                    ) this.inboundlinks.put(url, "anchor"); else this.outboundlinks.put(url, "anchor");
+                if ((thishost == null && url.getHost() == null) ||
+                    ((thishost != null && url.getHost() != null) &&
+                     (url.getHost().endsWith(thishost) ||
+                      (thishost.startsWith("www.") && url.getHost().endsWith(thishost.substring(4)))))) {
+                    this.inboundlinks.put(url, "anchor");
+                } else {
+                    this.outboundlinks.put(url, "anchor");
+                }
                 u = url.toNormalform(true, false);
                 String name = entry.getValue().getProperty("name", "");
                 if (u.startsWith("mailto:")) {
