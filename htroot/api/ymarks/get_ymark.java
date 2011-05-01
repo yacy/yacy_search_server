@@ -9,8 +9,10 @@ import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.data.UserDB;
+import de.anomic.data.ymark.YMarkDate;
 import de.anomic.data.ymark.YMarkEntry;
 import de.anomic.data.ymark.YMarkTables;
+import de.anomic.data.ymark.YMarkUtil;
 import de.anomic.data.ymark.YMarkTables.TABLES;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -21,6 +23,7 @@ public class get_ymark {
 	
 	private static Switchboard sb = null;
 	private static serverObjects prop = null;
+	final static String FOLDER_IMG = "<img src=\"/yacy/ui/img/treeview/folder-closed.gif\" />";
 	
 	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         sb = (Switchboard) env;
@@ -64,7 +67,7 @@ public class get_ymark {
                 query = ".*";                
             try {
                 final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-                final Collection<Row> result = sb.tables.bookmarks.orderBy(sb.tables.iterator(bmk_table, qtype, Pattern.compile(query)), sortname, sortorder);
+                final Collection<Row> result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.iterator(bmk_table, qtype, Pattern.compile(query)), sortname, sortorder);
                 total = result.size();
                 bookmarks = result.iterator();
             } catch (IOException e) {
@@ -136,7 +139,13 @@ public class get_ymark {
                 prop.put("json_"+count+"_hash", UTF8.String(bmk_row.getPK()));
                 for (YMarkEntry.BOOKMARK bmk : YMarkEntry.BOOKMARK.values()) {
                     if(bmk == YMarkEntry.BOOKMARK.PUBLIC)
-                        prop.put("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()).equals("true") ? 1 : 0);
+                        prop.put("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()).equals("true") ? 0 : 1);
+                    else if(bmk == YMarkEntry.BOOKMARK.TAGS)
+                    	prop.putJSON("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()).replaceAll(YMarkUtil.TAGS_SEPARATOR, ", "));
+                    else if(bmk == YMarkEntry.BOOKMARK.FOLDERS)
+                    	prop.putJSON("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()).replaceAll(YMarkUtil.TAGS_SEPARATOR, "<br />"+FOLDER_IMG));
+                    else if(bmk == YMarkEntry.BOOKMARK.DATE_ADDED || bmk == YMarkEntry.BOOKMARK.DATE_MODIFIED || bmk == YMarkEntry.BOOKMARK.DATE_VISITED)
+                    	prop.putJSON("json_"+count+"_"+bmk.key(), (new YMarkDate(bmk_row.get(bmk.key()))).toISO8601().replaceAll("T", "<br />"));
                     else
                         prop.putJSON("json_"+count+"_"+bmk.key(), bmk_row.get(bmk.key(),bmk.deflt()));
                 }

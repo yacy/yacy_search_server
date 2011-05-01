@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title>YaCy '#[user]#''s Bookmarks</title>
+		#%env/templates/metas.template%#
+		<link media="screen" type="text/css" href="yacy/ui/css/base.css" rel="stylesheet" />
+		<link media="screen" type="text/css" href="/yacy/ui/css/jquery.flexigrid.css" rel="stylesheet" />
+	</head>
+	<body id="ymarks_body">
+		#%env/templates/header.template%#
+		<script src="/yacy/ui/js/jquery-flexigrid.js" type="text/javascript"></script>
+		<script type="text/javascript">
+		   //<![CDATA[
+			HTMLenc = function(s) {
+				return $('<div/>').text(s).html();			
+			}
+			$(document).ready(function() {			
+				var height=document.documentElement.clientHeight - 180;    			
+		 		$('#ymarks').flexigrid({
+			 		url: '/api/ymarks/get_ymark.json',
+					dataType: 'json',
+			 		method: 'GET',
+			 		colModel: [	
+						{display: 'Hash', name : 'hash', width : 50, sortable : false, align: 'center', hide: true},
+						{display: 'Public', name : 'public', width : 25, sortable : true, align: 'center'},
+						{display: 'Title', name : 'title', width : 400, sortable : true, align: 'left'},
+						{display: 'Tags', name : 'tags', width : 160, sortable : false, align: 'left'},
+						{display: 'Folders', name : 'folders', width : 160, sortable : false, align: 'left', hide: false},
+						{display: 'Date', name : 'date', width : 100, sortable : true, align: 'left'}
+					],
+					buttons: [				
+						{name: 'Add', bclass: 'bookmark', onpress: bm_action},
+						{name: 'Crawl', bclass: 'crawl', onpress: bm_action},
+						{name: 'Edit', bclass: 'edit', onpress: bm_action},
+						{name: 'Delete', bclass: 'delete', onpress: bm_action},
+						{separator: true},
+						{name: 'RSS', bclass: 'rss', onpress: bm_action},
+						{name: 'XBEL', bclass: 'xml', onpress: bm_action},
+						{name: 'XML', bclass: 'xml', onpress: bm_action},
+						{separator: true},
+						{name: 'Add', bclass: 'addTag', onpress: tag_action},
+						{name: 'Rename', bclass: 'editTag', onpress: tag_action},							
+						{separator: true},
+						{name: 'Help', bclass: 'help', onpress: bm_action},
+					],
+					searchitems : [
+						{display: 'Tags', name : 'tags'},
+						{display: 'Folders', name : 'folders'},
+						{display: 'Title', name : 'title'},
+					],													
+					useRp: true,
+					rp: 15,
+					sortname: "title",
+					sortorder: "asc",
+					usepager: true,					
+					striped: true,
+					nowrap: false,			 									    				
+			 		height: height,
+			 		query: ".*",
+			 		qtype: "title"										    				
+		 		});
+
+		  		/* Init Sidebar_1 */
+		  		$("#side1").accordion({
+					autoHeight: false,
+					clearStyle: true,					
+					header: "h3"
+				});
+				loadTagCloud();
+				$("#side1").accordion("activate", 0);				
+			});
+
+			function loadTagCloud() {		
+				$("#tagcloud *").remove();
+				$("#sidebar-2-1").toggleClass("ui.loading");
+				$.ajax({
+					type: "POST",
+					url: "/api/ymarks/get_tags.xml?top=25&sort=alpha",			
+					dataType: "xml",
+					cache: false,
+					success: function(xml) {			
+						$(xml).find('tag').each(function(){					
+							var count = $(this).attr('count');
+							var tag = $(this).attr('tag');										
+							var size = ((count/20)+0.3);
+							if (size < 1) {size = 1;}					
+							$('<a style="font-size:'+size+'em"></a>')
+								.html(HTMLenc(tag)+' ')						
+								.appendTo('#tagcloud')																									
+						}); //close each(							
+						$("#sidebar-1-1").toggleClass("ui.loading");
+					}
+				}); //close $.ajax(
+			};
+			
+			function bm_action(com,grid) {
+				if (com=='XBEL') {
+					var qtype = "tags";
+					if (qtag.startsWith("/")) qtype = "folders";
+					window.document.location.href = '/api/bookmarks/get_bookmarks.xml?display=xbel&qtype='+qtype+'&query='+qtag;
+				}
+				else if (com=='RSS') {
+					window.document.location.href = '/Bookmarks.rss?qtype=tags&query='+qtag;
+				}
+				else if (com=='XML') {
+					window.document.location.href = '/api/bookmarks/get_bookmarks.xml?tag='+qtag;
+				}
+				else if (com=='Delete') {
+					var check = confirm('Delete ' + $('.trSelected',grid).length + ' bookmark(s)?');
+					if(check == true) {				
+						$('.trSelected',grid).each(function(){
+							var url = "/api/bookmarks/posts/delete_p.xml?login=&urlhash="+$(this).find('td :first').text();					
+							$.ajax({
+								type: 'POST',
+								url: url,			
+								dataType: 'xml'						
+							}); // close $.ajax(					
+						}); //close each(
+						loadTagCloud();
+						reloadBM();
+					}
+				}
+				else if (com=='Add') {			
+					$('#bmaddform').resetForm();
+					$("#bm_url").blur(function() { 
+						var url = $("input[name='bm_url']").getValue();
+						$.ajax({
+							type: "GET",
+							url: "/api/util/getpageinfo_p.xml?url="+url,			
+							dataType: "xml",
+							success: function(xml) {
+								var title = $(xml).find('title').text();
+								$("input[name='bm_title']").setValue(title);
+								var desc = $(xml).find('desc').text();					
+								$("textarea[name='bm_desc']").setValue(desc);					
+								tags = "";
+								$(xml).find('tag').each(function(){
+									tags = tags + "," + $(this).attr('name');
+								});
+								$("input[name='bm_tags']").setValue(tags);									
+							}					
+						});
+					});						
+					$("#bmadd").dialog('open');
+				} 
+				else if (com=='Edit') {
+					if ($('.trSelected',grid).length > 1) {
+						alert("Edit of more than one selected bookmark is currently not supportet!");
+						return false;
+					}
+					$("input[name='bm_url']").setValue($('.trSelected',grid).find('.url').text());
+		            $("input[name='bm_title']").setValue($('.trSelected',grid).find('h3.linktitle').text().trim());
+		            $("textarea[name='bm_desc']").setValue($('.trSelected',grid).find('p.desc').text().trim());            		
+		            $("input[name='bm_tags']").setValue($('.trSelected',grid).find('p.tags').text().trim().replace(/,\s/g,","));            
+		            $("input[name='bm_path']").setValue($('.trSelected',grid).find('p.folders').text().replace(/,\s/g,","));
+		            $("select[name='bm_public']").setValue($('.trSelected',grid).find('img').attr('alt'));
+		            $("#bmadd").dialog('open'); 
+				}		
+			}
+			function tag_action(com,grid) {
+				if (com=='Add') {
+					flex = grid;			
+					$('#tagaddform').resetForm();
+					$("#tagadd").dialog('open');
+				} else 	{
+					$('#tageditform').resetForm();
+					$("#tagedit").dialog('open');
+				}				
+			};
+		  //]]>
+		</script>
+		<div class="SubMenu">
+			<h3>Bookmarks</h3>
+			<!-- SubMenu -->
+			<ul class="SubMenu">
+				#(login)#<li><a href="YMarks.html" class="MenuItemLink">Login</a></li>::#(/login)#
+				<li><a href="/api/ymarks/test_treeview.html" class="MenuItemLink lock">TreeView</a></li>
+				<li><a href="/api/ymarks/test_import.html" class="MenuItemLink lock">Import Bookmarks</a></li>
+				<li><a href="/api/ymarks/get_xbel.xml" class="MenuItemLink lock">Bookmarks (XBEL)</a></li>
+			</ul>
+			<p/>
+		</div>
+		<div id="sidebar" class="sidebar" style="float: right;">
+			<div id="side1">
+				<h3 id="sidebar-1-1"><a href="#">Bookmark TagCloud</a></h3>
+				<div>
+					<p id="tagcloud"></p>	
+				</div>
+				<h3 id="sidebar-1-2"><a href="#">Test</a></h3>
+				<div>
+					<p id="test">texttext</p>	
+				</div>
+			</div>
+			<div id="side2"></div>
+		</div>	
+		<!-- Display Bookmarks Table -->
+		<div style="margin-top: 25px;">
+			<table id="ymarks" summary="YaCy Bookmarks">
+				<tbody>		
+				</tbody>
+			</table>
+		</div>	
+		#%env/templates/footer.template%#
+	</body>
+</html>

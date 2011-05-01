@@ -65,7 +65,7 @@ public class YMarkHTMLImporter extends HTMLEditorKit.ParserCallback implements R
         this.bookmarks = new ArrayBlockingQueue<YMarkEntry>(queueSize);
         this.bmk_file = bmk_file;
         this.RootFolder = root;
-        this.folderstring = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+        this.folderstring = new StringBuilder(YMarkTables.BUFFER_LENGTH);
         this.folderstring.append(this.RootFolder);        
         this.bmk = new YMarkEntry();
         

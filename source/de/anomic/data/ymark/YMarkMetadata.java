@@ -26,12 +26,9 @@
 
 package de.anomic.data.ymark;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.Enumeration;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -40,7 +37,6 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
-import net.yacy.document.WordTokenizer;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -141,48 +137,8 @@ public class YMarkMetadata {
 			metadata.put(METADATA.LANGUAGE, this.document.dc_language());
 			metadata.put(METADATA.CHARSET, this.document.getCharset());
 			// metadata.put(METADATA.SIZE, String.valueOf(document.getTextLength()));
-			metadata.put(METADATA.AUTOTAG, this.autoTag(5));
 		}
 		return metadata;
-	}
-	
-	public String autoTag(final int count) {
-        final StringBuilder buffer = new StringBuilder();
-		final Map<String, Word> words;
-        if(this.document != null) {
-		    words = new Condenser(this.document, true, true, LibraryProvider.dymLib).words();
-			buffer.append(this.document.dc_title());
-			buffer.append(this.document.dc_description());
-			buffer.append(this.document.dc_subject(' '));
-			final Enumeration<String> tokens = new WordTokenizer(new ByteArrayInputStream(UTF8.getBytes(buffer.toString())), LibraryProvider.dymLib);
-			while(tokens.hasMoreElements()) {
-				int max = 1;
-				String token = tokens.nextElement();
-				Word word = words.get(token);
-				if (words.containsKey(token)) {
-					/*
-					if (this.worktables.has(TABLES.TAGS.tablename(bmk_user), YMarkUtil.getKeyId(token))) {
-						max = word.occurrences() * 1000;
-					} else 
-					*/	
-					if (token.length()>3) {
-						max = word.occurrences() * 100;
-					}
-					for(int i=0; i<max; i++) {
-						word.inc();
-					}
-				}
-			}
-			buffer.setLength(0);
-			final ArrayList<String> topwords = new ArrayList<String>(sortWordCounts(words).descendingKeySet());
-			for(int i=0; i<count && i<topwords.size() ; i++) {
-				if(words.get(topwords.get(i)).occurrences() > 100) {
-					buffer.append(topwords.get(i));
-					buffer.append(YMarkUtil.TAGS_SEPARATOR);	
-				}
-			} 
-		}
-		return YMarkUtil.cleanTagsString(buffer.toString());
 	}
 	
 	public TreeMap<String,Word> getWordCounts() {

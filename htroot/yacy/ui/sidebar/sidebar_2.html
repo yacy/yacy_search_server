@@ -21,7 +21,7 @@
 		$("#sidebar-2-1").toggleClass("ui.loading");
 		$.ajax({
 			type: "POST",
-			url: "/api/bookmarks/tags/getTag.xml?top=25&sort=alpha",			
+			url: "/api/ymarks/get_tags.xml?top=25&sort=alpha",			
 			dataType: "xml",
 			cache: false,
 			success: function(xml) {				

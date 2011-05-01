@@ -53,7 +53,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
     private YMarkEntry bmk;
     private final XMLReader xmlReader;
     
-    // Statics
+    // Statics        
     public static enum XBEL {
 		NOTHING			(""),
 		XBEL			("<xbel"),
@@ -110,7 +110,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         this.bookmarks = new ArrayBlockingQueue<YMarkEntry>(queueSize);
         this.bmk_file = bmk_file;
         this.RootFolder = root;
-        this.folderstring = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+        this.folderstring = new StringBuilder(YMarkTables.BUFFER_LENGTH);
         this.folderstring.append(this.RootFolder);
         this.bmk = new YMarkEntry();
 
@@ -123,7 +123,7 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         this.bmkRef = new HashMap<String,YMarkEntry>();
         this.aliasRef = new HashSet<YMarkEntry>();
         this.buffer = new StringBuilder();
-        this.folder = new StringBuilder(YMarkTables.FOLDER_BUFFER_SIZE);
+        this.folder = new StringBuilder(YMarkTables.BUFFER_LENGTH);
         this.folder.append(this.RootFolder);
     }
     
@@ -180,8 +180,8 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 			}
             this.bmk.put(YMarkEntry.BOOKMARK.DATE_MODIFIED.key(), date.toString());
             UpdateBmkRef(atts.getValue(uri, YMarkEntry.BOOKMARKS_ID), true);
-            outer_state = XBEL.BOOKMARK;
-            inner_state = XBEL.NOTHING;
+            this.outer_state = XBEL.BOOKMARK;
+            this.inner_state = XBEL.NOTHING;
             this.parse_value = false;            
         } else if(XBEL.FOLDER.tag().equals(tag)) {
         	this.outer_state = XBEL.FOLDER;
@@ -196,9 +196,15 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
         	this.inner_state = XBEL.INFO;
         	this.parse_value = false;
         } else if (XBEL.METADATA.tag().equals(tag)) {
-        	/*
-        	atts.getValue(uri, "owner");
-        	*/
+        	// Support for old YaCy BookmarksDB XBEL Metadata (non valid XBEL)        	
+        	if(this.outer_state == XBEL.BOOKMARK) {
+        		final boolean isMozillaShortcutURL = atts.getValue(uri, "owner").equals("Mozilla") && !atts.getValue(uri, "ShortcutURL").isEmpty();
+        		final boolean isYacyPublic = atts.getValue(uri, "owner").equals("YaCy") && !atts.getValue(uri, "public").isEmpty();
+        		if(isMozillaShortcutURL)
+        			this.bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(atts.getValue(uri, "ShortcutURL")));
+        		if(isYacyPublic)
+        			this.bmk.put(YMarkEntry.BOOKMARK.PUBLIC.key(), atts.getValue(uri, "public"));        			
+        	}
         } else if (XBEL.ALIAS.tag().equals(tag)) {
         	final String r = atts.getValue(uri, YMarkEntry.BOOKMARKS_REF);
         	UpdateBmkRef(r, false);
@@ -242,25 +248,16 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 
     public void characters(final char ch[], final int start, final int length) {
         if (parse_value) {
-        	buffer.append(ch, start, length);      	
-        	for (int i = 0; i < buffer.length()-1; i++) {
-        		if(buffer.charAt(i) == '\n' | buffer.charAt(i) == '\t') {
-        			buffer.deleteCharAt(i);
-        			i--;
-        		}
-        	}
+        	buffer.append(ch, start, length);      	        	
         	switch(outer_state) {
             	case BOOKMARK:
             		switch(inner_state) {
             			case DESC:            				
-            				this.bmk.put(YMarkEntry.BOOKMARK.DESC.key(), buffer.toString());
+            				this.bmk.put(YMarkEntry.BOOKMARK.DESC.key(), buffer.toString().trim());
             				break;
             			case TITLE:
-            				this.bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), buffer.toString());
+            				this.bmk.put(YMarkEntry.BOOKMARK.TITLE.key(), buffer.toString().trim());
             				break;
-        				case METADATA:	
-        					// TODO: handle xbel bookmark metadata
-        					break;
             			default:
             				break;		
             		}
@@ -272,9 +269,6 @@ public class YMarkXBELImporter extends DefaultHandler implements Runnable {
 	        			case TITLE:
 	        				this.folder.append(YMarkUtil.FOLDERS_SEPARATOR);
 	        				this.folder.append(this.buffer);
-	        				break;
-	        			case METADATA:
-        					// TODO: handle xbel folder metadata
 	        				break;
 	        			default:
 	        				break;		

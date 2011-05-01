@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
@@ -75,8 +76,7 @@ public class YMarkTables {
     	}
     }
 		
-    public final static String FOLDERS_ROOT = "/"; 
-    public final static int FOLDER_BUFFER_SIZE = 100;    
+    public final static String FOLDERS_ROOT = "/";   
     public final static String BOOKMARKS_LOG = "BOOKMARKS";
     public final static String USER_ADMIN = "admin";
 	public final static String USER_AUTHENTICATE = "AUTHENTICATE";
@@ -91,12 +91,12 @@ public class YMarkTables {
     public final static String p7 = "/.*)";
     public final static String p8 = "(?:,|$)";
 	
+    public final static int BUFFER_LENGTH = 256;
+    
     private final WorkTables worktables;
-    private final StringBuffer patternBuilder;
     
     public YMarkTables(final Tables wt) {
     	this.worktables = (WorkTables)wt;
-    	this.patternBuilder = new StringBuffer(512);
     }
    
     public void deleteBookmark(final String bmk_user, final byte[] urlHash) throws IOException, RowSpaceExceededException {
@@ -112,19 +112,48 @@ public class YMarkTables {
     	this.deleteBookmark(bmk_user, YMarkUtil.getBookmarkId(url));
     }
     
+    public TreeMap<String, YMarkTag> getTags(final Iterator<Row> rowIterator) throws IOException {
+    	final TreeMap<String,YMarkTag> tags = new TreeMap<String,YMarkTag>();
+    	Tables.Row bmk_row = null;
+    	Iterator<String> tit = null;
+    	String tag;
+    	while(rowIterator.hasNext()) {
+    		bmk_row = rowIterator.next();
+    		if(bmk_row.containsKey(YMarkEntry.BOOKMARK.TAGS.key())) {
+    			tit = YMarkUtil.keysStringToSet(bmk_row.get(YMarkEntry.BOOKMARK.TAGS.key(), YMarkEntry.BOOKMARK.TAGS.deflt())).iterator();
+    			while(tit.hasNext()) {
+    				tag = tit.next();
+    				if(tags.containsKey(tag)) {
+    					tags.get(tag).inc();
+    				} else {
+    					tags.put(tag, new YMarkTag(tag));
+    				}
+    			}
+    		}
+    	}
+    	return tags;
+    }
+    
+    public TreeMap<String, YMarkTag> getTags(final String bmk_user) throws IOException {
+    	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
+    	final TreeMap<String,YMarkTag> tags = getTags(this.worktables.iterator(bmk_table));
+    	return tags;
+    }
+    
+    
     public TreeSet<String> getFolders(final String bmk_user, final String root) throws IOException {
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-    	this.patternBuilder.setLength(0);
-    	this.patternBuilder.append(p1);
-    	this.patternBuilder.append('(');
-    	this.patternBuilder.append(root);
-    	this.patternBuilder.append(p7);
-    	this.patternBuilder.append(p8);
-    	
-    	final Pattern r = Pattern.compile(this.patternBuilder.toString());
-    	final Iterator<Tables.Row> bit = this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), r);
     	final TreeSet<String> folders = new TreeSet<String>();
     	final StringBuilder path = new StringBuilder(200);
+    	final StringBuffer patternBuilder = new StringBuffer(BUFFER_LENGTH);
+    	patternBuilder.setLength(0);
+    	patternBuilder.append(p1);
+    	patternBuilder.append('(');
+    	patternBuilder.append(root);
+    	patternBuilder.append(p7);
+    	patternBuilder.append(p8);
+    	final Pattern r = Pattern.compile(patternBuilder.toString());
+    	final Iterator<Tables.Row> bit = this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), r);
     	Tables.Row bmk_row = null;
     	
     	while(bit.hasNext()) {
@@ -152,38 +181,40 @@ public class YMarkTables {
     
     public Iterator<Tables.Row> getBookmarksByFolder(final String bmk_user, final String folder) throws IOException {    	
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-    	this.patternBuilder.setLength(0);
-    	this.patternBuilder.append(p1);
-    	this.patternBuilder.append('(');
-    	this.patternBuilder.append(p2);
-		this.patternBuilder.append(folder);
-		this.patternBuilder.append(p3);
-		this.patternBuilder.append(')');
-		this.patternBuilder.append(p4);
-    	final Pattern p = Pattern.compile(this.patternBuilder.toString());
+        final StringBuffer patternBuilder = new StringBuffer(BUFFER_LENGTH);
+    	patternBuilder.setLength(0);
+    	patternBuilder.append(p1);
+    	patternBuilder.append('(');
+    	patternBuilder.append(p2);
+		patternBuilder.append(folder);
+		patternBuilder.append(p3);
+		patternBuilder.append(')');
+		patternBuilder.append(p4);
+    	final Pattern p = Pattern.compile(patternBuilder.toString());
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.FOLDERS.key(), p);
     }
     
     public Iterator<Tables.Row> getBookmarksByTag(final String bmk_user, final String[] tagArray) throws IOException {    	
     	final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-        this.patternBuilder.setLength(0);
-    	this.patternBuilder.append(p1);
-    	this.patternBuilder.append(p5);
+        final StringBuffer patternBuilder = new StringBuffer(BUFFER_LENGTH);
+    	patternBuilder.setLength(0);
+    	patternBuilder.append(p1);
+    	patternBuilder.append(p5);
     	for (final String tag : tagArray) {
-        	this.patternBuilder.append(p2);
-    		this.patternBuilder.append(tag);
-    		this.patternBuilder.append(p3);
-        	this.patternBuilder.append('|');
+        	patternBuilder.append(p2);
+    		patternBuilder.append(tag);
+    		patternBuilder.append(p3);
+        	patternBuilder.append('|');
 		}
-    	this.patternBuilder.deleteCharAt(this.patternBuilder.length()-1);
-    	this.patternBuilder.append(p6);
-    	this.patternBuilder.append(tagArray.length);
-    	this.patternBuilder.append('}');
-    	final Pattern p = Pattern.compile(this.patternBuilder.toString());
+    	patternBuilder.deleteCharAt(patternBuilder.length()-1);
+    	patternBuilder.append(p6);
+    	patternBuilder.append(tagArray.length);
+    	patternBuilder.append('}');
+    	final Pattern p = Pattern.compile(patternBuilder.toString());
     	return this.worktables.iterator(bmk_table, YMarkEntry.BOOKMARK.TAGS.key(), p);
     }
     
-    public SortedSet<Row> orderBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
+    public SortedSet<Row> orderBookmarksBy(final Iterator<Row> rowIterator, final String sortname, final String sortorder) {
         TreeSet<Row> sortTree = new TreeSet<Tables.Row>(new TablesRowComparator(sortname));
         Row row;
         while (rowIterator.hasNext()) {
@@ -196,7 +227,17 @@ public class YMarkTables {
         return sortTree;
     }
     
-	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean importer) throws IOException, RowSpaceExceededException {
+    public void addTags(final String bmk_user, final String url, final String tagString, final boolean merge) throws IOException, RowSpaceExceededException {
+    	if(!tagString.isEmpty()) {
+        	// do not set defaults as we only want to update tags
+    		final YMarkEntry bmk = new YMarkEntry(false);
+        	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);    	
+        	bmk.put(YMarkEntry.BOOKMARK.TAGS.key(), YMarkUtil.cleanTagsString(tagString));
+        	this.addBookmark(bmk_user, bmk, merge, true);  	
+    	}  	
+    }
+    
+	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean mergeTags, final boolean mergeFolders) throws IOException, RowSpaceExceededException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());
 		final byte[] urlHash = YMarkUtil.getBookmarkId(bmk.get(YMarkEntry.BOOKMARK.URL.key()));
@@ -208,10 +249,11 @@ public class YMarkTables {
 	        	// create and insert new entry
             	 this.worktables.insert(bmk_table, urlHash, bmk.getData());
 	        } else {	
-            	// modify and update existing entry
+	        	// modify and update existing entry
                 HashSet<String> oldSet;
                 HashSet<String> newSet;
-	        	for (YMarkEntry.BOOKMARK b : YMarkEntry.BOOKMARK.values()) {
+	        	
+                for (YMarkEntry.BOOKMARK b : YMarkEntry.BOOKMARK.values()) {
 	            	switch(b) {
 	    				case DATE_ADDED:
 	    					if(!bmk_row.containsKey(b.key()))
@@ -224,15 +266,15 @@ public class YMarkTables {
 	    	            	oldSet = YMarkUtil.keysStringToSet(bmk_row.get(b.key(),b.deflt()));
 	    	            	if(bmk.containsKey(b.key())) {
 	    	            		newSet = YMarkUtil.keysStringToSet(bmk.get(b.key()));
-	    	            		if(importer) {
+	    	            		if(mergeTags) {
 		    	            		newSet.addAll(oldSet);
+		    	            		if(newSet.size() > 1 && newSet.contains(YMarkEntry.BOOKMARK.TAGS.deflt()))
+		    	            			newSet.remove(YMarkEntry.BOOKMARK.TAGS.deflt());
 		    	            		bmk_row.put(b.key(), YMarkUtil.keySetToString(newSet));
-		    	            		oldSet.clear();
 	    	            		} else {
 	    	            			bmk_row.put(b.key(), bmk.get(b.key()));
 	    	            		}
 	    	            	} else {
-	    	            		newSet = new HashSet<String>();
 	    	            		bmk_row.put(b.key(), bmk_row.get(b.key(), b.deflt()));
 	    	            	}				
 	    	            	break;
@@ -240,15 +282,15 @@ public class YMarkTables {
 	    					oldSet = YMarkUtil.keysStringToSet(bmk_row.get(b.key(),b.deflt()));
 	    					if(bmk.containsKey(b.key())) {
 	    	            		newSet = YMarkUtil.keysStringToSet(bmk.get(b.key()));
-	    	            		if(importer) {
+	    	            		if(mergeFolders) {
 		    	            		newSet.addAll(oldSet);
+		    	            		if(newSet.size() > 1 && newSet.contains(YMarkEntry.BOOKMARK.FOLDERS.deflt()))
+		    	            			newSet.remove(YMarkEntry.BOOKMARK.FOLDERS.deflt());
 		    	            		bmk_row.put(b.key(), YMarkUtil.keySetToString(newSet));
-		    	            		oldSet.clear();
 	    	            		} else {
 	    	            			bmk_row.put(b.key(), bmk.get(b.key()));
 	    	            		}
 	    	            	} else {
-	    	            		newSet = new HashSet<String>();
 	    	            		bmk_row.put(b.key(), bmk_row.get(b.key(), b.deflt()));
 	    	            	}
 	    					break;	

@@ -15,7 +15,6 @@ public class TablesRowComparator implements Comparator<Tables.Row> {
         this.sortname = sortname;
     }
 
-    @Override
     public int compare(Tables.Row row0, Tables.Row row1) {
         if(row0 != null && row1 != null) {
             if(row0.containsKey(this.sortname) && row1.containsKey(this.sortname)) {

@@ -96,11 +96,17 @@ public class YMarkEntry extends TreeMap<String, String> {
     }
 
     public YMarkEntry() {
-        super();
-        setCurrentTimeMillis(BOOKMARK.DATE_ADDED);
-        setCurrentTimeMillis(BOOKMARK.DATE_MODIFIED);
-        setDefaults();
+    	this(true);
     }
+    
+    public YMarkEntry(final boolean setDefaults) {
+        super();
+        if(setDefaults) {
+            setCurrentTimeMillis(BOOKMARK.DATE_ADDED);
+            setCurrentTimeMillis(BOOKMARK.DATE_MODIFIED);
+            setDefaults();
+        }
+    }    
     
     public YMarkEntry(final DCEntry dc) {
         for (BOOKMARK b : BOOKMARK.values()) {
@@ -122,8 +128,14 @@ public class YMarkEntry extends TreeMap<String, String> {
     }
     
     private void setCurrentTimeMillis(BOOKMARK b) {
-        final String date = String.valueOf(System.currentTimeMillis());
-        this.put(b.key(), date);
+        switch(b) {
+        	case DATE_ADDED:
+        	case DATE_MODIFIED:
+        	case DATE_VISITED:
+        		this.put(b.key(), String.valueOf(System.currentTimeMillis()));
+    		default:
+    			break;
+        }        
     }
     
     private void setDefaults() {
