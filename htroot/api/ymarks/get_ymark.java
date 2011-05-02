@@ -60,53 +60,31 @@ public class get_ymark {
                 qtype = (post.containsKey("qtype")) ? post.get("qtype", YMarkEntry.BOOKMARK.TAGS.key()) : YMarkEntry.BOOKMARK.TAGS.key();
                 sortname = (post.containsKey("sortname")) ? post.get("sortname", YMarkEntry.BOOKMARK.TITLE.key()) : YMarkEntry.BOOKMARK.TITLE.key();
                 sortorder = (post.containsKey("sortorder")) ? post.get("sortorder", "asc") : "asc";
-            } 
-            if (qtype.isEmpty())
-                qtype = YMarkEntry.BOOKMARK.TITLE.key();
-            if (query.isEmpty())
-                query = ".*";                
+            }          
             try {
                 final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
-                final Collection<Row> result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.iterator(bmk_table, qtype, Pattern.compile(query)), sortname, sortorder);
+                final Collection<Row> result;
+                if(!query.isEmpty()) {
+                    if(!qtype.isEmpty()) {
+                        if(qtype.equals("_tags")) {
+                        	final String[] tagArray = YMarkUtil.cleanTagsString(query).split(YMarkUtil.TAGS_SEPARATOR);
+                        	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray), sortname, sortorder);
+                        } else if(qtype.equals("_folder")) {
+                        	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.bookmarks.getBookmarksByFolder(bmk_user, query), sortname, sortorder);
+                        } else {                
+                        	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.iterator(bmk_table, qtype, Pattern.compile(query)), sortname, sortorder);
+                        }
+                    } else {
+                    	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.iterator(bmk_table, Pattern.compile(query)), sortname, sortorder);
+                    }
+                } else {
+                	result = sb.tables.bookmarks.orderBookmarksBy(sb.tables.iterator(bmk_table), sortname, sortorder);
+                }
                 total = result.size();
                 bookmarks = result.iterator();
             } catch (IOException e) {
                 Log.logException(e);
             }
-
-            
-            
-            /*
-            if (qtype.equals(YMarkEntry.BOOKMARK.TAGS.key()) && !query.isEmpty()) {
-	    		final String[] tagArray = YMarkUtil.cleanTagsString(post.get(YMarkEntry.BOOKMARK.TAGS.key())).split(YMarkUtil.TAGS_SEPARATOR);
-	    		try {
-	    			bookmarks = YMarkTables.getPage(sb.tables.bookmarks.getBookmarksByTag(bmk_user, tagArray), sortname, itemsPerPage, page).iterator();    
-				} catch (IOException e) {
-					Log.logException(e);
-				}
-	    	} else {
-	    	    try {
-                    bookmarks = YMarkTables.getPage(sb.tables.iterator(YMarkTables.TABLES.BOOKMARKS.tablename(bmk_user)), sortname, itemsPerPage, page).iterator();
-                } catch (IOException e) {
-                    Log.logException(e);
-                }
-	    	}
-	    	*/
-	    	/*
-	    	if(post.containsKey(YMarkTables.BOOKMARK.FOLDERS.key())) {
-	    		final String[] folderArray = YMarkTables.cleanFoldersString(post.get(YMarkTables.BOOKMARK.FOLDERS.key())).split(YMarkTables.TAGS_SEPARATOR);
-                try {                	
-					if(tags)
-						bookmarks.retainAll(sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, folderArray));
-					else
-						bookmarks.addAll(sb.tables.bookmarks.folders.getBookmarkIds(bmk_user, folderArray));
-				} catch (IOException e) {
-					Log.logException(e);
-				} catch (RowSpaceExceededException e) {
-					Log.logException(e);
-				}
-	    	}
-	    	*/
             prop.put("page", page);
             prop.put("total", total);
 	    	putProp(bookmarks, rp, page);

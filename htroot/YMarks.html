@@ -14,8 +14,8 @@
 			HTMLenc = function(s) {
 				return $('<div/>').text(s).html();			
 			}
-			$(document).ready(function() {			
-				var height=document.documentElement.clientHeight - 180;    			
+			$(document).ready(function() {							
+				var height=document.documentElement.clientHeight - 220;    			
 		 		$('#ymarks').flexigrid({
 			 		url: '/api/ymarks/get_ymark.json',
 					dataType: 'json',
@@ -44,9 +44,13 @@
 						{name: 'Help', bclass: 'help', onpress: bm_action},
 					],
 					searchitems : [
-						{display: 'Tags', name : 'tags'},
-						{display: 'Folders', name : 'folders'},
-						{display: 'Title', name : 'title'},
+						{display: 'Full text (regexp)', name : ''},
+						{display: 'Tags (comma seperated)', name : '_tags'},
+						{display: 'Tags (regexp)', name : 'tags'},
+						{display: 'Singel Folder', name : '_folder'},
+						{display: 'Folders (regexp)', name : 'folders'},
+						{display: 'Title (regexp)', name : 'title'},
+						{display: 'Description (regexp)', name : 'desc'}
 					],													
 					useRp: true,
 					rp: 15,
@@ -63,16 +67,17 @@
 		  		/* Init Sidebar_1 */
 		  		$("#side1").accordion({
 					autoHeight: false,
-					clearStyle: true,					
+					clearStyle: true,
+					collapsible: true,										
 					header: "h3"
 				});
 				loadTagCloud();
-				$("#side1").accordion("activate", 0);				
+				$("#side1").accordion("activate", 1);				
 			});
 
 			function loadTagCloud() {		
 				$("#tagcloud *").remove();
-				$("#sidebar-2-1").toggleClass("ui.loading");
+				$("#sidebar-1-1").toggleClass("ui.loading");
 				$.ajax({
 					type: "POST",
 					url: "/api/ymarks/get_tags.xml?top=25&sort=alpha",			
@@ -86,9 +91,18 @@
 							if (size < 1) {size = 1;}					
 							$('<a style="font-size:'+size+'em"></a>')
 								.html(HTMLenc(tag)+' ')						
-								.appendTo('#tagcloud')																									
+								.appendTo('#tagcloud')
+								.bind('click', function() {
+									var qtag = $(this).text().replace(/\s+/g,"");								
+									$('#ymarks').flexOptions({
+										query: qtag,
+										qtype: "_tags"
+									});
+									$('#ymarks').flexReload();					
+								});																									
 						}); //close each(							
 						$("#sidebar-1-1").toggleClass("ui.loading");
+						$("#side1").accordion("activate", 0);
 					}
 				}); //close $.ajax(
 			};
@@ -180,16 +194,13 @@
 			</ul>
 			<p/>
 		</div>
-		<div id="sidebar" class="sidebar" style="float: right;">
+		<div id="sidebar" class="sidebar" style="float: right; margin-left: 15px;">
 			<div id="side1">
 				<h3 id="sidebar-1-1"><a href="#">Bookmark TagCloud</a></h3>
 				<div>
 					<p id="tagcloud"></p>	
 				</div>
-				<h3 id="sidebar-1-2"><a href="#">Test</a></h3>
-				<div>
-					<p id="test">texttext</p>	
-				</div>
+
 			</div>
 			<div id="side2"></div>
 		</div>	

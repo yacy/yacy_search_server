@@ -87,7 +87,7 @@ public class YMarkTables {
     public final static String p3 = "\\E";
     public final static String p4 = "(?:,.*|$)";
     public final static String p5 = "((?:";
-    public final static String p6 = "),*.*){";
+    public final static String p6 = "),.*){";
     public final static String p7 = "/.*)";
     public final static String p8 = "(?:,|$)";
 	
