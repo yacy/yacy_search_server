@@ -186,7 +186,7 @@ public class Latency {
         // find the delay as given by robots.txt on target site
         long robotsDelay = 0;
         if (!local) {
-            RobotsEntry robotsEntry;
+            RobotsTxtEntry robotsEntry;
             try {
                 robotsEntry = Switchboard.getSwitchboard().robots.getEntry(url, thisAgents);
             } catch (IOException e) {
@@ -239,7 +239,7 @@ public class Latency {
         // find the delay as given by robots.txt on target site
         long robotsDelay = 0;
         if (!local) {
-            RobotsEntry robotsEntry;
+            RobotsTxtEntry robotsEntry;
             try {
                 robotsEntry = Switchboard.getSwitchboard().robots.getEntry(url, thisAgents);
             } catch (IOException e) {

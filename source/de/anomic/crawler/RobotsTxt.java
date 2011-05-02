@@ -11,16 +11,16 @@
 //Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
+//it under the terms of the GNU General public License as published by
 //the Free Software Foundation; either version 2 of the License, or
 //(at your option) any later version.
 //
 //This program is distributed in the hope that it will be useful,
 //but WITHOUT ANY WARRANTY; without even the implied warranty of
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
+//GNU General public License for more details.
 //
-//You should have received a copy of the GNU General Public License
+//You should have received a copy of the GNU General public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
@@ -51,15 +51,15 @@ public class RobotsTxt {
     
     private static Logger log = Logger.getLogger(RobotsTxt.class);
 
-    public static final String ROBOTS_DB_PATH_SEPARATOR = ";";
-    public static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);
+    protected static final String ROBOTS_DB_PATH_SEPARATOR = ";";
+    protected static final Pattern ROBOTS_DB_PATH_SEPARATOR_MATCHER = Pattern.compile(ROBOTS_DB_PATH_SEPARATOR);
     
     BEncodedHeap robotsTable;
     private final ConcurrentHashMap<String, DomSync> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
     
     private static class DomSync {
-    	public DomSync() {}
+    	private DomSync() {}
     }
     
     public RobotsTxt(final BEncodedHeap robotsTable) {
@@ -78,16 +78,16 @@ public class RobotsTxt {
         return this.robotsTable.size();
     }
     
-    public RobotsEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents) throws IOException {
+    public RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents) throws IOException {
         if (theURL == null) throw new IllegalArgumentException();
         if (!theURL.getProtocol().startsWith("http")) return null;
         return getEntry(theURL, thisAgents, true);
     }
     
-    private RobotsEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) throws IOException {
+    private RobotsTxtEntry getEntry(final MultiProtocolURI theURL, final Set<String> thisAgents, final boolean fetchOnlineIfNotAvailableOrNotFresh) throws IOException {
             // this method will always return a non-null value
         String urlHostPort = getHostPort(theURL);
-        RobotsEntry robotsTxt4Host = null;
+        RobotsTxtEntry robotsTxt4Host = null;
         Map<String, byte[]> record;
         try {
             record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
@@ -95,7 +95,7 @@ public class RobotsTxt {
             log.warn("memory exhausted", e);
             record = null;
         }
-        if (record != null) robotsTxt4Host = new RobotsEntry(urlHostPort, record);
+        if (record != null) robotsTxt4Host = new RobotsTxtEntry(urlHostPort, record);
         
         if (fetchOnlineIfNotAvailableOrNotFresh && (
              robotsTxt4Host == null || 
@@ -123,7 +123,7 @@ public class RobotsTxt {
                     log.warn("memory exhausted", e);
                     record = null;
                 }
-                if (record != null) robotsTxt4Host = new RobotsEntry(urlHostPort, record);
+                if (record != null) robotsTxt4Host = new RobotsTxtEntry(urlHostPort, record);
                 if (robotsTxt4Host != null &&
                     robotsTxt4Host.getLoadedDate() != null &&
                     System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() <= 1*24*60*60*1000) {
@@ -160,7 +160,7 @@ public class RobotsTxt {
                     // no robots.txt available, make an entry to prevent that the robots loading is done twice
                     if (robotsTxt4Host == null) {
                         // generate artificial entry
-                        robotsTxt4Host = new RobotsEntry(
+                        robotsTxt4Host = new RobotsTxtEntry(
                                 robotsURL, 
                                 new ArrayList<String>(), 
                                 new ArrayList<String>(), 
@@ -183,7 +183,7 @@ public class RobotsTxt {
                     	addEntry(robotsTxt4Host);
                     }
                 } else {
-                    final robotsParser parserResult = new robotsParser((byte[]) result[DOWNLOAD_ROBOTS_TXT], thisAgents);
+                    final RobotsTxtParser parserResult = new RobotsTxtParser((byte[]) result[DOWNLOAD_ROBOTS_TXT], thisAgents);
                     ArrayList<String> denyPath = parserResult.denyList();
                     if (((Boolean) result[DOWNLOAD_ACCESS_RESTRICTED]).booleanValue()) {
                         denyPath = new ArrayList<String>();
@@ -208,7 +208,7 @@ public class RobotsTxt {
         return robotsTxt4Host;
     }
     
-    private RobotsEntry addEntry(
+    private RobotsTxtEntry addEntry(
     		final MultiProtocolURI theURL, 
     		final ArrayList<String> allowPathList, 
     		final ArrayList<String> denyPathList, 
@@ -219,7 +219,7 @@ public class RobotsTxt {
     		final long crawlDelayMillis,
     		final String agentName
     ) {
-        final RobotsEntry entry = new RobotsEntry(
+        final RobotsTxtEntry entry = new RobotsTxtEntry(
                                 theURL, allowPathList, denyPathList,
                                 loadedDate, modDate,
                                 eTag, sitemap, crawlDelayMillis, agentName);
@@ -227,7 +227,7 @@ public class RobotsTxt {
         return entry;
     }
     
-    private String addEntry(final RobotsEntry entry) {
+    private String addEntry(final RobotsTxtEntry entry) {
         // writes a new page and returns key
         try {
             this.robotsTable.insert(this.robotsTable.encodedKey(entry.getHostName()), entry.getMem());
@@ -240,10 +240,10 @@ public class RobotsTxt {
     
     // methods that had been in robotsParser.java:
     
-    public static final int DOWNLOAD_ACCESS_RESTRICTED = 0;
-    public static final int DOWNLOAD_ROBOTS_TXT = 1;
-    public static final int DOWNLOAD_ETAG = 2;
-    public static final int DOWNLOAD_MODDATE = 3;
+    private static final int DOWNLOAD_ACCESS_RESTRICTED = 0;
+    private static final int DOWNLOAD_ROBOTS_TXT = 1;
+    private static final int DOWNLOAD_ETAG = 2;
+    private static final int DOWNLOAD_MODDATE = 3;
     
     static final String getHostPort(final MultiProtocolURI theURL) {
         String urlHostPort = null;
@@ -267,7 +267,7 @@ public class RobotsTxt {
         return port;
     }
 
-    private static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsEntry entry) throws Exception {
+    private static Object[] downloadRobotsTxt(final MultiProtocolURI robotsURL, int redirectionCount, final RobotsTxtEntry entry) throws Exception {
         if (robotsURL == null || !robotsURL.getProtocol().startsWith("http")) return null;
         
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};

@@ -13,16 +13,16 @@
 //Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
+//it under the terms of the GNU General public License as published by
 //the Free Software Foundation; either version 2 of the License, or
 //(at your option) any later version.
 //
 //This program is distributed in the hope that it will be useful,
 //but WITHOUT ANY WARRANTY; without even the implied warranty of
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//GNU General Public License for more details.
+//GNU General public License for more details.
 //
-//You should have received a copy of the GNU General Public License
+//You should have received a copy of the GNU General public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
@@ -41,25 +41,25 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.ByteArray;
 
 
-public class RobotsEntry {
+public class RobotsTxtEntry {
     
-    public static final String HOST_NAME          = "hostname";
-    public static final String ALLOW_PATH_LIST    = "allow";
-    public static final String DISALLOW_PATH_LIST = "disallow";
-    public static final String LOADED_DATE        = "date";
-    public static final String MOD_DATE           = "modDate";
-    public static final String ETAG               = "etag";
-    public static final String SITEMAP            = "sitemap";
-    public static final String CRAWL_DELAY        = "crawlDelay";
-    public static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
-    public static final String AGENT_NAME         = "agentname";
+    private static final String HOST_NAME          = "hostname";
+    private static final String ALLOW_PATH_LIST    = "allow";
+    private static final String DISALLOW_PATH_LIST = "disallow";
+    private static final String LOADED_DATE        = "date";
+    private static final String MOD_DATE           = "modDate";
+    private static final String ETAG               = "etag";
+    private static final String SITEMAP            = "sitemap";
+    private static final String CRAWL_DELAY        = "crawlDelay";
+    private static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
+    private static final String AGENT_NAME         = "agentname";
     
     // this is a simple record structure that holds all properties of a single crawl start
     private final Map<String, byte[]> mem;
     private final List<String> allowPathList, denyPathList;
     private final String hostName, agentName;
     
-    public RobotsEntry(final String hostName, final Map<String, byte[]> mem) {
+    protected RobotsTxtEntry(final String hostName, final Map<String, byte[]> mem) {
         this.hostName = hostName.toLowerCase();
         this.mem = mem; 
         
@@ -90,7 +90,7 @@ public class RobotsEntry {
         this.agentName = this.mem.containsKey(AGENT_NAME) ? UTF8.String(this.mem.get(AGENT_NAME)) : null;
     }  
     
-    public RobotsEntry(
+    protected RobotsTxtEntry(
             final MultiProtocolURI theURL, 
             final List<String> allowPathList, 
             final List<String> disallowPathList, 
@@ -140,15 +140,15 @@ public class RobotsEntry {
         }
     }
     
-    public String getHostName() {
+    protected String getHostName() {
         return this.hostName;
     }
     
-    public String getAgentName() {
+    protected String getAgentName() {
         return this.agentName;
     }
     
-    public Map<String, byte[]> getMem() {
+    protected Map<String, byte[]> getMem() {
         if (!this.mem.containsKey(HOST_NAME)) this.mem.put(HOST_NAME, UTF8.getBytes(this.hostName));
         return this.mem;
     }
@@ -175,34 +175,34 @@ public class RobotsEntry {
         }
     }
     
-    public Date getLoadedDate() {
+    protected Date getLoadedDate() {
         if (this.mem.containsKey(LOADED_DATE)) {
             return new Date(ByteArray.parseDecimal(this.mem.get(LOADED_DATE)));
         }
         return null;
     }
     
-    public void setLoadedDate(final Date newLoadedDate) {
+    protected void setLoadedDate(final Date newLoadedDate) {
         if (newLoadedDate != null) {
             this.mem.put(LOADED_DATE, UTF8.getBytes(Long.toString(newLoadedDate.getTime())));
         }
     }
     
-    public Date getModDate() {
+    protected Date getModDate() {
         if (this.mem.containsKey(MOD_DATE)) {
             return new Date(ByteArray.parseDecimal(this.mem.get(MOD_DATE)));
         }
         return null;
     }        
     
-    public String getETag() {
+    protected String getETag() {
         if (this.mem.containsKey(ETAG)) {
             return UTF8.String(this.mem.get(ETAG));
         }
         return null;
     }          
     
-    public long getCrawlDelayMillis() {
+    protected long getCrawlDelayMillis() {
         if (this.mem.containsKey(CRAWL_DELAY_MILLIS)) try {
             return ByteArray.parseDecimal(this.mem.get(CRAWL_DELAY_MILLIS));
         } catch (final NumberFormatException e) {

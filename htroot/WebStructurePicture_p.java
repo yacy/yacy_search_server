@@ -105,7 +105,7 @@ public class WebStructurePicture_p {
         } else {
             // find start hash
             String hash = null;
-            try {
+            if (host != null && host.length() > 0) try {
                 hash = UTF8.String((new DigestURI("http://" + host)).hash(), 6, 6);
             } catch (final MalformedURLException e) {Log.logException(e);}
             //assert (sb.webStructure.outgoingReferences(hash) != null);

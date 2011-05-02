@@ -10,16 +10,16 @@
   Revision: $LastChangedRevision$
   
   This program is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
+  it under the terms of the GNU General public License as published by
   the Free Software Foundation; either version 2 of the License, or
   (at your option) any later version.
   
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+  GNU General public License for more details.
   
-  You should have received a copy of the GNU General Public License
+  You should have received a copy of the GNU General private License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
@@ -59,16 +59,16 @@ import java.util.regex.Pattern;
  *        See: http://www.kollar.com/robots.html
  */
 
-public final class robotsParser {
+public final class RobotsTxtParser {
     
     private static final Pattern patternTab = Pattern.compile("\t");
     
-	public static final String ROBOTS_USER_AGENT = "User-agent:".toUpperCase();
-    public static final String ROBOTS_DISALLOW = "Disallow:".toUpperCase();
-    public static final String ROBOTS_ALLOW = "Allow:".toUpperCase();
-    public static final String ROBOTS_COMMENT = "#";
-    public static final String ROBOTS_SITEMAP = "Sitemap:".toUpperCase();
-    public static final String ROBOTS_CRAWL_DELAY = "Crawl-delay:".toUpperCase();
+	private static final String ROBOTS_USER_AGENT = "User-agent:".toUpperCase();
+    private static final String ROBOTS_DISALLOW = "Disallow:".toUpperCase();
+    private static final String ROBOTS_ALLOW = "Allow:".toUpperCase();
+    private static final String ROBOTS_COMMENT = "#";
+    private static final String ROBOTS_SITEMAP = "Sitemap:".toUpperCase();
+    private static final String ROBOTS_CRAWL_DELAY = "Crawl-delay:".toUpperCase();
     
     private final ArrayList<String> allowList;
     private final ArrayList<String> denyList;
@@ -77,7 +77,7 @@ public final class robotsParser {
     private final Set<String> myNames; // a list of own name lists
     private       String agentName; // the name of the agent that was used to return the result
     
-    public robotsParser(final byte[] robotsTxt, final Set<String> myNames) {
+    protected RobotsTxtParser(final byte[] robotsTxt, final Set<String> myNames) {
         this.allowList = new ArrayList<String>(0);
         this.denyList = new ArrayList<String>(0);
         this.sitemap = "";
@@ -89,16 +89,6 @@ public final class robotsParser {
             final BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
             parse(reader);
         }
-    }
-    
-    public robotsParser(final BufferedReader reader, final Set<String> myNames) {
-        this.allowList = new ArrayList<String>(0);
-        this.denyList = new ArrayList<String>(0);
-        this.sitemap = "";
-        this.crawlDelayMillis = 0;
-        this.myNames = myNames;
-        this.agentName = null;
-        if (reader != null) parse(reader);
     }
     
     private void parse(final BufferedReader reader) {
@@ -260,7 +250,7 @@ public final class robotsParser {
      * does not make any no-DOS-forced crawl pause.
      * @return the crawl delay between two crawl access times in milliseconds
      */
-    public long crawlDelayMillis() {
+    protected long crawlDelayMillis() {
         return this.crawlDelayMillis;
     }
     
@@ -271,19 +261,19 @@ public final class robotsParser {
      * Effects: see also comment to crawlDelayMillis()
      * @return the name of the user agent that was used for the result properties or null if no user agent name was used to identify the agent
      */
-    public String agentName() {
+    protected String agentName() {
         return this.agentName;
     }
     
-    public String sitemap() {
+    protected String sitemap() {
         return this.sitemap;
     }
     
-    public ArrayList<String> allowList() {
+    protected ArrayList<String> allowList() {
         return this.allowList;
     }
     
-    public ArrayList<String> denyList() {
+    protected ArrayList<String> denyList() {
         return this.denyList;
     }
 }

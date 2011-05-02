@@ -59,8 +59,8 @@ public enum SolrScheme {
         solrdoc.addField("id", id);
         solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
         InetAddress address = Domains.dnsResolve(digestURI.getHost());
-        if (address != null) solrdoc.addField("attr_ip", address.getHostAddress());
-        if (digestURI.getHost() != null) solrdoc.addField("attr_host", digestURI.getHost());
+        if (address != null) solrdoc.addField("ip_s", address.getHostAddress());
+        if (digestURI.getHost() != null) solrdoc.addField("host_s", digestURI.getHost());
         solrdoc.addField("title", yacydoc.dc_title());
         solrdoc.addField("author", yacydoc.dc_creator());
         solrdoc.addField("description", yacydoc.dc_description());
@@ -68,7 +68,7 @@ public enum SolrScheme {
         solrdoc.addField("last_modified", header.lastModified());
         solrdoc.addField("keywords", yacydoc.dc_subject(' '));
         String content = UTF8.String(yacydoc.getTextBytes());
-        solrdoc.addField("attr_text", content);
+        solrdoc.addField("text_t", content);
         int contentwc = content.split(" ").length;
         solrdoc.addField("wordcount_i", contentwc);
 
@@ -111,14 +111,14 @@ public enum SolrScheme {
         solrdoc.addField("attr_outboundlinks", yacydoc.outboundLinks().toArray());
         
         // charset
-        solrdoc.addField("attr_charset", yacydoc.getCharset());
+        solrdoc.addField("charset_s", yacydoc.getCharset());
 
         // coordinates
         if (yacydoc.lat() != 0.0f && yacydoc.lon() != 0.0f) {
             solrdoc.addField("lon_coordinate", yacydoc.lon());
             solrdoc.addField("lat_coordinate", yacydoc.lat());
         }
-        solrdoc.addField("attr_httpstatus", "200");
+        solrdoc.addField("httpstatus_i", 200);
         Object parser = yacydoc.getParserObject();
         if (parser instanceof ContentScraper) {
             ContentScraper html = (ContentScraper) parser;
@@ -137,9 +137,9 @@ public enum SolrScheme {
             // meta tags
             Map<String, String> metas = html.getMetas();
             String robots = metas.get("robots");
-            if (robots != null) solrdoc.addField("attr_meta_robots", robots);
+            if (robots != null) solrdoc.addField("metarobots_t", robots);
             String generator = metas.get("generator");
-            if (generator != null) solrdoc.addField("attr_meta_generator", generator);
+            if (generator != null) solrdoc.addField("metagenerator_t", generator);
             
             // bold, italic
             String[] bold = html.getBold();

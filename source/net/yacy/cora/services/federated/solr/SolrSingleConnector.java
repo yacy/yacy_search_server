@@ -26,6 +26,7 @@ package net.yacy.cora.services.federated.solr;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,8 +42,11 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
+import net.yacy.cora.document.UTF8;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 
@@ -189,11 +193,10 @@ public class SolrSingleConnector {
     */
     
     public void add(String id, ResponseHeader header, Document doc) throws IOException {
-        add(id, header, doc, this.scheme);
+        add(this.scheme.yacy2solr(id, header, doc));
     }
-    
-    public void add(String id, ResponseHeader header, Document doc, SolrScheme tempScheme) throws IOException {
-        SolrInputDocument solrdoc = tempScheme.yacy2solr(id, header, doc);
+
+    private void add(SolrInputDocument solrdoc) throws IOException {
         int thisrrc = this.transmissionRoundRobinCounter;
         int nextrrc = thisrrc++;
         if (nextrrc >= transmissionQueueCount) nextrrc = 0;
@@ -221,6 +224,28 @@ public class SolrSingleConnector {
         } catch (SolrServerException e) {
             throw new IOException(e);
         }
+    }
+    
+    public void err(DigestURI digestURI, String failReason, int httpstatus) throws IOException {
+       
+            SolrInputDocument solrdoc = new SolrInputDocument();
+            solrdoc.addField("id", UTF8.String(digestURI.hash()));
+            solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
+            InetAddress address = Domains.dnsResolve(digestURI.getHost());
+            if (address != null) solrdoc.addField("ip_s", address.getHostAddress());
+            if (digestURI.getHost() != null) solrdoc.addField("host_s", digestURI.getHost());
+
+            // path elements of link
+            String path = digestURI.getPath();
+            if (path != null) {
+                String[] paths = path.split("/");
+                if (paths.length > 0) solrdoc.addField("attr_paths", paths);
+            }
+
+            solrdoc.addField("failreason_t", failReason);
+            solrdoc.addField("httpstatus_i", httpstatus);
+            
+            add(solrdoc);
     }
     
     private void flushTransmissionQueue(int idx) throws IOException {

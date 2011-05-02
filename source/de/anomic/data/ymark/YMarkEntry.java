@@ -133,7 +133,8 @@ public class YMarkEntry extends TreeMap<String, String> {
         	case DATE_MODIFIED:
         	case DATE_VISITED:
         		this.put(b.key(), String.valueOf(System.currentTimeMillis()));
-    		default:
+    		    break;
+            default:
     			break;
         }        
     }

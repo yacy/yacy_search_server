@@ -385,7 +385,7 @@ public class Crawler_p {
                                 sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
                                 1,
-                                reasonString);
+                                reasonString, -1);
                         }
                     } catch (final PatternSyntaxException e) {
                         prop.put("info", "4"); // crawlfilter does not match url

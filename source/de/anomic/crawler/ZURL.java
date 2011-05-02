@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.services.federated.solr.SolrSingleConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
@@ -66,13 +67,16 @@ public class ZURL implements Iterable<ZURL.Entry> {
     // the class object
     private Index urlIndex;
     private final ConcurrentLinkedQueue<byte[]> stack;
+    private final SolrSingleConnector solrConnector;
     
     public ZURL(
+            final SolrSingleConnector solrConnector,
     		final File cachePath,
     		final String tablename,
     		final boolean startWithEmptyFile,
             final boolean useTailCache,
             final boolean exceed134217727) {
+        this.solrConnector = solrConnector;
         // creates a new ZURL in a file
         cachePath.mkdirs();
         final File f = new File(cachePath, tablename);
@@ -94,7 +98,8 @@ public class ZURL implements Iterable<ZURL.Entry> {
         this.stack = new ConcurrentLinkedQueue<byte[]>();
     }
     
-    public ZURL() {
+    public ZURL(final SolrSingleConnector solrConnector) {
+        this.solrConnector = solrConnector;
         // creates a new ZUR in RAM
         this.urlIndex = new RowSet(rowdef);
         this.stack = new ConcurrentLinkedQueue<byte[]>();
@@ -126,14 +131,24 @@ public class ZURL implements Iterable<ZURL.Entry> {
             final byte[] executor,
             final Date workdate,
             final int workcount,
-            String anycause) {
+            String anycause,
+            int httpcode) {
         // assert executor != null; // null == proxy !
         if (exists(bentry.url().hash())) return; // don't insert double causes
         if (anycause == null) anycause = "unknown";
-        Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
+        String reason = anycause + ((httpcode >= 0) ? " (http return code = " + httpcode + ")" : "");
+        Entry entry = new Entry(bentry, executor, workdate, workcount, reason);
         put(entry);
         stack.add(entry.hash());
-        Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + anycause);
+        Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + reason);
+        if (this.solrConnector != null) {
+            // send the error to solr
+            try {
+                this.solrConnector.err(bentry.url(), reason, httpcode);
+            } catch (IOException e) {
+                Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
+            }
+        }
         while (stack.size() > maxStackSize) stack.poll();
     }
     

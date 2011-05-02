@@ -9,7 +9,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.RobotsEntry;
+import de.anomic.crawler.RobotsTxtEntry;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -106,7 +106,7 @@ public class getpageinfo_p {
                     final DigestURI theURL = new DigestURI(url);
                     
                 	// determine if crawling of the current URL is allowed
-                    RobotsEntry robotsEntry;
+                    RobotsTxtEntry robotsEntry;
                     try {
                         robotsEntry = sb.robots.getEntry(theURL, sb.peers.myBotIDs());
                     } catch (IOException e) {

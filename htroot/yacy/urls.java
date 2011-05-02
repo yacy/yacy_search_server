@@ -85,7 +85,8 @@ public class urls {
                                 sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
                                 0,
-                                "client=____________");
+                                "client=____________",
+                                -1);
                 
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");

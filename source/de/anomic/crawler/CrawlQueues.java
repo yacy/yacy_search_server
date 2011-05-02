@@ -80,8 +80,8 @@ public class CrawlQueues {
         log.logConfig("Starting Crawling Management");
         noticeURL = new NoticedURL(queuePath, sb.peers.myBotIDs(), sb.useTailCache, sb.exceed134217727);
         FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
-        errorURL = new ZURL(queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
-        delegatedURL = new ZURL(queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
+        errorURL = new ZURL(sb.solrConnector, queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
+        delegatedURL = new ZURL(sb.solrConnector, queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
     }
     
     public void relocate(final File newQueuePath) {
@@ -92,8 +92,8 @@ public class CrawlQueues {
         
         noticeURL = new NoticedURL(newQueuePath, sb.peers.myBotIDs(), sb.useTailCache, sb.exceed134217727);
         FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
-        errorURL = new ZURL(newQueuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
-        delegatedURL = new ZURL(newQueuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
+        errorURL = new ZURL(sb.solrConnector, newQueuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
+        delegatedURL = new ZURL(sb.solrConnector, newQueuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
     }
     
     public void close() {
@@ -571,7 +571,7 @@ public class CrawlQueues {
             try {
                 // checking robots.txt for http(s) resources
                 this.request.setStatus("worker-checkingrobots", WorkflowJob.STATUS_STARTED);
-                RobotsEntry robotsEntry;
+                RobotsTxtEntry robotsEntry;
                 if ((request.url().getProtocol().equals("http") || request.url().getProtocol().equals("https")) &&
                     (robotsEntry = sb.robots.getEntry(request.url(), sb.peers.myBotIDs())) != null &&
                     robotsEntry.isDisallowed(request.url())) {
@@ -581,7 +581,7 @@ public class CrawlQueues {
                             UTF8.getBytes(sb.peers.mySeed().hash),
                             new Date(),
                             1,
-                            "denied by robots.txt");
+                            "denied by robots.txt", -1);
                     this.request.setStatus("worker-disallowed", WorkflowJob.STATUS_FINISHED);
                 } else {
                     // starting a load from the internet
@@ -617,7 +617,7 @@ public class CrawlQueues {
                                 UTF8.getBytes(sb.peers.mySeed().hash),
                                 new Date(),
                                 1,
-                                "cannot load: " + result);
+                                "cannot load: " + result, -1);
                         this.request.setStatus("worker-error", WorkflowJob.STATUS_FINISHED);
                     } else {
                         this.request.setStatus("worker-processed", WorkflowJob.STATUS_FINISHED);
@@ -629,7 +629,7 @@ public class CrawlQueues {
                         UTF8.getBytes(sb.peers.mySeed().hash),
                         new Date(),
                         1,
-                        e.getMessage() + " - in worker");
+                        e.getMessage() + " - in worker", -1);
                 Log.logException(e);
 //                Client.initConnectionManager();
                 this.request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);

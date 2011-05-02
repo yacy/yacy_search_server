@@ -523,6 +523,11 @@ public final class Switchboard extends serverSwitch {
         log.logConfig("Parser: Initializing Mime Type deny list");
         TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
         
+        // set up the solr interface
+        String solrurl = this.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
+        boolean usesolr = this.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurl.length() > 0;
+        this.solrConnector = (usesolr) ? new SolrSingleConnector(solrurl, SolrScheme.SolrCell) : null;
+        
         // start a loader
         log.logConfig("Starting Crawl Loader");
         this.loader = new LoaderDispatcher(this);
@@ -604,11 +609,6 @@ public final class Switchboard extends serverSwitch {
                 log.logInfo("RANDOM PASSWORD REMOVED! User must set a new password");
             }
         }
-        
-        // set up the solr interface
-        String solrurl = this.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
-        boolean usesolr = this.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurl.length() > 0;
-        this.solrConnector = (usesolr) ? new SolrSingleConnector(solrurl, SolrScheme.SolrCell) : null;
         
         // initializing dht chunk generation
         this.dhtMaxReferenceCount = (int) getConfigLong(SwitchboardConstants.INDEX_DIST_CHUNK_SIZE_START, 50);
@@ -2423,7 +2423,7 @@ public final class Switchboard extends serverSwitch {
                 0, 
                 0,
                 0);
-        crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failreason);
+        crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failreason, -1);
     }
     
     public final void heuristicSite(final SearchEvent searchEvent, final String host) {

@@ -202,7 +202,7 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                nextQueue.errorURL.push(entry, UTF8.getBytes(peers.mySeed().hash), new Date(), 1, rejectReason);
+                nextQueue.errorURL.push(entry, UTF8.getBytes(peers.mySeed().hash), new Date(), 1, rejectReason, -1);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
@@ -469,9 +469,9 @@ public final class CrawlStacker {
         }
 
         // deny cgi
-        if (url.isIndividual())  {
+        if (url.isIndividual() && !(profile.crawlingQ()))  { // TODO: make special property for crawlingIndividual
             if (this.log.isFine()) this.log.logFine("URL '" + url.toString() + "' is CGI URL.");
-            return "cgi url not allowed";
+            return "individual url (sessionid etc) not wanted";
         }
 
         // deny post properties

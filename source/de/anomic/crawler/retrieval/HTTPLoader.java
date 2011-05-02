@@ -78,7 +78,7 @@ public final class HTTPLoader {
     private Response load(final Request request, final int retryCount, final long maxFileSize, final boolean checkBlacklist) throws IOException {
 
         if (retryCount < 0) {
-            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection counter exceeded");
+            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection counter exceeded", -1);
             throw new IOException("Redirection counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
         }
         
@@ -94,7 +94,7 @@ public final class HTTPLoader {
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
         if (checkBlacklist && Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
-            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "url in blacklist");
+            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "url in blacklist", -1);
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
         
@@ -138,7 +138,7 @@ public final class HTTPLoader {
                     redirectionUrlString = redirectionUrlString.trim();
 
                     if (redirectionUrlString.length() == 0) {
-                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection header empy");
+                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection header empy", code);
                         throw new IOException("CRAWLER Redirection of URL=" + request.url().toString() + " aborted. Location header is empty.");
                     }
                     
@@ -151,14 +151,14 @@ public final class HTTPLoader {
 
                     // if we are already doing a shutdown we don't need to retry crawling
                     if (Thread.currentThread().isInterrupted()) {
-                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "server shutdown");
+                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "server shutdown", code);
                         throw new IOException("CRAWLER Retry of URL=" + request.url().toString() + " aborted because of server shutdown.");
                     }
                     
                     // check if the url was already indexed
                     final String dbname = sb.urlExists(Segments.Process.LOCALCRAWLING, redirectionUrl.hash());
                     if (dbname != null) {
-                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection to double content");
+                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection to double content", code);
                         throw new IOException("CRAWLER Redirection of URL=" + request.url().toString() + " ignored. The url appears already in db " + dbname);
                     }
                     
@@ -167,12 +167,12 @@ public final class HTTPLoader {
                     return load(request, retryCount - 1, maxFileSize, checkBlacklist);
                 } else {
                 	// no redirection url provided
-                    sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no redirection url provided");
+                    sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no redirection url provided", code);
                     throw new IOException("REJECTED EMTPY REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
                 }
             } else if (responseBody == null) {
         	    // no response, reject file
-                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no response body (code = " + code + ")");
+                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "no response body", code);
                 throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
         	} else if (code == 200 || code == 203) {
                 // the transfer is ok
@@ -183,7 +183,7 @@ public final class HTTPLoader {
 
                 // check length again in case it was not possible to get the length before loading
                 if (maxFileSize > 0 && contentLength > maxFileSize) {
-                	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "file size limit exceeded");                    
+                	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "file size limit exceeded", code);                    
                 	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
                 }
 
@@ -201,7 +201,7 @@ public final class HTTPLoader {
                 return response;
         	} else {
                 // if the response has not the right response type then reject file
-            	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code " + code);
+            	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code", code);
                 throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
             }
     }

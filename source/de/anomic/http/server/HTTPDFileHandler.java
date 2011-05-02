@@ -305,7 +305,7 @@ public final class HTTPDFileHandler {
             final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
             final boolean softauth = accessFromLocalhost && authorization != null && authorization.length() > 6 && (adminAccountBase64MD5.equals(authorization.substring(6)));
 
-            if (protectedPage && ((!softauth && !grantedForLocalhost && !accountEmpty) || requestHeader.userAgent().startsWith("yacybot"))) {
+            if (protectedPage && !softauth && ((!grantedForLocalhost && !accountEmpty) || requestHeader.userAgent().startsWith("yacybot"))) {
                 // authentication required
                 if (authorization == null) {
                     // no authorization given in response. Ask for that

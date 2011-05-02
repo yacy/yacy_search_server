@@ -112,7 +112,7 @@ public class YMarkTables {
     	this.deleteBookmark(bmk_user, YMarkUtil.getBookmarkId(url));
     }
     
-    public TreeMap<String, YMarkTag> getTags(final Iterator<Row> rowIterator) throws IOException {
+    public TreeMap<String, YMarkTag> getTags(final Iterator<Row> rowIterator) {
     	final TreeMap<String,YMarkTag> tags = new TreeMap<String,YMarkTag>();
     	Tables.Row bmk_row = null;
     	Iterator<String> tit = null;
