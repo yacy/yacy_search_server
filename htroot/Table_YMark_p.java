@@ -166,7 +166,7 @@ public class Table_YMark_p {
                 }
             }
             try {
-                sb.tables.bookmarks.addBookmark(bmk_user, bmk, false);
+                sb.tables.bookmarks.addBookmark(bmk_user, bmk, false, false);
             } catch (IOException e) {
                 Log.logException(e);
             } catch (RowSpaceExceededException e) {
