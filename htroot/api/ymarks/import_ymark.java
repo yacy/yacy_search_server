@@ -47,12 +47,11 @@ public class import_ymark {
         	boolean empty = false;
             
         	if(post.containsKey("autotag") && !post.get("autotag", "off").equals("off")) {            	                          
-                if(post.get("autotag").equals("merge")) {
-                	autotag = true;
+        		autotag = true;
+        		if(post.get("autotag").equals("merge")) {                	
                 	merge = true;
                 }
                 if(post.get("autotag").equals("empty")) {
-                	autotag = true;
                 	empty = true;
                 }
                 t = new Thread(new YMarkAutoTagger(autoTaggingQueue, sb.loader, sb.tables.bookmarks, bmk_user, merge),"YMarks - autoTagger");
@@ -154,7 +153,7 @@ public class import_ymark {
 		try {
 			String url = bmk.get(YMarkEntry.BOOKMARK.URL.key());
 			// other protocols could cause problems
-			if(url.startsWith("http")) {
+			if(url != null && url.startsWith("http")) {
 				ymarks.addBookmark(bmk_user, bmk, true, true);				
 				if(autotag) {
 					if(!empty) {

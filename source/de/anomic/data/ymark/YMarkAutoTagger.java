@@ -65,6 +65,13 @@ public class YMarkAutoTagger implements Runnable, Thread.UncaughtExceptionHandle
 			response = loader.load(loader.request(uri, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
 		} catch (IOException e) {
 			Log.logWarning(YMarkTables.BOOKMARKS_LOG, "loadDocument failed due to IOException for url: "+url);
+			try {
+				this.ymarks.addFolder(this.bmk_user, url, "/IOExceptions");
+			} catch (IOException e1) {
+				Log.logException(e1);
+			} catch (RowSpaceExceededException e1) {
+				Log.logException(e1);
+			}
 			return null;
 		}		
 		try {

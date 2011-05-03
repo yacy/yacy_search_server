@@ -25,8 +25,9 @@
 						{display: 'Public', name : 'public', width : 25, sortable : true, align: 'center'},
 						{display: 'Title', name : 'title', width : 400, sortable : true, align: 'left'},
 						{display: 'Tags', name : 'tags', width : 160, sortable : false, align: 'left'},
-						{display: 'Folders', name : 'folders', width : 160, sortable : false, align: 'left', hide: false},
-						{display: 'Date', name : 'date', width : 100, sortable : true, align: 'left'}
+						{display: 'Folders', name : 'folders', width : 160, sortable : true, align: 'left', hide: false},
+						{display: 'Date added', name : 'date_added', width : 100, sortable : true, align: 'left'},
+						{display: 'Date visited', name : 'date_visited', width : 100, sortable : true, align: 'left'}
 					],
 					buttons: [				
 						{name: 'Add', bclass: 'bookmark', onpress: bm_action},
@@ -96,7 +97,8 @@
 									var qtag = $(this).text().replace(/\s+/g,"");								
 									$('#ymarks').flexOptions({
 										query: qtag,
-										qtype: "_tags"
+										qtype: "_tags",
+										newp: 1
 									});
 									$('#ymarks').flexReload();					
 								});																									

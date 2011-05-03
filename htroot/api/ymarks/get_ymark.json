@@ -9,7 +9,10 @@ rows: [
 "<h3 class='linktitle'>#[title]#</h3><p class='desc'>#[desc]#</p><p class='url'><a href='#[url]#'>#[url]#</a>",
 "<p class='tags'>#[tags]#</p>",
 "<p class='folders'><img src='/yacy/ui/img/treeview/folder-closed.gif' />#[folders]#</p>",
-"<p class='date'>#[date_added]#</p>"]}#[comma]#
+"<p class='date'>#[date_added]#</p>",
+"<p class='date'>#[date_modified]#</p>",
+"<p class='date'>#[date_visited]#</p>"
+]}#[comma]#
 #{/json}#
 ]
 }

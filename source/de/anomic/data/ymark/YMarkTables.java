@@ -237,6 +237,25 @@ public class YMarkTables {
     	}  	
     }
     
+    public void addFolder(final String bmk_user, final String url, final String folder) throws IOException, RowSpaceExceededException {
+    	if(!folder.isEmpty()) {
+        	// do not set defaults as we only want to add a folder
+    		final YMarkEntry bmk = new YMarkEntry(false);
+        	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);    	
+        	bmk.put(YMarkEntry.BOOKMARK.FOLDERS.key(), folder);
+        	this.addBookmark(bmk_user, bmk, true, true);  	
+    	}  	
+    }
+    
+    public void visited(final String bmk_user, final String url) throws IOException, RowSpaceExceededException {
+    	// do not set defaults
+		final YMarkEntry bmk = new YMarkEntry(false);
+    	bmk.put(YMarkEntry.BOOKMARK.URL.key(), url);    	
+    	bmk.put(YMarkEntry.BOOKMARK.DATE_VISITED.key(), (new YMarkDate()).toString());
+    	this.addBookmark(bmk_user, bmk, true, true);
+    }
+    
+    
 	public void addBookmark(final String bmk_user, final YMarkEntry bmk, final boolean mergeTags, final boolean mergeFolders) throws IOException, RowSpaceExceededException {
 		final String bmk_table = TABLES.BOOKMARKS.tablename(bmk_user);
         final String date = String.valueOf(System.currentTimeMillis());

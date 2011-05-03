@@ -594,7 +594,7 @@
 				
 				if ($.browser.opera) $(t).css('visibility','hidden');
 				
-				if (!p.newp) p.newp = 1;
+				if (!p.newp) p.newp = 1;		
 				
 				if (p.page>p.pages) p.page = p.pages;
 				//var param = {page:p.newp, rp: p.rp, sortname: p.sortname, sortorder: p.sortorder, query: p.query, qtype: p.qtype};
