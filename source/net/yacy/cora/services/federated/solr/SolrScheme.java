@@ -108,7 +108,7 @@ public enum SolrScheme {
                 ">" +
                 ((name.length() > 0) ? name : "") + "</a>";
         }
-        solrdoc.addField("attr_outboundlinks", yacydoc.outboundLinks().toArray());
+        solrdoc.addField("attr_outboundlinks", outboundlinks);
         
         // charset
         solrdoc.addField("charset_s", yacydoc.getCharset());
