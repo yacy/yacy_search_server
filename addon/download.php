@@ -18,7 +18,7 @@ if ($_GET['what'] == 'jre') {
 	
 	if($_GET['version'] == 32)
 		// jre-6u25-windows-i586.exe
-		header('Location: http://javadl.sun.com/webapps/download/AutoDL?BundleId=48343');
+		header('Location: http://javadl.sun.com/webapps/download/AutoDL?BundleId=48344');
 
 	if($_GET['version'] == 64)
 		// jre-6u25-windows-x64.exe
