@@ -279,18 +279,15 @@ public final class Condenser {
     private void createCondensement(final InputStream is, final WordCache meaningLib) {
         assert is != null;
         final Set<String> currsentwords = new HashSet<String>();
-        StringBuilder sentence = new StringBuilder(100);
         String word = "";
         String k;
         int wordlen;
         Word wsp, wsp1;
-        Phrase psp;
         int wordHandle;
         int wordHandleCount = 0;
         int sentenceHandleCount = 0;
         int allwordcounter = 0;
         int allsentencecounter = 0;
-        int idx;
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
         final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
@@ -298,58 +295,32 @@ public final class Condenser {
         // read source
         final WordTokenizer wordenum = new WordTokenizer(is, meaningLib);
         while (wordenum.hasMoreElements()) {
-            word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH); // TODO: does toLowerCase work for non ISO-8859-1 chars?
+            word = wordenum.nextElement().toLowerCase(Locale.ENGLISH);
             if (languageIdentificator != null) languageIdentificator.add(word);
             if (word.length() < wordminsize) continue;
             
             // distinguish punctuation and words
             wordlen = word.length();
-            Iterator<String> it;
-            if ((wordlen == 1) && (SentenceReader.punctuation(word.charAt(0)))) {
+            if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) {
                 // store sentence
-                if (sentence.length() > 0) {
-                    // we store the punctuation symbol as first element of the sentence vector
-                    allsentencecounter++;
-                    sentence.insert(0, word); // append at beginning
-                    if (sentences.containsKey(sentence)) {
-                        // sentence already exists
-                        psp = sentences.get(sentence);
-                        psp.inc();
-                        idx = psp.handle();
-                        sentences.put(sentence, psp);
-                    } else {
-                        // create new sentence
-                        idx = sentenceHandleCount++;
-                        sentences.put(sentence, new Phrase(idx));
-                    }
-                    // store to the words a link to this sentence
-                    it = currsentwords.iterator();
-                    while (it.hasNext()) {
-                        k = it.next();
-                        wsp = words.get(k);
-                        wsp.check(idx);
-                        words.put(k, wsp); // is that necessary?
-                    }
-                }
-                sentence = new StringBuilder(100);
                 currsentwords.clear();
                 wordInSentenceCounter = 1;
             } else {
                 // check index.of detection
-                if ((last_last) && (comb_indexof) && (word.equals("modified"))) {
+                if (last_last && comb_indexof && word.equals("modified")) {
                     this.RESULT_FLAGS.set(flag_cat_indexof, true);
                     wordenum.pre(true); // parse lines as they come with CRLF
                 }
-                if ((last_index) && (wordminsize > 2 || (word.equals("of")))) comb_indexof = true;
+                if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
                 last_last = word.equals("last");
                 last_index = word.equals("index");
                 
                 // store word
                 allwordcounter++;
                 currsentwords.add(word);
-                if (words.containsKey(word)) {
+                wsp = words.get(word);
+                if (wsp != null) {
                     // word already exists
-                    wsp = words.get(word);
                     wordHandle = wsp.posInText;
                     wsp.inc();
                 } else {
@@ -357,48 +328,10 @@ public final class Condenser {
                     wordHandle = wordHandleCount++;
                     wsp = new Word(wordHandle, wordInSentenceCounter, sentences.size() + 100);
                     wsp.flags = RESULT_FLAGS.clone();
+                    words.put(word, wsp);
                 }
-                words.put(word, wsp);
                 // we now have the unique handle of the word, put it into the sentence:
-                sentence.append(intStringFormatter.format(wordHandle));
                 wordInSentenceCounter++;
-            }
-        }
-        // finish last sentence
-        if (sentence.length() > 0) {
-            allsentencecounter++;
-            sentence.insert(0, "."); // append at beginning
-            if (sentences.containsKey(sentence)) {
-                psp = sentences.get(sentence);
-                psp.inc();
-                sentences.put(sentence, psp);
-            } else {
-                sentences.put(sentence, new Phrase(sentenceHandleCount++));
-            }
-        }
-
-        // we reconstruct the sentence hashtable
-        // and order the entries by the number of the sentence
-        // this structure is needed to replace double occurring words in sentences
-        final Object[] orderedSentences = new Object[sentenceHandleCount];
-        String[] s;
-        int wc;
-        Object o;
-        final Iterator<StringBuilder> sit = sentences.keySet().iterator();
-        while (sit.hasNext()) {
-            o = sit.next();
-            if (o != null) {
-                sentence = (StringBuilder) o;
-                wc = (sentence.length() - 1) / numlength;
-                s = new String[wc + 2];
-                psp = sentences.get(sentence);
-                s[0] = intStringFormatter.format(psp.occurrences()); // number of occurrences of this sentence
-                s[1] = sentence.substring(0, 1); // the termination symbol of this sentence
-                for (int i = 0; i < wc; i++) {
-                    k = sentence.substring(i * numlength + 1, (i + 1) * numlength + 1);
-                    s[i + 2] = k;
-                }
-                orderedSentences[psp.handle()] = s;
             }
         }
 
@@ -416,20 +349,6 @@ public final class Condenser {
                     if (wordlen > i) {
                         k = word.substring(0, wordlen - i);
                         if (words.containsKey(k)) {
-                            // we will delete the word 'word' and repoint the
-                            // corresponding links
-                            // in sentences that use this word
-                            wsp1 = words.get(k);
-                            final Iterator<Integer> it1 = wsp.phrases(); // we iterate over all sentences that refer to this word
-                            while (it1.hasNext()) {
-                                idx = it1.next().intValue(); // number of a sentence
-                                s = (String[]) orderedSentences[idx];
-                                for (int j = 2; j < s.length; j++) {
-                                    if (s[j].equals(intStringFormatter.format(wsp.posInText)))
-                                        s[j] = intStringFormatter.format(wsp1.posInText);
-                                }
-                                orderedSentences[idx] = s;
-                            }
                             // update word counter
                             wsp1.count = wsp1.count + wsp.count;
                             words.put(k, wsp1);
