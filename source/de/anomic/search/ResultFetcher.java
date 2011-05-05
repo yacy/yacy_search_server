@@ -344,9 +344,9 @@ public class ResultFetcher {
                     loops++;
                     final ResultEntry resultEntry = fetchSnippet(page, cacheStrategy); // does not fetch snippets if snippetMode == 0
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
-                    String rawLine = resultEntry.textSnippet().getLineRaw();
+                    String rawLine = resultEntry.textSnippet() == null ? null : resultEntry.textSnippet().getLineRaw();
                     //System.out.println("***SNIPPET*** raw='" + rawLine + "', pattern='" + this.snippetPattern.toString() + "'");
-                    if (!this.snippetPattern.matcher(rawLine).matches()) continue;
+                    if (rawLine != null && !this.snippetPattern.matcher(rawLine).matches()) continue;
                     
                     //if (result.contains(resultEntry)) continue;
                     urlRetrievalAllTime += resultEntry.dbRetrievalTime;
