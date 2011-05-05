@@ -397,7 +397,7 @@ public class ResultFetcher {
                     snippetFetchWordHashes,
                     null,
                     ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))),
-                    180,
+                    220,
                     Integer.MAX_VALUE,
                     !query.isLocal());
             return new ResultEntry(page, query.getSegment(), peers, snippet, null, dbRetrievalTime, 0); // result without snippet

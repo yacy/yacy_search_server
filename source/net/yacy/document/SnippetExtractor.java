@@ -159,8 +159,7 @@ public class SnippetExtractor {
                 " [..] " +
                 sentence.substring((maxpos + 26 > sentence.length()) ? sentence.length() : maxpos + 26).trim();
                 maxpos = maxpos + lenb - sentence.length() + 6;
-            }
-            if (maxpos > maxLength) {
+            } else if (maxpos > maxLength) {
                 // the string is too long, even if we cut it at the end
                 // so cut it here at both ends at once
                 assert maxpos >= minpos;
@@ -174,11 +173,11 @@ public class SnippetExtractor {
             }
             if (sentence.length() > maxLength) {
                 // trim sentence, 1st step (cut at right side)
-                sentence = sentence.substring(0, maxpos).trim() + " [..]";
+                sentence = sentence.substring(0, Math.min(maxpos + 20, sentence.length())).trim() + " [..]";
             }
             if (sentence.length() > maxLength) {
                 // trim sentence, 2nd step (cut at left side)
-                sentence = "[..] " + sentence.substring(minpos).trim();
+                sentence = "[..] " + sentence.substring(Math.max(minpos - 20, 0)).trim();
             }
             if (sentence.length() > maxLength) {
                 // trim sentence, 3rd step (cut in the middle)
