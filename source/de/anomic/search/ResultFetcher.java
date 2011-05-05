@@ -29,6 +29,7 @@ package de.anomic.search;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 
 
 import net.yacy.cora.document.MultiProtocolURI;
@@ -254,7 +255,7 @@ public class ResultFetcher {
             this.workerThreads = new Worker[deployCount];
             synchronized(this.workerThreads) {
                 for (int i = 0; i < workerThreads.length; i++) {
-                    Worker worker = new Worker(i, 10000, query.snippetCacheStrategy, neededResults);
+                    Worker worker = new Worker(i, 10000, query.snippetCacheStrategy, query.snippetMatcher, neededResults);
                     worker.start();
                     this.workerThreads[i] = worker;
                 }
@@ -266,7 +267,7 @@ public class ResultFetcher {
                 for (int i = 0; i < this.workerThreads.length; i++) {
                    if (deployCount <= 0) break;
                    if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
-                       Worker worker = new Worker(i, 10000, query.snippetCacheStrategy, neededResults);
+                       Worker worker = new Worker(i, 10000, query.snippetCacheStrategy, query.snippetMatcher, neededResults);
                        worker.start();
                        this.workerThreads[i] = worker;
                        deployCount--;
@@ -295,11 +296,13 @@ public class ResultFetcher {
         private final int id;
         private final CrawlProfile.CacheStrategy cacheStrategy;
         private final int neededResults;
+        private final Pattern snippetPattern;
         
-        public Worker(final int id, final long maxlifetime, CrawlProfile.CacheStrategy cacheStrategy, int neededResults) {
+        public Worker(final int id, final long maxlifetime, CrawlProfile.CacheStrategy cacheStrategy, Pattern snippetPattern, int neededResults) {
             this.id = id;
             this.cacheStrategy = cacheStrategy;
             this.lastLifeSign = System.currentTimeMillis();
+            this.snippetPattern = snippetPattern;
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
         }
@@ -340,10 +343,12 @@ public class ResultFetcher {
 
                     loops++;
                     final ResultEntry resultEntry = fetchSnippet(page, cacheStrategy); // does not fetch snippets if snippetMode == 0
-
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
-                    //if (result.contains(resultEntry)) continue;
+                    String rawLine = resultEntry.textSnippet().getLineRaw();
+                    //System.out.println("***SNIPPET*** raw='" + rawLine + "', pattern='" + this.snippetPattern.toString() + "'");
+                    if (!this.snippetPattern.matcher(rawLine).matches()) continue;
                     
+                    //if (result.contains(resultEntry)) continue;
                     urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                     snippetComputationAllTime += resultEntry.snippetComputationTime;
                     

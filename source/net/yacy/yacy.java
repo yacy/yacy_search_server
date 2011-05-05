@@ -528,7 +528,7 @@ public final class yacy {
         final int port = serverCore.getPortNr(config.getProperty("port", "8090"));
 
         // read password
-        String encodedPassword = (String) config.get(HTTPDemon.ADMIN_ACCOUNT_B64MD5);
+        String encodedPassword = (String) config.get(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5);
         if (encodedPassword == null) encodedPassword = ""; // not defined
 
         // send 'wget' to web interface

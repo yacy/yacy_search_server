@@ -38,7 +38,6 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -125,7 +124,7 @@ public class Status {
         }
 
         // password protection
-        if ((sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) && (!sb.getConfigBool("adminAccountForLocalhost", false))) {
+        if ((sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0) && (!sb.getConfigBool("adminAccountForLocalhost", false))) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
         } else {

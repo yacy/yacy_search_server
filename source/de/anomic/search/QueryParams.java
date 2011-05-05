@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -77,6 +78,7 @@ public final class QueryParams {
     
     public final String queryString;
     public HandleSet fullqueryHashes, queryHashes, excludeHashes;
+    public Pattern snippetMatcher;
     public final int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
@@ -131,6 +133,7 @@ public final class QueryParams {
     		this.excludeHashes = Word.words2hashesHandles(cq[1]);
     		this.fullqueryHashes = Word.words2hashesHandles(cq[2]);
     	}
+    	this.snippetMatcher = Pattern.compile(".*");
     	this.ranking = ranking;
     	this.tenant = null;
         this.maxDistance = Integer.MAX_VALUE;
@@ -165,6 +168,7 @@ public final class QueryParams {
         final String queryString, final HandleSet queryHashes,
         final HandleSet excludeHashes,
         final HandleSet fullqueryHashes,
+        final Pattern snippetMatcher,
         final String tenant,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
@@ -187,6 +191,7 @@ public final class QueryParams {
         this.queryHashes = queryHashes;
         this.excludeHashes = excludeHashes;
         this.fullqueryHashes = fullqueryHashes;
+        this.snippetMatcher = snippetMatcher;
         this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
         this.ranking = ranking;
         this.maxDistance = maxDistance;
@@ -532,5 +537,29 @@ public final class QueryParams {
         sb.append(theQuery.queryStringForUrl());
 
         return sb.toString();
+    }
+    
+    private static Pattern StringMatchPattern = Pattern.compile(".*?(\".*?\").*");
+    
+    /**
+     * calculate a pattern to match with a string search
+     * @param query
+     * @return
+     */
+    public static Pattern stringSearchPattern(String query) {
+        String p = "";
+        while (query.length() > 0) {
+            Matcher m = StringMatchPattern.matcher(query);
+            if (!m.matches()) break;
+            p += ".*" + query.substring(m.start(1) + 1, m.end(1) - 1);
+            query = query.substring(m.end(1));
+        }
+        p += ".*";
+        return Pattern.compile(p);
+    }
+    
+    public static void main(String[] args) {
+        Pattern p = stringSearchPattern("die \"peer-to-peer Suchmaschine\" ohne Zensur als \"freie Software\" runterladen");
+        System.out.println(p.toString());
     }
 }

@@ -35,8 +35,8 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 
 import de.anomic.data.UserDB;
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -95,7 +95,7 @@ public class User{
             final String password=post.get("password");
             
             entry=sb.userDB.passwordAuth(username, password);
-            final boolean staticAdmin = sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").equals(
+            final boolean staticAdmin = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").equals(
                     Digest.encodeMD5Hex(
                             Base64Order.standardCoder.encodeString(username + ":" + password)
                     )

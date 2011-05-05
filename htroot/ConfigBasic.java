@@ -40,7 +40,6 @@ import net.yacy.kelondro.workflow.InstantBusyThread;
 
 import de.anomic.data.WorkTables;
 import de.anomic.data.Translator;
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HTTPDFileHandler;
 import de.anomic.net.UPnP;
 import de.anomic.search.Switchboard;
@@ -218,7 +217,7 @@ public class ConfigBasic {
         prop.put("setUseCase_repositoryPath", sb.getConfig("repositoryPath", "/DATA/HTROOT/repository"));
         
         // check if values are proper
-        final boolean properPassword = (sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
+        final boolean properPassword = (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
         final boolean properName = (sb.peers.mySeed().getName().length() >= 3) && (!(yacySeed.isDefaultPeerName(sb.peers.mySeed().getName())));
         final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
         

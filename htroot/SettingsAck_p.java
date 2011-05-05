@@ -45,6 +45,7 @@ import net.yacy.kelondro.util.Formatter;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HTTPDProxyHandler;
 import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -92,7 +93,7 @@ public class SettingsAck_p {
                 return prop;
             }
             // check passed. set account:
-            env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
+            env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
             prop.put("info", "5");//admin account changed
             prop.putHTML("info_user", user);

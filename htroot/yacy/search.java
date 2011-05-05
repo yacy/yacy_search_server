@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
@@ -102,6 +103,7 @@ public final class search {
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
         final String  filter = post.get("filter", ".*");
+        final Pattern snippetPattern = Pattern.compile(post.get("snippet", ".*"));
         String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
         String  authorhash = post.get("authorhash", ""); if (authorhash.length() == 0) authorhash = null;
         String  language = post.get("language", "");
@@ -214,6 +216,7 @@ public final class search {
                     abstractSet,
                     new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0),
                     null,
+                    snippetPattern,
                     null,
                     maxdist,
                     prefer,
@@ -272,7 +275,8 @@ public final class search {
                     null, 
                     queryhashes, 
                     excludehashes, 
-                    null, 
+                    null,
+                    snippetPattern,
                     null,
                     maxdist, 
                     prefer,

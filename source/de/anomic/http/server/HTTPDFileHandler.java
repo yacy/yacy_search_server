@@ -96,6 +96,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -276,10 +277,6 @@ public final class HTTPDFileHandler {
                 return;
             }
             
-            // check permission/granted access
-            String authorization = requestHeader.get(RequestHeader.AUTHORIZATION);
-            if (authorization != null && authorization.length() == 0) authorization = null;
-            final String adminAccountBase64MD5 = switchboard.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
             
             // cache settings
             boolean nocache = path.contains("?") || body != null;
@@ -297,47 +294,62 @@ public final class HTTPDFileHandler {
                 path = "/api/bookmarks/" + path.substring(11);
             }
             
-            final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
-            final String refererHost = requestHeader.refererHost();
-            boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
-            final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
+            // these are the 5 cases where an access granted:
+            // (the alternative is that we deliver a 401 to request authorization)
+            
+            // -1- the page is not protected; or
             final boolean protectedPage = path.indexOf("_p.") > 0;
-            final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
-            final boolean softauth = accessFromLocalhost && authorization != null && authorization.length() > 6 && (adminAccountBase64MD5.equals(authorization.substring(6)));
-
-            if (protectedPage && !softauth && ((!grantedForLocalhost && !accountEmpty) || requestHeader.userAgent().startsWith("yacybot"))) {
-                // authentication required
-                if (authorization == null) {
-                    // no authorization given in response. Ask for that
-                    final ResponseHeader responseHeader = getDefaultHeaders(path);
-                    responseHeader.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
-                    //httpd.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                    final servletProperties tp=new servletProperties();
-                    tp.put("returnto", path);
-                    //TODO: separate error page Wrong Login / No Login
-                    HTTPDemon.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, responseHeader);
-                    return;
-                } else if (
-                    (HTTPDemon.staticAdminAuthenticated(authorization.trim().substring(6), switchboard) == 4) ||
-                    (sb.userDB.hasAdminRight(authorization, requestHeader.getHeaderCookies()))) {
-                    //Authentication successful. remove brute-force flag
-                    serverCore.bfHost.remove(conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
-                } else {
-                    // a wrong authentication was given or the userDB user does not have admin access. Ask again
-                    Log.logInfo("HTTPD", "Wrong log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
-                    final Integer attempts = serverCore.bfHost.get(clientIP);
-                    if (attempts == null)
-                        serverCore.bfHost.put(clientIP, Integer.valueOf(1));
-                    else
-                        serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
-    
-                    final ResponseHeader headers = getDefaultHeaders(path);
-                    headers.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
-                    HTTPDemon.sendRespondHeader(conProp,out,httpVersion,401,headers);
-                    return;
-                }
+            boolean accessGranted = !protectedPage;
+            
+            // -2- a password is not configured; or
+            final String adminAccountBase64MD5 = switchboard.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+            if (!accessGranted) {
+                accessGranted = adminAccountBase64MD5.length() == 0;
             }
-        
+            
+            // -3- access from localhost is granted and access comes from localhost; or
+            final String refererHost = requestHeader.refererHost();
+            if (!accessGranted) {
+                final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
+                boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+                accessGranted = adminAccountForLocalhost && accessFromLocalhost;
+            }
+            
+            // -4- a password is configured and access comes from localhost
+            //     and the realm-value of a http-authentify String is equal to the stored base64MD5; or
+            String realmProp = requestHeader.get(RequestHeader.AUTHORIZATION);
+            if (realmProp != null && realmProp.length() == 0) realmProp = null;
+            String realmValue = realmProp == null ? null : realmProp.substring(6);
+            if (!accessGranted) {
+                boolean accessFromLocalhost = Domains.isLocalhost(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+                accessGranted = accessFromLocalhost && realmValue != null && realmProp.length() > 6 && (adminAccountBase64MD5.equals(realmValue));
+            }
+            
+            // -5- a password is configured and access comes with matching http-authentify
+            if (!accessGranted) {
+                accessGranted = realmProp != null && realmValue != null && (sb.userDB.hasAdminRight(realmProp, requestHeader.getHeaderCookies()) || adminAccountBase64MD5.equals(Digest.encodeMD5Hex(realmValue)));
+            }
+            
+            // in case that we are still not granted we ask for a password
+            if (!accessGranted) {
+                Log.logInfo("HTTPD", "Wrong log-in for path '" + path + "' from host '" + clientIP + "'");
+                final Integer attempts = serverCore.bfHost.get(clientIP);
+                if (attempts == null)
+                    serverCore.bfHost.put(clientIP, Integer.valueOf(1));
+                else
+                    serverCore.bfHost.put(clientIP, Integer.valueOf(attempts.intValue() + 1));
+                
+                final ResponseHeader responseHeader = getDefaultHeaders(path);
+                responseHeader.put(RequestHeader.WWW_AUTHENTICATE,"Basic realm=\"admin log-in\"");
+                final servletProperties tp=new servletProperties();
+                tp.put("returnto", path);
+                HTTPDemon.sendRespondError(conProp, out, 5, 401, "Wrong Authentication", "", new File("proxymsg/authfail.inc"), tp, null, responseHeader);
+                return;
+            }
+
+            // Authentication successful. remove brute-force flag
+            serverCore.bfHost.remove(conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+            
             // parse arguments
             serverObjects args = new serverObjects();
             int argc = 0;
@@ -818,7 +830,7 @@ public final class HTTPDFileHandler {
                             // check if the servlets requests authentication
                             if (templatePatterns.containsKey(servletProperties.ACTION_AUTHENTICATE)) {
                                 // handle brute-force protection
-                                if (authorization != null) {
+                                if (realmProp != null) {
                                     Log.logInfo("HTTPD", "dynamic log-in for account 'admin' in http file handler for path '" + path + "' from host '" + clientIP + "'");
                                     final Integer attempts = serverCore.bfHost.get(clientIP);
                                     if (attempts == null)
@@ -948,7 +960,7 @@ public final class HTTPDFileHandler {
                                 null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         final ChunkedOutputStream chos = new ChunkedOutputStream(out);
-                        ServerSideIncludes.writeSSI(o, chos, authorization, clientIP);
+                        ServerSideIncludes.writeSSI(o, chos, realmProp, clientIP);
                         //chos.write(result);
                         chos.finish();
                     } else {
@@ -962,14 +974,14 @@ public final class HTTPDFileHandler {
                         
                         if (zipContent) {
                             GZIPOutputStream zippedOut = new GZIPOutputStream(o);
-                            ServerSideIncludes.writeSSI(o1, zippedOut, authorization, clientIP);
+                            ServerSideIncludes.writeSSI(o1, zippedOut, realmProp, clientIP);
                             //httpTemplate.writeTemplate(fis, zippedOut, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                             zippedOut.finish();
                             zippedOut.flush();
                             zippedOut.close();
                             zippedOut = null;
                         } else {
-                            ServerSideIncludes.writeSSI(o1, o, authorization, clientIP);
+                            ServerSideIncludes.writeSSI(o1, o, realmProp, clientIP);
                             //httpTemplate.writeTemplate(fis, o, tp, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
                         }
                         if (method.equals(HeaderFramework.METHOD_HEAD)) {

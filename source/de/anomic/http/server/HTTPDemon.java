@@ -60,11 +60,9 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.MapTools;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -94,12 +92,6 @@ import java.util.concurrent.ConcurrentMap;
  */
 public final class HTTPDemon implements serverHandler, Cloneable {
     
-    /**
-     * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
-     * <p>Name of the setting holding the authentication hash for the static <code>admin</code>-account. It is calculated
-     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
-     */
-    public static final String ADMIN_ACCOUNT_B64MD5 = "adminAccountBase64MD5";
     
     public static final int ERRORCASE_MESSAGE = 4;
     public static final int ERRORCASE_FILE = 5;
@@ -257,15 +249,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         else  prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,persistent?"keep-alive":"close");
         
         return persistent;
-    }
-    
-    public static int staticAdminAuthenticated(final String authorization, final serverSwitch sw) {
-        // the authorization string must be given with the truncated 6 bytes at the beginning
-        final String adminAccountBase64MD5 = sw.getConfig(ADMIN_ACCOUNT_B64MD5, "");
-        if (adminAccountBase64MD5.length() == 0) return 2; // no password stored
-        if (authorization == null || authorization.length() == 0) return 1;
-        if (adminAccountBase64MD5.equals(Digest.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
-        return 1;
     }
     
     private boolean handleYaCyHopAuthentication(final RequestHeader header, Properties prop, Session session) {

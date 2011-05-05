@@ -30,7 +30,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 
@@ -207,7 +206,7 @@ public class migration {
         // set preset accounts/passwords
         String acc;
         if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-            sb.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
+            sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
             sb.setConfig("adminAccount", "");
         }
     
@@ -217,7 +216,7 @@ public class migration {
             sb.setConfig("proxyAccountBase64", "");
         }
         if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
-            sb.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(acc));
+            sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(acc));
             sb.setConfig("adminAccountBase64", "");
         }
         if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {

@@ -108,6 +108,7 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
@@ -149,7 +150,6 @@ import de.anomic.data.wiki.WikiBoard;
 import de.anomic.data.wiki.WikiCode;
 import de.anomic.data.wiki.WikiParser;
 import de.anomic.http.client.Cache;
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.RobotsTxtConfig;
 import de.anomic.net.UPnP;
 import de.anomic.server.serverSwitch;
@@ -601,10 +601,10 @@ public final class Switchboard extends serverSwitch {
         // addresses are blocked to prevent attack szenarios where remote pages contain links to localhost
         // addresses that can steer a YaCy peer
         if ((getConfigBool("adminAccountForLocalhost", false))) {
-            if (getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
+            if (getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
                 // the password was set automatically with a random value.
                 // We must remove that here to prevent that a user cannot log in any more
-                setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
+                setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
                 // after this a message must be generated to alert the user to set a new password
                 log.logInfo("RANDOM PASSWORD REMOVED! User must set a new password");
             }
@@ -1525,9 +1525,9 @@ public final class Switchboard extends serverSwitch {
             }
             
             // set a random password if no password is configured
-            if (getConfigBool("adminAccountForLocalhost", false) && getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+            if (getConfigBool("adminAccountForLocalhost", false) && getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                 // make a 'random' password
-                setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "0000" + this.genRandomPassword());
+                setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + this.genRandomPassword());
                 setConfig("adminAccount", "");
             }
             
@@ -2216,27 +2216,45 @@ public final class Switchboard extends serverSwitch {
         return refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost);
     }
     
+    /**
+     * check authentication status for request
+     * access shall be granted if return value >= 2;
+     * these are the cases where an access is granted to protected pages:
+     * - a password is not configured: auth-level 2
+     * - access from localhost is granted and access comes from localhost: auth-level 3
+     * - a password is configured and access comes from localhost
+     *   and the realm-value of a http-authentify String is equal to the stored base64MD5: auth-level 3
+     * - a password is configured and access comes with matching http-authentify: auth-level 4
+     * @param requestHeader
+     * @return the auth-level as described above or 1 which means 'not authorized'. a 0 is returned in case of fraud attempts
+     */
     public int adminAuthenticated(final RequestHeader requestHeader) {
+        
+        // authorization in case that there is no account stored
+        final String adminAccountBase64MD5 = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+        if (adminAccountBase64MD5.length() == 0) return 2; // no password stored; this should not happen for older peers
         
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final boolean accessFromLocalhost = accessFromLocalhost(requestHeader);
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
         
         // get the authorization string from the header
-        final String authorization = (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
+        String realmProp = (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).trim();
+        final String realmValue = realmProp.substring(6);
         
         // security check against too long authorization strings
-        if (authorization.length() > 256) return 0;
+        if (realmValue.length() > 256) return 0;
         
         // authorization by encoded password, only for localhost access
-        final String adminAccountBase64MD5 = getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
-        if (accessFromLocalhost && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
+        if (accessFromLocalhost && (adminAccountBase64MD5.equals(realmValue))) return 3; // soft-authenticated for localhost
 
         // authorization by hit in userDB
-        if (userDB.hasAdminRight(requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx"), requestHeader.getHeaderCookies())) return 4; //return, because 4=max
+        if (userDB.hasAdminRight(realmProp, requestHeader.getHeaderCookies())) return 4; //return, because 4=max
 
         // authorization with admin keyword in configuration
-        return HTTPDemon.staticAdminAuthenticated(authorization, this);
+        if (realmValue == null || realmValue.length() == 0) return 1;
+        if (adminAccountBase64MD5.equals(Digest.encodeMD5Hex(realmValue))) return 4; // hard-authenticated, all ok
+        return 1;
     }
     
     public boolean verifyAuthentication(final RequestHeader header, final boolean strict) {
