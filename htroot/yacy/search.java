@@ -102,8 +102,8 @@ public final class search {
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
-        final String  filter = post.get("filter", ".*");
-        final Pattern snippetPattern = Pattern.compile(post.get("snippet", ".*"));
+        final String  filter = post.get("filter", ".*"); // a filter on the url
+        final Pattern snippetPattern = Pattern.compile(post.get("snippet", ".*")); // a filter on the snippet
         String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
         String  authorhash = post.get("authorhash", ""); if (authorhash.length() == 0) authorhash = null;
         String  language = post.get("language", "");

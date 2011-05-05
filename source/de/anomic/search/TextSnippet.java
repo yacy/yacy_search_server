@@ -132,11 +132,23 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     private String error;
     private ResultClass resultStatus;
 
-    public TextSnippet(final byte[] urlhash, final String line, final ResultClass errorCode, final String errortext) {
+    public TextSnippet(
+            final byte[] urlhash,
+            final String line,
+            final ResultClass errorCode,
+            final String errortext) {
         init(urlhash, line, errorCode, errortext);
     }
 
-    public TextSnippet(final LoaderDispatcher loader, final URIMetadataRow.Components comp, final HandleSet queryhashes, final CrawlProfile.CacheStrategy cacheStrategy, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
+    public TextSnippet(
+            final LoaderDispatcher loader,
+            final URIMetadataRow.Components comp,
+            final HandleSet queryhashes,
+            final CrawlProfile.CacheStrategy cacheStrategy,
+            final boolean pre,
+            final int snippetMaxLength,
+            final int maxDocLen,
+            final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final DigestURI url = comp.url();
         if (queryhashes.isEmpty()) {
@@ -298,13 +310,14 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return resultStatus;
     }
     
+    private final static Pattern splitPattern = Pattern.compile(" |-");
     public String getLineMarked(final HandleSet queryHashes) {
         if (line == null) return "";
         if (queryHashes == null || queryHashes.isEmpty()) return line.trim();
         if (line.endsWith(".")) line = line.substring(0, line.length() - 1);
         final Iterator<byte[]> i = queryHashes.iterator();
         byte[] h;
-        final String[] words = line.split(" ");
+        final String[] words = splitPattern.split(line);
         while (i.hasNext()) {
             h = i.next();
             for (int j = 0; j < words.length; j++) {

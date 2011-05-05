@@ -102,6 +102,7 @@ public final class Condenser {
             final boolean indexMedia,
             final WordCache meaningLib
             ) {
+        Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.intStringFormatter.setMinimumIntegerDigits(numlength);

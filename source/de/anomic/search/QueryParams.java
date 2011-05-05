@@ -133,7 +133,7 @@ public final class QueryParams {
     		this.excludeHashes = Word.words2hashesHandles(cq[1]);
     		this.fullqueryHashes = Word.words2hashesHandles(cq[2]);
     	}
-    	this.snippetMatcher = Pattern.compile(".*");
+    	this.snippetMatcher = QueryParams.catchall_pattern;
     	this.ranking = ranking;
     	this.tenant = null;
         this.maxDistance = Integer.MAX_VALUE;
@@ -540,22 +540,25 @@ public final class QueryParams {
     }
     
     private static Pattern StringMatchPattern = Pattern.compile(".*?(\".*?\").*");
-    
     /**
      * calculate a pattern to match with a string search
      * @param query
      * @return
      */
     public static Pattern stringSearchPattern(String query) {
-        String p = "";
+        StringBuilder p = new StringBuilder(query.length());
+        p.append("(?iu)");
+        int seqc = 0;
         while (query.length() > 0) {
             Matcher m = StringMatchPattern.matcher(query);
             if (!m.matches()) break;
-            p += ".*" + query.substring(m.start(1) + 1, m.end(1) - 1);
+            p.append(".*?").append(query.substring(m.start(1) + 1, m.end(1) - 1));
             query = query.substring(m.end(1));
+            seqc++;
         }
-        p += ".*";
-        return Pattern.compile(p);
+        if (seqc == 0) return QueryParams.catchall_pattern;
+        p.append(".*");
+        return Pattern.compile(p.toString());
     }
     
     public static void main(String[] args) {

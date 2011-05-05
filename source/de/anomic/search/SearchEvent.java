@@ -128,6 +128,7 @@ public final class SearchEvent {
                     QueryParams.hashSet2hashString(query.excludeHashes),
                     query.prefer,
                     query.urlMask,
+                    query.snippetMatcher,
                     query.targetlang == null ? "" : query.targetlang,
                     query.sitehash == null ? "" : query.sitehash,
                     query.authorhash == null ? "" : query.authorhash,

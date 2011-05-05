@@ -409,6 +409,7 @@ public final class yacyClient {
             final String urlhashes,
             final Pattern prefer,
             final Pattern filter,
+            final Pattern snippet,
             final String language,
             final String sitehash,
             final String authorhash,
@@ -445,7 +446,7 @@ public final class yacyClient {
         try {
             result = new SearchResult(
                 yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, crypt.randomSalt()),
-                mySeed, wordhashes, excludehashes, urlhashes, prefer, filter, language,
+                mySeed, wordhashes, excludehashes, urlhashes, prefer, filter, snippet, language,
                 sitehash, authorhash, count, time, maxDistance, global, partitions, target.getHexHash() + ".yacyh", target.getClusterAddress(),
                 secondarySearchSuperviser, rankingProfile, constraint);
         } catch (final IOException e) {
@@ -613,6 +614,7 @@ public final class yacyClient {
                 final String urlhashes,
                 final Pattern prefer,
                 final Pattern filter,
+                final Pattern snippet,
                 final String language,
                 final String sitehash,
                 final String authorhash,
@@ -659,8 +661,9 @@ public final class yacyClient {
             parts.put("exclude", UTF8.StringBody(excludehashes));
             parts.put("duetime", UTF8.StringBody("1000"));
             parts.put("urls", UTF8.StringBody(urlhashes));
-            parts.put("prefer", UTF8.StringBody(prefer.toString()));
-            parts.put("filter", UTF8.StringBody(filter.toString()));
+            parts.put("prefer", UTF8.StringBody(prefer.pattern()));
+            parts.put("filter", UTF8.StringBody(filter.pattern()));
+            parts.put("snippet", UTF8.StringBody(snippet.pattern()));
             parts.put("language", UTF8.StringBody(language));
             parts.put("sitehash", UTF8.StringBody(sitehash));
             parts.put("authorhash", UTF8.StringBody(authorhash));
@@ -1073,8 +1076,9 @@ public final class yacyClient {
                                 UTF8.String(wordhashe),
                                 "", // excludehashes,
                                 "", // urlhashes,
-                                Pattern.compile(""), // prefer,
-                                Pattern.compile(".*"), // filter,
+                                QueryParams.matchnothing_pattern, // prefer,
+                                QueryParams.catchall_pattern, // filter,
+                                QueryParams.catchall_pattern, // snippet,
                                 "", // language,
                                 "", // sitehash,
                                 "", // authorhash,

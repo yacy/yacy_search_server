@@ -35,6 +35,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.data.WorkTables;
+import de.anomic.search.QueryParams;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -51,7 +52,7 @@ public class Table_API_p {
         
         int startRecord = 0;
         int maximumRecords = 25;
-        Pattern query = Pattern.compile(".*");
+        Pattern query = QueryParams.catchall_pattern;
         if (post != null && post.containsKey("startRecord")) startRecord = post.getInt("startRecord", 0);
         if (post != null && post.containsKey("maximumRecords")) maximumRecords = post.getInt("maximumRecords", 0);
         if (post != null && post.containsKey("query") && !post.get("query", "").isEmpty()) {
@@ -63,7 +64,7 @@ public class Table_API_p {
 
         prop.put("inline", (inline) ? 1 : 0);
         
-        Pattern typefilter = Pattern.compile(".*");
+        Pattern typefilter = QueryParams.catchall_pattern;
         if (post != null && post.containsKey("filter") && post.get("filter", "").length() > 0) {
             typefilter = Pattern.compile(post.get("filter", ".*"));
         }
