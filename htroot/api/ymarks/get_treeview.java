@@ -51,8 +51,13 @@ public class get_treeview {
         	boolean isURLdb = false;
         	boolean isCrawlStart = false;
         	boolean isWordCount = false;
+        	boolean displayBmk = false;
 
         	if (post != null){
+        		if(post.containsKey("display") && post.get("display").equals("bmk")) {
+        			displayBmk = true;
+        		}
+        		
         		if (post.containsKey(ROOT)) {
             		if (post.get(ROOT).equals(SOURCE) || post.get(ROOT).equals(YMarkTables.FOLDERS_ROOT)) {
             			root = "";
@@ -108,7 +113,7 @@ public class get_treeview {
 	        	}
 	        	// loop through bookmarkList
 	        	try {
-	        		if(!root.isEmpty()) {
+	        		if(displayBmk && !root.isEmpty()) {
 	        			bit = sb.tables.bookmarks.getBookmarksByFolder(bmk_user, root);
 			        	while (bit.hasNext()) {
 			        		bmk_row = bit.next();
@@ -143,7 +148,7 @@ public class get_treeview {
 				} catch (IOException e) {
 					Log.logException(e);
 				}
-	        } else if(isBookmark) {
+	        } else if(displayBmk && isBookmark) {
 	        	try {
 					final String urlHash = post.get(ROOT).substring(2);
 	        		String url = "";
