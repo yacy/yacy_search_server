@@ -74,6 +74,7 @@ public final class RankingProcess extends Thread {
     private final SortedSet<byte[]> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
     private final SortedSet<byte[]> misses; // contains url-hashes that could not been found in the LURL-DB
+    private       int sortout; // counter for referenced that had been sorted out for other reasons
     //private final int[] domZones;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     
@@ -112,6 +113,7 @@ public final class RankingProcess extends Thread {
         //this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         this.misses = new TreeSet<byte[]>(URIMetadataRow.rowdef.objectOrder);
         //this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+        this.sortout = 0;
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.hostNavigator = new ConcurrentScoreMap<String>();
@@ -208,21 +210,23 @@ public final class RankingProcess extends Thread {
 
                 // check constraints
                 if (!testFlags(iEntry)) {
+                    this.sortout++;
                     continue;
                 }
 
                 // check document domain
                 if (query.contentdom != ContentDomain.TEXT) {
-                    if ((query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
-                    if ((query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
-                    if ((query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
-                    if ((query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
+                    if ((query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) { this.sortout++; continue; }
+                    if ((query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) { this.sortout++; continue; }
+                    if ((query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) { this.sortout++; continue; }
+                    if ((query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) { this.sortout++; continue; }
                 }
 
                 // check tld domain
                 /*
                 if ((DigestURI.domDomain(iEntry.metadataHash()) & this.query.zonecode) == 0) {
                     // filter out all tld that do not match with wanted tld domain
+                    this.sortout++;
                     continue;
                 }
                 */
@@ -241,6 +245,7 @@ public final class RankingProcess extends Thread {
                 } else {
                     if (!domhash.equals(query.sitehash)) {
                         // filter out all domains that do not match with the site constraint
+                        this.sortout++;
                         continue;
                     }
                 }
@@ -409,12 +414,14 @@ public final class RankingProcess extends Thread {
             
             // check errors
             if (metadata == null) {
+                this.sortout++;
                 continue; // rare case where the url is corrupted
             }
             
             if (!query.urlMask_isCatchall) {
                 // check url mask
                 if (!metadata.matches(query.urlMask)) {
+                    this.sortout++;
                     continue;
                 }
                 
@@ -428,6 +435,7 @@ public final class RankingProcess extends Thread {
             
             // check for more errors
             if (metadata.url() == null) {
+                this.sortout++;
                 continue; // rare case where the url is corrupted
             }
 
@@ -439,6 +447,7 @@ public final class RankingProcess extends Thread {
             if ((QueryParams.anymatch(pagetitle, query.excludeHashes)) ||
                 (QueryParams.anymatch(pageurl.toLowerCase(), query.excludeHashes)) ||
                 (QueryParams.anymatch(pageauthor.toLowerCase(), query.excludeHashes))) {
+                this.sortout++;
                 continue;
             }
 
@@ -450,6 +459,7 @@ public final class RankingProcess extends Thread {
                 while (wi.hasNext()) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }
+                this.sortout++;
                 continue;
             }
 
@@ -457,6 +467,7 @@ public final class RankingProcess extends Thread {
             if ((query.constraint != null) &&
                 (query.constraint.get(Condenser.flag_cat_haslocation)) &&
                 (metadata.lat() == 0.0f || metadata.lon() == 0.0f)) {
+                this.sortout++;
                 continue;
             }
             
@@ -465,6 +476,7 @@ public final class RankingProcess extends Thread {
                 (query.contentdom == ContentDomain.VIDEO && page.lvideo() == 0) ||
                 (query.contentdom == ContentDomain.IMAGE && page.limage() == 0) ||
                 (query.contentdom == ContentDomain.APP && page.lapp() == 0)) {
+                this.sortout++;
             	continue;
             }
             
@@ -476,12 +488,14 @@ public final class RankingProcess extends Thread {
 
                 // check if we already are filtering for authors
             	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
+                    this.sortout++;
             		continue;
             	}
             	
             	// add author to the author navigator
                 this.authorNavigator.inc(pageauthor);
             } else if (this.query.authorhash != null) {
+                this.sortout++;
             	continue;
             }
             
@@ -498,6 +512,7 @@ public final class RankingProcess extends Thread {
             
             // check Scanner
             if (!Scanner.acceptURL(metadata.url())) {
+                this.sortout++;
                 continue;
             }
             
@@ -568,6 +583,10 @@ public final class RankingProcess extends Thread {
     
     public int getMissCount() {
         return this.misses.size();
+    }
+    
+    public int getSortOutCount() {
+        return this.sortout;
     }
     
     public ScoreMap<String> getNamespaceNavigator() {

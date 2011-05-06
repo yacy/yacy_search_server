@@ -627,11 +627,12 @@ public class yacysearch {
             Log.logInfo("LOCAL_SEARCH", "EXIT WORD SEARCH: " + theQuery.queryString + " - " +
                     "local-unfiltered(" + theSearch.getRankingResult().getLocalIndexCount() + "), " +
                     "-local_miss(" + theSearch.getRankingResult().getMissCount() + "), " +
+                    "-local_sortout(" + theSearch.getRankingResult().getSortOutCount() + "), " +
                     "remote(" + theSearch.getRankingResult().getRemoteResourceSize() + ") links found, " +
                     (System.currentTimeMillis() - timestamp) + " ms");
 
             // prepare search statistics
-            theQuery.resultcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteIndexCount();
+            theQuery.resultcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
             theQuery.urlretrievaltime = theSearch.result().getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.result().getSnippetComputationTime();
@@ -695,7 +696,7 @@ public class yacysearch {
                 Log.logException(e);
             }
             
-            final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteIndexCount();
+            final int indexcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
             prop.put("num-results_offset", offset);
             prop.put("num-results_itemscount", Formatter.number(0, true));
             prop.put("num-results_itemsPerPage", itemsPerPage);

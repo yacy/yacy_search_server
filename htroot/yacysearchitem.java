@@ -92,7 +92,7 @@ public class yacysearchitem {
         final QueryParams theQuery = theSearch.getQuery();
         
         // dynamically update count values
-        final int totalcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteIndexCount();
+        final int totalcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
         final int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
         prop.put("offset", offset);
         prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theQuery.neededResults() : item + 1, totalcount)));

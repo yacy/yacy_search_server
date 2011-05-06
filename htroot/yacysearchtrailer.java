@@ -168,7 +168,7 @@ public class yacysearchtrailer {
         String aboutBody = env.getConfig("about.body", "");
         String aboutHeadline = env.getConfig("about.headline", "");
         if ((aboutBody.length() == 0 && aboutHeadline.length() == 0) ||
-            theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() + theSearch.getRankingResult().getRemoteIndexCount() == 0) {
+            theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount() == 0) {
             prop.put("nav-about", 0);
         } else {
             prop.put("nav-about", 1);
