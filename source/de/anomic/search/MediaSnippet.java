@@ -190,8 +190,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             url = new DigestURI(ientry.url());
             String u = url.toString();
             if (u.indexOf(".ico") >= 0 || u.indexOf("favicon") >= 0) continue;
-            if (ientry.height() > 0 && ientry.height() < 64) continue;
-            if (ientry.width() > 0 && ientry.width() < 64) continue;
+            if (ientry.height() > 0 && ientry.height() < 32) continue;
+            if (ientry.width() > 0 && ientry.width() < 32) continue;
             desc = ientry.alt();
             int appcount = queryhashes.size()  * 2 - 
                            removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -

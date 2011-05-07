@@ -606,6 +606,26 @@ public final class HTTPDFileHandler {
                             result.writeTo(out);
                         }
                     }
+                    /*
+                    if (img instanceof BufferedImage) {
+                        final BufferedImage i = (BufferedImage) img;
+                        // send an image to client
+                        targetDate = new Date(System.currentTimeMillis());
+                        nocache = true;
+                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
+
+                        // generate an byte array from the generated image
+                        int width = i.getWidth(); if (width < 0) width = 96; // bad hack
+                        int height = i.getHeight(); if (height < 0) height = 96; // bad hack
+                        final ByteBuffer result = RasterPlotter.exportImage(i, targetExt);
+
+                        // write the array to the client
+                        HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
+                        if (!method.equals(HeaderFramework.METHOD_HEAD)) {
+                            result.writeTo(out);
+                        }
+                    }
+                    */
                     if (img instanceof Image) {
                         final Image i = (Image) img;
                         // send an image to client

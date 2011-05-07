@@ -29,7 +29,7 @@ import net.yacy.document.parser.images.bmpParser;
 import net.yacy.document.parser.images.icoParser;
 
 public class ImageParser {
-
+    
     public static final Image parse(final String filename, final byte[] source) {
         final MediaTracker mediaTracker = new MediaTracker(new Container()); 
         Image image;
@@ -46,6 +46,21 @@ public class ImageParser {
         } else {
             // awt can handle jpg, png and gif formats, try it
             image = Toolkit.getDefaultToolkit().createImage(source);
+            /*
+            try {
+                ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
+                image = ImageIO.read(new ByteArrayInputStream(source));
+            } catch (IOException e) {
+                Image i = Toolkit.getDefaultToolkit().createImage(source);
+                mediaTracker.addImage(i, 0);
+                try {mediaTracker.waitForID(0);} catch (final InterruptedException ee) {}
+                
+                int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
+                int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
+                image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                image.createGraphics().drawImage(i, 0, 0, width, height, null); 
+            }
+             */
         }
         
         final int handle = image.hashCode();
@@ -54,5 +69,5 @@ public class ImageParser {
         
         return image;
     }
-    
+
 }

@@ -1522,6 +1522,7 @@ public final class Switchboard extends serverSwitch {
             if (!MemoryControl.request(8000000L, false)) {
                 for (final Segment indexSegment: this.indexSegments) indexSegment.urlMetadata().clearCache();
                 SearchEventCache.cleanupEvents(true);
+                this.trail.clear();
             }
             
             // set a random password if no password is configured

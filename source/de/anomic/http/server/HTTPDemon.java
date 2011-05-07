@@ -348,19 +348,21 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
     
     public Boolean EMPTY(final String arg, final Session session) throws IOException {
+        //System.out.println("EMPTY " + arg);
         return (++this.emptyRequestCount > 10) ? serverCore.TERMINATE_CONNECTION : serverCore.RESUME_CONNECTION;
     }
     
-    public Boolean UNKNOWN(final String requestLine, final Session session) throws IOException {
+    public Boolean UNKNOWN(final String arg, final Session session) throws IOException {
+        //System.out.println("UNKNOWN " + arg);
 
-        Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, requestLine, session);
+        Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
         int pos;
         String unknownCommand = null, args = null;
-        if ((pos = requestLine.indexOf(' ')) > 0) {
-            unknownCommand = requestLine.substring(0,pos);
-            args = requestLine.substring(pos+1);
+        if ((pos = arg.indexOf(' ')) > 0) {
+            unknownCommand = arg.substring(0,pos);
+            args = arg.substring(pos+1);
         } else {
-            unknownCommand = requestLine;
+            unknownCommand = arg;
             args = "";
         }
         
@@ -371,6 +373,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public Boolean GET(final String arg, final Session session) {
+        //System.out.println("GET " + arg);
         try {
             // parsing the http request line
             final Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
@@ -438,6 +441,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public Boolean HEAD(final String arg, final Session session) {
+        //System.out.println("HEAD " + arg);
         try {
             final Properties prop = parseRequestLine(HeaderFramework.METHOD_HEAD, arg, session);
             
@@ -482,6 +486,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
     
     public Boolean POST(final String arg, final Session session) {
+        //System.out.println("POST " + arg);
         try {
             final Properties prop = parseRequestLine(HeaderFramework.METHOD_POST, arg, session);
             
@@ -564,6 +569,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
     
     public Boolean CONNECT(String arg, final Session session) throws IOException {
+        //System.out.println("CONNECT " + arg);
         // establish a ssh-tunneled http connection
         // this is to support https   
         

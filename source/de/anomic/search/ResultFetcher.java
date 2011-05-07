@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
@@ -47,6 +48,7 @@ import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.WorkTables;
+import de.anomic.http.client.Cache;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.graphics.ProfilingGraph;
 
@@ -184,7 +186,13 @@ public class ResultFetcher {
         // iterate over all images in the result
         final List<MediaSnippet> imagemedia = result.mediaSnippets();
         if (imagemedia != null) {
-            for (final MediaSnippet ms: imagemedia) {
+            feedloop: for (final MediaSnippet ms: imagemedia) {
+                // check cache to see if the mime type of the image url is correct
+                ResponseHeader header = Cache.getResponseHeader(ms.href.hash());
+                if (header != null) {
+                    // this does not work for all urls since some of them may not be in the cache
+                    if (header.mime().startsWith("text") || header.mime().startsWith("application")) continue feedloop;
+                }
                 images.put(new ReverseElement<MediaSnippet>(ms, ms.ranking)); // remove smallest in case of overflow
                 c++;
                 //System.out.println("*** image " + UTF8.String(ms.href.hash()) + " images.size = " + images.size() + "/" + images.size());

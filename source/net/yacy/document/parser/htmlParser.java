@@ -68,6 +68,7 @@ public class htmlParser extends AbstractParser implements Parser {
         SUPPORTED_EXTENSIONS.add("aspx");
         SUPPORTED_EXTENSIONS.add("tex");
         SUPPORTED_EXTENSIONS.add("txt");
+        //SUPPORTED_EXTENSIONS.add("js");
         SUPPORTED_EXTENSIONS.add("jsp");
         SUPPORTED_EXTENSIONS.add("mf");
         SUPPORTED_EXTENSIONS.add("pl");
