@@ -1245,7 +1245,7 @@ public final class Switchboard extends serverSwitch {
         Cache.close();
         tables.close();
         Domains.close();
-        if (solrConnector != null) solrConnector.close();
+        if (solrConnector != null && this.getConfigBool("federated.service.solr.indexing.enabled", false)) solrConnector.close();
         AccessTracker.dumpLog(new File("DATA/LOG/queries.log"));
         UPnP.deletePortMapping();
         Tray.removeTray();
@@ -1922,7 +1922,7 @@ public final class Switchboard extends serverSwitch {
     
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
-        if (this.solrConnector != null /*in.queueEntry.profile().pushSolr()*/) {
+        if (this.solrConnector != null && this.getConfigBool("federated.service.solr.indexing.enabled", false)/*in.queueEntry.profile().pushSolr()*/) {
             // send the documents to solr
             for (Document doc: in.documents) {
                 try {

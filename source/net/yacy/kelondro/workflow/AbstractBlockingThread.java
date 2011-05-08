@@ -80,6 +80,7 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
                 this.running = false;
                 break;
             } catch (final Exception e) {
+                Log.logException(e);
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()
                 this.jobExceptionHandler(e);

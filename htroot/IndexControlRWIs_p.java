@@ -84,7 +84,7 @@ public class IndexControlRWIs_p {
         prop.put("keyhash", "");
         prop.put("result", "");
         prop.put("cleanup", post == null ? 1 : 0);
-        prop.put("cleanup_solr", sb.solrConnector == null ? 0 : 1);
+        prop.put("cleanup_solr", sb.solrConnector == null || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
         
         String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
         int i = 0;
@@ -154,8 +154,10 @@ public class IndexControlRWIs_p {
                 if (post.get("deleteIndex", "").equals("on")) {
                     segment.clear();
                 }
-                if (post.get("deleteSolr", "").equals("on")) {
+                if (post.get("deleteSolr", "").equals("on") && sb.getConfigBool("federated.service.solr.indexing.enabled", false)) try {
                     sb.solrConnector.clear();
+                } catch (Exception e) {
+                    Log.logException(e);
                 }
                 if (post.get("deleteCrawlQueues", "").equals("on")) {
                     sb.crawlQueues.clear();
