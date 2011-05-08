@@ -130,7 +130,7 @@ public final class Heap extends HeapModifier implements BLOB {
         synchronized (this) {
             // check the buffer
             assert buffer != null;
-            if (buffer == null) {
+            if (buffer != null) {
                 if (this.buffer.containsKey(key)) return true;
             }
             return super.containsKey(key);
