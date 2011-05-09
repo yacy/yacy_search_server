@@ -116,26 +116,28 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             final ResponseHeader responseHeaderLegacy = new ResponseHeader(client.getHttpResponse().getAllHeaders());
             
 			cleanResponseHeader(responseHeader);
+			
+			// TODO: is this fast, if not, use value from ProxyCacheHandler
+			DigestURI digestURI = new DigestURI(url);
+			ResponseHeader cachedResponseHeader = Cache.getResponseHeader(digestURI);
 
-
-            // TODO: wtf?
             // the cache does either not exist or is (supposed to be) stale
             long sizeBeforeDelete = -1;
             if (cachedResponseHeader != null) {
                 // delete the cache
-                ResponseHeader rh = Cache.getResponseHeader(new DigestURI(url));
+                ResponseHeader rh = Cache.getResponseHeader(digestURI);
                 if (rh != null && (sizeBeforeDelete = rh.getContentLength()) == 0) {
-                    byte[] b = Cache.getContent(url);
+                    byte[] b = Cache.getContent(new DigestURI(url));
                     if (b != null) sizeBeforeDelete = b.length;
                 }
-                Cache.delete(url);
-                conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REFRESH_MISS");
+                Cache.delete(digestURI);
+                // log refresh miss 
             }
             
             // reserver cache entry
             final de.anomic.crawler.retrieval.Request yacyRequest = new de.anomic.crawler.retrieval.Request(
         			null, 
-                    new DigestURI(url), 
+                    digestURI, 
                     null, //requestHeader.referer() == null ? null : new DigestURI(requestHeader.referer()).hash(), 
                     "", 
                     responseHeaderLegacy.lastModified(),
@@ -183,33 +185,34 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
                 } else {
                     cacheArray = null;
                 }
-                if (log.isFine()) log.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+                //if (log.isFine()) log.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
                 if (sizeBeforeDelete == -1) {
                     // totally fresh file
-                    response.setContent(cacheArray);
+                	yacyResponse.setContent(cacheArray);
                     try {
-                        Cache.store(response.url(), response.getResponseHeader(), cacheArray);
-                        sb.toIndexer(response);
+                        Cache.store(yacyResponse.url(), yacyResponse.getResponseHeader(), cacheArray);
+                        sb.toIndexer(yacyResponse);
                     } catch (IOException e) {
-                        log.logWarning("cannot write " + response.url() + " to Cache (1): " + e.getMessage(), e);
+                        //log.logWarning("cannot write " + response.url() + " to Cache (1): " + e.getMessage(), e);
                     }
-                    conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_MISS");
+                    // log cache miss
                 } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
+                	// TODO: what should happen here?
                     // before we came here we deleted a cache entry
                     cacheArray = null;
                     //cacheManager.push(cacheEntry); // unnecessary update
-                    conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REF_FAIL_HIT");
+                    // log cache refresh fail miss
                 } else {
                     // before we came here we deleted a cache entry
-                    response.setContent(cacheArray);
+                	yacyResponse.setContent(cacheArray);
                     try {
-                        Cache.store(response.url(), response.getResponseHeader(), cacheArray);
-                        sb.toIndexer(response);
+                        Cache.store(yacyResponse.url(), yacyResponse.getResponseHeader(), cacheArray);
+                        sb.toIndexer(yacyResponse);
                     } catch (IOException e) {
-                        log.logWarning("cannot write " + response.url() + " to Cache (2): " + e.getMessage(), e);
+                        //log.logWarning("cannot write " + response.url() + " to Cache (2): " + e.getMessage(), e);
                     }
-                    conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REFRESH_MISS");
+                    // log refresh cache miss
                 }
 
             } else {

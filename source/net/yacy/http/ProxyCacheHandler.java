@@ -42,7 +42,6 @@ import org.eclipse.jetty.server.Request;
 
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
-import de.anomic.search.Switchboard;
 
 /**
  * jetty http handler
@@ -75,9 +74,21 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
 			
 			if(cachedResponseHeader != null) {
 				RequestHeader proxyHeaders = ProxyHandler.convertHeaderFromJetty(request);
+				// TODO: this convertion is only necessary
+            	final de.anomic.crawler.retrieval.Request yacyRequest = new de.anomic.crawler.retrieval.Request(
+            			null, 
+                        url, 
+                        proxyHeaders.referer() == null ? null : new DigestURI(proxyHeaders.referer()).hash(), 
+                        "", 
+                        cachedResponseHeader.lastModified(),
+                        sb.crawler.defaultProxyProfile.handle(),
+                        0, 
+                        0, 
+                        0,
+                        0);
 
                 final Response cachedResponse = new Response(
-                		null,
+                		yacyRequest,
                 		proxyHeaders,
                         cachedResponseHeader,
                         "200 OK",
