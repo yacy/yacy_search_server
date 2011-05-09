@@ -41,11 +41,13 @@ InstallDirRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy"
 ;recommend free space in GB for YaCy
 !define RecommendSpace "30"
 
-; some string for Firewall
-!define WinAddYaCyPort 'netsh advfirewall firewall add rule name="YaCy" program="%SystemRoot%\System32\javaw.exe" dir=in action=allow protocol=tcp localport=8090'
-!define WinDelYaCyPort 'netsh advfirewall firewall del rule name="YaCy"'
-!define WinAdduPnpPort 'netsh advfirewall firewall add rule name="YaCy uPnp" program="%SystemRoot%\System32\javaw.exe" dir=in action=allow protocol=udp remoteip=defaultgateway remoteport=1900'
-!define WinDeluPnpPort 'netsh advfirewall firewall del rule name="YaCy uPnp"'
+; commands for firewall config, see http://support.microsoft.com/kb/947709/en-us
+!define WinXPAddFwRulePort 'netsh firewall add allowedprogram name="YaCy" program="%SystemRoot%\System32\javaw.exe"'
+!define WinXPDelFwRulePort 'netsh firewall del allowedprogram program="%SystemRoot%\System32\javaw.exe"'
+!define WinVistaAddFwRulePort 'netsh advfirewall firewall add rule name="YaCy" program="%SystemRoot%\System32\javaw.exe" dir=in action=allow'
+!define WinVistaDelFwRulePort 'netsh advfirewall firewall del rule name="YaCy"'
+var WinAddFwRulePort
+var WinDelFwRulePort
 
 ;requested execution level on Vista / 7
 RequestExecutionLevel admin
@@ -183,7 +185,7 @@ Section "Desktop Icon"
 	CreateShortCut "$DESKTOP\YaCy.lnk" "$INSTDIR\startYACY.bat" "" "$INSTDIR\addon\YaCy.ico" "" SW_SHOWMINIMIZED
 SectionEnd
 
-Section "Open Firewall (Port 8090 for YaCy and 1900 for uPnP)" Sec_Firewall_id
+Section "Configure Firewall" Sec_Firewall_id
 	SectionIn 1
 	SetShellVarContext current
 	call OpenFirewall	
@@ -265,9 +267,18 @@ Function .onInit
 
 	${If} ${IsWinVista} 
 	${OrIf} ${IsWin7}
-        	ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\MpsSvc" "Start"
+		StrCpy $WinAddFwRulePort '${WinVistaAddFwRulePort}'
+		StrCpy $WinDelFwRulePort '${WinVistaDelFwRulePort}'
+		ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\MpsSvc" "Start"
 	${EndIf}
 
+	${If} ${IsWinXP} 
+	${AndIf} ${AtLeastServicePack} 2
+		StrCpy $WinAddFwRulePort '${WinXPAddFwRulePort}'
+		StrCpy $WinDelFwRulePort '${WinXPDelFwRulePort}'
+		ReadRegDWORD $FirewallServiceStart HKLM "SYSTEM\CurrentControlSet\services\SharedAccess" "Start"
+	${EndIf}
+	
 	;need Admin for firewall-config
 	${IfNot} $0 = "Admin" 
 		IntOp $FirewallServiceStart 3 + 0
@@ -374,22 +385,12 @@ FunctionEnd
 
 Function OpenFirewall
 	var /global ExecErrorCode
-	; run netsh for Port 8090
-	nsExec::ExecToStack '${WinAddYaCyPort}'
+	; run netsh 
+	nsExec::ExecToStack '$WinAddFwRulePort'
 	pop $ExecErrorCode
 	; if run without error register for uninstall and clear finish page 
 	${If} $ExecErrorCode = "0"
-		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwYaCyPort" '${WinDelYaCyPort}'
-		IntOp $FirewallServiceStart 0 + 0
-	${Else}
-		IntOp $FirewallServiceStart 3 + 0
-	${EndIf}
-	; run netsh for Port 1900 - uPnP
-	nsExec::ExecToStack '${WinAdduPnpPort}'
-	pop $ExecErrorCode
-	; if run without error register for uninstall and clear finish page 
-	${If} $ExecErrorCode = "0"
-		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwuPnpPort" '${WinDeluPnpPort}'
+		WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRulePort" '$WinDelFwRulePort'
 		IntOp $FirewallServiceStart 0 + 0
 	${Else}
 		IntOp $FirewallServiceStart 3 + 0
@@ -400,22 +401,15 @@ Function SHOW_PageFinish_custom
 	; hide and disable firewall info from wiki if firewall is open
 	${If} $FirewallServiceStart = 0 
 		SendMessage $mui.FinishPage.ShowReadme ${BM_SETCHECK} 0 0
-		ShowWindow $mui.FinishPage.ShowReadme ${SW_HIDE}
+	    	ShowWindow $mui.FinishPage.ShowReadme ${SW_HIDE}
 	${EndIf}
 FunctionEnd
 
 Function un.CloseFirewall
 	; get string for closing port from registy
-	var /global UninstallCmd
-	; close YaCy-Port 8090
-	ReadRegStr '$UninstallCmd' HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwYaCyPort"
+	ReadRegStr '$WinDelFwRulePort' HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwRulePort"
 	; if found > run netsh to close port
-	${IfNot} '$UninstallCmd' == '' 
-		nsExec::ExecToStack '$UninstallCmd'
-	${EndIf}
-	; close uPnp-Port 1900
-	ReadRegStr '$UninstallCmd' HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DelFwuPnPPort"
-	${IfNot} '$UninstallCmd' == '' 
-		nsExec::ExecToStack '$UninstallCmd'
+	${IfNot} '$WinDelFwRulePort' == '' 
+		nsExec::ExecToStack '$WinDelFwRulePort'
 	${EndIf}
 FunctionEnd
