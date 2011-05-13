@@ -26,8 +26,11 @@ package net.yacy.kelondro.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
@@ -135,6 +138,16 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
             if (entry != null) return entry;
             return this.backend.get(key);
         }
+    }
+
+    public Map<byte[], Row.Entry> get(Collection<byte[]> keys) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(this.row().objectOrder);
+        Row.Entry entry;
+        for (byte[] key: keys) {
+            entry = get(key);
+            if (entry != null) map.put(key, entry);
+        }
+        return map;
     }
 
     public boolean has(byte[] key) {

@@ -396,14 +396,12 @@ public final class RankingProcess extends Thread {
         // returns from the current RWI list the best URL entry and removes this entry from the list
     	final long timeout = System.currentTimeMillis() + Math.max(10, waitingtime);
     	int p = -1;
-    	byte[] urlhash;
     	long timeleft;
     	while ((timeleft = timeout - System.currentTimeMillis()) > 0) {
     	    //System.out.println("timeleft = " + timeleft);
             final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi = takeRWI(skipDoubleDom, timeleft);
             if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
-            urlhash = obrwi.getElement().metadataHash();
-            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash, obrwi.getElement(), obrwi.getWeight());
+            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(obrwi);
             if (page == null) {
             	misses.add(obrwi.getElement().metadataHash());
             	continue;
@@ -606,7 +604,7 @@ public final class RankingProcess extends Thread {
             domhash = domhashs.next();
             if (domhash == null) continue;
             urlhash = this.hostResolver.get(domhash);
-            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(UTF8.getBytes(urlhash), null, 0);
+            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(UTF8.getBytes(urlhash));
             hostname = row == null ? null : row.metadata().url().getHost();
             if (hostname != null) {
                 result.set(hostname, this.hostNavigator.get(domhash));

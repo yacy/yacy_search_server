@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.Document;
@@ -195,7 +196,7 @@ public class Bookmarks {
                     final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash.getBytes(), null, 0);
+                        final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(UTF8.getBytes(urlHash));
                         if (urlentry != null) try {
                             final URIMetadataRow.Components metadata = urlentry.metadata();
                             final Document document = Document.mergeDocuments(metadata.url(), null, sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CrawlProfile.CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE));

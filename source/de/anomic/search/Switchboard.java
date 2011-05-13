@@ -1131,7 +1131,7 @@ public final class Switchboard extends serverSwitch {
     public DigestURI getURL(final Segments.Process process, final byte[] urlhash) {
         if (urlhash == null) return null;
         if (urlhash.length == 0) return null;
-        final URIMetadataRow le = indexSegments.urlMetadata(process).load(urlhash, null, 0);
+        final URIMetadataRow le = indexSegments.urlMetadata(process).load(urlhash);
         if (le != null) {
             Components metadata = le.metadata();
             if (metadata == null) return null;
@@ -1608,7 +1608,7 @@ public final class Switchboard extends serverSwitch {
                 Log.logException(e);
                 continue;
             }
-            final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) this.getConfigLong("port", 8090), this.getConfig("adminAccountBase64MD5", ""), pks);
+            final Map<String, Integer> callResult = this.tables.execAPICalls("localhost", (int) this.getConfigLong("port", 8090), this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), pks);
             for (final Map.Entry<String, Integer> call: callResult.entrySet()) {
                 log.logInfo("Scheduler executed api call, response " + call.getValue() + ": " + call.getKey());
             }

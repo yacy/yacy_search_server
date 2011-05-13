@@ -30,12 +30,14 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -304,6 +306,16 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
         final Index keeper = keeperOf(key);
         if (keeper == null) return null;
         return keeper.get(key);
+    }
+
+    public Map<byte[], Row.Entry> get(Collection<byte[]> keys) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(this.row().objectOrder);
+        Row.Entry entry;
+        for (byte[] key: keys) {
+            entry = get(key);
+            if (entry != null) map.put(key, entry);
+        }
+        return map;
     }
     
     private Index newTable() {

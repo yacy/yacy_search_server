@@ -25,9 +25,11 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
-
+import java.util.TreeMap;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -129,6 +131,16 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         final int index = find(key, 0);
         if (index < 0) return null;
         return get(index, true);
+    }
+
+    public Map<byte[], Row.Entry> get(Collection<byte[]> keys) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(this.row().objectOrder);
+        Row.Entry entry;
+        for (byte[] key: keys) {
+            entry = get(key);
+            if (entry != null) map.put(key, entry);
+        }
+        return map;
     }
     
     /**

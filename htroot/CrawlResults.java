@@ -182,7 +182,7 @@ public class CrawlResults {
             while (i.hasNext()) {
                 entry = i.next();
                 try {
-                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(entry.getKey().getBytes(), null, 0);
+                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(UTF8.getBytes(entry.getKey()));
                     if (urle == null) {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index with url hash " + entry.getKey());
                         urlstr = null;

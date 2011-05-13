@@ -103,7 +103,7 @@ public class YMarkMetadata {
 	
 	public EnumMap<METADATA, String> getMetadata() {
 		final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
-        final URIMetadataRow urlEntry = this.indexSegment.segment(Segments.Process.PUBLIC).urlMetadata().load(this.uri.hash(), null, 0);
+        final URIMetadataRow urlEntry = this.indexSegment.segment(Segments.Process.PUBLIC).urlMetadata().load(this.uri.hash());
         if (urlEntry != null) {
         	metadata.put(METADATA.SIZE, String.valueOf(urlEntry.size()));
         	metadata.put(METADATA.FRESHDATE, ISO8601Formatter.FORMATTER.format(urlEntry.freshdate()));

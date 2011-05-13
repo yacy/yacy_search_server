@@ -503,7 +503,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(recommendHash.getBytes(), null, 0);
+                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(UTF8.getBytes(recommendHash));
                 if (urlentry != null) {
                     final URIMetadataRow.Components metadata = urlentry.metadata();
                     Document[] documents = null;

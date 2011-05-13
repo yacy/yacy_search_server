@@ -122,7 +122,7 @@ public class ViewFile {
         String urlHash = post.get("urlHash", "");
         URIMetadataRow urlEntry = null;
         // get the urlEntry that belongs to the url hash
-        if (urlHash.length() > 0 && (urlEntry = indexSegment.urlMetadata().load(urlHash.getBytes(), null, 0)) != null) {
+        if (urlHash.length() > 0 && (urlEntry = indexSegment.urlMetadata().load(UTF8.getBytes(urlHash))) != null) {
             // get the url that belongs to the entry
             final URIMetadataRow.Components metadata = urlEntry.metadata();
             if ((metadata == null) || (metadata.url() == null)) {

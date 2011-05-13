@@ -26,11 +26,11 @@ package net.yacy.kelondro.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
@@ -137,7 +137,17 @@ public final class RAMIndex implements Index, Iterable<Row.Entry> {
         return index1.get(key);
     }
 
-	public final synchronized boolean has(final byte[] key) {
+    public Map<byte[], Row.Entry> get(Collection<byte[]> keys) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(this.row().objectOrder);
+        Row.Entry entry;
+        for (byte[] key: keys) {
+            entry = get(key);
+            if (entry != null) map.put(key, entry);
+        }
+        return map;
+    }
+    
+    public final synchronized boolean has(final byte[] key) {
 		assert (key != null);
         finishInitialization();
         assert index0.isSorted();

@@ -85,14 +85,14 @@ public class yacydoc {
         }
         if (urlhash == null || urlhash.length() == 0) return prop;
         
-        final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes(), null, 0);
+        final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes());
         if (entry == null) return prop;
 
         final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) {
             return prop;
         }
-        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
+        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash());
         
         prop.putXML("dc_title", metadata.dc_title());
         prop.putXML("dc_creator", metadata.dc_creator());

@@ -33,10 +33,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
+import java.util.Map;
+import java.util.TreeMap;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -193,6 +195,16 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         } catch (final Exception e) {
             throw new IOException(e.getMessage());
         }
+    }
+
+    public Map<byte[], Row.Entry> get(Collection<byte[]> keys) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(this.row().objectOrder);
+        Row.Entry entry;
+        for (byte[] key: keys) {
+            entry = get(key);
+            if (entry != null) map.put(key, entry);
+        }
+        return map;
     }
 
     public Row.Entry replace(final Row.Entry row) throws IOException {

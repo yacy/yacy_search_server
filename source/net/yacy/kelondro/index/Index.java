@@ -25,8 +25,10 @@
 package net.yacy.kelondro.index;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.yacy.kelondro.order.CloneableIterator;
 
@@ -41,6 +43,7 @@ public interface Index extends Iterable<Row.Entry> {
     public byte[] smallestKey();
     public byte[] largestKey();
     public boolean has(byte[] key); // use this only if there is no get in case that has returns true
+    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys) throws IOException, InterruptedException;
     public Row.Entry get(byte[] key) throws IOException;
     public Row.Entry replace(Row.Entry row) throws RowSpaceExceededException, IOException;
     

@@ -265,7 +265,7 @@ public class IndexControlRWIs_p {
                 URIMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = segment.urlMetadata().load(iEntry.metadataHash(), null, 0);
+                    lurl = segment.urlMetadata().load(iEntry.metadataHash());
                     if (lurl == null) {
                         try {
                             unknownURLEntries.put(iEntry.metadataHash());
@@ -341,7 +341,7 @@ public class IndexControlRWIs_p {
                             } catch (RowSpaceExceededException e) {
                                 Log.logException(e);
                             }
-                            final URIMetadataRow e = segment.urlMetadata().load(b, null, 0);
+                            final URIMetadataRow e = segment.urlMetadata().load(b);
                             segment.urlMetadata().remove(b);
                             if (e != null) {
                                 url = e.metadata().url();
@@ -374,7 +374,7 @@ public class IndexControlRWIs_p {
                             } catch (RowSpaceExceededException e) {
                                 Log.logException(e);
                             }
-                            final URIMetadataRow e = segment.urlMetadata().load(b, null, 0);
+                            final URIMetadataRow e = segment.urlMetadata().load(b);
                             segment.urlMetadata().remove(b);
                             if (e != null) {
                                 url = e.metadata().url();

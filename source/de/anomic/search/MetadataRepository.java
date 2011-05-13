@@ -35,8 +35,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.BlockingQueue;
 
 import de.anomic.crawler.CrawlStacker;
 
@@ -45,6 +48,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.cora.storage.ScoreMap;
+import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -55,6 +59,7 @@ import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.repository.Blacklist;
@@ -116,19 +121,76 @@ public final class MetadataRepository implements Iterable<byte[]> {
         if (urlIndexFile instanceof Cache) return ((Cache) urlIndexFile).writeBufferSize();
         return 0;
     }
-
-    public URIMetadataRow load(final byte[] urlHash, final WordReferenceVars searchedWord, final long ranking) {
-        // generates an plasmaLURLEntry using the url hash
-        // if the url cannot be found, this returns null
-        if (urlHash == null) return null;
-        assert urlIndexFile != null : "urlHash = " + UTF8.String(urlHash);
+    
+    /**
+     * generates an plasmaLURLEntry using the url hash
+     * if the url cannot be found, this returns null
+     * @param obrwi
+     * @return
+     */
+    public URIMetadataRow load(final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi) {
         if (urlIndexFile == null) return null;
+        if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
+        byte[] urlHash = obrwi.getElement().metadataHash();
+        if (urlHash == null) return null;
         try {
             final Row.Entry entry = urlIndexFile.get(urlHash);
             if (entry == null) return null;
-            return new URIMetadataRow(entry, searchedWord, ranking);
+            return new URIMetadataRow(entry, obrwi.getElement(), obrwi.getWeight());
         } catch (final IOException e) {
             return null;
+        }
+    }
+    
+    public URIMetadataRow load(final byte[] urlHash) {
+        if (urlIndexFile == null) return null;
+        if (urlHash == null) return null;
+        try {
+            final Row.Entry entry = urlIndexFile.get(urlHash);
+            if (entry == null) return null;
+            return new URIMetadataRow(entry, null, 0);
+        } catch (final IOException e) {
+            return null;
+        }
+    }
+    
+    public void load(final WeakPriorityBlockingQueue<WordReferenceVars> obrwis, int maxcount, long maxtime, final BlockingQueue<URIMetadataRow> rows) {
+        if (urlIndexFile == null) return;
+        if (obrwis == null) return;
+        final Map<byte[], WeakPriorityBlockingQueue.Element<WordReferenceVars>> collector = new TreeMap<byte[], WeakPriorityBlockingQueue.Element<WordReferenceVars>>(Base64Order.enhancedCoder);
+        final List<byte[]> collectOrder = new ArrayList<byte[]>();
+        int count = 0;
+        long timelimit = System.currentTimeMillis() + maxtime;
+        WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi;
+        byte[] urlHash;
+        while (System.currentTimeMillis() < timelimit && count < maxcount) {
+            try {
+                obrwi = obrwis.take();
+            } catch (InterruptedException e) {
+                break;
+            }
+            if (obrwi != null) {
+                urlHash = obrwi.getElement().metadataHash();
+                if (urlHash != null) {
+                    collector.put(urlHash, obrwi);
+                    collectOrder.add(urlHash);
+                    count++;
+                }
+            }
+        }
+        
+        try {
+            Map<byte[], Row.Entry> resultmap = urlIndexFile.get(collector.keySet());
+        } catch (final IOException e) {
+            return;
+        } catch (InterruptedException e) {
+            return;
+        }
+        
+        for (byte[] hash: collectOrder) {
+            WeakPriorityBlockingQueue.Element<WordReferenceVars> element = collector.get(hash);
+            if (element == null) continue;
+            
         }
     }
 
@@ -585,7 +647,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         TreeSet<String> set = new TreeSet<String>();
         for (hashStat hs: map.values()) {
             if (hs == null) continue;
-            urlref = this.load(UTF8.getBytes(hs.urlhash), null, 0);
+            urlref = this.load(UTF8.getBytes(hs.urlhash));
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
             set.add(urlref.metadata().url().getHost());
             count--;
@@ -619,7 +681,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;
-            urlref = this.load(UTF8.getBytes(urlhash), null, 0);
+            urlref = this.load(UTF8.getBytes(urlhash));
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
             if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
             comps = urlref.metadata();

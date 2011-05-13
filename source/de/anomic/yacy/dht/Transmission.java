@@ -133,7 +133,7 @@ public class Transmission {
                     notFoundx.add(e.metadataHash());
                     continue;
                 }
-                URIMetadataRow r = segment.urlMetadata().load(e.metadataHash(), null, 0);
+                URIMetadataRow r = segment.urlMetadata().load(e.metadataHash());
                 if (r == null) {
                     notFoundx.add(e.metadataHash());
                     badReferences.put(e.metadataHash());

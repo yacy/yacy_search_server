@@ -29,6 +29,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -95,7 +96,7 @@ public final class Settings_p {
         int pos;
         
         // admin password
-        if (env.getConfig("adminAccountBase64", "").length() == 0) {
+        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
             // no password has been specified
             prop.put("adminuser","admin");
         } else {

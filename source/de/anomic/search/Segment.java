@@ -410,7 +410,7 @@ public class Segment {
 
         if (urlhash == null) return 0;
         // determine the url string
-        final URIMetadataRow entry = urlMetadata().load(urlhash, null, 0);
+        final URIMetadataRow entry = urlMetadata().load(urlhash);
         if (entry == null) return 0;
         final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata == null || metadata.url() == null) return 0;
@@ -481,7 +481,7 @@ public class Segment {
                         entry = new WordReferenceVars(containerIterator.next());
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
-                        final URIMetadataRow ue = urlMetadata.load(entry.metadataHash(), entry, 0);
+                        final URIMetadataRow ue = urlMetadata.load(entry.metadataHash());
                         if (ue == null) {
                             urlHashs.put(entry.metadataHash());
                         } else {
