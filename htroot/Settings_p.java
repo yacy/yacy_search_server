@@ -96,7 +96,7 @@ public final class Settings_p {
         int pos;
         
         // admin password
-        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64, "").length() == 0) {
             // no password has been specified
             prop.put("adminuser","admin");
         } else {
