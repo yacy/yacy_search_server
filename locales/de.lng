@@ -2054,6 +2054,8 @@ free space==freiem Speicher
 disable DHT-in below==Deaktivere eingehende DHT Transfers unter
 RAM==Arbeitsspeicher
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Änderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
+restart now</a>==jetzt neustarten</a>
+Confirm Restart==Bestätige Neustart
 refresh graph==aktualisiere Diagramm
 #show memory tables==Zeige Speicher-Tabellen
 Use Default Profile:==Standard Profil benutzen:
