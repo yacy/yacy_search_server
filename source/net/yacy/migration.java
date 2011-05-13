@@ -215,10 +215,6 @@ public class migration {
             sb.setConfig("proxyAccountBase64MD5", Digest.encodeMD5Hex(acc));
             sb.setConfig("proxyAccountBase64", "");
         }
-        if ((acc = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64, "")).length() > 0) {
-            sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(acc));
-            sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64, "");
-        }
         if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
             sb.setConfig("uploadAccountBase64MD5", Digest.encodeMD5Hex(acc));
             sb.setConfig("uploadAccountBase64", "");

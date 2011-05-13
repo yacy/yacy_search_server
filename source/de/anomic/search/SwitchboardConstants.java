@@ -42,7 +42,6 @@ public final class SwitchboardConstants {
      * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
      */
     public static final String ADMIN_ACCOUNT_B64MD5 = "adminAccountBase64MD5";
-    public static final String ADMIN_ACCOUNT_B64    = "adminAccountBase64";
     
     public static final int   CRAWLJOB_SYNC = 0;
     public static final int   CRAWLJOB_STATUS = 1;

@@ -29,7 +29,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 
 import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -91,23 +90,8 @@ public final class Settings_p {
         prop.put("proxy.sendViaHeader", env.getConfigBool("proxy.sendViaHeader", false) ? "1" : "0");
         prop.put("proxy.sendXForwardedForHeader", env.getConfigBool("proxy.sendXForwardedForHeader", true) ? "1" : "0");
 
-        // set values
-        String s;
-        int pos;
-        
         // admin password
-        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64, "").length() == 0) {
-            // no password has been specified
-            prop.put("adminuser","admin");
-        } else {
-            s = env.getConfig("adminAccount", "admin:void");
-            pos = s.indexOf(":");
-            if (pos < 0) {
-                prop.put("adminuser","admin");
-            } else {
-                prop.put("adminuser",s.substring(0, pos));
-            }
-        }
+        prop.put("adminuser","admin");
         
         // remote proxy
         prop.put("remoteProxyUseChecked", env.getConfigBool("remoteProxyUse", false) ? 1 : 0);
