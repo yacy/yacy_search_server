@@ -213,5 +213,36 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 <!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#" -->
 <!-- /div -->
 </div>
+<!-- update the search results statistics after the search is finished -->
+<script type="text/javascript">
+
+function latestinfo() {
+  if (window.XMLHttpRequest) { // Mozilla/Safari
+    self.xmlHttpReq = new XMLHttpRequest(); 
+  } else if (window.ActiveXObject) { // IE
+    self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+  }
+  self.xmlHttpReq.open('GET', "yacysearchlatestinfo.json?eventID=#[eventID]#", true);
+  self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  self.xmlHttpReq.onreadystatechange = function() {
+    if (self.xmlHttpReq.readyState == 4) {
+      var rsp = eval("(" + self.xmlHttpReq.responseText + ")");
+      statistics(rsp.offset, rsp.itemscount, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount);
+    }
+  }
+  self.xmlHttpReq.send(null);
+}
+window.setTimeout('latestinfo();',500);
+window.setTimeout('latestinfo();',1000);
+window.setTimeout('latestinfo();',1500);
+window.setTimeout('latestinfo();',2000);
+window.setTimeout('latestinfo();',3000);
+window.setTimeout('latestinfo();',4000);
+window.setTimeout('latestinfo();',5000);
+window.setTimeout('latestinfo();',6000);
+window.setTimeout('latestinfo();',8000);
+window.setTimeout('latestinfo();',10000);
+</script>
+
 </body>
 </html>

@@ -39,7 +39,7 @@ public class opensearchdescription {
         String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         
-        String thisaddress = header.get("Host", "localhost");
+        String thisaddress = header.get("Host", "127.0.0.1");
         if (thisaddress.indexOf(':') == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8090"));
 
         int compareyacy = 0;

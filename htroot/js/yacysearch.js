@@ -71,8 +71,8 @@ function addHover() {
 }
 
 function statistics(offset, itemscount, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount) {
-  document.getElementById("resultsOffset").firstChild.nodeValue = offset;
-  document.getElementById("itemscount").firstChild.nodeValue = itemscount;
+  if (offset >= 0) document.getElementById("resultsOffset").firstChild.nodeValue = offset;
+  if (itemscount >= 0) document.getElementById("itemscount").firstChild.nodeValue = itemscount;
   document.getElementById("totalcount").firstChild.nodeValue = totalcount;
   if (document.getElementById("localResourceSize") == null) return;
   document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;

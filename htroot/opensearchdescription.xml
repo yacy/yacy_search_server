@@ -25,6 +25,6 @@
   <Query role="example" searchTerms="yacy+open+source" />
   <Tags>YaCy Open Source P2P Web Search</Tags>
   <Contact>See http://#[thisaddress]#/ViewProfile.html?hash=localhash</Contact>
-  <Attribution>YaCy Software &amp;copy; 2004-2010 by Michael Christen et al., YaCy.net; Content: ask peer owner</Attribution>
+  <Attribution>YaCy Software &amp;copy; 2004-2011 by Michael Christen et al., YaCy.net; Content: ask peer owner</Attribution>
   <SyndicationRight>open</SyndicationRight>
 </OpenSearchDescription>
