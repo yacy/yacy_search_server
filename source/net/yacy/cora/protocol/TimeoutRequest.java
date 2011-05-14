@@ -112,17 +112,23 @@ public class TimeoutRequest<E> {
     public static boolean ping(final String host, final int port, final int timeout) throws ExecutionException {
         return new TimeoutRequest<Boolean>(new Callable<Boolean>() {
             public Boolean call() {
+                //long time = System.currentTimeMillis();
                 try {
                     Socket socket = new Socket();
+                    //System.out.println("PING socket create = " + (System.currentTimeMillis() - time) + " ms (" + host + ":" + port + ")"); time = System.currentTimeMillis();
                     socket.connect(new InetSocketAddress(host, port), timeout);
+                    //System.out.println("PING socket connect = " + (System.currentTimeMillis() - time) + " ms (" + host + ":" + port + ")"); time = System.currentTimeMillis();
                     if (socket.isConnected()) {
                         socket.close();
                         return Boolean.TRUE;
                     }
+                    //System.out.println("PING socket close = " + (System.currentTimeMillis() - time) + " ms (" + host + ":" + port + ")"); time = System.currentTimeMillis();
                     return Boolean.FALSE;
                 } catch (UnknownHostException e) {
+                    //System.out.println("PING socket UnknownHostException = " + (System.currentTimeMillis() - time) + " ms (" + host + ":" + port + ")"); time = System.currentTimeMillis();
                     return Boolean.FALSE;
                 } catch (IOException e) {
+                    //System.out.println("PING socket IOException = " + (System.currentTimeMillis() - time) + " ms (" + host + ":" + port + ")"); time = System.currentTimeMillis();
                     return Boolean.FALSE;
                 }
             }

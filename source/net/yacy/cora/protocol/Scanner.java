@@ -202,7 +202,7 @@ public class Scanner extends Thread {
                     /*for (Runner r: runner.keySet()) {
                         if (r.age() > 3000) synchronized(r) { r.interrupt(); }
                     }*/
-                    if (runner.size() >= this.runnerCount) Thread.sleep(1000);
+                    if (runner.size() >= this.runnerCount) Thread.sleep(30);
                 }
                 Runner runner = new Runner(uri);
                 this.runner.put(runner, PRESENT);

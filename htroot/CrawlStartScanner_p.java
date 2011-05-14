@@ -45,9 +45,11 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CrawlStartScanner_p {
-
+    
+    private final static int CONCURRENT_RUNNER = 100;
+    
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-
+        
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
 
@@ -104,7 +106,7 @@ public class CrawlStartScanner_p {
                     if (p >= 0) host = host.substring(0, p);
                     ia.add(Domains.dnsResolve(host));
                 }
-                final Scanner scanner = new Scanner(ia, 100, sb.isIntranetMode() ? 1000 : 5000);
+                final Scanner scanner = new Scanner(ia, CONCURRENT_RUNNER, sb.isIntranetMode() ? 100 : 3000);
                 if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
                 if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
                 if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(false);
@@ -119,7 +121,7 @@ public class CrawlStartScanner_p {
             }
             
             if (post.containsKey("scan") && "intranet".equals(post.get("source", ""))) {
-                final Scanner scanner = new Scanner(Domains.myIntranetIPs(), 100, sb.isIntranetMode() ? 100 : 3000);
+                final Scanner scanner = new Scanner(Domains.myIntranetIPs(), CONCURRENT_RUNNER, sb.isIntranetMode() ? 100 : 3000);
                 if ("on".equals(post.get("scanftp", ""))) scanner.addFTP(false);
                 if ("on".equals(post.get("scanhttp", ""))) scanner.addHTTP(false);
                 if ("on".equals(post.get("scanhttps", ""))) scanner.addHTTPS(false);
