@@ -166,8 +166,10 @@ public class ConfigUpdate_p {
             
         // list downloaded releases
         final File[] downloadedFiles = sb.releasePath.listFiles();
+        // list can be null if RELEASE directory has been deleted manually
+        final int downloadedFilesNum = (downloadedFiles == null) ? 0 : downloadedFiles.length;
             
-        prop.put("candeploy_deployenabled", (downloadedFiles.length == 0) ? "0" : ((devenvironment) ? "1" : "2")); // prevent that a developer-version is over-deployed
+        prop.put("candeploy_deployenabled", (downloadedFilesNum == 0) ? "0" : ((devenvironment) ? "1" : "2")); // prevent that a developer-version is over-deployed
           
         final NavigableSet<yacyRelease> downloadedReleases = new TreeSet<yacyRelease>();
         for (final File downloaded : downloadedFiles) {
