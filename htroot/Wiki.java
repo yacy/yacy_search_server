@@ -69,9 +69,7 @@ public class Wiki {
             post.put("page", "start");
         }
 
-        final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
-        prop.put("display", display);
+        prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
         
         String access = sb.getConfig("WikiAccess", "admin");
         final String pagename = get(post, "page", "start");
@@ -125,11 +123,9 @@ public class Wiki {
             }
             page = newEntry;
             prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);
-            prop.put("LOCATION", prop.get("LOCATION") + "&display=" + display);
+            prop.put("LOCATION", prop.get("LOCATION"));
         }
-
-        prop.put("mode_display", display);
-
+        
         if (post != null && post.containsKey("edit")) {
             if ((access.equals("admin") && (!sb.verifyAuthentication(header, true)))) {
                 // check access right for admin
@@ -140,16 +136,13 @@ public class Wiki {
             prop.put("mode", "1"); //edit
             prop.putHTML("mode_author", author);
             prop.putHTML("mode_page-code", UTF8.String(page.page()));
-            prop.putHTML("mode_pagename", pagename);
-            prop.put("mode_display", display);
-        }
+            prop.putHTML("mode_pagename", pagename);        }
 
         //contributed by [MN]
         else if (post != null && post.containsKey("preview")) {
             // preview the page
             prop.put("mode", "2");//preview
             prop.putHTML("mode_pagename", pagename);
-            prop.put("mode_display", display);
             prop.putHTML("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
             prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", post.get("content", ""));
@@ -178,15 +171,11 @@ public class Wiki {
                 prop.putHTML("mode_error_message", e.getMessage());
             }
             prop.putHTML("mode_pagename", pagename);
-            prop.put("mode_display", display);
-        }
-        
-        else if (post != null && post.containsKey("diff")) {
+        } else if (post != null && post.containsKey("diff")) {
             // Diff
             prop.put("mode", "4");
             prop.putHTML("mode_page", pagename);
             prop.putHTML("mode_error_page", pagename);
-            prop.put("mode_error_display", display);
             
             try {
                 final Iterator<byte[]> it = sb.wikiDB.keysBkp(true);
@@ -244,7 +233,6 @@ public class Wiki {
                 } else if (post.containsKey("viewold") && oentry != null) {
                     prop.put("mode_versioning", "2");
                     prop.putHTML("mode_versioning_pagename", pagename);
-                    prop.put("mode_versioning_display", display);
                     prop.putHTML("mode_versioning_author", oentry.author());
                     prop.put("mode_versioning_date", dateString(oentry.date()));
                     prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_versioning_page", oentry.page());
@@ -260,7 +248,6 @@ public class Wiki {
             // show page
             prop.put("mode", "0"); //viewing
             prop.putHTML("mode_pagename", pagename);
-            prop.put("mode_display", display);
             prop.putHTML("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
             prop.putWiki(sb.peers.mySeed().getClusterAddress(), "mode_page", page.page());
