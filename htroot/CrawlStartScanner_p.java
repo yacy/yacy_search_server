@@ -61,6 +61,9 @@ public class CrawlStartScanner_p {
         prop.put("hosts", "");
         prop.put("intranet.checked", sb.isIntranetMode() ? 1 : 0);
 
+        int timeout = sb.isIntranetMode() ? 200 : 3000;
+        timeout = post == null ? timeout : post.getInt("timeout", timeout);
+        
         // make a scanhosts entry
         String hosts = post == null ? "" : post.get("scanhosts", "");
         Set<InetAddress> ips = Domains.myIntranetIPs();
@@ -108,7 +111,7 @@ public class CrawlStartScanner_p {
                     if (p >= 0) host = host.substring(0, p);
                     ia.add(Domains.dnsResolve(host));
                 }
-                final Scanner scanner = new Scanner(ia, CONCURRENT_RUNNER, sb.isIntranetMode() ? 100 : 3000);
+                final Scanner scanner = new Scanner(ia, CONCURRENT_RUNNER, timeout);
                 if (post.get("scanftp", "").equals("on")) scanner.addFTP(bigrange);
                 if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(bigrange);
                 if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(bigrange);
@@ -123,7 +126,7 @@ public class CrawlStartScanner_p {
             }
             
             if (post.containsKey("scan") && "intranet".equals(post.get("source", ""))) {
-                final Scanner scanner = new Scanner(Domains.myIntranetIPs(), CONCURRENT_RUNNER, sb.isIntranetMode() ? 100 : 3000);
+                final Scanner scanner = new Scanner(Domains.myIntranetIPs(), CONCURRENT_RUNNER, timeout);
                 if ("on".equals(post.get("scanftp", ""))) scanner.addFTP(bigrange);
                 if ("on".equals(post.get("scanhttp", ""))) scanner.addHTTP(bigrange);
                 if ("on".equals(post.get("scanhttps", ""))) scanner.addHTTPS(bigrange);
