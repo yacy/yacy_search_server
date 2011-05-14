@@ -46,6 +46,7 @@
         <input type="text" name="scanhosts" value="#[scanhosts]#" size="60" maxlength="400" /><br/><br/>
     
         <input type="radio" name="source" id="sourcenet" value="intranet"#(intranet.checked)#:: checked="checked"#(/intranet.checked)# />Full Intranet Scan: #[intranethosts]#<br/>
+        <input type="checkbox" name="bigrange" />bigrange
         #(intranetHint)#::<div class="info">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Do not use intranet scan results, you are not in an intranet environment!</div>#(/intranetHint)#
     </dd>
     <dt>Scan Cache</dt>

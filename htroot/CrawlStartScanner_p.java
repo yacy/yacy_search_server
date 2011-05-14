@@ -94,6 +94,8 @@ public class CrawlStartScanner_p {
                 if (repeat_unit.equals("seldays")) validTime = repeat_time * 24 * 60 * 60 * 1000;
             }
             
+            boolean bigrange = post.getBoolean("bigrange", false);
+            
             // case: an IP range was given; scan the range for services and display result
             if (post.containsKey("scan") && "hosts".equals(post.get("source", ""))) {
                 final Set<InetAddress> ia = new HashSet<InetAddress>();
@@ -107,10 +109,10 @@ public class CrawlStartScanner_p {
                     ia.add(Domains.dnsResolve(host));
                 }
                 final Scanner scanner = new Scanner(ia, CONCURRENT_RUNNER, sb.isIntranetMode() ? 100 : 3000);
-                if (post.get("scanftp", "").equals("on")) scanner.addFTP(false);
-                if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(false);
-                if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(false);
-                if (post.get("scansmb", "").equals("on")) scanner.addSMB(false);
+                if (post.get("scanftp", "").equals("on")) scanner.addFTP(bigrange);
+                if (post.get("scanhttp", "").equals("on")) scanner.addHTTP(bigrange);
+                if (post.get("scanhttps", "").equals("on")) scanner.addHTTPS(bigrange);
+                if (post.get("scansmb", "").equals("on")) scanner.addSMB(bigrange);
                 scanner.start();
                 scanner.terminate();
                 if ("on".equals(post.get("accumulatescancache", "")) && !"scheduler".equals(post.get("rescan", ""))) {
@@ -122,10 +124,10 @@ public class CrawlStartScanner_p {
             
             if (post.containsKey("scan") && "intranet".equals(post.get("source", ""))) {
                 final Scanner scanner = new Scanner(Domains.myIntranetIPs(), CONCURRENT_RUNNER, sb.isIntranetMode() ? 100 : 3000);
-                if ("on".equals(post.get("scanftp", ""))) scanner.addFTP(false);
-                if ("on".equals(post.get("scanhttp", ""))) scanner.addHTTP(false);
-                if ("on".equals(post.get("scanhttps", ""))) scanner.addHTTPS(false);
-                if ("on".equals(post.get("scansmb", ""))) scanner.addSMB(false);
+                if ("on".equals(post.get("scanftp", ""))) scanner.addFTP(bigrange);
+                if ("on".equals(post.get("scanhttp", ""))) scanner.addHTTP(bigrange);
+                if ("on".equals(post.get("scanhttps", ""))) scanner.addHTTPS(bigrange);
+                if ("on".equals(post.get("scansmb", ""))) scanner.addSMB(bigrange);
                 scanner.start();
                 scanner.terminate();
                 if ("on".equals(post.get("accumulatescancache", "")) && !"scheduler".equals(post.get("rescan", ""))) {
