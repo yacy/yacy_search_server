@@ -5,6 +5,7 @@
 //
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlSwitchboard;
@@ -65,7 +66,10 @@ public class WatchWebStructure_p {
         }
         
         // find start point
-        if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
+        if (host == null ||
+            host.length() == 0 ||
+            host.equals("auto") ||
+            sb.webStructure.referencesCount(DigestURI.hosthash6(host)) == 0) {
             // find domain with most references
             besthost = sb.webStructure.hostWithMaxReferences();
         } else {

@@ -397,7 +397,7 @@ public final class Switchboard extends serverSwitch {
         this.proxyLastAccess = System.currentTimeMillis() - 10000;
         this.localSearchLastAccess = System.currentTimeMillis() - 10000;
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
-        this.webStructure = new WebStructureGraph(log, new File(queuesRoot, "webStructure.map"));
+        this.webStructure = new WebStructureGraph(new File(queuesRoot, "webStructure.map"));
         
         // configuring list path
         if (!(listsPath.exists())) {
@@ -938,7 +938,7 @@ public final class Switchboard extends serverSwitch {
                     10000);
 
             // create new web structure
-            this.webStructure = new WebStructureGraph(log, new File(queuesRoot, "webStructure.map"));
+            this.webStructure = new WebStructureGraph(new File(queuesRoot, "webStructure.map"));
             
             
             // load domainList

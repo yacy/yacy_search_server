@@ -42,7 +42,7 @@ import de.anomic.server.serverSwitch;
 public class yacyNetwork {
 
 	public static final boolean authentifyRequest(final serverObjects post, final serverSwitch env) {
-		if ((post == null) || (env == null)) return false;
+		if (post == null || env == null) return false;
 		
 		// identify network
 		final String unitName = post.get(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT); // the network unit  

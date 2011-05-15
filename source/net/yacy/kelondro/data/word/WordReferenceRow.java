@@ -229,7 +229,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     }
 
     public String toPropertyForm() {
-        return entry.toPropertyForm(true, true, false);
+        return entry.toPropertyForm('=', true, true, false, false);
     }
     
     public Entry toKelondroEntry() {
@@ -322,12 +322,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return toPropertyForm();
     }
 
-    public boolean isOlder(final Reference other) {
-        if (other == null) return false;
-        if (this.lastModified() < other.lastModified()) return true;
-        return false;
-    }
-    
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;

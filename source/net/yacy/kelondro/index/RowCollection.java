@@ -86,7 +86,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
                 new ThreadPoolExecutor.CallerRunsPolicy())
         : null;
     
-    public    final Row    rowdef;
+    protected final Row    rowdef;
     protected       byte[] chunkcache;
     protected       int    chunkcount;
     protected       int    sortBound;

@@ -29,6 +29,9 @@ package de.anomic.yacy.graphics;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -47,38 +50,46 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.Row.Entry;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.MicroDate;
+import net.yacy.kelondro.rwi.AbstractReference;
+import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.ReferenceContainerCache;
+import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.LookAheadIterator;
 
 
 public class WebStructureGraph {
 
-    public static int maxCRLDump = 500000;
-    public static int maxCRGDump = 200000;
     public static int maxref = 300; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
     public static int maxhosts = 20000; // maximum number of hosts in web structure map
     
-    private final Log    log;
+    private final static Log log = new Log("WebStructureGraph");
+
     private final File   structureFile;
     private final TreeMap<String, String> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     private final TreeMap<String, String> structure_new;
     private final BlockingQueue<leanrefObject> publicRefDNSResolvingQueue;
-    private final publicRefDNSResolvingProcess publicRefDNSResolvingWorker;
+    private final PublicRefDNSResolvingProcess publicRefDNSResolvingWorker;
     
     private final static leanrefObject leanrefObjectPOISON = new leanrefObject(null, null);
     
     private static class leanrefObject {
-        public final DigestURI url;
-        public final Set<MultiProtocolURI> globalRefURLs;
-        public leanrefObject(final DigestURI url, final Set<MultiProtocolURI> globalRefURLs) {
+        private final DigestURI url;
+        private final Set<MultiProtocolURI> globalRefURLs;
+        private leanrefObject(final DigestURI url, final Set<MultiProtocolURI> globalRefURLs) {
             this.url = url;
             this.globalRefURLs = globalRefURLs;
         }
     }
     
-    public WebStructureGraph(final Log log, final File structureFile) {
-        this.log = log;
+    public WebStructureGraph(final File structureFile) {
         this.structure_old = new TreeMap<String, String>();
         this.structure_new = new TreeMap<String, String>();
         this.structureFile = structureFile;
@@ -110,12 +121,12 @@ public class WebStructureGraph {
         		delcount--;
         	}
         }
-        this.publicRefDNSResolvingWorker = new publicRefDNSResolvingProcess();
+        this.publicRefDNSResolvingWorker = new PublicRefDNSResolvingProcess();
         this.publicRefDNSResolvingWorker.start();
     }
     
-    private class publicRefDNSResolvingProcess extends Thread {
-        public publicRefDNSResolvingProcess() {
+    private class PublicRefDNSResolvingProcess extends Thread {
+        private PublicRefDNSResolvingProcess() {
         }
         public void run() {
             leanrefObject lro;
@@ -155,7 +166,7 @@ public class WebStructureGraph {
         }
     }
     
-    public void learnrefs(final leanrefObject lro) {
+    private void learnrefs(final leanrefObject lro) {
         final StringBuilder cpg = new StringBuilder(240);
         assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
         final String refhashp = UTF8.String(lro.url.hash(), 6, 6); // ref hash part
@@ -224,20 +235,20 @@ public class WebStructureGraph {
         return s.toString();
     }
     
-    public structureEntry outgoingReferences(final String domhash) {
-        // returns a map with a domhash(String):refcount(Integer) relation
-        assert domhash.length() == 6;
+    public StructureEntry outgoingReferences(final String hosthash) {
+        // returns a map with a hosthash(String):refcount(Integer) relation
+        assert hosthash.length() == 6;
         SortedMap<String, String> tailMap;
         Map<String, Integer> h = new HashMap<String, Integer>();
-        String domain = "";
+        String hostname = "";
         String date = "";
         String ref;
         synchronized (structure_old) {
-            tailMap = structure_old.tailMap(domhash);
+            tailMap = structure_old.tailMap(hosthash);
             if (!tailMap.isEmpty()) {
                 final String key = tailMap.firstKey();
-                if (key.startsWith(domhash)) {
-                    domain = key.substring(7);
+                if (key.startsWith(hosthash)) {
+                    hostname = key.substring(7);
                     ref = tailMap.get(key);
                     date = ref.substring(0, 8);
                     h = refstr2map(ref);
@@ -245,82 +256,220 @@ public class WebStructureGraph {
             }
         }
         synchronized (structure_new) {
-            tailMap = structure_new.tailMap(domhash);
+            tailMap = structure_new.tailMap(hosthash);
             if (!tailMap.isEmpty()) {
                 final String key = tailMap.firstKey();
-                if (key.startsWith(domhash)) {
+                if (key.startsWith(hosthash)) {
                     ref = tailMap.get(key);
-                    if (domain.length() == 0) domain = key.substring(7);
+                    if (hostname.length() == 0) hostname = key.substring(7);
                     if (date.length() == 0) date = ref.substring(0, 8);
-                    assert domain.equals(key.substring(7)) : "domain = " + domain + ", key = " + key;
                     h.putAll(refstr2map(ref));
                 }
             }
         }
         if (h.isEmpty()) return null;
-        return new structureEntry(domhash, domain, date, h);
+        return new StructureEntry(hosthash, hostname, date, h);
     }
     
-    public structureEntry incomingReferences(final String domhash) {
-        String host = resolveDomHash2DomString(domhash);
-        if (host == null) return null;
+    public StructureEntry incomingReferences(final String hosthash) {
+        String hostname = hostHash2hostName(hosthash);
+        if (hostname == null) return null;
         // collect the references
-        WebStructureGraph.structureEntry sentry;
-        HashMap<String, Integer> domhashes = new HashMap<String, Integer>();
-        Iterator<WebStructureGraph.structureEntry> i = structureEntryIterator(false);
+        WebStructureGraph.StructureEntry sentry;
+        HashMap<String, Integer> hosthashes = new HashMap<String, Integer>();
+        Iterator<WebStructureGraph.StructureEntry> i = new StructureIterator(false);
         while (i.hasNext()) {
             sentry = i.next();
-            if (sentry.references.containsKey(domhash)) domhashes.put(sentry.domhash, sentry.references.get(domhash));
+            if (sentry.references.containsKey(hosthash)) hosthashes.put(sentry.hosthash, sentry.references.get(hosthash));
         }
-        i = structureEntryIterator(true);
+        i = new StructureIterator(true);
         while (i.hasNext()) {
             sentry = i.next();
-            if (sentry.references.containsKey(domhash)) domhashes.put(sentry.domhash, sentry.references.get(domhash));
+            if (sentry.references.containsKey(hosthash)) hosthashes.put(sentry.hosthash, sentry.references.get(hosthash));
         }
         // construct a new structureEntry Object
-        return new structureEntry(
-                domhash,
-                host,
+        return new StructureEntry(
+                hosthash,
+                hostname,
                 GenericFormatter.SHORT_DAY_FORMATTER.format(),
-                domhashes);
+                hosthashes);
     }
     
-    public HashMap<String, Integer> incomingDomains(final String domhash) {
+    public static class HostReferenceFactory implements ReferenceFactory<HostReference> {
+
+        private static final Row hostReferenceRow = new Row("String h-6, Cardinal m-4 {b256}, Cardinal c-4 {b256}", Base64Order.enhancedCoder);
+        
+        public HostReferenceFactory() {
+        }
+        
+        public Row getRow() {
+            return hostReferenceRow;
+        }
+
+        public HostReference produceSlow(Entry e) {
+            return new HostReference(e);
+        }
+
+        public HostReference produceFast(HostReference e) {
+            return e;
+        }
+        
+    }
+    
+    public static class HostReference extends AbstractReference implements Reference {
+
+        private final Row.Entry entry;
+        
+        public HostReference(final byte[] hostHash, final long modified, final int count) {
+            assert (hostHash.length == 6) : "hostHash = " + UTF8.String(hostHash);
+            this.entry = hostReferenceFacory.getRow().newEntry();
+            this.entry.setCol(0, hostHash);
+            this.entry.setCol(1, MicroDate.microDateDays(modified));
+            this.entry.setCol(2, count);
+        }
+        
+        public HostReference(Row.Entry entry) {
+            this.entry = entry;
+        }
+        
+        public String toPropertyForm() {
+            return this.entry.toPropertyForm(':', true, true, false, true);
+        }
+
+        public Entry toKelondroEntry() {
+            return this.entry;
+        }
+
+        public byte[] metadataHash() {
+            return this.entry.getPrimaryKeyBytes();
+        }
+
+        public int count() {
+            return (int) this.entry.getColLong(2);
+        }
+        
+        public long lastModified() {
+            return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(1));
+        }
+
+        public void join(final Reference r) {
+            // joins two entries into one entry
+            HostReference oe = (HostReference) r; 
+            
+            // combine date
+            long o = oe.lastModified();
+            if (this.lastModified() < o) this.entry.setCol(1, MicroDate.microDateDays(o));
+            
+            // combine count
+            int c = oe.count();
+            if (this.count() < c) this.entry.setCol(2, c);
+        }
+
+        public Collection<Integer> positions() {
+            return new ArrayList<Integer>(0);
+        }
+    }
+    
+    public static final HostReferenceFactory hostReferenceFacory = new HostReferenceFactory();
+    public static       ReferenceContainerCache<HostReference> hostReferenceIndexCache = null;
+    public static       long hostReferenceIndexCacheTime = 0;
+    public static final long hostReferenceIndexCacheTTL = 1000 * 60 * 60 * 12; // 12 hours time to live for cache
+    
+    public synchronized ReferenceContainerCache<HostReference> incomingReferences() {
+        // we return a cache if the cache is filled and not stale
+        if (hostReferenceIndexCache != null &&
+            hostReferenceIndexCacheTime + hostReferenceIndexCacheTTL > System.currentTimeMillis()) return hostReferenceIndexCache; 
+        
         // collect the references
-        WebStructureGraph.structureEntry sentry;
-        HashMap<String, Integer> domains = new HashMap<String, Integer>();
-        Iterator<WebStructureGraph.structureEntry> i = structureEntryIterator(false);
-        while (i.hasNext()) {
-            sentry = i.next();
-            if (sentry.references.containsKey(domhash)) domains.put(sentry.domain, sentry.references.get(domhash));
-        }
-        i = structureEntryIterator(true);
-        while (i.hasNext()) {
-            sentry = i.next();
-            if (sentry.references.containsKey(domhash)) domains.put(sentry.domain, sentry.references.get(domhash));
-        }
-        return domains;
+        HostReferenceFactory hostReferenceFactory = new HostReferenceFactory();
+        ReferenceContainerCache<HostReference> idx = new ReferenceContainerCache<HostReference>(hostReferenceFactory, hostReferenceFactory.getRow(), Base64Order.enhancedCoder);
+        
+        // we iterate over all structure entries.
+        // one structure entry has information that a specific host links to a list of other hosts
+        incomingReferencesEnrich(idx, new StructureIterator(false), 3000);
+        incomingReferencesEnrich(idx, new StructureIterator(true), 3000);
+
+        // fill the cache again and set fill time
+        hostReferenceIndexCache = idx;
+        hostReferenceIndexCacheTime = System.currentTimeMillis();
+        //incomingReferencesTest(hostReferenceIndexCache);
+        return hostReferenceIndexCache;
     }
     
-    public int referencesCount(final String domhash) {
-        // returns the number of domains that are referenced by this domhash
-        assert domhash.length() == 6 : "domhash = " + domhash;
+    private void incomingReferencesEnrich(
+            ReferenceContainerCache<HostReference> idx,
+            Iterator<WebStructureGraph.StructureEntry> structureIterator,
+            long time) {
+        // we iterate over all structure entries.
+        // one structure entry has information that a specific host links to a list of other hosts
+        long timeout = System.currentTimeMillis() + time;
+        byte[] term;
+        HostReference hr;
+        WebStructureGraph.StructureEntry sentry;
+        structureLoop: while (structureIterator.hasNext()) {
+            sentry = structureIterator.next();
+            // then we loop over all the hosts that are linked from sentry.hosthash
+            refloop: for (Map.Entry<String, Integer> refhosthashandcounter: sentry.references.entrySet()) {
+                term = UTF8.getBytes(refhosthashandcounter.getKey());
+                try {
+                    hr = new HostReference(UTF8.getBytes(sentry.hosthash), GenericFormatter.SHORT_DAY_FORMATTER.parse(sentry.date).getTime(), refhosthashandcounter.getValue().intValue());
+                } catch (ParseException e) {
+                    continue refloop;
+                }
+                // each term refers to an index entry. look if we already have such an entry
+                ReferenceContainer<HostReference> r = idx.get(term, null);
+                try {
+                    if (r == null) {
+                        r = new ReferenceContainer<HostReference>(hostReferenceFacory, term);
+                        r.add(hr);
+                        idx.add(r);
+                    } else {
+                        r.put(hr);
+                    }
+                } catch (RowSpaceExceededException e) {
+                    continue refloop;
+                }
+            }
+            if (System.currentTimeMillis() > timeout) break structureLoop;
+        }
+    }
+    
+    /*
+    private void incomingReferencesTest(ReferenceContainerCache<HostReference> idx) {
+        for (ReferenceContainer<HostReference> references: idx) {
+            log.logInfo("Term-Host: " + hostHash2hostName(UTF8.String(references.getTermHash())));
+            Iterator<HostReference> referenceIterator = references.entries();
+            StringBuilder s = new StringBuilder();
+            HostReference reference;
+            while (referenceIterator.hasNext()) {
+                reference = referenceIterator.next();
+                s.append(reference.toPropertyForm());
+                log.logInfo("   ... referenced by " + hostHash2hostName(UTF8.String(reference.metadataHash())) + ", " + reference.count() + " references");
+            }
+        }
+    }
+    */
+    
+    public int referencesCount(final String hosthash) {
+        // returns the number of hosts that are referenced by this hosthash
+        assert hosthash.length() == 6 : "hosthash = " + hosthash;
+        if (hosthash == null || hosthash.length() != 6) return 0;
         SortedMap<String, String> tailMap;
         int c = 0;
         synchronized (structure_old) {
-            tailMap = structure_old.tailMap(domhash);
+            tailMap = structure_old.tailMap(hosthash);
             if (!tailMap.isEmpty()) {
                 final String key = tailMap.firstKey();
-                if (key.startsWith(domhash)) {
+                if (key.startsWith(hosthash)) {
                     c = refstr2count(tailMap.get(key));
                 }
             }
         }
         synchronized (structure_new) {
-            tailMap = structure_new.tailMap(domhash);
+            tailMap = structure_new.tailMap(hosthash);
             if (!tailMap.isEmpty()) {
                 final String key = tailMap.firstKey();
-                if (key.startsWith(domhash)) {
+                if (key.startsWith(hosthash)) {
                     c += refstr2count(tailMap.get(key));
                 }
             }
@@ -328,24 +477,24 @@ public class WebStructureGraph {
         return c;
     }
     
-    public String resolveDomHash2DomString(final String domhash) {
-        // returns the domain as string, null if unknown
-        assert domhash.length() == 6;
+    public String hostHash2hostName(final String hosthash) {
+        // returns the host as string, null if unknown
+        assert hosthash.length() == 6;
         SortedMap<String, String> tailMap;
         synchronized(structure_old) {
-            tailMap = structure_old.tailMap(domhash);
+            tailMap = structure_old.tailMap(hosthash);
             if (!tailMap.isEmpty()) {
                 final String key = tailMap.firstKey();
-                if (key.startsWith(domhash)) {
+                if (key.startsWith(hosthash)) {
                     return key.substring(7);
                 }
             }
         }
         synchronized(structure_new) {
-            tailMap = structure_new.tailMap(domhash);
+            tailMap = structure_new.tailMap(hosthash);
             if (!tailMap.isEmpty()) {
                 final String key = tailMap.firstKey();
-                if (key.startsWith(domhash)) {
+                if (key.startsWith(hosthash)) {
                     return key.substring(7);
                 }
             }
@@ -354,10 +503,10 @@ public class WebStructureGraph {
     }
     
     private void learn(final DigestURI url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
-        final String domhash = UTF8.String(url.hash(), 6, 6);
+        final String hosthash = UTF8.String(url.hash(), 6, 6);
 
         // parse the new reference string and join it with the stored references
-        structureEntry structure = outgoingReferences(domhash);
+        StructureEntry structure = outgoingReferences(hosthash);
         final Map<String, Integer> refs = (structure == null) ? new HashMap<String, Integer>() : structure.references;
         assert reference.length() % 12 == 0 : "reference.length() = " + reference.length() + ", reference = " + reference.toString();
         String dom;
@@ -394,7 +543,7 @@ public class WebStructureGraph {
 
         // store the map back to the structure
         synchronized(structure_new) {
-            structure_new.put(domhash + "," + url.getHost(), map2refstr(refs));
+            structure_new.put(hosthash + "," + url.getHost(), map2refstr(refs));
         }
     }
     
@@ -424,7 +573,7 @@ public class WebStructureGraph {
         }
     }
     
-    public void saveWebStructure() {
+    private void saveWebStructure() {
         joinOldNew();
         try {
             synchronized(structure_old) {
@@ -436,7 +585,7 @@ public class WebStructureGraph {
     }
     
     public String hostWithMaxReferences() {
-        // find domain with most references
+        // find host with most references
         String maxhost = null;
         int refsize, maxref = 0;
         joinOldNew();
@@ -452,20 +601,19 @@ public class WebStructureGraph {
         return maxhost;
     }
     
-    public Iterator<structureEntry> structureEntryIterator(final boolean latest) {
-        // iterates objects of type structureEntry
-        return new structureIterator(latest);
+    public Iterator<StructureEntry> structureEntryIterator(final boolean latest) {
+        return new StructureIterator(latest);
     }
     
-    public class structureIterator extends LookAheadIterator<structureEntry> implements Iterator<structureEntry> {
+    private class StructureIterator extends LookAheadIterator<StructureEntry> implements Iterator<StructureEntry> {
 
         private final Iterator<Map.Entry<String, String>> i;
         
-        public structureIterator(final boolean latest) {
+        private StructureIterator(final boolean latest) {
             i = ((latest) ? structure_new : structure_old).entrySet().iterator();
         }
         
-        public structureEntry next0() {
+        public StructureEntry next0() {
             Map.Entry<String, String> entry = null;
             String dom = null, ref = "";
             while (i.hasNext()) {
@@ -478,20 +626,22 @@ public class WebStructureGraph {
             }
             if (entry == null || dom == null) return null;
             assert (ref.length() - 8) % 10 == 0 : "refs = " + ref + ", length = " + ref.length();
-            return new structureEntry(dom.substring(0, 6), dom.substring(7), ref.substring(0, 8), refstr2map(ref));
+            return new StructureEntry(dom.substring(0, 6), dom.substring(7), ref.substring(0, 8), refstr2map(ref));
         }
     }
     
-    public static class structureEntry {
-        public String domhash, domain, date;
-        public Map<String, Integer> references;
-        public structureEntry(
-                final String domhash,
-                final String domain, 
+    public static class StructureEntry {
+        public String hosthash; // the tail of the host hash
+        public String hostname; // the host name
+        public String date;     // date of latest change
+        public Map<String, Integer> references; // a map from the referenced host hash to the number of referenced to that host
+        private StructureEntry(
+                final String hosthash,
+                final String hostname, 
                 final String date,
                 final Map<String, Integer> references) {
-            this.domhash = domhash;
-            this.domain = domain;
+            this.hosthash = hosthash;
+            this.hostname = hostname;
             this.date = date;
             this.references = references;
         }

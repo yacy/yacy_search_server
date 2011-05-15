@@ -35,11 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.BlockingQueue;
 
 import de.anomic.crawler.CrawlStacker;
 
@@ -59,7 +56,6 @@ import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.repository.Blacklist;
@@ -151,46 +147,6 @@ public final class MetadataRepository implements Iterable<byte[]> {
             return new URIMetadataRow(entry, null, 0);
         } catch (final IOException e) {
             return null;
-        }
-    }
-    
-    public void load(final WeakPriorityBlockingQueue<WordReferenceVars> obrwis, int maxcount, long maxtime, final BlockingQueue<URIMetadataRow> rows) {
-        if (urlIndexFile == null) return;
-        if (obrwis == null) return;
-        final Map<byte[], WeakPriorityBlockingQueue.Element<WordReferenceVars>> collector = new TreeMap<byte[], WeakPriorityBlockingQueue.Element<WordReferenceVars>>(Base64Order.enhancedCoder);
-        final List<byte[]> collectOrder = new ArrayList<byte[]>();
-        int count = 0;
-        long timelimit = System.currentTimeMillis() + maxtime;
-        WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi;
-        byte[] urlHash;
-        while (System.currentTimeMillis() < timelimit && count < maxcount) {
-            try {
-                obrwi = obrwis.take();
-            } catch (InterruptedException e) {
-                break;
-            }
-            if (obrwi != null) {
-                urlHash = obrwi.getElement().metadataHash();
-                if (urlHash != null) {
-                    collector.put(urlHash, obrwi);
-                    collectOrder.add(urlHash);
-                    count++;
-                }
-            }
-        }
-        
-        try {
-            Map<byte[], Row.Entry> resultmap = urlIndexFile.get(collector.keySet());
-        } catch (final IOException e) {
-            return;
-        } catch (InterruptedException e) {
-            return;
-        }
-        
-        for (byte[] hash: collectOrder) {
-            WeakPriorityBlockingQueue.Element<WordReferenceVars> element = collector.get(hash);
-            if (element == null) continue;
-            
         }
     }
 

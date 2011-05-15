@@ -108,4 +108,10 @@ public abstract class AbstractReference implements Reference {
         }
         return d / (positions().size() - 1);
     }
+    
+    public boolean isOlder(final Reference other) {
+        if (other == null) return false;
+        if (this.lastModified() < other.lastModified()) return true;
+        return false;
+    }
 }

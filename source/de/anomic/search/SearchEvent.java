@@ -39,6 +39,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -185,7 +186,7 @@ public final class SearchEvent {
                         IAneardhthash = wordhash;
                     }
                     IACount.put(wordhash, LargeNumberCache.valueOf(container.size()));
-                    IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
+                    IAResults.put(wordhash, WordReferenceFactory.compressIndex(container, null, 1000).toString());
                 }
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             } else {

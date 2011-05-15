@@ -40,8 +40,7 @@ public class webstructure {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-        final boolean latest = ((post == null) ? false : post.containsKey("latest"));
-        String about = ((post == null) ? null : post.get("about", null));
+        String about = post == null ? null : post.get("about", null);
         prop.put("out", 0);
         prop.put("in", 0);
         if (about != null) {
@@ -55,7 +54,7 @@ public class webstructure {
                 }
             }
             if (url != null && about != null) {
-                WebStructureGraph.structureEntry sentry = sb.webStructure.outgoingReferences(about);
+                WebStructureGraph.StructureEntry sentry = sb.webStructure.outgoingReferences(about);
                 if (sentry != null) {
                     reference(prop, "out", 0, sentry, sb.webStructure);
                     prop.put("out_domains", 1);
@@ -74,10 +73,12 @@ public class webstructure {
                     prop.put("in", 1);
                 }
             }
-        } else {
-            final Iterator<WebStructureGraph.structureEntry> i = sb.webStructure.structureEntryIterator(latest);
+        } else if (sb.adminAuthenticated(header) >= 2) {
+            // show a complete list of link structure informations in case that the user is authenticated
+            final boolean latest = ((post == null) ? false : post.containsKey("latest"));
+            final Iterator<WebStructureGraph.StructureEntry> i = sb.webStructure.structureEntryIterator(latest);
             int c = 0;
-            WebStructureGraph.structureEntry sentry;
+            WebStructureGraph.StructureEntry sentry;
             while (i.hasNext()) {
                 sentry = i.next();
                 reference(prop, "out", c, sentry, sb.webStructure);
@@ -86,6 +87,10 @@ public class webstructure {
             prop.put("out_domains", c);
             prop.put("out", 1);
             if (latest) sb.webStructure.joinOldNew();
+        } else {
+            // not-authenticated users show nothing
+            prop.put("out_domains", 0);
+            prop.put("out", 1);
         }
         prop.put("out_maxref", WebStructureGraph.maxref);
         prop.put("maxhosts", WebStructureGraph.maxhosts);
@@ -94,9 +99,9 @@ public class webstructure {
         return prop;
     }
     
-    public static void reference(serverObjects prop, String prefix, int c, WebStructureGraph.structureEntry sentry, WebStructureGraph ws) {
-        prop.put(prefix + "_domains_" + c + "_hash", sentry.domhash);
-        prop.put(prefix + "_domains_" + c + "_domain", sentry.domain);
+    public static void reference(serverObjects prop, String prefix, int c, WebStructureGraph.StructureEntry sentry, WebStructureGraph ws) {
+        prop.put(prefix + "_domains_" + c + "_hash", sentry.hosthash);
+        prop.put(prefix + "_domains_" + c + "_domain", sentry.hostname);
         prop.put(prefix + "_domains_" + c + "_date", sentry.date);
         Iterator<Map.Entry<String, Integer>> k = sentry.references.entrySet().iterator();
         Map.Entry<String, Integer> refentry;
@@ -106,7 +111,7 @@ public class webstructure {
         refloop: while (k.hasNext()) {
             refentry = k.next();
             refhash = refentry.getKey();
-            refdom = ws.resolveDomHash2DomString(refhash);
+            refdom = ws.hostHash2hostName(refhash);
             if (refdom == null) continue refloop;
             prop.put(prefix + "_domains_" + c + "_citations_" + d + "_refhash", refhash);
             prop.put(prefix + "_domains_" + c + "_citations_" + d + "_refdom", refdom);

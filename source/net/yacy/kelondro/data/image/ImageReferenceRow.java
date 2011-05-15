@@ -204,7 +204,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
     }
 
     public String toPropertyForm() {
-        return entry.toPropertyForm(true, true, false);
+        return entry.toPropertyForm('=', true, true, false, false);
     }
     
     public Entry toKelondroEntry() {

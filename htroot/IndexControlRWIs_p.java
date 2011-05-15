@@ -279,7 +279,7 @@ public class IndexControlRWIs_p {
                 }
                 
                 // make an indexContainerCache
-                ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, index.rowdef, Segment.wordOrder);
+                ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, index.row(), Segment.wordOrder);
                 try {
                     icc.add(index);
                 } catch (RowSpaceExceededException e) {

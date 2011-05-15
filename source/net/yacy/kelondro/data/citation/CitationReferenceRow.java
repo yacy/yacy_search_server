@@ -129,7 +129,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
     }
 
     public String toPropertyForm() {
-        return entry.toPropertyForm(true, true, false);
+        return entry.toPropertyForm('=', true, true, false, false);
     }
     
     public Entry toKelondroEntry() {

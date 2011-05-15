@@ -111,7 +111,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
     }
 
     public String toPropertyForm() {
-        return entry.toPropertyForm(true, true, false);
+        return entry.toPropertyForm('=', true, true, false, false);
     }
     
     public Entry toKelondroEntry() {

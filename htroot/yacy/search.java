@@ -45,6 +45,7 @@ import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Bitfield;
@@ -260,7 +261,7 @@ public final class search {
                     indexabstract.append("indexabstract.");
                     indexabstract.append(UTF8.String(wordhash));
                     indexabstract.append("=");
-                    indexabstract.append(ReferenceContainer.compressIndex(container, null, 1000).toString());
+                    indexabstract.append(WordReferenceFactory.compressIndex(container, null, 1000).toString());
                     indexabstract.append(serverCore.CRLF_STRING);
                 }
             }

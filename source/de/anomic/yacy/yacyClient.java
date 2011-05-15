@@ -69,6 +69,7 @@ import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -571,7 +572,7 @@ public final class yacyClient {
                     continue;
                 }
                 whacc += wordhash;
-                secondarySearchSuperviser.addAbstract(wordhash, ReferenceContainer.decompressIndex(ci, target.hash));
+                secondarySearchSuperviser.addAbstract(wordhash, WordReferenceFactory.decompressIndex(ci, target.hash));
                 ac++;
                 
             }

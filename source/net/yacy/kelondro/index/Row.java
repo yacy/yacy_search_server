@@ -79,7 +79,7 @@ public final class Row {
         this.objectOrder = objectOrder;
         // define row with row syntax
         // example:
-        //# Structure=<pivot-12>,'=',<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>
+        //# Structure=<pivot-12>,<UDate-3>,<VDate-3>,<LCount-2>,<GCount-2>,<ICount-2>,<DCount-2>,<TLength-3>,<WACount-3>,<WUCount-3>,<Flags-1>
 
         // parse pivot definition:
         //does not work with 'String idx-26 "id = created + originator",String cat-8,String rec-14,short  dis-2 {b64e},String att-462'
@@ -553,22 +553,26 @@ public final class Row {
             System.arraycopy(rowinstance, offset + colstart[column], target, targetOffset, row[column].cellwidth);
         }
         
-        public final String toPropertyForm(final boolean includeBraces, final boolean decimalCardinal, final boolean longname) {
+        public final String toPropertyForm(final char propertySymbol, final boolean includeBraces, final boolean decimalCardinal, final boolean longname, final boolean quotes) {
             final ByteBuffer bb = new ByteBuffer(objectsize() * 2);
             if (includeBraces) bb.append('{');
             for (int i = 0; i < row.length; i++) {
+                if (quotes) bb.append('"');
                 bb.append((longname) ? row[i].description : row[i].nickname);
-                bb.append('=');
+                if (quotes) bb.append('"');
+                bb.append(propertySymbol);
+                if (quotes) bb.append('"');
                 if ((decimalCardinal) && (row[i].celltype == Column.celltype_cardinal)) {
                     bb.append(Long.toString(getColLong(i)));
                 } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_bitfield)) {
                     bb.append((new Bitfield(getColBytes(i, true))).exportB64());
                 } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_binary)) {
-                    assert row[i].cellwidth == 1;
+                    assert row[i].cellwidth == 1 : toString();
                     bb.append(Integer.toString((0xff & getColByte(i))));
                 } else {
                     bb.append(rowinstance, offset + colstart[i], row[i].cellwidth);
                 }
+                if (quotes) bb.append('"');
                 if (i < row.length - 1) {
                     bb.append(',');
                     if (longname) bb.append(' ');
@@ -581,7 +585,7 @@ public final class Row {
         
         @Override
         public final String toString() {
-            return toPropertyForm(true, false, false);
+            return toPropertyForm('=', true, false, false, false);
         }
         
     }

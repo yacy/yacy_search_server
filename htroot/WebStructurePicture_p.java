@@ -140,7 +140,7 @@ public class WebStructurePicture_p {
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
         final double radius = 1.0 / (1 << nextlayer);
-        WebStructureGraph.structureEntry sr = structure.outgoingReferences(centerhash);
+        WebStructureGraph.StructureEntry sr = structure.outgoingReferences(centerhash);
         final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
         Map.Entry<String, Integer> entry;
         String targethash, targethost;
@@ -153,7 +153,7 @@ public class WebStructurePicture_p {
         while ((i.hasNext()) && (maxnodes > 0) && (System.currentTimeMillis() < timeout)) {
             entry = i.next();
             targethash = entry.getKey();
-            targethost = structure.resolveDomHash2DomString(targethash);
+            targethost = structure.hostHash2hostName(targethash);
             if (targethost == null) continue;
             thisrefs = entry.getValue().intValue();
             targetrefs = structure.referencesCount(targethash); // can be cpu/time-critical

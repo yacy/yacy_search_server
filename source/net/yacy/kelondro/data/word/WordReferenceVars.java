@@ -196,11 +196,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     public Bitfield flags() {
         return flags;
     }
-/*
-    public long freshUntil() {
-        return freshUntil;
-    }
-*/
+
     public byte[] getLanguage() {
         return language;
     }
@@ -211,11 +207,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 
     public int hitcount() {
         return hitcount;
-    }
-
-    public boolean isOlder(final Reference other) {
-        assert false; // should not be used
-        return false;
     }
 
     public long lastModified() {
