@@ -363,9 +363,9 @@ public final class Log {
 
             // creating the logging directory
             String logPattern = logManager.getProperty("java.util.logging.FileHandler.pattern");
-            int stripPos = logPattern.lastIndexOf('/');
+            int stripPos = logPattern.lastIndexOf(File.separatorChar);
             if (!new File(logPattern).isAbsolute()) logPattern = new File(dataPath, logPattern).getAbsolutePath();
-            if (stripPos < 0) stripPos = logPattern.lastIndexOf(File.pathSeparatorChar);
+            if (stripPos < 0) stripPos = logPattern.lastIndexOf(File.separatorChar);
             File log = new File(logPattern.substring(0, stripPos));
             if (!log.isAbsolute()) log = new File(dataPath, log.getPath());
             if (!log.canRead()) log.mkdir();
