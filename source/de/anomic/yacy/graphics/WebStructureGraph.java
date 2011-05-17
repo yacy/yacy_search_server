@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -139,7 +138,7 @@ public class WebStructureGraph {
         }
     }
     
-    public void generateCitationReference(final DigestURI url, final Document document, final Condenser condenser, final Date docDate) {
+    public void generateCitationReference(final DigestURI url, final Document document, final Condenser condenser) {
         // generate citation reference
         final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
         final Iterator<MultiProtocolURI> it = hl.keySet().iterator();

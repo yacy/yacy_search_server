@@ -1989,7 +1989,7 @@ public final class Switchboard extends serverSwitch {
             assert in.queueEntry != null;
             assert in.documents != null;
             assert in.queueEntry != null;
-            webStructure.generateCitationReference(in.queueEntry.url(), in.documents[i], (in.condenser == null) ? null : in.condenser[i], in.queueEntry.lastModified()); // [outlinksSame, outlinksOther]
+            webStructure.generateCitationReference(in.queueEntry.url(), in.documents[i], (in.condenser == null) ? null : in.condenser[i]); // [outlinksSame, outlinksOther]
         }
         return in;
     }
@@ -2174,7 +2174,7 @@ public final class Switchboard extends serverSwitch {
                             }
                             final Condenser condenser = new Condenser(document, true, true, LibraryProvider.dymLib);
                             ResultImages.registerImages(url, document, true);
-                            webStructure.generateCitationReference(url, document, condenser, response.lastModified());
+                            webStructure.generateCitationReference(url, document, condenser);
                             storeDocumentIndex(process, response, document, condenser, searchEvent, "heuristic:" + heuristicName);
                             log.logInfo("addToIndex fill of url " + url.toNormalform(true, true) + " finished");
                         }

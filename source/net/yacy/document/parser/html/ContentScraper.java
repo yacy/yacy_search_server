@@ -243,12 +243,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         String u;
         MultiProtocolURI url;
         while (s < b.length()) {
+            p = find(b, "://", s);
+            if (p == Integer.MAX_VALUE) break;
+            s = Math.max(0, p - 5);
             p = Math.min(find(b, "smb://", s), Math.min(find(b, "ftp://", s), Math.min(find(b, "http://", s), find(b, "https://", s))));
             if (p == Integer.MAX_VALUE) break;
             q = b.indexOf(" ", p + 1);
             u = b.substring(p, q < 0 ? b.length() : q);
             if (u.endsWith(".")) u = u.substring(0, u.length() - 1); // remove the '.' that was appended above
-            s = p + 1;
+            s = p + 6;
             try {
                 url = new MultiProtocolURI(u);
                 anchors.put(url, new Properties());
