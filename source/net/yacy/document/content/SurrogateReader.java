@@ -52,6 +52,17 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class SurrogateReader extends DefaultHandler implements Runnable {
 
+    // definition of the surrogate main element
+    public final static String SURROGATES_MAIN_ELEMENT_NAME =
+        "surrogates";
+    public final static String SURROGATES_MAIN_ELEMENT_OPEN =
+        "<" + SURROGATES_MAIN_ELEMENT_NAME +
+        " xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
+        " xmlns:yacy=\"http://yacy.net/\"" +
+        " xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\">";
+    public final static String SURROGATES_MAIN_ELEMENT_CLOSE =
+        "</" + SURROGATES_MAIN_ELEMENT_NAME + ">";
+
     // class variables
     private final StringBuilder buffer;
     private boolean parsingValue;

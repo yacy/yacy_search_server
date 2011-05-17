@@ -26,6 +26,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
+import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -695,7 +696,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         // start writing a new file
                         this.outputfilename = targetstub + "." + fc + ".xml.prt";
                         this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
-                        osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
+                        osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
                     Log.logInfo("WIKITRANSLATION", "[CONSUME] Title: " + record.title);
                     record.document.writeXML(osw, new Date());
@@ -709,10 +710,8 @@ public class MediawikiImporter extends Thread implements Importer {
                         fc++;
                         outputfilename = targetstub + "." + fc + ".xml.prt";
                         osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
-                        osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
+                        osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                     }
-
-                    
                 }
             } catch (InterruptedException e) {
                 Log.logException(e);
@@ -724,7 +723,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 Log.logException(e);
             } finally {
 	            try {
-					osw.write("</surrogates>\n");
+					osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
 		            osw.close();
 		            String finalfilename = targetstub + "." + fc + ".xml";
 		            new File(targetdir, outputfilename).renameTo(new File(targetdir, finalfilename));

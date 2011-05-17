@@ -40,6 +40,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.document.content.DCEntry;
+import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
@@ -275,7 +276,7 @@ public class PhpBB3Dao implements Dao {
                     if (outputfiletmp.exists()) outputfiletmp.delete();
                     if (outputfile.exists()) outputfile.delete();
                     osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outputfiletmp)), "UTF-8");
-                    osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
+                    osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                 }
                 e.writeXML(osw);
                 c++;
@@ -288,7 +289,7 @@ public class PhpBB3Dao implements Dao {
                     fc++;
                 }
             }
-            osw.write("</surrogates>\n");
+            osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
             osw.close();
             outputfiletmp.renameTo(outputfile);
             return fc + 1;
