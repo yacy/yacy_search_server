@@ -38,9 +38,7 @@ public class migration {
     public static final int USE_WORK_DIR=1389; //wiki & messages in DATA/WORK
     public static final int TAGDB_WITH_TAGHASH=1635; //tagDB keys are tagHashes instead of plain tagname.
     public static final int NEW_OVERLAYS=4422;
-    public static void main(final String[] args) {
-
-    }
+    public static final int IDX_HOST=7724; // api for index retrieval: host index
 
     public static void migrate(final Switchboard sb, final int fromRev, final int toRev){
         if(fromRev < toRev){

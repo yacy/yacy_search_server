@@ -1,6 +1,8 @@
 package de.anomic.yacy;
 
 import java.util.Locale;
+import java.util.regex.Pattern;
+
 import de.anomic.yacy.yacyBuildProperties;
 
 /**
@@ -31,6 +33,8 @@ public final class yacyBuildProperties {
 		return "@REPL_VERSION@";
 	}
 
+    public static final Pattern versionMatcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z"); 
+    
 	/**
 	 * returns the long version String (e. g. 0.9106712)
 	 */

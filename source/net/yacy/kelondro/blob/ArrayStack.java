@@ -49,7 +49,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
-import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
@@ -105,8 +104,8 @@ public class ArrayStack implements BLOB {
     public ArrayStack(
             final File heapLocation,
             final String prefix,
-            final int keylength,
             final ByteOrder ordering,
+            final int keylength,
             final int buffersize,
             final boolean trimall) throws IOException {
         this.keylength = keylength;
@@ -848,11 +847,11 @@ public class ArrayStack implements BLOB {
      */
     public File mergeMount(File f1, File f2,
             ReferenceFactory<? extends Reference> factory,
-            Row payloadrow, File newFile, int writeBuffer) {
+            File newFile, int writeBuffer) {
         if (f2 == null) {
             // this is a rewrite
             Log.logInfo("BLOBArray", "rewrite of " + f1.getName());
-            File resultFile = rewriteWorker(factory, this.keylength, this.ordering, f1, payloadrow, newFile, writeBuffer);
+            File resultFile = rewriteWorker(factory, this.keylength, this.ordering, f1, newFile, writeBuffer);
             if (resultFile == null) {
                 Log.logWarning("BLOBArray", "rewrite of file " + f1 + " returned null. newFile = " + newFile);
                 return null;
@@ -867,7 +866,7 @@ public class ArrayStack implements BLOB {
             return resultFile;
         } else {
             Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
-            File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile, writeBuffer);
+            File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, newFile, writeBuffer);
             if (resultFile == null) {
                 Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
                 return null;
@@ -885,18 +884,18 @@ public class ArrayStack implements BLOB {
     
     private static <ReferenceType extends Reference> File mergeWorker(
             ReferenceFactory<ReferenceType> factory,
-            int keylength, ByteOrder order, File f1, File f2, Row payloadrow, File newFile, int writeBuffer) {
+            int keylength, ByteOrder order, File f1, File f2, File newFile, int writeBuffer) {
         // iterate both files and write a new one
         
         CloneableIterator<ReferenceContainer<ReferenceType>> i1 = null, i2 = null;
         try {
-            i1 = new ReferenceIterator<ReferenceType>(f1, factory, payloadrow);
+            i1 = new ReferenceIterator<ReferenceType>(f1, factory);
         } catch (IOException e) {
             Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f1 = " + f1.toString() + ": " + e.getMessage(), e);
             return null;
         }
         try {
-            i2 = new ReferenceIterator<ReferenceType>(f2, factory, payloadrow);
+            i2 = new ReferenceIterator<ReferenceType>(f2, factory);
         } catch (IOException e) {
             Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f2 = " + f2.toString() + ": " + e.getMessage(), e);
             return null;
@@ -941,12 +940,12 @@ public class ArrayStack implements BLOB {
     
     private static <ReferenceType extends Reference> File rewriteWorker(
             ReferenceFactory<ReferenceType> factory,
-            int keylength, ByteOrder order, File f, Row payloadrow, File newFile, int writeBuffer) {
+            int keylength, ByteOrder order, File f, File newFile, int writeBuffer) {
         // iterate both files and write a new one
         
         CloneableIterator<ReferenceContainer<ReferenceType>> i = null;
         try {
-            i = new ReferenceIterator<ReferenceType>(f, factory, payloadrow);
+            i = new ReferenceIterator<ReferenceType>(f, factory);
         } catch (IOException e) {
             Log.logSevere("ArrayStack", "cannot rewrite because input file cannot be read, f = " + f.toString() + ": " + e.getMessage(), e);
             return null;
@@ -1094,7 +1093,7 @@ public class ArrayStack implements BLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final ArrayStack heap = new ArrayStack(f, "test", 12, NaturalOrder.naturalOrder, 512 * 1024, false);
+            final ArrayStack heap = new ArrayStack(f, "test", NaturalOrder.naturalOrder, 12, 512 * 1024, false);
             heap.insert("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.insert("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.insert("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());

@@ -292,30 +292,35 @@ public final class Row {
             this.offset = 0;
             for (int i = 0; i < elts.length; i++) {
                 p = elts[i].indexOf('=');
+                if (p < 0) p = elts[i].indexOf(':');
                 if (p > 0) {
                     nick = elts[i].substring(0, p).trim();
-                    if (p + 1 == elts[i].length())
-                        setCol(nick, null);
-                    else {
-                        if ((decimalCardinal) && (row[i].celltype == Column.celltype_cardinal)) {
+                    if (nick.charAt(0) == '"' && nick.charAt(nick.length() - 1) == '"') nick = nick.substring(1, nick.length() - 1);
+                    final Object[] ref = nickref.get(nick);
+                    Column col = (Column) ref[0];
+                    int clstrt = ((Integer) ref[1]).intValue();
+                    if (p + 1 == elts[i].length()) {
+                        setCol(clstrt, col.cellwidth, null);
+                    } else {
+                        if ((decimalCardinal) && (col.celltype == Column.celltype_cardinal)) {
                             try {
-                                setCol(nick, Long.parseLong(elts[i].substring(p + 1).trim()));
+                                setCol(col.encoder, offset + clstrt, col.cellwidth,  Long.parseLong(elts[i].substring(p + 1).trim()));
                             } catch (final NumberFormatException e) {
-                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
-                                setCol(nick, 0);
+                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_cardinal; row = " + i + ", celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
+                                setCol(col.encoder, offset + clstrt, col.cellwidth, 0);
                             }
-                        } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_binary)) {
-                            assert row[i].cellwidth == 1;
+                        } else if ((decimalCardinal) && (col.celltype == Column.celltype_binary)) {
+                            assert col.cellwidth == 1;
                             try {
-                                setCol(nick, new byte[]{(byte) Integer.parseInt(elts[i].substring(p + 1).trim())});
+                                setCol(clstrt, col.cellwidth, new byte[]{(byte) Integer.parseInt(elts[i].substring(p + 1).trim())});
                             } catch (final NumberFormatException e) {
-                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + row[i].celltype + ", encoder = " + row[i].encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
-                                setCol(nick, new byte[]{0});
+                                Log.logSevere("kelondroRow", "NumberFormatException for celltype_binary; row = " + i + ", celltype = " + col.celltype + ", encoder = " + col.encoder + ", value = '" + elts[i].substring(p + 1).trim() + "'");
+                                setCol(clstrt, col.cellwidth, new byte[]{0});
                             }
-                        } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_bitfield)) {
-                            setCol(nick, (new Bitfield(row[i].cellwidth, elts[i].substring(p + 1).trim())).bytes());
+                        } else if ((decimalCardinal) && (col.celltype == Column.celltype_bitfield)) {
+                            setCol(clstrt, col.cellwidth, (new Bitfield(col.cellwidth, elts[i].substring(p + 1).trim())).bytes());
                         } else {
-                            setCol(nick, UTF8.getBytes(elts[i].substring(p + 1).trim()));
+                            setCol(clstrt, col.cellwidth, UTF8.getBytes(elts[i].substring(p + 1).trim()));
                         }
                     }
                 }
@@ -394,14 +399,6 @@ public final class Row {
             return rowinstance[offset + colstart[column]] == 0;
         }
         
-        private final void setCol(final String nickname, final byte[] cell) {
-            if (nickref == null) genNickRef();
-            final Object[] ref = nickref.get(nickname);
-            if (ref == null) return;
-            final Column col = (Column) ref[0];
-            setCol(((Integer) ref[1]).intValue(), col.cellwidth, cell);
-        }
-        
         public final void setCol(final int column, final byte[] cell) {
             setCol(colstart[column], row[column].cellwidth, cell);
         }
@@ -432,14 +429,6 @@ public final class Row {
         
         public final void setCol(final int column, final String cell) {
             setCol(column, UTF8.getBytes(cell));
-        }
-        
-        private final void setCol(final String nickname, final long cell) {
-            if (nickref == null) genNickRef();
-            final Object[] ref = nickref.get(nickname);
-            if (ref == null) return;
-            final Column col = (Column) ref[0];
-            setCol(col.encoder, offset + ((Integer) ref[1]).intValue(), col.cellwidth, cell);
         }
         
         public final void setCol(final int column, final long cell) {

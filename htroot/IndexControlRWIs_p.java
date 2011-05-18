@@ -59,6 +59,7 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.data.ListManager;
 import de.anomic.data.WorkTables;
 import de.anomic.http.client.Cache;
+import de.anomic.search.BlockRank;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.ReferenceOrder;
@@ -279,7 +280,7 @@ public class IndexControlRWIs_p {
                 }
                 
                 // make an indexContainerCache
-                ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, index.row(), Segment.wordOrder);
+                ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
                 try {
                     icc.add(index);
                 } catch (RowSpaceExceededException e) {
@@ -442,7 +443,7 @@ public class IndexControlRWIs_p {
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", DigestURI.domLengthEstimation(entry.hash()));
-                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", RankingProcess.ybr(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", BlockRank.ranking(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
                 prop.put("genUrlList_urlList_"+i+"_urlExists_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
@@ -453,6 +454,7 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_lother", entry.word().lother());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_hitcount", entry.word().hitcount());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_worddistance", 0);
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", BlockRank.ranking(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_pos", entry.word().minposition());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_phrase", entry.word().posofphrase());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_posinphrase", entry.word().posinphrase());

@@ -43,9 +43,11 @@
 
 package de.anomic.yacy;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,6 +59,11 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import net.yacy.migration;
+import net.yacy.cora.document.JSONArray;
+import net.yacy.cora.document.JSONException;
+import net.yacy.cora.document.JSONObject;
+import net.yacy.cora.document.JSONTokener;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -96,19 +103,21 @@ import de.anomic.search.Switchboard;
 import de.anomic.search.TextSnippet;
 import de.anomic.server.serverCore;
 import de.anomic.tools.crypt;
+import de.anomic.yacy.graphics.WebStructureGraph;
+import de.anomic.yacy.graphics.WebStructureGraph.HostReference;
 
 public final class yacyClient {
 
 
     private static byte[] postToFile(final yacySeed target, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
-        // return HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/" + filename), timeout, target.getHexHash() + ".yacyh", parts);
-        final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
-        return httpClient.POSTbytes(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/" + filename), target.getHexHash() + ".yacyh", parts, false);
+        return postToFile(target.getClusterAddress(), target.hash, filename, parts, timeout);
     }
     private static byte[] postToFile(final yacySeedDB seedDB, final String targetHash, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
-        // return HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename), timeout, yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", parts);
-    	final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
-    	return httpClient.POSTbytes(new MultiProtocolURI("http://" + targetAddress(seedDB, targetHash) + "/yacy/" + filename), yacySeed.b64Hash2hexHash(targetHash)+ ".yacyh", parts, false);
+    	return postToFile(seedDB.targetAddress(targetHash), targetHash, filename, parts, timeout);
+    }
+    private static byte[] postToFile(final String targetAddress, String targetPeerHash, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
+        final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
+        return httpClient.POSTbytes(new MultiProtocolURI("http://" + targetAddress + "/yacy/" + filename), yacySeed.b64Hash2hexHash(targetPeerHash) + ".yacyh", parts, false);
     }
     
     /**
@@ -766,20 +775,6 @@ public final class yacyClient {
         }
     }
     
-    public static String targetAddress(final yacySeedDB seedDB, final String targetHash) {
-        // find target address    
-        String address;
-        if (targetHash.equals(seedDB.mySeed().hash)) {
-            address = seedDB.mySeed().getClusterAddress();
-        } else {
-            final yacySeed targetSeed = seedDB.getConnected(targetHash);
-            if (targetSeed == null) { return null; }
-            address = targetSeed.getClusterAddress();
-        }
-        if (address == null) address = "localhost:8090";
-        return address;
-    }
-
     public static Map<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final URIMetadataRow entry, final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);
@@ -1026,7 +1021,8 @@ public final class yacyClient {
     }
 
     public static Map<String, String> getProfile(final yacySeed targetSeed) {
-
+        // ReferenceContainerCache<HostReference> ref = loadIDXHosts(targetSeed);
+        
         // this post a message to the remote message board
         final String salt = crypt.randomSalt();
          
@@ -1043,9 +1039,70 @@ public final class yacyClient {
             return null;
         }
     }
+    
+    public static ReferenceContainerCache<HostReference> loadIDXHosts(final yacySeed target) {
+        ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
+        // check if the host supports this protocol
+        if (target.getRevision() < migration.IDX_HOST) {
+            // if the protocol is not supported then we just return an empty host reference container
+            return index;
+        }
+        
+        // prepare request
+        final String salt = crypt.randomSalt();
+            
+        // send request
+        try {
+            final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
+            parts.put("object", UTF8.StringBody("host"));
+            final byte[] content = postToFile(target, "idx.json", parts, 30000);
+            if (content == null || content.length == 0) {
+                yacyCore.log.logWarning("yacyClient.loadIDXHosts error: empty result");
+                return null;
+            }
+            JSONObject json = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(content))));
+            /* the json has the following form:
+            {
+            "version":"#[version]#",
+            "uptime":"#[uptime]#",
+            "name":"#[name]#",
+            "rowdef":"#[rowdef]#",
+            "idx":{
+            #{list}#"#[term]#":[#[references]#]#(comma)#::,#(/comma)#
+            #{/list}#
+            }
+            }
+            */
+            JSONObject idx = json.getJSONObject("idx");
+            // iterate over all references
+            Iterator<String> termIterator = idx.keys();
+            String term;
+            while (termIterator.hasNext()) {
+                term = termIterator.next();
+                JSONArray references = idx.getJSONArray(term);
+                // iterate until we get an exception or null
+                int c = 0;
+                String reference;
+                ReferenceContainer<HostReference> referenceContainer = new ReferenceContainer<HostReference>(WebStructureGraph.hostReferenceFactory, UTF8.getBytes(term));
+                try {
+                    while ((reference = references.getString(c++)) != null) {
+                        //System.out.println("REFERENCE: " + reference);
+                        referenceContainer.add(new HostReference(reference));
+                    }
+                } catch (JSONException e) {} // this finishes the iteration
+                index.add(referenceContainer);
+            }
+            return index;
+        } catch (final Exception e) {
+            yacyCore.log.logWarning("yacyClient.loadIDXHosts error:" + e.getMessage());
+            return index;
+        }
+    }
+
+    
 
     public static void main(final String[] args) {
-        if(args.length > 2) {
+        if (args.length > 2) {
             // search a remote peer. arguments:
             // first  arg: path to application home
             // second arg: address of target peer

@@ -292,7 +292,7 @@ public class Dispatcher {
                     seeds.redundancy() * 3,
                     true);
             this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + UTF8.String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
-            if (entry == null) entry = transmission.newChunk(primaryTarget, targets, lastContainer.row());
+            if (entry == null) entry = transmission.newChunk(primaryTarget, targets);
 
             /*/ lookup targets
             int sc = 1;

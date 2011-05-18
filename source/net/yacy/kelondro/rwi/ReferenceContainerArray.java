@@ -43,17 +43,16 @@ import net.yacy.kelondro.order.CloneableIterator;
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
     protected final ReferenceFactory<ReferenceType> factory;
-    protected final Row payloadrow;
     protected final ArrayStack array;
     private   final IODispatcher merger;
     
     /**
-     * open a index container based on a BLOB dump. The content of the BLOB will not be read
+     * open a index container array based on BLOB dumps. The content of the BLOBs will not be read
      * unless a .idx file exists. Only the .idx file is opened to get a fast read access to
      * the BLOB. This class provides no write methods, because BLOB files should not be
      * written in random access. To support deletion, a write access to the BLOB for deletion
      * is still possible
-     * @param payloadrow
+     * @param payloadrow the row definition for the BLOB data structure
      * @param log
      * @throws IOException 
      */
@@ -62,15 +61,14 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     		final String prefix,
     		final ReferenceFactory<ReferenceType> factory,
     		final ByteOrder termOrder,
-    		final Row payloadrow,
+    		final int termSize,
     		IODispatcher merger) throws IOException {
         this.factory = factory;
-        this.payloadrow = payloadrow;
         this.array = new ArrayStack(
             heapLocation,
             prefix,
-            payloadrow.primaryKeyLength,
             termOrder,
+            termSize,
             0,
             true);
         assert merger != null;
@@ -106,7 +104,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     }
     
     public Row rowdef() {
-        return this.payloadrow;
+        return this.factory.getRow();
     }
     
     /**
@@ -213,13 +211,13 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	if (entries == null || !entries.hasNext()) return null;
     	byte[] a = entries.next();
     	int k = 1;
-    	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, payloadrow));
+    	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, this.factory.getRow()));
     	if (System.currentTimeMillis() > timeout) {
     	    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
     	    return c;
     	}
     	while (entries.hasNext()) {
-    		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), payloadrow)));
+    		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), this.factory.getRow())));
     		k++;
     		if (System.currentTimeMillis() > timeout) {
     		    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
@@ -235,14 +233,14 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         if (entries == null || !entries.hasNext()) return 0;
         Long a = entries.next();
         int k = 1;
-        int c = RowSet.importRowCount(a, payloadrow);
+        int c = RowSet.importRowCount(a, this.factory.getRow());
         assert c >= 0;
         if (System.currentTimeMillis() > timeout) {
             Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
             return c;
         }
         while (entries.hasNext()) {
-            c += RowSet.importRowCount(entries.next(), payloadrow);
+            c += RowSet.importRowCount(entries.next(), this.factory.getRow());
             assert c >= 0;
             k++;
             if (System.currentTimeMillis() > timeout) {
@@ -293,7 +291,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         
         public byte[] rewrite(byte[] b) throws RowSpaceExceededException {
             if (b == null) return null;
-            ReferenceContainer<ReferenceType> c = rewriter.reduce(new ReferenceContainer<ReferenceType>(factory, this.wordHash, RowSet.importRowSet(b, payloadrow)));
+            ReferenceContainer<ReferenceType> c = rewriter.reduce(new ReferenceContainer<ReferenceType>(factory, this.wordHash, RowSet.importRowSet(b, factory.getRow())));
             if (c == null) return null;
             byte bb[] = c.exportCollection();
             assert bb.length <= b.length;
@@ -320,7 +318,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             File[] ff = this.array.unmountBestMatch(2.0f, targetFileSize);
             if (ff == null) break;
             Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
-            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
+            merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
             donesomething = true;
         }
         
@@ -329,7 +327,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             File[] ff = this.array.unmountSmallest(targetFileSize);
             if (ff == null) break;
             Log.logInfo("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
-            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
+            merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
             donesomething = true;
         }
         
@@ -338,7 +336,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             File[] ff = this.array.unmountBestMatch(2.0f, maxFileSize);
             if (ff == null) break;
             Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
-            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
+            merger.merge(ff[0], ff[1], this.factory, this.array, newContainerBLOBFile());
             donesomething = true;
         }
 
@@ -347,7 +345,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             File ff = this.array.unmountOldest();
             if (ff == null) break;
             Log.logInfo("RICELL-shrink4/rewrite", "unmountOldest()");
-            merger.merge(ff, null, this.factory, this.array, this.payloadrow, newContainerBLOBFile());
+            merger.merge(ff, null, this.factory, this.array, newContainerBLOBFile());
             donesomething = true;
         }
 
@@ -367,7 +365,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             if (f.length() < 22 || !f.startsWith("text.index") || !f.endsWith(".blob")) continue;
             File fl = new File(heapLocation, f);
             System.out.println("CELL REFERENCE COLLECTION opening blob " + fl);
-            CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceIterator<ReferenceType>(fl, factory, payloadrow);
+            CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceIterator<ReferenceType>(fl, factory);
         
             ReferenceContainer<ReferenceType> container;
             final long start = System.currentTimeMillis();

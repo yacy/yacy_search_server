@@ -73,6 +73,10 @@ public class ReferenceOrder {
         if (container.size() < 20) threads = 2;
         Thread distributor = new NormalizeDistributor(container, out, threads);
         distributor.start();
+        try {
+            distributor.join(10); // let the distributor work for at least 10 milliseconds
+        } catch (InterruptedException e) {
+        }
         
         // return the resulting queue while the processing queues are still working
         return out;
@@ -116,6 +120,11 @@ public class ReferenceOrder {
             
             // insert poison to stop the queues
             for (int i = 0; i < this.threads; i++) worker[i].add(WordReferenceVars.poison);
+            
+            // wait for termination but not too long to make it possible that this
+            // is called from outside with a join to get some normalization results
+            // before going on
+            for (int i = 0; i < this.threads; i++) try {worker[i].join(100);} catch (InterruptedException e) {}
         }
     }
 
@@ -208,7 +217,7 @@ public class ReferenceOrder {
         int minminpos = min.minposition();
         final long r =
              ((256 - DigestURI.domLengthNormalized(t.metadataHash())) << ranking.coeff_domlength)
-           + ((ranking.coeff_ybr > 12) ? ((256 - (RankingProcess.ybr(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
+           + ((ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
            + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
            + ((maxmaxpos           == minminpos        )   ? 0 : (256 - (((t.minposition()  - minminpos          ) << 8) / (maxmaxpos          - minminpos)          )) << ranking.coeff_posintext)

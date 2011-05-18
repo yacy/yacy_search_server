@@ -30,10 +30,10 @@ import java.util.TreeMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -69,11 +69,8 @@ public class Transmission {
         this.timeout4Transfer = timeout4Transfer;
     }
 
-    public Chunk newChunk(
-                byte[] primaryTarget,
-                final List<yacySeed> targets,
-                final Row payloadrow) {
-        return new Chunk(primaryTarget, targets, payloadrow);
+    public Chunk newChunk(byte[] primaryTarget, final List<yacySeed> targets) {
+        return new Chunk(primaryTarget, targets);
     }
 
     public class Chunk extends WorkflowJob implements Iterable<ReferenceContainer<WordReference>> {
@@ -100,15 +97,11 @@ public class Transmission {
          * the payloadrow defines the structure of container entries
          * @param primaryTarget
          * @param targets
-         * @param payloadrow
          */
-        public Chunk(
-                byte[] primaryTarget,
-                final List<yacySeed> targets,
-                final Row payloadrow) {
+        public Chunk(byte[] primaryTarget, final List<yacySeed> targets) {
             super();
             this.primaryTarget = primaryTarget;
-            this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, payloadrow, Segment.wordOrder);
+            this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
             this.references = new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
             this.badReferences = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.targets    = targets;

@@ -987,6 +987,20 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
     }
 
+    public String targetAddress(final String targetHash) {
+        // find target address    
+        String address;
+        if (targetHash.equals(this.mySeed().hash)) {
+            address = this.mySeed().getClusterAddress();
+        } else {
+            final yacySeed targetSeed = this.getConnected(targetHash);
+            if (targetSeed == null) { return null; }
+            address = targetSeed.getClusterAddress();
+        }
+        if (address == null) address = "localhost:8090";
+        return address;
+    }
+    
     private class seedEnum implements Iterator<yacySeed> {
         
         private MapDataMining.mapIterator it;

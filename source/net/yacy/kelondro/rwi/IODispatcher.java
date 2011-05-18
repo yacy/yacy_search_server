@@ -30,7 +30,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.kelondro.blob.ArrayStack;
-import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -108,16 +107,16 @@ public class IODispatcher extends Thread {
         return (controlQueue == null || !this.isAlive()) ? 0 : controlQueue.availablePermits();
     }
     
-    protected synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, ArrayStack array, Row payloadrow, File newFile) {
+    protected synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, ArrayStack array, File newFile) {
         if (mergeQueue == null || controlQueue == null || !this.isAlive()) {
             if (f2 == null) {
                 Log.logWarning("IODispatcher", "emergency rewrite of file " + f1.getName() + " to " + newFile.getName());
             } else {
                 Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
             }
-            array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+            array.mergeMount(f1, f2, factory, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         } else {
-            MergeJob job = new MergeJob(f1, f2, factory, array, payloadrow, newFile);
+            MergeJob job = new MergeJob(f1, f2, factory, array, newFile);
             try {
                 if (this.isAlive()) {
                     this.mergeQueue.put(job);
@@ -137,7 +136,7 @@ public class IODispatcher extends Thread {
                 }
             } catch (InterruptedException e) {
                 Log.logWarning("IODispatcher", "interrupted: " + e.getMessage(), e);
-                array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+                array.mergeMount(f1, f2, factory, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
             }
         }
     }
@@ -238,7 +237,6 @@ public class IODispatcher extends Thread {
 
         private File f1, f2, newFile;
         private ArrayStack array;
-        private Row payloadrow;
         private ReferenceFactory<? extends Reference> factory;
         
         private MergeJob(
@@ -246,14 +244,12 @@ public class IODispatcher extends Thread {
                 File f2,
                 ReferenceFactory<? extends Reference> factory,
                 ArrayStack array,
-                Row payloadrow,
                 File newFile) {
             this.f1 = f1;
             this.f2 = f2;
             this.factory = factory;
             this.newFile = newFile;
             this.array = array;
-            this.payloadrow = payloadrow;
         }
 
         private File merge() {
@@ -265,7 +261,7 @@ public class IODispatcher extends Thread {
         		Log.logWarning("IODispatcher", "merge of file (2) " + f2.getName() + " failed: file does not exists");
         		return null;
         	}
-            return array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+            return array.mergeMount(f1, f2, factory, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         }
     }
 

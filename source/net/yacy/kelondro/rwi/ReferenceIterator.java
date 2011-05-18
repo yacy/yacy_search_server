@@ -32,7 +32,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.blob.HeapReader;
-import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -43,13 +42,11 @@ import net.yacy.kelondro.order.CloneableIterator;
  */
 public class ReferenceIterator <ReferenceType extends Reference> implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
     HeapReader.entries blobs;
-    Row payloadrow;
     File blobFile;
     ReferenceFactory<ReferenceType> factory;
     
-    public ReferenceIterator(final File blobFile, ReferenceFactory<ReferenceType> factory, final Row payloadrow) throws IOException {
-        this.blobs = new HeapReader.entries(blobFile, payloadrow.primaryKeyLength);
-        this.payloadrow = payloadrow;
+    public ReferenceIterator(final File blobFile, ReferenceFactory<ReferenceType> factory) throws IOException {
+        this.blobs = new HeapReader.entries(blobFile, factory.getRow().primaryKeyLength);
         this.blobFile = blobFile;
         this.factory = factory;
     }
@@ -69,7 +66,7 @@ public class ReferenceIterator <ReferenceType extends Reference> implements Clon
         Map.Entry<byte[], byte[]> entry = blobs.next();
         byte[] payload = entry.getValue();
         try {
-            return new ReferenceContainer<ReferenceType>(factory, entry.getKey(), RowSet.importRowSet(payload, payloadrow));
+            return new ReferenceContainer<ReferenceType>(factory, entry.getKey(), RowSet.importRowSet(payload, factory.getRow()));
         } catch (RowSpaceExceededException e) {
             Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because of too low memory: " + e.toString());
             return null;
@@ -93,7 +90,7 @@ public class ReferenceIterator <ReferenceType extends Reference> implements Clon
         if (blobs != null) this.blobs.close();
         blobs = null;
         try {
-            return new ReferenceIterator<ReferenceType>(this.blobFile, factory, this.payloadrow);
+            return new ReferenceIterator<ReferenceType>(this.blobFile, factory);
         } catch (IOException e) {
             Log.logException(e);
             return null;

@@ -26,8 +26,6 @@
 
 package de.anomic.search;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
@@ -53,21 +51,15 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
-import net.yacy.kelondro.index.BinSearch;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.EventTracker;
-import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.yacy.graphics.ProfilingGraph;
 
 public final class RankingProcess extends Thread {
     
-    public  static BinSearch[] ybrTables = null; // block-rank tables
-    private static final int maxYBR = 3; // the lower this value, the faster the search
-    private static boolean useYBR = true;
     private static final int maxDoubleDomAll = 1000, maxDoubleDomSpecial = 10000;
     
     private final QueryParams query;
@@ -179,7 +171,7 @@ public final class RankingProcess extends Thread {
         if (local) {
             this.local_resourceSize += index.size();
         } else {
-            assert fullResource >= 0;
+            assert fullResource >= 0 : "fullResource = " + fullResource;
             this.remote_resourceSize += fullResource;
             this.remote_peerCount++;
         }
@@ -252,8 +244,15 @@ public final class RankingProcess extends Thread {
 			    
                 // finally make a double-check and insert result to stack
                 if (urlhashes.add(iEntry.metadataHash())) {
-                    stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
-                    
+                    rankingtryloop: while (true) {
+                        try {
+                            stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                            break rankingtryloop;
+                        } catch (ArithmeticException e) {
+                            // this may happen if the concurrent normalizer changes values during cardinal computation
+                            continue rankingtryloop;
+                        }
+                    }
                     // increase counter for statistics
                     if (local) this.local_indexCount++; else this.remote_indexCount++;
                 }
@@ -685,64 +684,6 @@ public final class RankingProcess extends Thread {
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ConcurrentScoreMap<String>();
         if (this.authorNavigator.sizeSmaller(2)) this.authorNavigator.clear(); // navigators with one entry are not useful
         return this.authorNavigator;
-    }
-    
-    /**
-     * load YaCy Block Rank tables
-     * These tables have a very simple structure: every file is a sequence of Domain hashes, ordered by b64.
-     * Each Domain hash has a length of 6 bytes and there is no separation character between the hashes
-     * @param rankingPath
-     * @param count
-     */
-    public static void loadYBR(final File rankingPath, final int count) {
-        // load ranking tables
-        if (rankingPath.exists()) {
-            ybrTables = new BinSearch[count];
-            String ybrName;
-            File f;
-            try {
-                for (int i = 0; i < count; i++) {
-                    ybrName = "YBR-4-" + Digest.encodeHex(i, 2) + ".idx";
-                    f = new File(rankingPath, ybrName);
-                    if (f.exists()) {
-                        ybrTables[i] = new BinSearch(FileUtils.read(f), 6);
-                    } else {
-                        ybrTables[i] = null;
-                    }
-                }
-            } catch (final IOException e) {
-                ybrTables = null;
-            }
-        } else {
-            ybrTables = null;
-        }
-    }
-    
-    public static boolean canUseYBR() {
-        return ybrTables != null;
-    }
-    
-    public static boolean isUsingYBR() {
-        return useYBR;
-    }
-    
-    public static void switchYBR(final boolean usage) {
-        useYBR = usage;
-    }
-    
-    public static int ybr(final byte[] urlHash) {
-        // returns the YBR value in a range of 0..15, where 0 means best ranking and 15 means worst ranking
-        if (ybrTables == null) return 15;
-        if (!(useYBR)) return 15;
-        byte[] domhash = new byte[6];
-        System.arraycopy(urlHash, 6, domhash, 0, 6);
-        final int m = Math.min(maxYBR, ybrTables.length);
-        for (int i = 0; i < m; i++) {
-            if ((ybrTables[i] != null) && (ybrTables[i].contains(domhash))) {
-                return i;
-            }
-        }
-        return 15;
     }
 
 }

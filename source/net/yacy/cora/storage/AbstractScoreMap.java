@@ -24,6 +24,9 @@
 
 package net.yacy.cora.storage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
 
     /**
@@ -36,4 +39,21 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
         }
     }
     
+    /**
+     * divide the map into two halve parts using the count of the entries
+     * @param score
+     * @return the objects of the smaller entries from at least 1/2 of the list
+     */
+    public List<E> lowerHalf() {
+        int half = this.size() >> 1;
+        int smallestCount = 0;
+        ArrayList<E> list = new ArrayList<E>();
+        while (list.size() < half) {
+            for (E entry: this) {
+                if (get(entry) == smallestCount) list.add(entry);
+            }
+            smallestCount++;
+        }
+        return list;
+    }
 }

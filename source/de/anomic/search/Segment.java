@@ -109,7 +109,7 @@ public class Segment {
                 "text.index",
                 wordReferenceFactory,
                 wordOrder,
-                WordReferenceRow.urlEntryRow,
+                Word.commonHashLength,
                 entityCacheMaxSize,
                 targetFileSize,
                 maxFileSize,

@@ -470,6 +470,14 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
     }
     
     /**
+     * get the SVN version of the peer
+     * @return
+     */
+    public final int getRevision() {
+        return yacyVersion.revision(get(yacySeed.VERSION, yacySeed.ZERO));
+    }
+    
+    /**
      * @return the public address of the peer as IP:port string or <code>null</code> if no valid values for
      * either the IP or the port could be retrieved from this yacySeed object
      */

@@ -38,7 +38,19 @@ import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
 
-public interface Index <ReferenceType extends Reference> {
+public interface Index <ReferenceType extends Reference> extends Iterable<ReferenceContainer<ReferenceType>> {
+    
+    /**
+     * every index entry is made for a term which has a fixed size
+     * @return the size of the term
+     */
+    public int termKeyLength();
+    
+    /**
+     * merge this index with another index
+     * @param otherIndex
+     */
+    public void merge(Index<ReferenceType> otherIndex) throws IOException, RowSpaceExceededException;
     
 	/**
 	 * add references to the reverse index
@@ -177,5 +189,5 @@ public interface Index <ReferenceType extends Reference> {
      * return the order that is used for the storage of the word hashes
      * @return
      */
-    public ByteOrder ordering();
+    public ByteOrder termKeyOrdering();
 }

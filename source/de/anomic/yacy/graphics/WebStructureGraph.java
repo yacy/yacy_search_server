@@ -321,10 +321,14 @@ public class WebStructureGraph {
         
         public HostReference(final byte[] hostHash, final long modified, final int count) {
             assert (hostHash.length == 6) : "hostHash = " + UTF8.String(hostHash);
-            this.entry = hostReferenceFacory.getRow().newEntry();
+            this.entry = hostReferenceFactory.getRow().newEntry();
             this.entry.setCol(0, hostHash);
             this.entry.setCol(1, MicroDate.microDateDays(modified));
             this.entry.setCol(2, count);
+        }
+        
+        public HostReference(final String json) {
+            this.entry = hostReferenceFactory.getRow().newEntry(json, true);
         }
         
         public HostReference(Row.Entry entry) {
@@ -369,7 +373,7 @@ public class WebStructureGraph {
         }
     }
     
-    public static final HostReferenceFactory hostReferenceFacory = new HostReferenceFactory();
+    public static final HostReferenceFactory hostReferenceFactory = new HostReferenceFactory();
     public static       ReferenceContainerCache<HostReference> hostReferenceIndexCache = null;
     public static       long hostReferenceIndexCacheTime = 0;
     public static final long hostReferenceIndexCacheTTL = 1000 * 60 * 60 * 12; // 12 hours time to live for cache
@@ -380,8 +384,7 @@ public class WebStructureGraph {
             hostReferenceIndexCacheTime + hostReferenceIndexCacheTTL > System.currentTimeMillis()) return hostReferenceIndexCache; 
         
         // collect the references
-        HostReferenceFactory hostReferenceFactory = new HostReferenceFactory();
-        ReferenceContainerCache<HostReference> idx = new ReferenceContainerCache<HostReference>(hostReferenceFactory, hostReferenceFactory.getRow(), Base64Order.enhancedCoder);
+        ReferenceContainerCache<HostReference> idx = new ReferenceContainerCache<HostReference>(hostReferenceFactory, Base64Order.enhancedCoder, 6);
         
         // we iterate over all structure entries.
         // one structure entry has information that a specific host links to a list of other hosts
@@ -419,7 +422,7 @@ public class WebStructureGraph {
                 ReferenceContainer<HostReference> r = idx.get(term, null);
                 try {
                     if (r == null) {
-                        r = new ReferenceContainer<HostReference>(hostReferenceFacory, term);
+                        r = new ReferenceContainer<HostReference>(hostReferenceFactory, term);
                         r.add(hr);
                         idx.add(r);
                     } else {

@@ -44,7 +44,7 @@ public abstract class AbstractBufferedIndex<ReferenceType extends Reference> ext
     public synchronized TreeSet<ReferenceContainer<ReferenceType>> references(byte[] startHash, final boolean rot, int count, boolean ram) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache
-        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ordering().clone());
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.termKeyOrdering().clone());
         if (startHash != null && startHash.length == 0) startHash = null;
         ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startHash);
         containerOrder.rotate(emptyContainer);

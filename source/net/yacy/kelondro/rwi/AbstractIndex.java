@@ -46,6 +46,30 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         this.factory = factory;
     }
     
+
+    /**
+     * merge this index with another index
+     * @param otherIndex
+     * @throws IOException 
+     * @throws RowSpaceExceededException 
+     */
+    public void merge(Index<ReferenceType> otherIndex) throws IOException, RowSpaceExceededException {
+        byte[] term;
+        for (ReferenceContainer<ReferenceType> otherContainer: otherIndex) {
+            term = otherContainer.getTermHash();
+            synchronized (this) {
+                ReferenceContainer<ReferenceType> container = this.get(term, null);
+                if (container == null) {
+                    this.add(otherContainer);
+                } else {
+                    container.merge(otherContainer);
+                    this.delete(term); // in some file-based environments we cannot just change the container
+                    this.add(container);
+                }
+            }
+        }
+    }
+    
     public void removeDelayed(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
@@ -69,7 +93,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
     public synchronized TreeSet<ReferenceContainer<ReferenceType>> references(final byte[] startHash, final boolean rot, int count) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache
-        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ordering().clone());
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.termKeyOrdering().clone());
         final ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startHash);
         containerOrder.rotate(emptyContainer);
         final TreeSet<ReferenceContainer<ReferenceType>> containers = new TreeSet<ReferenceContainer<ReferenceType>>(containerOrder);

@@ -110,6 +110,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -169,6 +170,7 @@ import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.graphics.WebStructureGraph;
+import de.anomic.yacy.graphics.WebStructureGraph.HostReference;
 
 public final class Switchboard extends serverSwitch {
     
@@ -444,11 +446,30 @@ public final class Switchboard extends serverSwitch {
             ppRamString(stopwordsFile.length()/1024));
         }
 
-        // load ranking tables
-        final File YBRPath = new File(appPath, "ranking/YBR");
-        if (YBRPath.exists()) {
-            RankingProcess.loadYBR(YBRPath, 15);
-        }
+        // load ranking from distribution
+        final File rankingPath = new File(this.appPath, "ranking/YBR".replace('/', File.separatorChar));
+        BlockRank.loadBlockRankTable(rankingPath, 8);
+        
+        // load distributed ranking
+        final File hostIndexFile = new File(queuesRoot, "hostIndex.blob");
+        // very large memory configurations allow to re-compute a ranking table
+        if (MemoryControl.available() > 1024 * 1024 * 1024) new Thread() {
+            public void run() {
+                ReferenceContainerCache<HostReference> hostIndex; // this will get large, more than 0.5 million entries by now
+                if (!hostIndexFile.exists()) {
+                    hostIndex = BlockRank.collect(peers, webStructure);
+                    BlockRank.saveHostIndex(hostIndex, hostIndexFile);
+                } else {
+                    hostIndex = BlockRank.loadHostIndex(hostIndexFile);
+                }
+                // recursively compute a new ranking table
+                BlockRank.ybrTables = BlockRank.evaluate(hostIndex, null, 0);
+                hostIndex = null; // we don't need that here any more, so free the memory
+                BlockRank.analyse(BlockRank.ybrTables, webStructure);
+                // store the new table
+                //BlockRank.storeBlockRankTable(rankingPath);
+            }
+        }.start();
         
         // load the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");

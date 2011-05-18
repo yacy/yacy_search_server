@@ -41,7 +41,6 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.ByteArray;
@@ -58,28 +57,38 @@ import net.yacy.kelondro.util.FileUtils;
  */
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
-    private   final Row payloadrow;
-    protected final ByteOrder termOrder;
-    private   final ContainerOrder<ReferenceType> containerOrder;
-    protected Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
+    private final int termSize;
+    private final ByteOrder termOrder;
+    private final ContainerOrder<ReferenceType> containerOrder;
+    private Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
     
     /**
      * open an existing heap file in undefined mode
      * after this a initialization should be made to use the heap:
      * either a read-only or read/write mode initialization
-     * @param payloadrow
-     * @param log
+     * @param factory the factory for payload reference objects
+     * @param termOrder the order on search terms for the cache
+     * @param termSize the fixed size of search terms
      */
-    public ReferenceContainerCache(final ReferenceFactory<ReferenceType> factory, final Row payloadrow, ByteOrder termOrder) {
+    public ReferenceContainerCache(final ReferenceFactory<ReferenceType> factory, ByteOrder termOrder, int termSize) {
         super(factory);
-        this.payloadrow = payloadrow;
         this.termOrder = termOrder;
+        this.termSize = termSize;
         this.containerOrder = new ContainerOrder<ReferenceType>(this.termOrder);
         this.cache = new ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>>();
     }
     
     public Row rowdef() {
-        return this.payloadrow;
+        return this.factory.getRow();
+    }
+    
+
+    /**
+     * every index entry is made for a term which has a fixed size
+     * @return the size of the term
+     */
+    public int termKeyLength() {
+        return this.termSize;
     }
     
     public void clear() {
@@ -107,7 +116,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".prt");
         HeapWriter dump;
         try {
-            dump = new HeapWriter(tmpFile, heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder, writeBuffer);
+            dump = new HeapWriter(tmpFile, heapFile, this.termSize, this.termOrder, writeBuffer);
         } catch (IOException e1) {
             Log.logException(e1);
             return;
@@ -119,20 +128,20 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         
         // write wCache
         long wordcount = 0, urlcount = 0;
-        byte[] wordHash = null, lwh;
+        byte[] term = null, lwh;
         for (final ReferenceContainer<ReferenceType> container: cachecopy) {
             // get entries
-            lwh = wordHash;
-            wordHash = container.getTermHash();
+            lwh = term;
+            term = container.getTermHash();
             
             // check consistency: entries must be ordered
-            assert (lwh == null || this.ordering().compare(wordHash, lwh) > 0);
+            assert (lwh == null || this.termKeyOrdering().compare(term, lwh) > 0);
             
             // put entries on heap
-            if (container != null && wordHash.length == payloadrow.primaryKeyLength) {
+            if (container != null && term.length == this.termSize) {
                 //System.out.println("Dump: " + wordHash);
                 try {
-                    dump.add(wordHash, container.exportCollection());
+                    dump.add(term, container.exportCollection());
                 } catch (IOException e) {
                     Log.logException(e);
                 } catch (RowSpaceExceededException e) {
@@ -447,7 +456,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return 0;
     }
 
-    public ByteOrder ordering() {
+    public ByteOrder termKeyOrdering() {
         return this.termOrder;
     }
  

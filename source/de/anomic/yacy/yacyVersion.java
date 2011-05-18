@@ -2,7 +2,6 @@ package de.anomic.yacy;
 
 import java.util.Comparator;
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
 
@@ -133,10 +132,9 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
     public static String combined2prettyVersion(final String ver) {
          return combined2prettyVersion(ver, "");
      }
-
-    public static String combined2prettyVersion(final String ver, final String computerName) {
-         final Matcher matcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z").matcher(ver); 
     
+    public static String combined2prettyVersion(final String ver, final String computerName) {
+        final Matcher matcher = yacyBuildProperties.versionMatcher.matcher(ver); 
          if (!matcher.find()) { 
              Log.logWarning("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");   
              return "dev/00000";
@@ -146,8 +144,14 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
         String revision = matcher.group(2);
         for(int i=revision.length();i<5;++i) revision += "0";
         return mainversion+"/"+revision;
-     }
+    }
 
+    public static int revision(final String ver) {
+        final Matcher matcher = yacyBuildProperties.versionMatcher.matcher(ver); 
+        if (!matcher.find()) return 0;
+        return Integer.parseInt(matcher.group(2));
+    }
+    
     /**
      * Combines the version of YaCy with the versionnumber from SVN to a
      * combined version

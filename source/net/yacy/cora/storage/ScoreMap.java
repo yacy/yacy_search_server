@@ -25,6 +25,7 @@
 package net.yacy.cora.storage;
 
 import java.util.Iterator;
+import java.util.List;
 
 public interface ScoreMap<E> extends Iterable<E> {
 
@@ -41,6 +42,14 @@ public interface ScoreMap<E> extends Iterable<E> {
      * @param minScore
      */
     public void shrinkToMinScore(int minScore);
+    
+
+    /**
+     * divide the map into two halve parts using the count of the entries
+     * @param score
+     * @return the objects of the smaller entries from at least 1/2 of the list
+     */
+    public List<E> lowerHalf();
     
     public int size();
     public boolean sizeSmaller(int size);    

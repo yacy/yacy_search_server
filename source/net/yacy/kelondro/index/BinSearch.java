@@ -26,6 +26,12 @@
 
 package net.yacy.kelondro.index;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
 
@@ -35,12 +41,23 @@ public final class BinSearch {
     private final byte[] chunks;
     private final int    chunksize;
     private final int    count;
-    private static final ByteOrder objectOrder = new NaturalOrder(true);
+    private static final ByteOrder objectOrder = new NaturalOrder(true); // the natural order is much faster than the b64Order
     
     public BinSearch(final byte[] chunks, final int chunksize) {
         this.chunks = chunks;
         this.chunksize = chunksize;
         this.count = chunks.length / chunksize;
+    }
+    
+    public BinSearch(final List<byte[]> chunkList, final int chunksize) {
+        byte[][] chunksa = new byte[chunkList.size()][];
+        chunksa = chunkList.toArray(chunksa);
+        Arrays.sort(chunksa, objectOrder);
+        this.chunks = new byte[chunkList.size() * chunksize];
+        for (int i = 0; i < chunksa.length; i++) System.arraycopy(chunksa[i], 0, this.chunks, i * chunksize, chunksize);
+        this.chunksize = chunksize;
+        this.count = chunks.length / chunksize;
+        assert this.count == chunkList.size();
     }
     
     public final boolean contains(final byte[] t) {
@@ -70,6 +87,19 @@ public final class BinSearch {
         final byte[] a = new byte[chunksize];
         System.arraycopy(this.chunks, element * this.chunksize, a, 0, chunksize);
         return a;
+    }
+    
+    public final byte[] get(final int element, byte[] a) {
+        assert a.length == chunksize;
+        System.arraycopy(this.chunks, element * this.chunksize, a, 0, chunksize);
+        return a;
+    }
+    
+    public final void write(File f) throws IOException {
+        FileOutputStream os = new FileOutputStream(f);
+        os.write(this.chunks);
+        os.flush();
+        os.close();
     }
     
     public static void main(final String[] args) {

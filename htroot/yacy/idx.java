@@ -41,15 +41,15 @@ public final class idx {
     // http://localhost:8090/yacy/idx.json?object=host
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        if (post == null || env == null) { return null; }
-
-        // return variable that accumulates replacements
-        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         prop.put("list", 0);
         prop.put("rowdef","");
         prop.put("name","");
+        if (post == null || env == null) return prop;
+
+        // return variable that accumulates replacements
+        final Switchboard sb = (Switchboard) env;
         
         if (sb.adminAuthenticated(header) < 2 && !yacyNetwork.authentifyRequest(post, env)) {
             return prop;
@@ -58,7 +58,7 @@ public final class idx {
         if (post.get("object", "").equals("host")) {
             prop.put("name","host");
             ReferenceContainerCache<HostReference> idx = sb.webStructure.incomingReferences();
-            prop.put("rowdef", WebStructureGraph.hostReferenceFacory.getRow().toString());
+            prop.put("rowdef", WebStructureGraph.hostReferenceFactory.getRow().toString());
             int count = 0;
             for (ReferenceContainer<HostReference> references: idx) {
                 prop.put("list_" + count + "_term", UTF8.String(references.getTermHash()));

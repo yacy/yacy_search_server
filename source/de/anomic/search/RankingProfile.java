@@ -85,14 +85,14 @@ public class RankingProfile {
     public RankingProfile(final ContentDomain mediatype) {
         // set default-values
         coeff_domlength          = 11;
-        coeff_ybr                = 9;
-        coeff_date               = 4;
+        coeff_ybr                = 15;
+        coeff_date               = 13;
         coeff_wordsintitle       = 4;
         coeff_wordsintext        = 2;
         coeff_phrasesintext      = 3;
         coeff_llocal             = 2;
         coeff_lother             = 3;
-        coeff_urllength          = 13;
+        coeff_urllength          = 14;
         coeff_urlcomps           = 12;
         coeff_hitcount           = 9;
         coeff_posintext          = 10;

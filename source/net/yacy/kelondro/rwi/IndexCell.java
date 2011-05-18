@@ -28,6 +28,7 @@ package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
@@ -35,7 +36,6 @@ import java.util.concurrent.Semaphore;
 import net.yacy.cora.storage.ComparableARC;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.HandleSet;
-import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
@@ -57,7 +57,7 @@ import net.yacy.kelondro.util.MemoryControl;
  * another BLOB file in the index array.
  */
 
-public final class IndexCell<ReferenceType extends Reference> extends AbstractBufferedIndex<ReferenceType> implements BufferedIndex<ReferenceType> {
+public final class IndexCell<ReferenceType extends Reference> extends AbstractBufferedIndex<ReferenceType> implements BufferedIndex<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
     private static final long cleanupCycle =  60000;
     private static final long dumpCycle    = 600000;
@@ -81,7 +81,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             final String prefix,
             final ReferenceFactory<ReferenceType> factory,
             final ByteOrder termOrder,
-            final Row payloadrow,
+            final int termSize,
             final int maxRamEntries,
             final long targetFileSize,
             final long maxFileSize,
@@ -90,8 +90,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             ) throws IOException {
         super(factory);
         
-        this.array = new ReferenceContainerArray<ReferenceType>(cellPath, prefix, factory, termOrder, payloadrow, merger);
-        this.ram = new ReferenceContainerCache<ReferenceType>(factory, payloadrow, termOrder);
+        this.array = new ReferenceContainerArray<ReferenceType>(cellPath, prefix, factory, termOrder, termSize, merger);
+        this.ram = new ReferenceContainerCache<ReferenceType>(factory, termOrder, termSize);
         this.countCache = new ComparableARC<byte[], Integer>(1000, termOrder);
         this.maxRamEntries = maxRamEntries;
         this.merger = merger;
@@ -107,6 +107,14 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     /*
      * methods to implement Index
      */
+
+    /**
+     * every index entry is made for a term which has a fixed size
+     * @return the size of the term
+     */
+    public int termKeyLength() {
+        return this.ram.termKeyLength();
+    }
     
     /**
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
@@ -374,7 +382,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
         
     }
-
+    
+    public Iterator<ReferenceContainer<ReferenceType>> iterator() {
+        return references(null, false);
+    } 
+    
     public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] starttermHash, boolean rot) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, starttermHash));
@@ -453,7 +465,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return 10 * 1024 * 1024;
     }
 
-    public ByteOrder ordering() {
+    public ByteOrder termKeyOrdering() {
         return this.array.ordering();
     }
     
@@ -470,6 +482,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             (this.ram.size() >= this.maxRamEntries ||
              (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
              (this.ram.size() > 3000 && this.lastDump + dumpCycle < t))) {
+            int termSize = this.ram.termKeyLength();
+            ByteOrder termOrder = this.ram.termKeyOrdering();
             try {
                 this.dumperSemaphore.acquire(); // only one may pass
                 if (this.ram.size() >= this.maxRamEntries ||
@@ -486,7 +500,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                     synchronized (this) {
                         ramdump = this.ram;
                         // get a fresh ram cache
-                        this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
+                        this.ram = new ReferenceContainerCache<ReferenceType>(factory, termOrder, termSize);
                     }
                     // dump the buffer
                     merger.dump(ramdump, dumpFile, array);
@@ -557,6 +571,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public void setBufferMaxWordCount(int maxWords) {
         this.maxRamEntries = maxWords;
         this.cleanCache();
-    }    
+    }
 
 }
