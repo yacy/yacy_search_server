@@ -244,6 +244,7 @@ public class CrawlProfileEditor_p {
 
         // start contrib [MN]
         int i = 0;
+        if (active && profile.domMaxPages() > 0 && profile.domMaxPages() != Integer.MAX_VALUE) {
         String item;
         while (i <= domlistlength && !"".equals(item = crawlStacker.domName(true, i))){
             if (i == domlistlength) {
@@ -252,7 +253,8 @@ public class CrawlProfileEditor_p {
             prop.putHTML(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterContent_" + i + "_item", item);
             i++;
         }
-
+        }
+        
         prop.put(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent", i);
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(profile.domMaxPages()));
