@@ -55,7 +55,7 @@ public class Word {
      */
     public static final int commonHashLength = 12;
     
-    private static final int hashCacheSize = Math.max(100000, Math.min(10000000, (int) (MemoryControl.available() / 20000L)));
+    private static final int hashCacheSize = Math.max(200000, Math.min(10000000, (int) (MemoryControl.available() / 20000L)));
     private static ARC<String, byte[]> hashCache = null;
     static {
         try {
@@ -122,7 +122,7 @@ public class Word {
         if (MemoryControl.shortStatus()) {
             hashCache.clear();
         } else {
-            hashCache.put(wordlc, h); // prevent expensive MD5 computation and encoding
+            hashCache.insertIfAbsent(wordlc, h); // prevent expensive MD5 computation and encoding
         }
         return h;
     }

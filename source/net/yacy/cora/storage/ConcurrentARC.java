@@ -89,7 +89,17 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      * @param v
      */
     public final void insert(final K s, final V v) {
-        this.arc[getPartition(s)].put(s, v);
+        this.arc[getPartition(s)].insert(s, v);
+    }
+
+    /**
+     * put a value to the cache if there was not an entry before
+     * do not return a previous content value
+     * @param s
+     * @param v
+     */
+    public void insertIfAbsent(K s, V v) {
+        this.arc[getPartition(s)].insertIfAbsent(s, v);
     }
     
     /**

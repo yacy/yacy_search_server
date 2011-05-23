@@ -91,7 +91,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             if (cache.containsKey(key)) return;
 
             // learn new snippet
-            cache.put(key, snippet);
+            cache.insertIfAbsent(key, snippet);
         }
         
         public String get(final String wordhashes, final String urlhash) {

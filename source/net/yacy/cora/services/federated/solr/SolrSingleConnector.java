@@ -170,28 +170,6 @@ public class SolrSingleConnector {
         }
     }
     
-    /*
-    public void addx(File file, String solrId) throws IOException {
-        ContentStreamUpdateRequest up = new ContentStreamUpdateRequest("/update/extract");
-        ModifiableSolrParams params = new ModifiableSolrParams();
-        List<ContentStream> contentStreams = new ArrayList<ContentStream>();
-        contentStreams.add(new ContentStreamBase.FileStream(file));
-        params.set("literal.id", solrId);
-        params.set("uprefix", "attr_");
-        params.set("fmap.content", "attr_content");
-        params.set( UpdateParams.COMMIT, "true" );
-        params.set( UpdateParams.WAIT_FLUSH, String.valueOf(true));
-        params.set( UpdateParams.WAIT_SEARCHER, String.valueOf(true));
-          
-        try {
-            server.
-            server.request(up);
-        } catch (SolrServerException e) {
-            throw new IOException(e);
-        }
-    }
-    */
-    
     public void add(String id, ResponseHeader header, Document doc) throws IOException {
         add(this.scheme.yacy2solr(id, header, doc));
     }
@@ -297,7 +275,7 @@ public class SolrSingleConnector {
     public static void main(String args[]) {
         SolrSingleConnector solr;
         try {
-            solr = new SolrSingleConnector("http://127.0.0.1:8983/solr", SolrScheme.SolrCell);
+            solr = new SolrSingleConnector("http://127.0.0.1:8983/solr", SolrScheme.SolrCellExtended);
             solr.clear();
             File exampleDir = new File("/Data/workspace2/yacy/test/parsertest/");
             long t, t0, a = 0;

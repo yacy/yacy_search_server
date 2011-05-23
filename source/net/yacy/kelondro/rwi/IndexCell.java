@@ -189,7 +189,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
         // put count result into cache
         if (MemoryControl.shortStatus()) this.countCache.clear();
-        this.countCache.put(termHash, c);
+        this.countCache.insert(termHash, c);
         return c;
     }
     

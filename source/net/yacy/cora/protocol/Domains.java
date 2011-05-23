@@ -501,7 +501,7 @@ public class Domains {
         final Collection<String> hosts = NAME_CACHE_HIT.getKeys(i);
         if (!hosts.isEmpty()) return hosts.iterator().next();
         final String host = i.getHostName();
-        NAME_CACHE_HIT.put(host, i);
+        NAME_CACHE_HIT.insertIfAbsent(host, i);
         return host;
         /*
         // call i.getHostName() using concurrency to interrupt execution in case of a time-out
@@ -560,14 +560,14 @@ public class Domains {
                 ip = InetAddress.getByName(host); //TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
             } catch (final UnknownHostException e) {
                 // add new entries
-                NAME_CACHE_MISS.put(host, PRESENT);
+                NAME_CACHE_MISS.insertIfAbsent(host, PRESENT);
                 LOOKUP_SYNC.remove(host);
                 return null;
             }
             
             if (ip != null && !ip.isLoopbackAddress() && !matchesList(host, nameCacheNoCachingPatterns)) {
                 // add new ip cache entries
-                NAME_CACHE_HIT.put(host, ip);
+                NAME_CACHE_HIT.insertIfAbsent(host, ip);
                 
                 // add also the isLocal host name caches
                 boolean localp = ip.isAnyLocalAddress() || ip.isLinkLocalAddress() || ip.isSiteLocalAddress();

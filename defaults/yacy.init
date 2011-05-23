@@ -1020,4 +1020,4 @@ color_searchurlhover = #008000
 # - to check whats in solr after indexing, open http://localhost:8983/solr/admin/
 federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
-federated.service.solr.indexing.scheme = SolrCell
+federated.service.solr.indexing.scheme = SolrCellExtended

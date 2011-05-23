@@ -44,15 +44,16 @@ import org.apache.solr.common.SolrInputDocument;
 public enum SolrScheme {
 
     SolrCell,
+    SolrCellExtended,
     DublinCore;
 
     
     public SolrInputDocument yacy2solr(String id, ResponseHeader header, Document document) {
-        if (this == SolrCell) return yacy2solrSolrCell(id, header, document);
+        if (this == SolrCellExtended) return yacy2solrSolrCellExtended(id, header, document);
         return null;
     }
     
-    public static SolrInputDocument yacy2solrSolrCell(String id, ResponseHeader header, Document yacydoc) {
+    public static SolrInputDocument yacy2solrSolrCellExtended(String id, ResponseHeader header, Document yacydoc) {
         // we user the SolrCell design as index scheme
         SolrInputDocument solrdoc = new SolrInputDocument();
         DigestURI digestURI = new DigestURI(yacydoc.dc_source());
@@ -199,7 +200,7 @@ public enum SolrScheme {
             if (frames.length > 0) solrdoc.addField("attr_frames", frames);
             
             // IFrames
-            Set<MultiProtocolURI> iframess = html.getFrames();
+            Set<MultiProtocolURI> iframess = html.getIFrames();
             String[] iframes = new String[iframess.size()];
             c = 0;
             for (MultiProtocolURI entry: iframess) {

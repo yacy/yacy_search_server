@@ -54,6 +54,12 @@ public class ZURL implements Iterable<ZURL.Entry> {
     private static final int EcoFSBufferSize = 2000;
     private static final int maxStackSize    = 1000;
     
+    public enum FailCategory {
+        NETWORK_FAILURE, // an entity could not been loaded
+        CRAWL_RULE,      // the crawler configuration does not want to load the entity
+        ROBOTS_RULE;     // a remote server denies indexing or loading
+    }
+    
     private final static Row rowdef = new Row(
             "String urlhash-"   + Word.commonHashLength + ", " + // the url's hash
             "String executor-"  + Word.commonHashLength + ", " + // the crawling executor

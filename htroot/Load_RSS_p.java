@@ -273,7 +273,7 @@ public class Load_RSS_p {
                     if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
                     if (sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null) continue loop;
                     sb.addToIndex(messageurl, null, null);
-                    RSSLoader.indexTriggered.put(messageurl.hash(), new Date());
+                    RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 } catch (IOException e) {
                     Log.logException(e);
                 } catch (Failure e) {

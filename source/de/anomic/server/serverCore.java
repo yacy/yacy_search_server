@@ -312,8 +312,9 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         try {
             // prepare for new connection
             // idleThreadCheck();
-            this.switchboard.handleBusyState(getJobCount());
-            if (this.log.isFinest()) this.log.logFinest("* waiting for connections, " + getJobCount() + " sessions running");
+            int jobCount = getJobCount();
+            this.switchboard.handleBusyState(jobCount);
+            if (this.log.isFinest()) this.log.logFinest("* waiting for connections, " + jobCount + " sessions running");
             
             announceThreadBlockApply();
             
@@ -322,10 +323,9 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             
             announceThreadBlockRelease();
             
-            int pp/*, trycount = 0*/;
-            if ((pp = getJobCount()) >= this.maxBusySessions) {
+            if (jobCount >= this.maxBusySessions) {
                 terminateOldSessions(3000);
-                this.log.logInfo("termination of old sessions: before = " + pp + ", after = " + getJobCount());
+                this.log.logInfo("termination of old sessions: before = " + jobCount + ", after = " + getJobCount());
                 //if (getJobCount() < this.maxBusySessions) break;
                 //if (trycount++ > 5) break;
                 //Thread.sleep(1000); // lets try again after a short break
@@ -458,7 +458,35 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     }
     
     public int getJobCount() {
-        return getJobList().size();
+        final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];     
+        serverCore.sessionThreadGroup.enumerate(threadList, false);
+        int c = 0;
+        for (Thread t: threadList) {
+            if (t == null) continue;
+            if (!(t instanceof Session)) {
+                //log.logSevere("serverCore.getJobList - thread is not Session: " + t.getClass().getName());
+                continue;
+            }
+            c++;
+        }
+        return c;
+    }
+
+    // idle sensor: the thread is idle if there are no sessions running
+    public boolean idle() {
+        // idleThreadCheck();
+        final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];     
+        serverCore.sessionThreadGroup.enumerate(threadList, false);
+        for (Thread t: threadList) {
+            if (t == null) continue;
+            if (!(t instanceof Session)) {
+                //log.logSevere("serverCore.getJobList - thread is not Session: " + t.getClass().getName());
+                continue;
+            }
+            return false;
+        }
+        return true;
+        //return (getJobCount() == 0);
     }
     
     public int getMaxSessionCount() {
@@ -467,12 +495,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     
     public void setMaxSessionCount(final int count) {
         this.maxBusySessions = count;
-    }
-    
-    // idle sensor: the thread is idle if there are no sessions running
-    public boolean idle() {
-        // idleThreadCheck();
-        return (getJobCount() == 0);
     }
 
     public final class Session extends Thread {

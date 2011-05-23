@@ -68,6 +68,7 @@ public class Evaluation {
         url,
         scriptpath,
         scriptcode,
+        framepath,
         iframepath,
         imgpath,
         apath,
@@ -156,32 +157,29 @@ public class Evaluation {
         }
         
     }
-    
-    public static class Scores {
 
-        private Map<String, ClusteredScoreMap<String>> modelMap; // a map from model names to attribute scores
-        
-        public Scores() {
-            this.modelMap = new HashMap<String, ClusteredScoreMap<String>>();
-        }
-        
-        /**
-         * produce all model names
-         * @return a set of model names
-         */
-        public Set<String> getModelNames() {
-            return this.modelMap.keySet();
-        }
-        
-        /**
-         * calculate the scores for a model
-         * the scores is a attribute/count map which count how often a specific attribute was found
-         * @param modelName
-         * @return
-         */
-        public ClusteredScoreMap<String> getScores(String modelName) {
-            return this.modelMap.get(modelName);
-        }
+    private final Map<String, ClusteredScoreMap<String>> modelMap; // a map from model names to attribute scores
+    
+    public Evaluation() {
+        this.modelMap = new HashMap<String, ClusteredScoreMap<String>>();
+    }
+    
+    /**
+     * produce all model names
+     * @return a set of model names
+     */
+    public Set<String> getModelNames() {
+        return this.modelMap.keySet();
+    }
+    
+    /**
+     * calculate the scores for a model
+     * the scores is a attribute/count map which count how often a specific attribute was found
+     * @param modelName
+     * @return
+     */
+    public ClusteredScoreMap<String> getScores(String modelName) {
+        return this.modelMap.get(modelName);
     }
 
     /**
@@ -199,25 +197,24 @@ public class Evaluation {
      * this will increase statistic counters for models if a model matches
      * @param element - the element where a matching is made
      * @param content - the content of the element which shall be matched
-     * @param scores - the score object where the scores are stored
      */
-    public static void match(Element element, String content, Scores scores) {
+    public void match(Element element, String content) {
         if (models.isEmpty()) return; // fast return if this feature is not used
         ClusteredScoreMap<String> newScores, oldScores;
         for (Model pattern: models) {
             newScores = pattern.match(element, content);
-            oldScores = scores.getScores(pattern.getName());
+            oldScores = this.getScores(pattern.getName());
             if (oldScores == null) {
                 oldScores = new ClusteredScoreMap<String>();
-                scores.modelMap.put(pattern.getName(), oldScores);
+                this.modelMap.put(pattern.getName(), oldScores);
             }
             oldScores.inc(newScores);
         }
     }
     
-    public static void match(Element element, char[] content, Scores scores) {
+    public void match(Element element, char[] content) {
         if (models.isEmpty()) return; // fast return if this feature is not used
-        match(element, new String(content), scores);
+        match(element, new String(content));
     }
     
 }

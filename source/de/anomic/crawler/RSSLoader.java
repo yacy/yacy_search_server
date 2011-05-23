@@ -90,7 +90,7 @@ public class RSSLoader extends Thread {
                 if (indexTriggered.containsKey(messageurl.hash())) continue loop;
                 if (sb.urlExists(Segments.Process.LOCALCRAWLING, messageurl.hash()) != null) continue loop;
                 sb.addToIndex(messageurl, null, null);
-                indexTriggered.put(messageurl.hash(), new Date());
+                indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
                 loadCount++;
             } catch (IOException e) {
                 Log.logException(e);

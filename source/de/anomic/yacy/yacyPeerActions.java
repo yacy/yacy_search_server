@@ -53,7 +53,7 @@ public class yacyPeerActions {
         userAgents = null;
     }
     
-    public synchronized boolean connectPeer(final yacySeed seed, final boolean direct) {
+    public boolean connectPeer(final yacySeed seed, final boolean direct) {
         // store a remote peer's seed
         // returns true if the peer is new and previously unknown
         if (seed == null) {

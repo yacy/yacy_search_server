@@ -138,7 +138,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     /**
      * evaluation scores: count appearance of specific attributes
      */
-    private Evaluation.Scores evaluationScores;
+    private Evaluation evaluationScores;
 
     @SuppressWarnings("unchecked")
     public ContentScraper(final MultiProtocolURI root) {
@@ -146,7 +146,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         this.root = root;
-        this.evaluationScores = new Evaluation.Scores();
+        this.evaluationScores = new Evaluation();
         this.rss = new HashMap<MultiProtocolURI, String>();
         this.css = new HashMap<MultiProtocolURI, String>();
         this.anchors = new HashMap<MultiProtocolURI, Properties>();
@@ -165,7 +165,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.htmlFilterEventListeners = new EventListenerList();
         this.lon = 0.0f;
         this.lat = 0.0f;
-        Evaluation.match(Element.url, root.toNormalform(false, false), this.evaluationScores);
+        this.evaluationScores.match(Element.url, root.toNormalform(false, false));
     }
     
     public void scrapeText(final char[] newtext, final String insideTag) {
@@ -173,7 +173,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         int p, pl, q, s = 0;
 
         // match evaluation pattern
-        Evaluation.match(Element.text, newtext, this.evaluationScores);
+        this.evaluationScores.match(Element.text, newtext);
         
         // try to find location information in text
         // Opencaching:
@@ -289,27 +289,29 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     }
                 }
             } catch (final NumberFormatException e) {}
-            Evaluation.match(Element.imgpath, src, this.evaluationScores);
+            this.evaluationScores.match(Element.imgpath, src);
         } else if(tagname.equalsIgnoreCase("base")) {
             try {
                 root = new MultiProtocolURI(tagopts.getProperty("href", ""));
             } catch (final MalformedURLException e) {}
         } else if (tagname.equalsIgnoreCase("frame")) {
-            anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts /* with property "name" */);
-            frames.add(absolutePath(tagopts.getProperty("src", "")));
+            MultiProtocolURI src = absolutePath(tagopts.getProperty("src", ""));
+            anchors.put(src, tagopts /* with property "name" */);
+            frames.add(src);
+            this.evaluationScores.match(Element.framepath, src.toNormalform(true, false));
         } else if (tagname.equalsIgnoreCase("body")) {
             String c = tagopts.getProperty("class", "");
-            Evaluation.match(Element.bodyclass, c, this.evaluationScores);
+            this.evaluationScores.match(Element.bodyclass, c);
         } else if (tagname.equalsIgnoreCase("div")) {
             String id = tagopts.getProperty("id", "");
-            Evaluation.match(Element.divid, id, this.evaluationScores);
+            this.evaluationScores.match(Element.divid, id);
         } else if (tagname.equalsIgnoreCase("meta")) {
             String name = tagopts.getProperty("name", "");
             String content = tagopts.getProperty("content","");
             if (name.length() > 0) {
                 metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
                 if (name.equals("generator")) {
-                    Evaluation.match(Element.metagenerator, content, this.evaluationScores);
+                    this.evaluationScores.match(Element.metagenerator, content);
                 }
             } else {
                 name = tagopts.getProperty("http-equiv", "");
@@ -340,7 +342,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     rss.put(newLink, linktitle);
                 } else if (rel.equalsIgnoreCase("stylesheet") && type.equalsIgnoreCase("text/css")) {
                     css.put(newLink, rel);
-                    Evaluation.match(Element.csspath, href, this.evaluationScores);
+                    this.evaluationScores.match(Element.csspath, href);
                 } else if (!rel.equalsIgnoreCase("stylesheet") && !rel.equalsIgnoreCase("alternate stylesheet")) {
                     Properties p = new Properties(); p.put("name", linktitle);
                     anchors.put(newLink, p);
@@ -377,7 +379,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     anchors.put(url, tagopts);
                 }
             }
-            Evaluation.match(Element.apath, href, this.evaluationScores);
+            this.evaluationScores.match(Element.apath, href);
         }
         final String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
@@ -413,17 +415,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             h = recursiveParse(text);
             if (h.length() > 0) li.add(h);
         } else if (tagname.equalsIgnoreCase("iframe")) {
-            String src = tagopts.getProperty("src", "");
-            anchors.put(absolutePath(src), tagopts /* with property "name" */);
-            iframes.add(absolutePath(src));
-            Evaluation.match(Element.iframepath, src, this.evaluationScores);
+            MultiProtocolURI src = absolutePath(tagopts.getProperty("src", ""));
+            anchors.put(src, tagopts /* with property "name" */);
+            iframes.add(src);
+            this.evaluationScores.match(Element.iframepath, src.toNormalform(true, false));
         } else if (tagname.equalsIgnoreCase("script")) {
             String src = tagopts.getProperty("src", "");
             if (src.length() > 0) {
                 script.add(absolutePath(src));
-                Evaluation.match(Element.scriptpath, src, this.evaluationScores);
+                this.evaluationScores.match(Element.scriptpath, src);
             } else {
-                Evaluation.match(Element.scriptcode, text, this.evaluationScores);
+                this.evaluationScores.match(Element.scriptcode, text);
             }
         }
 
@@ -433,7 +435,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
 
     public void scrapeComment(final char[] comment) {
-        Evaluation.match(Element.comment, comment, this.evaluationScores);
+        this.evaluationScores.match(Element.comment, comment);
     }
 
     private String recursiveParse(final char[] inlineHtml) {

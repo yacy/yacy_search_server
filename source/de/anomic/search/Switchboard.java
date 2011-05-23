@@ -547,7 +547,7 @@ public final class Switchboard extends serverSwitch {
         // set up the solr interface
         String solrurl = this.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         boolean usesolr = this.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurl.length() > 0;
-        this.solrConnector = (usesolr) ? new SolrSingleConnector(solrurl, SolrScheme.SolrCell) : null;
+        this.solrConnector = (usesolr) ? new SolrSingleConnector(solrurl, SolrScheme.SolrCellExtended) : null;
         
         // start a loader
         log.logConfig("Starting Crawl Loader");

@@ -48,7 +48,7 @@ import java.util.Set;
 abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, Iterable<Map.Entry<K, V>>, ARC<K, V> {
 
     protected int cacheSize;
-    protected Map<K, V> levelA, levelB;
+    protected Map<K, V> levelA, levelB; // we can assume that these maps are synchronized
     
     /**
      * put a value to the cache.
@@ -62,6 +62,32 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
         } else {
         	this.levelA.put(s, v);
             assert (this.levelA.size() <= cacheSize); // the cache should shrink automatically
+        }
+    }
+
+    /**
+     * put a value to the cache if there was not an entry before
+     * do not return a previous content value
+     * @param s
+     * @param v
+     */
+    public void insertIfAbsent(K s, V v) {
+        if (this.levelB.containsKey(s)) {
+            return;
+        } else if (this.levelA.containsKey(s)) {
+            return;
+        } else {
+            synchronized (this) {
+                // we must repeat the tests again because we did this in a not synchronized environment
+                if (this.levelB.containsKey(s)) {
+                    return;
+                } else if (this.levelA.containsKey(s)) {
+                    return;
+                } else {
+                    this.levelA.put(s, v);
+                    assert (this.levelA.size() <= cacheSize); // the cache should shrink automatically
+                }
+            }
         }
     }
     
@@ -93,6 +119,11 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
         V v = this.levelB.get(s);
         if (v != null) return v;
         synchronized (this) {
+            // we must repeat the get here because another thread may have moved the
+            // entry from A to B meanwhile
+            v = this.levelB.get(s);
+            if (v != null) return v;
+            // now get and move the entry to B
             v = this.levelA.remove(s);
             if (v == null) return null;
             // move value from A to B; since it was already removed from A, just put it to B

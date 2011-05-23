@@ -160,7 +160,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                 if (MemoryControl.shortStatus()) {
                     cache.clear();
                 } else {
-                    cache.put(key, newMap);
+                    cache.insert(key, newMap);
                 }
             }
         }
@@ -304,7 +304,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                     cache.clear();
                 } else {
                     // write map to cache
-                    cache.put(key, map);
+                    cache.insert(key, map);
                 }
             }
             
