@@ -145,7 +145,7 @@ public final class HTTPDFileHandler {
         final serverSwitch theSwitchboard = Switchboard.getSwitchboard();
         useTemplateCache = theSwitchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
         templateCache = (useTemplateCache)? new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>() : new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>(0);
-        templateMethodCache = (useTemplateCache) ? new ConcurrentHashMap<File, SoftReference<Method>>() : new ConcurrentHashMap<File, SoftReference<Method>>(0);
+        templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
         
         if (switchboard == null) {
             switchboard = theSwitchboard;
@@ -1217,7 +1217,7 @@ public final class HTTPDFileHandler {
         Method m = null;
         // now make a class out of the stream
         try {
-            if (useTemplateCache) {                
+            if (templateMethodCache != null) {                
                 final SoftReference<Method> ref = templateMethodCache.get(classFile);
                 if (ref != null) {
                     m = ref.get();
@@ -1226,7 +1226,7 @@ public final class HTTPDFileHandler {
                     } else {
                         return m;
                     }
-                }          
+                }
             }
             
             final Class<?> c = provider.loadClass(classFile);
@@ -1236,10 +1236,11 @@ public final class HTTPDFileHandler {
                     serverSwitch.class };
             m = c.getMethod("respond", params);
             
-            if (useTemplateCache) {
+            if (MemoryControl.shortStatus()) {
+                templateMethodCache.clear();
+            } else {
                 // storing the method into the cache
                 final SoftReference<Method> ref = new SoftReference<Method>(m);
-                if (MemoryControl.shortStatus()) templateMethodCache.clear();
                 templateMethodCache.put(classFile, ref);
             }
             
