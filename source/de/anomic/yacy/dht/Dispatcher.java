@@ -117,12 +117,12 @@ public class Dispatcher {
             gzipBody,
             timeout);
         
-        int concurrentSender = Math.min(25, Math.max(10, WorkflowProcessor.useCPU * 2 + 1));
+        int concurrentSender = Math.min(32, Math.max(10, WorkflowProcessor.availableCPU));
         indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
-                "storeDocumentIndex",
+                "transferDocumentIndex",
                 "This is the RWI transmission process",
                 new String[]{"RWI/Cache/Collections"},
-                this, "storeDocumentIndex", concurrentSender * 2, null, concurrentSender);
+                this, "transferDocumentIndex", concurrentSender * 2, null, concurrentSender);
     }
     
     public int cloudSize() {
@@ -391,7 +391,7 @@ public class Dispatcher {
         return true;
     }
     
-    public Transmission.Chunk storeDocumentIndex(Transmission.Chunk chunk) {
+    public Transmission.Chunk transferDocumentIndex(Transmission.Chunk chunk) {
 
         // do the transmission
         boolean success = chunk.transmit();

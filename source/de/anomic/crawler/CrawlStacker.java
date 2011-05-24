@@ -240,7 +240,7 @@ public final class CrawlStacker {
         }.start();
     }
 
-    public void enqueueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, Properties> hyperlinks, boolean replace) {
+    private void enqueueEntries(byte[] initiator, String profileHandle, Map<MultiProtocolURI, Properties> hyperlinks, boolean replace) {
         for (Map.Entry<MultiProtocolURI, Properties> e: hyperlinks.entrySet()) {
             if (e.getKey() == null) continue;
             

@@ -41,7 +41,6 @@ import net.yacy.kelondro.util.NamePrefixThreadFactory;
 public class WorkflowProcessor<J extends WorkflowJob> {
 
     public static final int availableCPU = Runtime.getRuntime().availableProcessors();
-    public static int       useCPU = availableCPU;
     private static final ArrayList<WorkflowProcessor<?>> processMonitor = new ArrayList<WorkflowProcessor<?>>();
 
     private ExecutorService executor;

@@ -170,9 +170,9 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     
     public static String clientAddress(final Socket s) {
         final InetAddress uAddr = s.getInetAddress();
-        if (uAddr.isAnyLocalAddress()) return "localhost";
+        if (uAddr.isAnyLocalAddress()) return "127.0.0.1";
         String cIP = uAddr.getHostAddress();
-        if (Domains.isLocal(cIP)) cIP = "localhost";
+        if (Domains.isLocal(cIP)) cIP = "127.0.0.1";
         return cIP;
     }
 

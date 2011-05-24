@@ -110,7 +110,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -170,7 +169,6 @@ import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.graphics.WebStructureGraph;
-import de.anomic.yacy.graphics.WebStructureGraph.HostReference;
 
 public final class Switchboard extends serverSwitch {
     
@@ -228,7 +226,7 @@ public final class Switchboard extends serverSwitch {
     public  URLLicense                     licensedURLs;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
     public  FilterEngine                   domainList;
-    public  Dispatcher                     dhtDispatcher;
+    private Dispatcher                     dhtDispatcher;
     public  LinkedBlockingQueue<String>    trail;
     public  yacySeedDB                     peers;
     public  WorkTables                     tables;
@@ -386,7 +384,7 @@ public final class Switchboard extends serverSwitch {
         //final long startedSeedListAquisition = System.currentTimeMillis();
         
         // init a DHT transmission dispatcher
-        this.dhtDispatcher = new Dispatcher(
+        this.dhtDispatcher = (peers.sizeConnected() == 0) ? null : new Dispatcher(
                 indexSegments.segment(Segments.Process.LOCALCRAWLING),
                 peers,
                 true, 
@@ -451,8 +449,9 @@ public final class Switchboard extends serverSwitch {
         BlockRank.loadBlockRankTable(rankingPath, 8);
         
         // load distributed ranking
-        final File hostIndexFile = new File(queuesRoot, "hostIndex.blob");
         // very large memory configurations allow to re-compute a ranking table
+        /*
+        final File hostIndexFile = new File(queuesRoot, "hostIndex.blob");
         if (MemoryControl.available() > 1024 * 1024 * 1024) new Thread() {
             public void run() {
                 ReferenceContainerCache<HostReference> hostIndex; // this will get large, more than 0.5 million entries by now
@@ -470,6 +469,7 @@ public final class Switchboard extends serverSwitch {
                 //BlockRank.storeBlockRankTable(rankingPath);
             }
         }.start();
+        */
         
         // load the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
@@ -639,27 +639,26 @@ public final class Switchboard extends serverSwitch {
         this.clusterhashes = this.peers.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
-        int indexerThreads = Math.max(1, WorkflowProcessor.useCPU / 2);
         this.indexingStorageProcessor      = new WorkflowProcessor<indexingQueueEntry>(
                 "storeDocumentIndex",
                 "This is the sequencing step of the indexing queue. Files are written as streams, too much councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
                 new String[]{"RWI/Cache/Collections"},
-                this, "storeDocumentIndex", 2 * WorkflowProcessor.useCPU, null, indexerThreads);
+                this, "storeDocumentIndex", 2 * WorkflowProcessor.availableCPU, null, 1 /*Math.max(1, WorkflowProcessor.availableCPU / 2)*/);
         this.indexingAnalysisProcessor     = new WorkflowProcessor<indexingQueueEntry>(
                 "webStructureAnalysis",
                 "This just stores the link structure of the document into a web structure database.",
                 new String[]{"storeDocumentIndex"},
-                this, "webStructureAnalysis", 2 * WorkflowProcessor.useCPU, indexingStorageProcessor, WorkflowProcessor.useCPU + 1);
+                this, "webStructureAnalysis", 2 * WorkflowProcessor.availableCPU, indexingStorageProcessor, WorkflowProcessor.availableCPU);
         this.indexingCondensementProcessor = new WorkflowProcessor<indexingQueueEntry>(
                 "condenseDocument",
                 "This does a structural analysis of plain texts: markup of headlines, slicing into phrases (i.e. sentences), markup with position, counting of words, calculation of term frequency.",
                 new String[]{"webStructureAnalysis"},
-                this, "condenseDocument", 4 * WorkflowProcessor.useCPU, indexingAnalysisProcessor, WorkflowProcessor.useCPU + 1);
+                this, "condenseDocument", 4 * WorkflowProcessor.availableCPU, indexingAnalysisProcessor, WorkflowProcessor.availableCPU);
         this.indexingDocumentProcessor     = new WorkflowProcessor<indexingQueueEntry>(
                 "parseDocument",
                 "This does the parsing of the newly loaded documents from the web. The result is not only a plain text document, but also a list of URLs that are embedded into the document. The urls are handed over to the CrawlStacker. This process has two child process queues!",
                 new String[]{"condenseDocument", "CrawlStacker"},
-                this, "parseDocument", 4 * WorkflowProcessor.useCPU, indexingCondensementProcessor, WorkflowProcessor.useCPU + 1);
+                this, "parseDocument", 4 * WorkflowProcessor.availableCPU, indexingCondensementProcessor, WorkflowProcessor.availableCPU);
         
         // deploy busy threads
         log.logConfig("Starting Threads");
@@ -894,7 +893,7 @@ public final class Switchboard extends serverSwitch {
             
             // shut down
             this.crawler.close();
-            this.dhtDispatcher.close();
+            if (this.dhtDispatcher != null) this.dhtDispatcher.close();
             synchronized (this.indexSegments) {
                 this.indexSegments.close();
             }
@@ -952,7 +951,7 @@ public final class Switchboard extends serverSwitch {
                     this.queuesRoot);
             
             // init a DHT transmission dispatcher
-            dhtDispatcher = new Dispatcher(
+            dhtDispatcher = (peers.sizeConnected() == 0) ? null : new Dispatcher(
                     indexSegments.segment(Segments.Process.LOCALCRAWLING),
                     peers,
                     true, 
@@ -1245,7 +1244,7 @@ public final class Switchboard extends serverSwitch {
         indexingCondensementProcessor.announceShutdown();
         indexingAnalysisProcessor.announceShutdown();
         indexingStorageProcessor.announceShutdown();
-        dhtDispatcher.close();
+        if (dhtDispatcher != null) dhtDispatcher.close();
         indexingCondensementProcessor.awaitShutdown(12000);
         indexingAnalysisProcessor.awaitShutdown(12000);
         indexingStorageProcessor.awaitShutdown(12000);
@@ -2379,6 +2378,7 @@ public final class Switchboard extends serverSwitch {
     }
     
     public boolean dhtTransferJob(final String segment) {
+        if (dhtDispatcher == null) return false;
         final String rejectReason = dhtShallTransfer(segment);
         if (rejectReason != null) {
             if (this.log.isFine()) {

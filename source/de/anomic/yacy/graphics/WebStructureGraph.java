@@ -217,15 +217,16 @@ public class WebStructureGraph {
         for (final Map.Entry<String, Integer> entry : map.entrySet()) {
             s.append(entry.getKey());
             h = Integer.toHexString(entry.getValue().intValue());
-            if (h.length() == 0) {
+            int hl = h.length();
+            if (hl == 0) {
                 s.append("0000");
-            } else if (h.length() == 1) {
+            } else if (hl == 1) {
                 s.append("000").append(h);
-            } else if (h.length() == 2) {
+            } else if (hl == 2) {
                 s.append("00").append(h);
-            } else if (h.length() == 3) {
+            } else if (hl == 3) {
                 s.append('0').append(h);
-            } else if (h.length() == 4) {
+            } else if (hl == 4) {
                 s.append(h);
             } else {
                 s.append("FFFF");

@@ -557,6 +557,7 @@ public class Domains {
             // do the dns lookup on the dns server
             //if (!matchesList(host, nameCacheNoCachingPatterns)) System.out.println("DNSLOOKUP " + host);
             try {
+                //System.out.println("DNSLOOKUP-*LOOKUP* " + host);
                 ip = InetAddress.getByName(host); //TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
             } catch (final UnknownHostException e) {
                 // add new entries
@@ -824,7 +825,10 @@ public class Domains {
         // check if there are other local IP addresses that are not in
         // the standard IP range
         if (localHostNames.contains(host)) return true;
-        if (globalHosts != null && globalHosts.contains(host)) return false;
+        if (globalHosts != null && globalHosts.contains(host)) {
+            //System.out.println("ISLOCAL-GLOBALHOSTS-HIT " + host);
+            return false;
+        }
         
         // check dns lookup: may be a local address even if the domain name looks global
         if (!recursive) return false;
