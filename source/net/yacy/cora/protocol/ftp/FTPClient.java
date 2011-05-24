@@ -2568,6 +2568,7 @@ public class FTPClient {
         }
         // then find all directories and add them recursively
         for (final String line : list) {
+            //System.out.println("LIST:" + line);
             info = parseListData(line);
             if (info != null && !info.name.endsWith(".") && !info.name.startsWith(".")) {
                 if (info.type == filetype.directory) {
@@ -2575,10 +2576,12 @@ public class FTPClient {
                 }
                 if (info.type == filetype.link) {
                     int q = info.name.indexOf("->");
-                    if (q >= 0) {
+                    if (q >= 0 && info.name.indexOf("..", q) < 0) {
+                        //System.out.println("*** LINK:" + line);
                         info.name = info.name.substring(0, q).trim();
                         sitelist(ftpClient, path + info.name, queue);
                     }
+                    
                 }
             }
         }
