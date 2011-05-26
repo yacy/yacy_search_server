@@ -336,7 +336,7 @@ public class ResultFetcher {
 
                     // check if we can succeed if we try to take another url
                     if (rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0) {
-                        Log.logWarning("ResultFetcher", "rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
+                        //Log.logWarning("ResultFetcher", "rankingProcess.feedingIsFinished() && rankingProcess.sizeQueue() == 0");
                         break;
                     }
     

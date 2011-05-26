@@ -29,6 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -539,10 +540,10 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         theHeader.append("\r\n");                
     }    
     
-    public static MultiProtocolURI getRequestURL(final Properties conProp) throws MalformedURLException {
-        String host =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
-        final String path =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
-        final String args =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
+    public static MultiProtocolURI getRequestURL(final HashMap<String, Object> conProp) throws MalformedURLException {
+        String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
+        final String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
+        final String args =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
         //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
         
         int port, pos;        

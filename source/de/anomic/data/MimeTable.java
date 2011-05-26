@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.util.Properties;
 
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.kelondro.logging.Log;
 
 public class MimeTable {
 
@@ -19,7 +20,7 @@ public class MimeTable {
                 mimeTableInputStream = new BufferedInputStream(new FileInputStream(mimeFile));
                 mimeTable.load(mimeTableInputStream);
             } catch (final Exception e) {                
-                e.printStackTrace();
+                Log.logException(e);
             } finally {
                 if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (final Exception e1) {}                
             }

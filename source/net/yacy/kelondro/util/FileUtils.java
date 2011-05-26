@@ -141,7 +141,8 @@ public final class FileUtils {
         return source.length();
     }
     
-    public static int copy(final Reader source, final Writer dest) throws IOException {        
+    public static int copy(final Reader source, final Writer dest) throws IOException {
+        if (source == null) throw new IOException("source is null");
         final char[] buffer = new char[DEFAULT_BUFFER_SIZE];
         int count = 0;
         int n = 0;
@@ -153,8 +154,8 @@ public final class FileUtils {
             dest.flush();
         } catch (final Exception e) {
             // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
-            Log.logException(e);
-            throw new IOException(e.getMessage(), e);
+            //Log.logException(e);
+            throw new IOException(e.getMessage() == null ? e.toString() : e.getMessage(), e);
         }
         return count;
     }

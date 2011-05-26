@@ -195,13 +195,13 @@ public class SMBLoader {
                 }
             }
         } catch (SmbException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 }

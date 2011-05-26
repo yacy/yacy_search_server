@@ -142,7 +142,7 @@ public class FTPLoader {
                     response = getFile(ftpClient, request, acceptOnlyParseable);
                 } catch (final Exception e) {
                     // add message to errorLog
-                    e.printStackTrace();
+                    Log.logException(e);
                     (new PrintStream(berr)).print(e.getMessage());
                 }
             }

@@ -29,7 +29,7 @@ package de.anomic.http.server;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Properties;
+import java.util.HashMap;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -84,13 +84,13 @@ public class ServerSideIncludes {
         }
         
         // set up virtual connection properties to call httpdFileHander.doGet()
-        final Properties conProp = new Properties();
+        final HashMap<String, Object> conProp = new HashMap<String, Object>();
         final RequestHeader header = new RequestHeader(HTTPDemon.reverseMappingCache);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_METHOD, HeaderFramework.METHOD_GET);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_PATH, path);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_ARGS, args);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
-        conProp.setProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, requesthost);
+        conProp.put(HeaderFramework.CONNECTION_PROP_METHOD, HeaderFramework.METHOD_GET);
+        conProp.put(HeaderFramework.CONNECTION_PROP_PATH, path);
+        conProp.put(HeaderFramework.CONNECTION_PROP_ARGS, args);
+        conProp.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+        conProp.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, requesthost);
         header.put(RequestHeader.AUTHORIZATION, authorization);
         HTTPDFileHandler.doGet(conProp, header, out);
     }

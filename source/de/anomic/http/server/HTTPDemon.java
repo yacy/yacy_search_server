@@ -44,7 +44,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -217,7 +216,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      * @param prop 
      * @return <code>true</code> if a persistent connection was requested or <code>false</code> otherwise
      */
-    private boolean handlePersistentConnection(final RequestHeader header, final Properties prop) {
+    private boolean handlePersistentConnection(final RequestHeader header, final HashMap<String, Object> prop) {
         
         if (!keepAliveSupport) {
             prop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
@@ -225,7 +224,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
         
         // getting the http version that is used by the client
-        final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        String httpVersion = (String) prop.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = "HTTP/0.9";
         
         // managing keep-alive: in HTTP/0.9 and HTTP/1.0 every connection is closed
         // afterwards. In HTTP/1.1 (and above, in the future?) connections are
@@ -238,7 +237,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }        
         
         final String transferEncoding = header.get(HeaderFramework.TRANSFER_ENCODING, "identity");
-        final boolean isPostRequest = prop.getProperty(HeaderFramework.CONNECTION_PROP_METHOD).equals(HeaderFramework.METHOD_POST);
+        final boolean isPostRequest = prop.get(HeaderFramework.CONNECTION_PROP_METHOD).equals(HeaderFramework.METHOD_POST);
         final boolean hasContentLength = header.containsKey(HeaderFramework.CONTENT_LENGTH);
         final boolean hasTransferEncoding = header.containsKey(HeaderFramework.TRANSFER_ENCODING) && !transferEncoding.equalsIgnoreCase("identity");
         
@@ -251,14 +250,14 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return persistent;
     }
     
-    private boolean handleYaCyHopAuthentication(final RequestHeader header, Properties prop, Session session) {
+    private boolean handleYaCyHopAuthentication(final RequestHeader header, HashMap<String, Object> prop, Session session) {
         // check if the user has allowed that his/her peer is used for hops
         if (!allowYaCyHop(session)) return false;
         
         // proxy hops must identify with 4 criteria:
         
         // the accessed port must not be port 80
-        final String host = prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
+        final String host = (String) prop.get(HeaderFramework.CONNECTION_PROP_HOST);
         if (host == null) return false;
         int pos;
         if ((pos = host.indexOf(':')) < 0) {
@@ -268,7 +267,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         if (Integer.parseInt(host.substring(pos + 1)) == 80) return false;
         
         // the access path must be into the yacy protocol path; it must start with 'yacy'
-        if (!(prop.getProperty(HeaderFramework.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) return false;
+        if (!(prop.containsKey(HeaderFramework.CONNECTION_PROP_PATH) && ((String) prop.get(HeaderFramework.CONNECTION_PROP_PATH)).startsWith("/yacy/"))) return false;
 
         // the accessing client must identify with user:password, where
         // user = addressed peer name
@@ -285,7 +284,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // furthermore, YaCy hops must not exceed a specific access frequency
         
         // check access requester frequency: protection against DoS against this peer
-        final String requester = prop.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+        final String requester = (String) prop.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
         if (requester == null) return false;
         if (lastAccessDelta(YaCyHopAccessRequester, requester) < 10000) return false;
         YaCyHopAccessRequester.put(requester, Long.valueOf(System.currentTimeMillis()));
@@ -303,9 +302,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return (lastAccess == null) ? Long.MAX_VALUE : System.currentTimeMillis() - lastAccess.longValue();
     }
     
-    private boolean handleProxyAuthentication(final RequestHeader header, final Properties prop, final Session session) throws IOException {
+    private boolean handleProxyAuthentication(final RequestHeader header, final HashMap<String, Object> prop, final Session session) throws IOException {
         // getting the http version that is used by the client
-        final String httpVersion = prop.getProperty("HTTP", "HTTP/0.9");            
+        String httpVersion = (String) prop.get("HTTP"); if (httpVersion == null) httpVersion = "HTTP/0.9";
         
         // reading the authentication settings from switchboard
         if (!this.proxyAccounts_init) {
@@ -355,7 +354,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public Boolean UNKNOWN(final String arg, final Session session) throws IOException {
         //System.out.println("UNKNOWN " + arg);
 
-        Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
+        HashMap<String, Object> prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
         int pos;
         String unknownCommand = null, args = null;
         if ((pos = arg.indexOf(' ')) > 0) {
@@ -376,10 +375,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         //System.out.println("GET " + arg);
         try {
             // parsing the http request line
-            final Properties prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
+            final HashMap<String, Object> prop = parseRequestLine(HeaderFramework.METHOD_GET, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header            
-            final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+            String httpVersion = (String) prop.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = HeaderFramework.HTTP_VERSION_0_9;
             final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))
                     ? new RequestHeader(reverseMappingCache)
                     : readHeader(prop, session);
@@ -390,7 +389,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             // determines if the connection should be kept alive
             handlePersistentConnection(header, prop);
             
-            if (prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
+            if (prop.get(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer(session)) {
                     HTTPDFileHandler.doGet(prop, header, session.out);
@@ -411,7 +410,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 }
             }
             
-            return prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return prop.get(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
             logUnexpectedError(e, session.userAddress.getHostAddress());
             return serverCore.TERMINATE_CONNECTION;
@@ -443,10 +442,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public Boolean HEAD(final String arg, final Session session) {
         //System.out.println("HEAD " + arg);
         try {
-            final Properties prop = parseRequestLine(HeaderFramework.METHOD_HEAD, arg, session);
+            final HashMap<String, Object> prop = parseRequestLine(HeaderFramework.METHOD_HEAD, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header
-            final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+            String httpVersion = (String) prop.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = HeaderFramework.HTTP_VERSION_0_9;
             final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))
                     ? new RequestHeader(reverseMappingCache)
                     : readHeader(prop,session);
@@ -458,7 +457,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             handlePersistentConnection(header, prop);
             
             // return multi-line message
-            if (prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
+            if (prop.get(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer(session)) {
                     HTTPDFileHandler.doHead(prop, header, session.out);
@@ -478,7 +477,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
-            return prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return prop.get(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
             logUnexpectedError(e, session.userAddress.getHostAddress());
             return serverCore.TERMINATE_CONNECTION;
@@ -488,10 +487,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public Boolean POST(final String arg, final Session session) {
         //System.out.println("POST " + arg);
         try {
-            final Properties prop = parseRequestLine(HeaderFramework.METHOD_POST, arg, session);
+            final HashMap<String, Object> prop = parseRequestLine(HeaderFramework.METHOD_POST, arg, session);
             
             // we now know the HTTP version. depending on that, we read the header
-            final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+            String httpVersion = (String) prop.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = HeaderFramework.HTTP_VERSION_0_9;
             final RequestHeader header = (httpVersion.equals(HeaderFramework.HTTP_VERSION_0_9))
                     ? new RequestHeader(reverseMappingCache)
                     : readHeader(prop, session);
@@ -523,7 +522,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             handlePersistentConnection(header, prop);
             
             // return multi-line message
-            if (prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
+            if (prop.get(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer(session)) {
                     HTTPDFileHandler.doPost(prop, header, session.out, sessionIn);
@@ -545,27 +544,27 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             }
             if (sessionIn instanceof ChunkedInputStream) sessionIn.close(); // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
             //return serverCore.RESUME_CONNECTION;
-            return prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return prop.get(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
             logUnexpectedError(e, session.userAddress.getHostAddress());
             return serverCore.TERMINATE_CONNECTION;
         }
     }
 
-    public static void handleTransparentProxySupport(final RequestHeader header, final Properties prop, final String virtualHost, final boolean isTransparentProxy) {   
+    public static void handleTransparentProxySupport(final RequestHeader header, final HashMap<String, Object> prop, final String virtualHost, final boolean isTransparentProxy) {   
         // transparent proxy support is only available for http 1.0 and above connections
-        if (prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, "HTTP/0.9").equals("HTTP/0.9")) return;
+        if (prop.containsKey(HeaderFramework.CONNECTION_PROP_HTTP_VER) && prop.get(HeaderFramework.CONNECTION_PROP_HTTP_VER).equals("HTTP/0.9")) return;
         
         // if the transparent proxy support was disabled, we have nothing todo here ...
         if (!(isTransparentProxy && header.containsKey(HeaderFramework.HOST))) return;
         
         // we only need to do the transparent proxy support if the request URL didn't contain the hostname
         // and therefor was set to virtualHost by function parseQuery()
-        if (!prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) return;
+        if (!prop.get(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) return;
         
         // TODO: we could have problems with connections from extern here ...
         final String dstHostSocket = header.get(HeaderFramework.HOST);
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST,(HTTPDemon.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
+        prop.put(HeaderFramework.CONNECTION_PROP_HOST,(HTTPDemon.isThisHostName(dstHostSocket)?virtualHost:dstHostSocket));
     }
     
     public Boolean CONNECT(String arg, final Session session) throws IOException {
@@ -582,11 +581,11 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         } else {
             httpVersion = "HTTP/1.0";
         }
-        Properties prop = new Properties();
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, httpVersion);
+        HashMap<String, Object> prop = new HashMap<String, Object>();
+        prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, httpVersion);
         
         // parse hostname and port
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, arg);
+        prop.put(HeaderFramework.CONNECTION_PROP_HOST, arg);
         pos = arg.indexOf(':');
         int port = 443;
         if (pos >= 0) {
@@ -595,11 +594,11 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }       
         
         // setting other connection properties
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, session.userAddress.isAnyLocalAddress() ? "localhost" : session.userAddress.getHostAddress());
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_METHOD, HeaderFramework.METHOD_CONNECT);
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, "/");
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_EXT, "");
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_URL, "");        
+        prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, session.userAddress.isAnyLocalAddress() ? "localhost" : session.userAddress.getHostAddress());
+        prop.put(HeaderFramework.CONNECTION_PROP_METHOD, HeaderFramework.METHOD_CONNECT);
+        prop.put(HeaderFramework.CONNECTION_PROP_PATH, "/");
+        prop.put(HeaderFramework.CONNECTION_PROP_EXT, "");
+        prop.put(HeaderFramework.CONNECTION_PROP_URL, "");        
         
         // parse remaining lines
         final RequestHeader header = readHeader(prop,session);               
@@ -630,24 +629,24 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         return serverCore.TERMINATE_CONNECTION;
     }
     
-    private final Properties parseRequestLine(final String cmd, final String s, final Session session) {
+    private final HashMap<String, Object> parseRequestLine(final String cmd, final String s, final Session session) {
         
         // parsing the header
-        final Properties p = parseRequestLine(cmd, s, virtualHost);
+        final HashMap<String, Object> p = parseRequestLine(cmd, s, virtualHost);
         
         // track the request
-        final String path = p.getProperty(HeaderFramework.CONNECTION_PROP_URL);
-        final String args = p.getProperty(HeaderFramework.CONNECTION_PROP_ARGS, "");
+        final String path = (String) p.get(HeaderFramework.CONNECTION_PROP_URL);
+        String args = (String) p.get(HeaderFramework.CONNECTION_PROP_ARGS); if (args == null) args = "";
         switchboard.track(session.userAddress.getHostAddress(), (args.length() > 0) ? path + "?" + args : path);
 
         // reseting the empty request counter
         this.emptyRequestCount = 0;
         
         // counting the amount of received requests within this permanent connection
-        p.setProperty(HeaderFramework.CONNECTION_PROP_KEEP_ALIVE_COUNT, Integer.toString(++this.keepAliveRequestCount));
+        p.put(HeaderFramework.CONNECTION_PROP_KEEP_ALIVE_COUNT, Integer.toString(++this.keepAliveRequestCount));
         
         // setting the client-IP
-        p.setProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, session.userAddress.getHostAddress());
+        p.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, session.userAddress.getHostAddress());
         
         return p;
     }
@@ -953,7 +952,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
     
     public static final void sendRespondError(
-            final Properties conProp,
+            final HashMap<String, Object> conProp,
             final OutputStream respond,
             final int errorcase,
             final int httpStatusCode,            
@@ -976,7 +975,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
     
     public static final void sendRespondError(
-            final Properties conProp,
+            final HashMap<String, Object> conProp,
             final OutputStream respond,
             final int httpStatusCode,            
             final String httpStatusText,
@@ -999,7 +998,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
     
     public static final void sendRespondError(
-            final Properties conProp,
+            final HashMap<String, Object> conProp,
             final OutputStream respond,
             final int errorcase,
             final int httpStatusCode,            
@@ -1015,7 +1014,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         ByteArrayOutputStream o = null;
         try {
             // setting the proper http status message
-            final String httpVersion = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
+            String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = "HTTP/1.1";
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
                 if (httpVersion.equals("HTTP/1.0") && HeaderFramework.http1_0.containsKey(Integer.toString(httpStatusCode))) 
                     httpStatusText = HeaderFramework.http1_0.get(Integer.toString(httpStatusCode));
@@ -1025,10 +1024,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             }
             
             // generating the desired request url
-            String host = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
-            final String path = conProp.getProperty(HeaderFramework.CONNECTION_PROP_PATH,"/");
-            final String args = conProp.getProperty(HeaderFramework.CONNECTION_PROP_ARGS);
-            final String method = conProp.getProperty(HeaderFramework.CONNECTION_PROP_METHOD);
+            String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
+            String path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH); if (path == null) path = "/";
+            final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);
+            final String method = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
             
             final int port;
             final int pos = host.indexOf(':');        
@@ -1049,7 +1048,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             // set rewrite values
             final serverObjects tp = new serverObjects();
 
-            final String clientIP = conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+            String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = "127.0.0.1";
 
             // check if ip is local ip address
             final InetAddress hostAddress = Domains.dnsResolve(clientIP);
@@ -1067,7 +1066,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             tp.put("peerName", (getAlternativeResolver() == null) ? "" : getAlternativeResolver().myName());
             tp.put("errorMessageType", errorcase);
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
-            tp.put("requestMethod",    conProp.getProperty(HeaderFramework.CONNECTION_PROP_METHOD));
+            tp.put("requestMethod",    (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD));
             tp.put("requestURL",       urlString);
 
             switch (errorcase) {
@@ -1136,7 +1135,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public static final void sendRespondHeader(
-            final Properties conProp,
+            final HashMap<String, Object> conProp,
             final OutputStream respond,
             final String httpVersion,
             final int httpStatusCode,
@@ -1151,14 +1150,14 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final boolean nocache
     ) throws IOException {
         
-        final String reqMethod = conProp.getProperty(HeaderFramework.CONNECTION_PROP_METHOD);
+        final String reqMethod = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
         
         if ((transferEnc != null) && !httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1)) { 
             throw new IllegalArgumentException("Transfer encoding is only supported for http/1.1 connections. The current connection version is " + httpVersion);
         }
 
         if (!reqMethod.equals(HeaderFramework.METHOD_HEAD)){
-            if (!conProp.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close").equals("close") &&
+            if (!"close".equals(conProp.get(HeaderFramework.CONNECTION_PROP_PERSISTENT)) &&
                     transferEnc == null && contentLength < 0) {
                 throw new IllegalArgumentException("Message MUST contain a Content-Length or a non-identity transfer-coding header field.");
             }
@@ -1197,7 +1196,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
     
     public static final void sendRespondHeader(
-            final Properties conProp,
+            final HashMap<String, Object> conProp,
             final OutputStream respond,
             final String httpVersion,
             final int httpStatusCode,  
@@ -1207,7 +1206,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
 
     public static final void sendRespondHeader(
-            final Properties conProp,
+            final HashMap<String, Object> conProp,
             final OutputStream respond,
             String httpVersion,
             final int httpStatusCode, 
@@ -1217,7 +1216,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         
         if (respond == null) throw new NullPointerException("The outputstream must not be null.");
         if (conProp == null) throw new NullPointerException("The connection property structure must not be null.");
-        if (httpVersion == null) httpVersion = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER,HeaderFramework.HTTP_VERSION_1_1);
+        if (httpVersion == null) httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = HeaderFramework.HTTP_VERSION_1_1;
         if (responseHeader == null) responseHeader = new ResponseHeader();
         
         try {                        
@@ -1244,19 +1243,19 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 if (!responseHeader.containsKey(HeaderFramework.CONTENT_TYPE)) 
                     responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html; charset=UTF-8"); // fix this
                 if (!responseHeader.containsKey(RequestHeader.CONNECTION) && conProp.containsKey(HeaderFramework.CONNECTION_PROP_PERSISTENT))
-                    responseHeader.put(RequestHeader.CONNECTION, conProp.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT));
+                    responseHeader.put(RequestHeader.CONNECTION, (String) conProp.get(HeaderFramework.CONNECTION_PROP_PERSISTENT));
                 if (!responseHeader.containsKey(RequestHeader.PROXY_CONNECTION) && conProp.containsKey(HeaderFramework.CONNECTION_PROP_PERSISTENT))
-                    responseHeader.put(RequestHeader.PROXY_CONNECTION, conProp.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT));                        
+                    responseHeader.put(RequestHeader.PROXY_CONNECTION, (String) conProp.get(HeaderFramework.CONNECTION_PROP_PERSISTENT));                        
                 
                 if (conProp.containsKey(HeaderFramework.CONNECTION_PROP_PERSISTENT) && 
-                    conProp.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") && 
+                    conProp.get(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") && 
                     !responseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && 
                     !responseHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
                     responseHeader.put(HeaderFramework.CONTENT_LENGTH, "0");
                 
                 // adding some yacy specific headers
-                responseHeader.put(HeaderFramework.X_YACY_KEEP_ALIVE_REQUEST_COUNT,conProp.getProperty(HeaderFramework.CONNECTION_PROP_KEEP_ALIVE_COUNT));
-                responseHeader.put(HeaderFramework.X_YACY_ORIGINAL_REQUEST_LINE,conProp.getProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE));
+                responseHeader.put(HeaderFramework.X_YACY_KEEP_ALIVE_REQUEST_COUNT,(String) conProp.get(HeaderFramework.CONNECTION_PROP_KEEP_ALIVE_COUNT));
+                responseHeader.put(HeaderFramework.X_YACY_ORIGINAL_REQUEST_LINE,(String) conProp.get(HeaderFramework.CONNECTION_PROP_REQUESTLINE));
                 //responseHeader.put(HeaderFramework.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(HeaderFramework.CONNECTION_PROP_PREV_REQUESTLINE));
                   
                 //read custom headers
@@ -1375,7 +1374,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     }
     
 
-    public static RequestHeader readHeader(final Properties prop, final serverCore.Session theSession) throws IOException {
+    public static RequestHeader readHeader(final HashMap<String, Object> prop, final serverCore.Session theSession) throws IOException {
         
         // reading all headers
         final RequestHeader header = new RequestHeader(HTTPDemon.reverseMappingCache);
@@ -1393,7 +1392,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         /* 
          * doing some header validation here ...
          */
-        final String httpVersion = prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        String httpVersion = (String) prop.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); if (httpVersion == null) httpVersion = "HTTP/0.9";
         if (httpVersion.equals("HTTP/1.1") && !header.containsKey(HeaderFramework.HOST)) {
             // the HTTP/1.1 specification requires that an HTTP/1.1 server must reject any  
             // HTTP/1.1 message that does not contain a Host header.            
@@ -1415,20 +1414,20 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     private static final Pattern P_60 = Pattern.compile("`", Pattern.LITERAL);
     
     
-    public static Properties parseRequestLine(final String cmd, String args, final String virtualHost) {
+    public static HashMap<String, Object> parseRequestLine(final String cmd, String args, final String virtualHost) {
         
-        final Properties prop = new Properties();
+        final HashMap<String, Object> prop = new HashMap<String, Object>(); // we can use a non-synchronized data structure here
         
         // storing informations about the request
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_METHOD, cmd);
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE, cmd + " " + args);
+        prop.put(HeaderFramework.CONNECTION_PROP_METHOD, cmd);
+        prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, cmd + " " + args);
         
         // this parses a whole URL
         if (args.isEmpty()) {
-            prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, virtualHost);
-            prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, "/");
-            prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
-            prop.setProperty(HeaderFramework.CONNECTION_PROP_EXT, "");
+            prop.put(HeaderFramework.CONNECTION_PROP_HOST, virtualHost);
+            prop.put(HeaderFramework.CONNECTION_PROP_PATH, "/");
+            prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+            prop.put(HeaderFramework.CONNECTION_PROP_EXT, "");
             return prop;
         }
         
@@ -1436,11 +1435,11 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         int sep = args.lastIndexOf(' ');
         if ((sep >= 0) && (args.substring(sep + 1).toLowerCase().startsWith("http/"))) {
             // HTTP version is given
-            prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
+            prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
             args = args.substring(0, sep).trim(); // cut off HTTP version mark
         } else {
             // HTTP version is not given, it will be treated as ver 0.9
-            prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
+            prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_0_9);
         }
         
         // replacing spaces in the url string correctly
@@ -1467,9 +1466,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         } else {
             argsString = "";
         }
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_URL, args); // store URL
+        prop.put(HeaderFramework.CONNECTION_PROP_URL, args); // store URL
         if (!argsString.isEmpty()) {
-            prop.setProperty(HeaderFramework.CONNECTION_PROP_ARGS, argsString);
+            prop.put(HeaderFramework.CONNECTION_PROP_ARGS, argsString);
         } // store arguments in original form
         
         // finally find host string
@@ -1484,13 +1483,13 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 // we are lazy and guess that it means
                 // /index.html
                 // which is a localhost access to the file servlet
-                prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, args);
+                prop.put(HeaderFramework.CONNECTION_PROP_HOST, args);
                 path = "/";
             } else {
                 // THIS IS THE "GOOD" CASE
                 // a perfect formulated url
                 final String dstHostSocket = args.substring(0, sep);
-                prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, (HTTPDemon.isThisHostName(dstHostSocket) ? virtualHost : dstHostSocket));
+                prop.put(HeaderFramework.CONNECTION_PROP_HOST, (HTTPDemon.isThisHostName(dstHostSocket) ? virtualHost : dstHostSocket));
                 path = args.substring(sep); // yes, including beginning "/"
             }
         } else {
@@ -1500,16 +1499,16 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                 // in this case, we simulate a
                 // http://localhost/s
                 // access by setting a virtual host
-                prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, virtualHost);
+                prop.put(HeaderFramework.CONNECTION_PROP_HOST, virtualHost);
                 path = args;
             } else {
                 // the client 'forgot' to set a leading '/'
                 // this is the same case as above, with some lazyness
-                prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, virtualHost);
+                prop.put(HeaderFramework.CONNECTION_PROP_HOST, virtualHost);
                 path = "/" + args;
             }
         }
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, path);
+        prop.put(HeaderFramework.CONNECTION_PROP_PATH, path);
 
         // find out file extension (we already stripped ?-parameters from args)
         final String ext;
@@ -1526,7 +1525,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         } else {
             ext = ""; // default when no file extension
         }
-        prop.setProperty(HeaderFramework.CONNECTION_PROP_EXT, ext);
+        prop.put(HeaderFramework.CONNECTION_PROP_EXT, ext);
         
         return prop;
     }

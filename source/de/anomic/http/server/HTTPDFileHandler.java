@@ -76,10 +76,10 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
@@ -234,28 +234,28 @@ public final class HTTPDFileHandler {
         return headers;
     }
     
-    public static void doGet(final Properties conProp, final RequestHeader requestHeader, final OutputStream response) {
+    public static void doGet(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doHead(final Properties conProp, final RequestHeader requestHeader, final OutputStream response) {
+    public static void doHead(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream response) {
         doResponse(conProp, requestHeader, response, null);
     }
     
-    public static void doPost(final Properties conProp, final RequestHeader requestHeader, final OutputStream response, final InputStream body) {
+    public static void doPost(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream response, final InputStream body) {
         doResponse(conProp, requestHeader, response, body);
     }
     
-    public static void doResponse(final Properties conProp, final RequestHeader requestHeader, final OutputStream out, final InputStream body) {
+    public static void doResponse(final HashMap<String, Object> conProp, final RequestHeader requestHeader, final OutputStream out, final InputStream body) {
   
         String path = null;
         try {
             // getting some connection properties            
-            final String method = conProp.getProperty(HeaderFramework.CONNECTION_PROP_METHOD);
-            path = conProp.getProperty(HeaderFramework.CONNECTION_PROP_PATH);
-            String argsString = conProp.getProperty(HeaderFramework.CONNECTION_PROP_ARGS); // is null if no args were given
-            final String httpVersion = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER);
-            final String clientIP = conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, "unknown-host");
+            final String method = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
+            path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);
+            String argsString = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); // is null if no args were given
+            final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+            String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = "unknown-host";
             
             // check hack attacks in path
             if (path.indexOf("..") >= 0) {
@@ -348,7 +348,7 @@ public final class HTTPDFileHandler {
             }
 
             // Authentication successful. remove brute-force flag
-            serverCore.bfHost.remove(conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+            serverCore.bfHost.remove(conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
             
             // parse arguments
             serverObjects args = new serverObjects();
@@ -438,7 +438,7 @@ public final class HTTPDFileHandler {
             }
             
             File targetFile = getLocalizedFile(path, localeSelection);
-            final String targetExt = conProp.getProperty("EXT","");
+            String targetExt = (String) conProp.get("EXT"); if (targetExt == null) targetExt = "";
             targetClass = rewriteClassFile(new File(htDefaultPath, path));
             if (path.endsWith("/") || path.endsWith("\\")) {
                 String testpath;
@@ -558,7 +558,7 @@ public final class HTTPDFileHandler {
                 // call an image-servlet to produce an on-the-fly - generated image
                 Object img = null;
                 try {
-                    requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+                    requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                     requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
                     requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "png");
                     // in case that there are no args given, args = null or empty hashmap
@@ -747,7 +747,7 @@ public final class HTTPDFileHandler {
                         indexOfDelimiter = cgiHeader[i].indexOf(':');
                         key = cgiHeader[i].substring(0, indexOfDelimiter).trim();
                         value = cgiHeader[i].substring(indexOfDelimiter + 1).trim();
-                        conProp.setProperty(key, value);
+                        conProp.put(key, value);
                         if (key.equals("Cache-Control") && value.equals("no-cache")) {
                             nocache = true;
                         } else if (key.equals("Content-type")) {
@@ -786,7 +786,7 @@ public final class HTTPDFileHandler {
 
             } else if ((targetClass != null) && (path.endsWith(".stream"))) {
                 // call rewrite-class
-                requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+                requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
                 requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, "stream");
                 //requestHeader.put(httpHeader.CONNECTION_PROP_INPUTSTREAM, body);
@@ -803,7 +803,8 @@ public final class HTTPDFileHandler {
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
                 String mimeType = MimeTable.ext2mime(targetExt, "text/html");
-                final boolean zipContent = requestHeader.acceptGzip() && HTTPDemon.shallTransportZipped("." + conProp.getProperty("EXT",""));
+                String ext = (String) conProp.get("EXT"); if (ext == null) ext = "";
+                final boolean zipContent = requestHeader.acceptGzip() && HTTPDemon.shallTransportZipped("." + ext);
                 if (path.endsWith("html") || 
                         path.endsWith("htm") || 
                         path.endsWith("xml") || 
@@ -833,7 +834,7 @@ public final class HTTPDFileHandler {
                     if (targetClass != null) {
                         // CGI-class: call the class to create a property for rewriting
                         try {
-                            requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP));
+                            requestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP));
                             requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, path);
                             int ep = path.lastIndexOf(".");
                             requestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, path.substring(ep + 1));
@@ -1106,7 +1107,7 @@ public final class HTTPDFileHandler {
                 HTTPDemon.sendRespondError(conProp,out,3,404,"File not Found",null,null);
                 return;
             }
-        } catch (final Exception e) {     
+        } catch (final Exception e) {
             try {
                 // error handling
                 int httpStatusCode = 400; 
@@ -1141,7 +1142,7 @@ public final class HTTPDFileHandler {
                 
                 errorMessage.append("\nSession: ").append(Thread.currentThread().getName())
                             .append("\nQuery:   ").append(path)
-                            .append("\nClient:  ").append(conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP,"unknown")) 
+                            .append("\nClient:  ").append(conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)) 
                             .append("\nReason:  ").append(e.getMessage());    
                 
                 if (!conProp.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
@@ -1192,9 +1193,9 @@ public final class HTTPDFileHandler {
         return targetFile;
     }
     
-    private static final void forceConnectionClose(final Properties conprop) {
+    private static final void forceConnectionClose(final HashMap<String, Object> conprop) {
         if (conprop != null) {
-            conprop.setProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");            
+            conprop.put(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");            
         }
     }
 
@@ -1292,8 +1293,8 @@ public final class HTTPDFileHandler {
      * not in separete servlet, because we need access to binary outstream
      * @throws IOException 
      */
-    private static void doURLProxy(final serverObjects args, final Properties conProp, final RequestHeader requestHeader, OutputStream out) throws IOException {
-        final String httpVersion = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+    private static void doURLProxy(final serverObjects args, final HashMap<String, Object> conProp, final RequestHeader requestHeader, OutputStream out) throws IOException {
+        final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
 		URL proxyurl = null;
 
 		if (args != null && args.containsKey("url")) {
@@ -1301,12 +1302,12 @@ public final class HTTPDFileHandler {
 			proxyurl = new URL(strUrl);
 		}
 		// set properties for proxy connection
-   		final Properties prop = new Properties();
-		prop.setProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
-		prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
-		prop.setProperty(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
-		prop.setProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
-		prop.setProperty("CLIENTIP", "0:0:0:0:0:0:0:1");
+   		final HashMap<String, Object> prop = new HashMap<String, Object>();
+		prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
+		prop.put(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
+		prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
+		prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
+		prop.put("CLIENTIP", "0:0:0:0:0:0:0:1");
 
 		// remove some stuff from request header, so it isn't send to the server
 		requestHeader.remove("CLIENTIP");
@@ -1336,7 +1337,7 @@ public final class HTTPDFileHandler {
 			return;
 		}
 		
-		final int httpStatus = Integer.parseInt(prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS)); 
+		final int httpStatus = Integer.parseInt((String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS)); 
 		
 		if (outgoingHeader.getContentType().startsWith("text/html")) {
 			StringWriter buffer = new StringWriter();
@@ -1378,7 +1379,7 @@ public final class HTTPDFileHandler {
 			out.write(sbb);
 		} else {
 			if (!outgoingHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
-				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, prop.getProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
+				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, (String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
     		HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
 			FileUtils.copy(in, out);
 		}
