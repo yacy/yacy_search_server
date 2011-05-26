@@ -1,0 +1,6 @@
+*.class
+lib/yacycore.jar
+libbuild/svnRevNr.jar
+gen/**
+DATA/
+classes/
