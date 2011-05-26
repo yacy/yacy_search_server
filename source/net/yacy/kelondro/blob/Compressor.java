@@ -45,6 +45,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 public class Compressor implements BLOB {
@@ -333,6 +334,8 @@ public class Compressor implements BLOB {
             this.buffer.put(UTF8.String(key), b);
             this.bufferlength += b.length;
         }
+        
+        if (MemoryControl.shortStatus()) flushAll();
     }
 
     public synchronized void delete(byte[] key) throws IOException {

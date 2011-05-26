@@ -691,9 +691,10 @@ public class yacysearch {
                     }
                 }
                 sb.localSearchTracker.put(client, trackerHandles);
-            	if (sb.localSearchTracker.size() > 1000) {
+            	if (sb.localSearchTracker.size() > 100) {
                     sb.localSearchTracker.remove(sb.localSearchTracker.keys().nextElement());
                 }
+            	if (MemoryControl.shortStatus()) sb.localSearchTracker.clear();
             } catch (Exception e) {
                 Log.logException(e);
             }

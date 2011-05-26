@@ -58,6 +58,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.SplitTable;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
 
 public final class MetadataRepository implements Iterable<byte[]> {
@@ -176,6 +177,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
         }
         statsDump = null;
+        if (MemoryControl.shortStatus()) clearCache() ;
     }
     
     public boolean remove(final byte[] urlHashBytes) {

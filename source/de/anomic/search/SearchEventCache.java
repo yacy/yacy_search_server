@@ -56,6 +56,7 @@ public class SearchEventCache {
     }
     
     public static void put(String eventID, SearchEvent event) {
+        if (MemoryControl.shortStatus()) cleanupEvents(true);
         lastEventID = eventID;
         SearchEvent oldEvent = lastEvents.put(eventID, event);
         if (oldEvent == null) cacheInsert++;

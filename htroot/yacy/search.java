@@ -52,6 +52,7 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.ISO639;
+import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.AccessTracker;
@@ -422,6 +423,7 @@ public final class search {
             while (trackerHandles.size() > 36) if (!trackerHandles.remove(trackerHandles.first())) break;
         }
         sb.remoteSearchTracker.put(client, trackerHandles);
+        if (MemoryControl.shortStatus()) sb.remoteSearchTracker.clear();
         
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +
