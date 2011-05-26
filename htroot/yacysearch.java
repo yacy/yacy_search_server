@@ -120,7 +120,9 @@ public class yacysearch {
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
         
-        final boolean rss = header.get("EXT", "").equals("rss");
+        final String EXT = header.get("EXT", "");
+        final boolean rss = EXT.equals("rss");
+        final boolean json = EXT.equals("json");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
@@ -642,7 +644,7 @@ public class yacysearch {
             final int meanMax = (post != null) ? post.getInt("meanCount", 0) : 0;
 
             prop.put("meanCount", meanMax);
-            if (meanMax > 0) {
+            if (meanMax > 0 && !json && !rss) {
                 final DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex(), querystring);
             	final Iterator<String> meanIt = didYouMean.getSuggestions(100, 5).iterator();
                 int meanCount = 0;
