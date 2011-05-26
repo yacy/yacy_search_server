@@ -37,7 +37,7 @@ public interface NavigationReference extends Reference {
 
     public String navigationHash();
 
-    public byte[] metadataHash();
+    public byte[] urlhash();
 
     public byte[] termHash();
 

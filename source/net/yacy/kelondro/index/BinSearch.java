@@ -64,19 +64,21 @@ public final class BinSearch {
         return contains(t, 0, this.count);
     }
 
-    private final synchronized boolean contains(final byte[] t, final int beginPos, final int endPos) {
+    private final boolean contains(final byte[] t, int beginPos, int endPos) {
         // the endPos is exclusive, beginPos is inclusive
         // this method is synchronized to make the use of the buffer possible
         assert t.length == this.chunksize;
-        if (beginPos >= endPos) return false;
-        final int pivot = (beginPos + endPos) / 2;
-        if ((pivot < 0) || (pivot >= this.count)) return false;
-        assert this.chunksize == t.length;
-        final int c = objectOrder.compare(this.chunks, pivot * this.chunksize, t, 0, this.chunksize);
-        if (c == 0) return true;
-        if (c < 0) /* buffer < t */ return contains(t, pivot + 1, endPos);
-        if (c > 0) /* buffer > t */ return contains(t, beginPos, pivot);
-        return false;
+        while (true) {
+            if (beginPos >= endPos) return false;
+            final int pivot = (beginPos + endPos) / 2;
+            if ((pivot < 0) || (pivot >= this.count)) return false;
+            assert this.chunksize == t.length;
+            final int c = objectOrder.compare(this.chunks, pivot * this.chunksize, t, 0, this.chunksize);
+            if (c == 0) return true;
+            if (c < 0) /* buffer < t */ {beginPos = pivot + 1; continue;}
+            if (c > 0) /* buffer > t */ {endPos = pivot; continue;}
+            return false;
+        }
     }
     
     public final int size() {

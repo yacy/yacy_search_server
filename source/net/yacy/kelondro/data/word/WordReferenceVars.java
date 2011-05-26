@@ -116,7 +116,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         //this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
         this.language = e.getLanguage();
-        this.urlHash = e.metadataHash();
+        this.urlHash = e.urlhash();
         this.type = e.getType();
         this.hitcount = e.hitcount();
         this.llocal = e.llocal();
@@ -267,7 +267,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return toRowEntry().toPropertyForm();
     }
 
-    public byte[] metadataHash() {
+    public byte[] urlhash() {
         return urlHash;
     }
 
@@ -369,7 +369,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     }
     
     public int compareTo(final WordReferenceVars o) {
-        return Base64Order.enhancedCoder.compare(this.urlHash, o.metadataHash());
+        return Base64Order.enhancedCoder.compare(this.urlHash, o.urlhash());
     }
 
     public int compare(WordReferenceVars o1, WordReferenceVars o2) {

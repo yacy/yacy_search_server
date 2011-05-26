@@ -122,7 +122,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         return this.entry.getColString(col_navhash);
     }
 
-    public byte[] metadataHash() {
+    public byte[] urlhash() {
         return UTF8.getBytes(navigationHash().substring(12));
     }
 

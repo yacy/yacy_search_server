@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.OrderedScoreMap;
@@ -44,6 +45,7 @@ import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.rwi.ReferenceIterator;
 import net.yacy.kelondro.util.FileUtils;
 
+import de.anomic.search.MetadataRepository.HostStat;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -149,21 +151,33 @@ public class BlockRank {
         return index;
     }
     
-    public static BinSearch[] evaluate(final ReferenceContainerCache<HostReference> index, BinSearch[] referenceTable, int recusions) {
+    public static BinSearch[] evaluate(final ReferenceContainerCache<HostReference> index, Map<String, HostStat> hostHashResolver, BinSearch[] referenceTable, int recusions) {
         
-        // first just count the number of references. all other information from the index is not used because they cannot be trusted
+        // first find out the maximum count of the hostHashResolver
+        int maxHostCount = 1;
+        for (HostStat stat: hostHashResolver.values()) {
+            if (stat.count > maxHostCount) maxHostCount = stat.count;
+        }
+        
+        // then just count the number of references. all other information from the index is not used because they cannot be trusted
         ScoreMap<byte[]> hostScore = new OrderedScoreMap<byte[]>(index.termKeyOrdering());
+        HostStat hostStat;
+        int hostCount;
         for (ReferenceContainer<HostReference> container: index) {
             if (container.size() == 0) continue;
             if (referenceTable == null) {
-                hostScore.set(container.getTermHash(), container.size());
+                hostStat = hostHashResolver.get(UTF8.String(container.getTermHash()));
+                hostCount = hostStat == null ? 6 /* high = a penalty for 'i do not know this', this may not be fair*/ : Math.max(1, hostStat.count);
+                hostScore.set(container.getTermHash(), container.size() * maxHostCount / hostCount);
             } else {
                 int score = 0;
                 Iterator<HostReference> hri = container.entries();
                 HostReference hr;
                 while (hri.hasNext()) {
                     hr = hri.next();
-                    score += (16 - ranking(hr.metadataHash(), referenceTable));
+                    hostStat =  hostHashResolver.get(UTF8.String(hr.urlhash()));
+                    hostCount = hostStat == null ? 6 /* high = a penalty for 'i do not know this', this may not be fair*/ : Math.max(1, hostStat.count);
+                    score += (17 - ranking(hr.urlhash(), referenceTable)) * maxHostCount / hostCount;
                 }
                 hostScore.set(container.getTermHash(), score);
             }
@@ -192,17 +206,22 @@ public class BlockRank {
 
         // re-use the new table for a recursion
         if (recusions == 0) return newTables;
-        return evaluate(index, newTables, --recusions); // one recursion step
+        return evaluate(index, hostHashResolver, newTables, --recusions); // one recursion step
     }
     
-    public static void analyse(BinSearch[] tables, final WebStructureGraph myGraph) {
+    public static void analyse(BinSearch[] tables, final WebStructureGraph myGraph, final Map<String, HostStat> hostHash2hostName) {
         byte[] hosth = new byte[6];
         String hosths, hostn;
+        HostStat hs;
         for (int ybr = 0; ybr < tables.length; ybr++) {
             row: for (int i = 0; i < tables[ybr].size(); i++) {
                 hosth = tables[ybr].get(i, hosth);
                 hosths = UTF8.String(hosth);
                 hostn = myGraph.hostHash2hostName(hosths);
+                if (hostn == null) {
+                    hs = hostHash2hostName.get(hostn);
+                    if (hs != null) hostn = hs.hostname;
+                }
                 if (hostn == null) {
                     //Log.logInfo("BlockRank", "Ranking for Host: ybr = " + ybr + ", hosthash = " + hosths);
                     continue row;
@@ -271,7 +290,7 @@ public class BlockRank {
     }
     
     public static int ranking(final byte[] hash, BinSearch[] rankingTable) {
-        if (rankingTable == null) return 15;
+        if (rankingTable == null) return 16;
         byte[] hosthash;
         if (hash.length == 6) {
             hosthash = hash;
@@ -281,10 +300,10 @@ public class BlockRank {
         }
         final int m = Math.min(16, rankingTable.length);
         for (int i = 0; i < m; i++) {
-            if ((rankingTable[i] != null) && (rankingTable[i].contains(hosthash))) {
+            if (rankingTable[i] != null && rankingTable[i].contains(hosthash)) {
                 return i;
             }
         }
-        return 15;
+        return 16;
     }
 }

@@ -42,6 +42,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.Latency;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 
@@ -152,7 +153,7 @@ public class FTPLoader {
         if (berr.size() > 0 || response == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "Errorlog: " + berr.toString() : "";
-            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, " ftp server download, " + detail, -1);
+            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, " ftp server download, " + detail, -1);
             throw new IOException("FTPLoader: Unable to download URL '" + request.url().toString() + "': " + detail);
         }
         

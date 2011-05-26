@@ -143,7 +143,7 @@ public class RobotsTxt {
                 if (robotsURL != null) {
                     if (log.isDebugEnabled()) log.debug("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
                     try {
-                        result = downloadRobotsTxt(robotsURL, 5, robotsTxt4Host);
+                        result = downloadRobotsTxt(robotsURL, 3, robotsTxt4Host);
                     } catch (final Exception e) {
                         result = null;
                     }

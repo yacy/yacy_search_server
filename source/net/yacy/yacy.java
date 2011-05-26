@@ -668,7 +668,7 @@ public final class yacy {
                     Reference iEntry;
                     while (wordIdxEntries.hasNext()) {
                         iEntry = wordIdxEntries.next();
-                        final byte[] urlHash = iEntry.metadataHash();                    
+                        final byte[] urlHash = iEntry.urlhash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             final URIMetadataRow urlEntry = currentUrlDB.load(urlHash);                       
                             urlCounter++;

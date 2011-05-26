@@ -211,7 +211,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
         return this.entry;
     }
 
-    public byte[] metadataHash() {
+    public byte[] urlhash() {
         return this.entry.getColBytes(col_urlhash, true);
     }
 
@@ -278,7 +278,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
     
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(this.metadataHash());
+        return ByteArray.hashCode(this.urlhash());
     }
 
     public void join(Reference oe) {

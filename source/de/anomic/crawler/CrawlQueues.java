@@ -46,6 +46,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
 
 import de.anomic.crawler.NoticedURL.StackType;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
@@ -581,6 +582,7 @@ public class CrawlQueues {
                             UTF8.getBytes(sb.peers.mySeed().hash),
                             new Date(),
                             1,
+                            FailCategory.FINAL_ROBOTS_RULE,
                             "denied by robots.txt", -1);
                     this.request.setStatus("worker-disallowed", WorkflowJob.STATUS_FINISHED);
                 } else {
@@ -617,6 +619,7 @@ public class CrawlQueues {
                                 UTF8.getBytes(sb.peers.mySeed().hash),
                                 new Date(),
                                 1,
+                                FailCategory.TEMPORARY_NETWORK_FAILURE,
                                 "cannot load: " + result, -1);
                         this.request.setStatus("worker-error", WorkflowJob.STATUS_FINISHED);
                     } else {
@@ -629,6 +632,7 @@ public class CrawlQueues {
                         UTF8.getBytes(sb.peers.mySeed().hash),
                         new Date(),
                         1,
+                        FailCategory.TEMPORARY_NETWORK_FAILURE,
                         e.getMessage() + " - in worker", -1);
                 Log.logException(e);
 //                Client.initConnectionManager();

@@ -103,7 +103,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      */
     public DigestURI(final MultiProtocolURI baseURL) {
         super(baseURL);
-        this.hash = null;
+        this.hash = (baseURL instanceof DigestURI) ? ((DigestURI) baseURL).hash : null;
     }
     
     /**

@@ -380,7 +380,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 while (refi.hasNext()) {
                 	reference = refi.next();
                 	if (reference == null) continue;
-                	mh = reference.metadataHash();
+                	mh = reference.urlhash();
                 	if (mh == null) continue;
                     references.inc(mh);
                 }

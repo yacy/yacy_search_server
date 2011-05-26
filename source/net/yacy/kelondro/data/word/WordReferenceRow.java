@@ -236,7 +236,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return this.entry;
     }
 
-    public byte[] metadataHash() {
+    public byte[] urlhash() {
         return this.entry.getColBytes(col_urlhash, true);
     }
 
@@ -328,12 +328,12 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         if (obj == null) return false;
         if (!(obj instanceof WordReferenceRow)) return false;
         WordReferenceRow other = (WordReferenceRow) obj;
-        return Base64Order.enhancedCoder.equal(this.metadataHash(), other.metadataHash());
+        return Base64Order.enhancedCoder.equal(this.urlhash(), other.urlhash());
     }
     
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(this.metadataHash());
+        return ByteArray.hashCode(this.urlhash());
     }
 
     public void join(final Reference oe) {

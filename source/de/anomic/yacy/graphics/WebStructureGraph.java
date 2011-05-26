@@ -67,7 +67,7 @@ import net.yacy.kelondro.util.LookAheadIterator;
 public class WebStructureGraph {
 
     public static int maxref = 300; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
-    public static int maxhosts = 20000; // maximum number of hosts in web structure map
+    public static int maxhosts = 50000; // maximum number of hosts in web structure map
     
     private final static Log log = new Log("WebStructureGraph");
 
@@ -140,6 +140,7 @@ public class WebStructureGraph {
     
     public void generateCitationReference(final DigestURI url, final Document document, final Condenser condenser) {
         // generate citation reference
+        if (url.isLocal()) return; // we do this only for global urls
         final Map<MultiProtocolURI, String> hl = document.getHyperlinks();
         final Iterator<MultiProtocolURI> it = hl.keySet().iterator();
         final HashSet<MultiProtocolURI> globalRefURLs = new HashSet<MultiProtocolURI>();
@@ -344,7 +345,7 @@ public class WebStructureGraph {
             return this.entry;
         }
 
-        public byte[] metadataHash() {
+        public byte[] urlhash() {
             return this.entry.getPrimaryKeyBytes();
         }
 
@@ -576,17 +577,6 @@ public class WebStructureGraph {
         }
     }
     
-    private void saveWebStructure() {
-        joinOldNew();
-        try {
-            synchronized(structure_old) {
-                FileUtils.saveMap(this.structureFile, this.structure_old, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
-            }
-        } catch (final IOException e) {
-            Log.logException(e);
-        }
-    }
-    
     public String hostWithMaxReferences() {
         // find host with most references
         String maxhost = null;
@@ -651,6 +641,7 @@ public class WebStructureGraph {
     }
     
     public void close() {
+        // finish dns resolving queue
         if (this.publicRefDNSResolvingWorker.isAlive()) {
             log.logInfo("Waiting for the DNS Resolving Queue to terminate");
             try {
@@ -659,7 +650,22 @@ public class WebStructureGraph {
             } catch (InterruptedException e) {
             }
         }
-        log.logInfo("Saving Web Structure File");
-        saveWebStructure();
+        
+        // save to web structure file
+        log.logInfo("Saving Web Structure File: new = " + this.structure_new.size() + " entries, old = " + this.structure_old.size() + " entries");
+        long time = System.currentTimeMillis();
+        joinOldNew();
+        if (this.structure_old.size() > 0) try {
+            synchronized(structure_old) {
+                if (this.structure_old.size() > 0) {
+                    FileUtils.saveMap(this.structureFile, this.structure_old, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
+                    long t = Math.max(1, System.currentTimeMillis() - time);
+                    log.logInfo("Saved Web Structure File: " + this.structure_old.size() + " entries in " + t + " milliseconds, " + (this.structure_old.size() * 1000 / t) + " entries/second");
+                }
+                this.structure_old.clear();
+            }
+        } catch (final IOException e) {
+            Log.logException(e);
+        }
     }
 }

@@ -198,7 +198,7 @@ public class Dispatcher {
             for (ReferenceContainer<WordReference> c: containers) {
                 urlHashes.clear();
                 it = c.entries();
-                while (it.hasNext()) try { urlHashes.put(it.next().metadataHash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
+                while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
                 if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + UTF8.String(c.getTermHash()) + "'");
                 if (!urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
@@ -250,7 +250,7 @@ public class Dispatcher {
             while (i.hasNext()) {
                 re = i.next();
                 if (re == null) continue;
-                partitionBuffer[this.seeds.scheme.verticalPosition(re.metadataHash())].add(re);
+                partitionBuffer[this.seeds.scheme.verticalPosition(re.urlhash())].add(re);
             }
             
             // add the containers to the result vector

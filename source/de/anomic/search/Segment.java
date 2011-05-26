@@ -481,13 +481,13 @@ public class Segment {
                         entry = new WordReferenceVars(containerIterator.next());
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
-                        final URIMetadataRow ue = urlMetadata.load(entry.metadataHash());
+                        final URIMetadataRow ue = urlMetadata.load(entry.urlhash());
                         if (ue == null) {
-                            urlHashs.put(entry.metadataHash());
+                            urlHashs.put(entry.urlhash());
                         } else {
                             url = ue.metadata().url();
                             if (url == null || Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
-                                urlHashs.put(entry.metadataHash());
+                                urlHashs.put(entry.urlhash());
                             }
                         }
                     }

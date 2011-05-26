@@ -163,7 +163,7 @@ public final class transferRWI {
                 wordHash = estring.substring(0, p);
                 wordhashes.add(wordHash);
                 iEntry = new WordReferenceRow(estring.substring(p));
-                urlHash = iEntry.metadataHash();
+                urlHash = iEntry.urlhash();
                 
                 // block blacklisted entries
                 if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {

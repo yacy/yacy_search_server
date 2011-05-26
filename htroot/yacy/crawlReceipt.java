@@ -36,6 +36,7 @@ import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -162,6 +163,7 @@ public final class crawlReceipt {
                 youare.getBytes(),
                 null,
                 0,
+                FailCategory.FINAL_LOAD_CONTEXT,
                 result + ":" + reason, -1);
         //switchboard.noticeURL.remove(receivedUrlhash);
         prop.put("delay", "3600");

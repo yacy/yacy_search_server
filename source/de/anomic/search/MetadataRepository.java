@@ -66,7 +66,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     protected Index               urlIndexFile;
     private   Export              exportthread; // will have a export thread assigned if exporter is running
     private   File                location;
-    private   ArrayList<hostStat> statsDump;
+    private   ArrayList<HostStat> statsDump;
 
     public MetadataRepository(
             final File path,
@@ -127,7 +127,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     public URIMetadataRow load(final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi) {
         if (urlIndexFile == null) return null;
         if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
-        byte[] urlHash = obrwi.getElement().metadataHash();
+        byte[] urlHash = obrwi.getElement().urlhash();
         if (urlHash == null) return null;
         try {
             final Row.Entry entry = urlIndexFile.get(urlHash);
@@ -502,7 +502,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                 }
                 
                 if (dom) {
-                    TreeSet<String> set = domainNameCollector(-1);
+                    TreeSet<String> set = domainNameCollector(-1, domainSampleCollector());
                     for (String host: set) {
                         if (!host.matches(filter)) continue;
                         if (format == 0) pw.println(host);
@@ -572,18 +572,25 @@ public final class MetadataRepository implements Iterable<byte[]> {
         
     }
     
-    private Map<String, hashStat> domainSampleCollector() throws IOException {
-        Map<String, hashStat> map = new HashMap<String, hashStat>();
+    /**
+     * collect domain samples: all url hashes from the metadata database is listed and the domain part
+     * of the url hashes is used to count how many of these domain hashes appear
+     * @return a map from domain hashes to hash statistics
+     * @throws IOException
+     */
+    public Map<String, URLHashCounter> domainSampleCollector() throws IOException {
+        Map<String, URLHashCounter> map = new HashMap<String, URLHashCounter>();
         // first collect all domains and calculate statistics about it
         CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
-        String urlhash, hosthash;
-        hashStat ds;
+        String hosthash;
+        byte[] urlhashb;
+        URLHashCounter ds;
         if (i != null) while (i.hasNext()) {
-            urlhash = UTF8.String(i.next());
-            hosthash = urlhash.substring(6);
+            urlhashb = i.next();
+            hosthash = UTF8.String(urlhashb).substring(6);
             ds = map.get(hosthash);
             if (ds == null) {
-                ds = new hashStat(urlhash);
+                ds = new URLHashCounter(urlhashb);
                 map.put(hosthash, ds);
             } else {
                 ds.count++;
@@ -592,18 +599,23 @@ public final class MetadataRepository implements Iterable<byte[]> {
         return map;
     }
     
-    public TreeSet<String> domainNameCollector(int count) throws IOException {
+    /**
+     * create a list of domain names in this database
+     * @param count number of entries or -1 for all
+     * @param domainSamples a map from domain hashes to hash statistics
+     * @return a set of domain names, ordered by name of the domains
+     */
+    public TreeSet<String> domainNameCollector(int count, Map<String, URLHashCounter> domainSamples) {
         // collect hashes from all domains
-        Map<String, hashStat> map = domainSampleCollector();
         
         // fetch urls from the database to determine the host in clear text
         URIMetadataRow urlref;
-        if (count < 0 || count > map.size()) count = map.size();
-        statsDump = new ArrayList<hostStat>();
+        if (count < 0 || count > domainSamples.size()) count = domainSamples.size();
+        statsDump = new ArrayList<HostStat>();
         TreeSet<String> set = new TreeSet<String>();
-        for (hashStat hs: map.values()) {
+        for (URLHashCounter hs: domainSamples.values()) {
             if (hs == null) continue;
-            urlref = this.load(UTF8.getBytes(hs.urlhash));
+            urlref = this.load(hs.urlhashb);
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
             set.add(urlref.metadata().url().getHost());
             count--;
@@ -611,27 +623,57 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
         return set;
     }
+
+    /**
+     * calculate a score map for url hash samples: each sample is a single url hash
+     * that stands for all entries for the corresponding domain. The map counts the number
+     * of occurrences of the domain
+     * @param domainSamples a map from domain hashes to hash statistics
+     * @return a map from url hash samples to counters
+     */
+    public ScoreMap<String> urlSampleScores(Map<String, URLHashCounter> domainSamples) {
+        ScoreMap<String> urlSampleScore = new ConcurrentScoreMap<String>();
+        for (Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
+            urlSampleScore.inc(UTF8.String(e.getValue().urlhashb), e.getValue().count);
+        }
+        return urlSampleScore;
+    }
     
-    public Iterator<hostStat> statistics(int count) throws IOException {
+    /**
+     * calculate all domain names for all domain hashes
+     * @param domainSamples a map from domain hashes to hash statistics
+     * @return a map from domain hashes to host stats including domain names
+     */
+    public Map<String, HostStat> domainHashResolver(Map<String, URLHashCounter> domainSamples) {
+        HashMap<String, HostStat> hostMap = new HashMap<String, HostStat>();
+        URIMetadataRow urlref;
+        
+        ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
+        for (Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
+            hosthashScore.inc(UTF8.String(e.getValue().urlhashb).substring(6), e.getValue().count);
+        }
+        URIMetadataRow.Components comps;
+        DigestURI url;
+        for (Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
+            urlref = this.load(e.getValue().urlhashb);
+            comps = urlref.metadata();
+            url = comps.url();
+            hostMap.put(e.getKey(), new HostStat(url.getHost(), url.getPort(), e.getKey(), hosthashScore.get(e.getKey())));
+        }
+        return hostMap;
+    }
+    
+    public Iterator<HostStat> statistics(int count, ScoreMap<String> domainScore) {
         // prevent too heavy IO.
         if (statsDump != null && count <= statsDump.size()) return statsDump.iterator();
-        
-        // collect hashes from all domains
-        Map<String, hashStat> map = domainSampleCollector();
-        
-        // order elements by size
-        ScoreMap<String> s = new ConcurrentScoreMap<String>();
-        for (Map.Entry<String, hashStat> e: map.entrySet()) {
-            s.inc(e.getValue().urlhash, e.getValue().count);
-        }
     
         // fetch urls from the database to determine the host in clear text
-        Iterator<String> j = s.keys(false); // iterate urlhash-examples in reverse order (biggest first)
+        Iterator<String> j = domainScore.keys(false); // iterate urlhash-examples in reverse order (biggest first)
         URIMetadataRow urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
-        if (count < 0 || s.sizeSmaller(count)) count = s.size();
-        statsDump = new ArrayList<hostStat>();
+        if (count < 0 || domainScore.sizeSmaller(count)) count = domainScore.size();
+        statsDump = new ArrayList<HostStat>();
         URIMetadataRow.Components comps;
         DigestURI url;
         while (j.hasNext()) {
@@ -639,31 +681,31 @@ public final class MetadataRepository implements Iterable<byte[]> {
             if (urlhash == null) continue;
             urlref = this.load(UTF8.getBytes(urlhash));
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
-            if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
+            if (statsDump == null) return new ArrayList<HostStat>().iterator(); // some other operation has destroyed the object
             comps = urlref.metadata();
             url = comps.url();
-            statsDump.add(new hostStat(url.getHost(), url.getPort(), urlhash.substring(6), s.get(urlhash)));
+            statsDump.add(new HostStat(url.getHost(), url.getPort(), urlhash.substring(6), domainScore.get(urlhash)));
             count--;
             if (count == 0) break;
         }
         // finally return an iterator for the result array
-        return (statsDump == null) ? new ArrayList<hostStat>().iterator() : statsDump.iterator();
+        return (statsDump == null) ? new ArrayList<HostStat>().iterator() : statsDump.iterator();
     }
     
-    private static class hashStat {
-        public String urlhash;
+    private static class URLHashCounter {
+        public byte[] urlhashb;
         public int count;
-        public hashStat(String urlhash) {
-            this.urlhash = urlhash;
+        public URLHashCounter(byte[] urlhashb) {
+            this.urlhashb = urlhashb;
             this.count = 1;
         }
     }
     
-    public static class hostStat {
+    public static class HostStat {
         public String hostname, hosthash;
         public int port;
         public int count;
-        public hostStat(String host, int port, String urlhashfragment, int count) {
+        public HostStat(String host, int port, String urlhashfragment, int count) {
             assert urlhashfragment.length() == 6;
             this.hostname = host;
             this.port = port;
@@ -698,8 +740,8 @@ public final class MetadataRepository implements Iterable<byte[]> {
         
         // finally remove the line with statistics
         if (statsDump != null) {
-            Iterator<hostStat> hsi = statsDump.iterator();
-            hostStat hs;
+            Iterator<HostStat> hsi = statsDump.iterator();
+            HostStat hs;
             while (hsi.hasNext()) {
                 hs = hsi.next();
                 if (hs.hosthash.equals(hosthash)) {

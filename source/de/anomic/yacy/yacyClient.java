@@ -507,8 +507,8 @@ public final class yacyClient {
             }
 
             // the search-result-url transports all the attributes of word indexes
-            if (!Base64Order.enhancedCoder.equal(entry.metadataHash(), urlEntry.hash())) {
-                yacyCore.log.logInfo("remote search: url-hash " + UTF8.String(urlEntry.hash()) + " does not belong to word-attached-hash " + UTF8.String(entry.metadataHash()) + "; url = " + metadata.url() + " from peer " + target.getName());
+            if (!Base64Order.enhancedCoder.equal(entry.urlhash(), urlEntry.hash())) {
+                yacyCore.log.logInfo("remote search: url-hash " + UTF8.String(urlEntry.hash()) + " does not belong to word-attached-hash " + UTF8.String(entry.urlhash()) + "; url = " + metadata.url() + " from peer " + target.getName());
                 continue; // spammed
             }
 
@@ -853,8 +853,8 @@ public final class yacyClient {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
-                if (urlCache.get(entry.metadataHash()) == null) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + UTF8.String(entry.metadataHash()) + "' is not contained in urlCache");
+                if (urlCache.get(entry.urlhash()) == null) {
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + UTF8.String(entry.urlhash()) + "' is not contained in urlCache");
                 }
             }
         }        

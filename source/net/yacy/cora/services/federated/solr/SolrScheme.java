@@ -57,6 +57,7 @@ public enum SolrScheme {
         // we user the SolrCell design as index scheme
         SolrInputDocument solrdoc = new SolrInputDocument();
         DigestURI digestURI = new DigestURI(yacydoc.dc_source());
+        solrdoc.addField("failreason_t", ""); // overwrite a possible fail reason (in case that there was a fail reason before)
         solrdoc.addField("id", id);
         solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
         InetAddress address = Domains.dnsResolve(digestURI.getHost());

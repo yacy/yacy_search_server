@@ -53,6 +53,7 @@ import net.yacy.repository.Blacklist;
 import net.yacy.repository.FilterEngine;
 
 import de.anomic.crawler.ResultURLs.EventOrigin;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.FTPLoader;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
@@ -202,7 +203,7 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                nextQueue.errorURL.push(entry, UTF8.getBytes(peers.mySeed().hash), new Date(), 1, rejectReason, -1);
+                nextQueue.errorURL.push(entry, UTF8.getBytes(peers.mySeed().hash), new Date(), 1, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);

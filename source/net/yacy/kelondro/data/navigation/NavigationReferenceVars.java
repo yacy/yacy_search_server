@@ -54,7 +54,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
     }
     
     public NavigationReferenceVars(final NavigationReference e) {
-        this.refhash = e.metadataHash();
+        this.refhash = e.urlhash();
         this.termhash = e.termHash();
         this.hitcount = e.hitcount();
         this.position = e.position(0);
@@ -94,7 +94,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         return UTF8.String(this.termhash) + UTF8.String(this.refhash);
     }
     
-    public byte[] metadataHash() {
+    public byte[] urlhash() {
         return this.refhash;
     }
 

@@ -33,6 +33,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -85,6 +86,7 @@ public class urls {
                                 sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
                                 0,
+                                FailCategory.FINAL_PROCESS_CONTEXT,
                                 "client=____________",
                                 -1);
                 

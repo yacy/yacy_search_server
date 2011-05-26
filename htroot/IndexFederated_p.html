@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Federated Index</title>
+    #%env/templates/metas.template%#
+  </head>
+  <body id="IndexFederated_p">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
+    <h2>Federated Index</h2>
+    <p>
+      YaCy supports multiple index storage locations. At this time only the YaCy-internal search index can be used for the Yacy search interface
+      A Solr index storage location is optional. The local index storage location can be disabled.
+    </p>
+    
+    <form action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+      <legend>
+        <input type="checkbox" name="yacy.indexing.enabled" id="yacy.indexing.enabled" #(yacy.indexing.enabled.checked)#:: checked="checked"#(/yacy.indexing.enabled.checked)# />
+        <label for="p2p">YaCy Embedded Index Engine</label>
+      </legend>
+        You can just switch on or off this index. If you switch it off, you will not be able to search with YaCy any more.
+      </fieldset>
+      
+      <fieldset>
+      <legend>
+        <input type="checkbox" name="solr.indexing.enabled" id="solr.indexing.enabled" #(solr.indexing.enabled.checked)#:: checked="checked"#(/solr.indexing.enabled.checked)# />
+        <label for="p2p">Remote Solr Index</label>
+      </legend>
+      You can set one or more Solr targets here. If you wish to set several targets, then list them in the 'Solr URL' field using a ',' (comma) as separator.
+
+      <div align="left">
+      <dl>
+      #(table)#::
+        <dt class="TableCellDark">Solr Hosts</dt>
+        <dd>
+      <div>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td><strong>Solr Host Administration Interface</strong><br/></td>
+        <td><strong>Index Size</strong></td>
+      </tr>
+      #{list}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td><a href="#[url]#">#[url]#</a></td>
+        <td align="right">#[size]#</td>
+      </tr>
+      #{/list}#
+      </table>
+      </div>
+        </dd>
+      #(/table)#
+        <dt class="TableCellDark">Solr URL(s)</dt>
+        <dd><textarea rows="5" cols="80" name="solr.indexing.url" id="solr.indexing.url"/>#[solr.indexing.url]#</textarea></dd>
+        <dt class="TableCellDark">Charding Method</dt>
+        <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.charding]#" name="solr.indexing.charding" id="solr.indexing.charding" disabled="disabled"/></dd>
+        <dt class="TableCellDark">Scheme</dt>
+        <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.scheme]#" name="solr.indexing.scheme" id="solr.indexing.scheme" disabled="disabled"/></dd>
+      </dl>
+      </div>
+    </fieldset>
+    <input type="submit" name="set" value="Set" />
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>

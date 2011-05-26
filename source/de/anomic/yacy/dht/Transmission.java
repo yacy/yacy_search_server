@@ -121,17 +121,17 @@ public class Transmission {
             List<byte[]> notFoundx = new ArrayList<byte[]>();
             while (i.hasNext()) {
                 WordReference e = i.next();
-                if (references.containsKey(e.metadataHash())) continue;
-                if (badReferences.has(e.metadataHash())) {
-                    notFoundx.add(e.metadataHash());
+                if (references.containsKey(e.urlhash())) continue;
+                if (badReferences.has(e.urlhash())) {
+                    notFoundx.add(e.urlhash());
                     continue;
                 }
-                URIMetadataRow r = segment.urlMetadata().load(e.metadataHash());
+                URIMetadataRow r = segment.urlMetadata().load(e.urlhash());
                 if (r == null) {
-                    notFoundx.add(e.metadataHash());
-                    badReferences.put(e.metadataHash());
+                    notFoundx.add(e.urlhash());
+                    badReferences.put(e.urlhash());
                 } else {
-                    references.put(e.metadataHash(), r);
+                    references.put(e.urlhash(), r);
                 }
             }
             // now delete all references that were not found

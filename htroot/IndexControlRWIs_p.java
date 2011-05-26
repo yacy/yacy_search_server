@@ -185,7 +185,7 @@ public class IndexControlRWIs_p {
                     index = segment.termIndex().get(keyhash, null);
                     final Iterator<WordReference> en = index.entries();
                     urlb = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, index.size());
-                    while (en.hasNext()) try { urlb.put(en.next().metadataHash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
+                    while (en.hasNext()) try { urlb.put(en.next().urlhash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
                     index = null;
                 }
                 if (delurlref) {
@@ -266,16 +266,16 @@ public class IndexControlRWIs_p {
                 URIMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = segment.urlMetadata().load(iEntry.metadataHash());
+                    lurl = segment.urlMetadata().load(iEntry.urlhash());
                     if (lurl == null) {
                         try {
-                            unknownURLEntries.put(iEntry.metadataHash());
+                            unknownURLEntries.put(iEntry.urlhash());
                         } catch (RowSpaceExceededException e) {
                             Log.logException(e);
                         }
                         urlIter.remove();
                     } else {
-                        knownURLs.put(iEntry.metadataHash(), lurl);
+                        knownURLs.put(iEntry.urlhash(), lurl);
                     }
                 }
                 
@@ -436,7 +436,7 @@ public class IndexControlRWIs_p {
                 if (rn == -1) rn = entry.ranking();
                 prop.put("genUrlList_urlList_"+i+"_urlExists", "1");
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
-                prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.word().metadataHash());
+                prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.word().urlhash());
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
                 prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", UTF8.String(keyhash));
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
@@ -472,7 +472,7 @@ public class IndexControlRWIs_p {
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "") +
-                        ((DigestURI.probablyRootURL(entry.word().metadataHash())) ? "probably root url" : "")
+                        ((DigestURI.probablyRootURL(entry.word().urlhash())) ? "probably root url" : "")
                 );
                 if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");

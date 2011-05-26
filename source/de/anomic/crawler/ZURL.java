@@ -34,7 +34,7 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.yacy.cora.document.UTF8;
-import net.yacy.cora.services.federated.solr.SolrSingleConnector;
+import net.yacy.cora.services.federated.solr.SolrChardingConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Index;
@@ -55,9 +55,12 @@ public class ZURL implements Iterable<ZURL.Entry> {
     private static final int maxStackSize    = 1000;
     
     public enum FailCategory {
-        NETWORK_FAILURE, // an entity could not been loaded
-        CRAWL_RULE,      // the crawler configuration does not want to load the entity
-        ROBOTS_RULE;     // a remote server denies indexing or loading
+        // TEMPORARY categories are such failure cases that should be tried again
+        // FINAL categories are such failure cases that are final and should not be tried again
+        TEMPORARY_NETWORK_FAILURE, // an entity could not been loaded
+        FINAL_PROCESS_CONTEXT,     // because of a processing context we do not want that url again (i.e. remote crawling)
+        FINAL_LOAD_CONTEXT,        // the crawler configuration does not want to load the entity
+        FINAL_ROBOTS_RULE;         // a remote server denies indexing or loading
     }
     
     private final static Row rowdef = new Row(
@@ -73,10 +76,10 @@ public class ZURL implements Iterable<ZURL.Entry> {
     // the class object
     private Index urlIndex;
     private final ConcurrentLinkedQueue<byte[]> stack;
-    private final SolrSingleConnector solrConnector;
+    private final SolrChardingConnector solrConnector;
     
     public ZURL(
-            final SolrSingleConnector solrConnector,
+            final SolrChardingConnector solrConnector,
     		final File cachePath,
     		final String tablename,
     		final boolean startWithEmptyFile,
@@ -104,7 +107,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         this.stack = new ConcurrentLinkedQueue<byte[]>();
     }
     
-    public ZURL(final SolrSingleConnector solrConnector) {
+    public ZURL(final SolrChardingConnector solrConnector) {
         this.solrConnector = solrConnector;
         // creates a new ZUR in RAM
         this.urlIndex = new RowSet(rowdef);
@@ -137,6 +140,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             final byte[] executor,
             final Date workdate,
             final int workcount,
+            final FailCategory failCategory,
             String anycause,
             int httpcode) {
         // assert executor != null; // null == proxy !
@@ -147,10 +151,10 @@ public class ZURL implements Iterable<ZURL.Entry> {
         put(entry);
         stack.add(entry.hash());
         Log.logInfo("Rejected URL", bentry.url().toNormalform(false, false) + " - " + reason);
-        if (this.solrConnector != null) {
+        if (this.solrConnector != null && (failCategory == FailCategory.TEMPORARY_NETWORK_FAILURE || failCategory == FailCategory.FINAL_ROBOTS_RULE)) {
             // send the error to solr
             try {
-                this.solrConnector.err(bentry.url(), reason, httpcode);
+                this.solrConnector.err(bentry.url(), failCategory.name() + " " + reason, httpcode);
             } catch (IOException e) {
                 Log.logWarning("SOLR", "failed to send error " + bentry.url().toNormalform(true, false) + " to solr: " + e.getMessage());
             }

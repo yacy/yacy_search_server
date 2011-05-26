@@ -88,8 +88,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
+import net.yacy.cora.services.federated.solr.SolrChardingConnector;
+import net.yacy.cora.services.federated.solr.SolrChardingSelection;
 import net.yacy.cora.services.federated.solr.SolrScheme;
-import net.yacy.cora.services.federated.solr.SolrSingleConnector;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -136,6 +137,7 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.CrawlProfile.CacheStrategy;
 import de.anomic.crawler.ResultURLs.EventOrigin;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.WorkTables;
@@ -242,7 +244,7 @@ public final class Switchboard extends serverSwitch {
     
     private final Semaphore shutdownSync = new Semaphore(0);
     private boolean terminate = false;
-    public SolrSingleConnector solrConnector = null;
+    public SolrChardingConnector solrConnector = null;
     
     //private Object  crawlingPausedSync = new Object();
     //private boolean crawlingIsPaused = false;    
@@ -446,7 +448,7 @@ public final class Switchboard extends serverSwitch {
 
         // load ranking from distribution
         final File rankingPath = new File(this.appPath, "ranking/YBR".replace('/', File.separatorChar));
-        BlockRank.loadBlockRankTable(rankingPath, 8);
+        BlockRank.loadBlockRankTable(rankingPath, 16);
         
         // load distributed ranking
         // very large memory configurations allow to re-compute a ranking table
@@ -461,10 +463,24 @@ public final class Switchboard extends serverSwitch {
                 } else {
                     hostIndex = BlockRank.loadHostIndex(hostIndexFile);
                 }
+                
+                // use an index segment to find hosts for given host hashes
+                String segmentName = getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
+                Segment segment = indexSegments.segment(segmentName);
+                MetadataRepository metadata = segment.urlMetadata();
+                Map<String,HostStat> hostHashResolver;
+                try {
+                    hostHashResolver = metadata.domainHashResolver(metadata.domainSampleCollector());
+                } catch (IOException e) {
+                    hostHashResolver = new HashMap<String, HostStat>();
+                }
+                
                 // recursively compute a new ranking table
-                BlockRank.ybrTables = BlockRank.evaluate(hostIndex, null, 0);
+                BlockRank.ybrTables = BlockRank.evaluate(hostIndex, hostHashResolver, null, 0);
                 hostIndex = null; // we don't need that here any more, so free the memory
-                BlockRank.analyse(BlockRank.ybrTables, webStructure);
+                
+                // use the web structure and the hostHash resolver to analyse the ranking table
+                BlockRank.analyse(BlockRank.ybrTables, webStructure, hostHashResolver);
                 // store the new table
                 //BlockRank.storeBlockRankTable(rankingPath);
             }
@@ -545,9 +561,14 @@ public final class Switchboard extends serverSwitch {
         TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
         
         // set up the solr interface
-        String solrurl = this.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
-        boolean usesolr = this.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurl.length() > 0;
-        this.solrConnector = (usesolr) ? new SolrSingleConnector(solrurl, SolrScheme.SolrCellExtended) : null;
+        String solrurls = this.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
+        boolean usesolr = this.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
+        try {
+            this.solrConnector = (usesolr) ? new SolrChardingConnector(solrurls, SolrScheme.SolrCellExtended, SolrChardingSelection.Method.MODULO_HOST_MD5) : null;
+        } catch (IOException e) {
+            Log.logException(e);
+            this.solrConnector = null;
+        }
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
@@ -1329,7 +1350,7 @@ public final class Switchboard extends serverSwitch {
             // log cause and close queue
             final DigestURI referrerURL = response.referrerURL();
             //if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
-            addURLtoErrorDB(response.url(), (referrerURL == null) ? null : referrerURL.hash(), response.initiator(), response.name(), noIndexReason);
+            addURLtoErrorDB(response.url(), (referrerURL == null) ? null : referrerURL.hash(), response.initiator(), response.name(), FailCategory.FINAL_PROCESS_CONTEXT, noIndexReason);
             // finish this entry
             return "not allowed: " + noIndexReason;
         }
@@ -1871,7 +1892,7 @@ public final class Switchboard extends serverSwitch {
             b = Cache.getContent(response.url().hash());
             if (b == null) {
                 this.log.logWarning("the resource '" + response.url() + "' is missing in the cache.");
-                addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), "missing in cache");
+                addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), FailCategory.FINAL_LOAD_CONTEXT, "missing in cache");
                 return null;
             }
         }
@@ -1884,7 +1905,7 @@ public final class Switchboard extends serverSwitch {
             }
         } catch (final Parser.Failure e) {
             this.log.logWarning("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
-            addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), e.getMessage());
+            addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), FailCategory.FINAL_PROCESS_CONTEXT, e.getMessage());
             return null;
         }
         
@@ -1963,6 +1984,14 @@ public final class Switchboard extends serverSwitch {
                 }
             }
         }
+        
+        // check if we should accept the document for our index
+        if (!this.getConfigBool("federated.service.yacy.indexing.enabled", false)) {
+            if (log.isInfo()) {
+                log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': indexing not wanted by federated rule for YaCy");
+            }
+            return new indexingQueueEntry(in.process, in.queueEntry, in.documents, null);
+        }
         if (!in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia()) {
             if (log.isInfo()) {
                 log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': indexing not wanted by crawl profile");
@@ -1977,7 +2006,7 @@ public final class Switchboard extends serverSwitch {
                 if (log.isInfo()) {
                     log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': denied by document-attached noindexing rule");
                 }
-                addURLtoErrorDB(in.queueEntry.url(), in.queueEntry.referrerHash(), in.queueEntry.initiator(), in.queueEntry.name(), "denied by document-attached noindexing rule");
+                addURLtoErrorDB(in.queueEntry.url(), in.queueEntry.referrerHash(), in.queueEntry.initiator(), in.queueEntry.name(), FailCategory.FINAL_PROCESS_CONTEXT, "denied by document-attached noindexing rule");
                 continue;
             }
             doclist.add(document);
@@ -2037,13 +2066,13 @@ public final class Switchboard extends serverSwitch {
 
         if (condenser == null || document.indexingDenied()) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by rule in document, process case=" + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_PROCESS_CONTEXT, "denied by rule in document, process case=" + processCase);
             return;
         }
         
         if (!queueEntry.profile().indexText() && !queueEntry.profile().indexMedia()) {
             //if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_LOAD_CONTEXT, "denied by profile rule, process case=" + processCase + ", profile name = " + queueEntry.profile().name());
             return;
         }
         
@@ -2066,7 +2095,7 @@ public final class Switchboard extends serverSwitch {
             yacyChannel.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), UTF8.getBytes(peers.mySeed().hash)) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase + ", error = " + e.getMessage());
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_LOAD_CONTEXT, "error storing url: " + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase + ", error = " + e.getMessage());
             return;
         }
         
@@ -2448,6 +2477,7 @@ public final class Switchboard extends serverSwitch {
             final byte[] referrerHash, 
             final byte[] initiator, 
             final String name, 
+            final FailCategory failCategory,
             final String failreason
     ) {
         // assert initiator != null; // null == proxy
@@ -2463,7 +2493,7 @@ public final class Switchboard extends serverSwitch {
                 0, 
                 0,
                 0);
-        crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failreason, -1);
+        crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failCategory, failreason, -1);
     }
     
     public final void heuristicSite(final SearchEvent searchEvent, final String host) {

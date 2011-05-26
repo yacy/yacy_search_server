@@ -296,6 +296,7 @@ public class BookmarksDB {
     	Set<String> tagSet;
     	while(bit.hasNext()){
             bm=getBookmark(bit.next());
+            if (bm == null) continue;
             tagSet = bm.getTags();
             it = tagSet.iterator();
             while (it.hasNext()) {

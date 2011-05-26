@@ -153,7 +153,8 @@ public final class FileUtils {
             dest.flush();
         } catch (final Exception e) {
             // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
-            throw new IOException(e.getMessage());
+            Log.logException(e);
+            throw new IOException(e.getMessage(), e);
         }
         return count;
     }

@@ -45,6 +45,19 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
      * @return the objects of the smaller entries from at least 1/2 of the list
      */
     public List<E> lowerHalf() {
+        
+        // first calculate the average of the entries
+        long a = 0;
+        for (E entry: this) a += get(entry);
+        a = a / this.size();
+        
+        // then select all entries which are smaller that the average
+
+        ArrayList<E> list = new ArrayList<E>();
+        for (E entry: this) if (get(entry) < a) list.add(entry);
+        return list;
+        
+        /*
         int half = this.size() >> 1;
         int smallestCount = 0;
         ArrayList<E> list = new ArrayList<E>();
@@ -55,5 +68,6 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
             smallestCount++;
         }
         return list;
+        */
     }
 }

@@ -370,10 +370,15 @@ public class Bookmarks {
     }    
     
     private static void printTagList(final String id, final String tagName, final int comp, final int max, final boolean opt){    	
-    	int count=0;
-
-    	final Iterator<BookmarksDB.Tag> it;
     	
+    	if (sb.bookmarksDB == null) {
+    	    prop.put("display_"+id, 0); 
+    	    return;
+    	}
+    	
+    	int count=0;
+        final Iterator<BookmarksDB.Tag> it;
+        
         if ("".equals(tagName)) {
             it = sb.bookmarksDB.getTagIterator(isAdmin, comp, max);
         } else {

@@ -287,13 +287,14 @@ public class IndexControlURLs_p {
         
         if (post.containsKey("statistics")) {
             int count = post.getInt("lines", 100);
-            Iterator<MetadataRepository.hostStat> statsiter;
+            Iterator<MetadataRepository.HostStat> statsiter;
             prop.put("statistics_lines", count);
             int cnt = 0;
             try {
-                statsiter = segment.urlMetadata().statistics(count);
+                MetadataRepository metadata = segment.urlMetadata();
+                statsiter = metadata.statistics(count, metadata.urlSampleScores(metadata.domainSampleCollector()));
                 boolean dark = true;
-                MetadataRepository.hostStat hs;
+                MetadataRepository.HostStat hs;
                 while (statsiter.hasNext() && cnt < count) {
                     hs = statsiter.next();
                     prop.put("statisticslines_domains_" + cnt + "_dark", (dark) ? "1" : "0");

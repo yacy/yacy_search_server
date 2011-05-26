@@ -268,8 +268,11 @@ public class Compressor implements BLOB {
         return null;
     }
     
-    public synchronized boolean containsKey(byte[] key) {
-        return this.buffer.containsKey(UTF8.String(key)) || this.backend.containsKey(key);
+    public boolean containsKey(byte[] key) {
+        String keys = UTF8.String(key);
+        synchronized (this) {
+            return this.buffer.containsKey(keys) || this.backend.containsKey(key);
+        }
     }
 
     public int keylength() {
@@ -285,16 +288,19 @@ public class Compressor implements BLOB {
         }
     }
     
-    public synchronized long length(byte[] key) throws IOException {
-        byte[] b = buffer.get(UTF8.String(key));
-        if (b != null) return b.length;
-        try {
-            b = this.backend.get(key);
-            if (b == null) return 0;
-            b = decompress(b);
-            return (b == null) ? 0 : b.length;
-        } catch (RowSpaceExceededException e) {
-            throw new IOException(e.getMessage());
+    public long length(byte[] key) throws IOException {
+        String keys = UTF8.String(key);
+        synchronized (this) {
+            byte[] b = buffer.get(keys);
+            if (b != null) return b.length;
+            try {
+                b = this.backend.get(key);
+                if (b == null) return 0;
+                b = decompress(b);
+                return (b == null) ? 0 : b.length;
+            } catch (RowSpaceExceededException e) {
+                throw new IOException(e.getMessage());
+            }
         }
     }
     

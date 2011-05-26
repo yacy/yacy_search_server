@@ -316,7 +316,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             ReferenceType ee;
             while (e.hasNext()) {
                 ee = e.next();
-                if (urlselection.has(ee.metadataHash())) {
+                if (urlselection.has(ee.urlhash())) {
                     c1.add(ee);
                 }
             }

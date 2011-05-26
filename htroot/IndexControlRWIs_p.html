@@ -43,7 +43,9 @@
         <dd><input type="checkbox" name="deleteIndex" id="deleteIndex"
              onclick="x=document.getElementById('deleteIndex').checked;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';document.getElementById('deleteSearchFl').checked=x;if(x){c='';}document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;document.getElementById('deleteSearchFl').disabled=c;"
             /><label for="deleteIndex">Delete Search Index</label><br/>
-            #(solr)#::<input type="checkbox" name="deleteSolr" id="deleteSolr" /><label for="deleteSolr">Delete Solr Index</label><br/>#(/solr)#
+            #(solr)#::<input type="checkbox" name="deleteSolr" id="deleteSolr"
+             onclick="x=document.getElementById('deleteSolr').checked;document.getElementById('deleteRobots').checked=x;document.getElementById('deleteCrawlQueues').checked=x;c='disabled';document.getElementById('deleteSearchFl').checked=x;if(x){c='';}document.getElementById('deletecomplete').disabled=c;document.getElementById('deleteCache').disabled=c;document.getElementById('deleteRobots').disabled=c;document.getElementById('deleteCrawlQueues').disabled=c;document.getElementById('deleteSearchFl').disabled=c;"
+            /><label for="deleteSolr">Delete Solr Index</label><br/>#(/solr)#
             <input type="checkbox" name="deleteCache" id="deleteCache" disabled="disabled" /><label for="deleteCache">Delete HTTP &amp; FTP Cache</label><br/>
             <input type="checkbox" name="deleteCrawlQueues" id="deleteCrawlQueues" disabled="disabled" /><label for="deleteCrawlQueues">Stop Crawler and delete Crawl Queues</label><br/>
             <input type="checkbox" name="deleteRobots" id="deleteRobots" disabled="disabled" /><label for="deleteRobots">Delete robots.txt Cache</label><br/>

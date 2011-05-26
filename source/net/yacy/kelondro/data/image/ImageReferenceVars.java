@@ -107,7 +107,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         //this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
         this.language = e.getLanguage();
-        this.urlHash = e.metadataHash();
+        this.urlHash = e.urlhash();
         this.type = e.getType();
         this.hitcount = e.hitcount();
         this.llocal = e.llocal();
@@ -267,7 +267,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         return toRowEntry().toPropertyForm();
     }
 
-    public byte[] metadataHash() {
+    public byte[] urlhash() {
         return urlHash;
     }
 

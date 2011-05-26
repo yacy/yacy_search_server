@@ -49,6 +49,7 @@ import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
+import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.BookmarkHelper;
 import de.anomic.data.WorkTables;
@@ -385,6 +386,7 @@ public class Crawler_p {
                                 sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
                                 1,
+                                FailCategory.FINAL_LOAD_CONTEXT,
                                 reasonString, -1);
                         }
                     } catch (final PatternSyntaxException e) {

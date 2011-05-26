@@ -192,7 +192,7 @@ public final class RankingProcess extends Thread {
             while (true) {
                 iEntry = decodedEntries.poll(1, TimeUnit.SECONDS);
                 if (iEntry == null || iEntry == WordReferenceVars.poison) break;
-                assert (iEntry.metadataHash().length == index.row().primaryKeyLength);
+                assert (iEntry.urlhash().length == index.row().primaryKeyLength);
                 //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
                 // increase flag counts
@@ -227,15 +227,16 @@ public final class RankingProcess extends Thread {
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
                 
                 // check site constraints
-                String domhash = UTF8.String(iEntry.metadataHash(), 6, 6);
+                String urlhashs = UTF8.String(iEntry.urlhash());
+                String hosthash = urlhashs.substring(6);
                 if (query.sitehash == null) {
                     // no site constraint there; maybe collect host navigation information
                     if (nav_hosts && query.urlMask_isCatchall) {
-                        this.hostNavigator.inc(domhash);
-                        this.hostResolver.put(domhash, UTF8.String(iEntry.metadataHash()));
+                        this.hostNavigator.inc(hosthash);
+                        this.hostResolver.put(hosthash, urlhashs);
                     }
                 } else {
-                    if (!domhash.equals(query.sitehash)) {
+                    if (!hosthash.equals(query.sitehash)) {
                         // filter out all domains that do not match with the site constraint
                         this.sortout++;
                         continue;
@@ -243,7 +244,7 @@ public final class RankingProcess extends Thread {
                 }
 			    
                 // finally make a double-check and insert result to stack
-                if (urlhashes.add(iEntry.metadataHash())) {
+                if (urlhashes.add(iEntry.urlhash())) {
                     rankingtryloop: while (true) {
                         try {
                             stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
@@ -332,7 +333,7 @@ public final class RankingProcess extends Thread {
                  }
                 
                 // check doubledom
-                final String domhash = UTF8.String(rwi.getElement().metadataHash(), 6, 6);
+                final String domhash = UTF8.String(rwi.getElement().urlhash(), 6, 6);
                 synchronized (this.doubleDomCache) {
                     m = this.doubleDomCache.get(domhash);
                     if (m == null) {
@@ -376,7 +377,7 @@ public final class RankingProcess extends Thread {
             if (bestEntry == null) return null;
             
             // finally remove the best entry from the doubledom cache
-            m = this.doubleDomCache.get(UTF8.String(bestEntry.getElement().metadataHash()).substring(6));
+            m = this.doubleDomCache.get(UTF8.String(bestEntry.getElement().urlhash()).substring(6));
             bestEntry = m.poll();
         }
         return bestEntry;
@@ -402,7 +403,7 @@ public final class RankingProcess extends Thread {
             if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
             final URIMetadataRow page = this.query.getSegment().urlMetadata().load(obrwi);
             if (page == null) {
-            	misses.add(obrwi.getElement().metadataHash());
+            	misses.add(obrwi.getElement().urlhash());
             	continue;
             }
             

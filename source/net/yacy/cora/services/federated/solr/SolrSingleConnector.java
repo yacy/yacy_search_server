@@ -174,7 +174,7 @@ public class SolrSingleConnector {
         add(this.scheme.yacy2solr(id, header, doc));
     }
 
-    private void add(SolrInputDocument solrdoc) throws IOException {
+    protected void add(SolrInputDocument solrdoc) throws IOException {
         int thisrrc = this.transmissionRoundRobinCounter;
         int nextrrc = thisrrc++;
         if (nextrrc >= transmissionQueueCount) nextrrc = 0;

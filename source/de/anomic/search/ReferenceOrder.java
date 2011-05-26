@@ -163,7 +163,7 @@ public class ReferenceOrder {
                     if (max == null) max = iEntry.clone(); else max.max(iEntry);
                     out.put(iEntry); // must be after the min/max check to prevent that min/max is null in cardinal()
                     // update domcount
-                    dom = UTF8.String(iEntry.metadataHash(), 6, 6);
+                    dom = UTF8.String(iEntry.urlhash(), 6, 6);
                     count = doms0.get(dom);
                     if (count == null) {
                         doms0.put(dom, int1);
@@ -216,8 +216,8 @@ public class ReferenceOrder {
         int maxmaxpos = max.maxposition();
         int minminpos = min.minposition();
         final long r =
-             ((256 - DigestURI.domLengthNormalized(t.metadataHash())) << ranking.coeff_domlength)
-           + ((ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
+             ((256 - DigestURI.domLengthNormalized(t.urlhash())) << ranking.coeff_domlength)
+           + ((ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.urlhash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
            + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
            + ((maxmaxpos           == minminpos        )   ? 0 : (256 - (((t.minposition()  - minminpos          ) << 8) / (maxmaxpos          - minminpos)          )) << ranking.coeff_posintext)
@@ -232,7 +232,7 @@ public class ReferenceOrder {
            + ((max.lother()        == min.lother())        ? 0 : (((t.lother()       - min.lother()        ) << 8) / (max.lother()       - min.lother())        ) << ranking.coeff_lother)
            + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
            + tf
-           + ((ranking.coeff_authority > 12) ? (authority(t.metadataHash()) << ranking.coeff_authority) : 0)
+           + ((ranking.coeff_authority > 12) ? (authority(t.urlhash()) << ranking.coeff_authority) : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)
@@ -245,7 +245,7 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0)
            + ((ByteBuffer.equals(t.language, this.language)) ? 255 << ranking.coeff_language           : 0)
-           + ((DigestURI.probablyRootURL(t.metadataHash())) ?  15 << ranking.coeff_urllength          : 0);
+           + ((DigestURI.probablyRootURL(t.urlhash())) ?  15 << ranking.coeff_urllength          : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
