@@ -362,7 +362,7 @@ proxyBlueList=yacy.blue
 # if several ip's are allowed then they must be separated by a ','
 # regular expressions may be used
 #proxyClient=192.168.0.4
-proxyClient=localhost,127\.0\.0\.1,192\.168\..*,10\..*,0:0:0:0:0:0:0:1
+proxyClient=localhost,127\.0\.0\.1,192\.168\..*,10\..*,0:0:0:0:0:0:0:1.*
 
 # YaCyHop: allow public usage of proxy for yacy-protocol
 # this enables usage of the internal http proxy for everyone,
