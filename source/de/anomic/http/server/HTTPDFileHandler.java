@@ -1352,10 +1352,15 @@ public final class HTTPDFileHandler {
 			String directory = "";
 			if (proxyurl.getPath().lastIndexOf('/') > 0)
 				directory = proxyurl.getPath().substring(0, proxyurl.getPath().lastIndexOf('/'));
+			// urls of form href="http://domain.com/path"
+			sbuffer = sbuffer.replaceAll("(href|src)=\"http([^\"]+)\"", "$1=\"/proxy.html?url=http$2\"");
+			sbuffer = sbuffer.replaceAll("(href|src)='http([^']+)'", "$1='/proxy.html?url=http$2'");
+			// urls of form href="/absolute/path/to/linked/page"
 			sbuffer = sbuffer.replaceAll("(href|src)=\"/([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+"/$2\"");
-			sbuffer = sbuffer.replaceAll("(href|src)='/([^:\"]+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+"/$2'");
+			sbuffer = sbuffer.replaceAll("(href|src)='/([^:']+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+"/$2'");
+			// urls of form href="relative/path"
 			sbuffer = sbuffer.replaceAll("(href|src)=\"([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2\"");
-			sbuffer = sbuffer.replaceAll("(href|src)='([^:\"]+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2'");
+			sbuffer = sbuffer.replaceAll("(href|src)='([^:']+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2'");
 			sbuffer = sbuffer.replaceAll("url\\(", "url(/proxy.html?url=http://"+proxyurl.getHost()+proxyurl.getPath());
 			
 			byte[] sbb = UTF8.getBytes(sbuffer);
