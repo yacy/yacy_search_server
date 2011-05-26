@@ -50,7 +50,7 @@ import net.yacy.kelondro.logging.Log;
 
 public class Digest {
 	
-    private final static int digestThreads = Runtime.getRuntime().availableProcessors() * 2 + 1;
+    private final static int digestThreads = Runtime.getRuntime().availableProcessors() * 4;
 	public static BlockingQueue<MessageDigest> digestPool = new ArrayBlockingQueue<MessageDigest>(digestThreads);
 	static {
 		for (int i = 0; i < digestThreads; i++)
@@ -115,7 +115,17 @@ public class Digest {
     public static byte[] encodeMD5Raw(final String key) {
     	MessageDigest digest = null;
     	boolean fromPool = true;
-        try {
+    	if (digestPool.size() == 0) {
+    	    // if there are no digest objects left, create some on the fly
+    	    // this is not the most effective way but if we wouldn't do that the encoder would block
+    	    try {
+                digest = MessageDigest.getInstance("MD5");
+                digest.reset();
+                fromPool = false;
+            } catch (NoSuchAlgorithmException e) {
+            }
+    	}
+        if (digest == null) try {
             digest = digestPool.take();
         } catch (InterruptedException e) {
         	Log.logWarning("Digest", "using generic instead of pooled digest");

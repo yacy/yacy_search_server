@@ -356,7 +356,7 @@ public class DidYouMean {
             public void run() {
                 String s;
                 try {
-                    while (!(s = guessLib.take()).equals(POISON_STRING)) {
+                    while ((s = guessLib.take()) != POISON_STRING) {
                         if (s.length() >= MinimumOutputWordLength && index.has(Word.word2hash(s))) resultSet.add(s);
                         if (System.currentTimeMillis() > timeLimit) return;
                     }
