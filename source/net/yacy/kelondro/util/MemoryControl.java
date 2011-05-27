@@ -170,7 +170,7 @@ public class MemoryControl {
     }
     
     public static boolean shortStatus() {
-        if (shortStatus) System.out.println("**** SHORT MEMORY ****");
+        //if (shortStatus) System.out.println("**** SHORT MEMORY ****");
         return shortStatus;
     }
     

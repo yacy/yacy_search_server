@@ -179,21 +179,19 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // first try to get the snippet from metadata
             String loc;
             boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
-            boolean objectWasInCache = (noCacheUsage) ? false : de.anomic.http.client.Cache.has(url);
-            boolean useMetadata = !objectWasInCache && (cacheStrategy == null || !cacheStrategy.mustBeOffline());
-            if (useMetadata && containsAllHashes(loc = comp.dc_title(), queryhashes)) {
+            if (containsAllHashes(loc = comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
                 init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
                 return;
-            } else if (useMetadata && containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
+            } else if (containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
                 // try to create the snippet from information given in the creator metadata
                 init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
                 return;
-            } else if (useMetadata && containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
+            } else if (containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
                 init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
                 return;
-            } else if (useMetadata && containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
+            } else if (containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
                 // try to create the snippet from information given in the url
                 init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
                 return;
@@ -210,8 +208,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     // if it is still not available, report an error
                     init(url.hash(), null, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
                     return;
-                }
-                if (!objectWasInCache) {
+                } else {
                     // place entry on indexing queue
                     Switchboard.getSwitchboard().toIndexer(response);
                     source = ResultClass.SOURCE_WEB;

@@ -133,6 +133,7 @@ public class SearchEventCache {
             // start a new event
             boolean delete = Switchboard.getSwitchboard() == null | Switchboard.getSwitchboard().getConfigBool("search.verify.delete", true);
             event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, burstRobinsonPercent, burstMultiwordPercent, delete);
+            MemoryControl.request(100 * 1024 * 1024, false); // this may trigger a short memory status which causes a reducing of cache space of other threads
         }
     
         return event;
