@@ -66,7 +66,7 @@ SetCompressor /SOLID LZMA
 ; ----------------------------------------
 ; GENERAL APPEARANCE
 
-BrandingText "yacy.net"
+;BrandingText "yacy.net"
 
 !define MUI_ICON "RELEASE\MAIN\addon\YaCy.ico"
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\orange-uninstall.ico"
