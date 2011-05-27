@@ -202,16 +202,15 @@ public final class RankingProcess extends Thread {
 
                 // check constraints
                 if (!testFlags(iEntry)) {
-                    this.sortout++;
                     continue;
                 }
 
                 // check document domain
                 if (query.contentdom != ContentDomain.TEXT) {
-                    if ((query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) { this.sortout++; continue; }
-                    if ((query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) { this.sortout++; continue; }
-                    if ((query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) { this.sortout++; continue; }
-                    if ((query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) { this.sortout++; continue; }
+                    if ((query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) { continue; }
+                    if ((query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) { continue; }
+                    if ((query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) { continue; }
+                    if ((query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) { continue; }
                 }
 
                 // check tld domain
@@ -238,7 +237,6 @@ public final class RankingProcess extends Thread {
                 } else {
                     if (!hosthash.equals(query.sitehash)) {
                         // filter out all domains that do not match with the site constraint
-                        this.sortout++;
                         continue;
                     }
                 }
