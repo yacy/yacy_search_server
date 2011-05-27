@@ -33,6 +33,7 @@ import java.util.Set;
 
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
@@ -221,6 +222,9 @@ public enum SolrScheme {
                     solrdoc.addField("attr_" + model + "count", html.getEvaluationModelScoreCounts(model, scorenames));
                 }
             }
+            
+            // response time
+            solrdoc.addField("responsetime_i", header.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0"));
         }
         return solrdoc;
     }

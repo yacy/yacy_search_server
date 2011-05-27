@@ -47,6 +47,7 @@ import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
+import net.yacy.cora.protocol.HeaderFramework;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -575,7 +576,9 @@ public class HTTPClient {
 	    }
 
 	    try {
+	        long time = System.currentTimeMillis();
             httpResponse = httpClient.execute(httpUriRequest, httpContext);
+            httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
         } catch (IOException e) {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();

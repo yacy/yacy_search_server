@@ -98,7 +98,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String ACCEPT_RANGES = "Accept-Ranges";
     public static final String CONTENT_RANGE = "Content-Range";
     public static final String RANGE = "Range";
-    
+
     public static final String LOCATION = "Location";
     public static final String ETAG = "ETag";
     public static final String VIA = "Via";
@@ -115,6 +115,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     
     public static final String CORS_ALLOW_ORIGIN = "Access-Control-Allow-Origin"; // Cross-Origin Resource Sharing properties (http://www.w3.org/TR/cors/)
 
+    public static final String RESPONSE_TIME_MILLIS = "ResponseTimeMillis";
 
     
     /* =============================================================
