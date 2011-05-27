@@ -155,7 +155,7 @@ public final class FileUtils {
         } catch (final Exception e) {
             // an "sun.io.MalformedInputException: Missing byte-order mark" - exception may occur here
             //Log.logException(e);
-            throw new IOException(e.getMessage() == null ? e.toString() : e.getMessage(), e);
+            throw new IOException(e == null ? "null" : e.getMessage() == null ? e.toString() : e.getMessage(), e);
         }
         return count;
     }
