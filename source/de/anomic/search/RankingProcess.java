@@ -38,8 +38,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.cora.storage.ClusteredScoreMap;
@@ -227,7 +227,7 @@ public final class RankingProcess extends Thread {
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
                 
                 // check site constraints
-                String urlhashs = UTF8.String(iEntry.urlhash());
+                String urlhashs = ASCII.String(iEntry.urlhash());
                 String hosthash = urlhashs.substring(6);
                 if (query.sitehash == null) {
                     // no site constraint there; maybe collect host navigation information
@@ -333,7 +333,7 @@ public final class RankingProcess extends Thread {
                  }
                 
                 // check doubledom
-                final String domhash = UTF8.String(rwi.getElement().urlhash(), 6, 6);
+                final String domhash = ASCII.String(rwi.getElement().urlhash(), 6, 6);
                 synchronized (this.doubleDomCache) {
                     m = this.doubleDomCache.get(domhash);
                     if (m == null) {
@@ -377,7 +377,7 @@ public final class RankingProcess extends Thread {
             if (bestEntry == null) return null;
             
             // finally remove the best entry from the doubledom cache
-            m = this.doubleDomCache.get(UTF8.String(bestEntry.getElement().urlhash()).substring(6));
+            m = this.doubleDomCache.get(ASCII.String(bestEntry.getElement().urlhash()).substring(6));
             bestEntry = m.poll();
         }
         return bestEntry;
@@ -482,7 +482,7 @@ public final class RankingProcess extends Thread {
             // author navigation:
             if (pageauthor != null && pageauthor.length() > 0) {
             	// add author to the author navigator
-                String authorhash = UTF8.String(Word.word2hash(pageauthor));
+                String authorhash = ASCII.String(Word.word2hash(pageauthor));
 
                 // check if we already are filtering for authors
             	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
@@ -604,7 +604,7 @@ public final class RankingProcess extends Thread {
             domhash = domhashs.next();
             if (domhash == null) continue;
             urlhash = this.hostResolver.get(domhash);
-            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(UTF8.getBytes(urlhash));
+            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(ASCII.getBytes(urlhash));
             hostname = row == null ? null : row.metadata().url().getHost();
             if (hostname != null) {
                 result.set(hostname, this.hostNavigator.get(domhash));

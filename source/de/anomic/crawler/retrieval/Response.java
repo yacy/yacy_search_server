@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Date;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -806,7 +807,7 @@ public class Response {
         // 6) local fetching for global crawling (other known or unknwon initiator)
         EventOrigin processCase = EventOrigin.UNKNOWN;
         // FIXME the equals seems to be incorrect: String.equals(boolean)
-        if ((initiator() == null) || initiator().length == 0 || UTF8.String(initiator()).equals("------------")) {
+        if (initiator() == null || initiator().length == 0 || ASCII.String(initiator()).equals("------------")) {
             // proxy-load
             processCase = EventOrigin.PROXY_LOAD;
         } else if (UTF8.String(initiator()).equals(mySeedHash)) {

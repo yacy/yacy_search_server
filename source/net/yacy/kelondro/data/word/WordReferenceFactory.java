@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -74,8 +74,8 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference> {
             while (i.hasNext()) {
                 iEntry = i.next();
                 if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.urlhash()) != null)) continue; // do not include urls that are in excludeContainer
-                dom = UTF8.String(iEntry.urlhash(), 6, 6);
-                mod = UTF8.String(iEntry.urlhash(), 0, 6);
+                dom = ASCII.String(iEntry.urlhash(), 6, 6);
+                mod = ASCII.String(iEntry.urlhash(), 0, 6);
                 if ((paths = doms.get(dom)) == null) {
                     doms.put(dom, new StringBuilder(30).append(mod));
                 } else {

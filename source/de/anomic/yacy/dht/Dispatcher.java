@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.HandleSet;
@@ -199,7 +199,7 @@ public class Dispatcher {
                 urlHashes.clear();
                 it = c.entries();
                 while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
-                if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + UTF8.String(c.getTermHash()) + "'");
+                if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
                 if (!urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
             rc = containers;
@@ -210,7 +210,7 @@ public class Dispatcher {
             for (ReferenceContainer<WordReference> c: containers) {
                 container = this.segment.termIndex().delete(c.getTermHash()); // be aware this might be null!
                 if (container != null && !container.isEmpty()) {
-                    if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + UTF8.String(c.getTermHash()) + "'");
+                    if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
                     rc.add(container);
                 }
             }
@@ -291,7 +291,7 @@ public class Dispatcher {
                     primaryTarget,
                     seeds.redundancy() * 3,
                     true);
-            this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + UTF8.String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
+            this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + ASCII.String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
             if (entry == null) entry = transmission.newChunk(primaryTarget, targets);
 
             /*/ lookup targets
@@ -398,11 +398,11 @@ public class Dispatcher {
         
         if (success && chunk.isFinished()) {
             // finished with this queue!
-            this.log.logInfo("STORE: Chunk " + UTF8.String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
+            this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
             return chunk;
         }
         
-        if (!success) this.log.logInfo("STORE: Chunk " + UTF8.String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
+        if (!success) this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
         
         if (chunk.canFinish()) {
             try {
@@ -413,7 +413,7 @@ public class Dispatcher {
             }
             return chunk;
         }
-        this.log.logInfo("STORE: Chunk " + UTF8.String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
+        this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
         chunk.restore();
         return null;
     }

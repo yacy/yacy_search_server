@@ -50,9 +50,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import de.anomic.search.Switchboard;
@@ -321,7 +321,7 @@ public class yacyCore {
                     yacySeed seed;
                     while (i.hasNext()) {
                         entry = i.next();
-                        hash = UTF8.String(entry.getKey());
+                        hash = ASCII.String(entry.getKey());
                         seed = seeds.get(hash);
                         if (seed == null) {
                             seed = sb.peers.get(hash);

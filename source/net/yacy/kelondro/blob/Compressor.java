@@ -33,13 +33,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
@@ -54,7 +54,7 @@ public class Compressor implements BLOB {
     static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
     
     private final BLOB backend;
-    private Map<String, byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
+    private TreeMap<byte[], byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
     private BlockingQueue<Entity> writeQueue;
     private long bufferlength;
     private final long maxbufferlength;
@@ -80,14 +80,14 @@ public class Compressor implements BLOB {
         this.backend.trim();
     }
     
-    private static class Entity implements Map.Entry<String, byte[]> {
-        private String key;
+    private static class Entity implements Map.Entry<byte[], byte[]> {
+        private byte[] key;
         private byte[] payload;
-        public Entity(String key, byte[] payload) {
+        public Entity(byte[] key, byte[] payload) {
             this.key = key;
             this.payload = payload;
         }
-        public String getKey() {
+        public byte[] getKey() {
             return this.key;
         }
 
@@ -102,7 +102,7 @@ public class Compressor implements BLOB {
         }
     }
     
-    private final static Entity poisonWorkerEntry = new Entity("poison", null);
+    private final static Entity poisonWorkerEntry = new Entity(ASCII.getBytes("poison"), null);
     
     private class Worker extends Thread {
         public Worker() {
@@ -113,7 +113,7 @@ public class Compressor implements BLOB {
             try {
                 while ((entry = writeQueue.take()) != poisonWorkerEntry) {
                     try {
-                        Compressor.this.backend.insert(UTF8.getBytes(entry.getKey()), compress(entry.getValue()));
+                        Compressor.this.backend.insert(entry.getKey(), compress(entry.getValue()));
                     } catch (IOException e) {
                         Log.logException(e);
                         buffer.put(entry.getKey(), entry.getValue());
@@ -136,7 +136,7 @@ public class Compressor implements BLOB {
     }
     
     private void initBuffer() {
-        this.buffer = new ConcurrentHashMap<String, byte[]>();
+        this.buffer = new TreeMap<byte[], byte[]>(this.backend.ordering());
         this.bufferlength = 0;
     }
 
@@ -160,7 +160,7 @@ public class Compressor implements BLOB {
         this.backend.close(writeIDX);
     }
     
-    private byte[] compress(byte[] b) {
+    private static byte[] compress(byte[] b) {
         int l = b.length;
         if (l < 100) return markWithPlainMagic(b);
         byte[] bb = compressAddMagic(b);
@@ -168,7 +168,7 @@ public class Compressor implements BLOB {
         return bb;
     }
     
-    private byte[] compressAddMagic(byte[] b) {
+    private static byte[] compressAddMagic(byte[] b) {
         // compress a byte array and add a leading magic for the compression
         try {
             //System.out.print("/(" + cdr + ")"); // DEBUG
@@ -185,7 +185,7 @@ public class Compressor implements BLOB {
         }
     }
     
-    private byte[] markWithPlainMagic(byte[] b) {
+    private static byte[] markWithPlainMagic(byte[] b) {
         //System.out.print("+"); // DEBUG
         byte[] r = new byte[b.length + 2];
         r[0] = plainMagic[0];
@@ -194,7 +194,7 @@ public class Compressor implements BLOB {
         return r;
     }
 
-    private byte[] decompress(byte[] b) {
+    private static byte[] decompress(byte[] b) {
         // use a magic in the head of the bytes to identify compression type
         if (b == null) return null;
         if (ByteArray.startsWith(b, gzipMagic)) {
@@ -234,19 +234,18 @@ public class Compressor implements BLOB {
     public byte[] get(byte[] key) throws IOException, RowSpaceExceededException {
         // depending on the source of the result, we additionally do entry compression
         // because if a document was read once, we think that it will not be retrieved another time again soon
-        String keys = UTF8.String(key);
         byte[] b = null;
         synchronized (this) {
-            b = buffer.remove(keys);
+            b = buffer.remove(key);
             if (b != null) {
                 // compress the entry now and put it to the backend
                 try {
-                    this.writeQueue.put(new Entity(keys, b));
+                    this.writeQueue.put(new Entity(key, b));
                     this.bufferlength = this.bufferlength - b.length;
                     return b;
                 } catch (InterruptedException e) {
                     Log.logException(e);
-                    buffer.put(keys, b);
+                    buffer.put(key, b);
                 }
             }
             
@@ -270,9 +269,8 @@ public class Compressor implements BLOB {
     }
     
     public boolean containsKey(byte[] key) {
-        String keys = UTF8.String(key);
         synchronized (this) {
-            return this.buffer.containsKey(keys) || this.backend.containsKey(key);
+            return this.buffer.containsKey(key) || this.backend.containsKey(key);
         }
     }
 
@@ -290,9 +288,8 @@ public class Compressor implements BLOB {
     }
     
     public long length(byte[] key) throws IOException {
-        String keys = UTF8.String(key);
         synchronized (this) {
-            byte[] b = buffer.get(keys);
+            byte[] b = this.buffer.get(key);
             if (b != null) return b.length;
             try {
                 b = this.backend.get(key);
@@ -306,7 +303,7 @@ public class Compressor implements BLOB {
     }
     
     private int removeFromQueues(byte[] key) {
-        byte[] b = buffer.remove(UTF8.String(key));
+        byte[] b = this.buffer.remove(key);
         if (b != null) return b.length;
         return 0;
     }
@@ -331,7 +328,7 @@ public class Compressor implements BLOB {
         // they are either written uncompressed to the database
         // or compressed later
         synchronized (this) {
-            this.buffer.put(UTF8.String(key), b);
+            this.buffer.put(key, b);
             this.bufferlength += b.length;
         }
         
@@ -367,7 +364,7 @@ public class Compressor implements BLOB {
     private boolean flushOne() {
         if (this.buffer.isEmpty()) return false;
         // depending on process case, write it to the file or compress it to the other queue
-        Map.Entry<String, byte[]> entry = this.buffer.entrySet().iterator().next();
+        Map.Entry<byte[], byte[]> entry = this.buffer.entrySet().iterator().next();
         this.buffer.remove(entry.getKey());
         try {
             this.writeQueue.put(new Entity(entry.getKey(), entry.getValue()));

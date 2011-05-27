@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.Hit;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.UTF8;
@@ -243,7 +244,7 @@ public class CrawlQueues {
                         log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
                     }
-                    CrawlProfile profile = sb.crawler.getActive(UTF8.getBytes(profileHandle));
+                    CrawlProfile profile = sb.crawler.getActive(ASCII.getBytes(profileHandle));
                     if (profile == null) {
                         log.logSevere(stats + ": NULL PROFILE HANDLE '" + urlEntry.profileHandle() + "' for URL " + urlEntry.url());
                         return true;
@@ -294,7 +295,7 @@ public class CrawlQueues {
             if (sb.loader.isSupportedProtocol(urlProtocol)) {
                 if (this.log.isFine())
                     log.logFine(stats + ": URL=" + urlEntry.url()
-                            + ", initiator=" + ((urlEntry.initiator() == null) ? "" : UTF8.String(urlEntry.initiator()))
+                            + ", initiator=" + ((urlEntry.initiator() == null) ? "" : ASCII.String(urlEntry.initiator()))
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
                             + ", crawlDepth=" + profile.depth()
@@ -468,7 +469,7 @@ public class CrawlQueues {
                 // stack url
                 if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
                 sb.crawlStacker.enqueueEntry(new Request(
-                        UTF8.getBytes(hash),
+                        ASCII.getBytes(hash),
                         url,
                         (referrer == null) ? null : referrer.hash(),
                         item.getDescription(),
@@ -579,7 +580,7 @@ public class CrawlQueues {
                     //if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     errorURL.push(
                             this.request,
-                            UTF8.getBytes(sb.peers.mySeed().hash),
+                            ASCII.getBytes(sb.peers.mySeed().hash),
                             new Date(),
                             1,
                             FailCategory.FINAL_ROBOTS_RULE,
@@ -616,7 +617,7 @@ public class CrawlQueues {
                     if (result != null) {
                         errorURL.push(
                                 this.request,
-                                UTF8.getBytes(sb.peers.mySeed().hash),
+                                ASCII.getBytes(sb.peers.mySeed().hash),
                                 new Date(),
                                 1,
                                 FailCategory.TEMPORARY_NETWORK_FAILURE,
@@ -629,7 +630,7 @@ public class CrawlQueues {
             } catch (final Exception e) {
                 errorURL.push(
                         this.request,
-                        UTF8.getBytes(sb.peers.mySeed().hash),
+                        ASCII.getBytes(sb.peers.mySeed().hash),
                         new Date(),
                         1,
                         FailCategory.TEMPORARY_NETWORK_FAILURE,

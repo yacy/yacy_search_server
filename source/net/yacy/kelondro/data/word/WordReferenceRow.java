@@ -29,7 +29,7 @@ package net.yacy.kelondro.data.word;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
@@ -136,7 +136,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
             final Bitfield flags  // attributes to the url and to the word according the url
     ) {
 
-        assert (urlHash.length == 12) : "urlhash = " + UTF8.String(urlHash);
+        assert (urlHash.length == 12) : "urlhash = " + ASCII.String(urlHash);
         this.entry = urlEntryRow.newEntry();
         final int mddlm = MicroDate.microDateDays(lastmodified);
         final int mddct = MicroDate.microDateDays(updatetime);
@@ -175,7 +175,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                             final int      outlinksSame,  // outlinks to same domain
                             final int      outlinksOther  // outlinks to other domain
                     ) {
-                        assert (urlHash.length == 12) : "urlhash = " + UTF8.String(urlHash);
+                        assert (urlHash.length == 12) : "urlhash = " + ASCII.String(urlHash);
                         this.entry = urlEntryRow.newEntry();
                         final int mddlm = MicroDate.microDateDays(lastmodified);
                         final int mddct = MicroDate.microDateDays(updatetime);

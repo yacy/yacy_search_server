@@ -122,8 +122,8 @@ public class ArrayStack implements BLOB {
         // init the thread pool for the keeperOf executor service
         this.executor = new ThreadPoolExecutor(
         		Runtime.getRuntime().availableProcessors() + 1, 
-        		Runtime.getRuntime().availableProcessors() + 1, 10, 
-        		TimeUnit.SECONDS, 
+        		Runtime.getRuntime().availableProcessors() * 4, 100, 
+        		TimeUnit.MILLISECONDS, 
         		new LinkedBlockingQueue<Runnable>(), 
         		new NamePrefixThreadFactory(prefix));
         

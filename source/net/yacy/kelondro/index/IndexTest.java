@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
@@ -49,7 +50,7 @@ public class IndexTest {
         // so we construct a generic Hash using two long values
         final String s = (Base64Order.enhancedCoder.encodeLongSB(Math.abs(r0), 6).toString() +
                     Base64Order.enhancedCoder.encodeLongSB(Math.abs(r1), 6).toString());
-        return UTF8.getBytes(s);
+        return ASCII.getBytes(s);
     }
     
     public static byte[] randomHash(final Random r) {

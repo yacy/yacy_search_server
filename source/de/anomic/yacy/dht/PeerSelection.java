@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.SortedMap;
 
 import net.yacy.cora.date.AbstractFormatter;
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.kelondro.data.word.Word;
@@ -65,7 +65,7 @@ public class PeerSelection {
         yacySeed s;
         while (i.hasNext()) {
             entry = i.next();
-            s = seedDB.get(UTF8.String(entry.getKey())); // should be getConnected; get only during testing time
+            s = seedDB.get(ASCII.String(entry.getKey())); // should be getConnected; get only during testing time
             if (s != null) {
                 s.setAlternativeAddress(entry.getValue());
                 l.add(s);
@@ -191,12 +191,12 @@ public class PeerSelection {
     }
 
     public static byte[] selectTransferStart() {
-        return UTF8.getBytes(Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + Word.commonHashLength));
+        return ASCII.getBytes(Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + Word.commonHashLength));
     }
     
     public static byte[] limitOver(final yacySeedDB seedDB, final byte[] startHash) {
         final Iterator<yacySeed> seeds = getAcceptRemoteIndexSeeds(seedDB, startHash, 1, false);
-        if (seeds.hasNext()) return UTF8.getBytes(seeds.next().hash);
+        if (seeds.hasNext()) return ASCII.getBytes(seeds.next().hash);
         return null;
     }
 
@@ -239,7 +239,7 @@ public class PeerSelection {
             this.remaining = max;
             this.doublecheck = new HandleSet(12, Base64Order.enhancedCoder, 0);
             this.nextSeed = nextInternal();
-            this.alsoMyOwn = alsoMyOwn && nextSeed != null && (Base64Order.enhancedCoder.compare(UTF8.getBytes(seedDB.mySeed().hash), UTF8.getBytes(nextSeed.hash)) > 0);
+            this.alsoMyOwn = alsoMyOwn && nextSeed != null && (Base64Order.enhancedCoder.compare(ASCII.getBytes(seedDB.mySeed().hash), ASCII.getBytes(nextSeed.hash)) > 0);
         }
         
         public boolean hasNext() {
@@ -253,7 +253,7 @@ public class PeerSelection {
                 while (se.hasNext()) {
                     s = se.next();
                     if (s == null) return null;
-                    byte[] hashb = UTF8.getBytes(s.hash);
+                    byte[] hashb = ASCII.getBytes(s.hash);
                     if (doublecheck.has(hashb)) return null;
                     try {
                         this.doublecheck.put(hashb);
@@ -276,7 +276,7 @@ public class PeerSelection {
         }
         
         public yacySeed next() {
-            if (alsoMyOwn && Base64Order.enhancedCoder.compare(UTF8.getBytes(seedDB.mySeed().hash), UTF8.getBytes(nextSeed.hash)) < 0) {
+            if (alsoMyOwn && Base64Order.enhancedCoder.compare(ASCII.getBytes(seedDB.mySeed().hash), ASCII.getBytes(nextSeed.hash)) < 0) {
                 // take my own seed hash instead the enumeration result
                 alsoMyOwn = false;
                 return seedDB.mySeed();

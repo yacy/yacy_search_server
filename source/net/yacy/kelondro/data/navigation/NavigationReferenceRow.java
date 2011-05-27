@@ -28,7 +28,7 @@ package net.yacy.kelondro.data.navigation;
 
 import java.util.Collection;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
@@ -86,10 +86,10 @@ public final class NavigationReferenceRow extends AbstractReference implements N
             final int      pos,
             final byte     flags
     ) {
-        assert (termhash.length == 12) : "termhash = " + UTF8.String(termhash);
-        assert (refhash.length == 12) : "refhash = " + UTF8.String(refhash);
+        assert (termhash.length == 12) : "termhash = " + ASCII.String(termhash);
+        assert (refhash.length == 12) : "refhash = " + ASCII.String(refhash);
         this.entry = navEntryRow.newEntry();
-        this.entry.setCol(col_navhash, UTF8.String(termhash) + UTF8.String(refhash));
+        this.entry.setCol(col_navhash, ASCII.String(termhash) + ASCII.String(refhash));
         this.entry.setCol(col_count, count);
         this.entry.setCol(col_pos, pos);
         this.entry.setCol(col_flags, flags);
@@ -123,11 +123,11 @@ public final class NavigationReferenceRow extends AbstractReference implements N
     }
 
     public byte[] urlhash() {
-        return UTF8.getBytes(navigationHash().substring(12));
+        return ASCII.getBytes(navigationHash().substring(12));
     }
 
     public byte[] termHash() {
-        return UTF8.getBytes(navigationHash().substring(0, 12));
+        return ASCII.getBytes(navigationHash().substring(0, 12));
     }
 
     public int hitcount() {

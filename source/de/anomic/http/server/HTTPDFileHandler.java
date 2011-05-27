@@ -85,6 +85,7 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -973,7 +974,7 @@ public final class HTTPDFileHandler {
                         // send page in chunks and parse SSIs
                         final ByteBuffer o = new ByteBuffer();
                         // apply templates
-                        TemplateEngine.writeTemplate(fis, o, templatePatterns, UTF8.getBytes("-UNRESOLVED_PATTERN-"));
+                        TemplateEngine.writeTemplate(fis, o, templatePatterns, ASCII.getBytes("-UNRESOLVED_PATTERN-"));
                         fis.close();
                         HTTPDemon.sendRespondHeader(conProp, out,
                                 httpVersion, 200, null, mimeType, -1,
@@ -989,7 +990,7 @@ public final class HTTPDFileHandler {
                         final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
                         final ByteBuffer o1 = new ByteBuffer();
-                        TemplateEngine.writeTemplate(fis, o1, templatePatterns, UTF8.getBytes("-UNRESOLVED_PATTERN-"));
+                        TemplateEngine.writeTemplate(fis, o1, templatePatterns, ASCII.getBytes("-UNRESOLVED_PATTERN-"));
                         fis.close();
                         final ByteBuffer o = new ByteBuffer();
                         

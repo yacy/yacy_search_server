@@ -37,6 +37,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
@@ -122,7 +123,7 @@ public class ViewFile {
         String urlHash = post.get("urlHash", "");
         URIMetadataRow urlEntry = null;
         // get the urlEntry that belongs to the url hash
-        if (urlHash.length() > 0 && (urlEntry = indexSegment.urlMetadata().load(UTF8.getBytes(urlHash))) != null) {
+        if (urlHash.length() > 0 && (urlEntry = indexSegment.urlMetadata().load(ASCII.getBytes(urlHash))) != null) {
             // get the url that belongs to the entry
             final URIMetadataRow.Components metadata = urlEntry.metadata();
             if ((metadata == null) || (metadata.url() == null)) {
@@ -153,7 +154,7 @@ public class ViewFile {
 
             // define an url by post parameter
             url = new DigestURI(MultiProtocolURI.unescape(urlString));
-            urlHash = UTF8.String(url.hash());
+            urlHash = ASCII.String(url.hash());
             pre = post.getBoolean("pre", false);
         } catch (final MalformedURLException e) {}
         

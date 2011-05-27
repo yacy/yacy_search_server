@@ -50,6 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -1108,7 +1109,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     fis = new FileInputStream(new File(htRootPath, "/proxymsg/error.html")), 
                     o = new ByteArrayOutputStream(512), 
                     tp, 
-                    UTF8.getBytes("-UNRESOLVED_PATTERN-")
+                    ASCII.getBytes("-UNRESOLVED_PATTERN-")
             );
             final byte[] result = o.toByteArray();
             o.close(); o = null;

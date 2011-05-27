@@ -36,6 +36,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
@@ -50,6 +51,7 @@ import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
@@ -260,7 +262,7 @@ public final class search {
                     final ReferenceContainer<WordReference> container = entry.getValue();
                     indexabstractContainercount += container.size();
                     indexabstract.append("indexabstract.");
-                    indexabstract.append(UTF8.String(wordhash));
+                    indexabstract.append(ASCII.String(wordhash));
                     indexabstract.append("=");
                     indexabstract.append(WordReferenceFactory.compressIndex(container, null, 1000).toString());
                     indexabstract.append(serverCore.CRLF_STRING);
@@ -333,7 +335,7 @@ public final class search {
                     while (j.hasNext()) {
                         wordhash = j.next();
                         indexabstractContainercount += theSearch.abstractsCount(wordhash);
-                        indexabstract.append("indexabstract.").append(UTF8.String(wordhash)).append("=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
+                        indexabstract.append("indexabstract.").append(ASCII.String(wordhash)).append("=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
@@ -346,11 +348,11 @@ public final class search {
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
                     indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsMaxCountHash());
-                    indexabstract.append("indexabstract.").append(UTF8.String(theSearch.getAbstractsMaxCountHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
-                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(UTF8.String(theSearch.getAbstractsNearDHTHash()).equals(UTF8.String(theSearch.getAbstractsMaxCountHash()))))) {
+                    indexabstract.append("indexabstract.").append(ASCII.String(theSearch.getAbstractsMaxCountHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
+                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(ByteBuffer.equals(theSearch.getAbstractsNearDHTHash(), theSearch.getAbstractsMaxCountHash())))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
                         indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsNearDHTHash());
-                        indexabstract.append("indexabstract.").append(UTF8.String(theSearch.getAbstractsNearDHTHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
+                        indexabstract.append("indexabstract.").append(ASCII.String(theSearch.getAbstractsNearDHTHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);

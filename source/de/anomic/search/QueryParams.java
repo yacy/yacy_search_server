@@ -37,6 +37,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
@@ -261,7 +262,7 @@ public final class QueryParams {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
-                keyhashes.put(UTF8.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
+                keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
             }
@@ -273,7 +274,7 @@ public final class QueryParams {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
-                keyhashes.put(UTF8.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
+                keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
             }
@@ -285,11 +286,11 @@ public final class QueryParams {
         final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
         int p = 0;
         for (final byte[] b : hashes) {
-            assert b.length == Word.commonHashLength : "hash = " + UTF8.String(b);
+            assert b.length == Word.commonHashLength : "hash = " + ASCII.String(b);
             System.arraycopy(b, 0, bb, p, Word.commonHashLength);
             p += Word.commonHashLength;
         }
-        return UTF8.String(bb);
+        return ASCII.String(bb);
     }
 
     public static String anonymizedQueryHashes(final HandleSet hashes) {
@@ -300,11 +301,11 @@ public final class QueryParams {
         byte[] hash;
         if (i.hasNext()) {
             hash = i.next();
-            sb.append(UTF8.String(hash).substring(0, 3)).append(".........");
+            sb.append(ASCII.String(hash).substring(0, 3)).append(".........");
         }
         while (i.hasNext()) {
             hash = i.next();
-            sb.append(", ").append(UTF8.String(hash).substring(0, 3)).append(".........");
+            sb.append(", ").append(ASCII.String(hash).substring(0, 3)).append(".........");
         }
         sb.append("]");
         return sb.toString();
@@ -452,7 +453,7 @@ public final class QueryParams {
         context.append(asterisk);
         context.append(this.zonecode);
         context.append(asterisk);
-        context.append(UTF8.String(Word.word2hash(this.ranking.toExternalString())));
+        context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString())));
         context.append(asterisk);
         context.append(this.prefer);
         context.append(asterisk);

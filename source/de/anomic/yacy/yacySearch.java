@@ -28,7 +28,7 @@ import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
@@ -137,7 +137,7 @@ public class yacySearch extends Thread {
     public static String set2string(final HandleSet hashes) {
         StringBuilder wh = new StringBuilder(hashes.size() * 12);
         final Iterator<byte[]> iter = hashes.iterator();
-        while (iter.hasNext()) { wh.append(UTF8.String(iter.next())); }
+        while (iter.hasNext()) { wh.append(ASCII.String(iter.next())); }
         return wh.toString();
     }
 
@@ -225,7 +225,7 @@ public class yacySearch extends Thread {
         // prepare seed targets and threads
         final yacySeed targetPeer = peers.getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
-        if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(UTF8.getBytes(targetPeer.hash)));
+        if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(ASCII.getBytes(targetPeer.hash)));
         final yacySearch searchThread = new yacySearch(
                 wordhashes, "", urlhashes, QueryParams.matchnothing_pattern, QueryParams.catchall_pattern, QueryParams.catchall_pattern, "", "", "", 20, time, 9999, true, 0, targetPeer,
                 indexSegment, peers, containerCache, null, blacklist, rankingProfile, constraint);

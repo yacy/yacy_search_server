@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.OrderedScoreMap;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.kelondro.index.BinSearch;
@@ -166,7 +166,7 @@ public class BlockRank {
         for (ReferenceContainer<HostReference> container: index) {
             if (container.size() == 0) continue;
             if (referenceTable == null) {
-                hostStat = hostHashResolver.get(UTF8.String(container.getTermHash()));
+                hostStat = hostHashResolver.get(ASCII.String(container.getTermHash()));
                 hostCount = hostStat == null ? 6 /* high = a penalty for 'i do not know this', this may not be fair*/ : Math.max(1, hostStat.count);
                 hostScore.set(container.getTermHash(), container.size() * maxHostCount / hostCount);
             } else {
@@ -175,7 +175,7 @@ public class BlockRank {
                 HostReference hr;
                 while (hri.hasNext()) {
                     hr = hri.next();
-                    hostStat =  hostHashResolver.get(UTF8.String(hr.urlhash()));
+                    hostStat =  hostHashResolver.get(ASCII.String(hr.urlhash()));
                     hostCount = hostStat == null ? 6 /* high = a penalty for 'i do not know this', this may not be fair*/ : Math.max(1, hostStat.count);
                     score += (17 - ranking(hr.urlhash(), referenceTable)) * maxHostCount / hostCount;
                 }
@@ -216,7 +216,7 @@ public class BlockRank {
         for (int ybr = 0; ybr < tables.length; ybr++) {
             row: for (int i = 0; i < tables[ybr].size(); i++) {
                 hosth = tables[ybr].get(i, hosth);
-                hosths = UTF8.String(hosth);
+                hosths = ASCII.String(hosth);
                 hostn = myGraph.hostHash2hostName(hosths);
                 if (hostn == null) {
                     hs = hostHash2hostName.get(hostn);

@@ -54,6 +54,7 @@ import org.xml.sax.SAXException;
 import de.anomic.data.BookmarksDB.Bookmark;
 import de.anomic.data.BookmarksDB.Tag;
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.parser.html.ContentScraper;
@@ -100,7 +101,7 @@ public class BookmarkHelper {
      *        tagName is converted to lower case before hash is generated!
      */
     public static String tagHash(final String tagName){
-        return UTF8.String(Word.word2hash(tagName.toLowerCase()));
+        return ASCII.String(Word.word2hash(tagName.toLowerCase()));
     }
     /*
     private static String tagHash(final String tagName, final String user){

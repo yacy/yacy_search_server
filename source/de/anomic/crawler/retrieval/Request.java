@@ -178,8 +178,7 @@ public class Request extends WorkflowJob {
         final byte[] serverdatestr = NaturalOrder.encodeLong(0 /*lastmodified*/, rowdef.width(13));
         final byte[] sizestr = NaturalOrder.encodeLong(this.size, rowdef.width(14));
         // store the hash in the hash cache
-        byte[] namebytes;
-        namebytes = UTF8.getBytes(this.name);
+        byte[] namebytes = UTF8.getBytes(this.name);
         final byte[][] entry = new byte[][] {
                 this.url.hash(),
                 initiator,

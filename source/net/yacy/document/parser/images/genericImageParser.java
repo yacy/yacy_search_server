@@ -173,7 +173,7 @@ public class genericImageParser extends AbstractParser implements Parser {
                     if (description == null || description.length() == 0) description = props.get("Copyright Notice");
                 }
             } catch (JpegProcessingException e) {
-                Log.logException(e);
+                //Log.logException(e);
                 // just ignore
             }
         } else {

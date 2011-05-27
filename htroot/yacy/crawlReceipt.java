@@ -29,7 +29,7 @@
 
 import java.io.IOException;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
@@ -128,7 +128,7 @@ public final class crawlReceipt {
         
         final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) {
-            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + UTF8.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
@@ -136,7 +136,7 @@ public final class crawlReceipt {
         // check if the entry is in our network domain
         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(metadata.url());
         if (urlRejectReason != null) {
-            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + UTF8.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + ASCII.String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
             return prop;
         }
@@ -146,7 +146,7 @@ public final class crawlReceipt {
             sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
             ResultURLs.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
-            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + UTF8.String(entry.hash()) + ":" + metadata.url().toNormalform(false, true));
+            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + metadata.url().toNormalform(false, true));
 
             // ready for more
             prop.put("delay", "10");

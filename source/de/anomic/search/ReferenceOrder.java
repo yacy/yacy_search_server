@@ -33,7 +33,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.storage.ReversibleScoreMap;
 import net.yacy.cora.storage.ClusteredScoreMap;
 import net.yacy.document.Condenser;
@@ -163,7 +163,7 @@ public class ReferenceOrder {
                     if (max == null) max = iEntry.clone(); else max.max(iEntry);
                     out.put(iEntry); // must be after the min/max check to prevent that min/max is null in cardinal()
                     // update domcount
-                    dom = UTF8.String(iEntry.urlhash(), 6, 6);
+                    dom = ASCII.String(iEntry.urlhash(), 6, 6);
                     count = doms0.get(dom);
                     if (count == null) {
                         doms0.put(dom, int1);
@@ -195,7 +195,7 @@ public class ReferenceOrder {
     }
     
     public int authority(final byte[] urlHash) {
-        return (doms.get(UTF8.String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
+        return (doms.get(ASCII.String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
     }
 
     /**

@@ -60,6 +60,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import net.yacy.migration;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.JSONArray;
 import net.yacy.cora.document.JSONException;
 import net.yacy.cora.document.JSONObject;
@@ -473,7 +474,7 @@ public final class yacyClient {
         final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
         for (int i = 0; i < words; i++) {
             try {
-                container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, UTF8.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)), count);
+                container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, ASCII.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)), count);
             } catch (RowSpaceExceededException e) {
                 Log.logException(e);
                 return -1;
@@ -484,7 +485,7 @@ public final class yacyClient {
         for (URIMetadataRow urlEntry: result.links) {
             // get one single search result
             if (urlEntry == null) continue;
-            assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + UTF8.String(urlEntry.hash());
+            assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + ASCII.String(urlEntry.hash());
             if (urlEntry.hash().length != 12) continue; // bad url hash
             final URIMetadataRow.Components metadata = urlEntry.metadata();
             if (metadata == null) continue;
@@ -508,7 +509,7 @@ public final class yacyClient {
 
             // the search-result-url transports all the attributes of word indexes
             if (!Base64Order.enhancedCoder.equal(entry.urlhash(), urlEntry.hash())) {
-                yacyCore.log.logInfo("remote search: url-hash " + UTF8.String(urlEntry.hash()) + " does not belong to word-attached-hash " + UTF8.String(entry.urlhash()) + "; url = " + metadata.url() + " from peer " + target.getName());
+                yacyCore.log.logInfo("remote search: url-hash " + ASCII.String(urlEntry.hash()) + " does not belong to word-attached-hash " + ASCII.String(entry.urlhash()) + "; url = " + metadata.url() + " from peer " + target.getName());
                 continue; // spammed
             }
 
@@ -526,7 +527,7 @@ public final class yacyClient {
                 // because they are search-specific.
                 // instead, they are placed in a snipped-search cache.
                 // System.out.println("--- RECEIVED SNIPPET '" + urlEntry.snippet() + "'");
-                TextSnippet.snippetsCache.put(wordhashes, UTF8.String(urlEntry.hash()), urlEntry.snippet());
+                TextSnippet.snippetsCache.put(wordhashes, ASCII.String(urlEntry.hash()), urlEntry.snippet());
             }
             
             // add the url entry to the word indexes
@@ -575,7 +576,7 @@ public final class yacyClient {
             for (Map.Entry<byte[], String> abstractEntry: result.indexabstract.entrySet()) {
                 try {
                     ci = new ByteBuffer(abstractEntry.getValue());
-                    wordhash = UTF8.String(abstractEntry.getKey());
+                    wordhash = ASCII.String(abstractEntry.getKey());
                 } catch (OutOfMemoryError e) {
                     Log.logException(e);
                     continue;
@@ -812,7 +813,7 @@ public final class yacyClient {
             // prepare request
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("process", UTF8.StringBody(process));
-            parts.put("urlhash", UTF8.StringBody(((entry == null) ? "" : UTF8.String(entry.hash()))));
+            parts.put("urlhash", UTF8.StringBody(((entry == null) ? "" : ASCII.String(entry.hash()))));
             parts.put("result", UTF8.StringBody(result));
             parts.put("reason", UTF8.StringBody(reason));
             parts.put("wordh", UTF8.StringBody(wordhashes));
@@ -854,7 +855,7 @@ public final class yacyClient {
             while (eenum.hasNext()) {
                 entry = eenum.next();
                 if (urlCache.get(entry.urlhash()) == null) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + UTF8.String(entry.urlhash()) + "' is not contained in urlCache");
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + ASCII.String(entry.urlhash()) + "' is not contained in urlCache");
                 }
             }
         }        
@@ -891,7 +892,7 @@ public final class yacyClient {
         // extract the urlCache from the result
         final URIMetadataRow[] urls = new URIMetadataRow[uhs.length];
         for (int i = 0; i < uhs.length; i++) {
-            urls[i] = urlCache.get(UTF8.getBytes(uhs[i]));
+            urls[i] = urlCache.get(ASCII.getBytes(uhs[i]));
             if (urls[i] == null) {
                 if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
             }
@@ -940,7 +941,7 @@ public final class yacyClient {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
-                entrypost.append(UTF8.String(ic.getTermHash())) 
+                entrypost.append(ASCII.String(ic.getTermHash())) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.CRLF_STRING);
                 indexcount++;
@@ -1124,14 +1125,14 @@ public final class yacyClient {
                     searchlines.add(args[2]);
                 }
                 for (final String line: searchlines) {
-                    final byte[] wordhashe = UTF8.getBytes(QueryParams.hashSet2hashString(Word.words2hashesHandles(QueryParams.cleanQuery(line)[0])));
+                    final byte[] wordhashe = ASCII.getBytes(QueryParams.hashSet2hashString(Word.words2hashesHandles(QueryParams.cleanQuery(line)[0])));
                     long time = System.currentTimeMillis();
                     SearchResult result;
                     try {
                         result = new SearchResult(
                                 yacyNetwork.basicRequestParts((String) null, (String) null, "freeworld"),
                                 null, // sb.peers.mySeed(),
-                                UTF8.String(wordhashe),
+                                ASCII.String(wordhashe),
                                 "", // excludehashes,
                                 "", // urlhashes,
                                 QueryParams.matchnothing_pattern, // prefer,

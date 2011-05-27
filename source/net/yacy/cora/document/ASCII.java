@@ -35,13 +35,14 @@ import java.util.Comparator;
  * Strings without applying .toUpperCase or .toLowerCase
  * Strings must contain no other than ASCII code.
  */
-public class ASCIIComparator implements Comparator<String> {
+public class ASCII implements Comparator<String> {
 
-    public static final ASCIIComparator insensitiveASCIIComparator = new ASCIIComparator(true);
+    public static final ASCII insensitiveASCIIComparator = new ASCII(true);
+    public static final ASCII identityASCIIComparator = new ASCII(false);
   
     public boolean insensitive;
     
-    public ASCIIComparator(boolean insensitive) {
+    public ASCII(boolean insensitive) {
         this.insensitive = insensitive;
     }
 
@@ -71,6 +72,26 @@ public class ASCIIComparator implements Comparator<String> {
         if (l1 > l0) return -1;
         return 0;
     }
+    
+    public boolean equals(String s0, String s1) {
+        if (s0 == null && s1 == null) return true;
+        if (s0 == null) return false;
+        if (s1 == null) return false;
+        int i = 0;
+        int l0 = s0.length(), l1 = s1.length();
+        int lm = Math.min(l0, l1);
+        char c0, c1;
+        while (i < lm) {
+            c0 = s0.charAt(i);
+            c1 = s1.charAt(i);
+            if (this.insensitive && c0 >= 'A' && c0 <='Z') c0 = (char) ((byte) c0 + 32);
+            if (this.insensitive && c1 >= 'A' && c1 <='Z') c1 = (char) ((byte) c1 + 32);
+            if (c0 != c1) return false;
+            i++;
+        }
+        if (l0 != l1) return false;
+        return true;
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -81,5 +102,31 @@ public class ASCIIComparator implements Comparator<String> {
     public int hashCode() {
         return System.identityHashCode(this);
     }
-
+    
+    public final static String String(final byte[] bytes) {
+        StringBuilder sb = new StringBuilder(bytes.length);
+        for (int i = 0; i < bytes.length; ++ i) {
+            if (bytes[i] < 0) throw new IllegalArgumentException();
+            sb.append((char) bytes[i]);
+        }
+        return sb.toString();
+    }
+    
+    public final static String String(final byte[] bytes, final int offset, final int length) {
+        int l = Math.min(length, bytes.length - offset);
+        StringBuilder sb = new StringBuilder(l);
+        for (int i = 0; i < l; ++ i) {
+            if (bytes[i + offset] < 0) throw new IllegalArgumentException();
+            sb.append((char) bytes[i + offset]);
+        }
+        return sb.toString();
+    }
+    
+    public final static byte[] getBytes(final String s) {
+        final byte[] b = new byte[s.length()];
+        for (int i = 0; i < s.length(); i++) {
+            b[i] = (byte) s.charAt(i);
+        }
+        return b;
+    }
 }

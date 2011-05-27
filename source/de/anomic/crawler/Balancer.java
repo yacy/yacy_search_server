@@ -38,6 +38,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.BufferedObjectIndex;
@@ -281,8 +282,8 @@ public class Balancer {
             // add to index
             final int s = this.urlFileIndex.size();
             this.urlFileIndex.put(entry.toRow());
-	        assert s < this.urlFileIndex.size() : "hash = " + UTF8.String(hash) + ", s = " + s + ", size = " + this.urlFileIndex.size();
-	        assert this.urlFileIndex.has(hash) : "hash = " + UTF8.String(hash);
+	        assert s < this.urlFileIndex.size() : "hash = " + ASCII.String(hash) + ", s = " + s + ", size = " + this.urlFileIndex.size();
+	        assert this.urlFileIndex.has(hash) : "hash = " + ASCII.String(hash);
 
 	        // add the hash to a queue
 	        pushHashToDomainStacks(entry.url().getHost(), entry.url().hash());
@@ -419,8 +420,8 @@ public class Balancer {
 		                (profileEntry.cacheStrategy() == CrawlProfile.CacheStrategy.IFEXIST && Cache.has(crawlEntry.url()))
 		                ) ? 0 : Latency.waitingRemaining(crawlEntry.url(), myAgentIDs, minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
 		        
-		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + UTF8.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + UTF8.String(rowEntry.getPrimaryKeyBytes());
-		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + UTF8.String(nexthash) + ", crawlEntry.url().hash() = " + UTF8.String(crawlEntry.url().hash());
+		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + ASCII.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + ASCII.String(rowEntry.getPrimaryKeyBytes());
+		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + ASCII.String(nexthash) + ", crawlEntry.url().hash() = " + ASCII.String(crawlEntry.url().hash());
 		        
 		        if (failhash != null && Base64Order.enhancedCoder.equal(failhash, nexthash)) break; // prevent endless loops
 		        

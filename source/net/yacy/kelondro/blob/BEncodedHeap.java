@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -574,7 +575,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
                 Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
                 while (i.hasNext()) {
                     Map.Entry<byte[], Map<String, byte[]>> entry = i.next();
-                    System.out.println(UTF8.String(entry.getKey()) + ": " + entry.getValue());
+                    System.out.println(ASCII.String(entry.getKey()) + ": " + entry.getValue());
                 }
                 // clean up
                 map.close();
@@ -590,7 +591,7 @@ public class BEncodedHeap implements Map<byte[], Map<String, byte[]>>, Iterable<
                 Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator();
                 while (i.hasNext()) {
                     Map.Entry<byte[], Map<String, byte[]>> entry = i.next();
-                    System.out.println(UTF8.String(entry.getKey()) + ": " + entry.getValue());
+                    System.out.println(ASCII.String(entry.getKey()) + ": " + entry.getValue());
                 }
                 map.close();
             } catch (IOException e) {

@@ -27,8 +27,8 @@ package de.anomic.yacy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
-import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MapTools;
 
@@ -206,7 +206,7 @@ public class yacyPeerActions {
         // we do this if we did not get contact with the other peer
         if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: no contact to a " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
         synchronized (seedDB) {
-            if (!seedDB.hasDisconnected(UTF8.getBytes(peer.hash))) { disconnects++; }
+            if (!seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { disconnects++; }
             peer.put("dct", Long.toString(System.currentTimeMillis()));
             seedDB.addDisconnected(peer); // update info
         }

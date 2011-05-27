@@ -40,6 +40,7 @@ import java.util.Locale;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.kelondro.util.ByteBuffer;
 
 import de.anomic.data.Diff;
 import de.anomic.data.wiki.WikiBoard;
@@ -118,7 +119,7 @@ public class Wiki {
             final Map<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
-            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !UTF8.String(page.page()).equals(UTF8.String(content))) {
+            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !ByteBuffer.equals(page.page(), content)) {
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;

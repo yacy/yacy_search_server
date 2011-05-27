@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.Scanner;
@@ -229,7 +229,7 @@ public class CrawlStartScanner_p {
                         try {
                             u = new DigestURI(host.getKey().url());
                             urlString = u.toNormalform(true, false);
-                            prop.put("servertable_list_" + i + "_pk", UTF8.String(u.hash()));
+                            prop.put("servertable_list_" + i + "_pk", ASCII.String(u.hash()));
                             prop.put("servertable_list_" + i + "_count", i);
                             prop.putHTML("servertable_list_" + i + "_protocol", u.getProtocol());
                             prop.putHTML("servertable_list_" + i + "_ip", host.getKey().getInetAddress().getHostAddress());

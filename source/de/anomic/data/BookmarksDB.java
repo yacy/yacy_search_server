@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -132,7 +133,7 @@ public class BookmarksDB {
     // adding a bookmark to the bookmarksDB
     public void saveBookmark(final Bookmark bookmark){
     	try {
-            bookmarks.insert(UTF8.getBytes(bookmark.getUrlHash()), bookmark.entry);
+            bookmarks.insert(ASCII.getBytes(bookmark.getUrlHash()), bookmark.entry);
         } catch (final Exception e) {
             Log.logException(e);
         }
@@ -145,7 +146,7 @@ public class BookmarksDB {
     
     public Bookmark getBookmark(final String urlHash){
         try {
-            final Map<String, String> map = bookmarks.get(UTF8.getBytes(urlHash));
+            final Map<String, String> map = bookmarks.get(ASCII.getBytes(urlHash));
             return (map == null) ? null : new Bookmark(map);
         } catch (final IOException e) {
             Log.logException(e);
@@ -172,7 +173,7 @@ public class BookmarksDB {
         Bookmark b;
         try {
             b = getBookmark(urlHash);
-            bookmarks.delete(UTF8.getBytes(urlHash));
+            bookmarks.delete(ASCII.getBytes(urlHash));
         } catch (final IOException e) {
             b = null;
         }
@@ -493,7 +494,7 @@ public class BookmarksDB {
                 url="http://"+url;
             }
             try {
-                this.urlHash = UTF8.String((new DigestURI(url)).hash());
+                this.urlHash = ASCII.String((new DigestURI(url)).hash());
             } catch (final MalformedURLException e) {
                 this.urlHash = null;
             }
@@ -514,7 +515,7 @@ public class BookmarksDB {
         }
         
         public Bookmark(final Map<String, String> map) throws MalformedURLException {
-            this(UTF8.String((new DigestURI(map.get(BOOKMARK_URL))).hash()), map);
+            this(ASCII.String((new DigestURI(map.get(BOOKMARK_URL))).hash()), map);
         }
         
         Map<String, String> toMap() {

@@ -62,6 +62,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.data.word.Word;
@@ -701,8 +702,8 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         if (interval == null) return randomHash();
         
         // find dht position and size of gap
-        long left = FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(interval.substring(0, 12)), null);
-        long right = FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(interval.substring(12)), null);
+        long left = FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(0, 12)), null);
+        long right = FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(interval.substring(12)), null);
         final long gap8 = FlatWordPartitionScheme.dhtDistance(left, right) >> 3; //  1/8 of a gap
         long gapx = gap8 + (Math.abs(random.nextLong()) % (6 * gap8));
         long gappos = (Long.MAX_VALUE - left >= gapx) ? left + gapx : (left - Long.MAX_VALUE) + gapx;
@@ -737,16 +738,16 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
                 continue;
             }
             l = FlatWordPartitionScheme.dhtDistance(
-                    FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(s0.hash), null),
-                    FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(s1.hash), null));
+                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s0.hash), null),
+                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s1.hash), null));
             gaps.put(l, s0.hash + s1.hash);
             s0 = s1;
         }
         // compute also the last gap
         if ((first != null) && (s0 != null)) {
             l = FlatWordPartitionScheme.dhtDistance(
-                    FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(s0.hash), null),
-                    FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(first.hash), null));
+                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(s0.hash), null),
+                    FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(first.hash), null));
             gaps.put(l, s0.hash + first.hash);
         }
         return gaps;
@@ -760,7 +761,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         // generate a seed for the local peer
         // this is the birthplace of a seed, that then will start to travel to other peers
 
-        final String hashs = UTF8.String(bestGap(db));
+        final String hashs = ASCII.String(bestGap(db));
         yacyCore.log.logInfo("init: OWN SEED = " + hashs);
 
         final yacySeed newSeed = new yacySeed(hashs);
@@ -777,7 +778,7 @@ public class yacySeed implements Cloneable, Comparable<yacySeed>, Comparator<yac
         final String hash =
             Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6) +
             Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6);
-        return UTF8.getBytes(hash);
+        return ASCII.getBytes(hash);
     }
 
     public static yacySeed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed, String patchIP) throws IOException {

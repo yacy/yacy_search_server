@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -331,7 +332,7 @@ public class WikiBoard {
         private String getChildName() {
             final String c = record.get("child");
             final byte[] subject;
-            return (c != null && (subject = Base64Order.enhancedCoder.decode(c)) != null) ? UTF8.String(subject) : null;
+            return (c != null && (subject = Base64Order.enhancedCoder.decode(c)) != null) ? ASCII.String(subject) : null;
         }
 
         /**

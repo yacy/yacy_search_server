@@ -28,7 +28,7 @@ package de.anomic.yacy.dht;
 import java.util.Random;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -61,7 +61,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
     }
 
     public final long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer) {
-        return dhtDistance(word, urlHash, UTF8.getBytes(peer.hash));
+        return dhtDistance(word, urlHash, ASCII.getBytes(peer.hash));
     }
     
     private final long dhtDistance(final byte[] from, final String urlHash, final byte[] to) {
@@ -96,9 +96,9 @@ public class FlatWordPartitionScheme implements PartitionScheme {
     
     public static byte[] positionToHash(final long l) {
         // transform the position of a peer position into a close peer hash
-        String s = UTF8.String(Base64Order.enhancedCoder.uncardinal(l));
+        String s = ASCII.String(Base64Order.enhancedCoder.uncardinal(l));
         while (s.length() < 12) s += "A";
-        return UTF8.getBytes(s);
+        return ASCII.getBytes(s);
     }
     
 

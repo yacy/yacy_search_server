@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -194,8 +195,8 @@ public class CrawlResults {
                     urlstr = metadata.url().toNormalform(false, true);
                     urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                     
-                    initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(UTF8.String(entry.getValue().initiatorHash));
-                    executorSeed = entry.getValue() == null || entry.getValue().executorHash == null ? null : sb.peers.getConnected(UTF8.String(entry.getValue().executorHash));
+                    initiatorSeed = entry.getValue() == null || entry.getValue().initiatorHash == null ? null : sb.peers.getConnected(ASCII.String(entry.getValue().initiatorHash));
+                    executorSeed = entry.getValue() == null || entry.getValue().executorHash == null ? null : sb.peers.getConnected(ASCII.String(entry.getValue().executorHash));
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");

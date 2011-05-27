@@ -28,7 +28,7 @@ package net.yacy.kelondro.data.navigation;
 
 import java.util.Collection;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
@@ -91,7 +91,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
     }
 
     public String navigationHash() {
-        return UTF8.String(this.termhash) + UTF8.String(this.refhash);
+        return ASCII.String(this.termhash) + ASCII.String(this.refhash);
     }
     
     public byte[] urlhash() {

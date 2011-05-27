@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
@@ -417,7 +418,7 @@ public class yacysearch {
                     author = querystring.substring(authori + 7, ftb);
                     querystring = querystring.replace("author:" + author, "");
             	}
-            	authorhash = UTF8.String(Word.word2hash(author));
+            	authorhash = ASCII.String(Word.word2hash(author));
             }
             final int tld = querystring.indexOf("tld:");
             if (tld >= 0) {

@@ -30,6 +30,7 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
@@ -167,7 +168,7 @@ public final class transferRWI {
                 
                 // block blacklisted entries
                 if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + UTF8.String(urlHash) + "' from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + ASCII.String(urlHash) + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }
@@ -175,7 +176,7 @@ public final class transferRWI {
                 // check if the entry is in our network domain
                 final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomainHash(urlHash);
                 if (urlRejectReason != null) {
-                    yacyCore.log.logWarning("transferRWI: blocked URL hash '" + UTF8.String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
+                    yacyCore.log.logWarning("transferRWI: blocked URL hash '" + ASCII.String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
                     //if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked URL hash '" + urlHash + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     blocked++;
                     continue;
@@ -200,7 +201,7 @@ public final class transferRWI {
                 } catch (final Exception ex) {
                     sb.getLog().logWarning(
                                 "transferRWI: DB-Error while trying to determine if URL with hash '" +
-                                UTF8.String(urlHash) + "' is known.", ex);
+                                ASCII.String(urlHash) + "' is known.", ex);
                 }
                 received++;
             }

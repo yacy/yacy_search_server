@@ -24,7 +24,7 @@
 
 import java.util.Iterator;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
@@ -61,7 +61,7 @@ public final class idx {
             prop.put("rowdef", WebStructureGraph.hostReferenceFactory.getRow().toString());
             int count = 0;
             for (ReferenceContainer<HostReference> references: idx) {
-                prop.put("list_" + count + "_term", UTF8.String(references.getTermHash()));
+                prop.put("list_" + count + "_term", ASCII.String(references.getTermHash()));
                 Iterator<HostReference> referenceIterator = references.entries();
                 StringBuilder s = new StringBuilder();
                 HostReference reference;

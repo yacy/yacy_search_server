@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.services.federated.solr.SolrChardingConnector;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -321,7 +322,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         private boolean error = false;
         
         private kiter(final boolean up, final String firstHash) throws IOException {
-            i = urlIndex.rows(up, (firstHash == null) ? null : UTF8.getBytes(firstHash));
+            i = urlIndex.rows(up, (firstHash == null) ? null : ASCII.getBytes(firstHash));
             error = false;
         }
 

@@ -32,15 +32,15 @@ import java.util.ArrayList;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import net.yacy.cora.document.ASCIIComparator;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 
 public class ContentTransformer extends AbstractTransformer implements Transformer {
     
     // statics: for initialization of the HTMLFilterAbstractTransformer
-    private static final TreeSet<String> linkTags0 = new TreeSet<String>(ASCIIComparator.insensitiveASCIIComparator);
-    private static final TreeSet<String> linkTags1 = new TreeSet<String>(ASCIIComparator.insensitiveASCIIComparator);
+    private static final TreeSet<String> linkTags0 = new TreeSet<String>(ASCII.insensitiveASCIIComparator);
+    private static final TreeSet<String> linkTags1 = new TreeSet<String>(ASCII.insensitiveASCIIComparator);
 
     static {
         linkTags0.add("img");

@@ -32,7 +32,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.TreeMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
@@ -366,8 +366,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie1 = se.next();
             ie2 = large.getReference(ie1.urlhash());
             if ((ie1 != null) && (ie2 != null)) {
-                assert (ie1.urlhash().length == keylength) : "ie0.urlHash() = " + UTF8.String(ie1.urlhash());
-                assert (ie2.urlhash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie2.urlhash());
+                assert (ie1.urlhash().length == keylength) : "ie0.urlHash() = " + ASCII.String(ie1.urlhash());
+                assert (ie2.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie2.urlhash());
                 // this is a hit. Calculate word distance:
                 
                 ie1 = factory.produceFast(ie2);
@@ -400,8 +400,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.urlhash());
-                assert (ie2.urlhash().length == keylength) : "ie2.urlHash() = " + UTF8.String(ie2.urlhash());
+                assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie1.urlhash());
+                assert (ie2.urlhash().length == keylength) : "ie2.urlHash() = " + ASCII.String(ie2.urlhash());
                 c = ordering.compare(ie1.urlhash(), ie2.urlhash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
@@ -456,8 +456,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 ie0 = se.next();
                 ie1 = excl.getReference(ie0.urlhash());
                 if ((ie0 != null) && (ie1 != null)) {
-                    assert (ie0.urlhash().length == keylength) : "ie0.urlHash() = " + UTF8.String(ie0.urlhash());
-                    assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.urlhash());
+                    assert (ie0.urlhash().length == keylength) : "ie0.urlHash() = " + ASCII.String(ie0.urlhash());
+                    assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie1.urlhash());
                     if (iterate_pivot) se.remove(); pivot.delete(ie0.urlhash());
                 }
             }
@@ -482,8 +482,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + UTF8.String(ie1.urlhash());
-                assert (ie2.urlhash().length == keylength) : "ie2.urlHash() = " + UTF8.String(ie2.urlhash());
+                assert (ie1.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie1.urlhash());
+                assert (ie2.urlhash().length == keylength) : "ie2.urlHash() = " + ASCII.String(ie2.urlhash());
                 c = pivot.rowdef.getOrdering().compare(ie1.urlhash(), ie2.urlhash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
@@ -504,7 +504,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public synchronized String toString() {
-        return "C[" + UTF8.String(termHash) + "] has " + this.size() + " entries";
+        return "C[" + ASCII.String(termHash) + "] has " + this.size() + " entries";
     }
     
     public int hashCode() {

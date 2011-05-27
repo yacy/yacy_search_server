@@ -26,7 +26,7 @@ import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.Map;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 
@@ -48,7 +48,7 @@ public class webstructure {
             if (about.length() > 6) {
                 try {
                     url = new DigestURI(about);
-                    about = UTF8.String(url.hash(), 6, 6);
+                    about = ASCII.String(url.hash(), 6, 6);
                 } catch (MalformedURLException e) {
                     about = null;
                 }

@@ -29,6 +29,7 @@ package net.yacy.kelondro.order;
 
 import java.util.Comparator;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -252,7 +253,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         }
                                 
         if (rfc1113compliant) while (writepos % 4 > 0 && writepos < sublen) out[writepos] = '=';
-        assert encode(in).substring(0, sublen).equals(UTF8.String(out));
+        assert encode(in).substring(0, sublen).equals(ASCII.String(out));
         return out;
     }
 

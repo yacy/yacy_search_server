@@ -36,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.util.ByteArray;
@@ -197,7 +198,7 @@ public class RobotsTxtEntry {
     
     protected String getETag() {
         if (this.mem.containsKey(ETAG)) {
-            return UTF8.String(this.mem.get(ETAG));
+            return ASCII.String(this.mem.get(ETAG));
         }
         return null;
     }          

@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -771,7 +772,7 @@ public class HeapReader {
             Map.Entry<byte[], byte[]> entry;
             while (hr.hasNext()) {
                 entry = hr.next();
-                System.out.println(UTF8.String(entry.getKey()) + ":" + UTF8.String(entry.getValue()));
+                System.out.println(ASCII.String(entry.getKey()) + ":" + UTF8.String(entry.getValue()));
             }
         } catch (IOException e) {
             Log.logException(e);

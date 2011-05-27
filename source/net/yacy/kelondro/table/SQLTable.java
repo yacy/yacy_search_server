@@ -39,6 +39,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
@@ -178,7 +180,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             final String sqlQuery = "SELECT value from test where hash = ?";
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery); 
-            sqlStatement.setString(1, UTF8.String(key));
+            sqlStatement.setString(1, ASCII.String(key));
             
             byte[] value = null;
             final ResultSet result = sqlStatement.executeQuery();

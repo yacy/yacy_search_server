@@ -39,6 +39,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -241,7 +242,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         entry.setCol(exp_chunkcount, this.chunkcount);
         entry.setCol(exp_last_read, daysSince2000(System.currentTimeMillis()));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
-        entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? UTF8.getBytes("__") : UTF8.getBytes(this.rowdef.objectOrder.signature()));
+        entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? ASCII.getBytes("__") : UTF8.getBytes(this.rowdef.objectOrder.signature()));
         entry.setCol(exp_order_bound, this.sortBound);
         entry.setCol(exp_collection, this.chunkcache);
         return entry.bytes();

@@ -32,6 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.storage.ClusteredScoreMap;
 import net.yacy.cora.storage.ScoreMap;
@@ -105,7 +106,7 @@ public final class ResultURLs {
         try {
             final Map<String, InitExecEntry> resultStack = getStack(stackType);
             if (resultStack != null) {
-                resultStack.put(UTF8.String(e.hash()), new InitExecEntry(initiatorHash, executorHash));
+                resultStack.put(ASCII.String(e.hash()), new InitExecEntry(initiatorHash, executorHash));
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());

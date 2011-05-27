@@ -29,6 +29,7 @@ package net.yacy.kelondro.data.image;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
@@ -160,7 +161,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
                             final int      outlinksSame,  // outlinks to same domain
                             final int      outlinksOther  // outlinks to other domain
                     ) {
-                        assert (urlHash.length == 12) : "urlhash = " + UTF8.String(urlHash);
+                        assert (urlHash.length == 12) : "urlhash = " + ASCII.String(urlHash);
                         this.entry = urlEntryRow.newEntry();
                         final int mddlm = MicroDate.microDateDays(lastmodified);
                         final int mddct = MicroDate.microDateDays(updatetime);

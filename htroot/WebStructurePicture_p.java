@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -106,7 +106,7 @@ public class WebStructurePicture_p {
             // find start hash
             String hash = null;
             if (host != null && host.length() > 0) try {
-                hash = UTF8.String((new DigestURI("http://" + host)).hash(), 6, 6);
+                hash = ASCII.String((new DigestURI("http://" + host)).hash(), 6, 6);
             } catch (final MalformedURLException e) {Log.logException(e);}
             //assert (sb.webStructure.outgoingReferences(hash) != null);
             

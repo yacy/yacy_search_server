@@ -25,6 +25,7 @@
 
 package de.anomic.yacy.dht;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import de.anomic.yacy.yacySeed;
 
@@ -69,7 +70,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         // in case that the partitionExpoent is 1, only one bit is taken from the urlHash,
         // which means that the partition is in two parts.
         // With partitionExponent = 2 it is divided in four parts and so on.
-        return (FlatWordPartitionScheme.std.dhtPosition(wordHash, null) & partitionMask) | (FlatWordPartitionScheme.std.dhtPosition(UTF8.getBytes(urlHash), null) & ~partitionMask);
+        return (FlatWordPartitionScheme.std.dhtPosition(wordHash, null) & partitionMask) | (FlatWordPartitionScheme.std.dhtPosition(ASCII.getBytes(urlHash), null) & ~partitionMask);
     }
     
     public final long dhtPosition(final byte[] wordHash, final int verticalPosition) {
@@ -108,7 +109,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
     }
  
     public final long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer) {
-        return dhtDistance(word, urlHash, UTF8.getBytes(peer.hash));
+        return dhtDistance(word, urlHash, ASCII.getBytes(peer.hash));
     }
     
     private long dhtDistance(final byte[] from, final String urlHash, final byte[] to) {

@@ -23,6 +23,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.SQLTable;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
+import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.ChartPlotter;
 
@@ -72,7 +73,7 @@ public class dbtest {
             final String s = UTF8.String(this.value).trim();
             if (s.length() == 0) return false;
             final long source = Long.parseLong(s);
-            return UTF8.String(this.key).equals(UTF8.String(randomHash(source, source)));
+            return ByteBuffer.equals(this.key, randomHash(source, source));
         }
 
         public byte[] getKey() {
@@ -334,13 +335,13 @@ public class dbtest {
                     if (entry == null)
                         System.out.println("missing value for entry " + UTF8.String(key) + " in test table");
                     else
-                        if (!(UTF8.String(entry.getColBytes(1, false)).equals(UTF8.String(key)))) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in test table");
+                        if (!ByteBuffer.equals(entry.getColBytes(1, false), key)) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in test table");
                     if (table_reference != null) {
                         entry = table_reference.get(key);
                         if (entry == null)
                             System.out.println("missing value for entry " + UTF8.String(key) + " in reference table");
                         else
-                            if (!(UTF8.String(entry.getColBytes(1, false)).equals(UTF8.String(key)))) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in reference table");
+                            if (!ByteBuffer.equals(entry.getColBytes(1, false), key)) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in reference table");
                     }
                     
                     if (i % 1000 == 0) {

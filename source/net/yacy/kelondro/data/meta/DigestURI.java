@@ -31,8 +31,8 @@ import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
-import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -69,7 +69,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
             Log.logException(e);
             return null;
         }
-        return (url == null) ? null : UTF8.String(url.hash(), 6, 6);
+        return (url == null) ? null : ASCII.String(url.hash(), 6, 6);
     }
     
     /**
@@ -223,7 +223,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
         assert hashs.length() == 12;
 
         // return result hash
-        byte[] b = UTF8.getBytes(hashs.toString());
+        byte[] b = ASCII.getBytes(hashs.toString());
         assert b.length == 12;
         return b;
     }
@@ -284,7 +284,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     public static final int domLengthEstimation(final byte[] urlHashBytes) {
         // generates an estimation of the original domain length
         assert (urlHashBytes != null);
-        assert (urlHashBytes.length == 12) : "urlhash = " + UTF8.String(urlHashBytes);
+        assert (urlHashBytes.length == 12) : "urlhash = " + ASCII.String(urlHashBytes);
         final int flagbyte = Base64Order.enhancedCoder.decodeByte(urlHashBytes[11]);
         final int domLengthKey = flagbyte & 3;
         switch (domLengthKey) {
@@ -307,7 +307,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
     public static final int domDomain(final byte[] urlHash) {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
-        assert (urlHash.length == 12 || urlHash.length == 6) : "urlhash = " + UTF8.String(urlHash);
+        assert (urlHash.length == 12 || urlHash.length == 6) : "urlhash = " + ASCII.String(urlHash);
         return (Base64Order.enhancedCoder.decodeByte(urlHash[(urlHash.length == 12) ? 11 : 5]) & 28) >> 2;
     }
 

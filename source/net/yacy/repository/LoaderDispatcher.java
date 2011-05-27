@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -116,7 +117,7 @@ public final class LoaderDispatcher {
             final boolean global
                     ) {
         return new Request(
-                UTF8.getBytes(sb.peers.mySeed().hash), 
+                ASCII.getBytes(sb.peers.mySeed().hash), 
                     url, 
                     null, 
                     "", 

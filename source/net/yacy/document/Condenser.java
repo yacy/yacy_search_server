@@ -38,6 +38,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.language.Identificator;
@@ -391,7 +392,7 @@ public final class Condenser {
                 final String s = p.getProperty("keywords" + i);
                 final String[] l = s.split(",");
                 for (int j = 0; j < l.length; j++) {
-                    sb.append(UTF8.String(Word.word2hash(l[j])));
+                    sb.append(ASCII.String(Word.word2hash(l[j])));
                 }
                 if (i < 15) sb.append(",\n");
             }

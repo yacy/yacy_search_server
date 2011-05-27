@@ -28,6 +28,7 @@ package net.yacy.kelondro.data.citation;
 
 import java.util.Collection;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Column;
@@ -83,7 +84,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
             final int      urlComps,      // number of path components
             final byte     typeofurl      // outlinks to same domain
     ) {
-        assert (urlHash.length == 12) : "urlhash = " + UTF8.String(urlHash);
+        assert (urlHash.length == 12) : "urlhash = " + ASCII.String(urlHash);
         this.entry = citationRow.newEntry();
         final int mddlm = MicroDate.microDateDays(lastmodified);
         final int mddct = MicroDate.microDateDays(updatetime);

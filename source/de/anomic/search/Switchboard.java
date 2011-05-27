@@ -75,6 +75,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.RSSFeed;
 import net.yacy.cora.document.RSSMessage;
@@ -1131,7 +1132,7 @@ public final class Switchboard extends serverSwitch {
             return network.indexOf(peer) >= 0;
         } else if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
             // check if we got the request from a peer in the public cluster
-            return this.clusterhashes.containsKey(UTF8.getBytes(peer));
+            return this.clusterhashes.containsKey(ASCII.getBytes(peer));
         } else {
             return false;
         }
@@ -1149,7 +1150,7 @@ public final class Switchboard extends serverSwitch {
             return network.indexOf(seed.getPublicAddress()) >= 0;
         } else if (clustermode.equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
             // check if we got the request from a peer in the public cluster
-            return this.clusterhashes.containsKey(UTF8.getBytes(seed.hash));
+            return this.clusterhashes.containsKey(ASCII.getBytes(seed.hash));
         } else {
             return false;
         }
@@ -1165,7 +1166,7 @@ public final class Switchboard extends serverSwitch {
     
     public void urlRemove(final Segment segment, final byte[] hash) {
         segment.urlMetadata().remove(hash);
-        ResultURLs.remove(UTF8.String(hash));
+        ResultURLs.remove(ASCII.String(hash));
         crawlQueues.urlRemove(hash);
     }
     
@@ -1451,7 +1452,7 @@ public final class Switchboard extends serverSwitch {
             // create a queue entry
             Document document = surrogate.document();
             Request request = new Request(
-                    UTF8.getBytes(peers.mySeed().hash), 
+                    ASCII.getBytes(peers.mySeed().hash), 
                     surrogate.getIdentifier(true), 
                     null, 
                     "", 
@@ -1878,7 +1879,7 @@ public final class Switchboard extends serverSwitch {
                 ", maxDepth=" + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth())) +
                 ", must-match=" + ((response.profile() == null) ? "null" : response.profile().mustMatchPattern().toString()) +
                 ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().mustNotMatchPattern().toString()) +
-                ", initiatorHash=" + ((response.initiator() == null) ? "null" : UTF8.String(response.initiator())) +
+                ", initiatorHash=" + ((response.initiator() == null) ? "null" : ASCII.String(response.initiator())) +
                 //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                 ", url=" + response.url()); // DEBUG
         }
@@ -2092,7 +2093,7 @@ public final class Switchboard extends serverSwitch {
                     condenser,
                     searchEvent,
                     sourceName);
-            yacyChannel.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), UTF8.getBytes(peers.mySeed().hash)) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
+            yacyChannel.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), ASCII.getBytes(peers.mySeed().hash)) ? yacyChannel.LOCALINDEXING : yacyChannel.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             //if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, FailCategory.FINAL_LOAD_CONTEXT, "error storing url: " + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase + ", error = " + e.getMessage());
@@ -2135,13 +2136,13 @@ public final class Switchboard extends serverSwitch {
         
         // if this was performed for a remote crawl request, notify requester
         if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
-            final yacySeed initiatorPeer = peers.get(UTF8.String(queueEntry.initiator()));
+            final yacySeed initiatorPeer = peers.get(ASCII.String(queueEntry.initiator()));
             if (initiatorPeer != null) {
                 if (clusterhashes != null) {
                     initiatorPeer.setAlternativeAddress(clusterhashes.get(queueEntry.initiator()));
                 }
                 // start a thread for receipt sending to avoid a blocking here
-                new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + UTF8.String(queueEntry.initiator())).start();
+                new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + ASCII.String(queueEntry.initiator())).start();
             }
         }
     }
@@ -2195,7 +2196,7 @@ public final class Switchboard extends serverSwitch {
         }
         if (indexSegments.segment(process).urlMetadata.exists(url.hash())) return; // don't do double-work
         final Request request = loader.request(url, true, true);
-        final CrawlProfile profile = sb.crawler.getActive(UTF8.getBytes(request.profileHandle()));
+        final CrawlProfile profile = sb.crawler.getActive(ASCII.getBytes(request.profileHandle()));
         String acceptedError = this.crawlStacker.checkAcceptance(url, profile, 0);
         if (acceptedError != null) {
             log.logWarning("addToIndex: cannot load " + url.toNormalform(false, false) + ": " + acceptedError);
@@ -2443,8 +2444,8 @@ public final class Switchboard extends serverSwitch {
                 log.logInfo("dhtTransferJob: approaching full DHT dispersion.");
                 return false;
             }
-            log.logInfo("dhtTransferJob: selected " + UTF8.String(startHash) + " as start hash");
-            log.logInfo("dhtTransferJob: selected " + UTF8.String(limitHash) + " as limit hash");
+            log.logInfo("dhtTransferJob: selected " + ASCII.String(startHash) + " as start hash");
+            log.logInfo("dhtTransferJob: selected " + ASCII.String(limitHash) + " as limit hash");
             boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
                     startHash,
                     limitHash,

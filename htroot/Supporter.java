@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ConcurrentScoreMap;
@@ -245,13 +246,13 @@ public class Supporter {
             // add/subtract votes and write record
             if (entry != null) {
                 try {
-                    urlhash = UTF8.String((new DigestURI(url)).hash());
+                    urlhash = ASCII.String((new DigestURI(url)).hash());
                 } catch (final MalformedURLException e) {
                     urlhash = null;
                 }
                 if (urlhash == null)
                     try {
-                        urlhash = UTF8.String((new DigestURI("http://" + url)).hash());
+                        urlhash = ASCII.String((new DigestURI("http://" + url)).hash());
                     } catch (final MalformedURLException e) {
                         urlhash = null;
                     }

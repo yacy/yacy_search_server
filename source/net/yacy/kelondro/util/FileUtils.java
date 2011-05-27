@@ -511,6 +511,10 @@ public final class FileUtils {
     	return table(new StringsIterator(br));
 	}
     
+
+    //private final static Pattern escaped_equal = Pattern.compile("\\=");
+    //private final static Pattern escaped_newline = Pattern.compile("\\n");
+    //private final static Pattern escaped_backslash = Pattern.compile("\\");
     public static ConcurrentHashMap<String, String> table(Iterator<String> li) {
     	String line;
     	final ConcurrentHashMap<String, String> props = new ConcurrentHashMap<String, String>();
@@ -523,6 +527,7 @@ public final class FileUtils {
     			pos = line.indexOf('=', pos+1);
     		} while ( pos > 0 && line.charAt(pos-1) == '\\');
     		if (pos > 0) {
+    		    //String key = escaped_equal.matcher(line.substring(0, pos).trim()).replaceAll("=");
     			String key = line.substring(0, pos).trim().replace("\\=", "=").replace("\\n", "\n").replace("\\", "\\");
     			String value = line.substring(pos + 1).trim().replace("\\n", "\n").replace("\\\\", "\\");
         		props.put(key, value);

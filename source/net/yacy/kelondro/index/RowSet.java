@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -557,7 +559,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         Row.Entry entry;
         while (ii.hasNext()) {
             entry = ii.next();
-            s = UTF8.String(entry.getPrimaryKeyBytes()).trim();
+            s = ASCII.String(entry.getPrimaryKeyBytes()).trim();
             System.out.print(s + ", ");
             if (s.equals("drei")) ii.remove();
         }
@@ -672,7 +674,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
     public static byte[] randomHash(final long r0, final long r1) {
         // a long can have 64 bit, but a 12-byte hash can have 6 * 12 = 72 bits
         // so we construct a generic Hash using two long values
-        return UTF8.getBytes(
+        return ASCII.getBytes(
                 Base64Order.enhancedCoder.encodeLongSB(Math.abs(r0), 11).substring(5) +
                 Base64Order.enhancedCoder.encodeLongSB(Math.abs(r1), 11).substring(5));
     }

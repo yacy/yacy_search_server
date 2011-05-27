@@ -42,7 +42,7 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
@@ -207,7 +207,7 @@ public class SolrSingleConnector {
     public void err(DigestURI digestURI, String failReason, int httpstatus) throws IOException {
        
             SolrInputDocument solrdoc = new SolrInputDocument();
-            solrdoc.addField("id", UTF8.String(digestURI.hash()));
+            solrdoc.addField("id", ASCII.String(digestURI.hash()));
             solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
             InetAddress address = Domains.dnsResolve(digestURI.getHost());
             if (address != null) solrdoc.addField("ip_s", address.getHostAddress());

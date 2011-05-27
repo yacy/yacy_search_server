@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -212,7 +213,7 @@ public class URIMetadataRow implements URIMetadata {
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         DigestURI url;
         try {
-            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), UTF8.getBytes(prop.getProperty("hash")));
+            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), ASCII.getBytes(prop.getProperty("hash")));
         } catch (final MalformedURLException e) {
             url = null;
         }
@@ -293,7 +294,7 @@ public class URIMetadataRow implements URIMetadata {
         GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
         
         try {
-            s.append("hash=").append(UTF8.String(hash()));
+            s.append("hash=").append(ASCII.String(hash()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",url=").append(crypt.simpleEncode(metadata.url().toNormalform(false, true)));
             assert (s.toString().indexOf(0) < 0);
@@ -315,7 +316,7 @@ public class URIMetadataRow implements URIMetadata {
             assert (s.toString().indexOf(0) < 0);
             s.append(",fresh=").append(formatter.format(freshdate()));
             assert (s.toString().indexOf(0) < 0);
-            s.append(",referrer=").append(referrerHash() == null ? "" : UTF8.String(referrerHash()));
+            s.append(",referrer=").append(referrerHash() == null ? "" : ASCII.String(referrerHash()));
             assert (s.toString().indexOf(0) < 0);
             s.append(",md5=").append(md5());
             assert (s.toString().indexOf(0) < 0);
@@ -506,7 +507,7 @@ public class URIMetadataRow implements URIMetadata {
 
     public Request toBalancerEntry(final String initiatorHash) {
         return new Request(
-                UTF8.getBytes(initiatorHash), 
+                ASCII.getBytes(initiatorHash), 
                 metadata().url(), 
                 referrerHash(), 
                 metadata().dc_title(),

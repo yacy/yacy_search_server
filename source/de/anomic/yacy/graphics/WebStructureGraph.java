@@ -44,6 +44,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.Condenser;
@@ -169,13 +170,13 @@ public class WebStructureGraph {
     private void learnrefs(final leanrefObject lro) {
         final StringBuilder cpg = new StringBuilder(240);
         assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
-        final String refhashp = UTF8.String(lro.url.hash(), 6, 6); // ref hash part
+        final String refhashp = ASCII.String(lro.url.hash(), 6, 6); // ref hash part
         String nexturlhash;
         for (MultiProtocolURI u: lro.globalRefURLs) {
             byte[] nexturlhashb = new DigestURI(u).hash();
             assert nexturlhashb != null;
             if (nexturlhashb != null) {
-                nexturlhash = UTF8.String(nexturlhashb);
+                nexturlhash = ASCII.String(nexturlhashb);
                 assert nexturlhash.length() == 12 : "nexturlhash.length() = " + nexturlhash.length() + ", nexturlhash = " + nexturlhash;
                 assert !nexturlhash.substring(6).equals(refhashp);
                 // this is a global link
@@ -322,7 +323,7 @@ public class WebStructureGraph {
         private final Row.Entry entry;
         
         public HostReference(final byte[] hostHash, final long modified, final int count) {
-            assert (hostHash.length == 6) : "hostHash = " + UTF8.String(hostHash);
+            assert (hostHash.length == 6) : "hostHash = " + ASCII.String(hostHash);
             this.entry = hostReferenceFactory.getRow().newEntry();
             this.entry.setCol(0, hostHash);
             this.entry.setCol(1, MicroDate.microDateDays(modified));
@@ -416,7 +417,7 @@ public class WebStructureGraph {
             refloop: for (Map.Entry<String, Integer> refhosthashandcounter: sentry.references.entrySet()) {
                 term = UTF8.getBytes(refhosthashandcounter.getKey());
                 try {
-                    hr = new HostReference(UTF8.getBytes(sentry.hosthash), GenericFormatter.SHORT_DAY_FORMATTER.parse(sentry.date).getTime(), refhosthashandcounter.getValue().intValue());
+                    hr = new HostReference(ASCII.getBytes(sentry.hosthash), GenericFormatter.SHORT_DAY_FORMATTER.parse(sentry.date).getTime(), refhosthashandcounter.getValue().intValue());
                 } catch (ParseException e) {
                     continue refloop;
                 }
@@ -507,7 +508,7 @@ public class WebStructureGraph {
     }
     
     private void learn(final DigestURI url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
-        final String hosthash = UTF8.String(url.hash(), 6, 6);
+        final String hosthash = ASCII.String(url.hash(), 6, 6);
 
         // parse the new reference string and join it with the stored references
         StructureEntry structure = outgoingReferences(hosthash);

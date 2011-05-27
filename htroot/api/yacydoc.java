@@ -28,6 +28,7 @@
 import java.net.MalformedURLException;
 
 import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -78,7 +79,7 @@ public class yacydoc {
         if (urlstring.length() > 0 && urlhash.length() == 0) {
             try {
                 DigestURI url = new DigestURI(urlstring);
-                urlhash = UTF8.String(url.hash());
+                urlhash = ASCII.String(url.hash());
             } catch (MalformedURLException e) {
                 Log.logException(e);
             }
@@ -109,7 +110,7 @@ public class yacydoc {
 
         prop.put("yacy_urlhash", metadata.url().hash());
         prop.putXML("yacy_loaddate", entry.loaddate().toString());
-        prop.putXML("yacy_referrer_hash", (le == null) ? "" : UTF8.String(le.hash()));
+        prop.putXML("yacy_referrer_hash", (le == null) ? "" : ASCII.String(le.hash()));
         prop.putXML("yacy_referrer_url", (le == null) ? "" : le.metadata().url().toNormalform(false, true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words",entry.wordCount());

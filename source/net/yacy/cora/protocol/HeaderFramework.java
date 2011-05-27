@@ -39,7 +39,7 @@ import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.ASCIIComparator;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 
@@ -224,13 +224,13 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         // 'proper' appearance, a translation cache is needed.
         // upon instantiation, such a mapping cache can be handed over
         // If the reverseMappingCache is null, none is used
-        super(ASCIIComparator.insensitiveASCIIComparator);
+        super(ASCII.insensitiveASCIIComparator);
         this.reverseMappingCache = reverseMappingCache;
     }
 
     public HeaderFramework(final Map<String, String> reverseMappingCache, final Map<String, String> othermap)  {
         // creates a case insensitive map from another map
-        super(ASCIIComparator.insensitiveASCIIComparator);
+        super(ASCII.insensitiveASCIIComparator);
         this.reverseMappingCache = reverseMappingCache;
 
         // load with data

@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
@@ -81,7 +81,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final CacheStrategy cacheStrategy) {
         super(40);
         if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
-        final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength) : UTF8.String(startURL.hash());
+        final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(name)).substring(0, Word.commonHashLength) : ASCII.String(startURL.hash());
         put(HANDLE,           handle);
         put(NAME,             name);
         put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));

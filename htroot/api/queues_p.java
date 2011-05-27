@@ -3,6 +3,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 
@@ -59,7 +60,7 @@ public class queues_p {
             for (final Request r : w)  {
                 if (r == null) continue;
                 prop.put("list-loader_"+count+"_profile", r.profileHandle());
-                initiator = sb.peers.getConnected((r.initiator() == null) ? "" : UTF8.String(r.initiator()));
+                initiator = sb.peers.getConnected((r.initiator() == null) ? "" : ASCII.String(r.initiator()));
                 prop.putHTML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", r.depth());
                 prop.putXML("list-loader_"+count+"_url", r.url().toString());
