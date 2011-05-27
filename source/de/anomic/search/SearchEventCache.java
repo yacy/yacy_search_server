@@ -62,8 +62,9 @@ public class SearchEventCache {
         if (oldEvent == null) cacheInsert++;
     }
     
-    public static void cleanupEvents(final boolean all) {
+    public static void cleanupEvents(boolean all) {
         // remove old events in the event cache
+        if (MemoryControl.shortStatus()) all = true;
         final List<SearchEvent> delete = new ArrayList<SearchEvent>();
         // the less memory is there, the less time is acceptable for elements in the cache
         long memx = MemoryControl.available();
@@ -87,6 +88,7 @@ public class SearchEventCache {
             @Override
             public void run() {
                 for (SearchEvent k: delete) {
+                    //System.out.println("**** CLEANUP SEARCH EVENT **** incache = "  + lastEvents.size() + ", word = " + k.getQuery().queryWords()[0]);
                     k.cleanup();
                 }
             }
