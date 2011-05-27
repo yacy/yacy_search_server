@@ -38,11 +38,12 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.MemoryControl;
 
 public class AccessTracker {
 
-    public static final int minSize = 1000;
-    public static final int maxSize = 5000;
+    public static final int minSize = 100;
+    public static final int maxSize = 1000;
     public static final int maxAge = 10 * 60 * 1000;
     
     public enum Location {local, remote}
@@ -57,21 +58,29 @@ public class AccessTracker {
     }
     
     private static void add(LinkedList<QueryParams> list, QueryParams query) {
+        // learn that this word can be a word completion for the DidYouMeanLibrary
+        if (query.resultcount > 10 && query.queryString != null && query.queryString.length() > 0) LibraryProvider.dymLib.learn(query.queryString);
+        
+        // add query to statistics list
         list.add(query);
-        while (list.size() > maxSize) {
-            addToDump(list.removeFirst());
+
+        // shrink dump list but keep essentials in dump
+        while (list.size() > maxSize || (list.size() > 0 && MemoryControl.shortStatus())) {
+            synchronized (list) {
+                if (list.size() > 0) addToDump(list.removeFirst()); else break;
+            }
         }
-        if (list.size() <= minSize) {
-            return;
-        }
+        
+        // if the list is small we can terminate
+        if (list.size() <= minSize) return;
+        
+        // if the list is large we look for too old entries
         long timeout = System.currentTimeMillis() - maxAge;
         while (list.size() > 0) {
             QueryParams q = list.getFirst();
             if (q.time.longValue() > timeout) break;
             addToDump(list.removeFirst());
         }
-        // learn that this word can be a word completion for the DidYouMeanLibrary
-        if (query.resultcount > 0 && query.queryString != null && query.queryString.length() > 0) LibraryProvider.dymLib.learn(query.queryString);
     }
     
     public static Iterator<QueryParams> get(Location location) {
