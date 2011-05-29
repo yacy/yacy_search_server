@@ -79,7 +79,7 @@ public final class RankingProcess extends Thread {
     
     private final ScoreMap<String> ref;  // reference score computation for the commonSense heuristic
     private final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
-    private final Map<String, String> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
+    private final Map<String, byte[]> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
     private final ScoreMap<String> authorNavigator;
     private final ScoreMap<String> namespaceNavigator;
     private final ReferenceOrder order;
@@ -109,7 +109,7 @@ public final class RankingProcess extends Thread {
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.hostNavigator = new ConcurrentScoreMap<String>();
-        this.hostResolver = new ConcurrentHashMap<String, String>();
+        this.hostResolver = new ConcurrentHashMap<String, byte[]>();
         this.authorNavigator = new ConcurrentScoreMap<String>();
         this.namespaceNavigator = new ConcurrentScoreMap<String>();
         this.ref = new ConcurrentScoreMap<String>();
@@ -226,13 +226,12 @@ public final class RankingProcess extends Thread {
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
                 
                 // check site constraints
-                String urlhashs = ASCII.String(iEntry.urlhash());
-                String hosthash = urlhashs.substring(6);
+                String hosthash = new String(iEntry.urlhash(), 6, 6);
                 if (query.sitehash == null) {
                     // no site constraint there; maybe collect host navigation information
                     if (nav_hosts && query.urlMask_isCatchall) {
                         this.hostNavigator.inc(hosthash);
-                        this.hostResolver.put(hosthash, urlhashs);
+                        this.hostResolver.put(hosthash, iEntry.urlhash());
                     }
                 } else {
                     if (!hosthash.equals(query.sitehash)) {
@@ -597,15 +596,16 @@ public final class RankingProcess extends Thread {
         
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
         URIMetadataRow row;
-        String domhash, urlhash, hostname;
+        byte[] urlhash;
+        String hosthash, hostname;
         if (this.hostResolver != null) while (domhashs.hasNext() && result.sizeSmaller(30)) {
-            domhash = domhashs.next();
-            if (domhash == null) continue;
-            urlhash = this.hostResolver.get(domhash);
-            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(ASCII.getBytes(urlhash));
+            hosthash = domhashs.next();
+            if (hosthash == null) continue;
+            urlhash = this.hostResolver.get(hosthash);
+            row = urlhash == null ? null : this.query.getSegment().urlMetadata().load(urlhash);
             hostname = row == null ? null : row.metadata().url().getHost();
             if (hostname != null) {
-                result.set(hostname, this.hostNavigator.get(domhash));
+                result.set(hostname, this.hostNavigator.get(hosthash));
             }
         }
         if (result.sizeSmaller(2)) result.clear(); // navigators with one entry are not useful
