@@ -279,6 +279,23 @@ public class MapDataMining extends MapHeap {
         super.delete(key);
     }
     
+/* would be better but does not work (recursion)
+    @Override
+    public synchronized void delete(final byte[] key) throws IOException {
+        if (key == null) return;
+        
+        // update elementCount
+        Map<String, String> map = super.remove(key);
+        if (map != null && (sortfields != null || longaccfields != null || floataccfields != null)) {
+            // update accumulators (subtract)
+            if ((longaccfields != null) || (floataccfields != null)) updateAcc(map, false);
+
+            // remove from sortCluster
+            if (sortfields != null) deleteSortCluster(UTF8.String(key));
+        }
+    }
+*/
+
     private void deleteSortCluster(final String key) {
         if (key == null) return;
         ScoreMap<String> cluster;

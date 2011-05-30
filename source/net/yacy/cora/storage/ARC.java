@@ -64,6 +64,15 @@ public interface ARC<K, V> extends Iterable<Map.Entry<K, V>> {
     public void insertIfAbsent(K s, V v);
 
     /**
+     * put a value to the cache if there was not an entry before
+     * return a previous content value
+     * @param s
+     * @param v
+     * @return the value before inserting the new value
+     */
+    public V putIfAbsent(K s, V v);
+
+    /**
      * put a value to the cache.
      * @param s
      * @param v

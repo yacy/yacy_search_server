@@ -92,6 +92,25 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
     }
     
     /**
+     * put a value to the cache if there was not an entry before
+     * return a previous content value
+     * @param s
+     * @param v
+     * @return the value before inserting the new value
+     */
+    public V putIfAbsent(K s, V v) {
+        synchronized (this) {
+            V o = this.levelB.get(s);
+            if (o != null) return o;
+            o = this.levelA.get(s);
+            if (o != null) return o;
+            this.levelA.put(s, v);
+            assert (this.levelA.size() <= cacheSize); // the cache should shrink automatically
+            return null;
+        }
+    }
+    
+    /**
      * put a value to the cache.
      * @param s
      * @param v

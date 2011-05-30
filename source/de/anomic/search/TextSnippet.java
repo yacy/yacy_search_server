@@ -88,7 +88,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // generate key
             final String key = urlhash + wordhashes;
 
-            // do nothing if snippet is known or learn new snippet
+            // do nothing if snippet is known or otherwise learn new snippet
             cache.insertIfAbsent(key, snippet);
         }
         

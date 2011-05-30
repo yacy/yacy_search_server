@@ -101,6 +101,17 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     public void insertIfAbsent(K s, V v) {
         this.arc[getPartition(s)].insertIfAbsent(s, v);
     }
+
+    /**
+     * put a value to the cache if there was not an entry before
+     * return a previous content value
+     * @param s
+     * @param v
+     * @return the value before inserting the new value
+     */
+    public V putIfAbsent(K s, V v) {
+        return this.arc[getPartition(s)].putIfAbsent(s, v);
+    }
     
     /**
      * put a value to the cache.
@@ -206,18 +217,24 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
     public int hashCode() {
         return this.arc.hashCode();
     }
+    
+    //private static String latestObject = "";
     /**
      * return in which partition the Object belongs
      * This function uses the objects hashCode() function
      * except for byte[] keys
-     * @return the partitrion number
+     * @return the partition number
      */
     private int getPartition(final Object x) {
         if (x instanceof byte[]) {
             int h = 0;
             for (byte c: (byte[])x) h = 31 * h + (c & 0xFF);
-            return h & mask;
+            int p = h & mask;
+            //String o = UTF8.String((byte[]) x); try { if (o.equals(latestObject)) throw new RuntimeException("ConcurrentARC: p = " + p + ", objectb = " + o); } catch (Exception e) { Log.logException(e); } latestObject = o;
+            return p;
         }
-        return x.hashCode() & mask;
+        int p = x.hashCode() & mask;
+        //String o = x.toString(); try { if (o.equals(latestObject)) throw new RuntimeException("ConcurrentARC: p = " + p + ", objecto = " + o); } catch (Exception e) { Log.logException(e); } latestObject = o;
+        return p;
     }
 }

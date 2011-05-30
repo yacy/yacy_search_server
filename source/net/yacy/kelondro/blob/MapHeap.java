@@ -69,7 +69,7 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             final int cachesize,
             char fillchar) throws IOException {
         this.blob = new Heap(heapFile, keylength, ordering, buffermax);
-        this.cache = new ConcurrentARC<byte[], Map<String, String>>(cachesize, Runtime.getRuntime().availableProcessors(), ordering);
+        this.cache = new ConcurrentARC<byte[], Map<String, String>>(cachesize, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()), ordering);
         this.fillchar = fillchar;
     }
    
@@ -285,6 +285,10 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         if (cache == null) return null; // case may appear during shutdown
         key = normalizeKey(key);
         
+        if (MemoryControl.shortStatus()) {
+            cache.clear();
+        } 
+        
         Map<String, String> map;
         if (storeCache) {
             synchronized (this) {
@@ -300,16 +304,12 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
                     throw new IOException(e.getMessage());
                 }
         
-                if (MemoryControl.shortStatus()) {
-                    cache.clear();
-                } else {
-                    // write map to cache
-                    cache.insert(key, map);
-                }
+                // write map to cache
+                cache.insert(key, map);
+                
+                // return value
+                return map;
             }
-            
-            // return value
-            return map;
         } else {
             byte[] b;
             synchronized (this) {
