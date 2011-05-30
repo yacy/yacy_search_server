@@ -384,7 +384,7 @@ public class yacysearch {
                 while (sitehost.endsWith(".")) {
                     sitehost = sitehost.substring(0, sitehost.length() - 1);
                 }
-                sitehash = DigestURI.domhash(sitehost);
+                sitehash = DigestURI.hosthash(sitehost);
             }
             
             final int heuristicScroogle = querystring.indexOf("heuristic:scroogle");

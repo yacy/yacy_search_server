@@ -226,7 +226,7 @@ public final class RankingProcess extends Thread {
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
                 
                 // check site constraints
-                String hosthash = new String(iEntry.urlhash(), 6, 6);
+                String hosthash = iEntry.hosthash();
                 if (query.sitehash == null) {
                     // no site constraint there; maybe collect host navigation information
                     if (nav_hosts && query.urlMask_isCatchall) {
@@ -330,13 +330,13 @@ public final class RankingProcess extends Thread {
                  }
                 
                 // check doubledom
-                final String domhash = ASCII.String(rwi.getElement().urlhash(), 6, 6);
+                final String hosthash = rwi.getElement().hosthash();
                 synchronized (this.doubleDomCache) {
-                    m = this.doubleDomCache.get(domhash);
+                    m = this.doubleDomCache.get(hosthash);
                     if (m == null) {
                         // first appearance of dom. we create an entry to signal that one of that domain was already returned
                         m = new WeakPriorityBlockingQueue<WordReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
-                        this.doubleDomCache.put(domhash, m);
+                        this.doubleDomCache.put(hosthash, m);
                         return rwi;
                     }
                     // second appearances of dom
@@ -374,7 +374,7 @@ public final class RankingProcess extends Thread {
             if (bestEntry == null) return null;
             
             // finally remove the best entry from the doubledom cache
-            m = this.doubleDomCache.get(ASCII.String(bestEntry.getElement().urlhash()).substring(6));
+            m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
             bestEntry = m.poll();
         }
         return bestEntry;

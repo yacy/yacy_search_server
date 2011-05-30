@@ -74,7 +74,7 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference> {
             while (i.hasNext()) {
                 iEntry = i.next();
                 if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.urlhash()) != null)) continue; // do not include urls that are in excludeContainer
-                dom = ASCII.String(iEntry.urlhash(), 6, 6);
+                dom = (iEntry instanceof WordReferenceVars) ? ((WordReferenceVars) iEntry).hosthash() : ASCII.String(iEntry.urlhash(), 6, 6);
                 mod = ASCII.String(iEntry.urlhash(), 0, 6);
                 if ((paths = doms.get(dom)) == null) {
                     doms.put(dom, new StringBuilder(30).append(mod));

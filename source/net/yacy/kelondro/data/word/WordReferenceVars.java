@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Base64Order;
@@ -58,6 +59,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     public long lastModified;
     public byte[] language;
     public byte[] urlHash;
+    private String hostHash = null;
     public char type;
     public int hitcount, llocal, lother, phrasesintext,
                posinphrase, posofphrase,
@@ -269,6 +271,12 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 
     public byte[] urlhash() {
         return urlHash;
+    }
+
+    public String hosthash() {
+        if (hostHash != null) return hostHash;
+        hostHash = ASCII.String(urlHash, 6, 6);
+        return hostHash;
     }
 
     public int urlcomps() {

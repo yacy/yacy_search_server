@@ -59,7 +59,7 @@ public class DigestURI extends MultiProtocolURI implements Serializable {
      * @param host
      * @return
      */
-    public static String domhash(final String host) {
+    public static String hosthash(final String host) {
         String h = host;
         if (!h.startsWith("http://")) h = "http://" + h;
         DigestURI url = null;

@@ -163,7 +163,7 @@ public class ReferenceOrder {
                     if (max == null) max = iEntry.clone(); else max.max(iEntry);
                     out.put(iEntry); // must be after the min/max check to prevent that min/max is null in cardinal()
                     // update domcount
-                    dom = ASCII.String(iEntry.urlhash(), 6, 6);
+                    dom = iEntry.hosthash();
                     count = doms0.get(dom);
                     if (count == null) {
                         doms0.put(dom, int1);
@@ -194,8 +194,9 @@ public class ReferenceOrder {
         }
     }
     
-    public int authority(final byte[] urlHash) {
-        return (doms.get(ASCII.String(urlHash, 6, 6)) << 8) / (1 + this.maxdomcount);
+    public int authority(final String hostHash) {
+        assert hostHash.length() == 6;
+        return (doms.get(hostHash) << 8) / (1 + this.maxdomcount);
     }
 
     /**
@@ -232,7 +233,7 @@ public class ReferenceOrder {
            + ((max.lother()        == min.lother())        ? 0 : (((t.lother()       - min.lother()        ) << 8) / (max.lother()       - min.lother())        ) << ranking.coeff_lother)
            + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
            + tf
-           + ((ranking.coeff_authority > 12) ? (authority(t.urlhash()) << ranking.coeff_authority) : 0)
+           + ((ranking.coeff_authority > 12) ? (authority(t.hosthash()) << ranking.coeff_authority) : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)

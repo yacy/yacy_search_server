@@ -447,7 +447,7 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", DigestURI.domLengthEstimation(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", BlockRank.ranking(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
-                prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
                 prop.put("genUrlList_urlList_"+i+"_urlExists_date", GenericFormatter.SHORT_DAY_FORMATTER.format(new Date(entry.word().lastModified())));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());
