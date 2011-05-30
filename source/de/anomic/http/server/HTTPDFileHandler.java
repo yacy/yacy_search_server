@@ -1297,16 +1297,24 @@ public final class HTTPDFileHandler {
     private static void doURLProxy(final serverObjects args, final HashMap<String, Object> conProp, final RequestHeader requestHeader, OutputStream out) throws IOException {
         final String httpVersion = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
 		URL proxyurl = null;
-
-		if (args != null && args.containsKey("url")) {
-			String strUrl = args.get("url");
-			proxyurl = new URL(strUrl);
+		
+		if(conProp != null && conProp.containsKey("ARGS")) {
+			String strARGS = (String) conProp.get("ARGS");
+			if(strARGS.startsWith("url=")) {
+				String strUrl = strARGS.substring(4); // strip url=
+				proxyurl = new URL(strUrl);
+			}
 		}
+		
+		if (proxyurl==null) {
+			throw new IOException("no url as argument supplied");
+		}
+
 		// set properties for proxy connection
    		final HashMap<String, Object> prop = new HashMap<String, Object>();
 		prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
 		prop.put(HeaderFramework.CONNECTION_PROP_HOST, proxyurl.getHost());
-		prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
+		prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getFile().replaceAll(" ", "%20"));
 		prop.put(HeaderFramework.CONNECTION_PROP_REQUESTLINE, "PROXY");
 		prop.put("CLIENTIP", "0:0:0:0:0:0:0:1");
 
@@ -1338,9 +1346,25 @@ public final class HTTPDFileHandler {
 			return;
 		}
 		
-		final int httpStatus = Integer.parseInt((String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS)); 
+		final int httpStatus = Integer.parseInt((String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_STATUS));
 		
-		if (outgoingHeader.getContentType().startsWith("text/html")) {
+		String directory = "";
+		if (proxyurl.getPath().lastIndexOf('/') > 0)
+			directory = proxyurl.getPath().substring(0, proxyurl.getPath().lastIndexOf('/'));
+
+		if (outgoingHeader.containsKey("Location")) {
+			// rewrite location header
+			String location = outgoingHeader.get("Location");
+			if (location.startsWith("http")) {
+				location = "/proxy.html?url=" + location;
+			} else {
+				location = "/proxy.html?url=http://" + proxyurl.getHost() + "/" + location;
+			}
+			outgoingHeader.put("Location", location);
+		}
+		
+		String mimeType = outgoingHeader.getContentType();
+		if (mimeType.startsWith("text/html") || mimeType.startsWith("text")) {
 			StringWriter buffer = new StringWriter();
 
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
@@ -1351,19 +1375,21 @@ public final class HTTPDFileHandler {
 
 			String sbuffer = buffer.toString();
 
-			String directory = "";
-			if (proxyurl.getPath().lastIndexOf('/') > 0)
-				directory = proxyurl.getPath().substring(0, proxyurl.getPath().lastIndexOf('/'));
 			// urls of form href="http://domain.com/path"
 			sbuffer = sbuffer.replaceAll("(href|src)=\"http([^\"]+)\"", "$1=\"/proxy.html?url=http$2\"");
 			sbuffer = sbuffer.replaceAll("(href|src)='http([^']+)'", "$1='/proxy.html?url=http$2'");
+			sbuffer = sbuffer.replaceAll("url\\('http([^']+)'\\)", "url('/proxy.html?url=http$1')");
+			sbuffer = sbuffer.replaceAll("url\\(http([^\\)]+)\\)'", "url(/proxy.html?url=http$1)");
 			// urls of form href="/absolute/path/to/linked/page"
 			sbuffer = sbuffer.replaceAll("(href|src)=\"/([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+"/$2\"");
 			sbuffer = sbuffer.replaceAll("(href|src)='/([^:']+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+"/$2'");
+			sbuffer = sbuffer.replaceAll("url\\('/([^:']+)'\\)", "url('/proxy.html?url=http://"+proxyurl.getHost()+"/$1')");
+			sbuffer = sbuffer.replaceAll("url\\(/([^:\\)]+)\\)", "url(/proxy.html?url=http://"+proxyurl.getHost()+"/$1)");
 			// urls of form href="relative/path"
 			sbuffer = sbuffer.replaceAll("(href|src)=\"([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2\"");
 			sbuffer = sbuffer.replaceAll("(href|src)='([^:']+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2'");
-			sbuffer = sbuffer.replaceAll("url\\(", "url(/proxy.html?url=http://"+proxyurl.getHost()+proxyurl.getPath());
+			sbuffer = sbuffer.replaceAll("url\\('([^:']+)'\\)", "url\\('/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$1')");
+			sbuffer = sbuffer.replaceAll("url\\(([^:\\)]+)\\)", "url\\(/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$1)");
 			
 			byte[] sbb = UTF8.getBytes(sbuffer);
 			
