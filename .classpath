@@ -37,14 +37,14 @@
 	<classpathentry kind="lib" path="lib/httpcore-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
-	<classpathentry kind="lib" path="lib/fontbox-1.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-1.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-fileupload-1.2.2.jar" sourcepath="/Users/admin/.m2/repository/commons-fileupload/commons-fileupload/1.2.2/commons-fileupload-1.2.2-sources.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.5.5.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.5.5.jar"/>
 	<classpathentry kind="lib" path="lib/apache-solr-solrj-3.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-1.5.0.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-1.5.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-core.jar"/>
 	<classpathentry kind="output" path="gen"/>
