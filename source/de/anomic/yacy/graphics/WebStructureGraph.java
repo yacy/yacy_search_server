@@ -178,7 +178,7 @@ public class WebStructureGraph {
             if (nexturlhashb != null) {
                 nexturlhash = ASCII.String(nexturlhashb);
                 assert nexturlhash.length() == 12 : "nexturlhash.length() = " + nexturlhash.length() + ", nexturlhash = " + nexturlhash;
-                assert !nexturlhash.substring(6).equals(refhashp);
+                //assert !nexturlhash.substring(6).equals(refhashp);
                 // this is a global link
                 cpg.append(nexturlhash); // store complete hash
                 assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();

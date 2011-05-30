@@ -82,16 +82,13 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public static class Cache {
         private final ARC<String, String> cache;
         public Cache() {
-            cache = new ConcurrentARC<String, String>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
+            cache = new ConcurrentARC<String, String>(maxCache, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
         }
         public void put(final String wordhashes, final String urlhash, final String snippet) {
             // generate key
             final String key = urlhash + wordhashes;
 
-            // do nothing if snippet is known
-            if (cache.containsKey(key)) return;
-
-            // learn new snippet
+            // do nothing if snippet is known or learn new snippet
             cache.insertIfAbsent(key, snippet);
         }
         
