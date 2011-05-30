@@ -414,7 +414,8 @@ public class IndexControlRWIs_p {
     
     public static void genURLList(final serverObjects prop, final byte[] keyhash, final String keystring, final RankingProcess ranked, final Bitfield flags, final int maxlines) {
         // search for a word hash and generate a list of url links
-        prop.put("genUrlList_keyHash", ASCII.String(keyhash));
+        String keyhashs = ASCII.String(keyhash);
+        prop.put("genUrlList_keyHash", keyhashs);
         
         if (ranked.filteredCount() == 0) {
             prop.put("genUrlList", 1);
@@ -440,7 +441,7 @@ public class IndexControlRWIs_p {
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.word().urlhash());
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
-                prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", ASCII.String(keyhash));
+                prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", keyhashs);
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));

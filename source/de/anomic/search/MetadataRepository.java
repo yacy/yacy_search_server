@@ -590,7 +590,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         URLHashCounter ds;
         if (i != null) while (i.hasNext()) {
             urlhashb = i.next();
-            hosthash = ASCII.String(urlhashb).substring(6);
+            hosthash = ASCII.String(urlhashb, 6, 6);
             ds = map.get(hosthash);
             if (ds == null) {
                 ds = new URLHashCounter(urlhashb);
@@ -653,7 +653,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         
         ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
         for (Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
-            hosthashScore.inc(ASCII.String(e.getValue().urlhashb).substring(6), e.getValue().count);
+            hosthashScore.inc(ASCII.String(e.getValue().urlhashb, 6, 6), e.getValue().count);
         }
         URIMetadataRow.Components comps;
         DigestURI url;
