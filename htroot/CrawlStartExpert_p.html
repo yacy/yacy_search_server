@@ -144,8 +144,8 @@
 			<input type="radio" name="range" id="rangeSubpath" value="subpath" />Restrict to sub-path
 		  </td>
           <td>
-            The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>
-            that must match with the URLs which are used to be crawled; default is 'catch all'.
+            The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>
+            that <b>must match</b> with the URLs which are used to be crawled; default is 'catch all'.
             Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'. 
             You can also use an automatic domain-restriction to fully crawl a single domain.
           </td>
@@ -156,7 +156,8 @@
 			<input name="mustnotmatch" id="mustnotmatch" type="text" size="60" maxlength="100" value="#[mustnotmatch]#" />
 		  </td>
           <td>
-            This filter must not match to allow that the page is accepted for crawling.
+            The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>
+            that <b>must not match</b> to allow that the page is accepted for crawling.
             The empty string is a never-match filter which should do well for most cases.
             If you don't know what this means, please leave this field empty.
           </td>
