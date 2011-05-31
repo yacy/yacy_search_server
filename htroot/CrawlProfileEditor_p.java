@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -153,6 +154,8 @@ public class CrawlProfileEditor_p {
         if ((post != null) && (selentry != null)) {
             if (post.containsKey("submit")) {
                 try {
+                	Pattern.compile(post.get(CrawlProfile.FILTER_MUSTMATCH, CrawlProfile.MATCH_ALL));
+                	Pattern.compile(post.get(CrawlProfile.FILTER_MUSTNOTMATCH, CrawlProfile.MATCH_NEVER));
                     final Iterator<eentry> lit = labels.iterator();
                     eentry tee;
                     while (lit.hasNext()) {
