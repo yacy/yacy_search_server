@@ -81,6 +81,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPOutputStream;
 
@@ -1374,24 +1375,49 @@ public final class HTTPDFileHandler {
 			}
 
 			String sbuffer = buffer.toString();
-
-			// urls of form href="http://domain.com/path"
-			sbuffer = sbuffer.replaceAll("(href|src)=\"http([^\"]+)\"", "$1=\"/proxy.html?url=http$2\"");
-			sbuffer = sbuffer.replaceAll("(href|src)='http([^']+)'", "$1='/proxy.html?url=http$2'");
-			sbuffer = sbuffer.replaceAll("url\\('http([^']+)'\\)", "url('/proxy.html?url=http$1')");
-			sbuffer = sbuffer.replaceAll("url\\(http([^\\)]+)\\)'", "url(/proxy.html?url=http$1)");
-			// urls of form href="/absolute/path/to/linked/page"
-			sbuffer = sbuffer.replaceAll("(href|src)=\"/([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+"/$2\"");
-			sbuffer = sbuffer.replaceAll("(href|src)='/([^:']+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+"/$2'");
-			sbuffer = sbuffer.replaceAll("url\\('/([^:']+)'\\)", "url('/proxy.html?url=http://"+proxyurl.getHost()+"/$1')");
-			sbuffer = sbuffer.replaceAll("url\\(/([^:\\)]+)\\)", "url(/proxy.html?url=http://"+proxyurl.getHost()+"/$1)");
-			// urls of form href="relative/path"
-			sbuffer = sbuffer.replaceAll("(href|src)=\"([^:\"]+)\"", "$1=\"/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2\"");
-			sbuffer = sbuffer.replaceAll("(href|src)='([^:']+)'", "$1='/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$2'");
-			sbuffer = sbuffer.replaceAll("url\\('([^:']+)'\\)", "url\\('/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$1')");
-			sbuffer = sbuffer.replaceAll("url\\(([^:\\)]+)\\)", "url\\(/proxy.html?url=http://"+proxyurl.getHost()+directory+"/$1)");
 			
-			byte[] sbb = UTF8.getBytes(sbuffer);
+			Pattern p = Pattern.compile("(href=\"|src=\")([^\"]+)|(href='|src=')([^']+)|(url\\(')([^']+)|(url\\(\")([^\"]+)|(url\\()([^\\)]+)");
+			Matcher m = p.matcher(buffer.toString());
+			StringBuffer result = new StringBuffer();
+			while (m.find()) {
+				String init = null;
+				if(m.group(1) != null) init = m.group(1);
+				if(m.group(3) != null) init = m.group(3);
+				if(m.group(5) != null) init = m.group(5);
+				if(m.group(7) != null) init = m.group(7);
+				if(m.group(9) != null) init = m.group(9);
+				String url = null;
+				if(m.group(2) != null) url = m.group(2);
+				if(m.group(4) != null) url = m.group(4);
+				if(m.group(6) != null) url = m.group(6);
+				if(m.group(8) != null) url = m.group(8);
+				if(m.group(10) != null) url = m.group(10);
+				if (url.startsWith("data:") || url.startsWith("#")) {
+				    m.appendReplacement(result, init + url);
+				    
+				} else if (url.startsWith("http")) {
+					// absoulte url of form href="http://domain.com/path"
+					if (sb.getConfig("proxyURL.rewriteURLs", "all").equals("domainlist")) {
+						if (sb.crawlStacker.urlInAcceptedDomain(new DigestURI(url)) != null) {
+							continue;
+						}
+					}
+					
+				    m.appendReplacement(result, init + "/proxy.html?url=" + url);
+					
+				} else if (url.startsWith("/")) {
+					// absolute path of form href="/absolute/path/to/linked/page"
+				    m.appendReplacement(result, init + "/proxy.html?url=http://" + proxyurl.getHost() + url);
+					
+				} else {
+					// relative path of form href="relative/path"
+				    m.appendReplacement(result, init + "/proxy.html?url=http://" + proxyurl.getHost() + directory + "/" + url);
+					
+				}
+			}
+			m.appendTail(result);
+
+			byte[] sbb = UTF8.getBytes(result.toString());
 			
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
