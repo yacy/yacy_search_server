@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -26,18 +26,17 @@
 
 package de.anomic.search;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
-
 import de.anomic.data.WorkTables;
+import de.anomic.search.ResultFetcher.Worker;
 import de.anomic.yacy.yacySeedDB;
 
 public class SearchEventCache {
@@ -50,57 +49,68 @@ public class SearchEventCache {
     public static final long memlimitMedium = 200 * 1024 * 1024; // 100 MB
     public static String lastEventID = "";
     public static long cacheInsert = 0, cacheHit = 0, cacheMiss = 0, cacheDelete = 0;
-    
+
     public static int size() {
         return lastEvents.size();
     }
-    
-    public static void put(String eventID, SearchEvent event) {
+
+    public static void put(final String eventID, final SearchEvent event) {
         if (MemoryControl.shortStatus()) cleanupEvents(true);
         lastEventID = eventID;
-        SearchEvent oldEvent = lastEvents.put(eventID, event);
+        final SearchEvent oldEvent = lastEvents.put(eventID, event);
         if (oldEvent == null) cacheInsert++;
     }
-    
+
     public static void cleanupEvents(boolean all) {
         // remove old events in the event cache
         if (MemoryControl.shortStatus()) all = true;
-        final List<SearchEvent> delete = new ArrayList<SearchEvent>();
         // the less memory is there, the less time is acceptable for elements in the cache
-        long memx = MemoryControl.available();
-        long acceptTime = memx > memlimitHigh ? eventLifetimeBigMem : memx > memlimitMedium ? eventLifetimeMediumMem : eventLifetimeShortMem;
+        final long memx = MemoryControl.available();
+        final long acceptTime = memx > memlimitHigh ? eventLifetimeBigMem : memx > memlimitMedium ? eventLifetimeMediumMem : eventLifetimeShortMem;
         Map.Entry<String, SearchEvent> event;
-        Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator();
+        final Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator();
         while (i.hasNext()) {
             event = i.next();
             if (all || event.getValue().getEventTime() + acceptTime < System.currentTimeMillis()) {
-                delete.add(event.getValue());
-                i.remove();
-                cacheDelete++;
-            }
-        }
-        /*
-         * thread to remove the events;
-         * this process may take time because it applies index modifications
-         * in case of failed words 
-         */
-        new Thread(){
-            @Override
-            public void run() {
-                for (SearchEvent k: delete) {
-                    //System.out.println("**** CLEANUP SEARCH EVENT **** incache = "  + lastEvents.size() + ", word = " + k.getQuery().queryWords()[0]);
-                    k.cleanup();
+                if (workerAlive(event.getValue())) {
+                    event.getValue().cleanup();
+                } else {
+                    i.remove();
+                    cacheDelete++;
                 }
             }
-        }.start();
+        }
     }
-    
+
     public static SearchEvent getEvent(final String eventID) {
-        SearchEvent event = lastEvents.get(eventID);
+        final SearchEvent event = lastEvents.get(eventID);
         if (event == null) cacheMiss++; else cacheHit++;
         return event;
     }
-    
+
+    public static int countAliveThreads() {
+        int alive = 0;
+        for (final SearchEvent e: SearchEventCache.lastEvents.values()) {
+            if (workerAlive(e)) alive++;
+        }
+        return alive;
+    }
+
+    private static boolean workerAlive(final SearchEvent e) {
+        if (e == null || e.result() == null || e.result().workerThreads == null) return false;
+        for (final Worker w: e.result().workerThreads) if (w != null && w.isAlive()) return true;
+        return false;
+    }
+
+    private static SearchEvent dummyEvent = null;
+
+    private static SearchEvent getDummyEvent(final WorkTables workTables, final LoaderDispatcher loader, final Segment indexSegment) {
+        if (dummyEvent != null) return dummyEvent;
+        final QueryParams query = new QueryParams("", 0, null, indexSegment, new RankingProfile(ContentDomain.TEXT), "");
+        dummyEvent = new SearchEvent(query, null, workTables, null, false, loader, 0, 0, 0, 0, false);
+        return dummyEvent;
+    }
+
     public static SearchEvent getEvent(
             final QueryParams query,
             final yacySeedDB peers,
@@ -112,8 +122,8 @@ public class SearchEventCache {
             final long remote_maxtime,
             final int burstRobinsonPercent,
             final int burstMultiwordPercent) {
-        
-        String id = query.id(false);
+
+        final String id = query.id(false);
         SearchEvent event = SearchEventCache.lastEvents.get(id);
         if (event == null) cacheMiss++; else cacheHit++;
         if (Switchboard.getSwitchboard() != null && !Switchboard.getSwitchboard().crawlQueues.noticeURL.isEmpty() && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
@@ -132,12 +142,40 @@ public class SearchEventCache {
             }
         }
         if (event == null) {
+
+            // throttling in case of too many search requests
+
+            int waitcount = 0;
+            throttling : while (true) {
+                final int allowedThreads = (int) Math.max(1, MemoryControl.available() / (query.snippetCacheStrategy == null ? 10 : 100) / 1024 / 1024);
+                // make room if there are too many search events (they need a lot of RAM)
+                if (SearchEventCache.lastEvents.size() > allowedThreads) {
+                    Log.logWarning("SearchEventCache", "throttling phase 1: " + SearchEventCache.lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
+                    cleanupEvents(false);
+                } else break throttling;
+                // if there are still some then delete just all
+                if (SearchEventCache.lastEvents.size() > allowedThreads) {
+                    Log.logWarning("SearchEventCache", "throttling phase 2: " + SearchEventCache.lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
+                    cleanupEvents(true);
+                } else break throttling;
+                // now there might be still events left that are alive
+                if (countAliveThreads() < allowedThreads) break throttling;
+                // finally we just wait some time until we get access
+                Log.logWarning("SearchEventCache", "throttling phase 3: " + SearchEventCache.lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
+                try { Thread.sleep(100); } catch (final InterruptedException e) { }
+                waitcount++;
+                if (waitcount >= 10) return getDummyEvent(workTables, loader, query.getSegment());
+            }
+
+            // check if there are too many other searches alive now
+            Log.logInfo("SearchEventCache", "getEvent: " + SearchEventCache.lastEvents.size() + " in cache; " + countAliveThreads() + " alive");
+
             // start a new event
-            boolean delete = Switchboard.getSwitchboard() == null | Switchboard.getSwitchboard().getConfigBool("search.verify.delete", true);
+            final boolean delete = Switchboard.getSwitchboard() == null | Switchboard.getSwitchboard().getConfigBool("search.verify.delete", true);
             event = new SearchEvent(query, peers, workTables, preselectedPeerHashes, generateAbstracts, loader, remote_maxcount, remote_maxtime, burstRobinsonPercent, burstMultiwordPercent, delete);
             MemoryControl.request(100 * 1024 * 1024, false); // this may trigger a short memory status which causes a reducing of cache space of other threads
         }
-    
+
         return event;
     }
 }

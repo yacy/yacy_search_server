@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -33,9 +33,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.Semaphore;
 
-import net.yacy.cora.document.ASCII;
-import net.yacy.cora.storage.ReversibleScoreMap;
-import net.yacy.cora.storage.ClusteredScoreMap;
+import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.document.Condenser;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -51,62 +49,62 @@ import net.yacy.kelondro.util.ByteBuffer;
 public class ReferenceOrder {
 
     private static int cores = Runtime.getRuntime().availableProcessors();
-    
+
     private       int maxdomcount;
     private       WordReferenceVars min, max;
-    private final ReversibleScoreMap<String> doms; // collected for "authority" heuristic 
+    private final ConcurrentScoreMap<String> doms; // collected for "authority" heuristic
     private final RankingProfile ranking;
     private final byte[] language;
-    
-    public ReferenceOrder(final RankingProfile profile, byte[] language) {
+
+    public ReferenceOrder(final RankingProfile profile, final byte[] language) {
         this.min = null;
         this.max = null;
         this.ranking = profile;
-        this.doms = new ClusteredScoreMap<String>();
+        this.doms = new ConcurrentScoreMap<String>();
         this.maxdomcount = 0;
         this.language = language;
     }
-    
+
     public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container) {
-        LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
-        int threads = cores + 1;
-        if (container.size() < 20) threads = 2;
-        Thread distributor = new NormalizeDistributor(container, out, threads);
+        final LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
+        int threads = cores;
+        if (container.size() < 100) threads = 2;
+        final Thread distributor = new NormalizeDistributor(container, out, threads);
         distributor.start();
         try {
             distributor.join(10); // let the distributor work for at least 10 milliseconds
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
         }
-        
+
         // return the resulting queue while the processing queues are still working
         return out;
     }
-    
+
     private final class NormalizeDistributor extends Thread {
 
         ReferenceContainer<WordReference> container;
         LinkedBlockingQueue<WordReferenceVars> out;
-        private int threads;
-        
-        public NormalizeDistributor(ReferenceContainer<WordReference> container, LinkedBlockingQueue<WordReferenceVars> out, int threads) {
+        private final int threads;
+
+        public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads) {
             this.container = container;
             this.out = out;
             this.threads = threads;
         }
-        
+
         @Override
         public void run() {
             // transform the reference container into a stream of parsed entries
-            BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(container);
-            
+            final BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(this.container);
+
             // start the transformation threads
-            Semaphore termination = new Semaphore(this.threads);
-            NormalizeWorker[] worker = new NormalizeWorker[this.threads];
+            final Semaphore termination = new Semaphore(this.threads);
+            final NormalizeWorker[] worker = new NormalizeWorker[this.threads];
             for (int i = 0; i < this.threads; i++) {
-                worker[i] = new NormalizeWorker(out, termination);
+                worker[i] = new NormalizeWorker(this.out, termination);
                 worker[i].start();
             }
-            
+
             // fill the queue
             WordReferenceVars iEntry;
             int p = 0;
@@ -115,16 +113,16 @@ public class ReferenceOrder {
                     worker[p % this.threads].add(iEntry);
                     p++;
                 }
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
             }
-            
+
             // insert poison to stop the queues
             for (int i = 0; i < this.threads; i++) worker[i].add(WordReferenceVars.poison);
-            
+
             // wait for termination but not too long to make it possible that this
             // is called from outside with a join to get some normalization results
             // before going on
-            for (int i = 0; i < this.threads; i++) try {worker[i].join(100);} catch (InterruptedException e) {}
+            for (int i = 0; i < this.threads; i++) try {worker[i].join(100);} catch (final InterruptedException e) {}
         }
     }
 
@@ -132,36 +130,36 @@ public class ReferenceOrder {
      * normalize ranking: find minimum and maximum of separate ranking criteria
      */
     private class NormalizeWorker extends Thread {
-        
+
         private final BlockingQueue<WordReferenceVars> out;
         private final Semaphore termination;
         private final BlockingQueue<WordReferenceVars> decodedEntries;
-        
-        public NormalizeWorker(final BlockingQueue<WordReferenceVars> out, Semaphore termination) {
+
+        public NormalizeWorker(final BlockingQueue<WordReferenceVars> out, final Semaphore termination) {
             this.out = out;
             this.termination = termination;
             this.decodedEntries = new LinkedBlockingQueue<WordReferenceVars>();
         }
-        
-        public void add(WordReferenceVars entry) {
+
+        public void add(final WordReferenceVars entry) {
             try {
-                decodedEntries.put(entry);
-            } catch (InterruptedException e) {
+                this.decodedEntries.put(entry);
+            } catch (final InterruptedException e) {
             }
         }
-        
+
         public void run() {
             try {
                 WordReferenceVars iEntry;
-                Map<String, Integer> doms0 = new HashMap<String, Integer>();
+                final Map<String, Integer> doms0 = new HashMap<String, Integer>();
                 String dom;
                 Integer count;
                 final Integer int1 = 1;
-                while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
+                while ((iEntry = this.decodedEntries.take()) != WordReferenceVars.poison) {
                     // find min/max
-                    if (min == null) min = iEntry.clone(); else min.min(iEntry);
-                    if (max == null) max = iEntry.clone(); else max.max(iEntry);
-                    out.put(iEntry); // must be after the min/max check to prevent that min/max is null in cardinal()
+                    if (ReferenceOrder.this.min == null) ReferenceOrder.this.min = iEntry.clone(); else ReferenceOrder.this.min.min(iEntry);
+                    if (ReferenceOrder.this.max == null) ReferenceOrder.this.max = iEntry.clone(); else ReferenceOrder.this.max.max(iEntry);
+                    this.out.put(iEntry); // must be after the min/max check to prevent that min/max is null in cardinal()
                     // update domcount
                     dom = iEntry.hosthash();
                     count = doms0.get(dom);
@@ -177,26 +175,26 @@ public class ReferenceOrder {
                 final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
                 while (di.hasNext()) {
                     entry = di.next();
-                    doms.inc(entry.getKey(), (entry.getValue()).intValue());
+                    ReferenceOrder.this.doms.inc(entry.getKey(), (entry.getValue()).intValue());
                 }
-                if (!doms.isEmpty()) maxdomcount = doms.getMaxScore();
-            } catch (InterruptedException e) {
+                if (!ReferenceOrder.this.doms.isEmpty()) ReferenceOrder.this.maxdomcount = ReferenceOrder.this.doms.getMaxScore();
+            } catch (final InterruptedException e) {
                 Log.logException(e);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Log.logException(e);
             } finally {
                 // insert poison to signal the termination to next queue
                 try {
                     this.termination.acquire();
                     if (this.termination.availablePermits() == 0) this.out.put(WordReferenceVars.poison);
-                } catch (InterruptedException e) {}
+                } catch (final InterruptedException e) {}
             }
         }
     }
-    
+
     public int authority(final String hostHash) {
         assert hostHash.length() == 6;
-        return (doms.get(hostHash) << 8) / (1 + this.maxdomcount);
+        return (this.doms.get(hostHash) << 8) / (1 + this.maxdomcount);
     }
 
     /**
@@ -208,45 +206,45 @@ public class ReferenceOrder {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
         final Bitfield flags = t.flags();
-        assert min != null;
-        assert max != null;
+        assert this.min != null;
+        assert this.max != null;
         assert t != null;
-        assert ranking != null;
-        final long tf = ((max.termFrequency() == min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-min.termFrequency())*256.0)/(max.termFrequency() - min.termFrequency())))) << ranking.coeff_termfrequency);
+        assert this.ranking != null;
+        final long tf = ((this.max.termFrequency() == this.min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-this.min.termFrequency())*256.0)/(this.max.termFrequency() - this.min.termFrequency())))) << this.ranking.coeff_termfrequency);
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
-        int maxmaxpos = max.maxposition();
-        int minminpos = min.minposition();
+        final int maxmaxpos = this.max.maxposition();
+        final int minminpos = this.min.minposition();
         final long r =
-             ((256 - DigestURI.domLengthNormalized(t.urlhash())) << ranking.coeff_domlength)
-           + ((ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.urlhash()) << 4)) << ranking.coeff_ybr) : 0)
-           + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
-           + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
-           + ((maxmaxpos           == minminpos        )   ? 0 : (256 - (((t.minposition()  - minminpos          ) << 8) / (maxmaxpos          - minminpos)          )) << ranking.coeff_posintext)
-           + ((max.posofphrase()   == min.posofphrase())   ? 0 : (256 - (((t.posofphrase()  - min.posofphrase()  ) << 8) / (max.posofphrase()  - min.posofphrase())  )) << ranking.coeff_posofphrase)
-           + ((max.posinphrase()   == min.posinphrase())   ? 0 : (256 - (((t.posinphrase()  - min.posinphrase()  ) << 8) / (max.posinphrase()  - min.posinphrase())  )) << ranking.coeff_posinphrase)
-           + ((max.distance()      == min.distance()   )   ? 0 : (256 - (((t.distance()     - min.distance()     ) << 8) / (max.distance()     - min.distance())     )) << ranking.coeff_worddistance)
-           + ((max.virtualAge()    == min.virtualAge())    ? 0 :        (((t.virtualAge()   - min.virtualAge()   ) << 8) / (max.virtualAge()   - min.virtualAge())    ) << ranking.coeff_date)
-           + ((max.wordsintitle()  == min.wordsintitle())  ? 0 : (((t.wordsintitle() - min.wordsintitle()  ) << 8) / (max.wordsintitle() - min.wordsintitle())  ) << ranking.coeff_wordsintitle)
-           + ((max.wordsintext()   == min.wordsintext())   ? 0 : (((t.wordsintext()  - min.wordsintext()   ) << 8) / (max.wordsintext()  - min.wordsintext())   ) << ranking.coeff_wordsintext)
-           + ((max.phrasesintext() == min.phrasesintext()) ? 0 : (((t.phrasesintext()- min.phrasesintext() ) << 8) / (max.phrasesintext()- min.phrasesintext()) ) << ranking.coeff_phrasesintext)
-           + ((max.llocal()        == min.llocal())        ? 0 : (((t.llocal()       - min.llocal()        ) << 8) / (max.llocal()       - min.llocal())        ) << ranking.coeff_llocal)
-           + ((max.lother()        == min.lother())        ? 0 : (((t.lother()       - min.lother()        ) << 8) / (max.lother()       - min.lother())        ) << ranking.coeff_lother)
-           + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
+             ((256 - DigestURI.domLengthNormalized(t.urlhash())) << this.ranking.coeff_domlength)
+           + ((this.ranking.coeff_ybr > 12) ? ((256 - (BlockRank.ranking(t.urlhash()) << 4)) << this.ranking.coeff_ybr) : 0)
+           + ((this.max.urlcomps()      == this.min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - this.min.urlcomps()     ) << 8) / (this.max.urlcomps()     - this.min.urlcomps())     )) << this.ranking.coeff_urlcomps)
+           + ((this.max.urllength()     == this.min.urllength()  )   ? 0 : (256 - (((t.urllength()    - this.min.urllength()    ) << 8) / (this.max.urllength()    - this.min.urllength())    )) << this.ranking.coeff_urllength)
+                                        + ((maxmaxpos == minminpos) ? 0 : (256 - (((t.minposition() - minminpos) << 8) / (maxmaxpos - minminpos))) << this.ranking.coeff_posintext)
+           + ((this.max.posofphrase()   == this.min.posofphrase())   ? 0 : (256 - (((t.posofphrase()  - this.min.posofphrase()  ) << 8) / (this.max.posofphrase()  - this.min.posofphrase())  )) << this.ranking.coeff_posofphrase)
+           + ((this.max.posinphrase()   == this.min.posinphrase())   ? 0 : (256 - (((t.posinphrase()  - this.min.posinphrase()  ) << 8) / (this.max.posinphrase()  - this.min.posinphrase())  )) << this.ranking.coeff_posinphrase)
+           + ((this.max.distance()      == this.min.distance()   )   ? 0 : (256 - (((t.distance()     - this.min.distance()     ) << 8) / (this.max.distance()     - this.min.distance())     )) << this.ranking.coeff_worddistance)
+           + ((this.max.virtualAge()    == this.min.virtualAge())    ? 0 :        (((t.virtualAge()   - this.min.virtualAge()   ) << 8) / (this.max.virtualAge()   - this.min.virtualAge())    ) << this.ranking.coeff_date)
+           + ((this.max.wordsintitle()  == this.min.wordsintitle())  ? 0 : (((t.wordsintitle() - this.min.wordsintitle()  ) << 8) / (this.max.wordsintitle() - this.min.wordsintitle())  ) << this.ranking.coeff_wordsintitle)
+           + ((this.max.wordsintext()   == this.min.wordsintext())   ? 0 : (((t.wordsintext()  - this.min.wordsintext()   ) << 8) / (this.max.wordsintext()  - this.min.wordsintext())   ) << this.ranking.coeff_wordsintext)
+           + ((this.max.phrasesintext() == this.min.phrasesintext()) ? 0 : (((t.phrasesintext()- this.min.phrasesintext() ) << 8) / (this.max.phrasesintext()- this.min.phrasesintext()) ) << this.ranking.coeff_phrasesintext)
+           + ((this.max.llocal()        == this.min.llocal())        ? 0 : (((t.llocal()       - this.min.llocal()        ) << 8) / (this.max.llocal()       - this.min.llocal())        ) << this.ranking.coeff_llocal)
+           + ((this.max.lother()        == this.min.lother())        ? 0 : (((t.lother()       - this.min.lother()        ) << 8) / (this.max.lother()       - this.min.lother())        ) << this.ranking.coeff_lother)
+           + ((this.max.hitcount()      == this.min.hitcount())      ? 0 : (((t.hitcount()     - this.min.hitcount()      ) << 8) / (this.max.hitcount()     - this.min.hitcount())      ) << this.ranking.coeff_hitcount)
            + tf
-           + ((ranking.coeff_authority > 12) ? (authority(t.hosthash()) << ranking.coeff_authority) : 0)
-           + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
-           + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
-           + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)
-           + ((flags.get(WordReferenceRow.flag_app_dc_subject))     ? 255 << ranking.coeff_app_dc_subject     : 0)
-           + ((flags.get(WordReferenceRow.flag_app_dc_description)) ? 255 << ranking.coeff_app_dc_description : 0)
-           + ((flags.get(WordReferenceRow.flag_app_emphasized))     ? 255 << ranking.coeff_appemph            : 0)
-           + ((flags.get(Condenser.flag_cat_indexof))      ? 255 << ranking.coeff_catindexof         : 0)
-           + ((flags.get(Condenser.flag_cat_hasimage))     ? 255 << ranking.coeff_cathasimage        : 0)
-           + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio        : 0)
-           + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0)
-           + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0)
-           + ((ByteBuffer.equals(t.language, this.language)) ? 255 << ranking.coeff_language           : 0)
-           + ((DigestURI.probablyRootURL(t.urlhash())) ?  15 << ranking.coeff_urllength          : 0);
+           + ((this.ranking.coeff_authority > 12) ? (authority(t.hosthash()) << this.ranking.coeff_authority) : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << this.ranking.coeff_appurl             : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << this.ranking.coeff_app_dc_title       : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << this.ranking.coeff_app_dc_creator     : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_subject))     ? 255 << this.ranking.coeff_app_dc_subject     : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_description)) ? 255 << this.ranking.coeff_app_dc_description : 0)
+           + ((flags.get(WordReferenceRow.flag_app_emphasized))     ? 255 << this.ranking.coeff_appemph            : 0)
+           + ((flags.get(Condenser.flag_cat_indexof))      ? 255 << this.ranking.coeff_catindexof         : 0)
+           + ((flags.get(Condenser.flag_cat_hasimage))     ? 255 << this.ranking.coeff_cathasimage        : 0)
+           + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
+           + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
+           + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
+           + ((ByteBuffer.equals(t.language, this.language)) ? 255 << this.ranking.coeff_language           : 0)
+           + ((DigestURI.probablyRootURL(t.urlhash())) ?  15 << this.ranking.coeff_urllength          : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 

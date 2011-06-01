@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -38,14 +38,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.Index;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
-import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.io.BufferedRecords;
 import net.yacy.kelondro.io.Records;
 import net.yacy.kelondro.logging.Log;
@@ -71,7 +72,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     // static tracker objects
     private final static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
     private final static long maxarraylength = 134217727L; // that may be the maximum size of array length in some JVMs
-    
+
     private final long minmemremaining; // if less than this memory is remaininig, the memory copy of a table is abandoned
     private final int buffersize;
     private final Row rowdef;
@@ -79,7 +80,7 @@ public class Table implements Index, Iterable<Row.Entry> {
     private       HandleMap index;
     private       BufferedRecords file;
     private       RowSet table;
-    
+
     public Table(
     		final File tablefile,
     		final Row rowdef,
@@ -88,10 +89,10 @@ public class Table implements Index, Iterable<Row.Entry> {
     		boolean useTailCache,
     		final boolean exceed134217727) throws RowSpaceExceededException {
         useTailCache = true; // fixed for testing
-        
+
         this.rowdef = rowdef;
         this.buffersize = buffersize;
-        this.minmemremaining = Math.max(20 * 1024 * 1024, MemoryControl.available() / 10);
+        this.minmemremaining = Math.max(400 * 1024 * 1024, MemoryControl.available() / 10);
         //this.fail = 0;
         // define the taildef, a row like the rowdef but without the first column
         final Column[] cols = new Column[rowdef.columns() - 1];
@@ -99,7 +100,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             cols[i] = rowdef.column(i + 1);
         }
         this.taildef = new Row(cols, NaturalOrder.naturalOrder);
-        
+
         // initialize table file
         boolean freshFile = false;
         if (!tablefile.exists()) {
@@ -114,19 +115,19 @@ public class Table implements Index, Iterable<Row.Entry> {
             }
             if (fos != null) try { fos.close(); } catch (final IOException e) {}
         }
-        
+
         try {
             // open an existing table file
-            int fileSize = (int) tableSize(tablefile, rowdef.objectsize, true);
-            
+            final int fileSize = (int) tableSize(tablefile, rowdef.objectsize, true);
+
             // initialize index and copy table
             final int  records = Math.max(fileSize, initialSpace);
             final long neededRAM4table = (records) * ((rowdef.objectsize) + 4L) * 3L;
             this.table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
                      (useTailCache && MemoryControl.available() > neededRAM4table + 200 * 1024 * 1024)) ?
-                    new RowSet(taildef, records) : null;
-            Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, needed: " + (neededRAM4table/1024/1024 + 200) + "MB, allocating space for " + records + " entries");
-            final long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
+                    new RowSet(this.taildef, records) : null;
+            Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((this.table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, needed: " + (neededRAM4table/1024/1024 + 200) + "MB, allocating space for " + records + " entries");
+            final long neededRAM4index = 400 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
             if (!MemoryControl.request(neededRAM4index, false)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
@@ -136,8 +137,8 @@ public class Table implements Index, Iterable<Row.Entry> {
                 Log.logSevere("TABLE", tablefile.getName() + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
             this.index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, tablefile.getAbsolutePath());
-            HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, tablefile.getAbsolutePath() + ".errors");
-            Log.logInfo("TABLE", tablefile + ": TABLE " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
+            final HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, tablefile.getAbsolutePath() + ".errors");
+            Log.logInfo("TABLE", tablefile + ": TABLE " + tablefile.toString() + " has table copy " + ((this.table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
             Log.logInfo("TABLE", "initializing RAM index for TABLE " + tablefile.getName() + ", please wait.");
@@ -165,14 +166,14 @@ public class Table implements Index, Iterable<Row.Entry> {
                     assert record != null;
                     if (record == null) {i++; continue;}
                     System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
-                    
+
                     // write the key into the index table
                     if (rowdef.objectOrder.wellformed(key)) {
-                        index.putUnique(key, i++);
+                        this.index.putUnique(key, i++);
                         // write the tail into the table
                         try {
-                            this.table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
-                        } catch (RowSpaceExceededException e) {
+                            this.table.addUnique(this.taildef.newEntry(record, rowdef.primaryKeyLength, true));
+                        } catch (final RowSpaceExceededException e) {
                             this.table = null;
                             break;
                         }
@@ -185,27 +186,27 @@ public class Table implements Index, Iterable<Row.Entry> {
                     }
                 }
             }
-            
+
             // open the file
             this.file = new BufferedRecords(new Records(tablefile, rowdef.objectsize), this.buffersize);
-            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
-            
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+
             // clean up the file by cleaning badly formed entries
-            int errorc = errors.size();
+            final int errorc = errors.size();
             int errorcc = 0;
             int idx;
-            for (Entry entry: errors) {
+            for (final Entry entry: errors) {
                 key = entry.getPrimaryKeyBytes();
                 idx = (int) entry.getColLong(1);
                 Log.logWarning("Table", "removing not well-formed entry " + idx + " with key: " + NaturalOrder.arrayList(key, 0, key.length) + ", " + errorcc++ + "/" + errorc);
                 removeInFile(idx);
             }
             errors.close();
-            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
-            
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+
             // remove doubles
             if (!freshFile) {
-                final ArrayList<long[]> doubles = index.removeDoubles();
+                final ArrayList<long[]> doubles = this.index.removeDoubles();
                 //assert index.size() + doubles.size() + fail == i;
                 //System.out.println(" -removed " + doubles.size() + " doubles- done.");
                 if (!doubles.isEmpty()) {
@@ -242,29 +243,29 @@ public class Table implements Index, Iterable<Row.Entry> {
             Log.logSevere("Table", "", e);
             throw new kelondroException(e.getMessage());
         }
-        
+
         // track this table
         tableTracker.put(tablefile.toString(), this);
     }
-    
+
     public long mem() {
-        return index.mem() + ((table == null) ? 0 : table.mem());
+        return this.index.mem() + ((this.table == null) ? 0 : this.table.mem());
     }
-    
+
     private boolean abandonTable() {
         // check if not enough memory is there to maintain a memory copy of the table
-        return MemoryControl.shortStatus() || MemoryControl.available() < minmemremaining;
+        return MemoryControl.shortStatus() || MemoryControl.available() < this.minmemremaining;
     }
-    
+
     public byte[] smallestKey() {
         return this.index.smallestKey();
     }
-    
+
     public byte[] largestKey() {
         return this.index.largestKey();
     }
-    
-    public static long tableSize(final File tablefile, final int recordsize, boolean fixIfCorrupted) throws kelondroException {
+
+    public static long tableSize(final File tablefile, final int recordsize, final boolean fixIfCorrupted) throws kelondroException {
         try {
             return Records.tableSize(tablefile, recordsize);
         } catch (final IOException e) {
@@ -300,111 +301,111 @@ public class Table implements Index, Iterable<Row.Entry> {
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
         synchronized (this) {
-            assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         }
         final HashMap<String, String> map = new HashMap<String, String>(8);
-        if (index == null) return map; // possibly closed or beeing closed
-        map.put("tableSize", Integer.toString(index.size()));
-        map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
-        map.put("tableKeyMem", Integer.toString(index.row().objectsize * index.size()));
-        map.put("tableValueChunkSize", (table == null) ? "0" : Integer.toString(table.row().objectsize));
-        map.put("tableValueMem", (table == null) ? "0" : Integer.toString(table.row().objectsize * table.size()));
+        if (this.index == null) return map; // possibly closed or beeing closed
+        map.put("tableSize", Integer.toString(this.index.size()));
+        map.put("tableKeyChunkSize", Integer.toString(this.index.row().objectsize));
+        map.put("tableKeyMem", Integer.toString(this.index.row().objectsize * this.index.size()));
+        map.put("tableValueChunkSize", (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize));
+        map.put("tableValueMem", (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize * this.table.size()));
         return map;
     }
-    
+
     public boolean usesFullCopy() {
         return this.table != null;
     }
-    
+
     public static long staticRAMIndexNeed(final File f, final Row rowdef) {
-        return (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize, true) * RowCollection.growfactorLarge100 / 100L);
+        return (((rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize, true) * RowCollection.growfactorLarge100 / 100L);
     }
-    
+
     public boolean consistencyCheck() {
         try {
-            return file.size() == index.size();
-        } catch (IOException e) {
+            return this.file.size() == this.index.size();
+        } catch (final IOException e) {
             Log.logException(e);
             return false;
         }
     }
-    
+
     public synchronized void addUnique(final Entry row) throws IOException, RowSpaceExceededException {
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
-        final int i = (int) file.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+        final int i = (int) this.file.size();
         try {
-            index.putUnique(row.getPrimaryKeyBytes(), i);
-        } catch (RowSpaceExceededException e) {
-            if (table == null) throw e; // in case the table is not used, there is no help here
-            table = null;
+            this.index.putUnique(row.getPrimaryKeyBytes(), i);
+        } catch (final RowSpaceExceededException e) {
+            if (this.table == null) throw e; // in case the table is not used, there is no help here
+            this.table = null;
             // try again with less memory
-            index.putUnique(row.getPrimaryKeyBytes(), i);
+            this.index.putUnique(row.getPrimaryKeyBytes(), i);
         }
-        if (table != null) {
-            assert table.size() == i;
+        if (this.table != null) {
+            assert this.table.size() == i;
             try {
-                table.addUnique(taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
-            } catch (RowSpaceExceededException e) {
-                table = null;
+                this.table.addUnique(this.taildef.newEntry(row.bytes(), this.rowdef.primaryKeyLength, true));
+            } catch (final RowSpaceExceededException e) {
+                this.table = null;
             }
-            if (abandonTable()) table = null;
+            if (abandonTable()) this.table = null;
         }
-        file.add(row.bytes(), 0);
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        this.file.add(row.bytes(), 0);
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
     }
 
     public synchronized void addUnique(final List<Entry> rows) throws IOException, RowSpaceExceededException {
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        for (Entry entry: rows) {
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        for (final Entry entry: rows) {
             try {
                 addUnique(entry);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 if (this.table == null) throw e;
-                table = null;
+                this.table = null;
                 addUnique(entry);
             }
         }
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
     }
 
     /**
-     * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException
      * remove double-entries from the table
      * this process calls the underlying removeDoubles() method from the table index
-     * and 
-     * @throws  
+     * and
+     * @throws
      */
     public synchronized List<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         final List<RowCollection> report = new ArrayList<RowCollection>();
         RowSet rows;
         final TreeSet<Long> d = new TreeSet<Long>();
-        final byte[] b = new byte[rowdef.objectsize];
+        final byte[] b = new byte[this.rowdef.objectsize];
         Row.Entry inconsistentEntry;
         // iterate over all entries that have inconsistent index references
         long lastlog = System.currentTimeMillis();
         List<long[]> doubles;
         try {
-            doubles = index.removeDoubles();
-        } catch (RowSpaceExceededException e) {
+            doubles = this.index.removeDoubles();
+        } catch (final RowSpaceExceededException e) {
             if (this.table == null) throw e;
-            table = null;
-            doubles = index.removeDoubles();
+            this.table = null;
+            doubles = this.index.removeDoubles();
         }
         for (final long[] is: doubles) {
             // 'is' is the set of all indexes, that have the same reference
             // we collect that entries now here
             rows = new RowSet(this.rowdef, is.length);
             for (final long L : is) {
-                assert (int) L < file.size() : "L.intValue() = " + (int) L + ", file.size = " + file.size(); // prevent ooBounds Exception
+                assert (int) L < this.file.size() : "L.intValue() = " + (int) L + ", file.size = " + this.file.size(); // prevent ooBounds Exception
                 d.add(L);
-                if ((int) L >= file.size()) continue; // prevent IndexOutOfBoundsException
-                file.get((int) L, b, 0); // TODO: fix IndexOutOfBoundsException here
-                inconsistentEntry = rowdef.newEntry(b);
+                if ((int) L >= this.file.size()) continue; // prevent IndexOutOfBoundsException
+                this.file.get((int) L, b, 0); // TODO: fix IndexOutOfBoundsException here
+                inconsistentEntry = this.rowdef.newEntry(b);
                 try {
                     rows.addUnique(inconsistentEntry);
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     if (this.table == null) throw e;
                     this.table = null;
                     rows.addUnique(inconsistentEntry);
@@ -417,16 +418,16 @@ public class Table implements Index, Iterable<Row.Entry> {
         while (!d.isEmpty()) {
             s = d.last();
             d.remove(s);
-            this.removeInFile(s.intValue());
+            removeInFile(s.intValue());
             if (System.currentTimeMillis() - lastlog > 30000) {
-                Log.logInfo("TABLE", "removing " + d.size() + " entries in " + this.filename());
+                Log.logInfo("TABLE", "removing " + d.size() + " entries in " + filename());
                 lastlog = System.currentTimeMillis();
             }
         }
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         return report;
     }
-    
+
     public void close() {
         if (this.file != null) this.file.close();
         this.file = null;
@@ -435,10 +436,10 @@ public class Table implements Index, Iterable<Row.Entry> {
         if (this.index != null) this.index.close();
         this.index = null;
     }
-    
+
     @Override
     protected void finalize() {
-        if (this.file != null) this.close();
+        if (this.file != null) close();
     }
 
     public String filename() {
@@ -446,42 +447,42 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public Entry get(final byte[] key) throws IOException {
-        if (file == null || index == null) return null;
+        if (this.file == null || this.index == null) return null;
         Entry e = get0(key);
         if (e != null && this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes())) return e;
         synchronized (this) {
-            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
-            assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+            assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
             e = get0(key);
             assert e == null || this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes());
             return e;
         }
     }
-    
+
     private Entry get0(final byte[] key) throws IOException {
-    	if (file == null || index == null) return null;
-        final int i = (int) index.get(key);
+    	if (this.file == null || this.index == null) return null;
+        final int i = (int) this.index.get(key);
         if (i == -1) return null;
-        final byte[] b = new byte[rowdef.objectsize];
-        if (table == null) {
+        final byte[] b = new byte[this.rowdef.objectsize];
+        if (this.table == null) {
             // read row from the file
-            file.get(i, b, 0);
+            this.file.get(i, b, 0);
         } else {
             // construct the row using the copy in RAM
-            final Row.Entry v = table.get(i, false);
+            final Row.Entry v = this.table.get(i, false);
             assert v != null;
             if (v == null) return null;
-            assert key.length == rowdef.primaryKeyLength;
+            assert key.length == this.rowdef.primaryKeyLength;
             System.arraycopy(key, 0, b, 0, key.length);
-            System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, rowdef.objectsize - rowdef.primaryKeyLength);
+            System.arraycopy(v.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
         }
-        return rowdef.newEntry(b);
+        return this.rowdef.newEntry(b);
     }
 
-    public Map<byte[], Row.Entry> get(Collection<byte[]> keys) throws IOException, InterruptedException {
-        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(this.row().objectOrder);
+    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys) throws IOException, InterruptedException {
+        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         Row.Entry entry;
-        for (byte[] key: keys) {
+        for (final byte[] key: keys) {
             entry = get(key);
             if (entry != null) map.put(key, entry);
         }
@@ -489,99 +490,99 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public boolean has(final byte[] key) {
-        if (index == null) return false;
-        return index.has(key);
+        if (this.index == null) return false;
+        return this.index.has(key);
     }
 
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        return index.keys(up, firstKey);
+        return this.index.keys(up, firstKey);
     }
 
     public synchronized Entry replace(final Entry row) throws IOException, RowSpaceExceededException {
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         assert row != null;
         assert row.bytes() != null;
         if ((row == null) || (row.bytes() == null)) return null;
-        final int i = (int) index.get(row.getPrimaryKeyBytes());
+        final int i = (int) this.index.get(row.getPrimaryKeyBytes());
         if (i == -1) {
             try {
                 addUnique(row);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 if (this.table == null) throw e;
                 this.table = null;
                 addUnique(row);
             }
             return null;
         }
-        
-        final byte[] b = new byte[rowdef.objectsize];
-        if (table == null) {
+
+        final byte[] b = new byte[this.rowdef.objectsize];
+        if (this.table == null) {
             // read old value
-            file.get(i, b, 0);
+            this.file.get(i, b, 0);
             // write new value
-            file.put(i, row.bytes(), 0);
+            this.file.put(i, row.bytes(), 0);
         } else {
             // read old value
-            final Row.Entry v = table.get(i, false);
+            final Row.Entry v = this.table.get(i, false);
             assert v != null;
-            System.arraycopy(row.getPrimaryKeyBytes(), 0, b, 0, rowdef.primaryKeyLength);
-            System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, rowdef.objectsize - rowdef.primaryKeyLength);
+            System.arraycopy(row.getPrimaryKeyBytes(), 0, b, 0, this.rowdef.primaryKeyLength);
+            System.arraycopy(v.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
             // write new value
             try {
-                table.set(i, taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
-            } catch (RowSpaceExceededException e) {
-                table = null;
+                this.table.set(i, this.taildef.newEntry(row.bytes(), this.rowdef.primaryKeyLength, true));
+            } catch (final RowSpaceExceededException e) {
+                this.table = null;
             }
-            if (abandonTable()) table = null;
-            file.put(i, row.bytes(), 0);
+            if (abandonTable()) this.table = null;
+            this.file.put(i, row.bytes(), 0);
         }
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         // return old value
-        return rowdef.newEntry(b);
+        return this.rowdef.newEntry(b);
     }
-    
+
     /**
      * Adds the row to the index. The row is identified by the primary key of the row.
      * @param row a index row
-     * @return true if this set did _not_ already contain the given row. 
+     * @return true if this set did _not_ already contain the given row.
      * @throws IOException
      * @throws RowSpaceExceededException
      */
     public synchronized boolean put(final Entry row) throws IOException, RowSpaceExceededException {
-        assert file == null || file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size() + ", file = " + this.filename();
+        assert this.file == null || this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size() + ", file = " + filename();
         assert row != null;
         assert row.bytes() != null;
-        if (file == null || row == null || row.bytes() == null) return true;
-        final int i = (int) index.get(row.getPrimaryKeyBytes());
+        if (this.file == null || row == null || row.bytes() == null) return true;
+        final int i = (int) this.index.get(row.getPrimaryKeyBytes());
         if (i == -1) {
             try {
                 addUnique(row);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 if (this.table == null) throw e;
                 this.table = null;
                 addUnique(row);
             }
             return true;
         }
-        
-        if (table == null) {
+
+        if (this.table == null) {
             // write new value
-            file.put(i, row.bytes(), 0);
+            this.file.put(i, row.bytes(), 0);
         } else {
             // write new value
             try {
-                table.set(i, taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
-            } catch (RowSpaceExceededException e) {
-                table = null;
+                this.table.set(i, this.taildef.newEntry(row.bytes(), this.rowdef.primaryKeyLength, true));
+            } catch (final RowSpaceExceededException e) {
+                this.table = null;
             }
-            if (abandonTable()) table = null;
-            file.put(i, row.bytes(), 0);
+            if (abandonTable()) this.table = null;
+            this.file.put(i, row.bytes(), 0);
         }
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         return false;
     }
 
@@ -593,11 +594,11 @@ public class Table implements Index, Iterable<Row.Entry> {
      * remove one entry from the file
      * @param i an index position within the file (not a byte position)
      * @throws IOException
-     * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException
      */
     private void removeInFile(final int i) throws IOException, RowSpaceExceededException {
         assert i >= 0;
-        
+
         final byte[] p = new byte[this.rowdef.objectsize];
         if (this.table == null) {
             if (i == this.index.size() - 1) {
@@ -616,169 +617,169 @@ public class Table implements Index, Iterable<Row.Entry> {
                 }
             }
         } else {
-            if (i == index.size() - 1) {
+            if (i == this.index.size() - 1) {
                 // special handling if the entry is the last entry in the file
-                table.removeRow(i, false);
-                file.cleanLast();
+                this.table.removeRow(i, false);
+                this.file.cleanLast();
             } else {
                 // switch values
-                final Row.Entry te = table.removeOne();
+                final Row.Entry te = this.table.removeOne();
                 try {
-                    table.set(i, te);
-                } catch (RowSpaceExceededException e) {
-                    table = null;
+                    this.table.set(i, te);
+                } catch (final RowSpaceExceededException e) {
+                    this.table = null;
                 }
 
-                while (file.size() > 0) {
-                    file.cleanLast(p, 0);
-                    final Row.Entry lr = rowdef.newEntry(p);
+                while (this.file.size() > 0) {
+                    this.file.cleanLast(p, 0);
+                    final Row.Entry lr = this.rowdef.newEntry(p);
                     if (lr == null) {
                         // in case that p is not well-formed lr may be null
                         // drop table copy because that becomes too complicated here
-                        table.clear();
-                        table = null;
+                        this.table.clear();
+                        this.table = null;
                         continue;
                     }
-                    file.put(i, p, 0);
-                    index.put(lr.getPrimaryKeyBytes(), i);
+                    this.file.put(i, p, 0);
+                    this.index.put(lr.getPrimaryKeyBytes(), i);
                     break;
                 }
             }
         }
     }
-    
+
     public boolean delete(final byte[] key) throws IOException {
         return remove(key) != null;
     }
-    
+
     public synchronized Entry remove(final byte[] key) throws IOException {
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
-        assert key.length == rowdef.primaryKeyLength;
-        final int i = (int) index.get(key);
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+        assert key.length == this.rowdef.primaryKeyLength;
+        final int i = (int) this.index.get(key);
         if (i == -1) return null; // nothing to do
-        
+
         // prepare result
-        final byte[] b = new byte[rowdef.objectsize];
-        final byte[] p = new byte[rowdef.objectsize];
-        final int sb = index.size();
+        final byte[] b = new byte[this.rowdef.objectsize];
+        final byte[] p = new byte[this.rowdef.objectsize];
+        final int sb = this.index.size();
         int ix;
-        assert i < index.size();
-        if (table == null) {
-            if (i == index.size() - 1) {
+        assert i < this.index.size();
+        if (this.table == null) {
+            if (i == this.index.size() - 1) {
                 // element is at last entry position
-                ix = (int) index.remove(key);
-                assert index.size() < i + 1 : "index.size() = " + index.size() + ", i = " + i;
+                ix = (int) this.index.remove(key);
+                assert this.index.size() < i + 1 : "index.size() = " + this.index.size() + ", i = " + i;
                 assert ix == i;
-                file.cleanLast(b, 0);
+                this.file.cleanLast(b, 0);
             } else {
                 // remove entry from index
-                assert i < index.size() - 1 : "index.size() = " + index.size() + ", i = " + i;
-                ix = (int) index.remove(key);
-                assert i < index.size() : "index.size() = " + index.size() + ", i = " + i;
+                assert i < this.index.size() - 1 : "index.size() = " + this.index.size() + ", i = " + i;
+                ix = (int) this.index.remove(key);
+                assert i < this.index.size() : "index.size() = " + this.index.size() + ", i = " + i;
                 assert ix == i;
-                
+
                 // read element that shall be removed
-                file.get(i, b, 0);
-                
+                this.file.get(i, b, 0);
+
                 // fill the gap with value from last entry in file
-                file.cleanLast(p, 0);
-                file.put(i, p, 0);
-                final byte[] k = new byte[rowdef.primaryKeyLength];
-                System.arraycopy(p, 0, k, 0, rowdef.primaryKeyLength);
+                this.file.cleanLast(p, 0);
+                this.file.put(i, p, 0);
+                final byte[] k = new byte[this.rowdef.primaryKeyLength];
+                System.arraycopy(p, 0, k, 0, this.rowdef.primaryKeyLength);
                 try {
-                    index.put(k, i);
-                } catch (RowSpaceExceededException e) {
+                    this.index.put(k, i);
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                     throw new IOException("RowSpaceExceededException: " + e.getMessage());
                 }
             }
-            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         } else {
             // get result value from the table copy, so we don't need to read it from the file
-            final Row.Entry v = table.get(i, false);
+            final Row.Entry v = this.table.get(i, false);
             System.arraycopy(key, 0, b, 0, key.length);
-            System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, taildef.objectsize);
-            
-            if (i == index.size() - 1) {
+            System.arraycopy(v.bytes(), 0, b, this.rowdef.primaryKeyLength, this.taildef.objectsize);
+
+            if (i == this.index.size() - 1) {
                 // special handling if the entry is the last entry in the file
-                ix = (int) index.remove(key);
-                assert index.size() < i + 1  : "index.size() = " + index.size() + ", i = " + i;
+                ix = (int) this.index.remove(key);
+                assert this.index.size() < i + 1  : "index.size() = " + this.index.size() + ", i = " + i;
                 assert ix == i;
-                table.removeRow(i, false);
-                file.cleanLast();
+                this.table.removeRow(i, false);
+                this.file.cleanLast();
             } else {
                 // remove entry from index
-                ix = (int) index.remove(key);
-                assert i < index.size() : "index.size() = " + index.size() + ", i = " + i;
+                ix = (int) this.index.remove(key);
+                assert i < this.index.size() : "index.size() = " + this.index.size() + ", i = " + i;
                 assert ix == i;
 
                 // switch values:
                 // remove last entry from the file copy to fill it in the gap
-                final Row.Entry te = table.removeOne();
+                final Row.Entry te = this.table.removeOne();
                 // fill the gap in file copy
                 try {
-                    table.set(i, te);
-                } catch (RowSpaceExceededException e) {
+                    this.table.set(i, te);
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
-                    table = null;
+                    this.table = null;
                 }
 
                 // move entry from last entry in file to gap position
-                file.cleanLast(p, 0);
-                file.put(i, p, 0);
+                this.file.cleanLast(p, 0);
+                this.file.put(i, p, 0);
                 // set new index for moved entry in index
-                final Row.Entry lr = rowdef.newEntry(p);
+                final Row.Entry lr = this.rowdef.newEntry(p);
                 try {
-                    index.put(lr.getPrimaryKeyBytes(), i);
-                } catch (RowSpaceExceededException e) {
-                    table = null;
+                    this.index.put(lr.getPrimaryKeyBytes(), i);
+                } catch (final RowSpaceExceededException e) {
+                    this.table = null;
                     throw new IOException("RowSpaceExceededException: " + e.getMessage());
                 }
             }
-            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-            assert table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+            assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+            assert this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         }
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
-        assert index.size() + 1 == sb : "index.size() = " + index.size() + ", sb = " + sb;
-        return rowdef.newEntry(b);
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+        assert this.index.size() + 1 == sb : "index.size() = " + this.index.size() + ", sb = " + sb;
+        return this.rowdef.newEntry(b);
     }
 
     public synchronized Entry removeOne() throws IOException {
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
-        final byte[] le = new byte[rowdef.objectsize];
-        long fsb = file.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
+        final byte[] le = new byte[this.rowdef.objectsize];
+        final long fsb = this.file.size();
         assert fsb != 0 : "file.size() = " + fsb;
-        file.cleanLast(le, 0);
-        assert file.size() < fsb : "file.size() = " + file.size();
-        final Row.Entry lr = rowdef.newEntry(le);
+        this.file.cleanLast(le, 0);
+        assert this.file.size() < fsb : "file.size() = " + this.file.size();
+        final Row.Entry lr = this.rowdef.newEntry(le);
         assert lr != null;
         assert lr.getPrimaryKeyBytes() != null;
-        final int is = index.size();
-        assert index.has(lr.getPrimaryKeyBytes());
-        final int i = (int) index.remove(lr.getPrimaryKeyBytes());
-        assert i < 0 || index.size() < is : "index.size() = " + index.size() + ", is = " + is;
+        final int is = this.index.size();
+        assert this.index.has(lr.getPrimaryKeyBytes());
+        final int i = (int) this.index.remove(lr.getPrimaryKeyBytes());
+        assert i < 0 || this.index.size() < is : "index.size() = " + this.index.size() + ", is = " + is;
         assert i >= 0;
-        if (table != null) {
-            int tsb = table.size();
-            table.removeOne();
-            assert table.size() < tsb : "table.size() = " + table.size() + ", tsb = " + tsb;
+        if (this.table != null) {
+            final int tsb = this.table.size();
+            this.table.removeOne();
+            assert this.table.size() < tsb : "table.size() = " + this.table.size() + ", tsb = " + tsb;
         }
-        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
+        assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
+        assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         return lr;
     }
-    
+
     public List<Row.Entry> top(int count) throws IOException {
-        ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
-        if ((file == null) || (index == null)) return list;
-        long i = file.size() - 1;
+        final ArrayList<Row.Entry> list = new ArrayList<Row.Entry>();
+        if ((this.file == null) || (this.index == null)) return list;
+        long i = this.file.size() - 1;
         while (count > 0 && i >= 0) {
-            byte[] b = new byte[rowdef.objectsize];
-            file.get(i, b, 0);
-            list.add(rowdef.newEntry(b));
+            final byte[] b = new byte[this.rowdef.objectsize];
+            this.file.get(i, b, 0);
+            list.add(this.rowdef.newEntry(b));
             i--;
             count--;
         }
@@ -786,11 +787,11 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public synchronized void clear() throws IOException {
-        final File f = file.filename();
+        final File f = this.file.filename();
         this.file.close();
         this.file = null;
         FileUtils.deletedelete(f);
-        
+
         // make new file
         FileOutputStream fos = null;
         try {
@@ -800,12 +801,12 @@ public class Table implements Index, Iterable<Row.Entry> {
             Log.logSevere("Table", "", e);
         }
         if (fos != null) try { fos.close(); } catch (final IOException e) {}
-        
-        this.file = new BufferedRecords(new Records(f, rowdef.objectsize), this.buffersize);
-        
+
+        this.file = new BufferedRecords(new Records(f, this.rowdef.objectsize), this.buffersize);
+
         // initialize index and copy table
-        table = (table == null) ? null : new RowSet(taildef);
-        index.clear();        
+        this.table = (this.table == null) ? null : new RowSet(this.taildef);
+        this.index.clear();
     }
 
     public Row row() {
@@ -813,17 +814,17 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     public int size() {
-        return index.size();
+        return this.index.size();
     }
-    
+
     public boolean isEmpty() {
-        return index.isEmpty();
+        return this.index.isEmpty();
     }
-    
+
     public Iterator<Entry> iterator() {
         try {
             return rows();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
@@ -837,45 +838,45 @@ public class Table implements Index, Iterable<Row.Entry> {
         Iterator<Row.Entry> i;
         int idx;
         byte[] key;
-        
+
         public rowIteratorNoOrder() {
             // don't use the ChunkIterator here because it may create too many open files during string load
             //ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
-            i = index.iterator();
+            this.i = Table.this.index.iterator();
         }
-        
-        public CloneableIterator<Entry> clone(Object modifier) {
+
+        public CloneableIterator<Entry> clone(final Object modifier) {
             return new rowIteratorNoOrder();
         }
-        
+
         public boolean hasNext() {
-            return i != null && i.hasNext();
+            return this.i != null && this.i.hasNext();
         }
-        
+
         public Entry next() {
-            Row.Entry entry = i.next();
+            final Row.Entry entry = this.i.next();
             if (entry == null) return null;
-            key = entry.getPrimaryKeyBytes();
-            if (key == null) return null;
-            idx = (int) entry.getColLong(1);
+            this.key = entry.getPrimaryKeyBytes();
+            if (this.key == null) return null;
+            this.idx = (int) entry.getColLong(1);
             try {
-                return get(key);
-            } catch (IOException e) {
+                return get(this.key);
+            } catch (final IOException e) {
                 return null;
             }
         }
-        
+
         public void remove() {
-            if (key != null) {
+            if (this.key != null) {
                 try {
-                    removeInFile(idx);
-                } catch (IOException e) {
-                } catch (RowSpaceExceededException e) {
+                    removeInFile(this.idx);
+                } catch (final IOException e) {
+                } catch (final RowSpaceExceededException e) {
                 }
-                i.remove();
+                this.i.remove();
             }
         }
-        
+
     }
 
     public synchronized CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
@@ -883,58 +884,58 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     private class rowIterator implements CloneableIterator<Entry> {
-        private Iterator<byte[]> i;
-        private boolean up;
-        private byte[] fk;
+        private final Iterator<byte[]> i;
+        private final boolean up;
+        private final byte[] fk;
         private int c;
-        
+
         private rowIterator(final boolean up, final byte[] firstKey) {
             this.up = up;
             this.fk = firstKey;
-            this.i  = index.keys(up, firstKey);
+            this.i  = Table.this.index.keys(up, firstKey);
             this.c = -1;
         }
-        
+
         public CloneableIterator<Entry> clone(final Object modifier) {
-            return new rowIterator(up, fk);
+            return new rowIterator(this.up, this.fk);
         }
 
         public boolean hasNext() {
-            return i.hasNext();
+            return this.i.hasNext();
         }
 
         public Entry next() {
-            final byte[] k = i.next();
+            final byte[] k = this.i.next();
             assert k != null;
             if (k == null) return null;
-            this.c = (int) index.get(k);
+            this.c = (int) Table.this.index.get(k);
             if (this.c < 0) throw new ConcurrentModificationException(); // this should only happen if the table was modified during the iteration
-            final byte[] b = new byte[rowdef.objectsize];
-            if (table == null) {
+            final byte[] b = new byte[Table.this.rowdef.objectsize];
+            if (Table.this.table == null) {
                 // read from file
                 try {
-                    file.get(this.c, b, 0);
+                    Table.this.file.get(this.c, b, 0);
                 } catch (final IOException e) {
                     Log.logSevere("Table", "", e);
                     return null;
                 }
             } else {
                 // compose from table and key
-                final Row.Entry v = table.get(this.c, false);
+                final Row.Entry v = Table.this.table.get(this.c, false);
                 assert v != null;
                 if (v == null) return null;
-                System.arraycopy(k, 0, b, 0, rowdef.primaryKeyLength);
-                System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, taildef.objectsize);
+                System.arraycopy(k, 0, b, 0, Table.this.rowdef.primaryKeyLength);
+                System.arraycopy(v.bytes(), 0, b, Table.this.rowdef.primaryKeyLength, Table.this.taildef.objectsize);
             }
-            return rowdef.newEntry(b);
+            return Table.this.rowdef.newEntry(b);
         }
 
         public void remove() {
             throw new UnsupportedOperationException("no remove in Table.rowIterator");
         }
-        
+
     }
-    
+
     private static byte[] testWord(final char c) {
         return new byte[]{(byte) c, 32, 32, 32};
     }
@@ -944,7 +945,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         for (int i = 0; i < letters; i++) p = p + ((char) (('A') + i));
         return permutations(p);
     }
-    
+
     private static String[] permutations(final String source) {
         if (source.length() == 0) return new String[0];
         if (source.length() == 1) return new String[]{source};
@@ -975,18 +976,18 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
         return tt;
     }
-    
+
     private static int countElements(final Table t) {
         int count = 0;
-        for (Row.Entry row: t) {
+        for (final Row.Entry row: t) {
             count++;
             if (row == null) System.out.println("ERROR! null element found");
-            // else System.out.println("counted element: " + new                                                    
-            // String(n.getKey()));                                                                                 
+            // else System.out.println("counted element: " + new
+            // String(n.getKey()));
         }
         return count;
     }
-    
+
     public static void bigtest(final int elements, final File testFile, final boolean useTailCache, final boolean exceed134217727) {
         System.out.println("starting big test with " + elements + " elements:");
         final long start = System.currentTimeMillis();
@@ -1003,14 +1004,14 @@ public class Table implements Index, Iterable<Row.Entry> {
                     System.out.println("wrong size for " + s[i] + ": count = " + count + ", size() = " + tt.size());
                 }
                 tt.close();
-                for (int j = 0; j < s.length; j++) {
+                for (final String element : s) {
                     tt = testTable(testFile, s[i], useTailCache, exceed134217727);
                     // delete by permutation j
-                    for (int elt = 0; elt < s[j].length(); elt++) {
-                        tt.remove(testWord(s[j].charAt(elt)));
+                    for (int elt = 0; elt < element.length(); elt++) {
+                        tt.remove(testWord(element.charAt(elt)));
                         count = countElements(tt);
                         if (count != tt.size()) {
-                            System.out.println("ERROR! wrong size for probe tree " + s[i] + "; probe delete " + s[j] + "; position " + elt + "; count = " + count + ", size() = " + tt.size());
+                            System.out.println("ERROR! wrong size for probe tree " + s[i] + "; probe delete " + element + "; position " + elt + "; count = " + count + ", size() = " + tt.size());
                         }
                     }
                     tt.close();
@@ -1022,12 +1023,12 @@ public class Table implements Index, Iterable<Row.Entry> {
             System.out.println("TERMINATED");
         }
     }
-    
+
     public void print() throws IOException {
         System.out.println("PRINTOUT of table, length=" + size());
         Entry row;
         byte[] key;
-        CloneableIterator<byte[]> i = keys(true, null);
+        final CloneableIterator<byte[]> i = keys(true, null);
         while (i.hasNext()) {
             System.out.print("row " + i + ": ");
             key = i.next();

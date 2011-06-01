@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -35,6 +35,7 @@ import java.util.concurrent.Semaphore;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -43,7 +44,6 @@ import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteArray;
-import net.yacy.kelondro.index.Row;
 
 
 public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable, Comparable<WordReferenceVars>, Comparator<WordReferenceVars> {
@@ -54,7 +54,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	public static final WordReferenceVars poison = new WordReferenceVars();
 	private static int cores = Runtime.getRuntime().availableProcessors();
 	public static final byte[] default_language = UTF8.getBytes("uk");
-	
+
     public Bitfield flags;
     public long lastModified;
     public byte[] language;
@@ -67,7 +67,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                wordsintext, wordsintitle;
     private final ConcurrentLinkedQueue<Integer> positions;
     public double termFrequency;
-    
+
     public WordReferenceVars(
             final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
@@ -76,7 +76,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      hitcount,      // how often appears this word in the text
             final int      wordcount,     // total number of words
             final int      phrasecount,   // total number of phrases
-            final ConcurrentLinkedQueue<Integer> ps,       // positions of words that are joined into the reference
+            final ConcurrentLinkedQueue<Integer> ps, // positions of words that are joined into the reference
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
@@ -102,7 +102,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.lother = outlinksOther;
         this.phrasesintext = phrasecount;
         this.positions = new ConcurrentLinkedQueue<Integer>();
-        for (Integer i: ps) this.positions.add(i);
+        if (ps.size() > 0) for (final Integer i: ps) this.positions.add(i);
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
         this.urlcomps = urlComps;
@@ -112,7 +112,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintitle = titleLength;
         this.termFrequency = termfrequency;
     }
-    
+
     public WordReferenceVars(final WordReference e) {
         this.flags = e.flags();
         //this.freshUntil = e.freshUntil();
@@ -125,7 +125,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.lother = e.lother();
         this.phrasesintext = e.phrasesintext();
         this.positions = new ConcurrentLinkedQueue<Integer>();
-        for (Integer i: e.positions()) this.positions.add(i);
+        if (e.positions().size() > 0) for (final Integer i: e.positions()) this.positions.add(i);
         this.posinphrase = e.posinphrase();
         this.posofphrase = e.posofphrase();
         this.urlcomps = e.urlcomps();
@@ -135,7 +135,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintitle = e.wordsintitle();
         this.termFrequency = e.termFrequency();
     }
-    
+
     /**
      * initializer for special poison object
      */
@@ -159,7 +159,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintitle = 0;
         this.termFrequency = 0.0;
     }
-    
+
     @Override
     public WordReferenceVars clone() {
         final WordReferenceVars c = new WordReferenceVars(
@@ -183,7 +183,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.termFrequency);
         return c;
     }
-    
+
     public void join(final WordReferenceVars v) {
         // combine the distance
         this.positions.addAll(v.positions);
@@ -196,71 +196,71 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     }
 
     public Bitfield flags() {
-        return flags;
+        return this.flags;
     }
 
     public byte[] getLanguage() {
-        return language;
+        return this.language;
     }
 
     public char getType() {
-        return type;
+        return this.type;
     }
 
     public int hitcount() {
-        return hitcount;
+        return this.hitcount;
     }
 
     public long lastModified() {
-        return lastModified;
+        return this.lastModified;
     }
 
     public int llocal() {
-        return llocal;
+        return this.llocal;
     }
 
     public int lother() {
-        return lother;
+        return this.lother;
     }
 
     public int phrasesintext() {
-        return phrasesintext;
+        return this.phrasesintext;
     }
 
     public int posinphrase() {
-        return posinphrase;
+        return this.posinphrase;
     }
 
     public Collection<Integer> positions() {
         return this.positions;
     }
-    
+
     public int posofphrase() {
-        return posofphrase;
+        return this.posofphrase;
     }
-    
+
     public WordReferenceRow toRowEntry() {
         return new WordReferenceRow(
-                urlHash,
-                urllength,     // byte-length of complete URL
-                urlcomps,      // number of path components
-                wordsintitle,  // length of description/length (longer are better?)
-                hitcount,      // how often appears this word in the text
-                wordsintext,   // total number of words
-                phrasesintext, // total number of phrases
-                positions.isEmpty() ? 1 : positions.iterator().next(), // position of word in all words
-                posinphrase,   // position of word in its phrase
-                posofphrase,   // number of the phrase where word appears
-                lastModified,  // last-modified time of the document where word appears
+                this.urlHash,
+                this.urllength,     // byte-length of complete URL
+                this.urlcomps,      // number of path components
+                this.wordsintitle,  // length of description/length (longer are better?)
+                this.hitcount,      // how often appears this word in the text
+                this.wordsintext,   // total number of words
+                this.phrasesintext, // total number of phrases
+                this.positions.isEmpty() ? 1 : this.positions.iterator().next(), // position of word in all words
+                this.posinphrase,   // position of word in its phrase
+                this.posofphrase,   // number of the phrase where word appears
+                this.lastModified,  // last-modified time of the document where word appears
                 System.currentTimeMillis(),    // update time;
-                language,      // (guessed) language of document
-                type,          // type of document
-                llocal,        // outlinks to same domain
-                lother,        // outlinks to other domain
-                flags          // attributes to the url and to the word according the url
+                this.language,      // (guessed) language of document
+                this.type,          // type of document
+                this.llocal,        // outlinks to same domain
+                this.lother,        // outlinks to other domain
+                this.flags          // attributes to the url and to the word according the url
         );
     }
-    
+
     public Entry toKelondroEntry() {
         return toRowEntry().toKelondroEntry();
     }
@@ -270,40 +270,40 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     }
 
     public byte[] urlhash() {
-        return urlHash;
+        return this.urlHash;
     }
 
     public String hosthash() {
-        if (hostHash != null) return hostHash;
-        hostHash = ASCII.String(urlHash, 6, 6);
-        return hostHash;
+        if (this.hostHash != null) return this.hostHash;
+        this.hostHash = ASCII.String(this.urlHash, 6, 6);
+        return this.hostHash;
     }
 
     public int urlcomps() {
-        return urlcomps;
+        return this.urlcomps;
     }
 
     public int urllength() {
-        return urllength;
+        return this.urllength;
     }
 
     public int virtualAge() {
-        return virtualAge;
+        return this.virtualAge;
     }
 
     public int wordsintext() {
-        return wordsintext;
+        return this.wordsintext;
     }
 
     public int wordsintitle() {
-        return wordsintitle;
+        return this.wordsintitle;
     }
 
     public double termFrequency() {
-        if (this.termFrequency == 0.0) this.termFrequency = (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
+        if (this.termFrequency == 0.0) this.termFrequency = (((double) hitcount()) / ((double) (wordsintext() + wordsintitle() + 1)));
         return this.termFrequency;
     }
-    
+
     public final void min(final WordReferenceVars other) {
     	if (other == null) return;
         int v;
@@ -325,7 +325,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.wordsintitle > (v = other.wordsintitle)) this.wordsintitle = v;
         if (this.termFrequency > (d = other.termFrequency)) this.termFrequency = d;
     }
-    
+
     public final void max(final WordReferenceVars other) {
     	if (other == null) return;
         int v;
@@ -350,10 +350,10 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 
     public void join(final Reference r) {
         // joins two entries into one entry
-        
+
         // combine the distance
-        WordReference oe = (WordReference) r; 
-        for (Integer i: r.positions()) this.positions.add(i);
+        final WordReference oe = (WordReference) r;
+        for (final Integer i: r.positions()) this.positions.add(i);
         this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
         this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
 
@@ -367,80 +367,80 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof WordReferenceVars)) return false;
-        WordReferenceVars other = (WordReferenceVars) obj;
+        final WordReferenceVars other = (WordReferenceVars) obj;
         return Base64Order.enhancedCoder.equal(this.urlHash, other.urlHash);
     }
-    
+
     @Override
     public int hashCode() {
         return ByteArray.hashCode(this.urlHash);
     }
-    
+
     public int compareTo(final WordReferenceVars o) {
         return Base64Order.enhancedCoder.compare(this.urlHash, o.urlhash());
     }
 
-    public int compare(WordReferenceVars o1, WordReferenceVars o2) {
+    public int compare(final WordReferenceVars o1, final WordReferenceVars o2) {
         return o1.compareTo(o2);
     }
-    
+
     public void addPosition(final int position) {
         this.positions.add(position);
     }
-    
+
     /**
      * transform a reference container into a stream of parsed entries
      * @param container
      * @return a blocking queue filled with WordReferenceVars that is still filled when the object is returned
      */
-    
-    public static BlockingQueue<WordReferenceVars> transform(ReferenceContainer<WordReference> container) {
-    	LinkedBlockingQueue<WordReferenceVars> vars = new LinkedBlockingQueue<WordReferenceVars>();
+
+    public static BlockingQueue<WordReferenceVars> transform(final ReferenceContainer<WordReference> container) {
+    	final LinkedBlockingQueue<WordReferenceVars> vars = new LinkedBlockingQueue<WordReferenceVars>();
     	if (container.size() <= 100) {
     	    // transform without concurrency to omit thread creation overhead
-    	    for (Row.Entry entry: container) try {
+    	    for (final Row.Entry entry: container) try {
                 vars.put(new WordReferenceVars(new WordReferenceRow(entry)));
-            } catch (InterruptedException e) {}
+            } catch (final InterruptedException e) {}
             try {
                 vars.put(WordReferenceVars.poison);
-            } catch (InterruptedException e) {}
+            } catch (final InterruptedException e) {}
             return vars;
     	}
-    	Thread distributor = new TransformDistributor(container, vars);
+    	final Thread distributor = new TransformDistributor(container, vars);
     	distributor.start();
-    	
+
     	// return the resulting queue while the processing queues are still working
     	return vars;
     }
-    
+
     public static class TransformDistributor extends Thread {
 
     	ReferenceContainer<WordReference> container;
     	BlockingQueue<WordReferenceVars> out;
-    	
-    	public TransformDistributor(ReferenceContainer<WordReference> container, BlockingQueue<WordReferenceVars> out) {
+
+    	public TransformDistributor(final ReferenceContainer<WordReference> container, final BlockingQueue<WordReferenceVars> out) {
     		this.container = container;
     		this.out = out;
     	}
-    	
+
         @Override
     	public void run() {
         	// start the transformation threads
-        	int cores0 = Math.min(cores, container.size() / 100) + 1;
-        	Semaphore termination = new Semaphore(cores0);
-        	TransformWorker[] worker = new TransformWorker[cores0];
+        	final int cores0 = Math.min(cores, this.container.size() / 100) + 1;
+        	final Semaphore termination = new Semaphore(cores0);
+        	final TransformWorker[] worker = new TransformWorker[cores0];
         	for (int i = 0; i < cores0; i++) {
-        		worker[i] = new TransformWorker(out, termination);
+        		worker[i] = new TransformWorker(this.out, termination);
         		worker[i].start();
         	}
-        	
+
         	// fill the queue
-        	int p = container.size();
+        	int p = this.container.size();
     		while (p > 0) {
     			p--;
-				worker[p % cores0].add(container.get(p, false));
+				worker[p % cores0].add(this.container.get(p, false));
             }
-        	
+
         	// insert poison to stop the queues
         	for (int i = 0; i < cores0; i++) worker[i].add(WordReferenceRow.poisonRowEntry);
     	}
@@ -451,32 +451,32 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	BlockingQueue<Row.Entry> in;
     	BlockingQueue<WordReferenceVars> out;
     	Semaphore termination;
-    	
-    	public TransformWorker(final BlockingQueue<WordReferenceVars> out, Semaphore termination) {
+
+    	public TransformWorker(final BlockingQueue<WordReferenceVars> out, final Semaphore termination) {
     		this.in = new LinkedBlockingQueue<Row.Entry>();
     		this.out = out;
     		this.termination = termination;
     	}
-    	
-    	public void add(Row.Entry entry) {
+
+    	public void add(final Row.Entry entry) {
     		try {
-				in.put(entry);
-			} catch (InterruptedException e) {
+				this.in.put(entry);
+			} catch (final InterruptedException e) {
 			}
     	}
-    	
+
         @Override
     	public void run() {
         	Row.Entry entry;
     		try {
-				while ((entry = in.take()) != WordReferenceRow.poisonRowEntry) out.put(new WordReferenceVars(new WordReferenceRow(entry)));
-			} catch (InterruptedException e) {}
+				while ((entry = this.in.take()) != WordReferenceRow.poisonRowEntry) this.out.put(new WordReferenceVars(new WordReferenceRow(entry)));
+			} catch (final InterruptedException e) {}
 
 			// insert poison to signal the termination to next queue
 	    	try {
 	    		this.termination.acquire();
 	    		if (this.termination.availablePermits() == 0) this.out.put(WordReferenceVars.poison);
-	    	} catch (InterruptedException e) {}
+	    	} catch (final InterruptedException e) {}
     	}
     }
 

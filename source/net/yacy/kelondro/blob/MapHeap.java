@@ -289,7 +289,13 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
             cache.clear();
         } 
         
-        Map<String, String> map;
+        // if we have the entry in the cache then just return that
+        Map<String, String> map = cache.get(key);
+        if (map != null) return map;
+        
+        // in all other cases we must look into the cache again within
+        // a synchronization in case that the entry was not in the cache but stored
+        // there while another process has taken it from the file system
         if (storeCache) {
             synchronized (this) {
                 map = cache.get(key);

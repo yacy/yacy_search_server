@@ -40,10 +40,14 @@ import net.yacy.repository.BlacklistFile;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import java.util.List;
+import java.util.regex.Pattern;
 
 // The Naming of the functions is a bit strange...
 
 public class ListManager {
+    
+    private final static Pattern commaPattern = Pattern.compile(",");
+    
     public static Switchboard switchboard = null;
     public static File listsPath = null;
 
@@ -143,7 +147,7 @@ public class ListManager {
         ArrayList<String> list;
 
         if (string != null && string.length() > 0) {
-            list = new ArrayList<String>(Arrays.asList(string.split(",")));
+            list = new ArrayList<String>(Arrays.asList(commaPattern.split(string, 0)));
         } else {
             list = new ArrayList<String>();
         }
@@ -161,7 +165,7 @@ public class ListManager {
         HashSet<String> set;
         
         if (string != null) {
-            set = new HashSet<String>(Arrays.asList(string.split(",")));
+            set = new HashSet<String>(Arrays.asList(commaPattern.split(string, 0)));
         } else {
             set = new HashSet<String>();
         }
@@ -180,7 +184,7 @@ public class ListManager {
         Vector<String> v;
 
         if (string != null) {
-            v = new Vector<String>(Arrays.asList(string.split(",")));
+            v = new Vector<String>(Arrays.asList(commaPattern.split(string, 0)));
         } else {
             v = new Vector<String>();
         }

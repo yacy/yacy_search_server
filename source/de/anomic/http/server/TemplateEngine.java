@@ -1,4 +1,4 @@
-//TemplateEngine.java 
+//TemplateEngine.java
 //-------------------------------------
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
@@ -58,6 +58,7 @@ import java.io.PushbackInputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -143,9 +144,9 @@ public final class TemplateEngine {
 
     public final static byte[] iOpen  = {hashChar, pcChar};
     public final static byte[] iClose = {pcChar, hashChar};
-    
+
     public final static byte[] ul = "_".getBytes();
-    
+
     /**
      * transfer until a specified pattern is found; everything but the pattern is transfered so far
      * the function returns true, if the pattern is found
@@ -172,7 +173,7 @@ public final class TemplateEngine {
         }
         return false;
     }
-    
+
     private final static boolean transferUntil(final PushbackInputStream i, final OutputStream o, final byte p) throws IOException {
         int b;
         while ((b = i.read()) > 0) {
@@ -195,7 +196,7 @@ public final class TemplateEngine {
      */
     private final static byte[] writeTemplate(final InputStream in, final OutputStream out, final Map<String, String> pattern, final byte[] dflt, final byte[] prefix) throws IOException {
         final PushbackInputStream pis = new PushbackInputStream(in, 100);
-        ByteArrayOutputStream keyStream = new ByteArrayOutputStream(512);
+        final ByteArrayOutputStream keyStream = new ByteArrayOutputStream(512);
         byte[] key;
         byte[] multi_key;
         byte[] replacement;
@@ -204,7 +205,7 @@ public final class TemplateEngine {
         while (transferUntil(pis, out, hashChar)) {
             bb = pis.read();
             keyStream.reset();
-            
+
             // #{
             if ((bb & 0xFF) == lcbr) { //multi
                 if (transferUntil(pis, keyStream, mClose)) { //close tag
@@ -250,12 +251,12 @@ public final class TemplateEngine {
                         Log.logSevere("TEMPLATE", "No Close Key found for #{"+UTF8.String(multi_key)+"}#"); //prefix here?
                     }
                 }
-                
+
             // #(
             } else if ((bb & 0xFF) == lrbr) { //alternative
                 int others=0;
                 final ByteBuffer text= new ByteBuffer();
-                
+
                 transferUntil(pis, keyStream, aClose);
                 key = keyStream.toByteArray(); //Caution: Key does not contain prefix
 
@@ -303,7 +304,7 @@ public final class TemplateEngine {
                             if ((bb & 0xFF) == lrbr){
                                 transferUntil(pis, keyStream, aClose);
 
-                                //reached the end. output last string.                                
+                                //reached the end. output last string.
                                 if (java.util.Arrays.equals(keyStream.toByteArray(),appendBytes(slashChar, key, null,null))) {
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
                                     //this maybe the wrong, but its the last
@@ -352,7 +353,7 @@ public final class TemplateEngine {
                         }
                     }//while
                 }//if(byName) (else branch)
-                
+
             // #[
             } else if ((bb & 0xFF) == lbr) { //normal
                 if (transferUntil(pis, keyStream, pClose)) {
@@ -360,9 +361,11 @@ public final class TemplateEngine {
                     key = keyStream.toByteArray();
                     final String patternKey = getPatternKey(prefix, key);
                     replacement = replacePattern(patternKey, pattern, dflt); //replace
-                    structure.append(UTF8.getBytes("<")).append(key).append(UTF8.getBytes(" type=\"normal\">\n"));
+                    structure.append(ASCII.getBytes("<")).append(key)
+                            .append(ASCII.getBytes(" type=\"normal\">\n"));
                     structure.append(replacement);
-                    structure.append(UTF8.getBytes("</")).append(key).append(UTF8.getBytes(">\n"));
+                    structure.append(ASCII.getBytes("</")).append(key)
+                            .append(ASCII.getBytes(">\n"));
 
                     FileUtils.copy(replacement, out);
                 } else {
@@ -370,10 +373,10 @@ public final class TemplateEngine {
                     FileUtils.copy(pis, out);
                     return structure.getBytes();
                 }
-                
+
             // #%
             } else if ((bb & 0xFF) == pcChar) { //include
-                final ByteBuffer include = new ByteBuffer();                
+                final ByteBuffer include = new ByteBuffer();
                 keyStream.reset(); //reset stream
                 if(transferUntil(pis, keyStream, iClose)){
                     byte[] filename = keyStream.toByteArray();
@@ -395,7 +398,7 @@ public final class TemplateEngine {
                                 include.append(UTF8.getBytes(line)).append(UTF8.getBytes(de.anomic.server.serverCore.CRLF_STRING));
                             }
                         } catch (final IOException e) {
-                            //file not found?                    
+                            //file not found?
                             Log.logSevere("FILEHANDLER","Include Error with file " + UTF8.String(filename) + ": " + e.getMessage());
                         } finally {
                             if (br != null) try { br.close(); br=null; } catch (final Exception e) {}
@@ -406,7 +409,7 @@ public final class TemplateEngine {
                         structure.append(UTF8.getBytes("</fileinclude>\n"));
                     }
                 }
-                
+
             // # - no special character. This is simply a '#' without meaning
             } else { //no match, but a single hash (output # + bb)
                 out.write(hashChar);
@@ -439,10 +442,10 @@ public final class TemplateEngine {
     private final static byte[] newPrefix(final byte[] oldPrefix, final byte[] key) {
         final ByteBuffer newPrefix = new ByteBuffer(oldPrefix.length + key.length + 1);
         newPrefix.append(oldPrefix).append(key).append(ul);
-        byte[] result = newPrefix.getBytes();
+        final byte[] result = newPrefix.getBytes();
         try {
             newPrefix.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
         return result;
@@ -453,7 +456,7 @@ public final class TemplateEngine {
         newPrefix.append(oldPrefix).append(multi_key).append(ul).append(UTF8.getBytes(Integer.toString(i))).append(ul);
         try {
             newPrefix.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
         return newPrefix.getBytes();
@@ -467,12 +470,12 @@ public final class TemplateEngine {
         } finally {
             try {
                 patternKey.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
         }
     }
-    
+
     private final static byte[] appendBytes(final byte[] b1, final byte[] b2, final byte[] b3, final byte[] b4) {
         final ByteBuffer byteArray = new ByteBuffer(b1.length + b2.length + (b3 == null ? 0 : b3.length) + (b4 == null ? 0 : b4.length));
         byteArray.append(b1).append(b2);
@@ -481,7 +484,7 @@ public final class TemplateEngine {
         final byte[] result = byteArray.getBytes();
         try {
             byteArray.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
         return result;

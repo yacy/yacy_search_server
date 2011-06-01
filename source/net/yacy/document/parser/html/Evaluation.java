@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -38,6 +38,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.storage.ClusteredScoreMap;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 /*
@@ -58,7 +59,7 @@ import net.yacy.kelondro.logging.Log;
 public class Evaluation {
 
     private static List<Model> models = new ArrayList<Model>(); // the list of all models that shall be applied
-    
+
     public static enum Element {
         text,
         bodyclass,
@@ -74,42 +75,42 @@ public class Evaluation {
         apath,
         comment;
     }
-    
+
     private static class Attribute {
         public String subject; // the name of the attribute
         public Pattern pattern; // the pattern that must match for that attribute
-        public Attribute(String subject, Pattern pattern) {
+        public Attribute(final String subject, final Pattern pattern) {
             this.subject = subject;
             this.pattern = pattern;
         }
     }
-    
+
     private static class Model {
-        
-        private String modelName;
-        private Map<Element, List<Attribute>> elementMatcher; // a mapping from element-names to lists of Attributes
-        
-        public Model(File patternProperties) throws IOException {
+
+        private final String modelName;
+        private final Map<Element, List<Attribute>> elementMatcher; // a mapping from element-names to lists of Attributes
+
+        public Model(final File patternProperties) throws IOException {
             if (!patternProperties.exists()) throw new IOException("File does not exist: " + patternProperties);
-            String name = patternProperties.getName();
+            final String name = patternProperties.getName();
             if (!name.startsWith("parser.")) throw new IOException("file name must start with 'parser.': " + name);
             if (!name.endsWith(".properties")) throw new IOException("file name must end with '.properties': " + name);
             this.modelName = name.substring(7, name.length() - 11);
             if (this.modelName.length() < 1) throw new IOException("file name too short: " + name);
-            
+
             // load the file
-            Properties p = new Properties();
+            final Properties p = new Properties();
             p.load(new FileReader(patternProperties));
-            
+
             // iterate through the properties and generate method patterns
-            elementMatcher = new HashMap<Element, List<Attribute>>();
+            this.elementMatcher = new HashMap<Element, List<Attribute>>();
             String subject, elementName;
             Element element;
             Pattern pattern;
-            for (Map.Entry<Object, Object> entry: p.entrySet()) {
-                String k = (String) entry.getKey();
-                String v = (String) entry.getValue();
-                int w = k.indexOf('_');
+            for (final Map.Entry<Object, Object> entry: p.entrySet()) {
+                final String k = (String) entry.getKey();
+                final String v = (String) entry.getValue();
+                final int w = k.indexOf('_');
                 if (w < 0) {
                     Log.logSevere("PatternAnalysis", "wrong configuration in " + name + ": separator '_' missing: " + k);
                     continue;
@@ -118,7 +119,7 @@ public class Evaluation {
                 elementName = k.substring(w + 1);
                 try {
                     pattern = Pattern.compile(v);
-                } catch (PatternSyntaxException e) {
+                } catch (final PatternSyntaxException e) {
                     Log.logSevere("PatternAnalysis", "bad pattern in " + name + ": '" + k + "=" + v + "' - " + e.getDescription());
                     continue;
                 }
@@ -135,35 +136,35 @@ public class Evaluation {
                 attributeList.add(new Attribute(subject, pattern));
             }
         }
-        
+
         public String getName() {
             return this.modelName;
         }
-        
+
         /**
          * match elementContents for a specific elementName
          * @param element - the name of the element as Element enum type
          * @param content - the content of the element
          * @return a list of subject names that match with the element
          */
-        public ClusteredScoreMap<String> match(Element element, String content) {
-            ClusteredScoreMap<String> subjects = new ClusteredScoreMap<String>();
-            List<Attribute> patterns = this.elementMatcher.get(element);
+        public ClusteredScoreMap<String> match(final Element element, final CharSequence content) {
+            final ClusteredScoreMap<String> subjects = new ClusteredScoreMap<String>();
+            final List<Attribute> patterns = this.elementMatcher.get(element);
             if (patterns == null) return subjects;
-            for (Attribute attribute: patterns) {
+            for (final Attribute attribute: patterns) {
                 if (attribute.pattern.matcher(content).matches()) subjects.inc(attribute.subject);
             }
             return subjects;
         }
-        
+
     }
 
     private final Map<String, ClusteredScoreMap<String>> modelMap; // a map from model names to attribute scores
-    
+
     public Evaluation() {
         this.modelMap = new HashMap<String, ClusteredScoreMap<String>>();
     }
-    
+
     /**
      * produce all model names
      * @return a set of model names
@@ -171,14 +172,14 @@ public class Evaluation {
     public Set<String> getModelNames() {
         return this.modelMap.keySet();
     }
-    
+
     /**
      * calculate the scores for a model
      * the scores is a attribute/count map which count how often a specific attribute was found
      * @param modelName
      * @return
      */
-    public ClusteredScoreMap<String> getScores(String modelName) {
+    public ClusteredScoreMap<String> getScores(final String modelName) {
         return this.modelMap.get(modelName);
     }
 
@@ -187,23 +188,23 @@ public class Evaluation {
      * @param f
      * @throws IOException
      */
-    public static void add(File f) throws IOException {
-        Model pattern = new Model(f);
+    public static void add(final File f) throws IOException {
+        final Model pattern = new Model(f);
         models.add(pattern);
     }
-    
+
     /**
      * match some content within a specific element
      * this will increase statistic counters for models if a model matches
      * @param element - the element where a matching is made
      * @param content - the content of the element which shall be matched
      */
-    public void match(Element element, String content) {
+    public void match(final Element element, final CharSequence content) {
         if (models.isEmpty()) return; // fast return if this feature is not used
         ClusteredScoreMap<String> newScores, oldScores;
-        for (Model pattern: models) {
+        for (final Model pattern: models) {
             newScores = pattern.match(element, content);
-            oldScores = this.getScores(pattern.getName());
+            oldScores = getScores(pattern.getName());
             if (oldScores == null) {
                 oldScores = new ClusteredScoreMap<String>();
                 this.modelMap.put(pattern.getName(), oldScores);
@@ -211,10 +212,12 @@ public class Evaluation {
             oldScores.inc(newScores);
         }
     }
-    
-    public void match(Element element, char[] content) {
+
+    public void match(final Element element, final char[] content) {
         if (models.isEmpty()) return; // fast return if this feature is not used
-        match(element, new String(content));
+        if (MemoryControl.request(content.length * 2, false)) {
+            match(element, new String(content) /*Segment(content, 0, content.length)*/);
+        }
     }
-    
+
 }

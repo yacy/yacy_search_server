@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -38,35 +38,40 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
 // this is a new implementation of this parser idiom using multiple documents as result set
 
 public class zipParser extends AbstractParser implements Parser {
 
-    public zipParser() {        
+    public zipParser() {
         super("ZIP File Parser");
-        SUPPORTED_EXTENSIONS.add("zip");
-        SUPPORTED_EXTENSIONS.add("jar");
-        SUPPORTED_EXTENSIONS.add("apk");    // Android package
-        SUPPORTED_MIME_TYPES.add("application/zip");
-        SUPPORTED_MIME_TYPES.add("application/x-zip");
-        SUPPORTED_MIME_TYPES.add("application/x-zip-compressed");
-        SUPPORTED_MIME_TYPES.add("application/x-compress");
-        SUPPORTED_MIME_TYPES.add("application/x-compressed");
-        SUPPORTED_MIME_TYPES.add("multipart/x-zip");
-        SUPPORTED_MIME_TYPES.add("application/java-archive");
-        SUPPORTED_MIME_TYPES.add("application/vnd.android.package-archive");
+        this.SUPPORTED_EXTENSIONS.add("zip");
+        this.SUPPORTED_EXTENSIONS.add("jar");
+        this.SUPPORTED_EXTENSIONS.add("apk");    // Android package
+        this.SUPPORTED_MIME_TYPES.add("application/zip");
+        this.SUPPORTED_MIME_TYPES.add("application/x-zip");
+        this.SUPPORTED_MIME_TYPES.add("application/x-zip-compressed");
+        this.SUPPORTED_MIME_TYPES.add("application/x-compress");
+        this.SUPPORTED_MIME_TYPES.add("application/x-compressed");
+        this.SUPPORTED_MIME_TYPES.add("multipart/x-zip");
+        this.SUPPORTED_MIME_TYPES.add("application/java-archive");
+        this.SUPPORTED_MIME_TYPES.add("application/vnd.android.package-archive");
     }
-    
+
     public Document[] parse(final MultiProtocolURI url, final String mimeType,
             final String charset, final InputStream source)
             throws Parser.Failure, InterruptedException {
-        Document[] docs = null;
+        // check memory for parser
+        if (!MemoryControl.request(200 * 1024 * 1024, true))
+            throw new Parser.Failure("Not enough Memory available for zip parser: " + MemoryControl.available(), url);
+
+         Document[] docs = null;
         final List<Document> docacc = new ArrayList<Document>();
         ZipEntry entry;
-        final ZipInputStream zis = new ZipInputStream(source);                      
+        final ZipInputStream zis = new ZipInputStream(source);
         File tmp = null;
-        
+
         // loop through the elements in the zip file and parse every single file inside
         while (true) {
             try {
@@ -74,22 +79,24 @@ public class zipParser extends AbstractParser implements Parser {
                 entry = zis.getNextEntry();
                 if (entry == null) break;
                 if (entry.isDirectory() || entry.getSize() <= 0) continue;
-                final String name = entry.getName();                
+                final String name = entry.getName();
                 final int idx = name.lastIndexOf('.');
                 final String mime = TextParser.mimeOf((idx >= 0) ? name.substring(idx + 1) : "");
                 try {
                     tmp = FileUtils.createTempFile(this.getClass(), name);
-                    FileUtils.copy(zis, tmp, entry.getSize());  
-                    docs = TextParser.parseSource(MultiProtocolURI.newURL(url, "#" + name), mime, null, tmp);
+                    FileUtils.copy(zis, tmp, entry.getSize());
+                    final MultiProtocolURI virtualURL = MultiProtocolURI.newURL(url, "#" + name);
+                    //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
+                    docs = TextParser.parseSource(virtualURL, mime, null, tmp);
                     if (docs == null) continue;
                     for (final Document d: docs) docacc.add(d);
                 } catch (final Parser.Failure e) {
-                    log.logWarning("ZIP parser entry " + name + ": " + e.getMessage());
+                    this.log.logWarning("ZIP parser entry " + name + ": " + e.getMessage());
                 } finally {
                     if (tmp != null) FileUtils.deletedelete(tmp);
                 }
-            } catch (IOException e) {
-                log.logWarning("ZIP parser:" + e.getMessage());
+            } catch (final IOException e) {
+                this.log.logWarning("ZIP parser:" + e.getMessage());
                 break;
             }
         }

@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import net.yacy.cora.document.UTF8;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -42,12 +42,12 @@ public class ServerSideIncludes {
     public static void writeSSI(final ByteBuffer in, final OutputStream out, final String authorization, final String requesthost) throws IOException {
         writeSSI(in, 0, out, authorization, requesthost);
     }
-    
+
     public static void writeSSI(final ByteBuffer in, int off, final OutputStream out, final String authorization, final String requesthost) throws IOException {
-        int p = in.indexOf(UTF8.getBytes("<!--#"), off);
+        int p = in.indexOf(ASCII.getBytes("<!--#"), off);
         int q;
         while (p >= 0) {
-            q = in.indexOf(UTF8.getBytes("-->"), p + 10);
+            q = in.indexOf(ASCII.getBytes("-->"), p + 10);
             if (out instanceof ChunkedOutputStream) {
                 ((ChunkedOutputStream) out).write(in, off, p - off);
             } else {
@@ -55,7 +55,7 @@ public class ServerSideIncludes {
             }
             parseSSI(in, p, out, authorization, requesthost);
             off = q + 3;
-            p = in.indexOf(UTF8.getBytes("<!--#"), off);
+            p = in.indexOf(ASCII.getBytes("<!--#"), off);
         }
         if (out instanceof ChunkedOutputStream) {
             ((ChunkedOutputStream) out).write(in, off, in.length() - off);
@@ -63,17 +63,17 @@ public class ServerSideIncludes {
             out.write(in.getBytes(off, in.length() - off));
         }
     }
-    
+
     private static void parseSSI(final ByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost) {
-        if (in.startsWith(UTF8.getBytes("<!--#include virtual=\""), off)) {
-            final int q = in.indexOf(UTF8.getBytes("\""), off + 22);
+        if (in.startsWith(ASCII.getBytes("<!--#include virtual=\""), off)) {
+            final int q = in.indexOf(ASCII.getBytes("\""), off + 22);
             if (q > 0) {
                 final String path = in.toString(off + 22, q - off - 22);
                 writeContent(path, out, authorization, requesthost);
             }
         }
     }
-    
+
     private static void writeContent(String path, final OutputStream out, final String authorization, final String requesthost) {
         // check if there are arguments in path string
         String args = "";
@@ -82,7 +82,7 @@ public class ServerSideIncludes {
             args = path.substring(argpos + 1);
             path = path.substring(0, argpos);
         }
-        
+
         // set up virtual connection properties to call httpdFileHander.doGet()
         final HashMap<String, Object> conProp = new HashMap<String, Object>();
         final RequestHeader header = new RequestHeader(HTTPDemon.reverseMappingCache);

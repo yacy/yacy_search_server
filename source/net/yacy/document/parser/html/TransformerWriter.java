@@ -96,10 +96,10 @@ public final class TransformerWriter extends Writer {
         this.inStyle      = false;
         this.binaryUnsuspect = true;
         this.passbyIfBinarySuspect = passbyIfBinarySuspect;
-        
+
         if (this.outStream != null) {
             this.out = new OutputStreamWriter(this.outStream,(charSet == null)?Charset.defaultCharset():charSet);
-        }        
+        }
     }
 
     public static char[] genTag0raw(final String tagname, final boolean opening, final char[] tagopts) {
@@ -118,7 +118,7 @@ public final class TransformerWriter extends Writer {
             final char[] result = bb.getChars();
             try {
 				bb.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 			    Log.logException(e);
 			}
             return result;
@@ -138,13 +138,13 @@ public final class TransformerWriter extends Writer {
             final char[] result = bb.getChars();
             try {
 				bb.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 			    Log.logException(e);
 			}
             return result;
     }
 
-    public static char[] genTag0(final String tagname, final Properties tagopts, final char quotechar) {   
+    public static char[] genTag0(final String tagname, final Properties tagopts, final char quotechar) {
             final char[] tagoptsx = (tagopts.isEmpty()) ? null : genOpts(tagopts, quotechar);
             final CharBuffer bb = new CharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
             bb.append((int)'<').append(tagname);
@@ -156,27 +156,27 @@ public final class TransformerWriter extends Writer {
             final char[] result = bb.getChars();
             try {
 				bb.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 			    Log.logException(e);
 			}
             return result;
     }
 
-    public static char[] genTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {  
+    public static char[] genTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
             final char[] gt0 = genTag0(tagname, tagopts, quotechar);
             final CharBuffer cb = new CharBuffer(gt0, gt0.length + text.length + tagname.length() + 3);
             cb.append(text).append((int)'<').append((int)'/').append(tagname).append((int)'>');
             final char[] result = cb.getChars();
             try {
 				cb.close();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 			    Log.logException(e);
 			}
             return result;
     }
 
     // a helper method for pretty-printing of properties for html tags
-    public static char[] genOpts(final Properties prop, final char quotechar) {   
+    public static char[] genOpts(final Properties prop, final char quotechar) {
             final Enumeration<?> e = prop.propertyNames();
             final CharBuffer bb = new CharBuffer(prop.size() * 40);
             String key;
@@ -184,7 +184,7 @@ public final class TransformerWriter extends Writer {
                 key = (String) e.nextElement();
                 bb.append(32).append(key).append((int)'=').append((int)quotechar);
                 bb.append(prop.getProperty(key));
-                bb.append((int)quotechar); 
+                bb.append((int)quotechar);
             }
             final char[] result;
             if (bb.length() > 0)
@@ -193,7 +193,7 @@ public final class TransformerWriter extends Writer {
             	result = bb.getChars();
             try {
 				bb.close();
-			} catch (IOException ex) {
+			} catch (final IOException ex) {
 			    Log.logException(ex);
 			}
             return result;
@@ -201,113 +201,115 @@ public final class TransformerWriter extends Writer {
 
     private char[] filterTag(final String tag, final boolean opening, final char[] content, final char quotechar) {
 //      System.out.println("FILTER1: filterTag=" + ((filterTag == null) ? "null" : filterTag) + ", tag=" + tag + ", opening=" + ((opening) ? "true" : "false") + ", content=" + UTF8.String(content)); // debug
-        if (filterTag == null) {
+        if (this.filterTag == null) {
             // we are not collection tag text
             if (tag == null) {
                 // and this is not a tag opener/closer
-                if (scraper != null) scraper.scrapeText(content, null);
-                if (transformer != null) return transformer.transformText(content);
+                if (this.scraper != null) this.scraper.scrapeText(content, null);
+                if (this.transformer != null) return this.transformer.transformText(content);
                 return content;
             }
-            
+
             // we have a new tag
             if (opening) {
-                if ((scraper != null) && (scraper.isTag0(tag))) {
+                if ((this.scraper != null) && (this.scraper.isTag0(tag))) {
                     // this single tag is collected at once here
                 	final CharBuffer charBuffer = new CharBuffer(content);
-                    scraper.scrapeTag0(tag, charBuffer.propParser());
+                    this.scraper.scrapeTag0(tag, charBuffer.propParser());
                     try {
 						charBuffer.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 						// TODO Auto-generated catch block
 					    Log.logException(e);
 					}
                 }
-                if ((transformer != null) && (transformer.isTag0(tag))) {
+                if ((this.transformer != null) && (this.transformer.isTag0(tag))) {
                     // this single tag is collected at once here
                 	final CharBuffer scb = new CharBuffer(content);
                 	try {
-                		return transformer.transformTag0(tag, scb.propParser(), quotechar);
+                		return this.transformer.transformTag0(tag, scb.propParser(), quotechar);
                 	} finally {
                 		try {
 							scb.close();
-						} catch (IOException e) {
+						} catch (final IOException e) {
 						    Log.logException(e);
 						}
                 	}
-                } else if (((scraper != null) && (scraper.isTag1(tag))) ||
-                           ((transformer != null) && (transformer.isTag1(tag)))) {
+                } else if (((this.scraper != null) && (this.scraper.isTag1(tag))) ||
+                           ((this.transformer != null) && (this.transformer.isTag1(tag)))) {
                     // ok, start collecting
-                    filterTag = tag;
+                    this.filterTag = tag;
                     final CharBuffer scb = new CharBuffer(content);
-                    filterOpts = scb.propParser();
+                    this.filterOpts = scb.propParser();
                     try {
 						scb.close();
-					} catch (IOException e) {
+					} catch (final IOException e) {
 					    Log.logException(e);
 					}
-                    if (filterCont == null) filterCont = new CharBuffer(Math.max(100, content.length)); else filterCont.reset();
+                    if (this.filterCont == null) this.filterCont = new CharBuffer(Math.max(100, content.length)); else this.filterCont.reset();
                     return new char[0];
                 } else {
                      // we ignore that thing and return it again
                      return genTag0raw(tag, true, content);
                 }
             }
-            
+
             // we ignore that thing and return it again
             return genTag0raw(tag, false, content);
-            
+
         }
-        
+
         // we are collection tag text for the tag 'filterTag'
         if (tag == null) {
             // go on collecting content
-            if (scraper != null) scraper.scrapeText(content, filterTag);
-            if (transformer != null) {
-                filterCont.append(transformer.transformText(content));
-            } else {
-                filterCont.append(content);
-            }
+            if (this.scraper != null) this.scraper.scrapeText(content, this.filterTag);
+            try {
+                if (this.transformer != null) {
+                    this.filterCont.append(this.transformer.transformText(content));
+                } else {
+                    this.filterCont.append(content);
+                }
+            } catch (final OutOfMemoryError e) {}
             return new char[0];
         }
-        
+
         // it's a tag! which one?
-        if ((opening) || (!(tag.equalsIgnoreCase(filterTag)))) {
+        if ((opening) || (!(tag.equalsIgnoreCase(this.filterTag)))) {
             // this tag is not our concern. just add it
-            filterCont.append(genTag0raw(tag, opening, content));
+            this.filterCont.append(genTag0raw(tag, opening, content));
             return new char[0];
         }
-        
+
         // it's our closing tag! return complete result.
         char[] ret;
-        if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getChars());
-        if (transformer != null) {
-            ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getChars(), quotechar);
+        if (this.scraper != null) this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
+        if (this.transformer != null) {
+            ret = this.transformer.transformTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
         } else {
-            ret = genTag1(filterTag, filterOpts, filterCont.getChars(), quotechar);
+            ret = genTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
         }
-        filterTag = null;
-        filterOpts = null;
-        filterCont = null;
+        this.filterTag = null;
+        this.filterOpts = null;
+        this.filterCont = null;
         return ret;
     }
 
     private char[] filterFinalize(final char quotechar) {
-        if (filterTag == null) {
+        if (this.filterTag == null) {
             return new char[0];
         }
-        
+
         // it's our closing tag! return complete result.
         char[] ret;
-        if (scraper != null) scraper.scrapeTag1(filterTag, filterOpts, filterCont.getChars());
-        if (transformer != null) {
-            ret = transformer.transformTag1(filterTag, filterOpts, filterCont.getChars(), quotechar);
+        if (this.scraper != null) this.scraper.scrapeTag1(this.filterTag, this.filterOpts, this.filterCont.getChars());
+        if (this.transformer != null) {
+            ret = this.transformer.transformTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
         } else {
-            ret = genTag1(filterTag, filterOpts, filterCont.getChars(), quotechar);
+            ret = genTag1(this.filterTag, this.filterOpts, this.filterCont.getChars(), quotechar);
         }
-        filterTag = null;
-        filterOpts = null;
-        filterCont = null;
+        this.filterTag = null;
+        this.filterOpts = null;
+        this.filterCont = null;
         return ret;
     }
 
@@ -316,27 +318,27 @@ public final class TransformerWriter extends Writer {
 //      System.out.println("FILTER0: " + UTF8.String(in)); // debug
         // scan the string and parse structure
         if (in.length > 2 && in[0] == lb) {
-            
+
             // a tag
             String tag;
             int tagend;
             if (in[1] == '/') {
                 // a closing tag
                 tagend = tagEnd(in, 2);
-                tag = new String(in, 2, tagend - 2); 
+                tag = new String(in, 2, tagend - 2);
                 final char[] text = new char[in.length - tagend - 1];
                 System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
                 return filterTag(tag, false, text, quotechar);
             }
-            
+
             // an opening tag
             tagend = tagEnd(in, 1);
-            tag = new String(in, 1, tagend - 1);    
+            tag = new String(in, 1, tagend - 1);
             final char[] text = new char[in.length - tagend - 1];
             System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
             return filterTag(tag, true, text, quotechar);
         }
-        
+
         // a text
         return filterTag(null, true, in, quotechar);
     }
@@ -357,160 +359,160 @@ public final class TransformerWriter extends Writer {
     @Override
     public void write(final int c) throws IOException {
 //      System.out.println((char) c);
-        if ((binaryUnsuspect) && (binaryHint((char)c))) {
-            binaryUnsuspect = false;
-            if (passbyIfBinarySuspect) close();
+        if ((this.binaryUnsuspect) && (binaryHint((char)c))) {
+            this.binaryUnsuspect = false;
+            if (this.passbyIfBinarySuspect) close();
         }
 
-        if (binaryUnsuspect || !passbyIfBinarySuspect) {
+        if (this.binaryUnsuspect || !this.passbyIfBinarySuspect) {
             char[] filtered;
-            if (inSingleQuote) {
-                buffer.append(c);
-                if (c == singlequote) inSingleQuote = false;
+            if (this.inSingleQuote) {
+                this.buffer.append(c);
+                if (c == singlequote) this.inSingleQuote = false;
                 // check error cases
-                if ((c == rb) && (buffer.length() > 0 && buffer.charAt(0) == lb)) {
-                    inSingleQuote = false;
+                if ((c == rb) && (this.buffer.length() > 0 && this.buffer.charAt(0) == lb)) {
+                    this.inSingleQuote = false;
                     // the tag ends here. after filtering: pass on
-                    filtered = filterSentence(buffer.getChars(), singlequote);
-                    if (out != null) { out.write(filtered); }
+                    filtered = filterSentence(this.buffer.getChars(), singlequote);
+                    if (this.out != null) { this.out.write(filtered); }
                     // buffer = new serverByteBuffer();
-                    buffer.reset();
+                    this.buffer.reset();
                 }
-            } else if (inDoubleQuote) {
-                buffer.append(c);
-                if (c == doublequote) inDoubleQuote = false;
+            } else if (this.inDoubleQuote) {
+                this.buffer.append(c);
+                if (c == doublequote) this.inDoubleQuote = false;
                 // check error cases
-                if (c == rb && buffer.length() > 0 && buffer.charAt(0) == lb) {
-                    inDoubleQuote = false;
+                if (c == rb && this.buffer.length() > 0 && this.buffer.charAt(0) == lb) {
+                    this.inDoubleQuote = false;
                     // the tag ends here. after filtering: pass on
-                    filtered = filterSentence(buffer.getChars(), doublequote);
-                    if (out != null) out.write(filtered);
+                    filtered = filterSentence(this.buffer.getChars(), doublequote);
+                    if (this.out != null) this.out.write(filtered);
                     // buffer = new serverByteBuffer();
-                    buffer.reset();
+                    this.buffer.reset();
                 }
-            } else if (inComment) {
-                buffer.append(c);
+            } else if (this.inComment) {
+                this.buffer.append(c);
                 if (c == rb &&
-                    buffer.length() > 6 &&
-                    buffer.charAt(buffer.length() - 3) == dash) {
+                    this.buffer.length() > 6 &&
+                    this.buffer.charAt(this.buffer.length() - 3) == dash) {
                     // comment is at end
-                    inComment = false;
-                    char[] comment = buffer.getChars();
-                    if (scraper != null) scraper.scrapeComment(comment);
-                    if (out != null) out.write(comment);
+                    this.inComment = false;
+                    final char[] comment = this.buffer.getChars();
+                    if (this.scraper != null) this.scraper.scrapeComment(comment);
+                    if (this.out != null) this.out.write(comment);
                     // buffer = new serverByteBuffer();
-                    buffer.reset();
+                    this.buffer.reset();
                 }
-            } else if (inScript) {
-                buffer.append(c);
-                final int bufferLength = buffer.length();
+            } else if (this.inScript) {
+                this.buffer.append(c);
+                final int bufferLength = this.buffer.length();
                 if ((c == rb) && (bufferLength > 14) &&
-                    (buffer.charAt(bufferLength - 9) == lb) &&
-                    (buffer.charAt(bufferLength - 8) == '/') &&
-                    (buffer.charAt(bufferLength - 7) == 's') &&
-                    (buffer.charAt(bufferLength - 6) == 'c') &&
-                    (buffer.charAt(bufferLength - 5) == 'r') &&
-                    (buffer.charAt(bufferLength - 4) == 'i') &&
-                    (buffer.charAt(bufferLength - 3) == 'p') &&
-                    (buffer.charAt(bufferLength - 2) == 't')) {
+                    (this.buffer.charAt(bufferLength - 9) == lb) &&
+                    (this.buffer.charAt(bufferLength - 8) == '/') &&
+                    (this.buffer.charAt(bufferLength - 7) == 's') &&
+                    (this.buffer.charAt(bufferLength - 6) == 'c') &&
+                    (this.buffer.charAt(bufferLength - 5) == 'r') &&
+                    (this.buffer.charAt(bufferLength - 4) == 'i') &&
+                    (this.buffer.charAt(bufferLength - 3) == 'p') &&
+                    (this.buffer.charAt(bufferLength - 2) == 't')) {
                     // script is at end
-                    inScript = false;
-                    if (out != null) out.write(buffer.getChars());
+                    this.inScript = false;
+                    if (this.out != null) this.out.write(this.buffer.getChars());
                     // buffer = new serverByteBuffer();
-                    buffer.reset();
+                    this.buffer.reset();
                 }
-            } else if (inStyle) {
-                buffer.append(c);
-                final int bufferLength = buffer.length();
+            } else if (this.inStyle) {
+                this.buffer.append(c);
+                final int bufferLength = this.buffer.length();
                 if ((c == rb) && (bufferLength > 13) &&
-                    (buffer.charAt(bufferLength - 8) == lb) &&
-                    (buffer.charAt(bufferLength - 7) == '/') &&
-                    (buffer.charAt(bufferLength - 6) == 's') &&
-                    (buffer.charAt(bufferLength - 5) == 't') &&
-                    (buffer.charAt(bufferLength - 4) == 'y') &&
-                    (buffer.charAt(bufferLength - 3) == 'l') &&
-                    (buffer.charAt(bufferLength - 2) == 'e')) {
+                    (this.buffer.charAt(bufferLength - 8) == lb) &&
+                    (this.buffer.charAt(bufferLength - 7) == '/') &&
+                    (this.buffer.charAt(bufferLength - 6) == 's') &&
+                    (this.buffer.charAt(bufferLength - 5) == 't') &&
+                    (this.buffer.charAt(bufferLength - 4) == 'y') &&
+                    (this.buffer.charAt(bufferLength - 3) == 'l') &&
+                    (this.buffer.charAt(bufferLength - 2) == 'e')) {
                     // style is at end
-                    inStyle = false;
-                    if (out != null) out.write(buffer.getChars());
+                    this.inStyle = false;
+                    if (this.out != null) this.out.write(this.buffer.getChars());
                     // buffer = new serverByteBuffer();
-                    buffer.reset();
+                    this.buffer.reset();
                 }
             } else {
-                if (buffer.length() == 0) {
+                if (this.buffer.length() == 0) {
                     if (c == rb) {
                         // very strange error case; we just let it pass
-                        if (out != null) out.write(c);
+                        if (this.out != null) this.out.write(c);
                     } else {
-                        buffer.append(c);
+                        this.buffer.append(c);
                     }
-                } else if (buffer.length() > 0 && buffer.charAt(0) == lb) {
-                    if (c == singlequote) inSingleQuote = true;
-                    if (c == doublequote) inDoubleQuote = true;
+                } else if (this.buffer.length() > 0 && this.buffer.charAt(0) == lb) {
+                    if (c == singlequote) this.inSingleQuote = true;
+                    if (c == doublequote) this.inDoubleQuote = true;
                     // fill in tag text
-                    if ((buffer.length() >= 3) && (buffer.charAt(1) == excl) &&
-                        (buffer.charAt(2) == dash) && (c == dash)) {
+                    if ((this.buffer.length() >= 3) && (this.buffer.charAt(1) == excl) &&
+                        (this.buffer.charAt(2) == dash) && (c == dash)) {
                         // this is the start of a comment
-                        inComment = true;
-                        buffer.append(c);
-                    } else if ((buffer.length() >= 6) &&
-                               (buffer.charAt(1) == 's') &&
-                               (buffer.charAt(2) == 'c') &&
-                               (buffer.charAt(3) == 'r') &&
-                               (buffer.charAt(4) == 'i') &&
-                               (buffer.charAt(5) == 'p') &&
+                        this.inComment = true;
+                        this.buffer.append(c);
+                    } else if ((this.buffer.length() >= 6) &&
+                               (this.buffer.charAt(1) == 's') &&
+                               (this.buffer.charAt(2) == 'c') &&
+                               (this.buffer.charAt(3) == 'r') &&
+                               (this.buffer.charAt(4) == 'i') &&
+                               (this.buffer.charAt(5) == 'p') &&
                                              (c  == 't')) {
                         // this is the start of a javascript
-                        inScript = true;
-                        buffer.append(c);
-                    } else if ((buffer.length() >= 5) &&
-                            (buffer.charAt(1) == 's') &&
-                            (buffer.charAt(2) == 't') &&
-                            (buffer.charAt(3) == 'y') &&
-                            (buffer.charAt(4) == 'l') &&
+                        this.inScript = true;
+                        this.buffer.append(c);
+                    } else if ((this.buffer.length() >= 5) &&
+                            (this.buffer.charAt(1) == 's') &&
+                            (this.buffer.charAt(2) == 't') &&
+                            (this.buffer.charAt(3) == 'y') &&
+                            (this.buffer.charAt(4) == 'l') &&
                                           (c  == 'e')) {
                      // this is the start of a css-style
-                     inStyle = true;
-                     buffer.append(c);
+                     this.inStyle = true;
+                     this.buffer.append(c);
                     } else if (c == rb) {
-                        buffer.append(c);
+                        this.buffer.append(c);
                         // the tag ends here. after filtering: pass on
-                        filtered = filterSentence(buffer.getChars(), doublequote);
-                        if (out != null) out.write(filtered);
+                        filtered = filterSentence(this.buffer.getChars(), doublequote);
+                        if (this.out != null) this.out.write(filtered);
                         // buffer = new serverByteBuffer();
-                        buffer.reset();
+                        this.buffer.reset();
                     } else if (c == lb) {
                         // this is an error case
                         // we consider that there is one rb missing
-                        if (buffer.length() > 0) {
-                            filtered = filterSentence(buffer.getChars(), doublequote);
-                            if (out != null) out.write(filtered);
+                        if (this.buffer.length() > 0) {
+                            filtered = filterSentence(this.buffer.getChars(), doublequote);
+                            if (this.out != null) this.out.write(filtered);
                         }
                         // buffer = new serverByteBuffer();
-                        buffer.reset();
-                        buffer.append(c);
+                        this.buffer.reset();
+                        this.buffer.append(c);
                     } else {
-                        buffer.append(c);
+                        this.buffer.append(c);
                     }
                 } else {
                     // fill in plain text
                     if (c == lb) {
                         // the text ends here
-                        if (buffer.length() > 0) {
-                            filtered = filterSentence(buffer.getChars(), doublequote);
-                            if (out != null) out.write(filtered);
+                        if (this.buffer.length() > 0) {
+                            filtered = filterSentence(this.buffer.getChars(), doublequote);
+                            if (this.out != null) this.out.write(filtered);
                         }
                         // buffer = new serverByteBuffer();
-                        buffer.reset();
-                        buffer.append(c);
+                        this.buffer.reset();
+                        this.buffer.append(c);
                     } else {
                         // simply append
-                        buffer.append(c);
+                        this.buffer.append(c);
                     }
                 }
             }
         } else {
-            out.write(c);
+            this.out.write(c);
         }
     }
 
@@ -529,28 +531,28 @@ public final class TransformerWriter extends Writer {
         // we cannot flush the current string buffer to prevent that
         // the filter process is messed up
         // instead, we simply flush the underlying output stream
-        if (out != null) out.flush();
+        if (this.out != null) this.out.flush();
         // if you want to flush all, call close() at end of writing;
     }
 
     public void close() throws IOException {
-        final char quotechar = (inSingleQuote) ? singlequote : doublequote;
-        if (buffer != null) {
-            if (buffer.length() > 0) {
-                final char[] filtered = filterSentence(buffer.getChars(), quotechar);
-                if (out != null) out.write(filtered);
+        final char quotechar = (this.inSingleQuote) ? singlequote : doublequote;
+        if (this.buffer != null) {
+            if (this.buffer.length() > 0) {
+                final char[] filtered = filterSentence(this.buffer.getChars(), quotechar);
+                if (this.out != null) this.out.write(filtered);
             }
-            buffer = null;
+            this.buffer = null;
         }
         final char[] finalized = filterFinalize(quotechar);
-        if (out != null) {
-            if (finalized != null) out.write(finalized);
-            out.flush();
-            out.close();
+        if (this.out != null) {
+            if (finalized != null) this.out.write(finalized);
+            this.out.flush();
+            this.out.close();
         }
-        filterTag = null;
-        filterOpts = null;
-        filterCont = null;
+        this.filterTag = null;
+        this.filterOpts = null;
+        this.filterCont = null;
 //      if (scraper != null) {scraper.close(); scraper = null;}
 //      if (transformer != null) {transformer.close(); transformer = null;}
     }
@@ -573,11 +575,11 @@ public final class TransformerWriter extends Writer {
     }
 
     public boolean binarySuspect() {
-        return !binaryUnsuspect;
+        return !this.binaryUnsuspect;
     }
 
     public static void main(final String[] args) {
-        // takes one argument: a file name 
+        // takes one argument: a file name
         if (args.length != 1) return;
         // TODO: this does not work at the moment
         System.out.println("this does not work at the moment");
@@ -585,7 +587,7 @@ public final class TransformerWriter extends Writer {
         final char[] buffer = new char[512];
         try {
             final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost:8090"));
-            final Transformer transformer = new ContentTransformer();            
+            final Transformer transformer = new ContentTransformer();
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));
             final Writer os = new TransformerWriter(fos, UTF8.charset, scraper, transformer, false);
