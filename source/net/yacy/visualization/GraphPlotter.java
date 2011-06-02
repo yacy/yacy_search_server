@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -44,24 +44,24 @@ public class GraphPlotter {
 
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
-    
-    private Map<String, coordinate> points;
-    private Set<String> borders;
+
+    private final Map<String, coordinate> points;
+    private final Set<String> borders;
     private double leftmost, rightmost, topmost, bottommost;
-    
+
     public GraphPlotter() {
-        points = new HashMap<String, coordinate>();
-        borders = new HashSet<String>();
-        leftmost = 1.0;
-        rightmost = -1.0;
-        topmost = -1.0;
-        bottommost = 1.0;
+        this.points = new HashMap<String, coordinate>();
+        this.borders = new HashSet<String>();
+        this.leftmost = 1.0;
+        this.rightmost = -1.0;
+        this.topmost = -1.0;
+        this.bottommost = 1.0;
     }
-    
+
     public coordinate getPoint(final String name) {
-        return points.get(name);
+        return this.points.get(name);
     }
-    
+
     public coordinate[] getBorder(final String name) {
         final int p = name.indexOf("$");
         if (p < 0) return null;
@@ -70,28 +70,28 @@ public class GraphPlotter {
         if ((from == null) || (to == null)) return null;
         return new coordinate[] {from, to};
     }
-    
+
     public coordinate addPoint(final String name, final double x, final double y, final int layer) {
         final coordinate newc = new coordinate(x, y, layer);
-        final coordinate oldc = points.put(name, newc);
+        final coordinate oldc = this.points.put(name, newc);
         assert oldc == null; // all add shall be unique
-        if (x > rightmost) rightmost = x;
-        if (x < leftmost) leftmost = x;
-        if (y > topmost) topmost = y;
-        if (y < bottommost) bottommost = y;
+        if (x > this.rightmost) this.rightmost = x;
+        if (x < this.leftmost) this.leftmost = x;
+        if (y > this.topmost) this.topmost = y;
+        if (y < this.bottommost) this.bottommost = y;
         return newc;
     }
-    
+
     public boolean hasBorder(final String fromPoint, final String toPoint) {
-        return borders.contains(fromPoint + "-" + toPoint);
+        return this.borders.contains(fromPoint + "-" + toPoint);
     }
-    
+
     public void setBorder(final String fromPoint, final String toPoint) {
-        final coordinate from = points.get(fromPoint);
-        final coordinate to = points.get(toPoint);
+        final coordinate from = this.points.get(fromPoint);
+        final coordinate to = this.points.get(toPoint);
         assert from != null;
         assert to != null;
-        borders.add(fromPoint + "$" + toPoint);
+        this.borders.add(fromPoint + "$" + toPoint);
     }
 
     public static class coordinate {
@@ -107,10 +107,10 @@ public class GraphPlotter {
             this.layer = layer;
         }
     }
-    
+
     public void print() {
         // for debug purpose: print out all coordinates
-        final Iterator<Map.Entry<String, coordinate>> i = points.entrySet().iterator();
+        final Iterator<Map.Entry<String, coordinate>> i = this.points.entrySet().iterator();
         Map.Entry<String, coordinate> entry;
         String name;
         coordinate c;
@@ -120,12 +120,12 @@ public class GraphPlotter {
             c = entry.getValue();
             System.out.println("point(" + c.x + ", " + c.y + ", " + c.layer + ") [" + name + "]");
         }
-        final Iterator<String> j = borders.iterator();
+        final Iterator<String> j = this.borders.iterator();
         while (j.hasNext()) {
             System.out.println("border(" + j.next() + ")");
         }
     }
-    
+
     public RasterPlotter draw(
             final int width,
             final int height,
@@ -139,15 +139,14 @@ public class GraphPlotter {
             final String color_lineend,
             final String color_text
             ) {
-        RasterPlotter.DrawMode drawMode = RasterPlotter.DrawMode.MODE_SUB;
-        if (RasterPlotter.darkColor(color_back)) drawMode = RasterPlotter.DrawMode.MODE_ADD;
-        
+        final RasterPlotter.DrawMode drawMode = (RasterPlotter.darkColor(color_back)) ? RasterPlotter.DrawMode.MODE_ADD : RasterPlotter.DrawMode.MODE_SUB;
+
         final RasterPlotter image = new RasterPlotter(width, height, drawMode, color_back);
-        final double xfactor = ((rightmost - leftmost) == 0.0) ? 0.0 : (width - leftborder - rightborder) / (rightmost - leftmost);
-        final double yfactor = ((topmost - bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (topmost - bottommost);
-        
+        final double xfactor = ((this.rightmost - this.leftmost) == 0.0) ? 0.0 : (width - leftborder - rightborder) / (this.rightmost - this.leftmost);
+        final double yfactor = ((this.topmost - this.bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (this.topmost - this.bottommost);
+
         // draw dots and names
-        final Iterator<Map.Entry<String, coordinate>> i = points.entrySet().iterator();
+        final Iterator<Map.Entry<String, coordinate>> i = this.points.entrySet().iterator();
         Map.Entry<String, coordinate> entry;
         String name;
         coordinate c;
@@ -156,8 +155,8 @@ public class GraphPlotter {
             entry = i.next();
             name = entry.getKey();
             c = entry.getValue();
-            x = (xfactor == 0.0) ? width / 2 : (int) (leftborder + (c.x - leftmost) * xfactor);
-            y = (yfactor == 0.0) ? height / 2 : (int) (height - bottomborder - (c.y - bottommost) * yfactor);
+            x = (xfactor == 0.0) ? width / 2 : (int) (leftborder + (c.x - this.leftmost) * xfactor);
+            y = (yfactor == 0.0) ? height / 2 : (int) (height - bottomborder - (c.y - this.bottommost) * yfactor);
             image.setColor(color_dot);
             image.dot(x, y, 6, true, 100);
             image.setColor(color_text);
@@ -165,7 +164,7 @@ public class GraphPlotter {
         }
 
         // draw lines
-        final Iterator<String> j = borders.iterator();
+        final Iterator<String> j = this.borders.iterator();
         coordinate[] border;
         image.setColor(color_line);
         int x0, x1, y0, y1;
@@ -176,20 +175,20 @@ public class GraphPlotter {
                 x0 = width / 2;
                 x1 = width / 2;
             } else {
-                x0 = (int) (leftborder + (border[0].x - leftmost) * xfactor);
-                x1 = (int) (leftborder + (border[1].x - leftmost) * xfactor);
+                x0 = (int) (leftborder + (border[0].x - this.leftmost) * xfactor);
+                x1 = (int) (leftborder + (border[1].x - this.leftmost) * xfactor);
             }
             if (yfactor == 0.0) {
                 y0 = height / 2;
                 y1 = height / 2;
             } else {
-                y0 = (int) (height - bottomborder - (border[0].y - bottommost) * yfactor);
-                y1 = (int) (height - bottomborder - (border[1].y - bottommost) * yfactor);
+                y0 = (int) (height - bottomborder - (border[0].y - this.bottommost) * yfactor);
+                y1 = (int) (height - bottomborder - (border[1].y - this.bottommost) * yfactor);
             }
             // draw the line, with the dot at the beginning of the line
             image.lineDot(x1, y1, x0, y0, 3, 4, color_line, color_lineend);
         }
         return image;
     }
-    
+
 }
