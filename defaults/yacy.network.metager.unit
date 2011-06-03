@@ -1,0 +1,92 @@
+# Network definition file for the freeworld network
+# this is the default standard network for fresh YaCy Peers
+
+# -----------------------------------------------------------------#
+# for an explanation please see the file yacy.network.readme       #
+# this is a work in progress. disabled properties are not yet used #
+# -----------------------------------------------------------------#
+
+# define the name of the nework
+# this nickname is also used to identifiy network requests
+network.unit.name = freeworld
+
+# the visible name of the network
+network.unit.description = YaCy freeworld enhanced for MetaGer feed
+
+# definition of the content domain: possible values are:
+# global, local, any
+network.unit.domain = global
+
+# maximum search time for remote queries (milliseconds)
+network.unit.remotesearch.maxtime = 1000
+
+# maximum number of results per remote query
+network.unit.remotesearch.maxcount = 100
+
+# flag to switch on dht transmission
+# if the dht transmission is set to 'false' then for a global
+# query all targets are accessed
+network.unit.dht = true
+
+# the number of redundant target peers:
+# redundant peers get a copy of the original dht target information
+network.unit.dhtredundancy.junior = 1
+network.unit.dhtredundancy.senior = 3
+
+# the vertical partition of the dht: this applies a division
+# of the dht into 2^^<partitionExponent> fragments which get
+# all the same word-partition targets but a document-dht computed
+# fragment of all documents
+network.unit.dht.partitionExponent = 4
+
+# network request burst attributes: this enables non-dht target
+# positions for certain situations. This is not a 'traditional' burst-mode
+# since it does not refer to a handshake to a single client but it refers
+# to not-handshaking in a distributed way. It means to get data without using
+# a dht transmission logic.
+
+# robinson burst: percentage of the number of robinson peers that
+# shall be accessed for every search. This includes also robinson peers
+# that do not have a matching peer tag. If this is set to 100 then all robinson
+# peers are always asked
+network.unit.dht.burst.robinson = 50
+
+# multi-word burst: percentage of the number of all peers that
+# shall be accessed for multi-word searches. Multi-word search is
+# a hard problem when the distributed search network is divided by
+# term (as done with yacy, partly..).
+# Scientific solutions for this problem is to apply heuristics.
+# This heuristic enables to switch on a full network scan to get also
+# non-distributed multi-word positions. For a full scan set this value to 100.
+# Attention: this may out-number the maxcount of available httpc network connections.
+network.unit.dht.burst.multiword = 30
+
+# switch to enable verification of search results
+# must be set to true in untrusted networks and can be
+# set to false in completely trusted networks
+network.unit.inspection.searchverify = true
+
+# speed of remote crawl de-queueing. this is the number of milliseconds
+# as a pause between two requests
+network.unit.remotecrawl.speed = 300
+
+# addresses of seed-list bootstrap locations
+network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
+network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
+network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
+network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
+
+# each network may use different yacy distributions.
+# the auto-updater can access network-specific update locations
+network.unit.update.location0 = http://yacy.net/en/index.html
+network.unit.update.location1 = http://latest.yacy.de
+network.unit.update.location2 = http://www.yacystats.de/yacybuild/
+network.unit.update.location2.key = MIIBtTCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYIAAn8bzmhk8EWOj9h+7zng1o3OlgI+LsG7lI7kVsDxyzMB/WYTpO+NKWoibFjQDFN92TKBQVAA8DQciHfolqcFfVAot9/3ipamXVGz29OAxz8i0Wty6KI6w50YrL2xAkWjx7jSBghJKlnKx3V0PaDCWqz37ogQvuxLKBFORyAjbv3O
+network.unit.update.location3 = https://latestyacy.f1ori.de/
+
+# properties for in-protocol response authentication:
+network.unit.protocol.control = uncontrolled
+
+# white/blacklists
+network.unit.access.whitelist = 10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,213.183.195.83,130.75.2.35,localhost
+network.unit.access.blacklist =
