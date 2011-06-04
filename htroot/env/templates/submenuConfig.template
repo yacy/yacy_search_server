@@ -1,7 +1,7 @@
 <div class="SubMenu">
   <h3>Peer Administration Console</h3>
   <ul class="SubMenu">
-    <li><a href="/Status.html" class="MenuItemLink lock">Status</a></li>
+    <li><a href="/Status.html" class="MenuItemLink">Status</a></li>
     <li><a href="/ConfigBasic.html" class="MenuItemLink lock">Basic Configuration</a></li>
     <li><a href="/ConfigAccounts_p.html" class="MenuItemLink lock">Accounts</a></li>
     <li><a href="/ConfigNetwork_p.html" class="MenuItemLink lock">Network Configuration</a></li>
