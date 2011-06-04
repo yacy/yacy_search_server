@@ -145,7 +145,7 @@ public class HTTPClient {
 		// connections per host (2 default)
 		clientConnectionManager.setDefaultMaxPerRoute(2);
 		// Increase max connections for localhost
-		HttpHost localhost = new HttpHost("locahost");
+		HttpHost localhost = new HttpHost("localhost");
 		clientConnectionManager.setMaxForRoute(new HttpRoute(localhost), maxcon);
 		/**
 		 * HTTP protocol settings
@@ -369,7 +369,7 @@ public class HTTPClient {
         String host = url.getHost();
         if (host == null) host = "127.0.0.1";
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        final InputStreamEntity inputStreamEntity = new InputStreamEntity(instream, length);
+        final NonClosingInputStreamEntity inputStreamEntity = new NonClosingInputStreamEntity(instream, length);
     	// statistics
     	upbytes = length;
     	httpPost.setEntity(inputStreamEntity);
@@ -441,7 +441,6 @@ public class HTTPClient {
         // statistics
         upbytes = length;
         httpPost.setEntity(inputStreamEntity);
-        currentRequest = httpPost;
         return getContentBytes(httpPost, Long.MAX_VALUE);
     }
 	
