@@ -576,7 +576,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     }
         
     private yacySeed get(final String hash, final MapDataMining database) {
-        if (hash == null) return null;
+        if (hash == null || hash.length() == 0) return null;
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
         ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
         try {
