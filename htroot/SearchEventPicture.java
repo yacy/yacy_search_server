@@ -1,4 +1,4 @@
-// SearchEventPicture.java 
+// SearchEventPicture.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -35,15 +35,15 @@ import de.anomic.yacy.graphics.NetworkGraph;
 // draw a picture of the yacy network
 
 public class SearchEventPicture {
-    
+
     public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final String eventID = header.get("event", SearchEventCache.lastEventID);
         if (eventID == null) return null;
-        final RasterPlotter yp = NetworkGraph.getSearchEventPicture(sb.peers, eventID, 0);
+        final RasterPlotter yp = NetworkGraph.getSearchEventPicture(sb.peers, eventID, 0, 0);
         if (yp == null) return new RasterPlotter(1, 1, RasterPlotter.DrawMode.MODE_SUB, "000000"); // empty image
-        
+
         return yp;
     }
-    
+
 }

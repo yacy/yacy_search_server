@@ -64,8 +64,7 @@ public class WebStructurePicture_p {
         int nodes = 100; // maximum number of host nodes that are painted
         int time = -1;
         String host = null;
-        boolean corona = false;
-        int coronaangle = 0;
+        int cyc = 0;
 
         if (post != null) {
             width         = post.getInt("width", 1024);
@@ -79,8 +78,7 @@ public class WebStructurePicture_p {
             color_dot     = post.get("colordot",     color_dot);
             color_line    = post.get("colorline",    color_line);
             color_lineend = post.get("colorlineend", color_lineend);
-            corona        = post.getBoolean("corona", true);
-            coronaangle   = (corona) ? post.getInt("coronaangle", 0) : -1;
+            cyc   = post.getInt("cyc", 0);
         }
 
         // too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
@@ -116,7 +114,7 @@ public class WebStructurePicture_p {
 
             // recursively find domains, up to a specific depth
             final GraphPlotter graph = new GraphPlotter();
-            if (host != null && hash != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth, coronaangle);
+            if (host != null && hash != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth, cyc);
             //graph.print();
 
             graphPicture = graph.draw(width, height, 40, 40, 16, 16, color_back, color_dot, color_line, color_lineend, color_text);
@@ -134,7 +132,7 @@ public class WebStructurePicture_p {
     private static final int place(
                     final GraphPlotter graph, final WebStructureGraph structure, final String centerhash, final String centerhost,
                     int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer,
-                    final int coronaangle) {
+                    final int cyc) {
         // returns the number of nodes that had been placed
         assert centerhost != null;
         final GraphPlotter.coordinate center = graph.getPoint(centerhost);
@@ -169,7 +167,7 @@ public class WebStructurePicture_p {
             targets.add(new String[] {targethash, targethost});
             if (graph.getPoint(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
-            final double angle = ((Base64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd) + (coronaangle / 360.0d)) * 2.0d * Math.PI;
+            final double angle = ((Base64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd) + (cyc / 360.0d)) * 2.0d * Math.PI;
             //System.out.println("ANGLE = " + angle);
             rr = radius * 0.25 * (1 - targetrefs / (double) maxtargetrefs);
             re = radius * 0.5 * (thisrefs / (double) maxthisrefs);
@@ -187,7 +185,7 @@ public class WebStructurePicture_p {
             targethost = target[1];
             final GraphPlotter.coordinate c = graph.getPoint(targethost);
             assert c != null;
-            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer, coronaangle);
+            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer, cyc);
             mynodes += nextnodes;
             maxnodes -= nextnodes;
             graph.setBorder(centerhost, targethost);
