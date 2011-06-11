@@ -631,6 +631,8 @@
       </classpath>
       <!--<arg value="-Xrunhprof"/>-->
       <arg line="-start"/>
+      <jvmarg line="-Xms180m"/>
+      <jvmarg line="-Xmx512m"/>
       <!-- <arg line="-migratewords"/>-->
       <!-- <arg line="-start ${user.dir}"/>-->
     </java>
