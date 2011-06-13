@@ -1,4 +1,4 @@
-// QueryParams.java 
+// QueryParams.java
 // -----------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -40,6 +40,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -53,12 +54,10 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.SetTools;
-
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.yacy.yacySeed;
 
 public final class QueryParams {
-    
+
     public static final int SEARCHDOM_LOCAL = 0;
     public static final int SEARCHDOM_CLUSTERDHT = 1;
     public static final int SEARCHDOM_CLUSTERALL = 2;
@@ -66,17 +65,17 @@ public final class QueryParams {
     public static final int SEARCHDOM_GLOBALALL = 4;
 
     private static final String ampersand = "&amp;";
-    
+
     public static enum FetchMode {
     	NO_FETCH_NO_VERIFY,
     	FETCH_BUT_ACCEPT_OFFLINE_OR_USE_CACHE,
     	FETCH_AND_VERIFY_ONLINE;
     }
-    
+
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
     public static final Pattern matchnothing_pattern = Pattern.compile("");
-    
+
     public final String queryString;
     public HandleSet fullqueryHashes, queryHashes, excludeHashes;
     public Pattern snippetMatcher;
@@ -93,13 +92,13 @@ public final class QueryParams {
     public final int maxDistance;
     public final Bitfield constraint;
     public final boolean allofconstraint;
-    public final CrawlProfile.CacheStrategy snippetCacheStrategy;
+    public final CacheStrategy snippetCacheStrategy;
     public final RankingProfile ranking;
     private final Segment indexSegment;
     public final String host; // this is the client host that starts the query, not a site operator
     public final String sitehash; // this is a domain hash, 6 bytes long or null
     public final String authorhash;
-    public final String tenant; 
+    public final String tenant;
     public yacySeed remotepeer;
     public final Long time;
     // values that are set after a search:
@@ -109,7 +108,7 @@ public final class QueryParams {
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     public final String userAgent;
     public boolean filterfailurls;
-    
+
     public QueryParams(
             final String queryString,
             final int itemsPerPage,
@@ -124,7 +123,7 @@ public final class QueryParams {
             this.excludeHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {
                 this.queryHashes.put(UTF8.getBytes(queryString));
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
     	} else {
@@ -164,7 +163,7 @@ public final class QueryParams {
         this.transmitcount = 0;
         this.filterfailurls = false;
     }
-    
+
     public QueryParams(
         final String queryString, final HandleSet queryHashes,
         final HandleSet excludeHashes,
@@ -174,7 +173,7 @@ public final class QueryParams {
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
         final String navigators,
-        final CrawlProfile.CacheStrategy snippetCacheStrategy,
+        final CacheStrategy snippetCacheStrategy,
         final int itemsPerPage, final int offset, final String urlMask,
         final int domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
@@ -231,57 +230,57 @@ public final class QueryParams {
         this.transmitcount = 0;
         this.filterfailurls = filterfailurls;
     }
-    
+
     public Segment getSegment() {
         return this.indexSegment;
     }
-    
+
     public int neededResults() {
         // the number of result lines that must be computed
         return this.offset + this.itemsPerPage;
     }
-    
+
     public int displayResults() {
         // the number of result lines that are displayed at once (size of result page)
         return this.itemsPerPage;
     }
-    
+
     public void setOffset(final int newOffset) {
         this.offset = newOffset;
     }
-    
+
     public String contentdom() {
         return this.contentdom.toString();
     }
-    
+
     public boolean isLocal() {
         return this.domType == SEARCHDOM_LOCAL;
     }
-    
+
     public static HandleSet hashes2Set(final String query) {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
                 keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
         }
         return keyhashes;
     }
-    
+
     public static HandleSet hashes2Handles(final String query) {
         final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
         if (query != null) {
             for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
                 keyhashes.put(ASCII.getBytes(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)));
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
         }
         return keyhashes;
     }
-    
+
     public static String hashSet2hashString(final HandleSet hashes) {
         final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
         int p = 0;
@@ -310,7 +309,7 @@ public final class QueryParams {
         sb.append("]");
         return sb.toString();
     }
-    
+
     /**
      * check if the given text matches with the query
      * this checks inclusion and exclusion words
@@ -325,25 +324,25 @@ public final class QueryParams {
         }
         return ret;
     }
-    
+
     protected static final boolean anymatch(final String text, final HandleSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
     	final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text, null).keySet());
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
-    
+
     private static String seps = "'.,/&_"; static {seps += '"';}
-    
+
     @SuppressWarnings("unchecked")
     public static TreeSet<String>[] cleanQuery(String querystring) {
         // returns three sets: a query set, a exclude set and a full query set
         final TreeSet<String> query = new TreeSet<String>(NaturalOrder.naturalComparator);
         final TreeSet<String> exclude = new TreeSet<String>(NaturalOrder.naturalComparator);
         final TreeSet<String> fullquery = new TreeSet<String>(NaturalOrder.naturalComparator);
-        
+
         if ((querystring != null) && (!querystring.isEmpty())) {
-        
+
             // convert Umlaute
             querystring = AbstractScraper.stripAll(querystring.toCharArray()).toLowerCase().trim();
             int c;
@@ -376,7 +375,7 @@ public final class QueryParams {
         }
         return new TreeSet[]{query, exclude, fullquery};
     }
-    
+
     public String queryString(final boolean encodeHTML) {
         final String ret;
     	if (encodeHTML){
@@ -386,25 +385,25 @@ public final class QueryParams {
         }
     	return ret;
     }
-    
+
     public String queryStringForUrl() {
     	try {
             return URLEncoder.encode(this.queryString, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             Log.logException(e);
             return this.queryString;
         }
     }
-    
+
     public TreeSet<String>[] queryWords() {
         return cleanQuery(this.queryString);
     }
-    
+
     public void filterOut(final SortedSet<String> blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
     	final HandleSet blues = Word.words2hashesHandles(blueList);
-    	for (final byte[] b: blues) queryHashes.remove(b);
+    	for (final byte[] b: blues) this.queryHashes.remove(b);
     }
 
 
@@ -418,23 +417,23 @@ public final class QueryParams {
             entry = i.next();
             url = entry.getKey();
             anchorText = entry.getValue();
-            if (this.matchesText(anchorText)) {
+            if (matchesText(anchorText)) {
                 matcher.put(url, anchorText);
                 i.remove();
             }
         }
         return matcher;
     }
-    
+
     private String idCacheAnon = null, idCache = null;
     final static private char asterisk = '*';
     public String id(final boolean anonymized) {
         if (anonymized) {
-            if (idCacheAnon != null) return idCacheAnon;
+            if (this.idCacheAnon != null) return this.idCacheAnon;
         } else {
-            if (idCache != null) return idCache;
+            if (this.idCache != null) return this.idCache;
         }
-        
+
         // generate a string that identifies a search so results can be re-used in a cache
         final StringBuilder context = new StringBuilder(120);
         if (anonymized) {
@@ -469,13 +468,13 @@ public final class QueryParams {
         context.append(asterisk);
         context.append(this.maxDistance);
         if (anonymized) {
-            idCacheAnon = context.toString();
+            this.idCacheAnon = context.toString();
         } else {
-            idCache = context.toString();
+            this.idCache = context.toString();
         }
         return context.toString();
     }
-    
+
     /**
      * make a query anchor tag
      * @param page
@@ -484,9 +483,22 @@ public final class QueryParams {
      * @param addToQuery
      * @return
      */
-    public static String navurl(
+    public static StringBuilder navurl(
             final String ext, final int page, final QueryParams theQuery,
-            String newQueryString, final String originalUrlMask, final String nav) {
+            final String newQueryString, final String originalUrlMask, final String nav) {
+
+        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, originalUrlMask, nav);
+
+        sb.append(ampersand);
+        sb.append("startRecord=");
+        sb.append(page * theQuery.displayResults());
+
+        return sb;
+    }
+
+    public static StringBuilder navurlBase(
+                    final String ext, final QueryParams theQuery,
+                    final String newQueryString, final String originalUrlMask, final String nav) {
 
         final StringBuilder sb = new StringBuilder(120);
         sb.append("/yacysearch.");
@@ -497,10 +509,6 @@ public final class QueryParams {
         sb.append(ampersand);
         sb.append("maximumRecords=");
         sb.append(theQuery.displayResults());
-
-        sb.append(ampersand);
-        sb.append("startRecord=");
-        sb.append(page * theQuery.displayResults());
 
         sb.append(ampersand);
         sb.append("resource=");
@@ -537,9 +545,9 @@ public final class QueryParams {
         sb.append("former=");
         sb.append(theQuery.queryStringForUrl());
 
-        return sb.toString();
+        return sb;
     }
-    
+
     private static Pattern StringMatchPattern = Pattern.compile(".*?(\".*?\").*");
     /**
      * calculate a pattern to match with a string search
@@ -547,11 +555,11 @@ public final class QueryParams {
      * @return
      */
     public static Pattern stringSearchPattern(String query) {
-        StringBuilder p = new StringBuilder(query.length());
+        final StringBuilder p = new StringBuilder(query.length());
         p.append("(?iu)");
         int seqc = 0;
         while (query.length() > 0) {
-            Matcher m = StringMatchPattern.matcher(query);
+            final Matcher m = StringMatchPattern.matcher(query);
             if (!m.matches()) break;
             p.append(".*?").append(query.substring(m.start(1) + 1, m.end(1) - 1));
             query = query.substring(m.end(1));
@@ -561,9 +569,9 @@ public final class QueryParams {
         p.append(".*");
         return Pattern.compile(p.toString());
     }
-    
-    public static void main(String[] args) {
-        Pattern p = stringSearchPattern("die \"peer-to-peer Suchmaschine\" ohne Zensur als \"freie Software\" runterladen");
+
+    public static void main(final String[] args) {
+        final Pattern p = stringSearchPattern("die \"peer-to-peer Suchmaschine\" ohne Zensur als \"freie Software\" runterladen");
         System.out.println(p.toString());
     }
 }

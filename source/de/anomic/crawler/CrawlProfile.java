@@ -1,4 +1,4 @@
-// CrawlProfile.java 
+// CrawlProfile.java
 // ------------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
@@ -36,11 +37,11 @@ import net.yacy.kelondro.order.Digest;
 public class CrawlProfile extends ConcurrentHashMap<String, String> implements Map<String, String> {
 
     private static final long serialVersionUID = 5527325718810703504L;
-    
+
     public static final String MATCH_ALL = ".*";
     public static final String MATCH_NEVER = "";
-    
-    // this is a simple record structure that hold all properties of a single crawl start    
+
+    // this is a simple record structure that hold all properties of a single crawl start
     public static final String HANDLE           = "handle";
     public static final String NAME             = "name";
     public static final String START_URL        = "startURL";
@@ -59,9 +60,9 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public static final String XDSTOPW          = "xdstopw";
     public static final String XPSTOPW          = "xpstopw";
     public static final String CACHE_STRAGEGY   = "cacheStrategy";
-    
+
     private Pattern mustmatch = null, mustnotmatch = null;
-    
+
     public CrawlProfile(
                  final String name,
                  final DigestURI startURL,
@@ -100,24 +101,24 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(XPSTOPW,          xpstopw); // exclude parent stop-words
         put(CACHE_STRAGEGY,   cacheStrategy.toString());
     }
-    
-    public CrawlProfile(Map<String, String> ext) {
+
+    public CrawlProfile(final Map<String, String> ext) {
         super(ext == null ? 1 : ext.size());
-        if (ext != null) this.putAll(ext);
+        if (ext != null) putAll(ext);
     }
-    
-    public void put(String key, boolean value) {
+
+    public void put(final String key, final boolean value) {
         super.put(key, Boolean.toString(value));
     }
-    
-    public void put(String key, int value) {
+
+    public void put(final String key, final int value) {
         super.put(key, Integer.toString(value));
     }
-    
-    public void put(String key, long value) {
+
+    public void put(final String key, final long value) {
         super.put(key, Long.toString(value));
     }
-    
+
     public String handle() {
         final String r = get(HANDLE);
         //if (r == null) return null;
@@ -168,7 +169,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return CacheStrategy.IFEXIST;
         }
     }
-    public void setCacheStrategy(CacheStrategy newStrategy) {
+    public void setCacheStrategy(final CacheStrategy newStrategy) {
         put(CACHE_STRAGEGY, newStrategy.toString());
     }
     public long recrawlIfOlder() {
@@ -242,44 +243,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         final String r = get(XPSTOPW);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
-    }
-    
-    public static enum CacheStrategy {
-        NOCACHE(0),    // never use the cache, all content from fresh internet source
-        IFFRESH(1),    // use the cache if the cache exists and is fresh using the proxy-fresh rules
-        IFEXIST(2),    // use the cache if the cache exist. Do no check freshness. Otherwise use online source.
-        CACHEONLY(3);  // never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available 
-        // the fifth case may be that the CacheStrategy object is assigned NULL. That means that no snippet creation is wanted.
-        public int code;
-        private CacheStrategy(int code) {
-            this.code = code;
-        }
-        public String toString() {
-            return Integer.toString(this.code);
-        }
-        public static CacheStrategy decode(int code) {
-            for (CacheStrategy strategy: CacheStrategy.values()) if (strategy.code == code) return strategy;
-            return NOCACHE;
-        }
-        public static CacheStrategy parse(String name) {
-            if (name == null) return null;
-            if (name.equals("nocache")) return NOCACHE;
-            if (name.equals("iffresh")) return IFFRESH;
-            if (name.equals("ifexist")) return IFEXIST;
-            if (name.equals("cacheonly")) return CACHEONLY;
-            if (name.equals("true")) return IFEXIST;
-            if (name.equals("false")) return null; // if this cache strategy is assigned as query attribute, null means "do not create a snippet"
-            return null;
-        }
-        public String toName() {
-            return this.name().toLowerCase();
-        }
-        public boolean isAllowedToFetchOnline() {
-            return this.code < 3;
-        }
-        public boolean mustBeOffline() {
-            return this.code == 3;
-        }
     }
 
     public static long getRecrawlDate(final long oldTimeMinutes) {

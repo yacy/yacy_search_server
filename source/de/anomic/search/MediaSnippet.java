@@ -34,11 +34,9 @@ import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import de.anomic.crawler.CrawlProfile;
-import de.anomic.data.MimeTable;
-
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.WordTokenizer;
@@ -49,6 +47,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
+import de.anomic.data.MimeTable;
 
 
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
@@ -78,7 +77,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
         if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
     }
-    
+
     public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final long ranking, final DigestURI source) {
         this.type = type;
         this.href = href;
@@ -93,47 +92,47 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
         if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
     }
-    
+
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(href.hash());
+        return ByteArray.hashCode(this.href.hash());
     }
-    
+
     @Override
     public String toString() {
-        return ASCII.String(href.hash());
+        return ASCII.String(this.href.hash());
     }
-    
+
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof MediaSnippet)) return false;
-        MediaSnippet other = (MediaSnippet) obj;
+        final MediaSnippet other = (MediaSnippet) obj;
         return Base64Order.enhancedCoder.equal(this.href.hash(), other.href.hash());
     }
-    
-    public int compareTo(MediaSnippet o) {
+
+    public int compareTo(final MediaSnippet o) {
         return Base64Order.enhancedCoder.compare(this.href.hash(), o.href.hash());
     }
-    
-    public int compare(MediaSnippet o1, MediaSnippet o2) {
+
+    public int compare(final MediaSnippet o1, final MediaSnippet o2) {
         return o1.compareTo(o2);
     }
-    
-    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final ContentDomain mediatype, final CrawlProfile.CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
+
+    public static List<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final ContentDomain mediatype, final CacheStrategy cacheStrategy, final int timeout, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
         }
-        
+
         Document document;
         try {
             document = Document.mergeDocuments(url, null, Switchboard.getSwitchboard().loader.loadDocuments(Switchboard.getSwitchboard().loader.request(url, false, reindexing), cacheStrategy, timeout, Long.MAX_VALUE));
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logFine("snippet fetch", "load error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
-        } catch (Parser.Failure e) {
+        } catch (final Parser.Failure e) {
             Log.logFine("snippet fetch", "parser error: " + e.getMessage());
             return new ArrayList<MediaSnippet>();
         }
@@ -146,16 +145,16 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         }
         return a;
     }
-    
+
     public static List<MediaSnippet> computeMediaSnippets(final DigestURI source, final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
-        
+
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<MultiProtocolURI, String> media = null;
         if (mediatype == ContentDomain.AUDIO) media = document.getAudiolinks();
         else if (mediatype == ContentDomain.VIDEO) media = document.getVideolinks();
         else if (mediatype == ContentDomain.APP) media = document.getApplinks();
         if (media == null) return null;
-        
+
         final Iterator<Map.Entry<MultiProtocolURI, String>> i = media.entrySet().iterator();
         Map.Entry<MultiProtocolURI, String> entry;
         DigestURI url;
@@ -165,7 +164,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             entry = i.next();
             url = new DigestURI(entry.getKey());
             desc = entry.getValue();
-            int ranking = removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
+            final int ranking = removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
                            removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
                 result.add(new MediaSnippet(mediatype, url, MimeTable.url2mime(url), desc, document.getTextLength(), null, ranking, source));
@@ -173,13 +172,13 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         }
         return result;
     }
-    
+
     public static List<MediaSnippet> computeImageSnippets(final DigestURI source, final Document document, final HandleSet queryhashes) {
-        
+
         final SortedSet<ImageEntry> images = new TreeSet<ImageEntry>();
         images.addAll(document.getImages().values()); // iterates images in descending size order!
         // a measurement for the size of the images can be retrieved using the htmlFilterImageEntry.hashCode()
-        
+
         final Iterator<ImageEntry> i = images.iterator();
         ImageEntry ientry;
         DigestURI url;
@@ -188,20 +187,20 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         while (i.hasNext()) {
             ientry = i.next();
             url = new DigestURI(ientry.url());
-            String u = url.toString();
+            final String u = url.toString();
             if (u.indexOf(".ico") >= 0 || u.indexOf("favicon") >= 0) continue;
             if (ientry.height() > 0 && ientry.height() < 32) continue;
             if (ientry.width() > 0 && ientry.width() < 32) continue;
             desc = ientry.alt();
-            int appcount = queryhashes.size()  * 2 - 
+            final int appcount = queryhashes.size()  * 2 -
                            removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
                            removeAppearanceHashes(desc, queryhashes).size();
-            final long ranking = Long.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);  
+            final long ranking = Long.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);
             result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, source));
         }
         return result;
     }
-    
+
     /**
      * removed all word hashes that can be computed as tokens from a given sentence from a given hash set
      * @param sentence
@@ -222,12 +221,12 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             if (pos == null) {
                 try {
                     remaininghashes.put(hash);
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                 }
             }
         }
         return remaininghashes;
     }
-    
+
 }

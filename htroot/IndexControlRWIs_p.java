@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -35,9 +35,10 @@ import java.util.List;
 import java.util.TreeMap;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.document.ASCII;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -52,11 +53,9 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
-
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.ListManager;
 import de.anomic.data.WorkTables;
@@ -76,7 +75,7 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.dht.PeerSelection;
 
 public class IndexControlRWIs_p {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
@@ -88,46 +87,46 @@ public class IndexControlRWIs_p {
         prop.put("result", "");
         prop.put("cleanup", post == null ? 1 : 0);
         prop.put("cleanup_solr", sb.solrConnector == null || !sb.getConfigBool("federated.service.solr.indexing.enabled", false) ? 0 : 1);
-        
+
         String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
         int i = 0;
-        for (String s: sb.indexSegments.segmentNames()) {
+        for (final String s: sb.indexSegments.segmentNames()) {
             prop.put("segments_" + i + "_name", s);
             prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
             i++;
         }
         Segment segment = sb.indexSegments.segment(segmentName);
         prop.put("segments", i);
-        
+
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
         prop.put("keyhashsimilar", 0);
         prop.put("genUrlList", 0);
-        
+
         // clean up all search events
         SearchEventCache.cleanupEvents(true);
-        
+
         if (post != null) {
             // default values
             segmentName = post.get("segment", segmentName).trim();
             i= 0;
-            for (String s: sb.indexSegments.segmentNames()) {
+            for (final String s: sb.indexSegments.segmentNames()) {
                 prop.put("segments_" + i + "_name", s);
                 prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
                 i++;
             }
             prop.put("segments", i);
             segment = sb.indexSegments.segment(segmentName);
-            
+
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
             prop.putHTML("keystring", keystring);
             prop.putHTML("keyhash", ASCII.String(keyhash));
 
             // read values from checkboxes
-            String[] urls = post.getAll("urlhx.*");
+            final String[] urls = post.getAll("urlhx.*");
             HandleSet urlb = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, urls.length);
-            if (urls != null) for (String s: urls) try { urlb.put(s.getBytes()); } catch (RowSpaceExceededException e) { Log.logException(e); }
+            if (urls != null) for (final String s: urls) try { urlb.put(s.getBytes()); } catch (final RowSpaceExceededException e) { Log.logException(e); }
             final boolean delurl    = post.containsKey("delurl");
             final boolean delurlref = post.containsKey("delurlref");
 
@@ -140,7 +139,7 @@ public class IndexControlRWIs_p {
                     prop.putHTML("searchresult_word", keystring);
                 }
             }
-    
+
             if (post.containsKey("keyhashsearch")) {
                 if (keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
@@ -151,7 +150,7 @@ public class IndexControlRWIs_p {
                     prop.putHTML("searchresult_wordhash", ASCII.String(keyhash));
                 }
             }
-            
+
             // delete everything
             if (post.containsKey("deletecomplete")) {
                 if (post.get("deleteIndex", "").equals("on")) {
@@ -159,7 +158,7 @@ public class IndexControlRWIs_p {
                 }
                 if (post.get("deleteSolr", "").equals("on") && sb.getConfigBool("federated.service.solr.indexing.enabled", false)) try {
                     sb.solrConnector.clear();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     Log.logException(e);
                 }
                 if (post.get("deleteCrawlQueues", "").equals("on")) {
@@ -178,7 +177,7 @@ public class IndexControlRWIs_p {
                 }
                 post.remove("deletecomplete");
             }
-    
+
             // delete word
             if (post.containsKey("keyhashdeleteall")) try {
                 if (delurl || delurlref) {
@@ -187,43 +186,43 @@ public class IndexControlRWIs_p {
                     index = segment.termIndex().get(keyhash, null);
                     final Iterator<WordReference> en = index.entries();
                     urlb = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, index.size());
-                    while (en.hasNext()) try { urlb.put(en.next().urlhash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
+                    while (en.hasNext()) try { urlb.put(en.next().urlhash()); } catch (final RowSpaceExceededException e) { Log.logException(e); }
                     index = null;
                 }
                 if (delurlref) {
-                    segment.removeAllUrlReferences(urlb, sb.loader, CrawlProfile.CacheStrategy.IFEXIST);
+                    segment.removeAllUrlReferences(urlb, sb.loader, CacheStrategy.IFEXIST);
                 }
                 // delete the word first because that is much faster than the deletion of the urls from the url database
                 segment.termIndex().delete(keyhash);
                 // now delete all urls if demanded
                 if (delurl || delurlref) {
-                    for (byte[] b: urlb) sb.urlRemove(segment, b);
+                    for (final byte[] b: urlb) sb.urlRemove(segment, b);
                 }
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
-    
+
             // delete selected URLs
             if (post.containsKey("keyhashdelete")) try {
                 if (delurlref) {
-                    segment.removeAllUrlReferences(urlb, sb.loader, CrawlProfile.CacheStrategy.IFEXIST);
+                    segment.removeAllUrlReferences(urlb, sb.loader, CacheStrategy.IFEXIST);
                 }
                 if (delurl || delurlref) {
-                    for (byte[] b: urlb) sb.urlRemove(segment, b);
+                    for (final byte[] b: urlb) sb.urlRemove(segment, b);
                 }
                 final HandleSet urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
-                for (byte[] b: urlb) try { urlHashes.put(b); } catch (RowSpaceExceededException e) { Log.logException(e); }
+                for (final byte[] b: urlb) try { urlHashes.put(b); } catch (final RowSpaceExceededException e) { Log.logException(e); }
                 segment.termIndex().remove(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
                 // thinks that it was called for a list presentation
                 post.remove("keyhashdelete");
                 post.put("urllist", "generated");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
-            
+
             if (post.containsKey("urllist")) {
                 if (keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
@@ -239,7 +238,7 @@ public class IndexControlRWIs_p {
                 if (keystring.length() == 0 || !ByteBuffer.equals(Word.word2hash(keystring), keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
-                
+
                 // find host & peer
                 String host = post.get("host", ""); // get host from input field
                 yacySeed seed = null;
@@ -255,7 +254,7 @@ public class IndexControlRWIs_p {
                     host = post.get("hostHash", ""); // if input field is empty, get from select box
                     seed = sb.peers.getConnected(host);
                 }
-                
+
                 // prepare index
                 ReferenceContainer<WordReference> index;
                 final long starttime = System.currentTimeMillis();
@@ -272,7 +271,7 @@ public class IndexControlRWIs_p {
                     if (lurl == null) {
                         try {
                             unknownURLEntries.put(iEntry.urlhash());
-                        } catch (RowSpaceExceededException e) {
+                        } catch (final RowSpaceExceededException e) {
                             Log.logException(e);
                         }
                         urlIter.remove();
@@ -280,15 +279,15 @@ public class IndexControlRWIs_p {
                         knownURLs.put(iEntry.urlhash(), lurl);
                     }
                 }
-                
+
                 // make an indexContainerCache
-                ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
+                final ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, Segment.wordOrder, Word.commonHashLength);
                 try {
                     icc.add(index);
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                 }
-                
+
                 // transport to other peer
                 final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
                 final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
@@ -300,10 +299,10 @@ public class IndexControlRWIs_p {
                              timeout);
                 prop.put("result", (error == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries.size() + " URL not found") : "error: " + error);
                 index = null;
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
-    
+
             // generate list
             if (post.containsKey("keyhashsimilar")) try {
                 final Iterator<ReferenceContainer<WordReference>> containerIt = segment.termIndex().references(keyhash, true, 256, false).iterator();
@@ -325,10 +324,10 @@ public class IndexControlRWIs_p {
                     prop.put("keyhashsimilar_rows_"+rows+"_cols", cols);
                     prop.put("keyhashsimilar_rows", rows + 1);
                     prop.put("result", "");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
-            
+
             if (post.containsKey("blacklist")) {
                 final String blacklist = post.get("blacklist", "");
                 final HandleSet urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, urlb.size());
@@ -338,10 +337,10 @@ public class IndexControlRWIs_p {
                         final String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
                         pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
                         DigestURI url;
-                        for (byte[] b: urlb) {
+                        for (final byte[] b: urlb) {
                             try {
                                 urlHashes.put(b);
-                            } catch (RowSpaceExceededException e) {
+                            } catch (final RowSpaceExceededException e) {
                                 Log.logException(e);
                             }
                             final URIMetadataRow e = segment.urlMetadata().load(b);
@@ -349,13 +348,13 @@ public class IndexControlRWIs_p {
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
-                                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                                    if (ListManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
+                                for (final String supportedBlacklistType : supportedBlacklistTypes) {
+                                    if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklist)) {
                                         Switchboard.urlBlacklist.add(
-                                                supportedBlacklistTypes[blTypes],
+                                                supportedBlacklistType,
                                                 url.getHost(),
                                                 url.getFile());
-                                    }                
+                                    }
                                 }
                                 SearchEventCache.cleanupEvents(true);
                             }
@@ -364,17 +363,17 @@ public class IndexControlRWIs_p {
                     } catch (final IOException e) {
                     }
                 }
-                
+
                 if (post.containsKey("blacklistdomains")) {
                     PrintWriter pw;
                     try {
                         final String[] supportedBlacklistTypes = Blacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw = new PrintWriter(new FileWriter(new File(ListManager.listsPath, blacklist), true));
                         DigestURI url;
-                        for (byte[] b: urlb) {
+                        for (final byte[] b: urlb) {
                             try {
                                 urlHashes.put(b);
-                            } catch (RowSpaceExceededException e) {
+                            } catch (final RowSpaceExceededException e) {
                                 Log.logException(e);
                             }
                             final URIMetadataRow e = segment.urlMetadata().load(b);
@@ -382,12 +381,12 @@ public class IndexControlRWIs_p {
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/.*");
-                                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-                                    if (ListManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
+                                for (final String supportedBlacklistType : supportedBlacklistTypes) {
+                                    if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklist)) {
                                         Switchboard.urlBlacklist.add(
-                                                supportedBlacklistTypes[blTypes],
+                                                supportedBlacklistType,
                                                 url.getHost(), ".*");
-                                    }                
+                                    }
                                 }
                             }
                         }
@@ -397,26 +396,26 @@ public class IndexControlRWIs_p {
                 }
                 try {
                     segment.termIndex().remove(keyhash, urlHashes);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
                 }
             }
-        
+
             if (prop.getInt("searchresult", 0) == 3) listHosts(prop, keyhash, sb);
         }
-        
+
 
         // insert constants
         prop.putNum("wcount", segment.termIndex().sizesMax());
         // return rewrite properties
         return prop;
     }
-    
+
     public static void genURLList(final serverObjects prop, final byte[] keyhash, final String keystring, final RankingProcess ranked, final Bitfield flags, final int maxlines) {
         // search for a word hash and generate a list of url links
-        String keyhashs = ASCII.String(keyhash);
+        final String keyhashs = ASCII.String(keyhash);
         prop.put("genUrlList_keyHash", keyhashs);
-        
+
         if (ranked.filteredCount() == 0) {
             prop.put("genUrlList", 1);
             prop.put("genUrlList_count", 0);
@@ -498,14 +497,14 @@ public class IndexControlRWIs_p {
             putBlacklists(prop, FileUtils.getDirListing(ListManager.listsPath));
         }
     }
-    
+
     public static void putBlacklists(final serverObjects prop, final List<String> lists) {
         prop.put("genUrlList_blacklists", lists.size());
         int i = 0;
-        for (String list : lists)
+        for (final String list : lists)
             prop.put("genUrlList_blacklists_" + i++ + "_name", list);
     }
-    
+
     public static Bitfield compileFlags(final serverObjects post) {
         final Bitfield b = new Bitfield(4);
         if (post.get("allurl", "").equals("on")) return null;
@@ -544,12 +543,12 @@ public class IndexControlRWIs_p {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, Segment segment, final byte[] keyhash, final Bitfield filter) {
+    public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, final Segment segment, final byte[] keyhash, final Bitfield filter) {
         final QueryParams query = new QueryParams(ASCII.String(keyhash), -1, filter, segment, sb.getRanking(), "IndexControlRWIs_p");
         final ReferenceOrder order = new ReferenceOrder(query.ranking, UTF8.getBytes(query.targetlang));
         final RankingProcess ranked = new RankingProcess(query, order, Integer.MAX_VALUE);
         ranked.run();
-        
+
         if (ranked.filteredCount() == 0) {
             prop.put("searchresult", 2);
             prop.put("searchresult_wordhash", keyhash);

@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -46,7 +46,6 @@ import java.util.regex.Pattern;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
-import net.yacy.kelondro.util.MemoryControl;
 
 public class Domains {
 
@@ -55,17 +54,17 @@ public class Domains {
     private static final int MAX_NAME_CACHE_HIT_SIZE = 20000;
     private static final int MAX_NAME_CACHE_MISS_SIZE = 20000;
     private static final int CONCURRENCY_LEVEL = Runtime.getRuntime().availableProcessors() + 1;
-    
+
     // a dns cache
     private static final ARC<String, InetAddress> NAME_CACHE_HIT = new ConcurrentARC<String, InetAddress>(MAX_NAME_CACHE_HIT_SIZE, CONCURRENCY_LEVEL);
     private static final ARC<String, String> NAME_CACHE_MISS = new ConcurrentARC<String, String>(MAX_NAME_CACHE_MISS_SIZE, CONCURRENCY_LEVEL);
     private static final ConcurrentHashMap<String, Object> LOOKUP_SYNC = new ConcurrentHashMap<String, Object>();
     private static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
     private static final List<Pattern> LOCALHOST_PATTERNS = makePatterns(LOCAL_PATTERNS);
-    
+
     /**
      * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
-     * 
+     *
      * Do not move a TLD to another group (if you do not exactly know what you
      * are doing)! Because it will change the hash of the url!
      */
@@ -425,20 +424,20 @@ public class Domains {
         insertTLDProps(TLD_Generic,             TLD_Generic_ID);
         // the id=7 is used to flag local addresses
     }
-    
+
     private static KeyList globalHosts = null;
     private static boolean noLocalCheck = false;
 
-    public static void init(File globalHostsnameCache) {
+    public static void init(final File globalHostsnameCache) {
         if (globalHostsnameCache == null) {
             globalHosts = null;
         } else try {
             globalHosts = new KeyList(globalHostsnameCache);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             globalHosts = null;
         }
     }
-    
+
     /**
      * the isLocal check can be switched off to gain a better crawling speed.
      * however, if the check is switched off, then ALL urls are considered as local
@@ -447,14 +446,14 @@ public class Domains {
      * Bad usage will make peers inoperable.
      * @param v
      */
-    public static void setNoLocalCheck(boolean v) {
+    public static void setNoLocalCheck(final boolean v) {
         noLocalCheck = v;
     }
 
     public static void close() {
-        if (globalHosts != null) try {globalHosts.close();} catch (IOException e) {}
+        if (globalHosts != null) try {globalHosts.close();} catch (final IOException e) {}
     }
-    
+
     /**
     * Does an DNS-Check to resolve a hostname to an IP.
     *
@@ -464,23 +463,23 @@ public class Domains {
     public static InetAddress dnsResolveFromCache(String host) throws UnknownHostException {
         if ((host == null) || host.isEmpty()) return null;
         host = host.toLowerCase().trim();
-        
+
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
         if (ip != null) return ip;
-        
+
         // trying to resolve host by doing a name cache lookup
         ip = NAME_CACHE_HIT.get(host);
         if (ip != null) return ip;
-        
+
         if (NAME_CACHE_MISS.containsKey(host)) return null;
         throw new UnknownHostException("host not in cache");
     }
-    
+
     public static void setNoCachingPatterns(final String patternList) {
         nameCacheNoCachingPatterns = makePatterns(patternList);
     }
-    
+
     public static List<Pattern> makePatterns(final String patternList) {
     	final String[] entries = (patternList != null) ? patternList.split(",") : new String[0];
     	final List<Pattern> patterns = new ArrayList<Pattern>(entries.length);
@@ -512,19 +511,21 @@ public class Domains {
         }
         */
     }
-    
+
     public static InetAddress dnsResolve(String host) {
         if ((host == null) || (host.length() == 0)) return null;
         host = host.toLowerCase().trim();
         // try to simply parse the address
         InetAddress ip = parseInetAddress(host);
         if (ip != null) return ip;
-        
+
+        /*
         if (MemoryControl.shortStatus()) {
             NAME_CACHE_HIT.clear();
             NAME_CACHE_MISS.clear();
         }
-        
+        */
+
         // try to resolve host by doing a name cache lookup
         ip = NAME_CACHE_HIT.get(host);
         if (ip != null) {
@@ -535,7 +536,7 @@ public class Domains {
             //System.out.println("DNSLOOKUP-CACHE-MISS(CONC) " + host);
             return null;
         }
-        
+
         // call dnsResolveNetBased(host) using concurrency to interrupt execution in case of a time-out
         final Object sync_obj_new = new Object();
         Object sync_obj = LOOKUP_SYNC.putIfAbsent(host, sync_obj_new);
@@ -553,7 +554,7 @@ public class Domains {
                 LOOKUP_SYNC.remove(host);
                 return null;
             }
-            
+
             // do the dns lookup on the dns server
             //if (!matchesList(host, nameCacheNoCachingPatterns)) System.out.println("DNSLOOKUP " + host);
             try {
@@ -565,29 +566,29 @@ public class Domains {
                 LOOKUP_SYNC.remove(host);
                 return null;
             }
-            
+
             if (ip != null && !ip.isLoopbackAddress() && !matchesList(host, nameCacheNoCachingPatterns)) {
                 // add new ip cache entries
                 NAME_CACHE_HIT.insertIfAbsent(host, ip);
-                
+
                 // add also the isLocal host name caches
-                boolean localp = ip.isAnyLocalAddress() || ip.isLinkLocalAddress() || ip.isSiteLocalAddress();
+                final boolean localp = ip.isAnyLocalAddress() || ip.isLinkLocalAddress() || ip.isSiteLocalAddress();
                 if (localp) {
                     localHostNames.add(host);
                 } else {
-                    if (globalHosts != null) try {globalHosts.add(host);} catch (IOException e) {}
+                    if (globalHosts != null) try {globalHosts.add(host);} catch (final IOException e) {}
                 }
             }
             LOOKUP_SYNC.remove(host);
             return ip;
         }
     }
-    
+
     private final static Pattern dotPattern = Pattern.compile("\\.");
-    
+
     public static final InetAddress parseInetAddress(String ip) {
         if (ip == null || ip.length() < 8) return null;
-        if (ip.equals("0:0:0:0:0:0:0:1%0")) ip = "127.0.0.1"; 
+        if (ip.equals("0:0:0:0:0:0:0:1%0")) ip = "127.0.0.1";
         final String[] ips = dotPattern.split(ip);
         if (ips.length != 4) return null;
         final byte[] ipb = new byte[4];
@@ -605,7 +606,7 @@ public class Domains {
             return null;
         }
     }
-    
+
     /**
     * Returns the number of entries in the nameCacheHit map
     *
@@ -619,19 +620,19 @@ public class Domains {
         return NAME_CACHE_MISS.size();
     }
 
-    private static String localHostName = "127.0.0.1"; 
+    private static String localHostName = "127.0.0.1";
     private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>();
     private static Set<String> localHostNames = new HashSet<String>();
     static {
         try {
-            InetAddress localHostAddress = InetAddress.getLocalHost();
+            final InetAddress localHostAddress = InetAddress.getLocalHost();
             if (localHostAddress != null) localHostAddresses.add(localHostAddress);
-        } catch (UnknownHostException e) {}
+        } catch (final UnknownHostException e) {}
         try {
             final InetAddress[] moreAddresses = InetAddress.getAllByName(localHostName);
             if (moreAddresses != null) localHostAddresses.addAll(Arrays.asList(moreAddresses));
-        } catch (UnknownHostException e) {}
-        
+        } catch (final UnknownHostException e) {}
+
         // to get the local host name, a dns lookup is necessary.
         // if such a lookup blocks, it can cause that the static initiatializer does not finish fast
         // therefore we start the host name lookup as concurrent thread
@@ -650,22 +651,22 @@ public class Domains {
                             if (addr != null) localHostAddresses.add(addr);
                         }
                     }
-                } catch (SocketException e) {
+                } catch (final SocketException e) {
                 }
-                
+
                 // now look up the host name
                 try {
                     localHostName = getHostName(InetAddress.getLocalHost());
-                } catch (UnknownHostException e) {}
+                } catch (final UnknownHostException e) {}
 
                 // after the host name was resolved, we try to look up more local addresses
                 // using the host name:
                 try {
                     final InetAddress[] moreAddresses = InetAddress.getAllByName(localHostName);
                     if (moreAddresses != null) localHostAddresses.addAll(Arrays.asList(moreAddresses));
-                } catch (UnknownHostException e) {
+                } catch (final UnknownHostException e) {
                 }
-                
+
                 // fill a cache of local host names
                 for (final InetAddress a: localHostAddresses) {
                     final String hostname = getHostName(a);
@@ -677,7 +678,7 @@ public class Domains {
             }
         }.start();
     }
-    
+
     public static InetAddress myPublicLocalIP() {
         // list all addresses
         // for (int i = 0; i < localHostAddresses.length; i++) System.out.println("IP: " + localHostAddresses[i].getHostAddress()); // DEBUG
@@ -708,7 +709,7 @@ public class Domains {
             if (localHostAddress != null &&
                 (0Xff & localHostAddress.getAddress()[0]) != 127 &&
                 localHostAddress.getHostAddress().indexOf(":") < 0) return localHostAddress;
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
         }
         // we filter out the loopback address 127.0.0.1 and all addresses without a name
         for (final InetAddress a: localHostAddresses) {
@@ -729,14 +730,14 @@ public class Domains {
         // finally, just get any
         return localHostAddresses.iterator().next();
     }
-    
+
     /**
      * generate a list of intranet InetAddresses without the loopback address 127.0.0.1
      * @return list of all intranet addresses
      */
     public static Set<InetAddress> myIntranetIPs() {
         // list all local addresses
-        if (localHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (InterruptedException e) {}
+        if (localHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         final Set<InetAddress> list = new HashSet<InetAddress>();
         if (localHostAddresses.isEmpty()) return list; // give up
         for (final InetAddress a: localHostAddresses) {
@@ -749,7 +750,7 @@ public class Domains {
 
     public static boolean isThisHostIP(final String hostName) {
         if ((hostName == null) || (hostName.length() == 0)) return false;
-        
+
         boolean isThisHostIP = false;
         try {
             final InetAddress clientAddress = Domains.dnsResolve(hostName);
@@ -760,28 +761,28 @@ public class Domains {
                     isThisHostIP = true;
                     break;
                 }
-            }  
-        } catch (final Exception e) {}   
+            }
+        } catch (final Exception e) {}
         return isThisHostIP;
-    }    
-    
+    }
+
     public static boolean isThisHostIP(final InetAddress clientAddress) {
         if (clientAddress == null) return false;
-        
+
         boolean isThisHostIP = false;
         try {
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
-            
+
             for (final InetAddress a: localHostAddresses) {
                 if (a.equals(clientAddress)) {
                     isThisHostIP = true;
                     break;
                 }
-            }  
-        } catch (final Exception e) {}   
+            }
+        } catch (final Exception e) {}
         return isThisHostIP;
     }
-    
+
     public static int getDomainID(final String host) {
         if (host == null || host.isEmpty() || isLocal(host)) return TLD_Local_ID;
         final int p = host.lastIndexOf('.');
@@ -789,7 +790,7 @@ public class Domains {
         final Integer i = TLDID.get(tld);
         return (i == null) ? TLD_Generic_ID : i.intValue();
     }
-    
+
     /**
      * check if a given host is the name for a local host address
      * this method will return true if noLocalCheck is switched on. This means that
@@ -806,13 +807,13 @@ public class Domains {
                 host.startsWith("0:0:0:0:0:0:0:1")
                 );
     }
-     
+
     public static boolean isLocal(final String host) {
         return isLocal(host, true);
     }
-    
-    private static boolean isLocal(final String host, boolean recursive) {
-        
+
+    private static boolean isLocal(final String host, final boolean recursive) {
+
         if (noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
             host == null ||
             host.length() == 0) return true;
@@ -821,7 +822,7 @@ public class Domains {
         // check local ip addresses
         if (matchesList(host, LOCALHOST_PATTERNS)) return true;
         if (host.startsWith("0:0:0:0:0:0:0:1")) return true;
-        
+
         // check if there are other local IP addresses that are not in
         // the standard IP range
         if (localHostNames.contains(host)) return true;
@@ -829,15 +830,15 @@ public class Domains {
             //System.out.println("ISLOCAL-GLOBALHOSTS-HIT " + host);
             return false;
         }
-        
+
         // check dns lookup: may be a local address even if the domain name looks global
         if (!recursive) return false;
         final InetAddress a = dnsResolve(host);
         return isLocal(a);
     }
-    
-    public static boolean isLocal(InetAddress a) {
-        boolean
+
+    public static boolean isLocal(final InetAddress a) {
+        final boolean
             localp = noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
             a == null ||
             a.isAnyLocalAddress() ||
@@ -847,7 +848,7 @@ public class Domains {
             isLocal(a.getHostAddress(), false);
         return localp;
     }
-    
+
     public static void main(final String[] args) {
         /*
         try {
@@ -868,8 +869,8 @@ public class Domains {
         a = dnsResolve("yacy.net"); System.out.println(a);
         a = dnsResolve("kaskelix.de"); System.out.println(a);
         a = dnsResolve("yacy.net"); System.out.println(a);
-        
-        try { Thread.sleep(1000);} catch (InterruptedException e) {} // get time for class init
+
+        try { Thread.sleep(1000);} catch (final InterruptedException e) {} // get time for class init
         System.out.println("myPublicLocalIP: " + myPublicLocalIP());
         for (final InetAddress b : myIntranetIPs()) {
             System.out.println("Intranet IP: " + b);

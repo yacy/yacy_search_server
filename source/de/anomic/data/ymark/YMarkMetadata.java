@@ -9,7 +9,7 @@
 // $LastChangedBy: apfelmaennchen $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -34,6 +34,7 @@ import java.util.TreeMap;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
@@ -42,7 +43,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.repository.LoaderDispatcher;
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.search.Segments;
 
@@ -50,7 +50,7 @@ public class YMarkMetadata {
 	private DigestURI uri;
 	Document document;
 	Segments indexSegment;
-	
+
 	public enum METADATA {
 		TITLE,
 		DESCRIPTION,
@@ -70,37 +70,37 @@ public class YMarkMetadata {
 		SNIPPET,
 		AUTOTAG
 	}
-	
+
 	public YMarkMetadata(final DigestURI uri) {
 		this.uri = uri;
 		this.document = null;
 		this.indexSegment = null;
 	}
-	
+
 	public YMarkMetadata(final DigestURI uri, final Segments indexSegment) {
 		this.uri = uri;
 		this.document = null;
 		this.indexSegment = indexSegment;
 	}
-	
+
 	public YMarkMetadata(final Document document) {
 		this.document = document;
 		try {
 			this.uri = new DigestURI(this.document.dc_identifier());
-		} catch (MalformedURLException e) {
+		} catch (final MalformedURLException e) {
 			this.uri = null;
 		}
 		this.indexSegment = null;
-	}	
-	
-	public void loadDocument(LoaderDispatcher loader) throws IOException, Failure {
-		if(document == null) {
+	}
+
+	public void loadDocument(final LoaderDispatcher loader) throws IOException, Failure {
+		if(this.document == null) {
 			Response response = null;
-			response = loader.load(loader.request(this.uri, true, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
-			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());			
+			response = loader.load(loader.request(this.uri, true, false), CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
+			this.document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
 		}
 	}
-	
+
 	public EnumMap<METADATA, String> getMetadata() {
 		final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
         final URIMetadataRow urlEntry = this.indexSegment.segment(Segments.Process.PUBLIC).urlMetadata().load(this.uri.hash());
@@ -113,22 +113,22 @@ public class YMarkMetadata {
         	metadata.put(METADATA.WORDCOUNT, String.valueOf(urlEntry.wordCount()));
         	metadata.put(METADATA.MIMETYPE, String.valueOf(urlEntry.doctype()));
         	metadata.put(METADATA.LANGUAGE, UTF8.String(urlEntry.language()));
-        	
+
         	final URIMetadataRow.Components meta = urlEntry.metadata();
-        	if (meta != null) {	        	
-	        	metadata.put(METADATA.TITLE, meta.dc_title()); 
+        	if (meta != null) {
+	        	metadata.put(METADATA.TITLE, meta.dc_title());
 	        	metadata.put(METADATA.CREATOR, meta.dc_creator());
 	        	metadata.put(METADATA.KEYWORDS, meta.dc_subject());
 	        	metadata.put(METADATA.PUBLISHER, meta.dc_publisher());
         	}
-        } 
+        }
         return metadata;
 	}
-	
+
 	public EnumMap<METADATA, String> loadMetadata() {
 		final EnumMap<METADATA, String> metadata = new EnumMap<METADATA, String>(METADATA.class);
         if(this.document != null) {
-			metadata.put(METADATA.TITLE, this.document.dc_title()); 
+			metadata.put(METADATA.TITLE, this.document.dc_title());
 			metadata.put(METADATA.CREATOR, this.document.dc_creator());
 			metadata.put(METADATA.KEYWORDS, this.document.dc_subject(' '));
 			metadata.put(METADATA.PUBLISHER, this.document.dc_publisher());
@@ -140,18 +140,18 @@ public class YMarkMetadata {
 		}
 		return metadata;
 	}
-	
+
 	public TreeMap<String,Word> getWordCounts() {
 		if (this.document != null) {
             return sortWordCounts(new Condenser(this.document, true, true, LibraryProvider.dymLib).words());
         }
 		return new TreeMap<String, Word>();
 	}
-	
-	public static TreeMap<String,Word> sortWordCounts(final Map<String, Word> unsorted_words) {		
+
+	public static TreeMap<String,Word> sortWordCounts(final Map<String, Word> unsorted_words) {
         final TreeMap<String, Word> sorted_words = new TreeMap<String, Word>(new YMarkWordCountComparator(unsorted_words));
         sorted_words.putAll(unsorted_words);
-        return sorted_words;	
+        return sorted_words;
     }
-	
+
 }

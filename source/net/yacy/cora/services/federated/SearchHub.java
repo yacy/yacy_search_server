@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General private
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -30,11 +30,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.crawler.CrawlProfile;
-
 import net.yacy.cora.document.RSSMessage;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.cora.storage.ScoreMap;
 
@@ -51,12 +50,12 @@ public class SearchHub {
     };
 
     public final static SearchHub EMPTY = new SearchHub("", 0);
-    
-    private String query;
-    private int timeout;
-    private List<SearchAccumulator> threads;
-    private Map<RSSMessage, List<Integer>> result;
-    
+
+    private final String query;
+    private final int timeout;
+    private final List<SearchAccumulator> threads;
+    private final Map<RSSMessage, List<Integer>> result;
+
     public SearchHub(final String query, final int timeout) {
         this.query = query;
         this.timeout = timeout;
@@ -77,10 +76,10 @@ public class SearchHub {
      * this is mainly used for awaitTermination() and isTerminated()
      * @param a
      */
-    public void addAccumulator(SearchAccumulator a) {
+    public void addAccumulator(final SearchAccumulator a) {
         this.threads.add(a);
     }
-    
+
     /**
      * get the original query string
      * @return
@@ -88,7 +87,7 @@ public class SearchHub {
     public String getQuery() {
         return this.query;
     }
-    
+
     /**
      * get the given time-out of the search request
      * @return
@@ -96,7 +95,7 @@ public class SearchHub {
     public int getTimeout() {
         return this.timeout;
     }
-    
+
     /**
      * get the list of search results as scored map.
      * The results are combined using their appearance positions.
@@ -104,11 +103,11 @@ public class SearchHub {
      * @return a score map of urls
      */
     public ScoreMap<String> getResults() {
-        ScoreMap<String> scores = new ConcurrentScoreMap<String>();
-        int m = threads.size();
-        for (Map.Entry<RSSMessage, List<Integer>> entry: this.result.entrySet()) {
+        final ScoreMap<String> scores = new ConcurrentScoreMap<String>();
+        final int m = this.threads.size();
+        for (final Map.Entry<RSSMessage, List<Integer>> entry: this.result.entrySet()) {
             int a = 0;
-            for (Integer i : entry.getValue()) a += i.intValue();
+            for (final Integer i : entry.getValue()) a += i.intValue();
             scores.inc(entry.getKey().getLink(), a * m / entry.getValue().size());
         }
         return scores;
@@ -118,27 +117,27 @@ public class SearchHub {
      * wait until all accumulation threads have terminated
      */
     public void waitTermination() {
-        for (SearchAccumulator t: threads) try {t.join();} catch (InterruptedException e) {}
+        for (final SearchAccumulator t: this.threads) try {t.join();} catch (final InterruptedException e) {}
     }
-    
+
     /**
      * return true if all accumulation threads have terminated
      * @return
      */
     public boolean isTerminated() {
-        for (SearchAccumulator t: threads) if (t.isAlive()) return false;
+        for (final SearchAccumulator t: this.threads) if (t.isAlive()) return false;
         return true;
     }
-    
+
     /**
      * return a hash code of the search hub.
      * This is computed using only the query string because that identifies the object
      */
     @Override
     public int hashCode() {
-        return query.hashCode();
+        return this.query.hashCode();
     }
-    
+
     /**
      * test method to add a list of SRU RSS services.
      * such services are provided by YaCy peers
@@ -148,32 +147,32 @@ public class SearchHub {
      * @param verify
      * @param global
      */
-    public static void addSRURSSServices(SearchHub search, String[] rssServices, int count, CrawlProfile.CacheStrategy verify, boolean global, String userAgent) {
-        for (String service: rssServices) {
-            SRURSSConnector accumulator = new SRURSSConnector(search, service, count, verify, global, userAgent);
+    public static void addSRURSSServices(final SearchHub search, final String[] rssServices, final int count, final CacheStrategy verify, final boolean global, final String userAgent) {
+        for (final String service: rssServices) {
+            final SRURSSConnector accumulator = new SRURSSConnector(search, service, count, verify, global, userAgent);
             accumulator.start();
             search.addAccumulator(accumulator);
         }
     }
-    
-    public static void main(String[] args) {
+
+    public static void main(final String[] args) {
         HTTPClient.setDefaultUserAgent("searchhub");
         HTTPClient.initConnectionManager();
-        
-        StringBuilder sb = new StringBuilder();
-        for (String s: args) sb.append(s).append(' ');
-        String query = sb.toString().trim();
-        SearchHub search = new SearchHub(query, 10000);
-        addSRURSSServices(search, SRURSSServicesList, 100, CrawlProfile.CacheStrategy.CACHEONLY, false, "searchhub");
-        try {Thread.sleep(100);} catch (InterruptedException e1) {}
+
+        final StringBuilder sb = new StringBuilder();
+        for (final String s: args) sb.append(s).append(' ');
+        final String query = sb.toString().trim();
+        final SearchHub search = new SearchHub(query, 10000);
+        addSRURSSServices(search, SRURSSServicesList, 100, CacheStrategy.CACHEONLY, false, "searchhub");
+        try {Thread.sleep(100);} catch (final InterruptedException e1) {}
         search.waitTermination();
-        ScoreMap<String> result = search.getResults();
-        Iterator<String> i = result.keys(true);
+        final ScoreMap<String> result = search.getResults();
+        final Iterator<String> i = result.keys(true);
         String u;
         while (i.hasNext()) {
             u = i.next();
             System.out.println("[" + result.get(u) + "] " + u);
         }
-        try {HTTPClient.closeConnectionManager();} catch (InterruptedException e) { e.printStackTrace(); }
+        try {HTTPClient.closeConnectionManager();} catch (final InterruptedException e) { e.printStackTrace(); }
     }
 }

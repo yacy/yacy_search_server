@@ -70,7 +70,7 @@ function addHover() {
   }
 }
 
-function statistics(offset, itemscount, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount) {
+function statistics(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase) {
   if (offset >= 0) document.getElementById("resultsOffset").firstChild.nodeValue = offset;
   if (itemscount >= 0) document.getElementById("itemscount").firstChild.nodeValue = itemscount;
   document.getElementById("totalcount").firstChild.nodeValue = totalcount;
@@ -79,4 +79,42 @@ function statistics(offset, itemscount, totalcount, localResourceSize, remoteRes
   document.getElementById("remoteResourceSize").firstChild.nodeValue = remoteResourceSize;
   document.getElementById("remoteIndexCount").firstChild.nodeValue = remoteIndexCount;
   document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
+  // compose page navigation
+
+  resnav = "";
+  thispage = offset / itemsperpage;
+            if (thispage == 0) {
+            	resnav += ("<img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" />&nbsp;");
+            } else {
+            	resnav += ("<a id=\"prevpage\" href=\"");
+                resnav += (QueryParams.navurl("html", thispage - 1, theQuery, null, originalUrlMask, navigation));
+            	resnav += ("\"><img src=\"env/grafics/navdl.gif\" alt=\"arrowleft\" width=\"16\" height=\"16\" /></a>&nbsp;");
+            }
+            numberofpages = Math.min(10, 1 + ((indexcount - 1) / itemsperpage));
+            
+            for (i = 0; i < numberofpages; i++) {
+                if (i == thispage) {
+                    resnav += "<img src=\"env/grafics/navs";
+                    resnav += (i + 1);
+                    resnav += (".gif\" alt=\"page");
+                    resnav += (i + 1);
+                    resnav += ("\" width=\"16\" height=\"16\" />&nbsp;");
+                } else {
+                    resnav += ("<a href=\"");
+                    resnav += (QueryParams.navurl("html", i, theQuery, null, originalUrlMask, navigation));
+                    resnav += ("\"><img src=\"env/grafics/navd");
+                    resnav += (i + 1);
+                    resnav += (".gif\" alt=\"page");
+                    resnav += (i + 1);
+                    resnav += ("\" width=\"16\" height=\"16\" /></a>&nbsp;");
+                }
+            }
+            if (thispage >= numberofpages) {
+            	resnav += ("<img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" />");
+            } else {
+                resnav += ("<a id=\"nextpage\" href=\"");
+                resnav += (QueryParams.navurl("html", thispage + 1, theQuery, null, originalUrlMask, navigation));
+                resnav += ("\"><img src=\"env/grafics/navdr.gif\" alt=\"arrowright\" width=\"16\" height=\"16\" /></a>");
+            }
+  document.getElementById("resNav").firstChild.nodeValue = resnav;
 }

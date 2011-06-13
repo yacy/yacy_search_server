@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -33,13 +33,13 @@ import java.util.Iterator;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.RotateIterator;
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.MetadataRepository;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
@@ -48,20 +48,20 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexControlURLs_p {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
-        
+
         final serverObjects prop = new serverObjects();
-        
+
         // set default values
         prop.put("urlstring", "");
         prop.put("urlhash", "");
         prop.put("result", "");
         String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
         int i = 0;
-        for (String s: sb.indexSegments.segmentNames()) {
+        for (final String s: sb.indexSegments.segmentNames()) {
             prop.put("segments_" + i + "_name", s);
             prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
             i++;
@@ -75,13 +75,13 @@ public class IndexControlURLs_p {
         prop.put("statistics_lines", 100);
         prop.put("statisticslines", 0);
         prop.put("reload", 0);
-        
+
         // do segment selection
         if (post != null && post.containsKey("segment")) {
             // default values
             segmentName = post.get("segment", segmentName).trim();
             i= 0;
-            for (String s: sb.indexSegments.segmentNames()) {
+            for (final String s: sb.indexSegments.segmentNames()) {
                 prop.put("segments_" + i + "_name", s);
                 prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
                 i++;
@@ -89,7 +89,7 @@ public class IndexControlURLs_p {
             prop.put("segments", i);
             segment = sb.indexSegments.segment(segmentName);
         }
-        
+
         // show export messages
         final MetadataRepository.Export export = segment.urlMetadata().export();
         if ((export != null) && (export.isAlive())) {
@@ -121,15 +121,15 @@ public class IndexControlURLs_p {
                 }
             }
         }
-        
+
         if (post == null || env == null) {
             return prop; // nothing to do
         }
-        
+
         // post values that are set on numerous input fields with same name
         String urlstring = post.get("urlstring", "").trim();
         String urlhash = post.get("urlhash", "").trim();
-        
+
         if (!urlstring.startsWith("http://") &&
             !urlstring.startsWith("https://") &&
             !urlstring.startsWith("ftp://") &&
@@ -141,7 +141,7 @@ public class IndexControlURLs_p {
         prop.put("result", " ");
 
         if (post.containsKey("urlhashdeleteall")) {
-            i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, CrawlProfile.CacheStrategy.IFEXIST);
+            i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, CacheStrategy.IFEXIST);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
             prop.put("lurlexport", 0);
             prop.put("reload", 0);
@@ -215,7 +215,7 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<URIMetadataRow> entryIt = new RotateIterator<URIMetadataRow>(segment.urlMetadata().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax()); 
+                final Iterator<URIMetadataRow> entryIt = new RotateIterator<URIMetadataRow>(segment.urlMetadata().entries(true, urlhash), ASCII.String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax());
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
                 URIMetadataRow entry;
                 i = 0;
@@ -242,7 +242,7 @@ public class IndexControlURLs_p {
             prop.put("lurlexport", 0);
             prop.put("reload", 0);
         }
-        
+
         if (post.containsKey("lurlexport")) {
             // parse format
             int format = 0;
@@ -251,7 +251,7 @@ public class IndexControlURLs_p {
             if (fname.endsWith("text")) format = 0;
             if (fname.endsWith("html")) format = 1;
             if (fname.endsWith("rss")) format = 2;
-            
+
             // extend export file name
 			String s = post.get("exportfile", "");
 			if (s.indexOf('.') < 0) {
@@ -267,16 +267,16 @@ public class IndexControlURLs_p {
 			prop.put("lurlexport_exportfile", s);
 			prop.put("lurlexport_urlcount", running.count());
 			if ((running != null) && (running.failed() == null)) {
-				prop.put("lurlexport", 2);			    
+				prop.put("lurlexport", 2);
 			}
 			prop.put("reload", 1);
         }
-        
+
         if (post.containsKey("deletedomain")) {
-            String hp = post.get("hashpart");
+            final String hp = post.get("hashpart");
             try {
                 segment.urlMetadata().deleteDomain(hp);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // TODO Auto-generated catch block
                 Log.logException(e);
             }
@@ -284,14 +284,14 @@ public class IndexControlURLs_p {
             post.put("statistics", "");
             prop.put("reload", 0);
         }
-        
+
         if (post.containsKey("statistics")) {
-            int count = post.getInt("lines", 100);
+            final int count = post.getInt("lines", 100);
             Iterator<MetadataRepository.HostStat> statsiter;
             prop.put("statistics_lines", count);
             int cnt = 0;
             try {
-                MetadataRepository metadata = segment.urlMetadata();
+                final MetadataRepository metadata = segment.urlMetadata();
                 statsiter = metadata.statistics(count, metadata.urlSampleScores(metadata.domainSampleCollector()));
                 boolean dark = true;
                 MetadataRepository.HostStat hs;
@@ -305,7 +305,7 @@ public class IndexControlURLs_p {
                     dark = !dark;
                     cnt++;
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 Log.logException(e);
             }
             prop.put("statisticslines_domains", cnt);
@@ -313,13 +313,13 @@ public class IndexControlURLs_p {
             prop.put("lurlexport", 0);
             prop.put("reload", 0);
         }
-        
+
         // insert constants
         prop.putNum("ucount", segment.urlMetadata().size());
         // return rewrite properties
         return prop;
     }
-    
+
     private static serverObjects genUrlProfile(final Segment segment, final URIMetadataRow entry, final String urlhash) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {

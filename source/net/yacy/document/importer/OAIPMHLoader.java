@@ -2,19 +2,19 @@
  *  OAIPMHLoader
  *  Copyright 2009 by Michael Peter Christen
  *  First released 30.09.2009 at http://yacy.net
- *  
+ *
  *  This is a part of YaCy, a peer-to-peer based web search engine
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -25,11 +25,10 @@ package net.yacy.document.importer;
 import java.io.File;
 import java.io.IOException;
 
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
-
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 
 
@@ -43,22 +42,22 @@ public class OAIPMHLoader {
 
     private final DigestURI source;
     private final ResumptionToken resumptionToken;
-    
-    public OAIPMHLoader(LoaderDispatcher loader, DigestURI source, File targetDir, String filePrefix) throws IOException {
+
+    public OAIPMHLoader(final LoaderDispatcher loader, final DigestURI source, final File targetDir, final String filePrefix) throws IOException {
         this.source = source;
-        
+
         // load the file from the net
-        Response response = loader.load(loader.request(source, false, true), CrawlProfile.CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
-        byte[] b = response.getContent();
+        final Response response = loader.load(loader.request(source, false, true), CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
+        final byte[] b = response.getContent();
         this.resumptionToken = new ResumptionToken(source, b);
         //System.out.println("*** ResumptionToken = " + this.resumptionToken.toString());
-        File f1 = new File(targetDir, OAIPMHImporter.filename4Source(source));
-        File f0 = new File(targetDir, f1.getName() + ".tmp");
-        
+        final File f1 = new File(targetDir, OAIPMHImporter.filename4Source(source));
+        final File f0 = new File(targetDir, f1.getName() + ".tmp");
+
         // transaction-safe writing
         FileUtils.copy(b, f0);
         f0.renameTo(f1);
-        
+
         /*
         SurrogateReader sr = new SurrogateReader(new ByteArrayInputStream(b), 100);
         Thread srt = new Thread(sr);
@@ -72,15 +71,15 @@ public class OAIPMHLoader {
         } catch (InterruptedException e) {}
         */
     }
-    
+
     public ResumptionToken getResumptionToken() {
         return this.resumptionToken;
     }
 
     public String source() {
-        return source.toNormalform(true, false);
+        return this.source.toNormalform(true, false);
     }
-    
+
     public static StringBuilder escape(final String s) {
         final int len = s.length();
         final StringBuilder sbuf = new StringBuilder(len + 10);
@@ -117,9 +116,9 @@ public class OAIPMHLoader {
                 case '%':
                     if (i + 2 < l) {
                         ch = s.charAt(++i);
-                        int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
+                        final int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
                         ch = s.charAt(++i);
-                        int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
+                        final int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
                         b = (hb << 4) | lb;
                     } else {
                         b = ch;

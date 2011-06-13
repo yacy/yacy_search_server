@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -42,6 +42,7 @@ import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -55,18 +56,16 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
-
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.search.AccessTracker;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
+import de.anomic.search.ResultEntry;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
-import de.anomic.search.ResultEntry;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -84,7 +83,7 @@ public final class search {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         sb.remoteSearchLastAccess = System.currentTimeMillis();
-        
+
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
@@ -152,7 +151,7 @@ public final class search {
             prop.put("references", "");
         	return prop;
         }
-        
+
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.remoteSearchTracker.get(client);
         if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
@@ -176,18 +175,18 @@ public final class search {
             prop.put("searchtime", "0");
             return prop;
         }
-        
+
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(100);
 
         EventTracker.delete(EventTracker.EClass.SEARCH);
         final HandleSet abstractSet = (abstracts.length() == 0 || abstracts.equals("auto")) ? null : QueryParams.hashes2Set(abstracts);
-        
+
         // store accessing peer
         yacySeed remoteSeed;
         try {
             remoteSeed = yacySeed.genRemoteSeed(oseed, key, false, client);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             yacyCore.log.logInfo("yacy.search: access with bad seed: " + e.getMessage());
             remoteSeed = null;
         }
@@ -201,10 +200,10 @@ public final class search {
         final HandleSet queryhashes = QueryParams.hashes2Set(query);
         final HandleSet excludehashes = (exclude.length() == 0) ? new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0) : QueryParams.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
-        
+
     	// prepare a search profile
         final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(ContentDomain.contentdomParser(contentdom)) : new RankingProfile("", profile);
-        
+
         // prepare an abstract result
         final StringBuilder indexabstract = new StringBuilder(6000);
         int indexabstractContainercount = 0;
@@ -214,7 +213,7 @@ public final class search {
         ArrayList<WeakPriorityBlockingQueue.Element<ResultEntry>> accu = null;
         if (query.length() == 0 && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
-            Segment indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+            final Segment indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
             theQuery = new QueryParams(
                     null,
                     abstractSet,
@@ -227,7 +226,7 @@ public final class search {
                     ContentDomain.contentdomParser(contentdom),
                     language,
                     "", // no navigation
-                    CrawlProfile.CacheStrategy.CACHEONLY,
+                    CacheStrategy.CACHEONLY,
                     count,
                     0,
                     filter,
@@ -235,7 +234,7 @@ public final class search {
                     -1,
                     null,
                     false,
-                    sitehash, 
+                    sitehash,
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,
@@ -250,7 +249,7 @@ public final class search {
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
             final TreeMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2Handles(urls));
-            
+
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.COLLECTION, "", incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
                 final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = incc.entrySet().iterator();
@@ -268,37 +267,37 @@ public final class search {
                     indexabstract.append(serverCore.CRLF_STRING);
                 }
             }
-            
+
             prop.put("indexcount", "");
             prop.put("joincount", "0");
             prop.put("references", "");
-            
+
         } else {
             // retrieve index containers from search request
             theQuery = new QueryParams(
-                    null, 
-                    queryhashes, 
-                    excludehashes, 
+                    null,
+                    queryhashes,
+                    excludehashes,
                     null,
                     snippetPattern,
                     null,
-                    maxdist, 
+                    maxdist,
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
                     language,
                     "", // no navigation
-                    CrawlProfile.CacheStrategy.CACHEONLY, 
-                    count, 
-                    0, 
-                    filter, 
-                    QueryParams.SEARCHDOM_LOCAL, 
-                    -1, 
-                    constraint, 
+                    CacheStrategy.CACHEONLY,
+                    count,
+                    0,
+                    filter,
+                    QueryParams.SEARCHDOM_LOCAL,
+                    -1,
+                    constraint,
                     false,
                     sitehash,
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
-                    client, 
+                    client,
                     false,
                     sb.indexSegments.segment(Segments.Process.PUBLIC),
                     rankingProfile,
@@ -307,10 +306,10 @@ public final class search {
                     );
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             yacyChannel.channels(yacyChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
-            
+
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime, (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0), (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
-            
+
             // set statistic details of search result and find best result index set
             joincount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount();
             prop.put("joincount", Integer.toString(joincount));
@@ -339,7 +338,7 @@ public final class search {
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
-                
+
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
@@ -360,12 +359,12 @@ public final class search {
                 }
             }
             if (partitions > 0) sb.searchQueriesGlobal += 1d / partitions; // increase query counter
-            
+
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(5);
+            final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(5);
             final StringBuilder refstr = new StringBuilder(6000);
-            Iterator<String> navigatorIterator = topicNavigator.keys(false);
+            final Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;
             String name;
             while (i < 5 && navigatorIterator.hasNext()) {
@@ -377,10 +376,10 @@ public final class search {
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.REFERENCECOLLECTION, "", i, System.currentTimeMillis() - timer), false);
         }
         prop.put("indexabstract", indexabstract.toString());
-        
+
         // prepare result
         if (joincount == 0 || accu == null || accu.isEmpty()) {
-            
+
             // no results
             prop.put("links", "");
             prop.put("linkcount", "0");
@@ -404,7 +403,7 @@ public final class search {
             prop.put("linkcount", accu.size());
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.RESULTLIST, "", accu.size(), System.currentTimeMillis() - timer), false);
         }
-        
+
         // add information about forward peers
         prop.put("fwhop", ""); // hops (depth) of forwards that had been performed to construct this result
         prop.put("fwsrc", ""); // peers that helped to construct this result
@@ -417,7 +416,7 @@ public final class search {
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();
         theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.result().getSnippetComputationTime();
         AccessTracker.add(AccessTracker.Location.remote, theQuery);
-        
+
         // update the search tracker
         synchronized (trackerHandles) {
             trackerHandles.add(theQuery.time); // thats the time when the handle was created
@@ -426,14 +425,14 @@ public final class search {
         }
         sb.remoteSearchTracker.put(client, trackerHandles);
         if (MemoryControl.shortStatus()) sb.remoteSearchTracker.clear();
-        
+
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +
                 QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");
- 
+
         prop.put("searchtime", System.currentTimeMillis() - timestamp);
 
         final int links = prop.getInt("linkcount",0);

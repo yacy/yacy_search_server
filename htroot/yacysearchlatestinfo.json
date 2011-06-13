@@ -1,5 +1,6 @@
 {
 "itemscount": "#[itemscount]#",
+"itemsperpage": "#[itemsperpage]#",
 "totalcount": "#[totalcount]#",
 "localResourceSize": "#[localResourceSize]#",
 "localMissCount": "#[localMissCount]#",

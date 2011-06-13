@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -36,12 +36,11 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
-
 import de.anomic.search.ContentDomain;
 import de.anomic.search.MediaSnippet;
 import de.anomic.search.QueryParams;
-import de.anomic.search.SearchEvent;
 import de.anomic.search.ResultEntry;
+import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -56,18 +55,18 @@ import de.anomic.yacy.graphics.ProfilingGraph;
 
 
 public class yacysearchitem {
-    
+
     private static final String SHORTEN_SUFFIX = "...";
     private static final int SHORTEN_SUFFIX_LENGTH = SHORTEN_SUFFIX.length();
     private static final int MAX_NAME_LENGTH = 60;
     private static final int MAX_URL_LENGTH = 120;
 
     private static boolean col = true;
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         final String eventID = post.get("eventID", "");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
@@ -82,7 +81,7 @@ public class yacysearchitem {
         prop.put("references", "0");
         prop.put("rssreferences", "0");
         prop.put("dynamic", "0");
-        
+
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
@@ -90,19 +89,20 @@ public class yacysearchitem {
             return prop;
         }
         final QueryParams theQuery = theSearch.getQuery();
-        
+
         // dynamically update count values
         final int totalcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();
         final int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
         prop.put("offset", offset);
         prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theQuery.neededResults() : item + 1, totalcount)));
+        prop.put("itemsperpage", Formatter.number(theQuery.itemsPerPage));
         prop.put("totalcount", Formatter.number(totalcount, true));
         prop.put("localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalIndexCount(), true));
         prop.put("localMissCount", Formatter.number(theSearch.getRankingResult().getMissCount(), true));
         prop.put("remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
-        
+
         final String target = sb.getConfig(SwitchboardConstants.SEARCH_TARGET, "_self");
         if (theQuery.contentdom == ContentDomain.TEXT) {
             // text search
@@ -120,7 +120,7 @@ public class yacysearchitem {
                 Log.logException(e1);
                 faviconURL = null;
             }
-            
+
             prop.put("content", 1); // switch on specific content
             prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) ? 1 : 0);
             prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
@@ -132,7 +132,7 @@ public class yacysearchitem {
             prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + ASCII.String(result.hash()) + "&urlmaskfilter=.*");
             prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?query=" + theQuery.queryString.replace(' ', '+') + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + ASCII.String(result.hash()) + "&urlmaskfilter=.*");
             prop.put("content_authorized_urlhash", ASCII.String(result.hash()));
-            String resulthashString = ASCII.String(result.hash());
+            final String resulthashString = ASCII.String(result.hash());
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
@@ -175,7 +175,7 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
-            SearchEvent.HeuristicResult heuristic = theSearch.getHeuristic(result.hash());
+            final SearchEvent.HeuristicResult heuristic = theSearch.getHeuristic(result.hash());
             if (heuristic == null) {
                 prop.put("content_heuristic", 0);
             } else {
@@ -189,7 +189,7 @@ public class yacysearchitem {
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.FINALIZATION, "" + item, 0, 0), false);
             final String ext = resultURL.getFileExtension().toLowerCase();
             if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
-                String license = sb.licensedURLs.aquireLicense(resultURL);
+                final String license = sb.licensedURLs.aquireLicense(resultURL);
                 prop.put("content_code", license);
             } else {
                 prop.put("content_code", "");
@@ -234,7 +234,7 @@ public class yacysearchitem {
             theQuery.transmitcount = item + 1;
             return prop;
         }
-        
+
         if ((theQuery.contentdom == ContentDomain.AUDIO) ||
             (theQuery.contentdom == ContentDomain.VIDEO) ||
             (theQuery.contentdom == ContentDomain.APP)) {
@@ -243,7 +243,7 @@ public class yacysearchitem {
             // generate result object
             final ResultEntry result = theSearch.oneResult(item, 500);
             if (result == null) return prop; // no content
-            
+
             prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
             final List<MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;
@@ -265,10 +265,10 @@ public class yacysearchitem {
             theQuery.transmitcount = item + 1;
             return prop;
         }
-        
+
         return prop;
     }
-    
+
     private static String shorten(final String s, final int length) {
         final String ret;
         if (s.length() <= length) {
@@ -289,7 +289,7 @@ public class yacysearchitem {
         }
         return ret;
     }
-    
+
     private static String sizename(int size) {
         if (size < 1024) return size + " bytes";
         size = size / 1024;

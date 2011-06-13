@@ -28,11 +28,13 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.document.Document;
@@ -48,8 +50,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.repository.LoaderDispatcher;
-
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.yacy.yacySearch;
 
@@ -82,29 +82,29 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public static class Cache {
         private final ARC<String, String> cache;
         public Cache() {
-            cache = new ConcurrentARC<String, String>(maxCache, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
+            this.cache = new ConcurrentARC<String, String>(maxCache, Math.max(32, 4 * Runtime.getRuntime().availableProcessors()));
         }
         public void put(final String wordhashes, final String urlhash, final String snippet) {
             // generate key
             final String key = urlhash + wordhashes;
 
             // do nothing if snippet is known or otherwise learn new snippet
-            cache.insertIfAbsent(key, snippet);
+            this.cache.insertIfAbsent(key, snippet);
         }
-        
+
         public String get(final String wordhashes, final String urlhash) {
             // generate key
             final String key = urlhash + wordhashes;
-            return cache.get(key);
+            return this.cache.get(key);
         }
-        
+
         public boolean contains(final String wordhashes, final String urlhash) {
-            return cache.containsKey(urlhash + wordhashes);
+            return this.cache.containsKey(urlhash + wordhashes);
         }
     }
-    
+
     public static final Cache snippetsCache = new Cache();
-    
+
     public static enum ResultClass {
         SOURCE_CACHE(false),
         SOURCE_FILE(false),
@@ -124,7 +124,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             return this.fail;
         }
     }
-    
+
     private byte[] urlhash;
     private String line;
     private String error;
@@ -142,7 +142,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             final LoaderDispatcher loader,
             final URIMetadataRow.Components comp,
             final HandleSet queryhashes,
-            final CrawlProfile.CacheStrategy cacheStrategy,
+            final CacheStrategy cacheStrategy,
             final boolean pre,
             final int snippetMaxLength,
             final int maxDocLen,
@@ -154,7 +154,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             init(url.hash(), null, ResultClass.ERROR_NO_HASH_GIVEN, "no query hashes given");
             return;
         }
-        
+
         // try to get snippet from snippetCache
         ResultClass source = ResultClass.SOURCE_CACHE;
         final String wordhashes = yacySearch.set2string(queryhashes);
@@ -165,8 +165,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             init(url.hash(), snippetLine, source, null);
             return;
         }
-        
-        
+
+
         /* ===========================================================================
          * LOAD RESOURCE DATA
          * =========================================================================== */
@@ -175,7 +175,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         try {
             // first try to get the snippet from metadata
             String loc;
-            boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
+            final boolean noCacheUsage = url.isFile() || url.isSMB() || cacheStrategy == null;
             if (containsAllHashes(loc = comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
                 init(url.hash(), loc, ResultClass.SOURCE_METADATA, null);
@@ -194,14 +194,14 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 return;
             } else {
                 // try to load the resource from the cache
-                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), noCacheUsage ? CrawlProfile.CacheStrategy.NOCACHE : cacheStrategy, Long.MAX_VALUE, true);
+                response = loader == null ? null : loader.load(loader.request(url, true, reindexing), noCacheUsage ? CacheStrategy.NOCACHE : cacheStrategy, Long.MAX_VALUE, true);
                 if (response == null) {
                     // in case that we did not get any result we can still return a success when we are not allowed to go online
                     if (cacheStrategy == null || cacheStrategy.mustBeOffline()) {
                         init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "omitted network load (not allowed), no cache entry");
                         return;
                     }
-                    
+
                     // if it is still not available, report an error
                     init(url.hash(), null, ResultClass.ERROR_RESOURCE_LOADING, "error loading resource from net, no cache entry");
                     return;
@@ -215,8 +215,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             //Log.logException(e);
             init(url.hash(), null, ResultClass.ERROR_SOURCE_LOADING, "error loading resource: " + e.getMessage());
             return;
-        } 
-        
+        }
+
         /* ===========================================================================
          * PARSE RESOURCE
          * =========================================================================== */
@@ -231,10 +231,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             init(url.hash(), null, ResultClass.ERROR_PARSER_FAILED, "parser error/failed"); // cannot be parsed
             return;
         }
-        
+
         /* ===========================================================================
          * COMPUTE SNIPPET
-         * =========================================================================== */    
+         * =========================================================================== */
         // we have found a parseable non-empty file: use the lines
 
         // compute snippet from text
@@ -250,25 +250,25 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             tsr = new SnippetExtractor(sentences, queryhashes, snippetMaxLength);
             textline = tsr.getSnippet();
             remainingHashes =  tsr.getRemainingWords();
-        } catch (UnsupportedOperationException e) {
+        } catch (final UnsupportedOperationException e) {
             init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
             return;
         }
-        
+
         // compute snippet from media
         //String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
         //String videoline = computeMediaSnippet(document.getVideolinks(), queryhashes);
         //String appline = computeMediaSnippet(document.getApplinks(), queryhashes);
         //String hrefline = computeMediaSnippet(document.getAnchors(), queryhashes);
         //String imageline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
-        
+
         snippetLine = "";
         //if (audioline != null) line += (line.length() == 0) ? audioline : "<br />" + audioline;
         //if (videoline != null) line += (line.length() == 0) ? videoline : "<br />" + videoline;
         //if (appline   != null) line += (line.length() == 0) ? appline   : "<br />" + appline;
         //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
         if (textline  != null) snippetLine += (snippetLine.length() == 0) ? textline  : "<br />" + textline;
-        
+
         if (snippetLine == null || !remainingHashes.isEmpty()) {
             init(url.hash(), null, ResultClass.ERROR_NO_MATCH, "no matching snippet found");
             return;
@@ -277,42 +277,42 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
         // finally store this snippet in our own cache
         snippetsCache.put(wordhashes, urls, snippetLine);
-        
+
         document.close();
         init(url.hash(), snippetLine, source, null);
     }
-    
+
     private void init(final byte[] urlhash, final String line, final ResultClass errorCode, final String errortext) {
         this.urlhash = urlhash;
         this.line = line;
         this.resultStatus = errorCode;
         this.error = errortext;
     }
-    
+
     public boolean exists() {
-        return line != null;
+        return this.line != null;
     }
-    
+
     public String getLineRaw() {
-        return (line == null) ? "" : line;
+        return (this.line == null) ? "" : this.line;
     }
-    
+
     public String getError() {
-        return (error == null) ? "" : error.trim();
+        return (this.error == null) ? "" : this.error.trim();
     }
-    
+
     public ResultClass getErrorCode() {
-        return resultStatus;
+        return this.resultStatus;
     }
-    
+
     private final static Pattern splitPattern = Pattern.compile(" |-");
     public String getLineMarked(final HandleSet queryHashes) {
-        if (line == null) return "";
-        if (queryHashes == null || queryHashes.isEmpty()) return line.trim();
-        if (line.endsWith(".")) line = line.substring(0, line.length() - 1);
+        if (this.line == null) return "";
+        if (queryHashes == null || queryHashes.isEmpty()) return this.line.trim();
+        if (this.line.endsWith(".")) this.line = this.line.substring(0, this.line.length() - 1);
         final Iterator<byte[]> i = queryHashes.iterator();
         byte[] h;
-        final String[] words = splitPattern.split(line);
+        final String[] words = splitPattern.split(this.line);
         while (i.hasNext()) {
             h = i.next();
             for (int j = 0; j < words.length; j++) {
@@ -327,32 +327,32 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 }
             }
         }
-        final StringBuilder l = new StringBuilder(line.length() + queryHashes.size() * 8);
-        for (int j = 0; j < words.length; j++) {
-            l.append(words[j]);
+        final StringBuilder l = new StringBuilder(this.line.length() + queryHashes.size() * 8);
+        for (final String word : words) {
+            l.append(word);
             l.append(' ');
         }
         return l.toString().trim();
     }
 
-    public int compareTo(TextSnippet o) {
+    public int compareTo(final TextSnippet o) {
         return Base64Order.enhancedCoder.compare(this.urlhash, o.urlhash);
     }
-    
-    public int compare(TextSnippet o1, TextSnippet o2) {
+
+    public int compare(final TextSnippet o1, final TextSnippet o2) {
         return o1.compareTo(o2);
     }
-    
+
     @Override
     public int hashCode() {
         return ByteArray.hashCode(this.urlhash);
     }
-    
+
     @Override
     public String toString() {
-        return (line == null) ? "" : line;
+        return (this.line == null) ? "" : this.line;
     }
-    
+
     /**
      * mark words with &lt;b&gt;-tags
      * @param word the word to mark
@@ -367,8 +367,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         //especially p. 123 and p. 390/391 (in the German version of the 2nd edition)
 
         StringBuilder theWord = new StringBuilder(word);
-        StringBuilder prefix = new StringBuilder(40);
-        StringBuilder postfix = new StringBuilder(40);
+        final StringBuilder prefix = new StringBuilder(40);
+        final StringBuilder postfix = new StringBuilder(40);
         int len = 0;
 
         // cut off prefix if it contains of non-characters or non-numbers
@@ -422,7 +422,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         theWord.append(CharacterCoding.unicode2html(postfix.toString(), false));
         return theWord.toString();
     }
-    
+
     /**
      * words that already has been marked has index <code>(i % 2 == 1)</code>
      * words that has not yet been marked has index <code>(i % 2 == 0)</code>
@@ -431,7 +431,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * @author [DW], 08.11.2008
      */
     private static List<String> markedWordArrayList(String string){
-        List<String> al = new java.util.ArrayList<String>(1);
+        final List<String> al = new java.util.ArrayList<String>(1);
         Matcher m = p01.matcher(string);
         while (m.find()) {
             al.add(m.group(1));
@@ -442,7 +442,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         al.add(string);
         return al;
     }
-    
+
     private static boolean containsAllHashes(final String sentence, final HandleSet queryhashes) {
         final SortedMap<byte[], Integer> m = WordTokenizer.hashSentence(sentence, null);
         for (final byte[] b: queryhashes) {

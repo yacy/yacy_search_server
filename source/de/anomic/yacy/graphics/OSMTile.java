@@ -2,7 +2,7 @@
  *  OSMTile
  *  Copyright 2008 by Michael Peter Christen
  *  First released 12.02.2008 at http://yacy.net
- *  
+ *
  *  $LastChangedDate$
  *  $LastChangedRevision$
  *  $LastChangedBy$
@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -34,19 +34,18 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.visualization.RasterPlotter;
-
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Switchboard;
 
 public class OSMTile {
-    
+
     // helper methods to load map images from openstreetmap.org
-    
+
     /**
      * generate a image according to a given coordinate of a middle tile
      * and a width and height of tile numbers. The tile number width and height must
@@ -62,7 +61,7 @@ public class OSMTile {
         final int h = (height - 1) / 2;
         height = h * 2 + 1;
         final RasterPlotter m = new RasterPlotter(256 * width, 256 * height, RasterPlotter.DrawMode.MODE_REPLACE, "FFFFFF");
-        List<Place> tileLoader = new ArrayList<Place>();
+        final List<Place> tileLoader = new ArrayList<Place>();
         Place place;
         // start tile loading concurrently
         for (int i = 0; i < width; i++) {
@@ -70,36 +69,36 @@ public class OSMTile {
                 place = new Place(m, t.xtile - w + i, t.ytile - h + j, 256 * i, 256 * j, t.zoom);
                 place.start();
                 tileLoader.add(place);
-                if (t.zoom >= 17) try {Thread.sleep(100);} catch (InterruptedException e) {} // be nice with tile server for uncached tiles
+                if (t.zoom >= 17) try {Thread.sleep(100);} catch (final InterruptedException e) {} // be nice with tile server for uncached tiles
             }
         }
         // wait until all tiles are loaded
-        for (Place p: tileLoader) try { p.join(); } catch (InterruptedException e) {}
+        for (final Place p: tileLoader) try { p.join(); } catch (final InterruptedException e) {}
         return m;
     }
-    
+
     static class Place extends Thread {
         RasterPlotter m;
         int xt, yt, xc, yc, z;
-        public Place(RasterPlotter m, int xt, int yt, int xc, int yc, int z) {
+        public Place(final RasterPlotter m, final int xt, final int yt, final int xc, final int yc, final int z) {
             this.m = m; this.xt = xt; this.yt = yt; this.xc = xc; this.yc = yc; this.z = z;
         }
         public void run() {
-            tileCoordinates t = new tileCoordinates(xt, yt, z);
+            final tileCoordinates t = new tileCoordinates(this.xt, this.yt, this.z);
             BufferedImage bi = null;
             for (int i = 0; i < 5; i++) {
                 bi = getSingleTile(t, i);
                 if (bi != null) {
-                    m.insertBitmap(bi, xc, yc);
+                    this.m.insertBitmap(bi, this.xc, this.yc);
                     return;
                 }
                 // don't DoS OSM when trying again
-                try {Thread.sleep(300 + 100 * i);} catch (InterruptedException e) {}
+                try {Thread.sleep(300 + 100 * i);} catch (final InterruptedException e) {}
             }
         }
     }
-    
-    public static BufferedImage getSingleTile(final tileCoordinates tile, int retry) {
+
+    public static BufferedImage getSingleTile(final tileCoordinates tile, final int retry) {
         DigestURI tileURL;
         try {
             tileURL = new DigestURI(tile.url(retry));
@@ -112,8 +111,8 @@ public class OSMTile {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;
             try {
-                entry = Switchboard.getSwitchboard().loader.load(Switchboard.getSwitchboard().loader.request(tileURL, false, false), CrawlProfile.CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
-            } catch (IOException e) {
+                entry = Switchboard.getSwitchboard().loader.load(Switchboard.getSwitchboard().loader.request(tileURL, false, false), CacheStrategy.IFEXIST, Long.MAX_VALUE, true);
+            } catch (final IOException e) {
                 Log.logWarning("OSMTile", "cannot load: " + e.getMessage());
                 return null;
             }
@@ -130,7 +129,7 @@ public class OSMTile {
     }
 
     public static class tileCoordinates {
-        
+
         int xtile, ytile, zoom;
 
         public tileCoordinates(final double lat, final double lon, final int zoom) {
@@ -139,18 +138,18 @@ public class OSMTile {
             this.xtile = (int) Math.floor((lon + 180) / 360 * (1 << zoom));
             this.ytile = (int) Math.floor((1 - Math.log(Math.tan(lat * RasterPlotter.PI180) + 1 / Math.cos(lat * RasterPlotter.PI180)) / Math.PI) / 2 * (1 << zoom));
         }
-        
+
         public tileCoordinates(final int xtile, final int ytile, final int zoom) {
             this.zoom = zoom;
             this.xtile = xtile;
             this.ytile = ytile;
         }
-        
-        public String url(int retry) {
+
+        public String url(final int retry) {
             // see http://wiki.openstreetmap.org/wiki/Public_Domain_Map
-            int hash = (xtile + 7 * ytile + 13 * zoom + retry) % 4;
-            String host = (hash == 3) ? "tile.openstreetmap.org" : ((char) ((int)'a' + hash)) + ".tile.openstreetmap.org";
-            String url = "http://" + host + "/" + zoom + "/" + xtile + "/" + ytile + ".png";
+            final int hash = (this.xtile + 7 * this.ytile + 13 * this.zoom + retry) % 4;
+            final String host = (hash == 3) ? "tile.openstreetmap.org" : ((char) ('a' + hash)) + ".tile.openstreetmap.org";
+            final String url = "http://" + host + "/" + this.zoom + "/" + this.xtile + "/" + this.ytile + ".png";
             //System.out.println("OSM URL = " + url);
             return url;
         }

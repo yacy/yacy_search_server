@@ -162,7 +162,7 @@ document.getElementById("Enter").value = "search again";
 	::
 	<p>No Results.</p>
 	::
-	<p>No Results. (length of search words must be at least 3 characters)</p>
+	<p>No Results. (length of search words must be at least 2 characters)</p>
 	::
 	<div id="results"></div>
 	<span id="resCounter" style="display: inline;"><strong id="resultsOffset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)#</span>
@@ -227,7 +227,7 @@ function latestinfo() {
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
       var rsp = eval("(" + self.xmlHttpReq.responseText + ")");
-      statistics(rsp.offset, rsp.itemscount, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount);
+      statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount);
     }
   }
   self.xmlHttpReq.send(null);

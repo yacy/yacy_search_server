@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -30,7 +30,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.util.EventTracker;
-
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
@@ -42,12 +41,12 @@ import de.anomic.yacy.graphics.ProfilingGraph;
 public class yacysearchtrailer {
 
     private static final int MAX_TOPWORDS = 12;
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        
+
         final String eventID = post.get("eventID", "");
-        
+
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
@@ -55,11 +54,11 @@ public class yacysearchtrailer {
             return prop;
         }
         final QueryParams theQuery = theSearch.getQuery();
-        
+
         // compose search navigation
 
         // namespace navigators
-        ScoreMap<String> namespaceNavigator = theSearch.getNamespaceNavigator();
+        final ScoreMap<String> namespaceNavigator = theSearch.getNamespaceNavigator();
         String name;
         int count;
         Iterator<String> navigatorIterator;
@@ -73,8 +72,8 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next();
                 count = namespaceNavigator.get(name);
                 prop.putJSON("nav-namespace_element_" + i + "_name", name);
-                prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
-                prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators));
+                prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
+                prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + "inurl:" + name, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-namespace_element_" + i + "_count", count);
                 prop.put("nav-namespace_element_" + i + "_modifier", "inurl:" + name);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
@@ -84,9 +83,9 @@ public class yacysearchtrailer {
             i--;
             prop.put("nav-namespace_element_" + i + "_nl", 0);
         }
-        
+
         // host navigators
-        ScoreMap<String> hostNavigator = theSearch.getHostNavigator();
+        final ScoreMap<String> hostNavigator = theSearch.getHostNavigator();
         if (hostNavigator == null || hostNavigator.isEmpty()) {
             prop.put("nav-domains", 0);
         } else {
@@ -97,8 +96,8 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next();
                 count = hostNavigator.get(name);
                 prop.putJSON("nav-domains_element_" + i + "_name", name);
-                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
-                prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + name, theQuery.urlMask.toString(), theQuery.navigators));
+                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + name, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
+                prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + "site:" + name, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-domains_element_" + i + "_count", count);
                 prop.put("nav-domains_element_" + i + "_modifier", "site:" + name);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
@@ -108,9 +107,9 @@ public class yacysearchtrailer {
             i--;
             prop.put("nav-domains_element_" + i + "_nl", 0);
         }
-        
+
         // author navigators
-        ScoreMap<String> authorNavigator = theSearch.getAuthorNavigator();
+        final ScoreMap<String> authorNavigator = theSearch.getAuthorNavigator();
         if (authorNavigator == null || authorNavigator.isEmpty()) {
             prop.put("nav-authors", 0);
         } else {
@@ -123,8 +122,8 @@ public class yacysearchtrailer {
                 count = authorNavigator.get(name);
                 anav = (name.indexOf(' ') < 0) ? "author:" + name : "author:'" + name.replace(" ", "+") + "'";
                 prop.putJSON("nav-authors_element_" + i + "_name", name);
-                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + " (" + count + ")</a>");
-                prop.putJSON("nav-authors_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators));
+                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
+                prop.putJSON("nav-authors_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + anav, theQuery.urlMask.toString(), theQuery.navigators).toString());
                 prop.put("nav-authors_element_" + i + "_count", count);
                 prop.put("nav-authors_element_" + i + "_modifier", "author:'" + name + "'");
                 prop.put("nav-authors_element_" + i + "_nl", 1);
@@ -136,7 +135,7 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(MAX_TOPWORDS);
+        final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(MAX_TOPWORDS);
         if (topicNavigator == null || topicNavigator.isEmpty()) {
             prop.put("nav-topics", "0");
         } else {
@@ -150,9 +149,9 @@ public class yacysearchtrailer {
                 if (name != null) {
                     prop.putJSON("nav-topics_element_" + i + "_name", name);
                     prop.put("nav-topics_element_" + i + "_url",
-                            "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">" + name + "</a>");
+                            "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + "</a>");
                             //+"<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.queryStringForUrl() + "+-" + name, theQuery.urlMask.toString(), theQuery.navigators) + "\">-</a>")*/;
-                    prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators));
+                    prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + name, theQuery.urlMask.toString(), theQuery.navigators).toString());
                     prop.put("nav-topics_element_" + i + "_count", count);
                     prop.put("nav-topics_element_" + i + "_modifier", name);
                     prop.put("nav-topics_element_" + i + "_nl", 1);
@@ -163,10 +162,10 @@ public class yacysearchtrailer {
             i--;
             prop.put("nav-topics_element_" + i + "_nl", 0);
         }
-        
+
         // about box
-        String aboutBody = env.getConfig("about.body", "");
-        String aboutHeadline = env.getConfig("about.headline", "");
+        final String aboutBody = env.getConfig("about.body", "");
+        final String aboutHeadline = env.getConfig("about.headline", "");
         if ((aboutBody.length() == 0 && aboutHeadline.length() == 0) ||
             theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount() == 0) {
             prop.put("nav-about", 0);
@@ -175,7 +174,7 @@ public class yacysearchtrailer {
             prop.put("nav-about_headline", aboutHeadline);
             prop.put("nav-about_body", aboutBody);
         }
-        
+
         // category: location search
         // show only if there is a location database present and if there had been any search results
         if (LibraryProvider.geoLoc.locations() == 0 ||
@@ -184,11 +183,11 @@ public class yacysearchtrailer {
         } else {
             prop.put("cat-location", 1);
             prop.put("cat-location_query", theQuery.queryString(true));
-            prop.put("cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));        
+            prop.put("cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));
         }
-        
+
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);
-        
+
         return prop;
     }
 

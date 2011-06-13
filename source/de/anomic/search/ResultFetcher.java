@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
@@ -45,7 +46,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.WorkTables;
 import de.anomic.http.client.Cache;
 import de.anomic.yacy.yacySeedDB;
@@ -308,11 +308,11 @@ public class ResultFetcher {
         private final long timeout; // the date until this thread should try to work
         private long lastLifeSign; // when the last time the run()-loop was executed
         private final int id;
-        private final CrawlProfile.CacheStrategy cacheStrategy;
+        private final CacheStrategy cacheStrategy;
         private final int neededResults;
         private final Pattern snippetPattern;
 
-        public Worker(final int id, final long maxlifetime, final CrawlProfile.CacheStrategy cacheStrategy, final Pattern snippetPattern, final int neededResults) {
+        public Worker(final int id, final long maxlifetime, final CacheStrategy cacheStrategy, final Pattern snippetPattern, final int neededResults) {
             this.id = id;
             this.cacheStrategy = cacheStrategy;
             this.lastLifeSign = System.currentTimeMillis();
@@ -390,7 +390,7 @@ public class ResultFetcher {
         }
     }
 
-    protected ResultEntry fetchSnippet(final URIMetadataRow page, final CrawlProfile.CacheStrategy cacheStrategy) {
+    protected ResultEntry fetchSnippet(final URIMetadataRow page, final CacheStrategy cacheStrategy) {
         // Snippet Fetching can has 3 modes:
         // 0 - do not fetch snippets
         // 1 - fetch snippets offline only

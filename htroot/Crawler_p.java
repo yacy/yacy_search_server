@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -41,20 +41,20 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
-
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL.FailCategory;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.BookmarkHelper;
-import de.anomic.data.WorkTables;
 import de.anomic.data.BookmarksDB;
 import de.anomic.data.ListManager;
+import de.anomic.data.WorkTables;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -67,17 +67,17 @@ public class Crawler_p {
 
     // this servlet does NOT create the Crawler servlet page content!
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
-        // inital values for AJAX Elements (without JavaScript) 
+        // inital values for AJAX Elements (without JavaScript)
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
         prop.put("urlpublictextSize", 0);
         prop.put("rwipublictextSize", 0);
         prop.put("list", "0");
-        prop.put("loaderSize", 0);        
+        prop.put("loaderSize", 0);
         prop.put("loaderMax", 0);
         prop.put("list-loader", 0);
         prop.put("localCrawlSize", sb.crawlQueues.coreCrawlJobSize());
@@ -88,11 +88,11 @@ public class Crawler_p {
         prop.put("remoteCrawlState", "");
         prop.put("list-remote", 0);
         prop.put("forwardToCrawlStart", "0");
-        
+
         // get segment
         Segment indexSegment = null;
         if (post != null && post.containsKey("segment")) {
-            String segmentName = post.get("segment");
+            final String segmentName = post.get("segment");
             if (sb.indexSegments.segmentExist(segmentName)) {
                 indexSegment = sb.indexSegments.segment(segmentName);
             }
@@ -100,9 +100,9 @@ public class Crawler_p {
             // take default segment
             indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
-        
+
         prop.put("info", "0");
-            
+
         if (post != null && post.containsKey("continue")) {
             // continue queue
             final String queue = post.get("continue", "");
@@ -122,7 +122,7 @@ public class Crawler_p {
                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
         }
-        
+
         if (post != null && post.containsKey("crawlingstart")) {
             // init crawl
             if (sb.peers == null) {
@@ -142,19 +142,19 @@ public class Crawler_p {
                 if (crawlingFile != null && crawlingFile.exists()) {
                     post.remove("crawlingFile$file");
                 }
-                
+
                 // normalize URL
                 DigestURI crawlingStartURL = null;
                 if (crawlingFile == null) try {crawlingStartURL = new DigestURI(crawlingStart);} catch (final MalformedURLException e1) {Log.logException(e1);}
                 crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
-               
+
                 // set new properties
                 final boolean fullDomain = "domain".equals(post.get("range", "wide")); // special property in simple crawl start
                 final boolean subPath    = "subpath".equals(post.get("range", "wide")); // special property in simple crawl start
-                
+
                 // set the crawl filter
                 String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL);
-                String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
+                final String newcrawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
                 if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = CrawlProfile.MATCH_ALL; // avoid that all urls are filtered out if bad value was submitted
                 // special cases:
                 if (crawlingStartURL!= null && fullDomain) {
@@ -171,14 +171,14 @@ public class Crawler_p {
                 if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
                     newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
                 }
-                
+
                 final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                 env.setConfig("crawlOrder", crawlOrder);
-                
+
                 int newcrawlingdepth = post.getInt("crawlingDepth", 8);
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
-                
+
                 // recrawl
                 final String recrawl = post.get("recrawl", "nodoubles"); // nodoubles, reload, scheduler
                 boolean crawlingIfOlderCheck = "on".equals(post.get("crawlingIfOlderCheck", "off"));
@@ -186,9 +186,9 @@ public class Crawler_p {
                 String crawlingIfOlderUnit = post.get("crawlingIfOlderUnit","year"); // year, month, day, hour
                 int repeat_time = post.getInt("repeat_time", -1);
                 final String repeat_unit = post.get("repeat_unit", "seldays"); // selminutes, selhours, seldays
-                
+
                 if ("scheduler".equals(recrawl) && repeat_time > 0) {
-                    // set crawlingIfOlder attributes that are appropriate for scheduled crawling 
+                    // set crawlingIfOlder attributes that are appropriate for scheduled crawling
                     crawlingIfOlderCheck = true;
                     crawlingIfOlderNumber = "selminutes".equals(repeat_unit) ? 1 : "selhours".equals(repeat_unit) ? repeat_time / 2 : repeat_time * 12;
                     crawlingIfOlderUnit = "hour";
@@ -199,7 +199,7 @@ public class Crawler_p {
                     repeat_time = -1;
                     crawlingIfOlderCheck = false;
                 }
-                long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);
+                final long crawlingIfOlder = recrawlIfOlderC(crawlingIfOlderCheck, crawlingIfOlderNumber, crawlingIfOlderUnit);
                 env.setConfig("crawlingIfOlder", crawlingIfOlder);
 
                 // store this call as api call
@@ -209,37 +209,37 @@ public class Crawler_p {
                 } else {
                     // store just a protocol
                     sb.tables.recordAPICall(post, "Crawler_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "crawl start for " + ((crawlingStart == null) ? post.get("crawlingFile", "") : crawlingStart));
-                }                    
-                
+                }
+
                 final boolean crawlingDomMaxCheck = "on".equals(post.get("crawlingDomMaxCheck", "off"));
                 final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? post.getInt("crawlingDomMaxPages", -1) : -1;
                 env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
-                
+
                 final boolean crawlingQ = "on".equals(post.get("crawlingQ", "off"));
                 env.setConfig("crawlingQ", crawlingQ);
-                
+
                 final boolean indexText = "on".equals(post.get("indexText", "on"));
                 env.setConfig("indexText", indexText);
-                
+
                 final boolean indexMedia = "on".equals(post.get("indexMedia", "on"));
                 env.setConfig("indexMedia", indexMedia);
-                
+
                 boolean storeHTCache = "on".equals(post.get("storeHTCache", "on"));
                 if (crawlingStartURL!= null &&(crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                 env.setConfig("storeHTCache", storeHTCache);
-                
-                CrawlProfile.CacheStrategy cachePolicy = CrawlProfile.CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
-                if (cachePolicy == null) cachePolicy = CrawlProfile.CacheStrategy.IFFRESH;
-                
+
+                CacheStrategy cachePolicy = CacheStrategy.parse(post.get("cachePolicy", "iffresh"));
+                if (cachePolicy == null) cachePolicy = CacheStrategy.IFFRESH;
+
                 final boolean xsstopw = "on".equals(post.get("xsstopw", "off"));
                 env.setConfig("xsstopw", xsstopw);
-                
+
                 final boolean xdstopw = "on".equals(post.get("xdstopw", "off"));
                 env.setConfig("xdstopw", xdstopw);
-                
+
                 final boolean xpstopw = "on".equals(post.get("xpstopw", "off"));
                 env.setConfig("xpstopw", xpstopw);
-                
+
                 final String crawlingMode = post.get("crawlingMode","url");
                 if (crawlingStart != null && crawlingStart.startsWith("ftp")) {
                     try {
@@ -279,7 +279,7 @@ public class Crawler_p {
                     }
                     sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                 } else if ("url".equals(crawlingMode)) {
-                    
+
                     // check if pattern matches
                     if ((crawlingStart == null || crawlingStartURL == null) /* || (!(crawlingStart.matches(newcrawlingfilter))) */) {
                         // print error message
@@ -287,10 +287,10 @@ public class Crawler_p {
                         prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
                         prop.putHTML("info_crawlingStart", crawlingStart);
                     } else try {
-                        
+
                         // check if the crawl filter works correctly
                         Pattern.compile(newcrawlingMustMatch);
-                        
+
                         // stack request
                         // first delete old entry, if exists
                         final DigestURI url = new DigestURI(crawlingStart);
@@ -298,7 +298,7 @@ public class Crawler_p {
                         indexSegment.urlMetadata().remove(urlhash);
                         sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                         sb.crawlQueues.errorURL.remove(urlhash);
-                        
+
                         // stack url
                         sb.crawler.removePassive(crawlingStartURL.hash()); // if there is an old entry, delete it
                         final CrawlProfile pe = new CrawlProfile(
@@ -330,13 +330,13 @@ public class Crawler_p {
                                 0,
                                 0
                                 ));
-                        
+
                         if (reasonString == null) {
                             // create a bookmark from crawl start url
-                            Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
+                            final Set<String> tags=ListManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));
                             tags.add("crawlStart");
                             if ("on".equals(post.get("createBookmark","off"))) {
-                            BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
+                            final BookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");
                                 if (bookmark != null) {
                                     bookmark.setProperty(BookmarksDB.Bookmark.BOOKMARK_TITLE, post.get("bookmarkTitle", crawlingStart));
                                     bookmark.setOwner("admin");
@@ -348,7 +348,7 @@ public class Crawler_p {
                             // liftoff!
                             prop.put("info", "8");//start msg
                             prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
-                            
+
                             // generate a YaCyNews if the global flag was set
                             if (!sb.isRobinsonMode() && crawlOrder) {
                                 final Map<String, String> m = new HashMap<String, String>(pe); // must be cloned
@@ -365,12 +365,12 @@ public class Crawler_p {
                                 m.remove("specificFilter");
                                 m.put("intention", post.get("intention", "").replace(',', '/'));
                                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m);
-                            }                                
+                            }
                         } else {
                             prop.put("info", "5"); //Crawling failed
                             prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
                             prop.putHTML("info_reasonString", reasonString);
-                            
+
                             sb.crawlQueues.errorURL.push(
                                 new Request(
                                         sb.peers.mySeed().hash.getBytes(),
@@ -400,7 +400,7 @@ public class Crawler_p {
                         prop.putHTML("info_error", e.getMessage());
                         Log.logException(e);
                     }
-                    
+
                 } else if ("file".equals(crawlingMode)) {
                     if (post.containsKey("crawlingFile")) {
                         final String crawlingFileContent = post.get("crawlingFile$file", "");
@@ -415,11 +415,11 @@ public class Crawler_p {
                                 FileUtils.copy(crawlingFileContent, writer);
                             }
                             writer.close();
-                            
+
                             // get links and generate filter
                             final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
                             if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
-                            
+
                             final DigestURI crawlURL = new DigestURI("file://" + crawlingFile.toString());
                             final CrawlProfile profile = new CrawlProfile(
                                     crawlingFileName,
@@ -455,7 +455,7 @@ public class Crawler_p {
                         sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                     }
                 } else if ("sitemap".equals(crawlingMode)) {
-                    String sitemapURLStr = post.get("sitemapURL","");
+                    final String sitemapURLStr = post.get("sitemapURL","");
                 	try {
                 		final DigestURI sitemapURL = new DigestURI(sitemapURLStr);
                 		final CrawlProfile pe = new CrawlProfile(
@@ -490,10 +490,10 @@ public class Crawler_p {
                         final DigestURI sitelistURL = new DigestURI(crawlingStart);
                         // download document
                         ContentScraper scraper = null;
-                        scraper = sb.loader.parseResource(sitelistURL, CrawlProfile.CacheStrategy.IFFRESH);
+                        scraper = sb.loader.parseResource(sitelistURL, CacheStrategy.IFFRESH);
                         // String title = scraper.getTitle();
                         // String description = scraper.getDescription();
-                        
+
                         // get links and generate filter
                         final Map<MultiProtocolURI, Properties> hyperlinks = scraper.getAnchors();
                         if (fullDomain && newcrawlingdepth > 0) newcrawlingMustMatch = siteFilter(hyperlinks.keySet());
@@ -530,10 +530,10 @@ public class Crawler_p {
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             sb.crawlStacker.enqueueEntry(new Request(
-                                    sb.peers.mySeed().hash.getBytes(), 
-                                    nexturl, 
-                                    null, 
-                                    e.getValue().getProperty("name", ""), 
+                                    sb.peers.mySeed().hash.getBytes(),
+                                    nexturl,
+                                    null,
+                                    e.getValue().getProperty("name", ""),
                                     new Date(),
                                     profile.handle(),
                                     0,
@@ -552,11 +552,11 @@ public class Crawler_p {
                 }
             }
         }
-        
+
         if (post != null && post.containsKey("crawlingPerformance")) {
             setPerformance(sb, post);
         }
-        
+
         // performance settings
         final long LCbusySleep = env.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 1000L);
         final int LCppm = (int) (60000L / Math.max(1,LCbusySleep));
@@ -564,11 +564,11 @@ public class Crawler_p {
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 30000)) ? "1" : "0");
         prop.put("crawlingSpeedMinChecked", (LCppm <= 10) ? "1" : "0");
         prop.put("customPPMdefault", Integer.toString(LCppm));
-        
+
         // return rewrite properties
         return prop;
     }
-    
+
     private static long recrawlIfOlderC(final boolean recrawlIfOlderCheck, final int recrawlIfOlderNumber, final String crawlingIfOlderUnit) {
         if (!recrawlIfOlderCheck) return 0L;
         if ("year".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L * 24L * 365L;
@@ -577,7 +577,7 @@ public class Crawler_p {
         if ("hour".equals(crawlingIfOlderUnit)) return System.currentTimeMillis() - (long) recrawlIfOlderNumber * 1000L * 60L * 60L;
         return System.currentTimeMillis() - (long) recrawlIfOlderNumber;
     }
-    
+
     private static void setPerformance(final Switchboard sb, final serverObjects post) {
         final String crawlingPerformance = post.get("crawlingPerformance", "custom");
         final long LCbusySleep = sb.getConfigLong(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, 1000L);
@@ -589,8 +589,8 @@ public class Crawler_p {
         if ("maximum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 30000;
         sb.setPerformance(wantedPPM);
     }
-    
-    private static String siteFilter(Set<MultiProtocolURI> uris) {
+
+    private static String siteFilter(final Set<MultiProtocolURI> uris) {
         final StringBuilder filter = new StringBuilder();
         final Set<String> filterSet = new HashSet<String>();
         for (final MultiProtocolURI uri: uris) {

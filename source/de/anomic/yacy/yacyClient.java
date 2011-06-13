@@ -74,6 +74,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.services.federated.opensearch.SRURSSConnector;
+import net.yacy.cora.services.federated.yacy.CacheStrategy;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -91,13 +92,12 @@ import net.yacy.repository.Blacklist;
 
 import org.apache.http.entity.mime.content.ContentBody;
 
-import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.ResultURLs.EventOrigin;
 import de.anomic.search.ContentDomain;
 import de.anomic.search.QueryParams;
-import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
@@ -116,16 +116,16 @@ public final class yacyClient {
     private static byte[] postToFile(final yacySeedDB seedDB, final String targetHash, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
     	return postToFile(seedDB.targetAddress(targetHash), targetHash, filename, parts, timeout);
     }
-    private static byte[] postToFile(final String targetAddress, String targetPeerHash, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
+    private static byte[] postToFile(final String targetAddress, final String targetPeerHash, final String filename, final Map<String,ContentBody> parts, final int timeout) throws IOException {
         final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
         return httpClient.POSTbytes(new MultiProtocolURI("http://" + targetAddress + "/yacy/" + filename), yacySeed.b64Hash2hexHash(targetPeerHash) + ".yacyh", parts, false);
     }
-    
+
     /**
      * this is called to enrich the seed information by
      * - own address (if peer is behind a nat/router)
      * - check peer type (virgin/junior/senior/principal)
-     * 
+     *
      * to do this, we send a 'Hello' to another peer
      * this carries the following information:
      * 'iam' - own hash
@@ -136,15 +136,15 @@ public final class yacyClient {
      * - 'yourip' the ip of the connection peer (we)
      * - 'yourtype' the type of this peer that the other peer checked by asking for a specific word
      * and the remote seed string
-     * 
+     *
      * one exceptional failure case is when we know the other's peers hash, the other peers responds correctly
      * but they appear to be another peer by comparisment of the other peer's hash
      * this works of course only if we know the other peer's hash.
-     * 
-     * @return the number of new seeds 
+     *
+     * @return the number of new seeds
      */
     public static int hello(final yacySeed mySeed, final yacyPeerActions peerActions, final String address, final String otherHash) {
-        
+
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
         try {
@@ -169,7 +169,7 @@ public final class yacyClient {
             // try again (go into loop)
             result = null;
         }
-        
+
         if (result == null) {
             yacyCore.log.logInfo("yacyClient.hello result error: " +
             ((result == null) ? "result null" : ("result=" + result.toString())));
@@ -186,15 +186,15 @@ public final class yacyClient {
             	yacyCore.log.logInfo("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + yacySeed.maxsize + ")");
             } else {
             	try {
-            	    int p = address.indexOf(':');
+            	    final int p = address.indexOf(':');
             	    if (p < 0) return -1;
-            	    String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
+            	    final String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
                     otherPeer = yacySeed.genRemoteSeed(seed, salt, false, host);
                     if (!otherPeer.hash.equals(otherHash)) {
                         yacyCore.log.logInfo("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + otherHash);
                         return -1; // no success
                     }
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     yacyCore.log.logInfo("yacyClient.hello: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
                     return -1; // no success
                 }
@@ -213,7 +213,7 @@ public final class yacyClient {
 
         // change our seed-type
         String mytype = result.get(yacySeed.YOURTYPE);
-        if (mytype == null) { mytype = ""; }        
+        if (mytype == null) { mytype = ""; }
         final yacyAccessible accessible = new yacyAccessible();
         if (mytype.equals(yacySeed.PEERTYPE_SENIOR)||mytype.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             accessible.IWasAccessed = true;
@@ -226,7 +226,7 @@ public final class yacyClient {
         accessible.lastUpdated = System.currentTimeMillis();
         yacyCore.amIAccessibleDB.put(otherHash, accessible);
 
-        /* 
+        /*
          * If we were reported as junior we have to check if your port forwarding channel is broken
          * If this is true we try to reconnect the sch channel to the remote server now.
          */
@@ -264,15 +264,15 @@ public final class yacyClient {
             } else {
                 try {
                     if (i == 1) {
-                        int p = address.indexOf(':');
+                        final int p = address.indexOf(':');
                         if (p < 0) return -1;
-                        String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
+                        final String host = Domains.dnsResolve(address.substring(0, p)).getHostAddress();
                         s = yacySeed.genRemoteSeed(seedStr, salt, false, host);
                     } else {
                         s = yacySeed.genRemoteSeed(seedStr, salt, false, null);
                     }
                     if (peerActions.peerArrival(s, (i == 1))) count++;
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     yacyCore.log.logInfo("hello/client: rejected contacting seed; bad (" + e.getMessage() + ")");
                 }
             }
@@ -283,7 +283,7 @@ public final class yacyClient {
     public static yacySeed querySeed(final yacySeed target, final String seedHash) {
         // prepare request
         final String salt = crypt.randomSalt();
-            
+
         // send request
         try {
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
@@ -291,7 +291,7 @@ public final class yacyClient {
             parts.put("env", UTF8.StringBody(seedHash));
             final byte[] content = postToFile(target, "query.html", parts, 10000);
             final Map<String, String> result = FileUtils.table(content);
-            
+
             if (result == null || result.isEmpty()) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
             return yacySeed.genRemoteSeed(result.get("response"), salt, false, target.getIP());
@@ -304,7 +304,7 @@ public final class yacyClient {
     public static int queryRWICount(final yacySeed target, final String wordHash) {
         // prepare request
         final String salt = crypt.randomSalt();
-            
+
         // send request
         try {
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
@@ -313,7 +313,7 @@ public final class yacyClient {
             parts.put("env", UTF8.StringBody(wordHash));
             final byte[] content = postToFile(target, "query.html", parts, 5000);
             final Map<String, String> result = FileUtils.table(content);
-            
+
             if (result == null || result.isEmpty()) { return -1; }
             return Integer.parseInt(result.get("response"));
         } catch (final Exception e) {
@@ -327,12 +327,12 @@ public final class yacyClient {
      * @param target
      * @return an array of two long: [0] is the count of urls, [1] is a magic
      */
-    public static long[] queryUrlCount(final yacySeed target) {        
+    public static long[] queryUrlCount(final yacySeed target) {
         if (target == null) return new long[]{-1, -1};
-        
+
         // prepare request
         final String salt = crypt.randomSalt();
-        
+
         // send request
         try {
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
@@ -341,7 +341,7 @@ public final class yacyClient {
             parts.put("env", UTF8.StringBody(""));
             final byte[] content = postToFile(target, "query.html", parts, 5000);
             final Map<String, String> result = FileUtils.table(content);
-            
+
             if (result == null || result.isEmpty()) return new long[]{-1, -1};
             final String resp = result.get("response");
             if (resp == null) return new long[]{-1, -1};
@@ -358,16 +358,16 @@ public final class yacyClient {
     }
 
     public static RSSFeed queryRemoteCrawlURLs(final yacySeedDB seedDB, final yacySeed target, final int maxCount, final long maxTime) {
-        // returns a list of 
+        // returns a list of
         if (target == null) { return null; }
-        int targetCount = Integer.parseInt(target.get(yacySeed.RCOUNT, "0"));
+        final int targetCount = Integer.parseInt(target.get(yacySeed.RCOUNT, "0"));
         if (targetCount <= 0) {
             yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs wrong peer '" + target.getName() + "' selected: not enough links available");
             return null;
         }
         // prepare request
         final String salt = crypt.randomSalt();
-        
+
         // send request
         try {
             /* a long time-out is needed */
@@ -375,7 +375,7 @@ public final class yacyClient {
             parts.put("call", UTF8.StringBody("remotecrawl"));
             parts.put("count", UTF8.StringBody(Integer.toString(maxCount)));
             parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
-            // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts); 
+            // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), (int) maxTime);
             final byte[] result = httpClient.POSTbytes(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false);
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
@@ -405,10 +405,10 @@ public final class yacyClient {
             return null;
         }
     }
-    
-    public static RSSFeed search(final yacySeed targetSeed, String query, CrawlProfile.CacheStrategy verify, boolean global, long timeout, int startRecord, int maximumRecords) throws IOException {
-        String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8090") : targetSeed.getClusterAddress();
-        String urlBase = "http://" + address + "/yacysearch.rss";
+
+    public static RSSFeed search(final yacySeed targetSeed, final String query, final CacheStrategy verify, final boolean global, final long timeout, final int startRecord, final int maximumRecords) throws IOException {
+        final String address = (targetSeed == null || targetSeed == Switchboard.getSwitchboard().peers.mySeed()) ? "localhost:" + Switchboard.getSwitchboard().getConfig("port", "8090") : targetSeed.getClusterAddress();
+        final String urlBase = "http://" + address + "/yacysearch.rss";
         return SRURSSConnector.loadSRURSS(urlBase, query, timeout, startRecord, maximumRecords, verify, global, null);
     }
 
@@ -427,7 +427,7 @@ public final class yacyClient {
             final int count,
             final long time,
             final int maxDistance,
-            final boolean global, 
+            final boolean global,
             final int partitions,
             final yacySeed target,
             final Segment indexSegment,
@@ -467,7 +467,7 @@ public final class yacyClient {
         }
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
-        
+
         // create containers
         final int words = wordhashes.length() / Word.commonHashLength;
         assert words > 0 : "wordhashes = " + wordhashes;
@@ -475,14 +475,14 @@ public final class yacyClient {
         for (int i = 0; i < words; i++) {
             try {
                 container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, ASCII.getBytes(wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength)), count);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
                 return -1;
             }
         }
 
         // insert results to containers
-        for (URIMetadataRow urlEntry: result.links) {
+        for (final URIMetadataRow urlEntry: result.links) {
             // get one single search result
             if (urlEntry == null) continue;
             assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + ASCII.String(urlEntry.hash());
@@ -493,7 +493,7 @@ public final class yacyClient {
                 if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search: filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
                 continue; // block with backlist
             }
-            
+
             final String urlRejectReason = Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(metadata.url());
             if (urlRejectReason != null) {
                 if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search: rejected url '" + metadata.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
@@ -501,7 +501,7 @@ public final class yacyClient {
             }
 
             // save the url entry
-            Reference entry = urlEntry.word();
+            final Reference entry = urlEntry.word();
             if (entry == null) {
                 if (yacyCore.log.isWarning()) yacyCore.log.logWarning("remote search: no word attached from peer " + target.getName() + ", version " + target.getVersion());
                 continue; // no word attached
@@ -529,12 +529,12 @@ public final class yacyClient {
                 // System.out.println("--- RECEIVED SNIPPET '" + urlEntry.snippet() + "'");
                 TextSnippet.snippetsCache.put(wordhashes, ASCII.String(urlEntry.hash()), urlEntry.snippet());
             }
-            
+
             // add the url entry to the word indexes
             for (int m = 0; m < words; m++) {
                 try {
                     container[m].add(entry);
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                     break;
                 }
@@ -547,12 +547,12 @@ public final class yacyClient {
         containerCache.add(container[0], false, target.getName() + "/" + target.hash, result.joincount, true);
 
         // insert the containers to the index
-        for (ReferenceContainer<WordReference> c: container) try {
+        for (final ReferenceContainer<WordReference> c: container) try {
             indexSegment.termIndex().add(c);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Log.logException(e);
         }
-        boolean thisIsASecondarySearch = urlhashes.length() > 0;
+        final boolean thisIsASecondarySearch = urlhashes.length() > 0;
         assert !thisIsASecondarySearch || secondarySearchSuperviser == null;
 
         yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + container[0].size() + "/" + result.joincount + " references for " + (thisIsASecondarySearch ? "a secondary search" : "joined word queries"));
@@ -566,32 +566,32 @@ public final class yacyClient {
                 containerCache.addTopic(result.references);
             }
         }
-        
+
         // read index abstract
         if (secondarySearchSuperviser != null) {
             String wordhash;
             String whacc = "";
             ByteBuffer ci;
             int ac = 0;
-            for (Map.Entry<byte[], String> abstractEntry: result.indexabstract.entrySet()) {
+            for (final Map.Entry<byte[], String> abstractEntry: result.indexabstract.entrySet()) {
                 try {
                     ci = new ByteBuffer(abstractEntry.getValue());
                     wordhash = ASCII.String(abstractEntry.getKey());
-                } catch (OutOfMemoryError e) {
+                } catch (final OutOfMemoryError e) {
                     Log.logException(e);
                     continue;
                 }
                 whacc += wordhash;
                 secondarySearchSuperviser.addAbstract(wordhash, WordReferenceFactory.decompressIndex(ci, target.hash));
                 ac++;
-                
+
             }
             if (ac > 0) {
                 secondarySearchSuperviser.commitAbstract();
                 yacyCore.log.logInfo("remote search: peer " + target.getName() + " sent " + ac + " index abstracts for words "+ whacc);
             }
         }
-        
+
         // generate statistics
         if (yacyCore.log.isFine()) yacyCore.log.logFine(
                 "SEARCH " + result.urlcount +
@@ -601,9 +601,9 @@ public final class yacyClient {
                 ", references=" + result.references);
         return result.urlcount;
     }
-    
+
     public static class SearchResult {
-        
+
         public String version; // version : application version of responder
         public String uptime; // uptime : uptime in seconds of responder
         public String fwhop; // hops (depth) of forwards that had been performed to construct this result
@@ -616,9 +616,9 @@ public final class yacyClient {
         public String[] references; // search hints, the top-words
         public List<URIMetadataRow> links; // LURLs of search
         public Map<byte[], String> indexabstract; // index abstracts, a collection of url-hashes per word
-        
+
         public SearchResult(
-                Map<String,ContentBody> parts,
+                final Map<String,ContentBody> parts,
                 final yacySeed mySeed,
                 final String wordhashes,
                 final String excludehashes,
@@ -632,10 +632,10 @@ public final class yacyClient {
                 final int count,
                 final long time,
                 final int maxDistance,
-                final boolean global, 
+                final boolean global,
                 final int partitions,
-                String hostname,
-                String hostaddress,
+                final String hostname,
+                final String hostaddress,
                 final SearchEvent.SecondarySearchSuperviser secondarySearchSuperviser,
                 final RankingProfile rankingProfile,
                 final Bitfield constraint) throws IOException {
@@ -653,13 +653,13 @@ public final class yacyClient {
             // global     : if "true", then result may consist of answers from other peers
             // partitions : number of remote peers that are asked (for evaluation of QPM)
             // duetime    : maximum time that a peer should spent to create a result
-            
+
             // send request
             Map<String, String> resultMap = null;
             String key = "";
-            ContentBody keyBody = parts.get("key");
+            final ContentBody keyBody = parts.get("key");
             if (keyBody != null) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream(20);
+                final ByteArrayOutputStream baos = new ByteArrayOutputStream(20);
                 keyBody.writeTo(baos);
                 key = baos.toString();
             }
@@ -688,7 +688,7 @@ public final class yacyClient {
 
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), 60000);
             resultMap = FileUtils.table(httpClient.POSTbytes(new MultiProtocolURI("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false));
-            
+
             // evaluate request result
             if (resultMap == null || resultMap.isEmpty()) throw new IOException("resultMap is NULL");
             try {
@@ -710,36 +710,36 @@ public final class yacyClient {
             this.fwsrc = resultMap.get("fwsrc");
             this.fwrec = resultMap.get("fwrec");
             // scan the result map for entries with special prefix
-            indexcount = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-            indexabstract = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
-            for (Map.Entry<String, String> entry: resultMap.entrySet()) {
+            this.indexcount = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
+            this.indexabstract = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
+            for (final Map.Entry<String, String> entry: resultMap.entrySet()) {
                 if (entry.getKey().startsWith("indexcount.")) {
-                    indexcount.put(UTF8.getBytes(entry.getKey().substring(11)), Integer.parseInt(entry.getValue()));
+                    this.indexcount.put(UTF8.getBytes(entry.getKey().substring(11)), Integer.parseInt(entry.getValue()));
                 }
                 if (entry.getKey().startsWith("indexabstract.")) {
-                    indexabstract.put(UTF8.getBytes(entry.getKey().substring(14)), entry.getValue());
+                    this.indexabstract.put(UTF8.getBytes(entry.getKey().substring(14)), entry.getValue());
                 }
             }
-            references = resultMap.get("references").split(",");
+            this.references = resultMap.get("references").split(",");
             this.links = new ArrayList<URIMetadataRow>(this.urlcount);
             for (int n = 0; n < this.urlcount; n++) {
                 // get one single search result
-                String resultLine = resultMap.get("resource" + n);
+                final String resultLine = resultMap.get("resource" + n);
                 if (resultLine == null) continue;
-                URIMetadataRow urlEntry = URIMetadataRow.importEntry(resultLine);
+                final URIMetadataRow urlEntry = URIMetadataRow.importEntry(resultLine);
                 if (urlEntry == null) continue;
                 this.links.add(urlEntry);
             }
         }
     }
-    
+
     public static Map<String, String> permissionMessage(final yacySeedDB seedDB, final String targetHash) {
         // ask for allowed message size and attachement size
         // if this replies null, the peer does not answer
-        
+
         // prepare request
         final String salt = crypt.randomSalt();
-        
+
         // send request
         try {
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
@@ -775,7 +775,7 @@ public final class yacyClient {
             return null;
         }
     }
-    
+
     public static Map<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final URIMetadataRow entry, final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);
@@ -786,28 +786,28 @@ public final class yacyClient {
          negative cases, no retry
            unavailable - the resource is not avaiable (a broken link); not found or interrupted
            robot       - a robot-file has denied to crawl that resource
-         
+
          negative cases, retry possible
            rejected    - the peer has rejected to load the resource
            dequeue     - peer too busy - rejected to crawl
-         
+
          positive cases with crawling
            fill        - the resource was loaded and processed
            update      - the resource was already in database but re-loaded and processed
-         
+
          positive cases without crawling
            known       - the resource is already in database, believed to be fresh and not reloaded
            stale       - the resource was reloaded but not processed because source had no changes
-         
+
          */
-        
+
         // prepare request
         final String salt = crypt.randomSalt();
-        
+
         // determining target address
         final String address = target.getClusterAddress();
         if (address == null) { return null; }
-            
+
         // send request
         try {
             // prepare request
@@ -850,7 +850,7 @@ public final class yacyClient {
         // check if we got all necessary urls in the urlCache (only for debugging)
         Iterator<WordReference> eenum;
         Reference entry;
-        for (ReferenceContainer<WordReference> ic: indexes) {
+        for (final ReferenceContainer<WordReference> ic: indexes) {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
@@ -858,37 +858,37 @@ public final class yacyClient {
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + ASCII.String(entry.urlhash()) + "' is not contained in urlCache");
                 }
             }
-        }        
-        
+        }
+
         // transfer the RWI without the URLs
         Map<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
-        
+
         if (in == null) {
             return "no connection from transferRWI";
         }
-        
+
         String result = in.get("result");
         if (result == null) {
             return "no result from transferRWI";
         }
-        
+
         if (!(result.equals("ok"))) {
             return result;
         }
-        
+
         // in now contains a list of unknown hashes
         String uhss = in.get("unknownURL");
         if (uhss == null) {
             return "no unknownURL tag in response";
         }
         yacyChannel.channels(yacyChannel.DHTSEND).addMessage(new RSSMessage("Sent " + indexes.size() + " RWIs to " + targetSeed.getName(), "", targetSeed.hash));
-        
+
         uhss = uhss.trim();
         if (uhss.length() == 0 || uhss.equals(",")) { return null; } // all url's known, we are ready here
-        
+
         final String[] uhs = uhss.split(",");
         if (uhs.length == 0) { return null; } // all url's known
-        
+
         // extract the urlCache from the result
         final URIMetadataRow[] urls = new URIMetadataRow[uhs.length];
         for (int i = 0; i < uhs.length; i++) {
@@ -897,23 +897,23 @@ public final class yacyClient {
                 if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
             }
         }
-        
+
         in = transferURL(targetSeed, urls, gzipBody, timeout);
-        
+
         if (in == null) {
             return "no connection from transferURL";
         }
-        
+
         result = in.get("result");
         if (result == null) {
             return "no result from transferURL";
         }
-        
+
         if (!result.equals("ok")) {
             return result;
-        }            
+        }
         yacyChannel.channels(yacyChannel.DHTSEND).addMessage(new RSSMessage("Sent " + uhs.length + " URLs to peer " + targetSeed.getName(), "", targetSeed.hash));
-        
+
         return null;
     }
 
@@ -927,22 +927,22 @@ public final class yacyClient {
 
         // prepare post values
         final String salt = crypt.randomSalt();
-        
+
         // enabling gzip compression for post request body
         if (gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED)) {
             gzipBody = false;
         }
-        
+
         int indexcount = 0;
         final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
         Iterator<WordReference> eenum;
         Reference entry;
-        for (ReferenceContainer<WordReference> ic: indexes) {
+        for (final ReferenceContainer<WordReference> ic: indexes) {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
-                entrypost.append(ASCII.String(ic.getTermHash())) 
-                         .append(entry.toPropertyForm()) 
+                entrypost.append(ASCII.String(ic.getTermHash()))
+                         .append(entry.toPropertyForm())
                          .append(serverCore.CRLF_STRING);
                 indexcount++;
             }
@@ -965,7 +965,7 @@ public final class yacyClient {
             final byte[] content = httpClient.POSTbytes(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
             final Iterator<String> v = FileUtils.strings(content);
             // this should return a list of urlhashes that are unknown
-            
+
             final Map<String, String> result = FileUtils.table(v);
             // return the transfered index data in bytes (for debugging only)
             result.put("indexPayloadSize", Integer.toString(entrypost.length()));
@@ -984,18 +984,18 @@ public final class yacyClient {
         // prepare post values
         final String salt = crypt.randomSalt();
         final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
-        
+
         // enabling gzip compression for post request body
         if (gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED)) {
             gzipBody = false;
         }
-        
+
         String resource;
         int urlc = 0;
         int urlPayloadSize = 0;
-        for (int i = 0; i < urls.length; i++) {
-            if (urls[i] != null) {
-                resource = urls[i].toString();
+        for (final URIMetadataRow url : urls) {
+            if (url != null) {
+                resource = url.toString();
                 //System.out.println("*** DEBUG resource = " + resource);
                 if (resource != null && resource.indexOf(0) == -1) {
                     parts.put("url" + urlc, UTF8.StringBody(resource));
@@ -1010,10 +1010,10 @@ public final class yacyClient {
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
             final byte[] content = httpClient.POSTbytes(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
             final Iterator<String> v = FileUtils.strings(content);
-            
+
             final Map<String, String> result = FileUtils.table(v);
             // return the transfered url data in bytes (for debugging only)
-            result.put("urlPayloadSize", Integer.toString(urlPayloadSize));            
+            result.put("urlPayloadSize", Integer.toString(urlPayloadSize));
             return result;
         } catch (final Exception e) {
             yacyCore.log.logWarning("yacyClient.transferURL to " + address + " error: " + e.getMessage());
@@ -1023,10 +1023,10 @@ public final class yacyClient {
 
     public static Map<String, String> getProfile(final yacySeed targetSeed) {
         // ReferenceContainerCache<HostReference> ref = loadIDXHosts(targetSeed);
-        
+
         // this post a message to the remote message board
         final String salt = crypt.randomSalt();
-         
+
         String address = targetSeed.getClusterAddress();
         if (address == null) { address = "localhost:8090"; }
         try {
@@ -1040,18 +1040,18 @@ public final class yacyClient {
             return null;
         }
     }
-    
+
     public static ReferenceContainerCache<HostReference> loadIDXHosts(final yacySeed target) {
-        ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
+        final ReferenceContainerCache<HostReference> index = new ReferenceContainerCache<HostReference>(WebStructureGraph.hostReferenceFactory, Base64Order.enhancedCoder, 6);
         // check if the host supports this protocol
         if (target.getRevision() < migration.IDX_HOST) {
             // if the protocol is not supported then we just return an empty host reference container
             return index;
         }
-        
+
         // prepare request
         final String salt = crypt.randomSalt();
-            
+
         // send request
         try {
             final Map<String,ContentBody> parts = yacyNetwork.basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
@@ -1061,7 +1061,7 @@ public final class yacyClient {
                 yacyCore.log.logWarning("yacyClient.loadIDXHosts error: empty result");
                 return null;
             }
-            JSONObject json = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(content))));
+            final JSONObject json = new JSONObject(new JSONTokener(new InputStreamReader(new ByteArrayInputStream(content))));
             /* the json has the following form:
             {
             "version":"#[version]#",
@@ -1074,23 +1074,23 @@ public final class yacyClient {
             }
             }
             */
-            JSONObject idx = json.getJSONObject("idx");
+            final JSONObject idx = json.getJSONObject("idx");
             // iterate over all references
-            Iterator<String> termIterator = idx.keys();
+            final Iterator<String> termIterator = idx.keys();
             String term;
             while (termIterator.hasNext()) {
                 term = termIterator.next();
-                JSONArray references = idx.getJSONArray(term);
+                final JSONArray references = idx.getJSONArray(term);
                 // iterate until we get an exception or null
                 int c = 0;
                 String reference;
-                ReferenceContainer<HostReference> referenceContainer = new ReferenceContainer<HostReference>(WebStructureGraph.hostReferenceFactory, UTF8.getBytes(term));
+                final ReferenceContainer<HostReference> referenceContainer = new ReferenceContainer<HostReference>(WebStructureGraph.hostReferenceFactory, UTF8.getBytes(term));
                 try {
                     while ((reference = references.getString(c++)) != null) {
                         //System.out.println("REFERENCE: " + reference);
                         referenceContainer.add(new HostReference(reference));
                     }
-                } catch (JSONException e) {} // this finishes the iteration
+                } catch (final JSONException e) {} // this finishes the iteration
                 index.add(referenceContainer);
             }
             return index;
@@ -1100,7 +1100,7 @@ public final class yacyClient {
         }
     }
 
-    
+
 
     public static void main(final String[] args) {
         if (args.length > 2) {
@@ -1110,14 +1110,14 @@ public final class yacyClient {
             // third  arg: search word or file name with list of search words
             // i.e. /Data/workspace1/yacy/ localhost:8090 /Data/workspace1/yacy/test/words/searchtest.words
             System.out.println("yacyClient Test");
-                File searchwordfile = new File(args[2]);
-                List<String> searchlines = new ArrayList<String>();
+                final File searchwordfile = new File(args[2]);
+                final List<String> searchlines = new ArrayList<String>();
                 if (searchwordfile.exists()) {
                     Iterator<String> i;
                     try {
                         i = FileUtils.strings(FileUtils.read(searchwordfile));
                         while (i.hasNext()) searchlines.add(i.next());
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         e.printStackTrace();
                         System.exit(-1);
                     }
@@ -1126,7 +1126,7 @@ public final class yacyClient {
                 }
                 for (final String line: searchlines) {
                     final byte[] wordhashe = ASCII.getBytes(QueryParams.hashSet2hashString(Word.words2hashesHandles(QueryParams.cleanQuery(line)[0])));
-                    long time = System.currentTimeMillis();
+                    final long time = System.currentTimeMillis();
                     SearchResult result;
                     try {
                         result = new SearchResult(
@@ -1144,18 +1144,18 @@ public final class yacyClient {
                                 10, // count,
                                 3000, // time,
                                 1000, // maxDistance,
-                                true, //global, 
+                                true, //global,
                                 16, // partitions,
                                 "", args[1],
                                 null, //secondarySearchSuperviser,
                                 new RankingProfile(ContentDomain.TEXT), // rankingProfile,
                                 null // constraint);
                         );
-                        for (URIMetadataRow link: result.links) {
+                        for (final URIMetadataRow link: result.links) {
                                 System.out.println(link.metadata().url().toNormalform(true, false));
                                 System.out.println(link.snippet());
                         }
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         // TODO Auto-generated catch block
                         e.printStackTrace();
                     }
@@ -1187,13 +1187,13 @@ public final class yacyClient {
 				final HTTPClient httpClient = new HTTPClient(ClientIdentification.getUserAgent(), timeout);
 				res = httpClient.POSTbytes(url, vhost, newpost, true);
 				System.out.println(UTF8.String(res));
-			} catch (IOException e1) {
+			} catch (final IOException e1) {
 				Log.logException(e1);
 			}
         }
 		try {
 			net.yacy.cora.protocol.http.HTTPClient.closeConnectionManager();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			Log.logException(e);
 		}
     }
