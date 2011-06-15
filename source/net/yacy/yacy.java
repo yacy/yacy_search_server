@@ -926,98 +926,103 @@ public final class yacy {
      *            Given arguments from the command line.
      */
     public static void main(String args[]) {
-
-        // check assertion status
-        //ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
-        boolean assertionenabled = false;
-        assert assertionenabled = true;
-        if (assertionenabled) System.out.println("Asserts are enabled");
-        
-        // check memory amount
-        System.gc();
-        final long startupMemFree  = MemoryControl.free();
-        final long startupMemTotal = MemoryControl.total();
-        
-        // maybe go into headless awt mode: we have three cases depending on OS and one exception:
-        // windows   : better do not go into headless mode
-        // mac       : go into headless mode because an application is shown in gui which may not be wanted
-        // linux     : go into headless mode because this does not need any head operation
-        // exception : if the -gui option is used then do not go into headless mode since that uses a gui
-        boolean headless = true;
-        if (OS.isWindows) headless = false;
-        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
-        System.setProperty("java.awt.headless", headless ? "true" : "false");
-        
-        String s = ""; for (String a: args) s += a + " ";
-        yacyRelease.startParameter = s.trim();
-        
-        File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
-        File dataRoot = applicationRoot;
-        //System.out.println("args.length=" + args.length);
-        //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
-        if ((args.length >= 1) && (args[0].toLowerCase().equals("-startup") || args[0].equals("-start"))) {
-            // normal start-up of yacy
-            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
-            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
-        } else if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
-            // start-up of yacy with gui
-            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
-            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
-        } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
-            // normal shutdown of yacy
-            if (args.length == 2) applicationRoot= new File(args[1]);
-            shutdown(applicationRoot);
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-update"))) {
-            // aut-update yacy
-            if (args.length == 2) applicationRoot= new File(args[1]);
-            update(applicationRoot);
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-version"))) {
-            // show yacy version
-            System.out.println(copyright);
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
-            // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
-            // attention: this may run long and should not be interrupted!
-            if (args.length >= 3 && args[1].toLowerCase().equals("-cache")) {
-                args = shift(args, 1, 2);
-            }
-            if (args.length == 2) applicationRoot= new File(args[1]);
-            minimizeUrlDB(dataRoot, applicationRoot, "freeworld");
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-testpeerdb"))) {
-            if (args.length == 2) {
-                applicationRoot = new File(args[1]);
-            } else if (args.length > 2) {
-                System.err.println("Usage: -testPeerDB [homeDbRoot]");
-            }
-            testPeerDB(applicationRoot);
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-genwordstat"))) {
-            // this can help to create a stop-word list
-            // to use this, you need a 'yacy.words' file in the root path
-            // start this with "java -classpath classes yacy -genwordstat [<rootdir>]"
-            if (args.length == 2) applicationRoot= new File(args[1]);
-            genWordstat(applicationRoot);
-        } else if ((args.length == 4) && (args[0].toLowerCase().equals("-cleanwordlist"))) {
-            // this can be used to organize and clean a word-list
-            // start this with "java -classpath classes yacy -cleanwordlist <word-file> <minlength> <maxlength>"
-            final int minlength = Integer.parseInt(args[2]);
-            final int maxlength = Integer.parseInt(args[3]);
-            cleanwordlist(args[1], minlength, maxlength);
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
-            // generate a url list and save it in a file
-            if (args.length == 2) applicationRoot= new File(args[1]);
-            urldbcleanup(dataRoot, applicationRoot, "freeworld");
-        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-rwihashlist"))) {
-            // generate a url list and save it in a file
-            String domain = "all";
-            String format = "txt";
-            if (args.length >= 2) domain= args[1];
-            if (args.length >= 3) format= args[2];
-            if (args.length == 4) applicationRoot= new File(args[3]);
-            final String outfile = "rwihashlist_" + System.currentTimeMillis();
-            RWIHashList(dataRoot, applicationRoot, outfile, domain, format);
-        } else {
-            if (args.length == 1) applicationRoot= new File(args[0]);
-            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
-        }
+    	
+    	try {
+	
+	        // check assertion status
+	        //ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+	        boolean assertionenabled = false;
+	        assert assertionenabled = true;
+	        if (assertionenabled) System.out.println("Asserts are enabled");
+	        
+	        // check memory amount
+	        System.gc();
+	        final long startupMemFree  = MemoryControl.free();
+	        final long startupMemTotal = MemoryControl.total();
+	        
+	        // maybe go into headless awt mode: we have three cases depending on OS and one exception:
+	        // windows   : better do not go into headless mode
+	        // mac       : go into headless mode because an application is shown in gui which may not be wanted
+	        // linux     : go into headless mode because this does not need any head operation
+	        // exception : if the -gui option is used then do not go into headless mode since that uses a gui
+	        boolean headless = true;
+	        if (OS.isWindows) headless = false;
+	        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
+	        System.setProperty("java.awt.headless", headless ? "true" : "false");
+	        
+	        String s = ""; for (String a: args) s += a + " ";
+	        yacyRelease.startParameter = s.trim();
+	        
+	        File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
+	        File dataRoot = applicationRoot;
+	        //System.out.println("args.length=" + args.length);
+	        //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
+	        if ((args.length >= 1) && (args[0].toLowerCase().equals("-startup") || args[0].equals("-start"))) {
+	            // normal start-up of yacy
+	            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
+	        } else if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
+	            // start-up of yacy with gui
+	            if (args.length > 1) dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
+	        } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
+	            // normal shutdown of yacy
+	            if (args.length == 2) applicationRoot= new File(args[1]);
+	            shutdown(applicationRoot);
+	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-update"))) {
+	            // aut-update yacy
+	            if (args.length == 2) applicationRoot= new File(args[1]);
+	            update(applicationRoot);
+	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-version"))) {
+	            // show yacy version
+	            System.out.println(copyright);
+	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
+	            // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
+	            // attention: this may run long and should not be interrupted!
+	            if (args.length >= 3 && args[1].toLowerCase().equals("-cache")) {
+	                args = shift(args, 1, 2);
+	            }
+	            if (args.length == 2) applicationRoot= new File(args[1]);
+	            minimizeUrlDB(dataRoot, applicationRoot, "freeworld");
+	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-testpeerdb"))) {
+	            if (args.length == 2) {
+	                applicationRoot = new File(args[1]);
+	            } else if (args.length > 2) {
+	                System.err.println("Usage: -testPeerDB [homeDbRoot]");
+	            }
+	            testPeerDB(applicationRoot);
+	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-genwordstat"))) {
+	            // this can help to create a stop-word list
+	            // to use this, you need a 'yacy.words' file in the root path
+	            // start this with "java -classpath classes yacy -genwordstat [<rootdir>]"
+	            if (args.length == 2) applicationRoot= new File(args[1]);
+	            genWordstat(applicationRoot);
+	        } else if ((args.length == 4) && (args[0].toLowerCase().equals("-cleanwordlist"))) {
+	            // this can be used to organize and clean a word-list
+	            // start this with "java -classpath classes yacy -cleanwordlist <word-file> <minlength> <maxlength>"
+	            final int minlength = Integer.parseInt(args[2]);
+	            final int maxlength = Integer.parseInt(args[3]);
+	            cleanwordlist(args[1], minlength, maxlength);
+	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-urldbcleanup"))) {
+	            // generate a url list and save it in a file
+	            if (args.length == 2) applicationRoot= new File(args[1]);
+	            urldbcleanup(dataRoot, applicationRoot, "freeworld");
+	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-rwihashlist"))) {
+	            // generate a url list and save it in a file
+	            String domain = "all";
+	            String format = "txt";
+	            if (args.length >= 2) domain= args[1];
+	            if (args.length >= 3) format= args[2];
+	            if (args.length == 4) applicationRoot= new File(args[3]);
+	            final String outfile = "rwihashlist_" + System.currentTimeMillis();
+	            RWIHashList(dataRoot, applicationRoot, outfile, domain, format);
+	        } else {
+	            if (args.length == 1) applicationRoot= new File(args[0]);
+	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
+	        }
+    	} finally {
+    		Log.shutdown();
+    	}
     }
 }
 
