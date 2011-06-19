@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -26,6 +26,7 @@ package net.yacy.cora.document;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+
 import org.apache.http.entity.mime.content.StringBody;
 
 /**
@@ -43,20 +44,20 @@ public class UTF8 {
     static {
         charset = Charset.forName("UTF-8");
     }
-    
+
     public final static StringBody StringBody(final byte[] b) {
         return StringBody(UTF8.String(b));
     }
-    
+
     public final static StringBody StringBody(final String s) {
         try {
             return new StringBody(s, charset);
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
         }
     }
-    
+
     /**
      * using the string method with the default charset given as argument should prevent using the charset cache
      * in FastCharsetProvider.java:118 which locks all concurrent threads using a UTF8.String() method
@@ -64,28 +65,28 @@ public class UTF8 {
      * @return
      */
     public final static String String(final byte[] bytes) {
-        return new String(bytes, charset);
+        return new String(bytes, 0, bytes.length, charset);
     }
-    
+
     public final static String String(final byte[] bytes, final int offset, final int length) {
         return new String(bytes, offset, length, charset);
     }
-    
+
     /**
      * getBytes() as method for String synchronizes during the look-up for the
      * Charset object for the default charset as given with a default charset name.
      * This is the normal process:
-    
+
     public byte[] getBytes() {
     return StringCoding.encode(value, offset, count);
     }
-    
+
     static byte[] encode(char[] ca, int off, int len) {
     String csn = Charset.defaultCharset().name();
     try {
         return encode(csn, ca, off, len);
         ...
-    
+
     static byte[] encode(String charsetName, char[] ca, int off, int len)
     throws UnsupportedEncodingException
     {
@@ -97,17 +98,17 @@ public class UTF8 {
         try {
         Charset cs = lookupCharset(csn);
         ....
-    
+
     private static Charset lookupCharset(String csn) {
     if (Charset.isSupported(csn)) {
         try {
         return Charset.forName(csn);
         ....
-    
+
     public static Charset forName(String charsetName) {
     Charset cs = lookup(charsetName);
     ....
-    
+
     private static Charset lookup(String charsetName) {
     if (charsetName == null)
         throw new IllegalArgumentException("Null charset name");
@@ -136,7 +137,7 @@ public class UTF8 {
     {
         cache(charsetName, cs);
         ....
-        
+
     At this point the getBytes() call synchronizes at one of the methods
     standardProvider.charsetForName
     lookupExtendedCharset
@@ -152,5 +153,5 @@ public class UTF8 {
         if (s == null) return null;
         return s.getBytes(charset);
     }
-    
+
 }
