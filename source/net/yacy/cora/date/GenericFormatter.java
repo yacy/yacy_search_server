@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -24,6 +24,7 @@
 
 package net.yacy.cora.date;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -37,7 +38,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final String PATTERN_SHORT_MILSEC = "yyyyMMddHHmmssSSS";
     public static final String PATTERN_RFC1123_SHORT = "EEE, dd MMM yyyy";
     public static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
-    
+
     public static final SimpleDateFormat FORMAT_SHORT_DAY     = new SimpleDateFormat(PATTERN_SHORT_DAY, Locale.US);
     public static final SimpleDateFormat FORMAT_SHORT_SECOND  = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
     public static final SimpleDateFormat FORMAT_SHORT_MILSEC  = new SimpleDateFormat(PATTERN_SHORT_MILSEC, Locale.US);
@@ -64,11 +65,11 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final GenericFormatter SHORT_MILSEC_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MILSEC, 1);
     public static final GenericFormatter ANSIC_FORMATTER         = new GenericFormatter(FORMAT_ANSIC, time_second);
     public static final GenericFormatter RFC1123_SHORT_FORMATTER = new GenericFormatter(FORMAT_RFC1123_SHORT, time_minute);
-    
-    private SimpleDateFormat dateFormat;
-    private long maxCacheDiff;
 
-    public GenericFormatter(SimpleDateFormat dateFormat, long maxCacheDiff) {
+    private final SimpleDateFormat dateFormat;
+    private final long maxCacheDiff;
+
+    public GenericFormatter(final SimpleDateFormat dateFormat, final long maxCacheDiff) {
         this.dateFormat = (SimpleDateFormat) dateFormat.clone(); // avoid concurrency locking effects
         this.last_time = 0;
         this.last_format = "";
@@ -91,21 +92,21 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
             return this.dateFormat.format(date);
         }
     }
-    
+
     public String format() {
-        if (Math.abs(System.currentTimeMillis() - last_time) < maxCacheDiff) return last_format;
+        if (Math.abs(System.currentTimeMillis() - this.last_time) < this.maxCacheDiff) return this.last_format;
         synchronized (this.dateFormat) {
             // threads that had been waiting here may use the cache now instead of calculating the date again
-            long time = System.currentTimeMillis();
-            if (Math.abs(time - last_time) < maxCacheDiff) return last_format;
-            
+            final long time = System.currentTimeMillis();
+            if (Math.abs(time - this.last_time) < this.maxCacheDiff) return this.last_format;
+
             // if the cache is not fresh, calculate the date
-            last_format = this.dateFormat.format(new Date(time));
-            last_time = time;
+            this.last_format = this.dateFormat.format(new Date(time));
+            this.last_time = time;
         }
-        return last_format;
+        return this.last_format;
     }
-    
+
     /**
      * Parse a String representation of a Date in short day format assuming the date
      * is aligned to the GMT/UTC timezone. An example for such a date string is "20071218".
@@ -119,7 +120,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
             return this.dateFormat.parse(timeString);
         }
     }
-    
+
     /**
      * Like {@link #parseShortSecond(String)} using additional timezone information provided in an
      * offset String, like "+0100" for CET.
@@ -151,7 +152,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         final long om = Long.parseLong(diffString.substring(3));
         return ((ahead) ? (long) 1 : (long) -1) * (oh * AbstractFormatter.hourMillis + om * AbstractFormatter.minuteMillis);
     }
-    
+
     private static long UTCDiff() {
         // DST_OFFSET is dependent on the time of the Calendar, so it has to be updated
         // to get the correct current offset
@@ -163,6 +164,8 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         }
     }
 
+    private final static DecimalFormat D2 = new DecimalFormat("00");
+
     public static String UTCDiffString() {
         // we express the UTC Difference in 5 digits:
         // SHHMM
@@ -173,19 +176,22 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         // we need too show also the minutes of the time shift
         // Examples: http://www.timeanddate.com/library/abbreviations/timezones/
         final long offsetHours = UTCDiff();
-        final int om = Math.abs((int) (offsetHours / AbstractFormatter.minuteMillis)) % 60;
-        final int oh = Math.abs((int) (offsetHours / AbstractFormatter.hourMillis));
-        String diff = Integer.toString(om);
-        if (diff.length() < 2) diff = "0" + diff;
-        diff = Integer.toString(oh) + diff;
-        if (diff.length() < 4) diff = "0" + diff;
+        final StringBuilder sb = new StringBuilder(5);
         if (offsetHours < 0) {
-            return "-" + diff;
+            sb.append('-');
+        } else {
+            sb.append('+');
         }
-        return "+" + diff;
+        sb.append(D2.format(Math.abs((int) (offsetHours / AbstractFormatter.hourMillis))));
+        sb.append(D2.format(Math.abs((int) (offsetHours / AbstractFormatter.minuteMillis)) % 60));
+        return sb.toString();
     }
-    
+
     public static long correctedUTCTime() {
         return System.currentTimeMillis() - UTCDiff();
+    }
+
+    public static void main(final String[] args) {
+        System.out.println(UTCDiffString());
     }
 }
