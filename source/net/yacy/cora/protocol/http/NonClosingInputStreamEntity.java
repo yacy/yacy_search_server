@@ -46,7 +46,7 @@ public class NonClosingInputStreamEntity extends AbstractHttpEntity {
     private final InputStream content;
     private final long length;
 
-    public NonClosingInputStreamEntity(final InputStream instream, long length) {
+    public NonClosingInputStreamEntity(final InputStream instream, final long length) {
         super();
         if (instream == null) {
             throw new IllegalArgumentException("Source input stream may not be null");
@@ -71,8 +71,8 @@ public class NonClosingInputStreamEntity extends AbstractHttpEntity {
         if (outstream == null) {
             throw new IllegalArgumentException("Output stream may not be null");
         }
-        InputStream instream = this.content;
-        byte[] buffer = new byte[BUFFER_SIZE];
+        final InputStream instream = this.content;
+        final byte[] buffer = new byte[BUFFER_SIZE];
         int l;
         if (this.length < 0) {
             // consume until EOF
@@ -101,6 +101,7 @@ public class NonClosingInputStreamEntity extends AbstractHttpEntity {
      * @deprecated Either use {@link #getContent()} and call {@link java.io.InputStream#close()} on that;
      * otherwise call {@link #writeTo(OutputStream)} which is required to free the resources.
      */
+    @Deprecated
     public void consumeContent() throws IOException {
         // If the input stream is from a connection, closing it will read to
         // the end of the content. Otherwise, we don't care what it does.
