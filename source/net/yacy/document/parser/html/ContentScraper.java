@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.event.EventListenerList;
@@ -243,10 +244,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         String u;
         MultiProtocolURI url;
         while (s < b.length()) {
-            p = find(b, "://", s);
+            p = find(b, dpssp, s);
             if (p == Integer.MAX_VALUE) break;
             s = Math.max(0, p - 5);
-            p = Math.min(find(b, "smb://", s), Math.min(find(b, "ftp://", s), Math.min(find(b, "http://", s), find(b, "https://", s))));
+            p = find(b, protp, s);
             if (p == Integer.MAX_VALUE) break;
             q = b.indexOf(" ", p + 1);
             u = b.substring(p, q < 0 ? b.length() : q);
@@ -262,8 +263,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (b.length() != 0) this.content.append(b).append(32);
     }
 
-    private static final int find(final String s, final String m, final int start) {
-        final int p = s.indexOf(m, start);
+    private final static Pattern dpssp = Pattern.compile("://");
+    private final static Pattern protp = Pattern.compile("smb://|ftp://|http://|https://");
+
+    private static final int find(final String s, final Pattern m, final int start) {
+        final Matcher mm = m.matcher(s.subSequence(start, s.length()));
+        if (!mm.find()) return Integer.MAX_VALUE;
+        final int p = mm.start() + start;
+        //final int p = s.indexOf(m, start);
         return (p < 0) ? Integer.MAX_VALUE : p;
     }
 
