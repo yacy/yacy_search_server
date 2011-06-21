@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -37,12 +37,13 @@ import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Scanner;
-import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.cora.storage.ClusteredScoreMap;
+import net.yacy.cora.storage.ConcurrentScoreMap;
 import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
@@ -55,13 +56,12 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.EventTracker;
-
 import de.anomic.yacy.graphics.ProfilingGraph;
 
 public final class RankingProcess extends Thread {
-    
+
     private static final int maxDoubleDomAll = 1000, maxDoubleDomSpecial = 10000;
-    
+
     private final QueryParams query;
     private final SortedSet<byte[]> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
@@ -69,14 +69,14 @@ public final class RankingProcess extends Thread {
     private       int sortout; // counter for referenced that had been sorted out for other reasons
     //private final int[] domZones;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
-    
+
     private int remote_resourceSize, remote_indexCount, remote_peerCount;
     private int local_resourceSize, local_indexCount;
     private final WeakPriorityBlockingQueue<WordReferenceVars> stack;
     private int feeders;
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
-    
+
     private final ScoreMap<String> ref;  // reference score computation for the commonSense heuristic
     private final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
     private final Map<String, byte[]> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
@@ -85,7 +85,7 @@ public final class RankingProcess extends Thread {
     private final ReferenceOrder order;
     private final long startTime;
     private       boolean addRunning;
-    
+
     public RankingProcess(final QueryParams query, final ReferenceOrder order, final int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
@@ -116,36 +116,36 @@ public final class RankingProcess extends Thread {
         this.feeders = 1;
         this.startTime = System.currentTimeMillis();
     }
-    
+
     public QueryParams getQuery() {
         return this.query;
     }
-    
+
     public ReferenceOrder getOrder() {
         return this.order;
     }
-    
+
     @Override
     public void run() {
         // do a search
-        
+
         // sort the local containers and truncate it to a limited count,
         // so following sortings together with the global results will be fast
         try {
-            long timer = System.currentTimeMillis();
+            final long timer = System.currentTimeMillis();
             final TermSearch<WordReference> search = this.query.getSegment().termIndex().query(
-                    query.queryHashes,
-                    query.excludeHashes,
+                    this.query.queryHashes,
+                    this.query.excludeHashes,
                     null,
                     Segment.wordReferenceFactory,
-                    query.maxDistance);
+                    this.query.maxDistance);
             this.localSearchInclusion = search.inclusion();
             final ReferenceContainer<WordReference> index = search.joined();
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.JOIN, query.queryString, index.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.JOIN, this.query.queryString, index.size(), System.currentTimeMillis() - timer), false);
             if (index.isEmpty()) {
                 return;
             }
-            
+
             add(index, true, "local index: " + this.query.getSegment().getLocation(), -1, true);
         } catch (final Exception e) {
             Log.logException(e);
@@ -153,21 +153,21 @@ public final class RankingProcess extends Thread {
             oneFeederTerminated();
         }
     }
-    
+
     public void add(
             final ReferenceContainer<WordReference> index,
             final boolean local,
-            String resourceName,
+            final String resourceName,
             final int fullResource,
             final boolean finalizeAddAtEnd) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
         this.addRunning = true;
-        
+
         assert (index != null);
         if (index.isEmpty()) return;
-        
+
         if (local) {
             this.local_resourceSize += index.size();
         } else {
@@ -175,16 +175,16 @@ public final class RankingProcess extends Thread {
             this.remote_resourceSize += fullResource;
             this.remote_peerCount++;
         }
-        
+
         long timer = System.currentTimeMillis();
-        
+
         // normalize entries
         final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.NORMALIZING, resourceName, index.size(), System.currentTimeMillis() - timer), false);
-        
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.NORMALIZING, resourceName, index.size(), System.currentTimeMillis() - timer), false);
+
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
+        final boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
 
         // apply all constraints
         try {
@@ -197,7 +197,7 @@ public final class RankingProcess extends Thread {
 
                 // increase flag counts
                 for (int j = 0; j < 32; j++) {
-                    if (iEntry.flags().get(j)) {flagcount[j]++;}
+                    if (iEntry.flags().get(j)) {this.flagcount[j]++;}
                 }
 
                 // check constraints
@@ -206,11 +206,11 @@ public final class RankingProcess extends Thread {
                 }
 
                 // check document domain
-                if (query.contentdom != ContentDomain.TEXT) {
-                    if ((query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) { continue; }
-                    if ((query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) { continue; }
-                    if ((query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) { continue; }
-                    if ((query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) { continue; }
+                if (this.query.contentdom != ContentDomain.TEXT) {
+                    if ((this.query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) { continue; }
+                    if ((this.query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) { continue; }
+                    if ((this.query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) { continue; }
+                    if ((this.query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) { continue; }
                 }
 
                 // check tld domain
@@ -221,32 +221,32 @@ public final class RankingProcess extends Thread {
                     continue;
                 }
                 */
-			    
+
                 // count domZones
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
-                
+
                 // check site constraints
-                String hosthash = iEntry.hosthash();
-                if (query.sitehash == null) {
+                final String hosthash = iEntry.hosthash();
+                if (this.query.sitehash == null) {
                     // no site constraint there; maybe collect host navigation information
-                    if (nav_hosts && query.urlMask_isCatchall) {
+                    if (nav_hosts && this.query.urlMask_isCatchall) {
                         this.hostNavigator.inc(hosthash);
                         this.hostResolver.put(hosthash, iEntry.urlhash());
                     }
                 } else {
-                    if (!hosthash.equals(query.sitehash)) {
+                    if (!hosthash.equals(this.query.sitehash)) {
                         // filter out all domains that do not match with the site constraint
                         continue;
                     }
                 }
-			    
+
                 // finally make a double-check and insert result to stack
-                if (urlhashes.add(iEntry.urlhash())) {
+                if (this.urlhashes.add(iEntry.urlhash())) {
                     rankingtryloop: while (true) {
                         try {
-                            stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                            this.stack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                             break rankingtryloop;
-                        } catch (ArithmeticException e) {
+                        } catch (final ArithmeticException e) {
                             // this may happen if the concurrent normalizer changes values during cardinal computation
                             continue rankingtryloop;
                         }
@@ -256,14 +256,14 @@ public final class RankingProcess extends Thread {
                 }
             }
 
-        } catch (InterruptedException e) {} finally {
+        } catch (final InterruptedException e) {} finally {
             if (finalizeAddAtEnd) this.addRunning = false;
         }
-        
+
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
     }
-    
+
     /**
      * method to signal the incoming stack that one feeder has terminated
      */
@@ -271,56 +271,56 @@ public final class RankingProcess extends Thread {
     	this.feeders--;
     	assert this.feeders >= 0 : "feeders = " + this.feeders;
     }
-    
+
     protected void moreFeeders(final int countMoreFeeders) {
     	this.feeders += countMoreFeeders;
     }
-    
+
     public boolean feedingIsFinished() {
     	return System.currentTimeMillis() - this.startTime > 50 && this.feeders == 0;
     }
-    
+
     private boolean testFlags(final WordReference ientry) {
-        if (query.constraint == null) return true;
+        if (this.query.constraint == null) return true;
         // test if ientry matches with filter
         // if all = true: let only entries pass that has all matching bits
         // if all = false: let all entries pass that has at least one matching bit
-        if (query.allofconstraint) {
+        if (this.query.allofconstraint) {
             for (int i = 0; i < 32; i++) {
-                if ((query.constraint.get(i)) && (!ientry.flags().get(i))) return false;
+                if ((this.query.constraint.get(i)) && (!ientry.flags().get(i))) return false;
             }
             return true;
         }
         for (int i = 0; i < 32; i++) {
-            if ((query.constraint.get(i)) && (ientry.flags().get(i))) return true;
+            if ((this.query.constraint.get(i)) && (ientry.flags().get(i))) return true;
         }
         return false;
     }
-    
+
     protected Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {
         // direct access to the result maps is needed for abstract generation
         // this is only available if execQuery() was called before
-        return localSearchInclusion;
+        return this.localSearchInclusion;
     }
-    
+
     private WeakPriorityBlockingQueue.Element<WordReferenceVars> takeRWI(final boolean skipDoubleDom, final long waitingtime) {
-        
+
         // returns from the current RWI list the best entry and removes this entry from the list
         WeakPriorityBlockingQueue<WordReferenceVars> m;
         WeakPriorityBlockingQueue.Element<WordReferenceVars> rwi = null;
-        
+
         // take one entry from the stack if there are entries on that stack or the feeding is not yet finished
         try {
             //System.out.println("stack.poll: feeders = " + this.feeders + ", stack.sizeQueue = " + stack.sizeQueue());
             int loops = 0; // a loop counter to terminate the reading if all the results are from the same domain
-            long timeout = System.currentTimeMillis() + waitingtime;
-            while (((!feedingIsFinished() && this.addRunning) || stack.sizeQueue() > 0) &&
+            final long timeout = System.currentTimeMillis() + waitingtime;
+            while (((!feedingIsFinished() && this.addRunning) || this.stack.sizeQueue() > 0) &&
                    (this.query.itemsPerPage < 1 || loops++ < this.query.itemsPerPage)) {
                 if (waitingtime <= 0) {
-                    rwi = stack.poll();
+                    rwi = this.stack.poll();
                 } else timeoutloop:while (System.currentTimeMillis() < timeout) {
-                    if (feedingIsFinished() && stack.sizeQueue() == 0) break timeoutloop;
-                    rwi = stack.poll(50);
+                    if (feedingIsFinished() && this.stack.sizeQueue() == 0) break timeoutloop;
+                    rwi = this.stack.poll(50);
                     if (rwi != null) break timeoutloop;
                 }
                 if (rwi == null) break;
@@ -328,14 +328,14 @@ public final class RankingProcess extends Thread {
                     //System.out.println("!skipDoubleDom");
                     return rwi;
                  }
-                
+
                 // check doubledom
                 final String hosthash = rwi.getElement().hosthash();
                 synchronized (this.doubleDomCache) {
                     m = this.doubleDomCache.get(hosthash);
                     if (m == null) {
                         // first appearance of dom. we create an entry to signal that one of that domain was already returned
-                        m = new WeakPriorityBlockingQueue<WordReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
+                        m = new WeakPriorityBlockingQueue<WordReferenceVars>((this.query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
                         this.doubleDomCache.put(hosthash, m);
                         return rwi;
                     }
@@ -343,9 +343,9 @@ public final class RankingProcess extends Thread {
                     m.put(rwi);
                 }
             }
-        } catch (InterruptedException e1) {}
+        } catch (final InterruptedException e1) {}
         if (this.doubleDomCache.isEmpty()) return null;
-        
+
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
         WeakPriorityBlockingQueue.Element<WordReferenceVars> bestEntry = null;
@@ -355,7 +355,7 @@ public final class RankingProcess extends Thread {
             while (i.hasNext()) {
                 try {
                     m = i.next();
-                } catch (ConcurrentModificationException e) {
+                } catch (final ConcurrentModificationException e) {
                     Log.logException(e);
                     continue; // not the best solution...
                 }
@@ -372,14 +372,14 @@ public final class RankingProcess extends Thread {
                 }
             }
             if (bestEntry == null) return null;
-            
+
             // finally remove the best entry from the doubledom cache
             m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
             bestEntry = m.poll();
         }
         return bestEntry;
     }
-    
+
     /**
      * get one metadata entry from the ranked results. This will be the 'best' entry so far
      * according to the applied ranking. If there are no more entries left or the timeout
@@ -400,26 +400,26 @@ public final class RankingProcess extends Thread {
             if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
             final URIMetadataRow page = this.query.getSegment().urlMetadata().load(obrwi);
             if (page == null) {
-            	misses.add(obrwi.getElement().urlhash());
+            	this.misses.add(obrwi.getElement().urlhash());
             	continue;
             }
-            
+
             // prepare values for constraint check
             final URIMetadataRow.Components metadata = page.metadata();
-            
+
             // check errors
             if (metadata == null) {
                 this.sortout++;
                 continue; // rare case where the url is corrupted
             }
-            
-            if (!query.urlMask_isCatchall) {
+
+            if (!this.query.urlMask_isCatchall) {
                 // check url mask
-                if (!metadata.matches(query.urlMask)) {
+                if (!metadata.matches(this.query.urlMask)) {
                     this.sortout++;
                     continue;
                 }
-                
+
                 // in case that we do not have e catchall filter for urls
                 // we must also construct the domain navigator here
                 //if (query.sitehash == null) {
@@ -427,7 +427,7 @@ public final class RankingProcess extends Thread {
                 //    this.hostResolver.put(UTF8.String(urlhash, 6, 6), UTF8.String(urlhash));
                 //}
             }
-            
+
             // check for more errors
             if (metadata.url() == null) {
                 this.sortout++;
@@ -439,18 +439,18 @@ public final class RankingProcess extends Thread {
             final String pagetitle = metadata.dc_title().toLowerCase();
 
             // check exclusion
-            if ((QueryParams.anymatch(pagetitle, query.excludeHashes)) ||
-                (QueryParams.anymatch(pageurl.toLowerCase(), query.excludeHashes)) ||
-                (QueryParams.anymatch(pageauthor.toLowerCase(), query.excludeHashes))) {
+            if ((QueryParams.anymatch(pagetitle, this.query.excludeHashes)) ||
+                (QueryParams.anymatch(pageurl.toLowerCase(), this.query.excludeHashes)) ||
+                (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.excludeHashes))) {
                 this.sortout++;
                 continue;
             }
 
             // check index-of constraint
-            if ((query.constraint != null) &&
-                (query.constraint.get(Condenser.flag_cat_indexof)) &&
+            if ((this.query.constraint != null) &&
+                (this.query.constraint.get(Condenser.flag_cat_indexof)) &&
                 (!(pagetitle.startsWith("index of")))) {
-                final Iterator<byte[]> wi = query.queryHashes.iterator();
+                final Iterator<byte[]> wi = this.query.queryHashes.iterator();
                 while (wi.hasNext()) {
                     this.query.getSegment().termIndex().removeDelayed(wi.next(), page.hash());
                 }
@@ -459,41 +459,41 @@ public final class RankingProcess extends Thread {
             }
 
             // check location constraint
-            if ((query.constraint != null) &&
-                (query.constraint.get(Condenser.flag_cat_haslocation)) &&
+            if ((this.query.constraint != null) &&
+                (this.query.constraint.get(Condenser.flag_cat_haslocation)) &&
                 (metadata.lat() == 0.0f || metadata.lon() == 0.0f)) {
                 this.sortout++;
                 continue;
             }
-            
+
             // check content domain
-            if ((query.contentdom == ContentDomain.AUDIO && page.laudio() == 0) ||
-                (query.contentdom == ContentDomain.VIDEO && page.lvideo() == 0) ||
-                (query.contentdom == ContentDomain.IMAGE && page.limage() == 0) ||
-                (query.contentdom == ContentDomain.APP && page.lapp() == 0)) {
+            if ((this.query.contentdom == ContentDomain.AUDIO && page.laudio() == 0) ||
+                (this.query.contentdom == ContentDomain.VIDEO && page.lvideo() == 0) ||
+                (this.query.contentdom == ContentDomain.IMAGE && page.limage() == 0) ||
+                (this.query.contentdom == ContentDomain.APP && page.lapp() == 0)) {
                 this.sortout++;
             	continue;
             }
-            
+
             // evaluate information of metadata for navigation
             // author navigation:
             if (pageauthor != null && pageauthor.length() > 0) {
             	// add author to the author navigator
-                String authorhash = ASCII.String(Word.word2hash(pageauthor));
+                final String authorhash = ASCII.String(Word.word2hash(pageauthor));
 
                 // check if we already are filtering for authors
             	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
                     this.sortout++;
             		continue;
             	}
-            	
+
             	// add author to the author navigator
                 this.authorNavigator.inc(pageauthor);
             } else if (this.query.authorhash != null) {
                 this.sortout++;
             	continue;
             }
-            
+
             // namespace navigation
             String pagepath = metadata.url().getPath();
             if ((p = pagepath.indexOf(':')) >= 0) {
@@ -504,49 +504,49 @@ public final class RankingProcess extends Thread {
                     this.namespaceNavigator.inc(pagepath);
                 }
             }
-            
+
             // check Scanner
             if (!Scanner.acceptURL(metadata.url())) {
                 this.sortout++;
                 continue;
             }
-            
+
             // accept url
             return page;
         }
         return null;
     }
-    
+
     public int sizeQueue() {
-        int c = stack.sizeQueue();
-        for (WeakPriorityBlockingQueue<WordReferenceVars> s: this.doubleDomCache.values()) {
+        int c = this.stack.sizeQueue();
+        for (final WeakPriorityBlockingQueue<WordReferenceVars> s: this.doubleDomCache.values()) {
             c += s.sizeQueue();
         }
         return c;
     }
-    
+
     public int sizeAvailable() {
-        int c = stack.sizeAvailable();
-        for (WeakPriorityBlockingQueue<WordReferenceVars> s: this.doubleDomCache.values()) {
+        int c = this.stack.sizeAvailable();
+        for (final WeakPriorityBlockingQueue<WordReferenceVars> s: this.doubleDomCache.values()) {
             c += s.sizeAvailable();
         }
         return c;
     }
-    
+
     public boolean isEmpty() {
-        if (!stack.isEmpty()) return false;
-        for (WeakPriorityBlockingQueue<WordReferenceVars> s: this.doubleDomCache.values()) {
+        if (!this.stack.isEmpty()) return false;
+        for (final WeakPriorityBlockingQueue<WordReferenceVars> s: this.doubleDomCache.values()) {
             if (!s.isEmpty()) return false;
         }
         return true;
     }
-    
+
     public int[] flagCount() {
-    	return flagcount;
+    	return this.flagcount;
     }
-    
+
     // "results from a total number of <remote_resourceSize + local_resourceSize> known (<local_resourceSize> local, <remote_resourceSize> remote), <remote_indexCount> links from <remote_peerCount> other YaCy peers."
-    
+
     public int filteredCount() {
         // the number of index entries that are considered as result set
         return this.stack.sizeAvailable();
@@ -556,44 +556,44 @@ public final class RankingProcess extends Thread {
         // the number of results in the local peer after filtering
         return this.local_indexCount;
     }
-    
+
     public int getRemoteIndexCount() {
         // the number of result contributions from all the remote peers
         return this.remote_indexCount;
     }
-    
+
     public int getRemoteResourceSize() {
         // the number of all hits in all the remote peers
         return Math.max(this.remote_resourceSize, this.remote_indexCount);
     }
-    
+
     public int getRemotePeerCount() {
         // the number of remote peers that have contributed
         return this.remote_peerCount;
     }
-    
+
     public Iterator<byte[]> miss() {
         return this.misses.iterator();
     }
-    
+
     public int getMissCount() {
         return this.misses.size();
     }
-    
+
     public int getSortOutCount() {
         return this.sortout;
     }
-    
+
     public ScoreMap<String> getNamespaceNavigator() {
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ClusteredScoreMap<String>();
         if (this.namespaceNavigator.sizeSmaller(2)) this.namespaceNavigator.clear(); // navigators with one entry are not useful
         return this.namespaceNavigator;
     }
-    
+
     public ScoreMap<String> getHostNavigator() {
-        ScoreMap<String> result = new ConcurrentScoreMap<String>();
+        final ScoreMap<String> result = new ConcurrentScoreMap<String>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return result;
-        
+
         final Iterator<String> domhashs = this.hostNavigator.keys(false);
         URIMetadataRow row;
         byte[] urlhash;
@@ -613,14 +613,14 @@ public final class RankingProcess extends Thread {
     }
 
     public static final Comparator<Map.Entry<String, Integer>> mecomp = new Comparator<Map.Entry<String, Integer>>() {
-        public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+        public int compare(final Map.Entry<String, Integer> o1, final Map.Entry<String, Integer> o2) {
             if (o1.getValue().intValue() < o2.getValue().intValue()) return 1;
             if (o2.getValue().intValue() < o1.getValue().intValue()) return -1;
             return 0;
         }
     };
 
-    public ScoreMap<String> getTopicNavigator(int count) {
+    public ScoreMap<String> getTopicNavigator(final int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
@@ -645,38 +645,40 @@ public final class RankingProcess extends Thread {
                 counts.put(word, q);
             }
         }
-        if (max > min) for (Map.Entry<String, Float> ce: counts.entrySet()) {
+        if (max > min) for (final Map.Entry<String, Float> ce: counts.entrySet()) {
             result.set(ce.getKey(), (int) (((double) count) * (ce.getValue() - min) / (max - min)));
         }
         return this.ref;
     }
-    
+
+    private final static Pattern lettermatch = Pattern.compile("[a-z]+");
+
     public void addTopic(final String[] words) {
         String word;
         for (final String w : words) {
             word = w.toLowerCase();
             if (word.length() > 2 &&
                 "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off".indexOf(word) < 0 &&
-                !query.queryHashes.has(Word.word2hash(word)) &&
-                word.matches("[a-z]+") &&
+                !this.query.queryHashes.has(Word.word2hash(word)) &&
+                lettermatch.matcher(word).matches() &&
                 !Switchboard.badwords.contains(word) &&
                 !Switchboard.stopwords.contains(word)) {
-                ref.inc(word);
+                this.ref.inc(word);
             }
         }
     }
-    
+
     protected void addTopics(final ResultEntry resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
         final String[] descrcomps = MultiProtocolURI.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
-        
+
         // add references
         //addTopic(urlcomps);
         addTopic(descrcomps);
     }
-    
+
     public ScoreMap<String> getAuthorNavigator() {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls

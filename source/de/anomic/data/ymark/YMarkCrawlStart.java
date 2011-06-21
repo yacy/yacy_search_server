@@ -9,7 +9,7 @@
 // $LastChangedBy: apfelmaennchen $
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -32,39 +32,38 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.blob.Tables;
-
 import de.anomic.data.WorkTables;
 
 public class YMarkCrawlStart extends HashMap<String,String>{
 
 	private static final long serialVersionUID = 1L;
-	private WorkTables worktables;
-	
+	private final WorkTables worktables;
+
 	public YMarkCrawlStart(final WorkTables worktables) {
 		this.worktables = worktables;
 	}
-	
+
 	public YMarkCrawlStart(final WorkTables worktables, final String url) {
 		this.worktables = worktables;
-		this.clear();
-		this.load(url);
+		clear();
+		load(url);
 	}
-	
-	public void load(String url) {	
+
+	public void load(final String url) {
 		try {
-			final StringBuffer buffer = new StringBuffer(500);
+			final StringBuilder buffer = new StringBuilder(500);
 			buffer.append("^.*crawlingURL=\\Q");
 			buffer.append(url);
 			buffer.append("\\E?.*");
-			final Pattern pattern = Pattern.compile(buffer.toString());			
+			final Pattern pattern = Pattern.compile(buffer.toString());
 			final Iterator<Tables.Row> APIcalls = this.worktables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_URL, pattern);
-			Tables.Row row = null;			
+			Tables.Row row = null;
 			while(APIcalls.hasNext()) {
 				row = APIcalls.next();
 				if(row.get(WorkTables.TABLE_API_COL_TYPE, "").equals("crawler")) {
 					buffer.setLength(0);
 					buffer.append(row.get(WorkTables.TABLE_API_COL_URL, ""));
-					buffer.delete(0, buffer.indexOf("?")+1);					
+					buffer.delete(0, buffer.indexOf("?")+1);
 					int start = 0;
 					int end = 0;
 					String key;
@@ -78,12 +77,12 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 							end = buffer.length()-1;
 						value = buffer.substring(start, end);
 						start = end+1;
-						this.put(key, value);
+						put(key, value);
 					}
 					break;
-				}				
+				}
 			}
-		} catch (IOException e) {
+		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 		}
 	}

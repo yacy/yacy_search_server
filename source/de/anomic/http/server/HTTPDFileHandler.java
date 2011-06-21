@@ -1377,7 +1377,7 @@ public final class HTTPDFileHandler {
 
 			final Pattern p = Pattern.compile("(href=\"|src=\")([^\"]+)|(href='|src=')([^']+)|(url\\(')([^']+)|(url\\(\")([^\"]+)|(url\\()([^\\)]+)");
 			final Matcher m = p.matcher(sbuffer);
-			final StringBuffer result = new StringBuffer();
+			final StringBuffer result = new StringBuffer(80);
 			while (m.find()) {
 				String init = null;
 				if(m.group(1) != null) init = m.group(1);

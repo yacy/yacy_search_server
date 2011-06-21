@@ -1,4 +1,4 @@
-// Dispatcher.java 
+// Dispatcher.java
 // ------------------------------
 // part of YaCy
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
@@ -28,6 +28,7 @@ package de.anomic.yacy.dht;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -41,11 +42,9 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
-
 import de.anomic.search.Segment;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
-import java.util.List;
 
 public class Dispatcher {
 
@@ -80,30 +79,30 @@ public class Dispatcher {
      *     or the target queue runs out of entries. If the target queue is empty, the transmission is
      *     called failed. In case of a fail, the RWI fragment is put back into the backend index structure
      */
-    
+
     // a cloud is a cache for the objects that wait to be transmitted
     // the String-key is the primary target as contained in the Entry
     private Map<ByteArray, Transmission.Chunk> transmissionCloud;
-    
+
     // the segment backend is used to store the remaining indexContainers in case that the object is closed
     private final Segment segment;
-    
+
     // the seed database
     private final yacySeedDB seeds;
-    
+
     // the log
     private final Log log;
-    
+
     // transmission process
     private WorkflowProcessor<Transmission.Chunk> indexingTransmissionProcessor;
-   
+
     // transmission object
     private final Transmission transmission;
-    
+
     public Dispatcher(
             final Segment segment,
             final yacySeedDB seeds,
-            final boolean gzipBody, 
+            final boolean gzipBody,
             final int timeout
             ) {
         this.transmissionCloud = new ConcurrentHashMap<ByteArray, Transmission.Chunk>();
@@ -111,28 +110,28 @@ public class Dispatcher {
         this.seeds = seeds;
         this.log = new Log("INDEX-TRANSFER-DISPATCHER");
         this.transmission = new Transmission(
-            log,
+            this.log,
             segment,
             seeds,
             gzipBody,
             timeout);
-        
-        int concurrentSender = Math.min(32, Math.max(10, WorkflowProcessor.availableCPU));
-        indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
+
+        final int concurrentSender = Math.min(32, Math.max(10, WorkflowProcessor.availableCPU));
+        this.indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
                 "transferDocumentIndex",
                 "This is the RWI transmission process",
                 new String[]{"RWI/Cache/Collections"},
                 this, "transferDocumentIndex", concurrentSender * 2, null, concurrentSender);
     }
-    
+
     public int cloudSize() {
     	return (this.transmissionCloud == null) ? 0 : this.transmissionCloud.size();
     }
-    
+
     public int transmissionSize() {
     	return (this.indexingTransmissionProcessor == null) ? 0 : this.indexingTransmissionProcessor.queueSize();
     }
-    
+
     /**
      * PROCESS(1)
      * select a number of index containers from the backend index.
@@ -150,15 +149,15 @@ public class Dispatcher {
             final int maxContainerCount,
             final int maxReferenceCount,
             final int maxtime) throws IOException {
-        
+
     	// prefer file
-        ArrayList<ReferenceContainer<WordReference>> containers = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime, false);
+        final ArrayList<ReferenceContainer<WordReference>> containers = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime, false);
 
         // if ram does not provide any result, take from file
         //if (containers.isEmpty()) containers = selectContainers(hash, limitHash, maxContainerCount, maxtime, false);
         return containers;
     }
-    
+
     private ArrayList<ReferenceContainer<WordReference>> selectContainers(
             final byte[] hash,
             final byte[] limitHash,
@@ -166,9 +165,9 @@ public class Dispatcher {
             final int maxReferenceCount,
             final int maxtime,
             final boolean ram) throws IOException {
-        
+
         final ArrayList<ReferenceContainer<WordReference>> containers = new ArrayList<ReferenceContainer<WordReference>>(maxContainerCount);
-        
+
         final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.segment.termIndex().references(hash, true, ram);
         ReferenceContainer<WordReference> container;
         int refcount = 0;
@@ -183,7 +182,7 @@ public class Dispatcher {
                 ((container = indexContainerIterator.next()) != null) &&
                 ((containers.isEmpty()) ||
                  (Base64Order.enhancedCoder.compare(container.getTermHash(), limitHash) < 0))
-                
+
         ) {
             if (container.isEmpty()) continue;
             refcount += container.size();
@@ -193,12 +192,12 @@ public class Dispatcher {
         final ArrayList<ReferenceContainer<WordReference>> rc;
         if (ram) {
             // selection was only from ram, so we have to carefully remove only the selected entries
-            HandleSet urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            final HandleSet urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             Iterator<WordReference> it;
-            for (ReferenceContainer<WordReference> c: containers) {
+            for (final ReferenceContainer<WordReference> c: containers) {
                 urlHashes.clear();
                 it = c.entries();
-                while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
+                while (it.hasNext()) try { urlHashes.put(it.next().urlhash()); } catch (final RowSpaceExceededException e) { Log.logException(e); }
                 if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
                 if (!urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
@@ -207,7 +206,7 @@ public class Dispatcher {
             // selection was from whole index, so we can just delete the whole container
             // but to avoid race conditions return the results from the deletes
             rc = new ArrayList<ReferenceContainer<WordReference>>(containers.size());
-            for (ReferenceContainer<WordReference> c: containers) {
+            for (final ReferenceContainer<WordReference> c: containers) {
                 container = this.segment.termIndex().delete(c.getTermHash()); // be aware this might be null!
                 if (container != null && !container.isEmpty()) {
                     if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + ASCII.String(c.getTermHash()) + "'");
@@ -215,7 +214,7 @@ public class Dispatcher {
                 }
             }
         }
-        
+
         // finished. The caller must take care of the containers and must put them back if not needed
         return rc;
     }
@@ -226,33 +225,33 @@ public class Dispatcher {
      * @param containers
      * @param scheme
      * @return
-     * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException
      */
     @SuppressWarnings("unchecked")
-    private List<ReferenceContainer<WordReference>>[] splitContainers(List<ReferenceContainer<WordReference>> containers) throws RowSpaceExceededException {
-        
+    private List<ReferenceContainer<WordReference>>[] splitContainers(final List<ReferenceContainer<WordReference>> containers) throws RowSpaceExceededException {
+
         // init the result vector
-        int partitionCount = this.seeds.scheme.verticalPartitions();
-        List<ReferenceContainer<WordReference>>[] partitions = (ArrayList<ReferenceContainer<WordReference>>[]) new ArrayList[partitionCount];
+        final int partitionCount = this.seeds.scheme.verticalPartitions();
+        final List<ReferenceContainer<WordReference>>[] partitions = new ArrayList[partitionCount];
         for (int i = 0; i < partitions.length; i++) partitions[i] = new ArrayList<ReferenceContainer<WordReference>>();
-        
+
         // check all entries and split them to the partitions
-        ReferenceContainer<WordReference>[] partitionBuffer = new ReferenceContainer[partitionCount];
+        final ReferenceContainer<WordReference>[] partitionBuffer = new ReferenceContainer[partitionCount];
         WordReference re;
-        for (ReferenceContainer<WordReference> container: containers) {
+        for (final ReferenceContainer<WordReference> container: containers) {
             // init the new partitions
             for (int j = 0; j < partitionBuffer.length; j++) {
                 partitionBuffer[j] = new ReferenceContainer<WordReference>(Segment.wordReferenceFactory, container.getTermHash(), container.size() / partitionCount);
             }
 
             // split the container
-            Iterator<WordReference> i = container.entries();
+            final Iterator<WordReference> i = container.entries();
             while (i.hasNext()) {
                 re = i.next();
                 if (re == null) continue;
                 partitionBuffer[this.seeds.scheme.verticalPosition(re.urlhash())].add(re);
             }
-            
+
             // add the containers to the result vector
             for (int j = 0; j < partitionBuffer.length; j++) {
                 partitions[j].add(partitionBuffer[j]);
@@ -260,7 +259,7 @@ public class Dispatcher {
         }
         return partitions;
     }
-    
+
     /**
      * PROCESS(3) and PROCESS(4)
      * put containers into cloud. This needs information about the network,
@@ -272,7 +271,7 @@ public class Dispatcher {
      * then no additional IO is necessary.
      */
     private void enqueueContainersToCloud(final List<ReferenceContainer<WordReference>>[] containers) {
-        if (transmissionCloud == null) return;
+        if (this.transmissionCloud == null) return;
         ReferenceContainer<WordReference> lastContainer;
         byte[] primaryTarget;
         ByteArray pTArray;
@@ -283,16 +282,16 @@ public class Dispatcher {
             primaryTarget = FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(lastContainer.getTermHash(), vertical));
             assert primaryTarget[2] != '@';
             pTArray = new ByteArray(primaryTarget);
-            
+
             // get or make a entry object
             entry = this.transmissionCloud.get(pTArray); // if this is not null, the entry is extended here
-            List<yacySeed> targets = PeerSelection.getAcceptRemoteIndexSeedsList(
-                    seeds,
+            final List<yacySeed> targets = PeerSelection.getAcceptRemoteIndexSeedsList(
+                    this.seeds,
                     primaryTarget,
-                    seeds.redundancy() * 3,
+                    this.seeds.redundancy() * 3,
                     true);
             this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + ASCII.String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
-            if (entry == null) entry = transmission.newChunk(primaryTarget, targets);
+            if (entry == null) entry = this.transmission.newChunk(primaryTarget, targets);
 
             /*/ lookup targets
             int sc = 1;
@@ -303,17 +302,17 @@ public class Dispatcher {
 				this.log.logInfo("enqueueContainers: distance to first container at position " + sc + ": " + FlatWordPartitionScheme.std.dhtDistance(FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(containers[vertical].get(0).getTermHash(), vertical)), null, seed));
 				sc++;
 			}*/
-            
+
             // fill the entry with the containers
-            for (ReferenceContainer<WordReference> c: containers[vertical]) {
+            for (final ReferenceContainer<WordReference> c: containers[vertical]) {
                 try {
                     entry.add(c);
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                     break;
                 }
             }
-            
+
             // put the entry into the cloud
             if (entry.containersSize() > 0) this.transmissionCloud.put(pTArray, entry);
         }
@@ -330,12 +329,12 @@ public class Dispatcher {
     	List<ReferenceContainer<WordReference>> selectedContainerCache;
         try {
             selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             this.log.logSevere("selectContainersEnqueueToCloud: selectedContainer failed", e);
             return false;
         }
         this.log.logInfo("selectContainersEnqueueToCloud: selectedContainerCache was filled with " + selectedContainerCache.size() + " entries");
-        
+
         if (selectedContainerCache == null || selectedContainerCache.isEmpty()) {
         	this.log.logInfo("selectContainersEnqueueToCloud: selectedContainerCache is empty, cannot do anything here.");
         	return false;
@@ -344,7 +343,7 @@ public class Dispatcher {
         List<ReferenceContainer<WordReference>>[] splitContainerCache;
         try {
             splitContainerCache = splitContainers(selectedContainerCache);
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             this.log.logSevere("selectContainersEnqueueToCloud: splitContainers failed because of too low RAM", e);
             return false;
         }
@@ -363,7 +362,7 @@ public class Dispatcher {
     	this.log.logInfo("selectContainersEnqueueToCloud: splitContainerCache enqueued to cloud array which has now " + this.transmissionCloud.size() + " entries.");
         return true;
     }
-    
+
     /**
      * PROCESS(5)
      * take the largest container from the cloud and put it into the 'next' array,
@@ -371,43 +370,50 @@ public class Dispatcher {
      * This method returns true if a container was dequeued, false if not
      */
     public boolean dequeueContainer() {
-    	if (transmissionCloud == null) return false;
-        if (this.indexingTransmissionProcessor.queueSize() > indexingTransmissionProcessor.concurrency()) return false;
+    	if (this.transmissionCloud == null) return false;
+        if (this.indexingTransmissionProcessor.queueSize() > this.indexingTransmissionProcessor.concurrency()) return false;
         ByteArray maxtarget = null;
         int maxsize = -1;
-        for (Map.Entry<ByteArray, Transmission.Chunk> chunk: this.transmissionCloud.entrySet()) {
+        for (final Map.Entry<ByteArray, Transmission.Chunk> chunk: this.transmissionCloud.entrySet()) {
             if (chunk.getValue().containersSize() > maxsize) {
                 maxsize = chunk.getValue().containersSize();
                 maxtarget = chunk.getKey();
             }
         }
         if (maxsize < 0) return false;
-        Transmission.Chunk chunk = this.transmissionCloud.remove(maxtarget);
+        final Transmission.Chunk chunk = this.transmissionCloud.remove(maxtarget);
         try {
             this.indexingTransmissionProcessor.enQueue(chunk);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             Log.logException(e);
         }
         return true;
     }
-    
-    public Transmission.Chunk transferDocumentIndex(Transmission.Chunk chunk) {
+
+    /**
+     * transfer job: this method is called using reflection from the switchboard
+     * the method is called as a Workflow process. That means it is always called whenever
+     * a job is placed in the workflow queue. This happens in dequeueContainer()
+     * @param chunk
+     * @return
+     */
+    public Transmission.Chunk transferDocumentIndex(final Transmission.Chunk chunk) {
 
         // do the transmission
-        boolean success = chunk.transmit();
-        
+        final boolean success = chunk.transmit();
+
         if (success && chunk.isFinished()) {
             // finished with this queue!
             this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
             return chunk;
         }
-        
+
         if (!success) this.log.logInfo("STORE: Chunk " + ASCII.String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
-        
+
         if (chunk.canFinish()) {
             try {
                 if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.enQueue(chunk);
-            } catch (InterruptedException e) {
+            } catch (final InterruptedException e) {
                 Log.logException(e);
                 return null;
             }
@@ -420,12 +426,12 @@ public class Dispatcher {
 
     public void close() {
         // removes all entries from the dispatcher and puts them back to a RAMRI
-        if (indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
+        if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
         if (this.transmissionCloud != null) {
-        	outerLoop: for (Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
-        		for (ReferenceContainer<WordReference> i : e.getValue()) try {
+        	outerLoop: for (final Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
+        		for (final ReferenceContainer<WordReference> i : e.getValue()) try {
         		    this.segment.termIndex().add(i);
-        		} catch (Exception e1) {
+        		} catch (final Exception e1) {
         		    Log.logException(e1);
         		    break outerLoop;
         		}
@@ -433,11 +439,11 @@ public class Dispatcher {
         	this.transmissionCloud.clear();
         }
         this.transmissionCloud = null;
-        if (indexingTransmissionProcessor != null) {
+        if (this.indexingTransmissionProcessor != null) {
         	this.indexingTransmissionProcessor.awaitShutdown(10000);
         	this.indexingTransmissionProcessor.clear();
         }
         this.indexingTransmissionProcessor = null;
     }
-    
+
 }

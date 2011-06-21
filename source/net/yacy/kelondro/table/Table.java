@@ -464,17 +464,17 @@ public class Table implements Index, Iterable<Row.Entry> {
         final int i = (int) this.index.get(key);
         if (i == -1) return null;
         final byte[] b = new byte[this.rowdef.objectsize];
-        if (this.table == null) {
+        final Row.Entry cacherow;
+        if (this.table == null || (cacherow = this.table.get(i, false)) == null) {
             // read row from the file
             this.file.get(i, b, 0);
         } else {
             // construct the row using the copy in RAM
-            final Row.Entry v = this.table.get(i, false);
-            assert v != null;
-            if (v == null) return null;
+            assert cacherow != null;
+            if (cacherow == null) return null;
             assert key.length == this.rowdef.primaryKeyLength;
             System.arraycopy(key, 0, b, 0, key.length);
-            System.arraycopy(v.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
+            System.arraycopy(cacherow.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
         }
         return this.rowdef.newEntry(b);
     }
@@ -503,7 +503,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         assert row != null;
         assert row.bytes() != null;
-        if ((row == null) || (row.bytes() == null)) return null;
+        if (row == null || row.bytes() == null) return null;
         final int i = (int) this.index.get(row.getPrimaryKeyBytes());
         if (i == -1) {
             try {
@@ -517,17 +517,17 @@ public class Table implements Index, Iterable<Row.Entry> {
         }
 
         final byte[] b = new byte[this.rowdef.objectsize];
-        if (this.table == null) {
+        Row.Entry cacherow;
+        if (this.table == null || (cacherow = this.table.get(i, false)) == null) {
             // read old value
             this.file.get(i, b, 0);
             // write new value
             this.file.put(i, row.bytes(), 0);
         } else {
             // read old value
-            final Row.Entry v = this.table.get(i, false);
-            assert v != null;
+            assert cacherow != null;
             System.arraycopy(row.getPrimaryKeyBytes(), 0, b, 0, this.rowdef.primaryKeyLength);
-            System.arraycopy(v.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
+            System.arraycopy(cacherow.bytes(), 0, b, this.rowdef.primaryKeyLength, this.rowdef.objectsize - this.rowdef.primaryKeyLength);
             // write new value
             try {
                 this.table.set(i, this.taildef.newEntry(row.bytes(), this.rowdef.primaryKeyLength, true));
@@ -573,13 +573,12 @@ public class Table implements Index, Iterable<Row.Entry> {
             this.file.put(i, row.bytes(), 0);
         } else {
             // write new value
-            try {
+            this.file.put(i, row.bytes(), 0);
+            if (abandonTable()) this.table = null; else try {
                 this.table.set(i, this.taildef.newEntry(row.bytes(), this.rowdef.primaryKeyLength, true));
             } catch (final RowSpaceExceededException e) {
                 this.table = null;
             }
-            if (abandonTable()) this.table = null;
-            this.file.put(i, row.bytes(), 0);
         }
         assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
@@ -665,7 +664,8 @@ public class Table implements Index, Iterable<Row.Entry> {
         final int sb = this.index.size();
         int ix;
         assert i < this.index.size();
-        if (this.table == null) {
+        final Row.Entry cacherow;
+        if (this.table == null || (cacherow = this.table.get(i, false)) == null) {
             if (i == this.index.size() - 1) {
                 // element is at last entry position
                 ix = (int) this.index.remove(key);
@@ -697,9 +697,8 @@ public class Table implements Index, Iterable<Row.Entry> {
             assert this.file.size() == this.index.size() : "file.size() = " + this.file.size() + ", index.size() = " + this.index.size();
         } else {
             // get result value from the table copy, so we don't need to read it from the file
-            final Row.Entry v = this.table.get(i, false);
             System.arraycopy(key, 0, b, 0, key.length);
-            System.arraycopy(v.bytes(), 0, b, this.rowdef.primaryKeyLength, this.taildef.objectsize);
+            System.arraycopy(cacherow.bytes(), 0, b, this.rowdef.primaryKeyLength, this.taildef.objectsize);
 
             if (i == this.index.size() - 1) {
                 // special handling if the entry is the last entry in the file
@@ -911,7 +910,8 @@ public class Table implements Index, Iterable<Row.Entry> {
             this.c = (int) Table.this.index.get(k);
             if (this.c < 0) throw new ConcurrentModificationException(); // this should only happen if the table was modified during the iteration
             final byte[] b = new byte[Table.this.rowdef.objectsize];
-            if (Table.this.table == null) {
+            final Row.Entry cacherow;
+            if (Table.this.table == null || (cacherow = Table.this.table.get(this.c, false)) == null) {
                 // read from file
                 try {
                     Table.this.file.get(this.c, b, 0);
@@ -921,11 +921,10 @@ public class Table implements Index, Iterable<Row.Entry> {
                 }
             } else {
                 // compose from table and key
-                final Row.Entry v = Table.this.table.get(this.c, false);
-                assert v != null;
-                if (v == null) return null;
+                assert cacherow != null;
+                if (cacherow == null) return null;
                 System.arraycopy(k, 0, b, 0, Table.this.rowdef.primaryKeyLength);
-                System.arraycopy(v.bytes(), 0, b, Table.this.rowdef.primaryKeyLength, Table.this.taildef.objectsize);
+                System.arraycopy(cacherow.bytes(), 0, b, Table.this.rowdef.primaryKeyLength, Table.this.taildef.objectsize);
             }
             return Table.this.rowdef.newEntry(b);
         }

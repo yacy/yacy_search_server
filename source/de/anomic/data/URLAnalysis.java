@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -61,10 +61,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainerArray;
 import net.yacy.kelondro.util.MemoryControl;
-
 import de.anomic.search.MetadataRepository;
-import de.anomic.search.Segment;
 import de.anomic.search.MetadataRepository.Export;
+import de.anomic.search.Segment;
 
 public class URLAnalysis {
 
@@ -78,21 +77,21 @@ public class URLAnalysis {
     static {
         try {
             poison = new DigestURI("http://poison.org/poison");
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             poison = null;
         }
     }
-    
+
     public static class splitter extends Thread {
-        
-        private ArrayBlockingQueue<DigestURI> in;
-        private ConcurrentHashMap<String, Integer> out;
+
+        private final ArrayBlockingQueue<DigestURI> in;
+        private final ConcurrentHashMap<String, Integer> out;
 
         public splitter(final ArrayBlockingQueue<DigestURI> in, final ConcurrentHashMap<String, Integer> out) {
             this.in = in;
             this.out = out;
         }
-        
+
         @Override
         public void run() {
             try {
@@ -100,29 +99,29 @@ public class URLAnalysis {
                 final Pattern p = Pattern.compile("~|\\(|\\)|\\+|-|@|:|%|\\.|;|_");
                 while (true) {
                     try {
-                        url = in.take();
+                        url = this.in.take();
                         if (url == poison) break;
                         update(patternMinus.matcher(url.getHost()).replaceAll("\\.").split("\\."));
                         update(p.matcher(url.getPath()).replaceAll("/").split("/"));
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         Log.logException(e);
                     }
                 }
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Log.logException(e);
             }
         }
-        
+
         private void update(final String[] s) {
             Integer c;
             for (final String t: s) {
                 if (t.length() == 0) continue;
-                c = out.get(t);
-                out.put(t, (c == null) ? 1 : c.intValue() + 1);
+                c = this.out.get(t);
+                this.out.put(t, (c == null) ? 1 : c.intValue() + 1);
             }
         }
     }
-    
+
     public static void cleanup(final ConcurrentHashMap<String, Integer> stat) {
     	Map.Entry<String, Integer> entry;
     	int c, low = Integer.MAX_VALUE;
@@ -146,7 +145,7 @@ public class URLAnalysis {
     	}
     	Runtime.getRuntime().gc();
     }
-    
+
     public static void genstat(final String urlfile) {
 
         final boolean gz = urlfile.endsWith(".gz");
@@ -165,7 +164,7 @@ public class URLAnalysis {
         final File outfile = new File(analysis);
         BufferedReader reader = null;
         long time = System.currentTimeMillis();
-        long start = time;
+        final long start = time;
         int count = 0;
 
         System.out.println("start processing");
@@ -178,11 +177,11 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        DigestURI url = new DigestURI(line);
+                        final DigestURI url = new DigestURI(line);
                         in.put(url);
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         Log.logException(e);
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         continue;
                     }
                 }
@@ -208,15 +207,15 @@ public class URLAnalysis {
         System.out.println("stopping threads");
         for (int i = 0, available = Runtime.getRuntime().availableProcessors() + 1; i < available; i++) try {
             in.put(poison);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             Log.logException(e);
         }
         try {
             spl.join();
-        } catch (InterruptedException e1) {
+        } catch (final InterruptedException e1) {
             Log.logException(e1);
         }
-        
+
         // generate statistics
         System.out.println("start processing results");
         final TreeMap<String, Integer> results = new TreeMap<String, Integer>();
@@ -233,7 +232,7 @@ public class URLAnalysis {
                 System.out.println("processed " + count + " results, " + (MemoryControl.available() / 1024 / 1024) + " mb left");
             }
         }
-        
+
         // write statistics
         System.out.println("start writing results");
         try {
@@ -252,13 +251,13 @@ public class URLAnalysis {
                 }
             }
             os.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
-        
+
         System.out.println("finished");
     }
-    
+
     public static void genhost(final String urlfile) {
 
         final boolean gz = urlfile.endsWith(".gz");
@@ -280,9 +279,9 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        DigestURI url = new DigestURI(line);
+                        final DigestURI url = new DigestURI(line);
                         hosts.add(url.getHost());
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         continue;
                     }
                 }
@@ -298,7 +297,7 @@ public class URLAnalysis {
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {}
         }
-        
+
         // copy everything into a TreeSet to order it
         System.out.println("start processing results");
         final TreeSet<String> results = new TreeSet<String>();
@@ -313,18 +312,18 @@ public class URLAnalysis {
                 System.out.println("processed " + count + " results, " + (MemoryControl.available() / 1024 / 1024) + " mb left");
             }
         }
-        
+
         // write hosts
         writeSet(trunk, gz, results);
-        
+
         System.out.println("finished");
     }
-    
+
     private static void writeSet(final String trunk, final boolean gz, final Set<String> set) {
 
         // write hosts
         System.out.println("start writing results");
-        File outfile = new File(trunk + ((gz) ? ".gz" : ""));
+        final File outfile = new File(trunk + ((gz) ? ".gz" : ""));
         long time = System.currentTimeMillis();
         try {
             OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
@@ -340,13 +339,13 @@ public class URLAnalysis {
                 }
             }
             os.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
         }
 
         System.out.println("finished writing results");
     }
-    
+
     public static void sortsplit(final String urlfile) {
 
         final boolean gz = urlfile.endsWith(".gz");
@@ -370,9 +369,9 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        DigestURI url = new DigestURI(line);
+                        final DigestURI url = new DigestURI(line);
                         urls.add(url.toNormalform(true, true));
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         continue;
                     }
                 }
@@ -394,13 +393,13 @@ public class URLAnalysis {
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {}
         }
-        
+
         // write hosts
         writeSet(trunk + "." + filecount, gz, urls);
 
         System.out.println("finished");
     }
-    
+
     public static void incell(final File cellPath, final String statisticPath) {
         try {
         	final HandleMap idx = ReferenceContainerArray.referenceHashes(
@@ -412,7 +411,7 @@ public class URLAnalysis {
             idx.dump(new File(statisticPath));
             System.out.println("INDEX REFERENCE COLLECTION finished dump, wrote " + idx.size() + " entries to " + statisticPath);
             idx.close();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Log.logException(e);
         }
     }
@@ -444,7 +443,7 @@ public class URLAnalysis {
         System.out.println("INDEX DIFF URL-COL finished dump, wrote " + count + " references that occur in the URL-DB, but not in the collection-dump");
         return count;
     }
-    
+
     public static void export(final String metadataPath, final int format, final String export, final String diffFile) throws IOException, RowSpaceExceededException {
         // format: 0=text, 1=html, 2=rss/xml
         System.out.println("URL EXPORT startup");
@@ -454,12 +453,12 @@ public class URLAnalysis {
         final Export e = mr.export(new File(export), ".*", hs, format, false);
         try {
             e.join();
-        } catch (InterruptedException e1) {
+        } catch (final InterruptedException e1) {
             Log.logException(e1);
         }
         System.out.println("URL EXPORT finished export, wrote " + ((hs == null) ? mr.size() : hs.size()) + " entries");
     }
-    
+
     public static void delete(final String metadataPath, final String diffFile) throws IOException, RowSpaceExceededException {
         System.out.println("URL DELETE startup");
         final MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
@@ -471,12 +470,12 @@ public class URLAnalysis {
         }
         System.out.println("URL DELETE finished deletions, " + mr.size() + " entries left in URL database");
     }
-    
+
     public static void main(final String[] args) {
         if (args[0].equals("-stat") && args.length >= 2) {
             // generate a statistics about common words in file, store to <file>.stat
             // example:
-            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -stat DATA/EXPORT/urls1.txt.gz 
+            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -stat DATA/EXPORT/urls1.txt.gz
             for (int i = 1; i < args.length; i++) genstat(args[i]);
     	} else if (args[0].equals("-host") && args.length >= 2) {
     	    // generate a file <file>.host containing only the hosts of the urls
@@ -495,7 +494,7 @@ public class URLAnalysis {
             // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -diffurlcol DATA/INDEX/freeworld/TEXT/METADATA used.dump diffurlcol.dump
             try {
                 diffurlcol(args[1], args[2], args[3]);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Log.logException(e);
             }
         } else if (args[0].equals("-export") && args.length >= 4) {
@@ -503,10 +502,10 @@ public class URLAnalysis {
             // example:
             // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -export DATA/INDEX/freeworld/TEXT xml urls.xml diffurlcol.dump
             // instead of 'xml' (which is in fact a rss), the format can also be 'text' and 'html'
-            int format = (args[2].equals("xml")) ? 2 : (args[2].equals("html")) ? 1 : 0;
+            final int format = (args[2].equals("xml")) ? 2 : (args[2].equals("html")) ? 1 : 0;
             try {
                 export(args[1], format, args[3], (args.length >= 5) ? args[4] : null);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Log.logException(e);
             }
         } else if (args[0].equals("-delete") && args.length >= 3) {
@@ -516,7 +515,7 @@ public class URLAnalysis {
             // instead of 'xml' (which is in fact a rss), the format can also be 'text' and 'html'
             try {
                 delete(args[1], args[2]);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 Log.logException(e);
             }
         } else {
@@ -553,9 +552,9 @@ public class URLAnalysis {
     	}
         System.exit(0); // kill remaining threads
     }
-    
+
     private static final String num(final int i) {
-        StringBuffer s = new StringBuffer(Integer.toString(i));
+        final StringBuilder s = new StringBuilder(Integer.toString(i));
         while (s.length() < 9) s.insert(0, "0");
         return s.toString();
     }
