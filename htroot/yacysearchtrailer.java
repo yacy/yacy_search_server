@@ -163,6 +163,58 @@ public class yacysearchtrailer {
             prop.put("nav-topics_element_" + i + "_nl", 0);
         }
 
+        // protocol navigators
+        final ScoreMap<String> protocolNavigator = theSearch.getProtocolNavigator();
+        if (protocolNavigator == null || protocolNavigator.isEmpty()) {
+            prop.put("nav-protocols", 0);
+        } else {
+            prop.put("nav-protocols", 1);
+            navigatorIterator = protocolNavigator.keys(false);
+            int i = 0;
+            String pnav;
+            while (i < 20 && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next().trim();
+                count = protocolNavigator.get(name);
+                pnav = "/" + name;
+                prop.putJSON("nav-protocols_element_" + i + "_name", name);
+                prop.put("nav-protocols_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + pnav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
+                prop.putJSON("nav-protocols_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + pnav, theQuery.urlMask.toString(), theQuery.navigators).toString());
+                prop.put("nav-protocols_element_" + i + "_count", count);
+                prop.put("nav-protocols_element_" + i + "_modifier", "protocol:'" + name + "'");
+                prop.put("nav-protocols_element_" + i + "_nl", 1);
+                i++;
+            }
+            prop.put("nav-protocols_element", i);
+            i--;
+            prop.put("nav-protocols_element_" + i + "_nl", 0);
+        }
+
+        // filetype navigators
+        final ScoreMap<String> filetypeNavigator = theSearch.getFiletypeNavigator();
+        if (filetypeNavigator == null || filetypeNavigator.isEmpty()) {
+            prop.put("nav-filetypes", 0);
+        } else {
+            prop.put("nav-filetypes", 1);
+            navigatorIterator = filetypeNavigator.keys(false);
+            int i = 0;
+            String tnav;
+            while (i < 20 && navigatorIterator.hasNext()) {
+                name = navigatorIterator.next().trim();
+                count = filetypeNavigator.get(name);
+                tnav = "filetype:" + name;
+                prop.putJSON("nav-filetypes_element_" + i + "_name", name);
+                prop.put("nav-filetypes_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, theQuery, theQuery.queryStringForUrl() + "+" + tnav, theQuery.urlMask.toString(), theQuery.navigators).toString() + "\">" + name + " (" + count + ")</a>");
+                prop.putJSON("nav-filetypes_element_" + i + "_url-json", QueryParams.navurl("json", 0, theQuery, theQuery.queryStringForUrl() + "+" + tnav, theQuery.urlMask.toString(), theQuery.navigators).toString());
+                prop.put("nav-filetypes_element_" + i + "_count", count);
+                prop.put("nav-filetypes_element_" + i + "_modifier", "filetype:'" + name + "'");
+                prop.put("nav-filetypes_element_" + i + "_nl", 1);
+                i++;
+            }
+            prop.put("nav-filetypes_element", i);
+            i--;
+            prop.put("nav-filetypes_element_" + i + "_nl", 0);
+        }
+
         // about box
         final String aboutBody = env.getConfig("about.body", "");
         final String aboutHeadline = env.getConfig("about.headline", "");

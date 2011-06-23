@@ -79,13 +79,18 @@ public final class RankingProcess extends Thread {
     //private final HandleSet handover; // key = urlhash; used for double-check of urls that had been handed over to search process
 
     private final ScoreMap<String> ref;  // reference score computation for the commonSense heuristic
-    private final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
     private final Map<String, byte[]> hostResolver; // a mapping from a host hash (6 bytes) to the full url hash of one of these urls that have the host hash
-    private final ScoreMap<String> authorNavigator;
-    private final ScoreMap<String> namespaceNavigator;
     private final ReferenceOrder order;
     private final long startTime;
     private       boolean addRunning;
+
+    // navigation scores
+    private final ScoreMap<String> hostNavigator; // a counter for the appearance of the host hash
+    private final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
+    private final ScoreMap<String> namespaceNavigator; // a counter for name spaces
+    private final ScoreMap<String> protocolNavigator; // a counter for protocol types
+    private final ScoreMap<String> filetypeNavigator; // a counter for file types
+
 
     public RankingProcess(final QueryParams query, final ReferenceOrder order, final int maxentries) {
         // we collect the urlhashes and construct a list with urlEntry objects
@@ -113,6 +118,8 @@ public final class RankingProcess extends Thread {
         this.hostResolver = new ConcurrentHashMap<String, byte[]>();
         this.authorNavigator = new ConcurrentScoreMap<String>();
         this.namespaceNavigator = new ConcurrentScoreMap<String>();
+        this.protocolNavigator = new ConcurrentScoreMap<String>();
+        this.filetypeNavigator = new ConcurrentScoreMap<String>();
         this.ref = new ConcurrentScoreMap<String>();
         this.feeders = 1;
         this.startTime = System.currentTimeMillis();
@@ -516,6 +523,14 @@ public final class RankingProcess extends Thread {
                 }
             }
 
+            // protocol navigation
+            final String protocol = metadata.url().getProtocol();
+            this.protocolNavigator.inc(protocol);
+
+            // file type navigation
+            final String fileext = metadata.url().getFileExtension();
+            if (fileext.length() > 0) this.filetypeNavigator.inc(fileext);
+
             // check Scanner
             if (!Scanner.acceptURL(metadata.url())) {
                 this.sortout++;
@@ -621,6 +636,18 @@ public final class RankingProcess extends Thread {
         }
         if (result.sizeSmaller(2)) result.clear(); // navigators with one entry are not useful
         return result;
+    }
+
+    public ScoreMap<String> getProtocolNavigator() {
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("protocol") < 0) return new ClusteredScoreMap<String>();
+        if (this.protocolNavigator.sizeSmaller(2)) this.protocolNavigator.clear(); // navigators with one entry are not useful
+        return this.protocolNavigator;
+    }
+
+    public ScoreMap<String> getFiletypeNavigator() {
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("filetype") < 0) return new ClusteredScoreMap<String>();
+        if (this.filetypeNavigator.sizeSmaller(2)) this.filetypeNavigator.clear(); // navigators with one entry are not useful
+        return this.filetypeNavigator;
     }
 
     public static final Comparator<Map.Entry<String, Integer>> mecomp = new Comparator<Map.Entry<String, Integer>>() {

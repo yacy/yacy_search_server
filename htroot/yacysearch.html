@@ -91,9 +91,11 @@ $(function() {
 		header: "h3"
 	});
 	$("#sidebarDomains").accordion({});
-	$("#sidebarNameSpace").accordion({});
+	$("#sidebarProtocols").accordion({});
+	$("#sidebarFiletypes").accordion({});
 	$("#sidebarAuthors").accordion({});
 	$("#sidebarAuthors").accordion('activate', false);
+	$("#sidebarNameSpace").accordion({});
     $("#sidebarTopics").tagcloud({type:"sphere",power:.25,seed:0,sizemin:10,sizemax:20,height:80,colormin:"682",colormax:"20C"}).find("li").tsort();
     $("#sidebarAbout").accordion({});
 	$("#search").focus();

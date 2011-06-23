@@ -348,6 +348,14 @@ public final class SearchEvent {
         return this.rankingProcess.getAuthorNavigator();
     }
 
+    public ScoreMap<String> getProtocolNavigator() {
+        return this.rankingProcess.getProtocolNavigator();
+    }
+
+    public ScoreMap<String> getFiletypeNavigator() {
+        return this.rankingProcess.getFiletypeNavigator();
+    }
+
     public void addHeuristic(final byte[] urlhash, final String heuristicName, final boolean redundant) {
         synchronized (this.heuristics) {
             this.heuristics.put(urlhash, new HeuristicResult(urlhash, heuristicName, redundant));
