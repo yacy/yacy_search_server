@@ -2,7 +2,7 @@
  *  HandleMap
  *  Copyright 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
  *  First released 08.04.2008 at http://yacy.net
- *  
+ *
  *  $LastChangedDate$
  *  $LastChangedRevision$
  *  $LastChangedBy$
@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -51,10 +51,10 @@ import net.yacy.kelondro.order.CloneableIterator;
 
 
 public final class HandleMap implements Iterable<Row.Entry> {
-    
+
     private   final Row rowdef;
     private RAMIndexCluster index;
-    
+
     /**
      * initialize a HandleMap
      * This may store a key and a long value for each key.
@@ -63,9 +63,9 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param objectOrder
      * @param space
      */
-    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace, String name) {
+    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace, final String name) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
-        this.index = new RAMIndexCluster(name, rowdef, spread(expectedspace));
+        this.index = new RAMIndexCluster(name, this.rowdef, spread(expectedspace));
     }
 
     /**
@@ -73,8 +73,8 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param keylength
      * @param objectOrder
      * @param file
-     * @throws IOException 
-     * @throws RowSpaceExceededException 
+     * @throws IOException
+     * @throws RowSpaceExceededException
      */
     public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final File file) throws IOException, RowSpaceExceededException {
         this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)), file.getAbsolutePath());
@@ -82,7 +82,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         InputStream is;
         try {
             is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             is = new FileInputStream(file);
         }
         if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
@@ -99,25 +99,25 @@ public final class HandleMap implements Iterable<Row.Entry> {
         is = null;
         assert this.index.size() == file.length() / (keylength + idxbytes);
     }
-    
+
     public void trim() {
         this.index.trim();
     }
-    
+
     public long mem() {
-        return index.mem();
+        return this.index.mem();
     }
-    
-    private static final int spread(int expectedspace) {
+
+    private static final int spread(final int expectedspace) {
         return Math.min(Runtime.getRuntime().availableProcessors(), Math.max(1, expectedspace / 3000));
     }
-    
+
     public final int[] saturation() {
     	int keym = 0;
     	int valm = this.rowdef.width(1);
     	int valc;
     	byte[] lastk = null, thisk;
-    	for (Row.Entry row: this) {
+    	for (final Row.Entry row: this) {
     		// check length of key
     		if (lastk == null) {
     			lastk = row.bytes();
@@ -142,7 +142,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
     	}
     	return a.length;
     }
-    
+
     /**
      * write a dump of the index to a file. All entries are written in order
      * which makes it possible to read them again in a fast way
@@ -159,7 +159,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         OutputStream os;
         try {
             os = new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024);
-        } catch (OutOfMemoryError e) {
+        } catch (final OutOfMemoryError e) {
             os = new FileOutputStream(tmp);
         }
         if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os);
@@ -177,33 +177,33 @@ public final class HandleMap implements Iterable<Row.Entry> {
     }
 
     public final Row row() {
-        return index.row();
+        return this.index.row();
     }
-    
+
     public final void clear() {
-        index.clear();
+        this.index.clear();
     }
-    
+
     public final byte[] smallestKey() {
-        return index.smallestKey();
+        return this.index.smallestKey();
     }
-    
+
     public final byte[] largestKey() {
-        return index.largestKey();
+        return this.index.largestKey();
     }
-    
+
     public final boolean has(final byte[] key) {
         assert (key != null);
-        return index.has(key);
+        return this.index.has(key);
     }
-    
+
     public final long get(final byte[] key) {
         assert (key != null);
-        final Row.Entry indexentry = index.get(key);
+        final Row.Entry indexentry = this.index.get(key);
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }
-    
+
     /**
      * Adds the key-value pair to the index.
      * @param key the index key
@@ -218,58 +218,58 @@ public final class HandleMap implements Iterable<Row.Entry> {
         final Row.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, l);
-        final Row.Entry oldentry = index.replace(newentry);
+        final Row.Entry oldentry = this.index.replace(newentry);
         if (oldentry == null) return -1;
         return oldentry.getColLong(1);
     }
-    
+
     public final void putUnique(final byte[] key, final long l) throws RowSpaceExceededException {
         assert l >= 0 : "l = " + l;
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, l);
-        index.addUnique(newentry);
+        this.index.addUnique(newentry);
     }
-    
+
     public final long add(final byte[] key, final long a) throws RowSpaceExceededException {
         assert key != null;
         assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
-        synchronized (index) {
-            final Row.Entry indexentry = index.get(key);
+        synchronized (this.index) {
+            final Row.Entry indexentry = this.index.get(key);
             if (indexentry == null) {
                 final Row.Entry newentry = this.rowdef.newEntry();
                 newentry.setCol(0, key);
                 newentry.setCol(1, a);
-                index.addUnique(newentry);
+                this.index.addUnique(newentry);
                 return 1;
             }
             final long i = indexentry.getColLong(1) + a;
             indexentry.setCol(1, i);
-            index.put(indexentry);
+            this.index.put(indexentry);
             return i;
         }
     }
-    
+
     public final long inc(final byte[] key) throws RowSpaceExceededException {
         return add(key, 1);
     }
-    
+
     public final long dec(final byte[] key) throws RowSpaceExceededException {
         return add(key, -1);
     }
-    
+
     public final ArrayList<long[]> removeDoubles() throws RowSpaceExceededException {
         final ArrayList<long[]> report = new ArrayList<long[]>();
         long[] is;
         int c;
         long l;
-        final int initialSize = this.size();
-        ArrayList<RowCollection> rd = index.removeDoubles();
+        final int initialSize = size();
+        final ArrayList<RowCollection> rd = this.index.removeDoubles();
         for (final RowCollection rowset: rd) {
             is = new long[rowset.size()];
             c = 0;
-            for (Row.Entry e: rowset) {
+            for (final Row.Entry e: rowset) {
             	l = e.getColLong(1);
             	assert l < initialSize : "l = " + l + ", initialSize = " + initialSize;
                 is[c++] = l;
@@ -278,60 +278,60 @@ public final class HandleMap implements Iterable<Row.Entry> {
         }
         return report;
     }
-    
-    public final ArrayList<byte[]> top(int count) {
-        List<Row.Entry> list0 = index.top(count);
-        ArrayList<byte[]> list = new ArrayList<byte[]>();
-        for (Row.Entry entry: list0) {
+
+    public final ArrayList<byte[]> top(final int count) {
+        final List<Row.Entry> list0 = this.index.top(count);
+        final ArrayList<byte[]> list = new ArrayList<byte[]>();
+        for (final Row.Entry entry: list0) {
             list.add(entry.getPrimaryKeyBytes());
         }
         return list;
     }
-    
+
     public final synchronized long remove(final byte[] key) {
         assert (key != null);
         final Row.Entry indexentry;
-        synchronized (index) {
-            final boolean exist = index.has(key);
+        synchronized (this.index) {
+            final boolean exist = this.index.has(key);
             if (!exist) return -1;
-            final int s = index.size();
-            final long m = index.mem();
-            indexentry = index.remove(key);
+            final int s = this.index.size();
+            final long m = this.index.mem();
+            indexentry = this.index.remove(key);
             assert (indexentry != null);
-            assert index.size() < s : "s = " + s + ", index.size() = " + index.size();
-            assert index.mem() <= m : "m = " + m + ", index.mem() = " + index.mem();
+            assert this.index.size() < s : "s = " + s + ", index.size() = " + this.index.size();
+            assert this.index.mem() <= m : "m = " + m + ", index.mem() = " + this.index.mem();
         }
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }
 
     public final long removeone() {
-        final Row.Entry indexentry = index.removeOne();
+        final Row.Entry indexentry = this.index.removeOne();
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }
-    
+
     public final int size() {
-        return index.size();
+        return this.index.size();
     }
-    
+
     public final boolean isEmpty() {
-        return index.isEmpty();
+        return this.index.isEmpty();
     }
-    
+
     public final CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
-        return index.keys(up, firstKey);
+        return this.index.keys(up, firstKey);
     }
 
     public final CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
-        return index.rows(up, firstKey);
+        return this.index.rows(up, firstKey);
     }
-    
+
     public final void close() {
-        index.close();
-        index = null;
+        this.index.close();
+        this.index = null;
     }
-    
+
     /**
      * this method creates a concurrent thread that can take entries that are used to initialize the map
      * it should be used when a HandleMap is initialized when a file is read. Concurrency of FileIO and
@@ -342,7 +342,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param bufferSize
      * @return
      */
-    public final static initDataConsumer asynchronusInitializer(String name, final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
+    public final static initDataConsumer asynchronusInitializer(final String name, final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
         final initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, expectedspace, name));
         final ExecutorService service = Executors.newSingleThreadExecutor();
         initializer.setResult(service.submit(initializer));
@@ -358,49 +358,51 @@ public final class HandleMap implements Iterable<Row.Entry> {
             this.l = l;
         }
     }
-    
+
     protected static final entry poisonEntry = new entry(new byte[0], 0);
-    
+
     public final static class initDataConsumer implements Callable<HandleMap> {
 
         private final BlockingQueue<entry> cache;
         private final HandleMap map;
         private Future<HandleMap> result;
-        
+
         public initDataConsumer(final HandleMap map) {
             this.map = map;
-            cache = new LinkedBlockingQueue<entry>();
+            this.cache = new LinkedBlockingQueue<entry>();
         }
-        
+
         protected final void setResult(final Future<HandleMap> result) {
             this.result = result;
         }
-        
+
         /**
          * hand over another entry that shall be inserted into the HandleMap with an addl method
          * @param key
          * @param l
          */
         public final void consume(final byte[] key, final long l) {
-            try {
-                cache.put(new entry(key, l));
-            } catch (InterruptedException e) {
-                Log.logException(e);
+            while (true) try {
+                this.cache.put(new entry(key, l));
+                break;
+            } catch (final InterruptedException e) {
+                continue;
             }
         }
-        
+
         /**
          * to signal the initialization thread that no more entries will be submitted with consumer()
          * this method must be called. The process will not terminate if this is not called before.
          */
         public final void finish() {
-            try {
-                cache.put(poisonEntry);
-            } catch (InterruptedException e) {
-                Log.logException(e);
+            while (true) try {
+                this.cache.put(poisonEntry);
+                break;
+            } catch (final InterruptedException e) {
+                continue;
             }
         }
-        
+
         /**
          * this must be called after a finish() was called. this method blocks until all entries
          * had been processed, and the content was sorted. It returns the HandleMap
@@ -412,27 +414,32 @@ public final class HandleMap implements Iterable<Row.Entry> {
         public final HandleMap result() throws InterruptedException, ExecutionException {
             return this.result.get();
         }
-        
+
         public final HandleMap call() throws IOException {
             try {
-                entry c;
-                while ((c = cache.take()) != poisonEntry) {
-                    map.putUnique(c.key, c.l);
+                finishloop: while (true) {
+                    entry c;
+                    try {
+                        while ((c = this.cache.take()) != poisonEntry) {
+                            this.map.putUnique(c.key, c.l);
+                        }
+                        break finishloop;
+                    } catch (final InterruptedException e) {
+                        continue finishloop;
+                    }
                 }
-            } catch (InterruptedException e) {
-                Log.logException(e);
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
             }
-            return map;
+            return this.map;
         }
-        
+
         public void close() {
             this.map.close();
         }
     }
 
 	public Iterator<Row.Entry> iterator() {
-		return this.rows(true, null);
+		return rows(true, null);
 	}
 }

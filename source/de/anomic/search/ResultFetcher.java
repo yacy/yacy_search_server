@@ -69,6 +69,7 @@ public class ResultFetcher {
     long snippetComputationAllTime;
     int taketimeout;
     private final boolean deleteIfSnippetFail;
+    private boolean cleanupState;
 
     public ResultFetcher(
             final LoaderDispatcher loader,
@@ -86,6 +87,7 @@ public class ResultFetcher {
         this.workTables = workTables;
         this.taketimeout = taketimeout;
         this.deleteIfSnippetFail = deleteIfSnippetFail;
+        this.cleanupState = false;
 
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
@@ -110,6 +112,10 @@ public class ResultFetcher {
         this.workerThreads = null;
         deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
+    }
+
+    public void setCleanupState() {
+        this.cleanupState = true;
     }
 
     public long getURLRetrievalTime() {
@@ -140,7 +146,7 @@ public class ResultFetcher {
         WeakPriorityBlockingQueue.Element<ResultEntry> entry = null;
         while (System.currentTimeMillis() < finishTime) {
             if (this.result.sizeAvailable() + this.rankingProcess.sizeQueue() <= item  && !anyWorkerAlive() && this.rankingProcess.feedingIsFinished()) break;
-            try {entry = this.result.element(item, 50);} catch (final InterruptedException e) {Log.logException(e);}
+            try {entry = this.result.element(item, 50);} catch (final InterruptedException e) {break;}
             if (entry != null) break;
             if (!anyWorkerAlive() && this.rankingProcess.sizeQueue() == 0 && this.rankingProcess.feedingIsFinished()) break;
         }
@@ -258,6 +264,7 @@ public class ResultFetcher {
 
 
     public void deployWorker(int deployCount, final int neededResults) {
+        if (this.cleanupState) return; // we do not start another worker if we are in cleanup state
         if (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0) return;
         if (this.result.sizeAvailable() >= neededResults) return;
 
@@ -311,6 +318,7 @@ public class ResultFetcher {
         private final CacheStrategy cacheStrategy;
         private final int neededResults;
         private final Pattern snippetPattern;
+        private boolean shallrun;
 
         public Worker(final int id, final long maxlifetime, final CacheStrategy cacheStrategy, final Pattern snippetPattern, final int neededResults) {
             this.id = id;
@@ -319,6 +327,7 @@ public class ResultFetcher {
             this.snippetPattern = snippetPattern;
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
             this.neededResults = neededResults;
+            this.shallrun = true;
         }
 
         @Override
@@ -331,7 +340,7 @@ public class ResultFetcher {
             try {
                 //System.out.println("DEPLOYED WORKER " + id + " FOR " + this.neededResults + " RESULTS, timeoutd = " + (this.timeout - System.currentTimeMillis()));
                 int loops = 0;
-                while (System.currentTimeMillis() < this.timeout) {
+                while (this.shallrun && System.currentTimeMillis() < this.timeout) {
                     this.lastLifeSign = System.currentTimeMillis();
 
                     // check if we have enough
@@ -379,6 +388,10 @@ public class ResultFetcher {
                 Log.logException(e);
             }
             Log.logInfo("SEARCH", "resultWorker thread " + this.id + " terminated");
+        }
+
+        public void pleaseStop() {
+            this.shallrun = false;
         }
 
         /**

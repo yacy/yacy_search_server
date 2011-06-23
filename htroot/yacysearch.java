@@ -308,6 +308,26 @@ public class yacysearch {
                 querystring = querystring.replace("/date", "");
                 ranking.coeff_date = RankingProfile.COEFF_MAX;
             }
+            if (querystring.indexOf("/http") >= 0) {
+                querystring = querystring.replace("/http", "");
+                urlmask = "http://.*";
+            }
+            if (querystring.indexOf("/https") >= 0) {
+                querystring = querystring.replace("/https", "");
+                urlmask = "https://.*";
+            }
+            if (querystring.indexOf("/ftp") >= 0) {
+                querystring = querystring.replace("/ftp", "");
+                urlmask = "ftp://.*";
+            }
+            if (querystring.indexOf("/smb") >= 0) {
+                querystring = querystring.replace("/smb", "");
+                urlmask = "smb://.*";
+            }
+            if (querystring.indexOf("/file") >= 0) {
+                querystring = querystring.replace("/file", "");
+                urlmask = "file://.*";
+            }
             if (querystring.indexOf("/location") >= 0) {
                 querystring = querystring.replace("/location", "");
                 if (constraint == null) {

@@ -92,7 +92,7 @@ public final class QueryParams {
     public final int maxDistance;
     public final Bitfield constraint;
     public final boolean allofconstraint;
-    public final CacheStrategy snippetCacheStrategy;
+    public CacheStrategy snippetCacheStrategy;
     public final RankingProfile ranking;
     private final Segment indexSegment;
     public final String host; // this is the client host that starts the query, not a site operator

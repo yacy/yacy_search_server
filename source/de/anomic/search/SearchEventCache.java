@@ -36,7 +36,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.LoaderDispatcher;
 import de.anomic.data.WorkTables;
-import de.anomic.search.ResultFetcher.Worker;
 import de.anomic.yacy.yacySeedDB;
 
 public class SearchEventCache {
@@ -67,17 +66,21 @@ public class SearchEventCache {
         // the less memory is there, the less time is acceptable for elements in the cache
         final long memx = MemoryControl.available();
         final long acceptTime = memx > memlimitHigh ? eventLifetimeBigMem : memx > memlimitMedium ? eventLifetimeMediumMem : eventLifetimeShortMem;
-        Map.Entry<String, SearchEvent> event;
+        Map.Entry<String, SearchEvent> eventEntry;
         final Iterator<Map.Entry<String, SearchEvent>> i = lastEvents.entrySet().iterator();
+        SearchEvent event;
         while (i.hasNext()) {
-            event = i.next();
-            if (all || event.getValue().getEventTime() + acceptTime < System.currentTimeMillis()) {
-                if (workerAlive(event.getValue())) {
-                    event.getValue().cleanup();
-                } else {
-                    i.remove();
-                    cacheDelete++;
+            eventEntry = i.next();
+            event = eventEntry.getValue();
+            if (event == null) continue;
+            if (all || event.getEventTime() + acceptTime < System.currentTimeMillis()) {
+                if (event.workerAlive()) {
+                    event.cleanup();
                 }
+            }
+            if (!event.workerAlive()) {
+                i.remove();
+                cacheDelete++;
             }
         }
     }
@@ -91,15 +94,9 @@ public class SearchEventCache {
     public static int countAliveThreads() {
         int alive = 0;
         for (final SearchEvent e: SearchEventCache.lastEvents.values()) {
-            if (workerAlive(e)) alive++;
+            if (e.workerAlive()) alive++;
         }
         return alive;
-    }
-
-    private static boolean workerAlive(final SearchEvent e) {
-        if (e == null || e.result() == null || e.result().workerThreads == null) return false;
-        for (final Worker w: e.result().workerThreads) if (w != null && w.isAlive()) return true;
-        return false;
     }
 
     private static SearchEvent dummyEvent = null;
@@ -147,14 +144,14 @@ public class SearchEventCache {
 
             int waitcount = 0;
             throttling : while (true) {
-                final int allowedThreads = (int) Math.max(1, MemoryControl.available() / (query.snippetCacheStrategy == null ? 10 : 100) / 1024 / 1024);
+                final int allowedThreads = (int) Math.max(1, MemoryControl.available() / (query.snippetCacheStrategy == null ? 3 : 30) / 1024 / 1024);
                 // make room if there are too many search events (they need a lot of RAM)
-                if (SearchEventCache.lastEvents.size() > allowedThreads) {
+                if (SearchEventCache.lastEvents.size() >= allowedThreads) {
                     Log.logWarning("SearchEventCache", "throttling phase 1: " + SearchEventCache.lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
                     cleanupEvents(false);
                 } else break throttling;
                 // if there are still some then delete just all
-                if (SearchEventCache.lastEvents.size() > allowedThreads) {
+                if (SearchEventCache.lastEvents.size() >= allowedThreads) {
                     Log.logWarning("SearchEventCache", "throttling phase 2: " + SearchEventCache.lastEvents.size() + " in cache; " + countAliveThreads() + " alive; " + allowedThreads + " allowed");
                     cleanupEvents(true);
                 } else break throttling;
@@ -165,6 +162,11 @@ public class SearchEventCache {
                 try { Thread.sleep(100); } catch (final InterruptedException e) { }
                 waitcount++;
                 if (waitcount >= 10) return getDummyEvent(workTables, loader, query.getSegment());
+            }
+
+            if (waitcount > 0) {
+                // do not fetch snippets because that is most time-expensive
+                query.snippetCacheStrategy = null;
             }
 
             // check if there are too many other searches alive now

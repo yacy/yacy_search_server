@@ -48,6 +48,7 @@ import net.yacy.cora.storage.ScoreMap;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.document.Condenser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -189,9 +190,12 @@ public final class RankingProcess extends Thread {
         // apply all constraints
         try {
             WordReferenceVars iEntry;
-            while (true) {
+            final String pattern = this.query.urlMask.pattern();
+            final boolean httpPattern = pattern.equals("http://.*");
+            final boolean noHttpButProtocolPattern = pattern.equals("https://.*") || pattern.equals("ftp://.*") || pattern.equals("smb://.*") || pattern.equals("file://.*");
+            pollloop: while (true) {
                 iEntry = decodedEntries.poll(1, TimeUnit.SECONDS);
-                if (iEntry == null || iEntry == WordReferenceVars.poison) break;
+                if (iEntry == null || iEntry == WordReferenceVars.poison) break pollloop;
                 assert (iEntry.urlhash().length == index.row().primaryKeyLength);
                 //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
@@ -202,15 +206,15 @@ public final class RankingProcess extends Thread {
 
                 // check constraints
                 if (!testFlags(iEntry)) {
-                    continue;
+                    continue pollloop;
                 }
 
                 // check document domain
                 if (this.query.contentdom != ContentDomain.TEXT) {
-                    if ((this.query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) { continue; }
-                    if ((this.query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) { continue; }
-                    if ((this.query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) { continue; }
-                    if ((this.query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) { continue; }
+                    if ((this.query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) { continue pollloop; }
+                    if ((this.query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) { continue pollloop; }
+                    if ((this.query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) { continue pollloop; }
+                    if ((this.query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) { continue pollloop; }
                 }
 
                 // check tld domain
@@ -236,8 +240,15 @@ public final class RankingProcess extends Thread {
                 } else {
                     if (!hosthash.equals(this.query.sitehash)) {
                         // filter out all domains that do not match with the site constraint
-                        continue;
+                        continue pollloop;
                     }
+                }
+
+                // check protocol
+                if (!this.query.urlMask_isCatchall) {
+                    final boolean httpFlagSet = DigestURI.flag4HTTPset(iEntry.urlHash);
+                    if (httpPattern && !httpFlagSet) continue pollloop;
+                    if (noHttpButProtocolPattern && httpFlagSet) continue pollloop;
                 }
 
                 // finally make a double-check and insert result to stack
