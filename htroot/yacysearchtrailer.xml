@@ -20,6 +20,20 @@
 #{/element}#
 </yacy:facet>
 #(/nav-authors)#
+#(nav-filetype)#::
+<yacy:facet name="domains" displayname="Filetypes" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" />
+#{/element}#
+</yacy:facet>
+#(/nav-filetype)#
+#(nav-protocol)#::
+<yacy:facet name="domains" displayname="Protocols" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" />
+#{/element}#
+</yacy:facet>
+#(/nav-protocol)#
 #(nav-topics)#::
 <yacy:facet name="topwords" displayname="Topics" type="String" min="0" max="0" mean="0">
 #{element}#

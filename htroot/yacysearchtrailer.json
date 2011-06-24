@@ -1,4 +1,30 @@
-    "navigation": [#(nav-domains)#::
+    "navigation": [#(nav-filetypes)#::
+    {
+      "facetname": "filetypes",
+      "displayname": "Filetype",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-filetypes)##(nav-protocols)#::
+    {
+      "facetname": "protocols",
+      "displayname": "Protocol",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-protocols)##(nav-domains)#::
     {
       "facetname": "domains",
       "displayname": "Domains",
