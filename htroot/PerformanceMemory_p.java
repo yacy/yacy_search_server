@@ -38,25 +38,24 @@ import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
-
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class PerformanceMemory_p {
-    
+
     private static final long KB = 1024;
     private static final long MB = 1024 * KB;
     private static Map<String, String> defaultSettings = null;
-        
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
             defaultSettings = FileUtils.loadMap(new File(env.getAppPath(), "defaults/yacy.init"));
         }
-        
+
         prop.put("gc", "0");
         if (post != null) {
             if (post.containsKey("gc")) {
@@ -64,7 +63,7 @@ public class PerformanceMemory_p {
                 prop.put("gc", "1");
             }
         }
-        
+
         final long memoryFreeNow = MemoryControl.free();
         final long memoryFreeAfterInitBGC = env.getConfigLong("memoryFreeAfterInitBGC", 0L);
         final long memoryFreeAfterInitAGC = env.getConfigLong("memoryFreeAfterInitAGC", 0L);
@@ -73,7 +72,7 @@ public class PerformanceMemory_p {
         final long memoryTotalAfterInitBGC = env.getConfigLong("memoryTotalAfterInitBGC", 0L);
         final long memoryTotalAfterInitAGC = env.getConfigLong("memoryTotalAfterInitAGC", 0L);
         final long memoryTotalAfterStartup = env.getConfigLong("memoryTotalAfterStartup", 0L);
-        
+
         prop.putNum("memoryMax", MemoryControl.maxMemory / MB);
         prop.putNum("memoryAvailAfterStartup", (MemoryControl.maxMemory - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
         prop.putNum("memoryAvailAfterInitBGC", (MemoryControl.maxMemory - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
@@ -91,7 +90,7 @@ public class PerformanceMemory_p {
         prop.putNum("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / KB);
         prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
         prop.putNum("memoryUsedNow", (memoryTotalNow - memoryFreeNow) / MB);
-        
+
         // write table for Table index sizes
         Iterator<String> i = Table.filenames();
         String filename;
@@ -109,19 +108,19 @@ public class PerformanceMemory_p {
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableKeyChunkSize", map.get("tableKeyChunkSize"));
-            
+
             mem = Long.parseLong(map.get("tableValueMem"));
             totalmem += mem;
             prop.put("EcoList_" + c + "_tableValueMem", Formatter.bytesToString(mem));
             prop.put("EcoList_" + c + "_tableValueChunkSize", map.get("tableValueChunkSize"));
-            
+
             c++;
         }
         prop.put("EcoList", c);
         prop.putNum("EcoIndexTotalMem", totalmem / (1024 * 1024d));
-        
+
         // write object cache table
-        Iterator<Map.Entry<String, RAMIndex>> oi = RAMIndex.objects();
+        final Iterator<Map.Entry<String, RAMIndex>> oi = RAMIndex.objects();
         c = 0;
         mem = 0;
         Map.Entry<String, RAMIndex> oie;
@@ -130,25 +129,25 @@ public class PerformanceMemory_p {
         while (oi.hasNext()) {
             try {
                 oie = oi.next();
-            } catch (ConcurrentModificationException e) {
+            } catch (final ConcurrentModificationException e) {
                 break;
             }
             filename = oie.getKey();
             cache = oie.getValue();
             prop.put("indexcache_" + c + "_Name", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
-            
+
             hitmem = cache.mem();
             totalhitmem += hitmem;
             prop.put("indexcache_" + c + "_ChunkSize", cache.row().objectsize);
             prop.putNum("indexcache_" + c + "_Count", cache.size());
             prop.put("indexcache_" + c + "_NeededMem", cache.size() * cache.row().objectsize);
             prop.put("indexcache_" + c + "_UsedMem", hitmem);
-            
+
             c++;
         }
         prop.put("indexcache", c);
         prop.putNum("indexcacheTotalMem", totalhitmem / (1024 * 1024d));
-        
+
         // write object cache table
         i = Cache.filenames();
         c = 0;
@@ -158,7 +157,7 @@ public class PerformanceMemory_p {
             filename = i.next();
             map = Cache.memoryStats(filename);
             prop.put("ObjectList_" + c + "_objectCachePath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
-            
+
             // hit cache
             hitmem = Long.parseLong(map.get("objectHitMem"));
             totalhitmem += hitmem;
@@ -171,7 +170,7 @@ public class PerformanceMemory_p {
             prop.putNum("ObjectList_" + c + "_objectHitCacheWriteDouble", map.get("objectHitCacheWriteDouble"));
             prop.putNum("ObjectList_" + c + "_objectHitCacheDeletes", map.get("objectHitCacheDeletes"));
             prop.putNum("ObjectList_" + c + "_objectHitCacheFlushes", map.get("objectHitCacheFlushes"));
-            
+
             // miss cache
             missmem = Long.parseLong(map.get("objectMissMem"));
             totalmissmem += missmem;
@@ -184,7 +183,7 @@ public class PerformanceMemory_p {
             prop.putNum("ObjectList_" + c + "_objectMissCacheWriteDouble", map.get("objectMissCacheWriteDouble"));
             prop.putNum("ObjectList_" + c + "_objectMissCacheDeletes", map.get("objectMissCacheDeletes"));
             //prop.put("ObjectList_" + c + "_objectMissCacheFlushes", map.get("objectMissCacheFlushes"));
-            
+
             c++;
         }
         prop.put("ObjectList", c);
@@ -192,11 +191,17 @@ public class PerformanceMemory_p {
         prop.putNum("objectCacheStartShrink", Cache.getMemStartShrink() / (1024 * 1024d));
         prop.putNum("objectHitCacheTotalMem", totalhitmem / (1024 * 1024d));
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024 * 1024d));
-        
+
         // other caching structures
         prop.putNum("namecacheHit.size", Domains.nameCacheHitSize());
+        prop.putNum("namecacheHit.Hit", Domains.cacheHit_Hit);
+        prop.putNum("namecacheHit.Miss", Domains.cacheHit_Miss);
+        prop.putNum("namecacheHit.Insert", Domains.cacheHit_Insert);
         prop.putNum("namecacheMiss.size", Domains.nameCacheMissSize());
-        prop.putNum("namecache.noCache", 0);
+        prop.putNum("namecacheMiss.Hit", Domains.cacheMiss_Hit);
+        prop.putNum("namecacheMiss.Miss", Domains.cacheMiss_Miss);
+        prop.putNum("namecacheMiss.Insert", Domains.cacheMiss_Insert);
+        prop.putNum("namecache.noCache", Domains.nameCacheNoCachingPatternsSize());
         prop.putNum("blacklistcache.size", Switchboard.urlBlacklist.blacklistCacheSize());
         prop.putNum("searchevent.size", SearchEventCache.size());
         prop.putNum("searchevent.hit", SearchEventCache.cacheHit);

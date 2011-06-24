@@ -191,17 +191,25 @@
         <td>Delete</td>
       </tr>
       <tr class="TableCellLight">
-        <td>DNSCache</td>
-        <td></td>
+        <td>DNSCache/Hit</td>
         <td>#[namecacheHit.size]#</td>
+        <td>#[namecacheHit.Hit]#</td>
+        <td>#[namecacheHit.Miss]#</td>
+        <td>#[namecacheHit.Insert]#</td>
+        <td>(ARC)</td>
+      </tr>
+      <tr class="TableCellLight">
+        <td>DNSCache/Miss</td>
         <td>#[namecacheMiss.size]#</td>
-        <td></td>
-        <td></td>
+        <td>#[namecacheMiss.Hit]#</td>
+        <td>#[namecacheMiss.Miss]#</td>
+        <td>#[namecacheMiss.Insert]#</td>
+        <td>(ARC)</td>
       </tr>
       <tr class="TableCellDark">
         <td>DNSNoCache</td>
-        <td></td>
         <td>#[namecache.noCache]#</td>
+        <td></td>
         <td></td>
         <td></td>
         <td></td>

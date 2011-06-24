@@ -61,6 +61,8 @@ public class Domains {
     private static final ConcurrentHashMap<String, Object> LOOKUP_SYNC = new ConcurrentHashMap<String, Object>();
     private static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
     private static final List<Pattern> LOCALHOST_PATTERNS = makePatterns(LOCAL_PATTERNS);
+    public static long cacheHit_Hit = 0, cacheHit_Miss = 0, cacheHit_Insert = 0; // for statistics only; do not write
+    public static long cacheMiss_Hit = 0, cacheMiss_Miss = 0, cacheMiss_Insert = 0; // for statistics only; do not write
 
     /**
      * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
@@ -470,9 +472,17 @@ public class Domains {
 
         // trying to resolve host by doing a name cache lookup
         ip = NAME_CACHE_HIT.get(host);
-        if (ip != null) return ip;
+        if (ip != null) {
+            cacheHit_Hit++;
+            return ip;
+        }
+        cacheHit_Miss++;
 
-        if (NAME_CACHE_MISS.containsKey(host)) return null;
+        if (NAME_CACHE_MISS.containsKey(host)) {
+            cacheMiss_Hit++;
+            return null;
+        }
+        cacheMiss_Miss++;
         throw new UnknownHostException("host not in cache");
     }
 
@@ -501,6 +511,7 @@ public class Domains {
         if (!hosts.isEmpty()) return hosts.iterator().next();
         final String host = i.getHostName();
         NAME_CACHE_HIT.insertIfAbsent(host, i);
+        cacheHit_Insert++;
         return host;
         /*
         // call i.getHostName() using concurrency to interrupt execution in case of a time-out
@@ -530,12 +541,16 @@ public class Domains {
         ip = NAME_CACHE_HIT.get(host);
         if (ip != null) {
             //System.out.println("DNSLOOKUP-CACHE-HIT(CONC) " + host);
+            cacheHit_Hit++;
             return ip;
         }
+        cacheHit_Miss++;
         if (NAME_CACHE_MISS.containsKey(host)) {
             //System.out.println("DNSLOOKUP-CACHE-MISS(CONC) " + host);
+            cacheMiss_Hit++;
             return null;
         }
+        cacheMiss_Miss++;
 
         // call dnsResolveNetBased(host) using concurrency to interrupt execution in case of a time-out
         final Object sync_obj_new = new Object();
@@ -547,13 +562,17 @@ public class Domains {
             if (ip != null) {
                 //System.out.println("DNSLOOKUP-CACHE-HIT(SYNC) " + host);
                 LOOKUP_SYNC.remove(host);
+                cacheHit_Hit++;
                 return ip;
             }
+            cacheHit_Miss++;
             if (NAME_CACHE_MISS.containsKey(host)) {
                 //System.out.println("DNSLOOKUP-CACHE-MISS(SYNC) " + host);
                 LOOKUP_SYNC.remove(host);
+                cacheMiss_Hit++;
                 return null;
             }
+            cacheMiss_Miss++;
 
             // do the dns lookup on the dns server
             //if (!matchesList(host, nameCacheNoCachingPatterns)) System.out.println("DNSLOOKUP " + host);
@@ -563,6 +582,7 @@ public class Domains {
             } catch (final UnknownHostException e) {
                 // add new entries
                 NAME_CACHE_MISS.insertIfAbsent(host, PRESENT);
+                cacheMiss_Insert++;
                 LOOKUP_SYNC.remove(host);
                 return null;
             }
@@ -570,6 +590,7 @@ public class Domains {
             if (ip != null && !ip.isLoopbackAddress() && !matchesList(host, nameCacheNoCachingPatterns)) {
                 // add new ip cache entries
                 NAME_CACHE_HIT.insertIfAbsent(host, ip);
+                cacheHit_Insert++;
 
                 // add also the isLocal host name caches
                 final boolean localp = ip.isAnyLocalAddress() || ip.isLinkLocalAddress() || ip.isSiteLocalAddress();
@@ -618,6 +639,10 @@ public class Domains {
 
     public static int nameCacheMissSize() {
         return NAME_CACHE_MISS.size();
+    }
+
+    public static int nameCacheNoCachingPatternsSize() {
+        return nameCacheNoCachingPatterns.size();
     }
 
     private static String localHostName = "127.0.0.1";
