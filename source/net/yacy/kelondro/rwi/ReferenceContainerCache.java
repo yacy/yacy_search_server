@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -61,7 +61,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     private final ByteOrder termOrder;
     private final ContainerOrder<ReferenceType> containerOrder;
     private Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
-    
+
     /**
      * open an existing heap file in undefined mode
      * after this a initialization should be made to use the heap:
@@ -70,18 +70,18 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param termOrder the order on search terms for the cache
      * @param termSize the fixed size of search terms
      */
-    public ReferenceContainerCache(final ReferenceFactory<ReferenceType> factory, ByteOrder termOrder, int termSize) {
+    public ReferenceContainerCache(final ReferenceFactory<ReferenceType> factory, final ByteOrder termOrder, final int termSize) {
         super(factory);
         this.termOrder = termOrder;
         this.termSize = termSize;
         this.containerOrder = new ContainerOrder<ReferenceType>(this.termOrder);
         this.cache = new ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>>();
     }
-    
+
     public Row rowdef() {
         return this.factory.getRow();
     }
-    
+
 
     /**
      * every index entry is made for a term which has a fixed size
@@ -90,15 +90,15 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public int termKeyLength() {
         return this.termSize;
     }
-    
+
     public void clear() {
-        if (cache != null) cache.clear();
+        if (this.cache != null) this.cache.clear();
     }
-    
+
     public void close() {
     	this.cache = null;
     }
-    
+
     /**
      * dump the cache to a file. This method can be used in a destructive way
      * which means that memory can be freed during the dump. This may be important
@@ -108,24 +108,24 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param writeBuffer
      * @param destructive - if true then the cache is cleaned during the dump causing to free memory
      */
-    public void dump(final File heapFile, int writeBuffer, boolean destructive) {
+    public void dump(final File heapFile, final int writeBuffer, final boolean destructive) {
         assert this.cache != null;
         if (this.cache == null) return;
-        Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
+        Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + this.cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
-        File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".prt");
+        final File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".prt");
         HeapWriter dump;
         try {
             dump = new HeapWriter(tmpFile, heapFile, this.termSize, this.termOrder, writeBuffer);
-        } catch (IOException e1) {
+        } catch (final IOException e1) {
             Log.logException(e1);
             return;
         }
         final long startTime = System.currentTimeMillis();
-        
+
         // sort the map
-        List<ReferenceContainer<ReferenceType>> cachecopy = sortedClone();
-        
+        final List<ReferenceContainer<ReferenceType>> cachecopy = sortedClone();
+
         // write wCache
         long wordcount = 0, urlcount = 0;
         byte[] term = null, lwh;
@@ -133,18 +133,18 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             // get entries
             lwh = term;
             term = container.getTermHash();
-            
+
             // check consistency: entries must be ordered
             assert (lwh == null || this.termKeyOrdering().compare(term, lwh) > 0);
-            
+
             // put entries on heap
             if (container != null && term.length == this.termSize) {
                 //System.out.println("Dump: " + wordHash);
                 try {
                     dump.add(term, container.exportCollection());
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     Log.logException(e);
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                 }
                 if (destructive) container.clear(); // this memory is not needed any more
@@ -155,32 +155,32 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         try {
             dump.close(true);
             Log.logInfo("indexContainerRAMHeap", "finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logSevere("indexContainerRAMHeap", "failed rwi heap dump: " + e.getMessage(), e);
         } finally {
             dump = null;
         }
     }
-    
+
     /**
      * create a clone of the cache content that is sorted using the this.containerOrder
      * @return the sorted ReferenceContainer[]
      */
     protected List<ReferenceContainer<ReferenceType>> sortedClone() {
-        final List<ReferenceContainer<ReferenceType>> cachecopy = new ArrayList<ReferenceContainer<ReferenceType>>(cache.size());
-        synchronized (cache) {
-            for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: cache.entrySet()) {
+        final List<ReferenceContainer<ReferenceType>> cachecopy = new ArrayList<ReferenceContainer<ReferenceType>>(this.cache.size());
+        synchronized (this.cache) {
+            for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: this.cache.entrySet()) {
                 if (entry.getValue() != null && entry.getValue().getTermHash() != null) cachecopy.add(entry.getValue());
             }
         }
         Collections.sort(cachecopy, this.containerOrder);
         return cachecopy;
     }
-    
+
     public int size() {
         return (this.cache == null) ? 0 : this.cache.size();
     }
-    
+
     public boolean isEmpty() {
         if (this.cache == null) return true;
         return this.cache.isEmpty();
@@ -189,12 +189,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public int maxReferences() {
         // iterate to find the max score
         int max = 0;
-        for (ReferenceContainer<ReferenceType> container : cache.values()) {
+        for (final ReferenceContainer<ReferenceType> container : this.cache.values()) {
             if (container.size() > max) max = container.size();
         }
         return max;
     }
-    
+
     /**
      * return an iterator object that creates top-level-clones of the indexContainers
      * in the cache, so that manipulations of the iterated objects do not change
@@ -208,8 +208,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public Iterator<ReferenceContainer<ReferenceType>> iterator() {
         return references(null, false);
     }
-    
-    
+
+
     /**
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
@@ -220,73 +220,73 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
         // so this class simulates wCache.tailMap(startWordHash).values().iterator()
         // plus the mentioned features
-        
+
         private final boolean rot;
         private final List<ReferenceContainer<ReferenceType>> cachecopy;
         private int p;
         private byte[] latestTermHash;
-        
+
         public heapCacheIterator(byte[] startWordHash, final boolean rot) {
             this.rot = rot;
             if (startWordHash != null && startWordHash.length == 0) startWordHash = null;
             this.cachecopy = sortedClone();
             assert this.cachecopy != null;
-            assert termOrder != null;
+            assert ReferenceContainerCache.this.termOrder != null;
             this.p = 0;
             if (startWordHash != null) {
                 while ( this.p < this.cachecopy.size() &&
-                        termOrder.compare(this.cachecopy.get(this.p).getTermHash(), startWordHash) < 0
+                        ReferenceContainerCache.this.termOrder.compare(this.cachecopy.get(this.p).getTermHash(), startWordHash) < 0
                       ) this.p++;
             }
             this.latestTermHash = null;
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
-        
+
         public heapCacheIterator clone(final Object secondWordHash) {
-            return new heapCacheIterator((byte[]) secondWordHash, rot);
+            return new heapCacheIterator((byte[]) secondWordHash, this.rot);
         }
-        
+
         public boolean hasNext() {
-            if (rot) return this.cachecopy.size() > 0;
+            if (this.rot) return this.cachecopy.size() > 0;
             return this.p < this.cachecopy.size();
         }
 
         public ReferenceContainer<ReferenceType> next() {
             if (this.p < this.cachecopy.size()) {
-                ReferenceContainer<ReferenceType> c = this.cachecopy.get(this.p++);
+                final ReferenceContainer<ReferenceType> c = this.cachecopy.get(this.p++);
                 this.latestTermHash = c.getTermHash();
                 try {
                     return c.topLevelClone();
-                } catch (RowSpaceExceededException e) {
+                } catch (final RowSpaceExceededException e) {
                     Log.logException(e);
                     return null;
                 }
             }
             // rotation iteration
-            if (!rot) {
+            if (!this.rot) {
                 return null;
             }
             if (this.cachecopy.isEmpty()) return null;
-            p = 0;
-            ReferenceContainer<ReferenceType> c = this.cachecopy.get(this.p++);
+            this.p = 0;
+            final ReferenceContainer<ReferenceType> c = this.cachecopy.get(this.p++);
             this.latestTermHash = c.getTermHash();
             try {
                 return c.topLevelClone();
-            } catch (RowSpaceExceededException e) {
+            } catch (final RowSpaceExceededException e) {
                 Log.logException(e);
                 return null;
             }
         }
 
         public void remove() {
-            System.arraycopy(this.cachecopy, this.p, this.cachecopy, this.p - 1, this.cachecopy.size() - p);
-            cache.remove(new ByteArray(this.latestTermHash));
+            System.arraycopy(this.cachecopy, this.p, this.cachecopy, this.p - 1, this.cachecopy.size() - this.p);
+            ReferenceContainerCache.this.cache.remove(new ByteArray(this.latestTermHash));
         }
 
         public Iterator<ReferenceContainer<ReferenceType>> iterator() {
             return this;
         }
-        
+
     }
 
     /**
@@ -298,21 +298,21 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public boolean has(final byte[] key) {
         return this.cache.containsKey(new ByteArray(key));
     }
-    
+
     /**
      * get a indexContainer from a heap
      * @param key
      * @return the indexContainer if one exist, null otherwise
-     * @throws  
+     * @throws
      */
-    public ReferenceContainer<ReferenceType> get(final byte[] key, HandleSet urlselection) {
-        ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
+    public ReferenceContainer<ReferenceType> get(final byte[] key, final HandleSet urlselection) {
+        final ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
         if (urlselection == null) return c;
         if (c == null) return null;
         // because this is all in RAM, we must clone the entries (flat)
         try {
-            ReferenceContainer<ReferenceType> c1 = new ReferenceContainer<ReferenceType>(factory, c.getTermHash(), c.size());
-            Iterator<ReferenceType> e = c.entries();
+            final ReferenceContainer<ReferenceType> c1 = new ReferenceContainer<ReferenceType>(this.factory, c.getTermHash(), c.size());
+            final Iterator<ReferenceType> e = c.entries();
             ReferenceType ee;
             while (e.hasNext()) {
                 ee = e.next();
@@ -321,7 +321,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 }
             }
             return c1;
-        } catch (RowSpaceExceededException e2) {
+        } catch (final RowSpaceExceededException e2) {
             Log.logException(e2);
         }
         return null;
@@ -333,11 +333,11 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @return
      */
     public int count(final byte[] key) {
-        ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
+        final ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
         if (c == null) return 0;
         return c.size();
     }
-    
+
     /**
      * delete a indexContainer from the heap cache. This can only be used for write-enabled heaps
      * @param wordHash
@@ -347,7 +347,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         // returns the index that had been deleted
         assert this.cache != null;
         if (this.cache == null) return null;
-        return cache.remove(new ByteArray(termHash));
+        return this.cache.remove(new ByteArray(termHash));
     }
 
     public void removeDelayed(final byte[] termHash, final byte[] urlHashBytes) {
@@ -356,15 +356,15 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public boolean remove(final byte[] termHash, final byte[] urlHashBytes) {
         assert this.cache != null;
         if (this.cache == null) return false;
-        ByteArray tha = new ByteArray(termHash);
-        synchronized (cache) {
-	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
+        final ByteArray tha = new ByteArray(termHash);
+        synchronized (this.cache) {
+	        final ReferenceContainer<ReferenceType> c = this.cache.get(tha);
 	        if (c != null && c.delete(urlHashBytes)) {
 	            // removal successful
 	            if (c.isEmpty()) {
 	                delete(termHash);
 	            } else {
-	                cache.put(tha, c);
+	                this.cache.put(tha, c);
 	            }
 	            return true;
 	        }
@@ -380,16 +380,16 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         assert this.cache != null;
         if (this.cache == null) return  0;
         if (urlHashes.isEmpty()) return 0;
-        ByteArray tha = new ByteArray(termHash);
+        final ByteArray tha = new ByteArray(termHash);
         int count;
-        synchronized (cache) {
-            final ReferenceContainer<ReferenceType> c = cache.get(tha);
+        synchronized (this.cache) {
+            final ReferenceContainer<ReferenceType> c = this.cache.get(tha);
             if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
                 // removal successful
                 if (c.isEmpty()) {
                     delete(termHash);
                 } else {
-                    cache.put(tha, c);
+                    this.cache.put(tha, c);
                 }
                 return count;
             }
@@ -402,12 +402,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void add(final ReferenceContainer<ReferenceType> container) throws RowSpaceExceededException {
         // this puts the entries into the cache
         if (this.cache == null || container == null || container.isEmpty()) return;
-        
+
         // put new words into cache
-        ByteArray tha = new ByteArray(container.getTermHash());
+        final ByteArray tha = new ByteArray(container.getTermHash());
         int added = 0;
-        synchronized (cache) {
-            ReferenceContainer<ReferenceType> entries = cache.get(tha); // null pointer exception? wordhash != null! must be cache==null
+        synchronized (this.cache) {
+            ReferenceContainer<ReferenceType> entries = this.cache.get(tha); // null pointer exception? wordhash != null! must be cache==null
             if (entries == null) {
                 entries = container.topLevelClone();
                 added = entries.size();
@@ -415,7 +415,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 added = entries.putAllRecent(container);
             }
             if (added > 0) {
-                cache.put(tha, entries);
+                this.cache.put(tha, entries);
             }
             entries = null;
             return;
@@ -425,16 +425,16 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void add(final byte[] termHash, final ReferenceType newEntry) throws RowSpaceExceededException {
         assert this.cache != null;
         if (this.cache == null) return;
-        ByteArray tha = new ByteArray(termHash);
-        
+        final ByteArray tha = new ByteArray(termHash);
+
         // first access the cache without synchronization
-        ReferenceContainer<ReferenceType> container = cache.remove(tha);
-        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, 1);
+        ReferenceContainer<ReferenceType> container = this.cache.remove(tha);
+        if (container == null) container = new ReferenceContainer<ReferenceType>(this.factory, termHash, 1);
         container.put(newEntry);
-        
+
         // synchronization: check if the entry is still empty and set new value
-        synchronized (cache) {
-            ReferenceContainer<ReferenceType> containerNew = cache.put(tha, container);
+        synchronized (this.cache) {
+            final ReferenceContainer<ReferenceType> containerNew = this.cache.put(tha, container);
             if (containerNew == null) return;
             if (container == containerNew) {
                 // The containers are the same, so nothing needs to be done
@@ -442,12 +442,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             }
             // Now merge the smaller container into the lager.
             // The other way around can become very slow
-            if (container.size() >= containerNew.size()) { 
+            if (container.size() >= containerNew.size()) {
                 container.putAllRecent(containerNew);
-       	        cache.put(tha, container);
+       	        this.cache.put(tha, container);
             } else {
                 containerNew.putAllRecent(container);
-                cache.put(tha, containerNew);
+                this.cache.put(tha, containerNew);
             }
         }
     }
@@ -459,17 +459,17 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public ByteOrder termKeyOrdering() {
         return this.termOrder;
     }
- 
+
     public static class ContainerOrder<ReferenceType extends Reference> implements Comparator<ReferenceContainer<ReferenceType>> {
         private final ByteOrder o;
-        public ContainerOrder(ByteOrder order) {
+        public ContainerOrder(final ByteOrder order) {
             this.o = order;
         }
-        public int compare(ReferenceContainer<ReferenceType> arg0, ReferenceContainer<ReferenceType> arg1) {
+        public int compare(final ReferenceContainer<ReferenceType> arg0, final ReferenceContainer<ReferenceType> arg1) {
             if (arg0 == arg1) return 0;
             if (arg0 == null) return -1;
             if (arg1 == null) return 1;
-            return o.compare(arg0.getTermHash(), arg1.getTermHash());
+            return this.o.compare(arg0.getTermHash(), arg1.getTermHash());
         }
     }
 
