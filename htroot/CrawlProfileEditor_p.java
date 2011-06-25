@@ -134,9 +134,11 @@ public class CrawlProfileEditor_p {
         Map<String, String> orderdHandles = new TreeMap<String, String>();
         for (final byte[] h : sb.crawler.getActive()) {
             selentry = sb.crawler.getActive(h);
-            if (ignoreNames.contains(selentry.name())) continue;
-            orderdHandles.put(selentry.name(), selentry.handle());
+            if (selentry != null && !ignoreNames.contains(selentry.name())) {
+                orderdHandles.put(selentry.name(), selentry.handle());
+            }
         }
+        
         // then write into pop-up menu list
         int count = 0;
         for (final Map.Entry<String, String> NameHandle: orderdHandles.entrySet()) {
