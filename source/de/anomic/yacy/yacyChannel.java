@@ -57,12 +57,6 @@ public enum yacyChannel {
      * the following static channels object is used to organize a storage array for RSS feeds
      */
     private static final ConcurrentMap<yacyChannel, RSSFeed> channels = new ConcurrentHashMap<yacyChannel, RSSFeed>();
-    public static RSSFeed channels(final String channelName) {
-        for (final yacyChannel channel : yacyChannel.values()) {
-            if (channel.name().equals(channelName)) return channels(channel);
-        }
-        return null;
-    }
 
     public static RSSFeed channels(final yacyChannel channel) {
         RSSFeed feed = channels.get(channel);
