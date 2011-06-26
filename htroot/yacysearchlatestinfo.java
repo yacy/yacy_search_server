@@ -21,7 +21,6 @@ public class yacysearchlatestinfo {
             return prop;
         }
         final QueryParams theQuery = theSearch.getQuery();
-        //if (sb.isGlobalMode() && !theQuery.isLocal()) try {Thread.sleep(1000);} catch (InterruptedException e) {}
 
         // dynamically update count values
         final int totalcount = theSearch.getRankingResult().getLocalIndexCount() - theSearch.getRankingResult().getMissCount() - theSearch.getRankingResult().getSortOutCount() + theSearch.getRankingResult().getRemoteIndexCount();

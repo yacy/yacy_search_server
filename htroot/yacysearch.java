@@ -628,9 +628,6 @@ public class yacysearch {
                       sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_USER, sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)),
                 (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_ROBINSON, 0),
                 (int) sb.getConfigLong(SwitchboardConstants.DHT_BURST_MULTIWORD, 0));
-            try {
-                Thread.sleep(global ? 100 : 10);
-            } catch (final InterruptedException e1) {} // wait a little time to get first results in the search
 
             if (offset == 0) {
                 if (sitehost != null && sb.getConfigBool("heuristic.site", false) && authenticated) {

@@ -129,6 +129,8 @@ public class ResultFetcher {
     public ResultEntry oneResult(final int item, final long timeout) {
         // check if we already retrieved this item
     	// (happens if a search pages is accessed a second time)
+        if (!this.query.isLocal() && item == 0) try { Thread.sleep(100); } catch (final InterruptedException e1) {} // wait a little time to get first results in the search
+
         final long finishTime = System.currentTimeMillis() + timeout;
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.ONERESULT, "started, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
         if (this.result.sizeAvailable() > item) {
@@ -212,7 +214,7 @@ public class ResultFetcher {
         while ( this.result.sizeAvailable() < this.query.neededResults() &&
                 anyWorkerAlive() &&
                 System.currentTimeMillis() < timeout) {
-            try {Thread.sleep(20);} catch (final InterruptedException e) {}
+            try {Thread.sleep(10);} catch (final InterruptedException e) {}
             //System.out.println("+++DEBUG-completeResults+++ sleeping " + 200);
         }
         return this.result.list(Math.min(this.query.neededResults(), this.result.sizeAvailable()));
