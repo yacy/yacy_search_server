@@ -152,6 +152,9 @@ public final class TemplateEngine {
     private final static byte[] open_endtag = ASCII.getBytes("</");
     private final static byte[] close_quotetagn = ASCII.getBytes("\">\n");
     private final static byte[] close_tagn = ASCII.getBytes(">\n");
+    private final static byte[] PP = ASCII.getBytes("%%");
+    private final static byte[] hash_brackopen_slash = ASCII.getBytes("#(/");
+    private final static byte[] brackclose_hash = ASCII.getBytes(")#");
 
 
     /**
@@ -290,7 +293,7 @@ public final class TemplateEngine {
                 PushbackInputStream pis2;
                 if (byName) {
                     //TODO: better Error Handling
-                    transferUntil(pis, keyStream, appendBytes(ASCII.getBytes("%%"), patternName, null, null));
+                    transferUntil(pis, keyStream, appendBytes(PP, patternName, null, null));
                     if(pis.available()==0){
                         Log.logSevere("TEMPLATE", "No such Template: %%" + UTF8.String(patternName));
                         return structure.getBytes();
@@ -299,7 +302,7 @@ public final class TemplateEngine {
                     transferUntil(pis, keyStream, dpdpa);
                     pis2 = new PushbackInputStream(new ByteArrayInputStream(keyStream.toByteArray()));
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
-                    transferUntil(pis, keyStream, appendBytes(ASCII.getBytes("#(/"), key, ASCII.getBytes(")#"), null));
+                    transferUntil(pis, keyStream, appendBytes(hash_brackopen_slash, key, brackclose_hash, null));
                     if(pis.available()==0){
                         Log.logSevere("TEMPLATE", "No Close Key found for #("+UTF8.String(key)+")# (by Name)");
                     }
@@ -321,10 +324,10 @@ public final class TemplateEngine {
                                     found=true;
                                 }else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
                                     others--;
-                                    text.append(aOpen).append(keyStream.toByteArray()).append(ASCII.getBytes(")#"));
+                                    text.append(aOpen).append(keyStream.toByteArray()).append(brackclose_hash);
                                 } else { //nested
                                     others++;
-                                    text.append(aOpen).append(keyStream.toByteArray()).append(ASCII.getBytes(")#"));
+                                    text.append(aOpen).append(keyStream.toByteArray()).append(brackclose_hash);
                                 }
                                 keyStream.reset(); //reset stream
                                 continue;
@@ -341,7 +344,7 @@ public final class TemplateEngine {
                                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
                                     structure.append(open_endtag).append(key).append(close_tagn);
 
-                                    transferUntil(pis, keyStream, appendBytes(ASCII.getBytes("#(/"),key,ASCII.getBytes(")#"),null));//to #(/key)#.
+                                    transferUntil(pis, keyStream, appendBytes(hash_brackopen_slash, key, brackclose_hash,null));//to #(/key)#.
 
                                     found=true;
                                 }
