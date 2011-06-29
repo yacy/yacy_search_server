@@ -454,9 +454,9 @@ public final class QueryParams {
         context.append(asterisk);
         context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString())));
         context.append(asterisk);
-        context.append(this.prefer);
+        context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString()));
         context.append(asterisk);
-        context.append(this.urlMask);
+        context.append(Base64Order.enhancedCoder.encodeString(this.urlMask.toString()));
         context.append(asterisk);
         context.append(this.sitehash);
         context.append(asterisk);
