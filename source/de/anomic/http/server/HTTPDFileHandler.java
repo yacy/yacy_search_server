@@ -87,6 +87,7 @@ import java.util.zip.GZIPOutputStream;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -1410,7 +1411,8 @@ public final class HTTPDFileHandler {
 
 				} else {
 					// relative path of form href="relative/path"
-				    m.appendReplacement(result, init + "/proxy.html?url=http://" + proxyurl.getHost() + directory + "/" + url);
+					MultiProtocolURI target = new MultiProtocolURI(proxyurl.getHost() + directory + "/" + url);
+				    m.appendReplacement(result, init + "/proxy.html?url=" + target.toString());
 
 				}
 			}
@@ -1421,14 +1423,17 @@ public final class HTTPDFileHandler {
 			if (outgoingHeader.containsKey(HeaderFramework.TRANSFER_ENCODING)) {
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
 
-				out = new ChunkedOutputStream(out);
+				ChunkedOutputStream cos = new ChunkedOutputStream(out);
+
+				cos.write(sbb);
+				cos.finish();
 			} else {
 				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(sbb.length));
 
 				HTTPDemon.sendRespondHeader(conProp, out, httpVersion, httpStatus, outgoingHeader);
-			}
 
-			out.write(sbb);
+				out.write(sbb);
+			}
 		} else {
 			if (!outgoingHeader.containsKey(HeaderFramework.CONTENT_LENGTH))
 				outgoingHeader.put(HeaderFramework.CONTENT_LENGTH, (String) prop.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_SIZE));
