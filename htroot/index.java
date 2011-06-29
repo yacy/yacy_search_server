@@ -117,6 +117,7 @@ public class index {
         prop.put("type", type);
         prop.put("depth", "0");
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+        prop.put("pi", sb.getConfigBool("publicAdministratorPi", false) ? 1 : 0);
         prop.putHTML("constraint", constraint);
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
