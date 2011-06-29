@@ -1,0 +1,193 @@
+## this is a list of all solr keys
+## solr can be used as alternative index target, solr is NOT the primary indexing system of YaCy
+## this complete list of keys can be reduced:
+## reduced list of keys can be placed in DATA/SETTINGS/solr.keys.<profile>.list
+## where they can be used as profiles for solr index transport
+
+## the syntax of this file:
+## - all lines beginning with '##' are comments
+## - all non-empty lines not beginning with '#' are keyword lines
+## - all lines beginning with '#' and where the second character is not '#' are commented-out keyword lines
+
+##url of document, string
+sku
+
+## primary key of document, the URL hash, string
+id
+
+## longitude of location as declared in WSG84, tdouble
+lon_coordinate
+
+## longitude of location as declared in WSG84, tdouble
+lat_coordinate
+
+## last-modified from http header, date
+last_modified
+
+## if of host of url (after DNS lookup), string
+ip_s
+
+## mime-type of document, string
+content_type
+
+## content of title tag, text
+title
+
+## content of author-tag, texgen
+author
+
+## content of description-tag, text
+description
+
+## content of keywords tag; words are separated by space, textgen
+keywords
+
+## character encoding, string
+charset_s
+
+## urls of css entries, normalized with absolute URL, textgen
+attr_css
+
+## number of css entries, int
+csscount_i
+
+## urls of script entries, normalized with absolute URL, textgen
+attr_scripts
+
+## number of script entries, int
+scriptscount_i
+
+## content of <meta name="robots" content=#content#> tag, text
+metarobots_t
+
+## html status return code (i.e. "200" for ok), -1 if not loaded, int
+httpstatus_
+
+## content of <meta name="generator" content=#content#> tag, text
+metagenerator_t
+
+## all visible text, text
+text_t
+
+## number of words in visible area, int
+wordcount_i
+
+## internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
+attr_inboundlinks
+
+## number of inbound links, int
+inboundlinkscount_i
+
+## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
+attr_outboundlinks
+
+## number of external links, int
+outboundlinkscount_i
+
+## h1 header, textgen
+attr_h1
+
+## h2 header, textgen
+attr_h2
+
+## h3 header, textgen
+attr_h3
+
+## h4 header, textgen
+attr_h4
+
+## h5 header, textgen
+attr_h5
+
+## h6 header, textgen
+attr_h6
+
+## binary pattern for the existance of h1..h6 headlines, int
+htags_i
+
+## all path elements in the url, textgen
+attr_paths
+
+## host of the url, string
+host_s
+
+## all texts in <li> tags, textgen
+attr_li
+
+## number of <li> tags, int
+licount_i
+
+## all texts inside of <b> or <strong> tags. no doubles. listed in the order of number of occurrences in decreasing order, textgen
+attr_bold
+
+## number of occurrences of texts in attr_bold, textgen
+attr_boldcount
+
+## total number of occurrences of <b> or <strong>, int
+bold_i
+
+## all texts inside of <i> tags. no doubles. listed in the order of number of occurrences in decreasing order, textgen
+attr_italic
+
+## number of occurrences of texts in attr_italic, textgen
+attr_italiccount
+
+## total number of occurrences of <i>, int
+italic_i
+
+## all image tags, encoded as <img> tag inclusive alt- and title property, textgen
+attr_images
+
+## number of images, int
+imagescount_i
+
+## flag that shows if a swf file is linked, boolen
+flash_b
+
+## list of all links to frames, textgen
+attr_frames
+
+## number of attr_frames, int
+framesscount_i
+
+## list of all links to iframes, textgen
+attr_iframes
+
+## number of attr_iframes, int
+iframesscount_i
+
+## names of cms attributes; if several are recognized then they are listen in decreasing order of number of matching criterias, textgen
+attr_cms
+
+##number of attributes that count for a specific cms in attr_cms, textgen
+attr_cmscount
+
+## names of ad-servers/ad-services, textgen
+attr_ads
+
+## number of attributes counts in attr_ads, textgen
+attr_adscount
+
+## names of recognized community functions, textgen
+attr_community
+
+## number of attribute counts in attr_community, textgen
+attr_communitycount
+
+## names of map services, textgen
+attr_maps
+
+## number of attribute counts in attr_maps, textgen
+attr_mapscount
+
+## names of tracker server, textgen
+attr_tracker
+
+## number of attribute counts in attr_tracker, textgen
+attr_trackercount
+
+## fail reason if a page was not loaded. if the page was loaded then this field is empty, text
+failreason_t
+
+## response time of target server in milliseconds, int
+responsetime_i
