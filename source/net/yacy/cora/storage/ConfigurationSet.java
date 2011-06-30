@@ -40,12 +40,22 @@ import java.util.Set;
  * the list may contain lines with one keyword, comment lines, empty lines and out-commented keyword lines
  * when an attribute is changed here, the list is stored again with the original formatting
  *
+ * the syntax of configuration files:
+ * - all lines beginning with '##' are comments
+ * - all non-empty lines not beginning with '#' are keyword lines
+ * - all lines beginning with '#' and where the second character is not '#' are commented-out keyword lines
+ *
  * @author Michael Christen
  */
 public class ConfigurationSet extends AbstractSet<String> implements Set<String> {
 
     private final File file;
     private String[] lines;
+
+    public ConfigurationSet() {
+        this.file = null;
+        this.lines = new String[0];
+    }
 
     public ConfigurationSet(final File file) {
         this.file = file;
@@ -62,11 +72,18 @@ public class ConfigurationSet extends AbstractSet<String> implements Set<String>
         }
     }
 
+    @Override
+    public boolean isEmpty() {
+        // a shortcut to a fast 'true' in case that we initialized the class without a configuration file
+        return this.lines == null || this.lines.length == 0 || super.isEmpty();
+    }
+
     /**
      * save the configuration back to the file
      * @throws IOException
      */
     private void commit() throws IOException {
+        if (this.file == null) return;
         final BufferedWriter writer = new BufferedWriter(new FileWriter(this.file));
         for (final String s: this.lines) {
             writer.write(s);

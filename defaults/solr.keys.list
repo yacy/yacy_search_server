@@ -141,7 +141,7 @@ attr_images
 ## number of images, int
 imagescount_i
 
-## flag that shows if a swf file is linked, boolen
+## flag that shows if a swf file is linked, boolean
 flash_b
 
 ## list of all links to frames, textgen

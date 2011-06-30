@@ -55,6 +55,10 @@ public class SolrChardingConnector {
         this.scheme = scheme;
     }
 
+    public SolrScheme getScheme() {
+        return this.scheme;
+    }
+
     public void close() {
         for (final SolrSingleConnector connector: this.connectors) connector.close();
     }

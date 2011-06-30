@@ -21,6 +21,7 @@
       </legend>
         You can just switch on or off this index. If you switch it off, you will not be able to search with YaCy any more.
       </fieldset>
+      <input type="submit" name="set" value="Set" />
       
       <fieldset>
       <legend>
@@ -55,8 +56,25 @@
         <dt class="TableCellDark">Charding Method</dt>
         <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.charding]#" name="solr.indexing.charding" id="solr.indexing.charding" disabled="disabled"/></dd>
         <dt class="TableCellDark">Scheme</dt>
-        <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.scheme]#" name="solr.indexing.scheme" id="solr.indexing.scheme" disabled="disabled"/></dd>
+        <dd><input type="text" size="50" maxlength="50" value="#[solr.indexing.schemefile]#" name="solr.indexing.schemefile" id="solr.indexing.schemefile" disabled="disabled"/></dd>
       </dl>
+      </div>
+      <div>
+      <h3>Index Scheme</h3>
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
+      <tr class="TableHeader" valign="bottom">
+        <td>Active</td>
+        <td>Attribute</td>
+        <td>Comment</td>
+      </tr>
+      #{scheme}#
+      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        <td align="center"><input type="checkbox" name="scheme_#[key]#" value="checked" #(checked)#::checked="checked"#(/checked)#/></td>
+        <td align="left">#[key]#</td>
+        <td align="left">#[comment]#</td>
+      </tr>
+      #{/scheme}#
+      </table>
       </div>
     </fieldset>
     <input type="submit" name="set" value="Set" />

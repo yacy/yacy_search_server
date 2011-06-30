@@ -11,12 +11,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -25,211 +25,271 @@
 package net.yacy.cora.services.federated.solr;
 
 
+import java.io.File;
 import java.net.InetAddress;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.storage.ConfigurationSet;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.cora.document.MultiProtocolURI;
+
 import org.apache.solr.common.SolrInputDocument;
 
-public enum SolrScheme {
+public class SolrScheme extends ConfigurationSet {
 
-    SolrCell,
-    SolrCellExtended,
-    DublinCore;
-
-    
-    public SolrInputDocument yacy2solr(String id, ResponseHeader header, Document document) {
-        if (this == SolrCellExtended) return yacy2solrSolrCellExtended(id, header, document);
-        return null;
+    /**
+     * initialize with an empty ConfigurationSet which will cause that all the index
+     * attributes are used
+     */
+    public SolrScheme() {
+        super();
     }
-    
-    public static SolrInputDocument yacy2solrSolrCellExtended(String id, ResponseHeader header, Document yacydoc) {
+
+    /**
+     * initialize the scheme with a given configuration file
+     * the configuration file simply contains a list of lines with keywords
+     * @param configurationFile
+     */
+    public SolrScheme(final File configurationFile) {
+        super(configurationFile);
+    }
+
+    private void addSolr(final SolrInputDocument solrdoc, final String key, final String value) {
+        if (isEmpty() || contains(key)) solrdoc.setField(key, value);
+    }
+
+    private void addSolr(final SolrInputDocument solrdoc, final String key, final Date value) {
+        if (isEmpty() || contains(key)) solrdoc.setField(key, value);
+    }
+
+    private void addSolr(final SolrInputDocument solrdoc, final String key, final int value) {
+        if (isEmpty() || contains(key)) solrdoc.setField(key, value);
+    }
+
+    private void addSolr(final SolrInputDocument solrdoc, final String key, final String[] value) {
+        if (isEmpty() || contains(key)) solrdoc.setField(key, value);
+    }
+
+    private void addSolr(final SolrInputDocument solrdoc, final String key, final float value) {
+        if (isEmpty() || contains(key)) solrdoc.setField(key, value);
+    }
+
+    private void addSolr(final SolrInputDocument solrdoc, final String key, final boolean value) {
+        if (isEmpty() || contains(key)) solrdoc.setField(key, value);
+    }
+
+    private void addSolr(final SolrInputDocument solrdoc, final String key, final String value, final float boost) {
+        if (isEmpty() || contains(key)) solrdoc.setField(key, value, boost);
+    }
+
+    public SolrInputDocument yacy2solr(final String id, final ResponseHeader header, final Document yacydoc) {
         // we user the SolrCell design as index scheme
-        SolrInputDocument solrdoc = new SolrInputDocument();
-        DigestURI digestURI = new DigestURI(yacydoc.dc_source());
-        solrdoc.addField("failreason_t", ""); // overwrite a possible fail reason (in case that there was a fail reason before)
-        solrdoc.addField("id", id);
-        solrdoc.addField("sku", digestURI.toNormalform(true, false), 3.0f);
-        InetAddress address = Domains.dnsResolve(digestURI.getHost());
-        if (address != null) solrdoc.addField("ip_s", address.getHostAddress());
-        if (digestURI.getHost() != null) solrdoc.addField("host_s", digestURI.getHost());
-        solrdoc.addField("title", yacydoc.dc_title());
-        solrdoc.addField("author", yacydoc.dc_creator());
-        solrdoc.addField("description", yacydoc.dc_description());
-        solrdoc.addField("content_type", yacydoc.dc_format());
-        solrdoc.addField("last_modified", header.lastModified());
-        solrdoc.addField("keywords", yacydoc.dc_subject(' '));
-        String content = UTF8.String(yacydoc.getTextBytes());
-        solrdoc.addField("text_t", content);
-        int contentwc = content.split(" ").length;
-        solrdoc.addField("wordcount_i", contentwc);
+        final SolrInputDocument solrdoc = new SolrInputDocument();
+        final DigestURI digestURI = new DigestURI(yacydoc.dc_source());
+        addSolr(solrdoc, "failreason_t", ""); // overwrite a possible fail reason (in case that there was a fail reason before)
+        addSolr(solrdoc, "id", id);
+        addSolr(solrdoc, "sku", digestURI.toNormalform(true, false), 3.0f);
+        final InetAddress address = Domains.dnsResolve(digestURI.getHost());
+        if (address != null) addSolr(solrdoc, "ip_s", address.getHostAddress());
+        if (digestURI.getHost() != null) addSolr(solrdoc, "host_s", digestURI.getHost());
+        addSolr(solrdoc, "title", yacydoc.dc_title());
+        addSolr(solrdoc, "author", yacydoc.dc_creator());
+        addSolr(solrdoc, "description", yacydoc.dc_description());
+        addSolr(solrdoc, "content_type", yacydoc.dc_format());
+        addSolr(solrdoc, "last_modified", header.lastModified());
+        addSolr(solrdoc, "keywords", yacydoc.dc_subject(' '));
+        final String content = UTF8.String(yacydoc.getTextBytes());
+        addSolr(solrdoc, "text_t", content);
+        if (contains("wordcount_i")) {
+            final int contentwc = content.split(" ").length;
+            addSolr(solrdoc, "wordcount_i", contentwc);
+        }
 
         // path elements of link
-        String path = digestURI.getPath();
-        if (path != null) {
-            String[] paths = path.split("/");
-            if (paths.length > 0) solrdoc.addField("attr_paths", paths);
+        final String path = digestURI.getPath();
+        if (path != null && contains("attr_paths")) {
+            final String[] paths = path.split("/");
+            if (paths.length > 0) addSolr(solrdoc, "attr_paths", paths);
         }
-        
+
         // list all links
-        Map<MultiProtocolURI, Properties> alllinks = yacydoc.getAnchors();        
+        final Map<MultiProtocolURI, Properties> alllinks = yacydoc.getAnchors();
         int c = 0;
-        String[] inboundlinks = new String[yacydoc.inboundLinkCount()];
-        solrdoc.addField("inboundlinkscount_i", inboundlinks.length);
-        for (MultiProtocolURI url: yacydoc.inboundLinks()) {
-            Properties p = alllinks.get(url);
-            String name = p.getProperty("name", "");
-            String rel = p.getProperty("rel", "");
-            inboundlinks[c++] =
-                "<a href=\"" + url.toNormalform(false, false) + "\"" +
-                ((rel.toLowerCase().equals("nofollow")) ? " rel=\"nofollow\"" : "") +
-                ">" +
-                ((name.length() > 0) ? name : "") + "</a>";
+        addSolr(solrdoc, "inboundlinkscount_i", yacydoc.inboundLinkCount());
+        if (contains("attr_inboundlinks")) {
+            final String[] inboundlinks = new String[yacydoc.inboundLinkCount()];
+            for (final MultiProtocolURI url: yacydoc.inboundLinks()) {
+                final Properties p = alllinks.get(url);
+                final String name = p.getProperty("name", "");
+                final String rel = p.getProperty("rel", "");
+                inboundlinks[c++] =
+                    "<a href=\"" + url.toNormalform(false, false) + "\"" +
+                    ((rel.toLowerCase().equals("nofollow")) ? " rel=\"nofollow\"" : "") +
+                    ">" +
+                    ((name.length() > 0) ? name : "") + "</a>";
+            }
+            addSolr(solrdoc, "attr_inboundlinks", inboundlinks);
         }
-        solrdoc.addField("attr_inboundlinks", inboundlinks);
         c = 0;
-        String[] outboundlinks = new String[yacydoc.outboundLinkCount()];
-        solrdoc.addField("outboundlinkscount_i", outboundlinks.length);
-        for (MultiProtocolURI url: yacydoc.outboundLinks()) {
-            Properties p = alllinks.get(url);
-            String name = p.getProperty("name", "");
-            String rel = p.getProperty("rel", "");
-            outboundlinks[c++] =
-                "<a href=\"" + url.toNormalform(false, false) + "\"" +
-                ((rel.toLowerCase().equals("nofollow")) ? " rel=\"nofollow\"" : "") +
-                ">" +
-                ((name.length() > 0) ? name : "") + "</a>";
+        final String[] outboundlinks = new String[yacydoc.outboundLinkCount()];
+        if (contains("attr_outboundlinks")) {
+            addSolr(solrdoc, "outboundlinkscount_i", outboundlinks.length);
+            for (final MultiProtocolURI url: yacydoc.outboundLinks()) {
+                final Properties p = alllinks.get(url);
+                final String name = p.getProperty("name", "");
+                final String rel = p.getProperty("rel", "");
+                outboundlinks[c++] =
+                    "<a href=\"" + url.toNormalform(false, false) + "\"" +
+                    ((rel.toLowerCase().equals("nofollow")) ? " rel=\"nofollow\"" : "") +
+                    ">" +
+                    ((name.length() > 0) ? name : "") + "</a>";
+            }
+            addSolr(solrdoc, "attr_outboundlinks", outboundlinks);
         }
-        solrdoc.addField("attr_outboundlinks", outboundlinks);
-        
         // charset
-        solrdoc.addField("charset_s", yacydoc.getCharset());
+        addSolr(solrdoc, "charset_s", yacydoc.getCharset());
 
         // coordinates
         if (yacydoc.lat() != 0.0f && yacydoc.lon() != 0.0f) {
-            solrdoc.addField("lon_coordinate", yacydoc.lon());
-            solrdoc.addField("lat_coordinate", yacydoc.lat());
+            addSolr(solrdoc, "lon_coordinate", yacydoc.lon());
+            addSolr(solrdoc, "lat_coordinate", yacydoc.lat());
         }
-        solrdoc.addField("httpstatus_i", 200);
-        Object parser = yacydoc.getParserObject();
+        addSolr(solrdoc, "httpstatus_i", 200);
+        final Object parser = yacydoc.getParserObject();
         if (parser instanceof ContentScraper) {
-            ContentScraper html = (ContentScraper) parser;
-            
+            final ContentScraper html = (ContentScraper) parser;
+
             // header tags
             int h = 0;
             int f = 1;
             for (int i = 1; i <= 6; i++) {
-                String[] hs = html.getHeadlines(i);
+                final String[] hs = html.getHeadlines(i);
                 h = h | (hs.length > 0 ? f : 0);
                 f = f * 2;
-                solrdoc.addField("attr_h" + i, hs);
+                addSolr(solrdoc, "attr_h" + i, hs);
             }
-            solrdoc.addField("htags_i", h);
+            addSolr(solrdoc, "htags_i", h);
 
             // meta tags
-            Map<String, String> metas = html.getMetas();
-            String robots = metas.get("robots");
-            if (robots != null) solrdoc.addField("metarobots_t", robots);
-            String generator = metas.get("generator");
-            if (generator != null) solrdoc.addField("metagenerator_t", generator);
-            
-            // bold, italic
-            String[] bold = html.getBold();
-            solrdoc.addField("boldcount_i", bold.length);
-            if (bold.length > 0) {
-                solrdoc.addField("attr_bold", bold);
-                solrdoc.addField("attr_boldcount", html.getBoldCount(bold));
-            }
-            String[] italic = html.getItalic();
-            solrdoc.addField("italiccount_i", italic.length);
-            if (italic.length > 0) {
-                solrdoc.addField("attr_italic", italic);
-                solrdoc.addField("attr_italiccount", html.getItalicCount(italic));
-            }
-            String[] li = html.getLi();
-            solrdoc.addField("licount_i", li.length);
-            if (li.length > 0) solrdoc.addField("attr_li", li);
-            
-            // images
-            Collection<ImageEntry> imagesc = html.getImages().values();
-            String[] images = new String[imagesc.size()];
-            c = 0;
-            for (ImageEntry ie: imagesc) images[c++] = ie.toString();
-            solrdoc.addField("imagescount_i", images.length);
-            if (images.length > 0) solrdoc.addField("attr_images", images);
+            final Map<String, String> metas = html.getMetas();
+            final String robots = metas.get("robots");
+            if (robots != null) addSolr(solrdoc, "metarobots_t", robots);
+            final String generator = metas.get("generator");
+            if (generator != null) addSolr(solrdoc, "metagenerator_t", generator);
 
-            // style sheets
-            Map<MultiProtocolURI, String> csss = html.getCSS();
-            String[] css = new String[csss.size()];
-            c = 0;
-            for (Map.Entry<MultiProtocolURI, String> entry: csss.entrySet()) {
-                css[c++] =
-                    "<link rel=\"stylesheet\" type=\"text/css\" media=\"" + entry.getValue() + "\"" +
-                    " href=\""+ entry.getKey().toNormalform(false, false, false, false) + "\" />";
-            }
-            solrdoc.addField("csscount_i", css.length);
-            if (css.length > 0) solrdoc.addField("attr_css", css);
-            
-            // Scripts
-            Set<MultiProtocolURI> scriptss = html.getScript();
-            String[] scripts = new String[scriptss.size()];
-            c = 0;
-            for (MultiProtocolURI url: scriptss) {
-                scripts[c++] = url.toNormalform(false, false, false, false);
-            }
-            solrdoc.addField("scriptscount_i", scripts.length);
-            if (scripts.length > 0) solrdoc.addField("attr_scripts", scripts);
-            
-            // Frames
-            Set<MultiProtocolURI> framess = html.getFrames();
-            String[] frames = new String[framess.size()];
-            c = 0;
-            for (MultiProtocolURI entry: framess) {
-                frames[c++] = entry.toNormalform(false, false, false, false);
-            }
-            solrdoc.addField("framesscount_i", frames.length);
-            if (frames.length > 0) solrdoc.addField("attr_frames", frames);
-            
-            // IFrames
-            Set<MultiProtocolURI> iframess = html.getIFrames();
-            String[] iframes = new String[iframess.size()];
-            c = 0;
-            for (MultiProtocolURI entry: iframess) {
-                iframes[c++] = entry.toNormalform(false, false, false, false);
-            }
-            solrdoc.addField("iframesscount_i", iframes.length);
-            if (iframes.length > 0) solrdoc.addField("attr_iframes", iframes);
-            
-            // flash embedded
-            solrdoc.addField("flash_b", html.containsFlash());
-            
-            // generic evaluation pattern
-            for (String model: html.getEvaluationModelNames()) {
-                String[] scorenames = html.getEvaluationModelScoreNames(model);
-                if (scorenames.length > 0) {
-                    solrdoc.addField("attr_" + model, scorenames);
-                    solrdoc.addField("attr_" + model + "count", html.getEvaluationModelScoreCounts(model, scorenames));
+            // bold, italic
+            final String[] bold = html.getBold();
+            addSolr(solrdoc, "boldcount_i", bold.length);
+            if (bold.length > 0) {
+                addSolr(solrdoc, "attr_bold", bold);
+                if (contains("attr_boldcount")) {
+                    addSolr(solrdoc, "attr_boldcount", html.getBoldCount(bold));
                 }
             }
-            
+            final String[] italic = html.getItalic();
+            addSolr(solrdoc, "italiccount_i", italic.length);
+            if (italic.length > 0) {
+                addSolr(solrdoc, "attr_italic", italic);
+                if (contains("attr_italiccount")) {
+                    addSolr(solrdoc, "attr_italiccount", html.getItalicCount(italic));
+                }
+            }
+            final String[] li = html.getLi();
+            addSolr(solrdoc, "licount_i", li.length);
+            if (li.length > 0) addSolr(solrdoc, "attr_li", li);
+
+            // images
+            if (contains("attr_images")) {
+                final Collection<ImageEntry> imagesc = html.getImages().values();
+                final String[] images = new String[imagesc.size()];
+                c = 0;
+                for (final ImageEntry ie: imagesc) images[c++] = ie.toString();
+                addSolr(solrdoc, "imagescount_i", images.length);
+                if (images.length > 0) addSolr(solrdoc, "attr_images", images);
+            }
+
+            // style sheets
+            if (contains("attr_css")) {
+                final Map<MultiProtocolURI, String> csss = html.getCSS();
+                final String[] css = new String[csss.size()];
+                c = 0;
+                for (final Map.Entry<MultiProtocolURI, String> entry: csss.entrySet()) {
+                    css[c++] =
+                        "<link rel=\"stylesheet\" type=\"text/css\" media=\"" + entry.getValue() + "\"" +
+                        " href=\""+ entry.getKey().toNormalform(false, false, false, false) + "\" />";
+                }
+                addSolr(solrdoc, "csscount_i", css.length);
+                if (css.length > 0) addSolr(solrdoc, "attr_css", css);
+            }
+
+            // Scripts
+            if (contains("attr_scripts")) {
+                final Set<MultiProtocolURI> scriptss = html.getScript();
+                final String[] scripts = new String[scriptss.size()];
+                c = 0;
+                for (final MultiProtocolURI url: scriptss) {
+                    scripts[c++] = url.toNormalform(false, false, false, false);
+                }
+                addSolr(solrdoc, "scriptscount_i", scripts.length);
+                if (scripts.length > 0) addSolr(solrdoc, "attr_scripts", scripts);
+            }
+
+            // Frames
+            if (contains("attr_frames")) {
+                final Set<MultiProtocolURI> framess = html.getFrames();
+                final String[] frames = new String[framess.size()];
+                c = 0;
+                for (final MultiProtocolURI entry: framess) {
+                    frames[c++] = entry.toNormalform(false, false, false, false);
+                }
+                addSolr(solrdoc, "framesscount_i", frames.length);
+                if (frames.length > 0) addSolr(solrdoc, "attr_frames", frames);
+            }
+
+            // IFrames
+            if (contains("attr_iframes")) {
+                final Set<MultiProtocolURI> iframess = html.getIFrames();
+                final String[] iframes = new String[iframess.size()];
+                c = 0;
+                for (final MultiProtocolURI entry: iframess) {
+                    iframes[c++] = entry.toNormalform(false, false, false, false);
+                }
+                addSolr(solrdoc, "iframesscount_i", iframes.length);
+                if (iframes.length > 0) addSolr(solrdoc, "attr_iframes", iframes);
+            }
+
+            // flash embedded
+            addSolr(solrdoc, "flash_b", html.containsFlash());
+
+            // generic evaluation pattern
+            for (final String model: html.getEvaluationModelNames()) {
+                if (contains("attr_" + model)) {
+                    final String[] scorenames = html.getEvaluationModelScoreNames(model);
+                    if (scorenames.length > 0) {
+                        addSolr(solrdoc, "attr_" + model, scorenames);
+                        addSolr(solrdoc, "attr_" + model + "count", html.getEvaluationModelScoreCounts(model, scorenames));
+                    }
+                }
+            }
+
             // response time
-            solrdoc.addField("responsetime_i", header.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0"));
+            addSolr(solrdoc, "responsetime_i", header.get(HeaderFramework.RESPONSE_TIME_MILLIS, "0"));
         }
         return solrdoc;
     }
-    
-    
+
+
     /*
      * standard solr scheme
 

@@ -560,11 +560,16 @@ public final class Switchboard extends serverSwitch {
         this.log.logConfig("Parser: Initializing Mime Type deny list");
         TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
 
+        // prepare a solr index profile switch list
+        final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/solr.keys.default.list");
+        if (!solrWorkProfile.exists()) FileUtils.copy(new File("defaults/solr.keys.list"), solrWorkProfile);
+        final SolrScheme scheme = new SolrScheme(solrWorkProfile);
+
         // set up the solr interface
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
         final boolean usesolr = getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
         try {
-            this.solrConnector = (usesolr) ? new SolrChardingConnector(solrurls, SolrScheme.SolrCellExtended, SolrChardingSelection.Method.MODULO_HOST_MD5) : null;
+            this.solrConnector = (usesolr) ? new SolrChardingConnector(solrurls, scheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null;
         } catch (final IOException e) {
             Log.logException(e);
             this.solrConnector = null;
