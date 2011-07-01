@@ -181,6 +181,9 @@ public class SolrScheme extends ConfigurationSet {
             }
             addSolr(solrdoc, "htags_i", h);
 
+            // canonical tag
+            if (html.getCanonical() != null) addSolr(solrdoc, "canonical_s", html.getCanonical().toNormalform(false, false));
+
             // meta tags
             final Map<String, String> metas = html.getMetas();
             final String robots = metas.get("robots");

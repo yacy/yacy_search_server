@@ -111,6 +111,9 @@ attr_paths
 ## host of the url, string
 host_s
 
+## url inside the canonical link element, string
+canonical_s
+
 ## all texts in <li> tags, textgen
 attr_li
 

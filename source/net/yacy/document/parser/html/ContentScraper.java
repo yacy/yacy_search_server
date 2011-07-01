@@ -125,6 +125,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private CharBuffer content;
     private final EventListenerList htmlFilterEventListeners;
     private float lon, lat;
+    private MultiProtocolURI canonical;
 
     /**
      * {@link MultiProtocolURI} to the favicon that belongs to the document
@@ -167,6 +168,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.lon = 0.0f;
         this.lat = 0.0f;
         this.evaluationScores.match(Element.url, root.toNormalform(false, false));
+        this.canonical = null;
     }
 
     public void scrapeText(final char[] newtext, final String insideTag) {
@@ -345,6 +347,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
                     this.images.put(ie.url(), ie);
                     this.favicon = newLink;
+                } else if (rel.equalsIgnoreCase("canonical")) {
+                    final Properties p = new Properties(); p.put("name", this.title);
+                    this.anchors.put(newLink, p);
+                    this.canonical = newLink;
                 } else if (rel.equalsIgnoreCase("alternate") && type.equalsIgnoreCase("application/rss+xml")) {
                     this.rss.put(newLink, linktitle);
                 } else if (rel.equalsIgnoreCase("stylesheet") && type.equalsIgnoreCase("text/css")) {
@@ -597,6 +603,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     public Set<MultiProtocolURI> getScript() {
         return this.script;
+    }
+
+    public MultiProtocolURI getCanonical() {
+        return this.canonical;
     }
 
     /**

@@ -72,6 +72,7 @@ public class ConfigurationSet extends AbstractSet<String> implements Set<String>
         }
     }
 
+
     @Override
     public boolean isEmpty() {
         // a shortcut to a fast 'true' in case that we initialized the class without a configuration file
