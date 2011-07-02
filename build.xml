@@ -211,7 +211,8 @@
         <pathelement location="${lib}/slf4j-api-1.5.5.jar" />
         <pathelement location="${lib}/slf4j-jdk14-1.5.5.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
-    	<pathelement location="${lib}/xerces.jar" />
+    	<pathelement location="${lib}/xercesImpl.jar" />
+    	<pathelement location="${lib}/xml-apis.jar" />
     </path>
 	
   <target name="compile-core" depends="init" description="compile YaCy core">
