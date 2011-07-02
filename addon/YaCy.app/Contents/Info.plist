@@ -48,12 +48,12 @@
 			<string>$JAVAROOT/lib/commons-io-1.4.jar</string>
 			<string>$JAVAROOT/lib/commons-jxpath-1.3.jar</string>
 			<string>$JAVAROOT/lib/commons-logging-1.1.1.jar</string>
-			<string>$JAVAROOT/lib/fontbox-1.5.0.jar</string>
+			<string>$JAVAROOT/lib/fontbox-1.6.0.jar</string>
 			<string>$JAVAROOT/lib/httpclient-4.1.1.jar</string>
 			<string>$JAVAROOT/lib/httpcore-4.1.1.jar</string>
 			<string>$JAVAROOT/lib/httpmime-4.1.1.jar</string>
 			<string>$JAVAROOT/lib/icu4j-core.jar</string>
-			<string>$JAVAROOT/lib/jempbox-1.5.0.jar</string>
+			<string>$JAVAROOT/lib/jempbox-1.6.0.jar</string>
 			<string>$JAVAROOT/lib/J7Zip-modified.jar</string>
 			<string>$JAVAROOT/lib/jakarta-oro-2.0.8.jar</string>
 			<string>$JAVAROOT/lib/jcifs-1.3.15.jar</string>
@@ -61,7 +61,7 @@
 			<string>$JAVAROOT/lib/log4j-1.2.16.jar</string>
 			<string>$JAVAROOT/lib/metadata-extractor-2.4.0-beta-1.jar</string>
 			<string>$JAVAROOT/lib/mysql-connector-java-5.1.12-bin.jar</string>
-			<string>$JAVAROOT/lib/pdfbox-1.5.0.jar</string>
+			<string>$JAVAROOT/lib/pdfbox-1.6.0.jar</string>
 			<string>$JAVAROOT/lib/poi-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/poi-scratchpad-3.6-20091214.jar</string>
 			<string>$JAVAROOT/lib/servlet-api.jar</string>
