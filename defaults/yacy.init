@@ -381,7 +381,7 @@ serverClient=*
 
 # use_proxyAccounts: set to true to restrict proxy-access to some identified users.
 #use User_p.html to create some Users.
-use_proxyAccounts=false
+use_proxyAccounts=true
 
 # adminAccount: a user:password - pair for administration of
 # settings through the web interface
