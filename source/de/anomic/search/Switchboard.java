@@ -569,7 +569,7 @@ public final class Switchboard extends serverSwitch {
 
         // update the working scheme with the backup scheme. This is necessary to include new features.
         // new features are always activated by default
-
+        workingScheme.fill(backupScheme);
 
         // set up the solr interface
         final String solrurls = getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");

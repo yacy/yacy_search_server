@@ -72,6 +72,64 @@ public class ConfigurationSet extends AbstractSet<String> implements Set<String>
         }
     }
 
+    public boolean containsDisabled(final String o) {
+        if (o == null) return false;
+        final Iterator<Entry> i = new EntryIterator();
+        Entry e;
+        while (i.hasNext()) {
+            e = i.next();
+            if (!e.enabled() && o.equals(e.key)) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean add(final String key) {
+        return add(key, null);
+    }
+
+    public boolean add(final String key, final String comment) {
+        return add(key, comment, true);
+    }
+
+    public boolean add(final String key, final String comment, final boolean enabled) {
+        if (contains(key)) {
+            try {
+                if (!enabled) disable(key);
+            } catch (final IOException e) {
+            }
+            return true;
+        }
+        if (containsDisabled(key)) {
+            try {
+                if (enabled) enable(key);
+            } catch (final IOException e) {
+            }
+            return false;
+        }
+        // extend the lines
+        final String[] l = new String[this.lines.length + (comment == null ? 2 : 3)];
+        System.arraycopy(this.lines, 0, l, 0, this.lines.length);
+        l[this.lines.length] = "";
+        if (comment != null) l[this.lines.length + 1] = "## " + comment;
+        l[this.lines.length + (comment == null ? 1 : 2)] = enabled ? key : "#" + key;
+        this.lines = l;
+        try {
+            commit();
+        } catch (final IOException e) {
+        }
+        return false;
+    }
+
+    public void fill(final ConfigurationSet other) {
+        final Iterator<Entry> i = other.allIterator();
+        Entry e;
+        while (i.hasNext()) {
+            e = i.next();
+            if (contains(e.key) || containsDisabled(e.key)) continue;
+            this.add(e.key(), other.commentHeadline(e.key()), e.enabled());
+        }
+    }
 
     @Override
     public boolean isEmpty() {
