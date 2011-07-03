@@ -25,8 +25,6 @@
 package de.anomic.crawler;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryControl;
@@ -110,7 +108,8 @@ public class ResourceObserver {
      * </ul>
      */
     private Space getNormalizedDiskFree() {
-    	final long currentSpace = getUsableSpace(this.path);
+        final long currentSpace = this.path.getUsableSpace();
+    	//final long currentSpace = getUsableSpace(this.path);
     	if (currentSpace < 1L) return Space.HIGH;
     	Space ret = Space.HIGH;
     	
@@ -171,6 +170,7 @@ public class ResourceObserver {
 	 * @return "The number of available bytes on the partition or 0L  if the abstract pathname does not name a partition." -1L on error.
 	 * @author lotus at mail.berlios.de
 	 */
+    /**
 	public static long getUsableSpace(final File file) {
 		 try {
 			final Class<?> File6 = Class.forName("java.io.File");
@@ -184,5 +184,5 @@ public class ResourceObserver {
 			return -1L;
 		}
 	}
-    
+    */
 }
