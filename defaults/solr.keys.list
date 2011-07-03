@@ -61,7 +61,7 @@ scriptscount_i
 metarobots_t
 
 ## html status return code (i.e. "200" for ok), -1 if not loaded, int
-httpstatus_
+httpstatus_i
 
 ## content of <meta name="generator" content=#content#> tag, text
 metagenerator_t
