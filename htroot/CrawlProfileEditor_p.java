@@ -101,7 +101,10 @@ public class CrawlProfileEditor_p {
         labels.add(new eentry(CrawlProfile.XPSTOPW,             "Parent stop-words",     false, eentry.BOOLEAN));
     }
     
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(
+            final RequestHeader header, 
+            final serverObjects post,
+            final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final Switchboard sb = (Switchboard)env;
         
@@ -131,7 +134,7 @@ public class CrawlProfileEditor_p {
         
         // generate handle list: first sort by handle name
         CrawlProfile selentry;
-        Map<String, String> orderdHandles = new TreeMap<String, String>();
+        final Map<String, String> orderdHandles = new TreeMap<String, String>();
         for (final byte[] h : sb.crawler.getActive()) {
             selentry = sb.crawler.getActive(h);
             if (selentry != null && !ignoreNames.contains(selentry.name())) {
@@ -219,7 +222,8 @@ public class CrawlProfileEditor_p {
                 prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_label", ee.label);
                 prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type", ee.type);
                 if (ee.type == eentry.BOOLEAN) {
-                    prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_checked", Boolean.parseBoolean(val) ? "1" : "0");
+                    prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_checked",
+                            Boolean.parseBoolean(val) ? "1" : "0");
                 } else {
                     prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_value", val);
                 }
@@ -231,7 +235,14 @@ public class CrawlProfileEditor_p {
         return prop;
     }
     
-    private static void putProfileEntry(final servletProperties prop, final CrawlStacker crawlStacker, final CrawlProfile profile, final boolean active, final boolean dark, final int count, final int domlistlength) {
+    private static void putProfileEntry(
+            final servletProperties prop,
+            final CrawlStacker crawlStacker,
+            final CrawlProfile profile,
+            final boolean active,
+            final boolean dark,
+            final int count,
+            final int domlistlength) {
 
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
         prop.put(CRAWL_PROFILE_PREFIX + count + "_name", profile.name());
@@ -247,13 +258,13 @@ public class CrawlProfileEditor_p {
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", "inactive");
 
-        // start contrib [MN]
         int i = 0;
-        if (active && profile.domMaxPages() > 0 && profile.domMaxPages() != Integer.MAX_VALUE) {
+        if (active && profile.domMaxPages() > 0
+                && profile.domMaxPages() != Integer.MAX_VALUE) {
         String item;
-        while (i <= domlistlength && !"".equals(item = crawlStacker.domName(true, i))){
+        while (i <= domlistlength && !(item = crawlStacker.domName(true, i)).isEmpty()){
             if (i == domlistlength) {
-                item = item + " ...";
+                item += " ...";
             }
             prop.putHTML(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterContent_" + i + "_item", item);
             i++;

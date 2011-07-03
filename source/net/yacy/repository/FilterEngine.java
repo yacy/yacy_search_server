@@ -45,6 +45,7 @@ public class FilterEngine {
             this.types = types;
         }
 
+        @Override
         public int compareTo(FilterEntry fe) {
             return this.path.compareToIgnoreCase(fe.path);
         }
@@ -229,7 +230,7 @@ public class FilterEngine {
             path = element.substring(slashPos + 1);
         }
 
-        if (!allowRegex || !isValidRegex(host)) {
+        if (!allowRegex || !RegexHelper.isValidRegex(host)) {
             final int i = host.indexOf('*');
 
             // check whether host begins illegally
@@ -255,33 +256,16 @@ public class FilterEngine {
             if (host.indexOf("*", i + 1) > -1) {
                 return ERR_TWO_WILDCARDS_IN_HOST;
             }
-        } else if (allowRegex && !isValidRegex(host)) {
+        } else if (allowRegex && !RegexHelper.isValidRegex(host)) {
             return ERR_HOST_REGEX;
         }
 
         // check for errors on regex-compiling path
-        if (!isValidRegex(path) && !path.equals("*")) {
+        if (!RegexHelper.isValidRegex(path) && !path.equals("*")) {
             return ERR_PATH_REGEX;
         }
 
         return 0;
     }
-
-    /**
-     * Checks if a given expression is a valid regular expression.
-     * @param expression The expression to be checked.
-     * @return True if the expression is a valid regular expression, else false.
-     */
-    private static boolean isValidRegex(String expression) {
-        boolean ret = true;
-        try {
-            Pattern.compile(expression);
-        } catch (final PatternSyntaxException e) {
-
-            ret = false;
-        }
-        return ret;
-    }
-    
 
 }

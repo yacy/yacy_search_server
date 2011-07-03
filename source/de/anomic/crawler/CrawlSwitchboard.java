@@ -39,6 +39,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
+import net.yacy.repository.RegexHelper;
 
 public final class CrawlSwitchboard {
 
@@ -52,6 +53,7 @@ public final class CrawlSwitchboard {
 
     public static final String DBFILE_ACTIVE_CRAWL_PROFILES        = "crawlProfilesActive.heap";
     public static final String DBFILE_PASSIVE_CRAWL_PROFILES       = "crawlProfilesPassive.heap";
+    public static final String DBFILE_INVALID_CRAWL_PROFILES       = "crawlProfilesInvalid.heap";
 
     public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L;
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
@@ -61,7 +63,7 @@ public final class CrawlSwitchboard {
     public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
 
     private final Log       log;
-    private        Map<byte[], Map<String, String>>   profilesActiveCrawls, profilesPassiveCrawls;
+    private Map<byte[], Map<String, String>> profilesActiveCrawls, profilesPassiveCrawls, profilesInvalidCrawls;
     public  CrawlProfile    defaultProxyProfile;
     public  CrawlProfile    defaultRemoteProfile;
     public  CrawlProfile    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
@@ -87,40 +89,37 @@ public final class CrawlSwitchboard {
         this.queuesRoot.mkdirs();
         this.log.logConfig("Initializing Crawl Profiles");
 
+        final File profilesInvalidFile = new File(queuesRoot, DBFILE_INVALID_CRAWL_PROFILES);
+        this.profilesInvalidCrawls = loadFromDB(profilesInvalidFile);
+        
         final File profilesActiveFile = new File(queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
-        try {
-            this.profilesActiveCrawls = new MapHeap(profilesActiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
-        } catch (final IOException e) {
-            Log.logException(e);Log.logException(e);
-            FileUtils.deletedelete(profilesActiveFile);
-            try {
-                this.profilesActiveCrawls = new MapHeap(profilesActiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
-            } catch (final IOException e1) {
-                Log.logException(e1);
-                this.profilesActiveCrawls = null;
+        this.profilesActiveCrawls = loadFromDB(profilesActiveFile);
+        for (final byte[] handle : this.profilesActiveCrawls.keySet()) {
+            final CrawlProfile p;
+            p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
+            if (!RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_MUSTMATCH))) {
+                this.removeActive(handle);
+                this.putInvalid(handle, p);
+                Log.logWarning("CrawlProfiles", "removed Profile " + p.handle() + ": " + p.name()
+                        + " from active crawls since " + CrawlProfile.FILTER_MUSTMATCH 
+                        + " is no valid regular expression: " + p.get(CrawlProfile.FILTER_MUSTMATCH));
+            } else if (!RegexHelper.isValidRegex(p.get(CrawlProfile.FILTER_MUSTNOTMATCH))) {
+                this.putInvalid(handle, p);
+                this.removeActive(handle);
+                Log.logWarning("CrawlProfiles", "removed Profile " + p.handle() + ": " + p.name()
+                        + " from active crawls since " + CrawlProfile.FILTER_MUSTNOTMATCH 
+                        + " is no valid regular expression: " + p.get(CrawlProfile.FILTER_MUSTNOTMATCH));
+            } else {
+                Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
             }
-        }
-        for (final byte[] handle: this.profilesActiveCrawls.keySet()) {
-            final CrawlProfile p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
-            Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
+            
         }
         initActiveCrawlProfiles();
         log.logInfo("Loaded active crawl profiles from file " + profilesActiveFile.getName() + ", " + this.profilesActiveCrawls.size() + " entries");
 
         final File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
-        try {
-            this.profilesPassiveCrawls = new MapHeap(profilesPassiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
-        } catch (final IOException e) {
-            Log.logException(e);Log.logException(e);
-            FileUtils.deletedelete(profilesActiveFile);
-            try {
-                this.profilesPassiveCrawls = new MapHeap(profilesPassiveFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
-            } catch (final IOException e1) {
-                Log.logException(e1);
-                this.profilesPassiveCrawls = null;
-            }
-        }
-        for (final byte[] handle: this.profilesPassiveCrawls.keySet()) {
+        this.profilesPassiveCrawls = loadFromDB(profilesPassiveFile);
+        for (final byte[] handle : this.profilesPassiveCrawls.keySet()) {
             final CrawlProfile p = new CrawlProfile(this.profilesPassiveCrawls.get(handle));
             Log.logInfo("CrawlProfiles", "loaded Profile " + p.handle() + ": " + p.name());
         }
@@ -135,6 +134,13 @@ public final class CrawlSwitchboard {
         if (m == null) return null;
         return new CrawlProfile(m);
     }
+    
+    public CrawlProfile getInvalid(final byte[] profileKey) {
+        if (profileKey == null) return null;
+        final Map<String, String> m = this.profilesInvalidCrawls.get(profileKey);
+        if (m == null) return null;
+        return new CrawlProfile(m);
+    }
 
     public CrawlProfile getPassive(final byte[] profileKey) {
         if (profileKey == null) return null;
@@ -146,6 +152,10 @@ public final class CrawlSwitchboard {
     public Set<byte[]> getActive() {
         return this.profilesActiveCrawls.keySet();
     }
+    
+    public Set<byte[]> getInvalid() {
+        return this.profilesInvalidCrawls.keySet();
+    }
 
     public Set<byte[]> getPassive() {
         return this.profilesPassiveCrawls.keySet();
@@ -155,6 +165,11 @@ public final class CrawlSwitchboard {
         if (profileKey == null) return;
         this.profilesActiveCrawls.remove(profileKey);
     }
+    
+    public void removeInvalid(final byte[] profileKey) {
+        if (profileKey == null) return;
+        this.profilesInvalidCrawls.remove(profileKey);
+    }
 
     public void removePassive(final byte[] profileKey) {
         if (profileKey == null) return;
@@ -163,6 +178,10 @@ public final class CrawlSwitchboard {
 
     public void putActive(final byte[] profileKey, final CrawlProfile profile) {
         this.profilesActiveCrawls.put(profileKey, profile);
+    }
+    
+    public void putInvalid(final byte[] profileKey, final CrawlProfile profile) {
+        this.profilesInvalidCrawls.put(profileKey, profile);
     }
 
     public void putPassive(final byte[] profileKey, final CrawlProfile profile) {
@@ -302,7 +321,31 @@ public final class CrawlSwitchboard {
 
     public void close() {
         ((MapHeap) this.profilesActiveCrawls).close();
+        ((MapHeap) this.profilesInvalidCrawls).close();
         ((MapHeap) this.profilesPassiveCrawls).close();
+    }
+    
+    
+    /**
+     * Loads crawl profiles from a DB file.
+     * @param file DB file
+     * @return crawl profile data
+     */
+    private Map<byte[], Map<String, String>> loadFromDB(final File file) {
+        Map<byte[], Map<String, String>> ret;
+        try {
+            ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
+        } catch (final IOException e) {
+            Log.logException(e);Log.logException(e);
+            FileUtils.deletedelete(file);
+            try {
+                ret = new MapHeap(file, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, ' ');
+            } catch (final IOException e1) {
+                Log.logException(e1);
+                ret = null;
+            }
+        }
+        return ret;
     }
 
 }

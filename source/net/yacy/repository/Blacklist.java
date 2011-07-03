@@ -444,7 +444,7 @@ public class Blacklist {
             path = element.substring(slashPos + 1);
         }
 
-        if (!allowRegex || !isValidRegex(host)) {
+        if (!allowRegex || !RegexHelper.isValidRegex(host)) {
             final int i = host.indexOf('*');
 
             // check whether host begins illegally
@@ -470,31 +470,16 @@ public class Blacklist {
             if (host.indexOf("*", i + 1) > -1) {
                 return BlacklistError.TWO_WILDCARDS_IN_HOST;
             }
-        } else if (allowRegex && !isValidRegex(host)) {
+        } else if (allowRegex && !RegexHelper.isValidRegex(host)) {
             return BlacklistError.HOST_REGEX;
         }
 
         // check for errors on regex-compiling path
-        if (!isValidRegex(path) && !"*".equals(path)) {
+        if (!RegexHelper.isValidRegex(path) && !"*".equals(path)) {
             return BlacklistError.PATH_REGEX;
         }
 
         return BlacklistError.NO_ERROR;
-    }
-
-    /**
-     * Checks if a given expression is a valid regular expression.
-     * @param expression The expression to be checked.
-     * @return True if the expression is a valid regular expression, else false.
-     */
-    private static boolean isValidRegex(final String expression) {
-        boolean ret = true;
-        try {
-            Pattern.compile(expression);
-        } catch (final PatternSyntaxException e) {
-            ret = false;
-        }
-        return ret;
     }
 
     public static String defaultBlacklist(final File listsPath) {
