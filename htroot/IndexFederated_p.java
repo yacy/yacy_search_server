@@ -61,11 +61,13 @@ public class IndexFederated_p {
                 sb.solrConnector = null;
             }
 
+            final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
+            final SolrScheme scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
+
             if (!solrWasOn && solrIsOnAfterwards) {
                 // switch on
                 final String solrurls = sb.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
-                final SolrScheme scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/solr.keys.default.list"));
                 try {
                     sb.solrConnector = (usesolr) ? new SolrChardingConnector(solrurls, scheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null;
                 } catch (final IOException e) {
@@ -75,7 +77,6 @@ public class IndexFederated_p {
             }
 
             // read index scheme table flags
-            final SolrScheme scheme = sb.solrConnector.getScheme();
             final Iterator<ConfigurationSet.Entry> i = scheme.allIterator();
             ConfigurationSet.Entry entry;
             while (i.hasNext()) {

@@ -111,14 +111,14 @@ public class SolrScheme extends ConfigurationSet {
         addSolr(solrdoc, "keywords", yacydoc.dc_subject(' '));
         final String content = UTF8.String(yacydoc.getTextBytes());
         addSolr(solrdoc, "text_t", content);
-        if (contains("wordcount_i")) {
+        if (isEmpty() || contains("wordcount_i")) {
             final int contentwc = content.split(" ").length;
             addSolr(solrdoc, "wordcount_i", contentwc);
         }
 
         // path elements of link
         final String path = digestURI.getPath();
-        if (path != null && contains("attr_paths")) {
+        if (path != null && (isEmpty() || contains("attr_paths"))) {
             final String[] paths = path.split("/");
             if (paths.length > 0) addSolr(solrdoc, "attr_paths", paths);
         }
@@ -126,8 +126,9 @@ public class SolrScheme extends ConfigurationSet {
         // list all links
         final Map<MultiProtocolURI, Properties> alllinks = yacydoc.getAnchors();
         int c = 0;
-        addSolr(solrdoc, "inboundlinkscount_i", yacydoc.inboundLinkCount());
-        if (contains("attr_inboundlinks")) {
+        if (isEmpty() || contains("inboundlinkscount_i")) addSolr(solrdoc, "inboundlinkscount_i", yacydoc.inboundLinkCount());
+        if (isEmpty() || contains("inboundlinksnoindexcount_i")) addSolr(solrdoc, "inboundlinksnoindexcount_i", yacydoc.inboundLinkNoindexCount());
+        if (isEmpty() || contains("attr_inboundlinks")) {
             final String[] inboundlinks = new String[yacydoc.inboundLinkCount()];
             for (final MultiProtocolURI url: yacydoc.inboundLinks()) {
                 final Properties p = alllinks.get(url);
@@ -135,23 +136,24 @@ public class SolrScheme extends ConfigurationSet {
                 final String rel = p.getProperty("rel", "");
                 inboundlinks[c++] =
                     "<a href=\"" + url.toNormalform(false, false) + "\"" +
-                    ((rel.toLowerCase().equals("nofollow")) ? " rel=\"nofollow\"" : "") +
+                    (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                     ">" +
                     ((name.length() > 0) ? name : "") + "</a>";
             }
             addSolr(solrdoc, "attr_inboundlinks", inboundlinks);
         }
         c = 0;
-        final String[] outboundlinks = new String[yacydoc.outboundLinkCount()];
-        if (contains("attr_outboundlinks")) {
-            addSolr(solrdoc, "outboundlinkscount_i", outboundlinks.length);
+        if (isEmpty() || contains("outboundlinkscount_i")) addSolr(solrdoc, "outboundlinkscount_i", yacydoc.outboundLinkCount());
+        if (isEmpty() || contains("outboundlinksnoindexcount_i")) addSolr(solrdoc, "outboundlinksnoindexcount_i", yacydoc.outboundLinkNoindexCount());
+        if (isEmpty() || contains("attr_outboundlinks")) {
+            final String[] outboundlinks = new String[yacydoc.outboundLinkCount()];
             for (final MultiProtocolURI url: yacydoc.outboundLinks()) {
                 final Properties p = alllinks.get(url);
                 final String name = p.getProperty("name", "");
                 final String rel = p.getProperty("rel", "");
                 outboundlinks[c++] =
                     "<a href=\"" + url.toNormalform(false, false) + "\"" +
-                    ((rel.toLowerCase().equals("nofollow")) ? " rel=\"nofollow\"" : "") +
+                    (rel.length() > 0 ? " rel=\"" + rel + "\"" : "") +
                     ">" +
                     ((name.length() > 0) ? name : "") + "</a>";
             }
@@ -196,7 +198,7 @@ public class SolrScheme extends ConfigurationSet {
             addSolr(solrdoc, "boldcount_i", bold.length);
             if (bold.length > 0) {
                 addSolr(solrdoc, "attr_bold", bold);
-                if (contains("attr_boldcount")) {
+                if (isEmpty() || contains("attr_boldcount")) {
                     addSolr(solrdoc, "attr_boldcount", html.getBoldCount(bold));
                 }
             }
@@ -204,7 +206,7 @@ public class SolrScheme extends ConfigurationSet {
             addSolr(solrdoc, "italiccount_i", italic.length);
             if (italic.length > 0) {
                 addSolr(solrdoc, "attr_italic", italic);
-                if (contains("attr_italiccount")) {
+                if (isEmpty() || contains("attr_italiccount")) {
                     addSolr(solrdoc, "attr_italiccount", html.getItalicCount(italic));
                 }
             }
@@ -213,7 +215,7 @@ public class SolrScheme extends ConfigurationSet {
             if (li.length > 0) addSolr(solrdoc, "attr_li", li);
 
             // images
-            if (contains("attr_images")) {
+            if (isEmpty() || contains("attr_images")) {
                 final Collection<ImageEntry> imagesc = html.getImages().values();
                 final String[] images = new String[imagesc.size()];
                 c = 0;
@@ -223,7 +225,7 @@ public class SolrScheme extends ConfigurationSet {
             }
 
             // style sheets
-            if (contains("attr_css")) {
+            if (isEmpty() || contains("attr_css")) {
                 final Map<MultiProtocolURI, String> csss = html.getCSS();
                 final String[] css = new String[csss.size()];
                 c = 0;
@@ -237,7 +239,7 @@ public class SolrScheme extends ConfigurationSet {
             }
 
             // Scripts
-            if (contains("attr_scripts")) {
+            if (isEmpty() || contains("attr_scripts")) {
                 final Set<MultiProtocolURI> scriptss = html.getScript();
                 final String[] scripts = new String[scriptss.size()];
                 c = 0;
@@ -249,7 +251,7 @@ public class SolrScheme extends ConfigurationSet {
             }
 
             // Frames
-            if (contains("attr_frames")) {
+            if (isEmpty() || contains("attr_frames")) {
                 final Set<MultiProtocolURI> framess = html.getFrames();
                 final String[] frames = new String[framess.size()];
                 c = 0;
@@ -261,7 +263,7 @@ public class SolrScheme extends ConfigurationSet {
             }
 
             // IFrames
-            if (contains("attr_iframes")) {
+            if (isEmpty() || contains("attr_iframes")) {
                 final Set<MultiProtocolURI> iframess = html.getIFrames();
                 final String[] iframes = new String[iframess.size()];
                 c = 0;
@@ -277,7 +279,7 @@ public class SolrScheme extends ConfigurationSet {
 
             // generic evaluation pattern
             for (final String model: html.getEvaluationModelNames()) {
-                if (contains("attr_" + model)) {
+                if (isEmpty() || contains("attr_" + model)) {
                     final String[] scorenames = html.getEvaluationModelScoreNames(model);
                     if (scorenames.length > 0) {
                         addSolr(solrdoc, "attr_" + model, scorenames);

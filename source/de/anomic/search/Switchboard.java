@@ -562,7 +562,8 @@ public final class Switchboard extends serverSwitch {
 
         // prepare a solr index profile switch list
         final File solrBackupProfile = new File("defaults/solr.keys.list");
-        final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/solr.keys.default.list");
+        final String schemename = getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
+        final File solrWorkProfile = new File(getDataPath(), "DATA/SETTINGS/" + schemename);
         if (!solrWorkProfile.exists()) FileUtils.copy(solrBackupProfile, solrWorkProfile);
         final SolrScheme backupScheme = new SolrScheme(solrBackupProfile);
         final SolrScheme workingScheme = new SolrScheme(solrWorkProfile);

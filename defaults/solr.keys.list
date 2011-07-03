@@ -75,14 +75,20 @@ wordcount_i
 ## internal links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
 attr_inboundlinks
 
-## number of inbound links, int
+## total number of inbound links, int
 inboundlinkscount_i
+
+## number of inbound links with noindex tag, int
+inboundlinksnoindexcount_i
 
 ## external links, normalized (absolute URLs), as <a> - tag with anchor text and nofollow, textgen
 attr_outboundlinks
 
-## number of external links, int
+## total number of external links, int
 outboundlinkscount_i
+
+## number of external links with noindex tag, int
+outboundlinksnoindexcount_i
 
 ## h1 header, textgen
 attr_h1

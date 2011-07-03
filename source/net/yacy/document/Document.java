@@ -403,13 +403,15 @@ dc_rights
             for (final Map.Entry<MultiProtocolURI, Properties> entry: this.anchors.entrySet()) {
                 url = entry.getKey();
                 if (url == null) continue;
+                final boolean noindex = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("noindex") >= 0;
+                final boolean nofollow = entry.getValue().getProperty("rel", "").toLowerCase().indexOf("nofollow") >= 0;
                 if ((thishost == null && url.getHost() == null) ||
                     ((thishost != null && url.getHost() != null) &&
                      (url.getHost().endsWith(thishost) ||
                       (thishost.startsWith("www.") && url.getHost().endsWith(thishost.substring(4)))))) {
-                    this.inboundlinks.put(url, "anchor");
+                    this.inboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 } else {
-                    this.outboundlinks.put(url, "anchor");
+                    this.outboundlinks.put(url, "anchor" + (noindex ? " noindex" : "") + (nofollow ? " nofollow" : ""));
                 }
                 u = url.toNormalform(true, false);
                 final String name = entry.getValue().getProperty("name", "");
@@ -603,6 +605,26 @@ dc_rights
     public int outboundLinkCount() {
         if (this.outboundlinks == null) resortLinks();
         return (this.outboundlinks == null) ? 0 : this.outboundlinks.size();
+    }
+
+    public int inboundLinkNoindexCount() {
+        if (this.inboundlinks == null) resortLinks();
+        if (this.inboundlinks == null) return 0;
+        int c = 0;
+        for (final String tag: this.inboundlinks.values()) {
+            if (tag.contains("noindex")) c++;
+        }
+        return c;
+    }
+
+    public int outboundLinkNoindexCount() {
+        if (this.outboundlinks == null) resortLinks();
+        if (this.outboundlinks == null) return 0;
+        int c = 0;
+        for (final String tag: this.outboundlinks.values()) {
+            if (tag.contains("noindex")) c++;
+        }
+        return c;
     }
 
     public Set<MultiProtocolURI> inboundLinks() {
