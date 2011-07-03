@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -28,7 +28,6 @@ package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.blob.HeapReader;
@@ -36,62 +35,59 @@ import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.util.LookAheadIterator;
 
 /**
  * iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
  */
-public class ReferenceIterator <ReferenceType extends Reference> implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
+public class ReferenceIterator <ReferenceType extends Reference> extends LookAheadIterator<ReferenceContainer<ReferenceType>> implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
     HeapReader.entries blobs;
     File blobFile;
     ReferenceFactory<ReferenceType> factory;
-    
-    public ReferenceIterator(final File blobFile, ReferenceFactory<ReferenceType> factory) throws IOException {
+
+    public ReferenceIterator(final File blobFile, final ReferenceFactory<ReferenceType> factory) throws IOException {
         this.blobs = new HeapReader.entries(blobFile, factory.getRow().primaryKeyLength);
         this.blobFile = blobFile;
         this.factory = factory;
-    }
-    
-    public boolean hasNext() {
-        if (blobs == null) return false;
-        if (blobs.hasNext()) return true;
-        close();
-        return false;
     }
 
     /**
      * return an index container
      * because they may get very large, it is wise to deallocate some memory before calling next()
      */
-    public ReferenceContainer<ReferenceType> next() {
-        Map.Entry<byte[], byte[]> entry = blobs.next();
-        byte[] payload = entry.getValue();
-        try {
-            return new ReferenceContainer<ReferenceType>(factory, entry.getKey(), RowSet.importRowSet(payload, factory.getRow()));
-        } catch (RowSpaceExceededException e) {
-            Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because of too low memory: " + e.toString());
-            return null;
+    public ReferenceContainer<ReferenceType> next0() {
+        if (this.blobs == null) return null;
+        RowSet row;
+        Map.Entry<byte[], byte[]> entry;
+        while (this.blobs.hasNext()) {
+            entry = this.blobs.next();
+            try {
+                row = RowSet.importRowSet(entry.getValue(), this.factory.getRow());
+                if (row == null) {
+                    Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because importRowSet returned null");
+                    continue; // thats a fail but not as REALLY bad if the whole method would crash here
+                }
+                return new ReferenceContainer<ReferenceType>(this.factory, entry.getKey(), row);
+            } catch (final RowSpaceExceededException e) {
+                Log.logSevere("ReferenceIterator", "lost entry '" + entry.getKey() + "' because of too low memory: " + e.toString());
+                continue;
+            }
         }
-    }
-    
-    public void remove() {
-        throw new UnsupportedOperationException("heap dumps are read-only");
+        close();
+        return null;
     }
 
-    public Iterator<ReferenceContainer<ReferenceType>> iterator() {
-        return this;
-    }
-    
     public void close() {
-        if (blobs != null) this.blobs.close();
-        blobs = null;
+        if (this.blobs != null) this.blobs.close();
+        this.blobs = null;
     }
 
-    public CloneableIterator<ReferenceContainer<ReferenceType>> clone(Object modifier) {
-        if (blobs != null) this.blobs.close();
-        blobs = null;
+    public CloneableIterator<ReferenceContainer<ReferenceType>> clone(final Object modifier) {
+        if (this.blobs != null) this.blobs.close();
+        this.blobs = null;
         try {
-            return new ReferenceIterator<ReferenceType>(this.blobFile, factory);
-        } catch (IOException e) {
+            return new ReferenceIterator<ReferenceType>(this.blobFile, this.factory);
+        } catch (final IOException e) {
             Log.logException(e);
             return null;
         }

@@ -76,29 +76,29 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
 
     public final static RowSet importRowSet(final byte[] b, final Row rowdef) throws RowSpaceExceededException {
     	assert b.length >= exportOverheadSize : "b.length = " + b.length;
-    	if (b.length < exportOverheadSize) return new RowSet(rowdef);
+    	if (b.length < exportOverheadSize) return new RowSet(rowdef, 0);
         final int size = (int) NaturalOrder.decodeLong(b, 0, 4);
         assert size >= 0 : "size = " + size;
-        if (size < 0) return new RowSet(rowdef);
+        if (size < 0) return new RowSet(rowdef, 0);
         final int orderbound = (int) NaturalOrder.decodeLong(b, 10, 4);
         assert orderbound >= 0 : "orderbound = " + orderbound;
-        if (orderbound < 0) return new RowSet(rowdef); // error
+        if (orderbound < 0) return new RowSet(rowdef, 0); // error
         final long alloc = ((long) size) * ((long) rowdef.objectsize);
         assert alloc <= Integer.MAX_VALUE : "alloc = " + alloc;
-        if (alloc > Integer.MAX_VALUE) return null;
+        if (alloc > Integer.MAX_VALUE) throw new RowSpaceExceededException((int) alloc, "importRowSet: alloc > Integer.MAX_VALUE");
         assert alloc == b.length - exportOverheadSize;
-        if (alloc != b.length - exportOverheadSize) return null;
+        if (alloc != b.length - exportOverheadSize) throw new RowSpaceExceededException((int) alloc, "importRowSet: alloc != b.length - exportOverheadSize");
         MemoryControl.request((int) alloc, true);
         final byte[] chunkcache;
         try {
             chunkcache = new byte[(int) alloc];
         } catch (final OutOfMemoryError e) {
-            throw new RowSpaceExceededException((int) alloc, "importRowSet");
+            throw new RowSpaceExceededException((int) alloc, "importRowSet: OutOfMemoryError");
         }
         //assert b.length - exportOverheadSize == size * rowdef.objectsize : "b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize;
         if (b.length - exportOverheadSize != alloc) {
             Log.logSevere("RowSet", "exportOverheadSize wrong: b.length = " + b.length + ", size * rowdef.objectsize = " + size * rowdef.objectsize);
-            return new RowSet(rowdef);
+            return new RowSet(rowdef, 0);
         }
         System.arraycopy(b, (int) exportOverheadSize, chunkcache, 0, chunkcache.length);
         return new RowSet(rowdef, size, chunkcache, orderbound);
