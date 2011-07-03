@@ -53,7 +53,8 @@ public class IndexFederated_p {
             env.setConfig("federated.service.solr.indexing.enabled", solrIsOnAfterwards);
             env.setConfig("federated.service.solr.indexing.url", post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr")));
             env.setConfig("federated.service.solr.indexing.charding", post.get("solr.indexing.charding", env.getConfig("federated.service.solr.indexing.charding", "modulo-host-md5")));
-            env.setConfig("federated.service.solr.indexing.schemefile", post.get("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list")));
+            final String schemename = post.get("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list"));
+            env.setConfig("federated.service.solr.indexing.schemefile", schemename);
 
             if (solrWasOn && !solrIsOnAfterwards) {
                 // switch off
@@ -61,7 +62,6 @@ public class IndexFederated_p {
                 sb.solrConnector = null;
             }
 
-            final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
             final SolrScheme scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
 
             if (!solrWasOn && solrIsOnAfterwards) {
@@ -109,33 +109,38 @@ public class IndexFederated_p {
                 }
                 prop.put("table_list", size.length);
 
-                // write scheme
-                final SolrScheme scheme = sb.solrConnector.getScheme();
-                final Iterator<ConfigurationSet.Entry> i = scheme.allIterator();
-                int c = 0;
-                dark = false;
-                ConfigurationSet.Entry entry;
-                while (i.hasNext()) {
-                    entry = i.next();
-                    prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
-                    prop.put("scheme_" + c + "_checked", scheme.contains(entry.key()) ? 1 : 0);
-                    prop.putHTML("scheme_" + c + "_key", entry.key());
-                    prop.putHTML("scheme_" + c + "_comment", scheme.commentHeadline(entry.key()));
-                    c++;
-                }
-                prop.put("scheme", c);
             } catch (final IOException e) {
                 Log.logException(e);
                 prop.put("table", 0);
             }
         }
 
+        // write scheme
+        SolrScheme scheme = (sb.solrConnector == null) ? null : sb.solrConnector.getScheme();
+        final String schemename = sb.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list");
+        if (scheme == null) {
+            scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
+        }
+        final Iterator<ConfigurationSet.Entry> i = scheme.allIterator();
+        int c = 0;
+        boolean dark = false;
+        ConfigurationSet.Entry entry;
+        while (i.hasNext()) {
+            entry = i.next();
+            prop.put("scheme_" + c + "_dark", dark ? 1 : 0); dark = !dark;
+            prop.put("scheme_" + c + "_checked", scheme.contains(entry.key()) ? 1 : 0);
+            prop.putHTML("scheme_" + c + "_key", entry.key());
+            prop.putHTML("scheme_" + c + "_comment", scheme.commentHeadline(entry.key()));
+            c++;
+        }
+        prop.put("scheme", c);
+
         // fill attribute fields
         prop.put("yacy.indexing.enabled.checked", env.getConfigBool("federated.service.yacy.indexing.enabled", true) ? 1 : 0);
         prop.put("solr.indexing.enabled.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
         prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
         prop.put("solr.indexing.charding", env.getConfig("federated.service.solr.indexing.charding", "modulo-host-md5"));
-        prop.put("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list"));
+        prop.put("solr.indexing.schemefile", schemename);
 
         // return rewrite properties
         return prop;
