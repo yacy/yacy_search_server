@@ -251,7 +251,7 @@ public class SolrSingleConnector {
         query.setQuery(querystring);
         query.setRows(count);
         query.setStart(offset);
-        query.addSortField( "price", SolrQuery.ORDER.asc );
+        //query.addSortField( "price", SolrQuery.ORDER.asc );
 
         // query the server
         //SearchResult result = new SearchResult(count);
