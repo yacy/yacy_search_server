@@ -32,6 +32,7 @@ import java.util.List;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -46,6 +47,7 @@ public class SolrChardingConnector {
     private final String[] urls;
 
     public SolrChardingConnector(final String urlList, final SolrScheme scheme, final SolrChardingSelection.Method method) throws IOException {
+        urlList.replace(' ', ',');
         this.urls = urlList.split(",");
         this.connectors = new ArrayList<SolrSingleConnector>();
         for (final String u: this.urls) {
@@ -156,17 +158,22 @@ public class SolrChardingConnector {
         return list;
     }
 
-    public long[] getSizeList() throws IOException {
+    public long[] getSizeList() {
         final long[] size = new long[this.connectors.size()];
         int i = 0;
         for (final SolrSingleConnector connector: this.connectors) {
-            final SolrDocumentList list = connector.get("*:*", 0, 1);
-            size[i++] = list.getNumFound();
+            try {
+                final SolrDocumentList list = connector.get("*:*", 0, 1);
+                size[i++] = list.getNumFound();
+            } catch (final IOException e) {
+                Log.logException(e);
+                size[i++] = 0;
+            }
         }
         return size;
     }
 
-    public long getSize() throws IOException {
+    public long getSize() {
         final long[] size = getSizeList();
         long s = 0;
         for (final long l: size) s += l;

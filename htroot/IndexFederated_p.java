@@ -22,10 +22,14 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Iterator;
 
+import net.yacy.cora.document.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.services.federated.solr.SolrChardingConnector;
 import net.yacy.cora.services.federated.solr.SolrChardingSelection;
@@ -51,12 +55,25 @@ public class IndexFederated_p {
             final boolean solrWasOn = env.getConfigBool("federated.service.solr.indexing.enabled", true);
             final boolean solrIsOnAfterwards = post.getBoolean("solr.indexing.enabled", false);
             env.setConfig("federated.service.solr.indexing.enabled", solrIsOnAfterwards);
-            env.setConfig("federated.service.solr.indexing.url", post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr")));
+            String solrurls = post.get("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
+            final BufferedReader r = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(UTF8.getBytes(solrurls))));
+            final StringBuilder s = new StringBuilder();
+            String s0;
+            try {
+                while ((s0 = r.readLine()) != null) {
+                    s0 = s0.trim();
+                    if (s0.length() > 0) s.append(s0).append(',');
+                }
+            } catch (final IOException e1) {
+            }
+            if (s.length() > 0) s.setLength(s.length() - 1);
+            solrurls = s.toString().trim();
+            env.setConfig("federated.service.solr.indexing.url", solrurls);
             env.setConfig("federated.service.solr.indexing.charding", post.get("solr.indexing.charding", env.getConfig("federated.service.solr.indexing.charding", "modulo-host-md5")));
             final String schemename = post.get("solr.indexing.schemefile", env.getConfig("federated.service.solr.indexing.schemefile", "solr.keys.default.list"));
             env.setConfig("federated.service.solr.indexing.schemefile", schemename);
 
-            if (solrWasOn && !solrIsOnAfterwards) {
+            if (solrWasOn) {
                 // switch off
                 sb.solrConnector.close();
                 sb.solrConnector = null;
@@ -64,9 +81,8 @@ public class IndexFederated_p {
 
             final SolrScheme scheme = new SolrScheme(new File(env.getDataPath(), "DATA/SETTINGS/" + schemename));
 
-            if (!solrWasOn && solrIsOnAfterwards) {
+            if (solrIsOnAfterwards) {
                 // switch on
-                final String solrurls = sb.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr");
                 final boolean usesolr = sb.getConfigBool("federated.service.solr.indexing.enabled", false) & solrurls.length() > 0;
                 try {
                     sb.solrConnector = (usesolr) ? new SolrChardingConnector(solrurls, scheme, SolrChardingSelection.Method.MODULO_HOST_MD5) : null;
@@ -98,21 +114,15 @@ public class IndexFederated_p {
             prop.put("table", 0);
         } else {
             prop.put("table", 1);
-            try {
-                final long[] size = sb.solrConnector.getSizeList();
-                final String[] urls = sb.solrConnector.getAdminInterfaceList();
-                boolean dark = false;
-                for (int i = 0; i < size.length; i++) {
-                    prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;
-                    prop.put("table_list_" + i + "_url", urls[i]);
-                    prop.put("table_list_" + i + "_size", size[i]);
-                }
-                prop.put("table_list", size.length);
-
-            } catch (final IOException e) {
-                Log.logException(e);
-                prop.put("table", 0);
+            final long[] size = sb.solrConnector.getSizeList();
+            final String[] urls = sb.solrConnector.getAdminInterfaceList();
+            boolean dark = false;
+            for (int i = 0; i < size.length; i++) {
+                prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;
+                prop.put("table_list_" + i + "_url", urls[i]);
+                prop.put("table_list_" + i + "_size", size[i]);
             }
+            prop.put("table_list", size.length);
         }
 
         // write scheme
@@ -138,7 +148,7 @@ public class IndexFederated_p {
         // fill attribute fields
         prop.put("yacy.indexing.enabled.checked", env.getConfigBool("federated.service.yacy.indexing.enabled", true) ? 1 : 0);
         prop.put("solr.indexing.enabled.checked", env.getConfigBool("federated.service.solr.indexing.enabled", false) ? 1 : 0);
-        prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr"));
+        prop.put("solr.indexing.url", env.getConfig("federated.service.solr.indexing.url", "http://127.0.0.1:8983/solr").replace(",", "\n"));
         prop.put("solr.indexing.charding", env.getConfig("federated.service.solr.indexing.charding", "modulo-host-md5"));
         prop.put("solr.indexing.schemefile", schemename);
 

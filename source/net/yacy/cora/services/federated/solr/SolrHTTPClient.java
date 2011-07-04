@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.http.HTTPClient;
 
 import org.apache.http.entity.mime.content.ContentBody;
@@ -44,9 +45,9 @@ import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.BinaryResponseParser;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.request.RequestWriter;
 import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
@@ -57,9 +58,9 @@ import org.apache.solr.common.util.ContentStream;
 import org.apache.solr.common.util.NamedList;
 
 /**
- * The {@link SolrHTTPClient} uses the Apache Commons HTTP Client to connect to solr. 
+ * The {@link SolrHTTPClient} uses the Apache Commons HTTP Client to connect to solr.
  * <pre class="prettyprint" >SolrServer server = new CommonsHttpSolrServer( url );</pre>
- * 
+ *
  * @version $Id: CommonsHttpSolrServer.java 1067552 2011-02-05 23:52:42Z koji $
  * @since solr 1.3
  */
@@ -71,7 +72,7 @@ public class SolrHTTPClient extends SolrServer {
    * org.apache.commons.httpclient.HttpClient HttpClient} to the Solr
    * server from the client.
    */
-  public static final String AGENT = "Solr["+SolrHTTPClient.class.getName()+"] 1.0"; 
+  public static final String AGENT = "Solr["+SolrHTTPClient.class.getName()+"] 1.0";
 
   public final static Charset utf8;
   static {
@@ -81,15 +82,16 @@ public class SolrHTTPClient extends SolrServer {
   /**
    * The URL of the Solr server.
    */
-  protected String _baseURL;
-  
+  protected String _baseURL, host, solraccount, solrpw;
+  protected int port;
+
   /**
    * Default value: null / empty. <p/>
-   * Parameters that are added to every request regardless.  This may be a place to add 
+   * Parameters that are added to every request regardless.  This may be a place to add
    * something like an authentication token.
    */
   protected ModifiableSolrParams _invariantParams;
-  
+
   /**
    * Default response parser is BinaryResponseParser <p/>
    * This parser represents the default Response Parser chosen to
@@ -104,14 +106,14 @@ public class SolrHTTPClient extends SolrServer {
    * @see org.apache.solr.client.solrj.request.RequestWriter
    */
   protected RequestWriter requestWriter = new RequestWriter();
-  
-  /**  
-   * @param solrServerUrl The URL of the Solr server.  For 
+
+  /**
+   * @param solrServerUrl The URL of the Solr server.  For
    * example, "<code>http://localhost:8983/solr/</code>"
-   * if you are using the standard distribution Solr webapp 
+   * if you are using the standard distribution Solr webapp
    * on your local machine.
    */
-  public SolrHTTPClient(String solrServerUrl) throws MalformedURLException {
+  public SolrHTTPClient(final String solrServerUrl) throws MalformedURLException {
     this(new URL(solrServerUrl));
   }
 
@@ -120,7 +122,7 @@ public class SolrHTTPClient extends SolrServer {
    * "<code>http://localhost:8983/solr/</code>" if you are using the
    * standard distribution Solr webapp on your local machine.
    */
-  public SolrHTTPClient(URL baseURL) 
+  public SolrHTTPClient(final URL baseURL)
   {
     this(baseURL, new BinaryResponseParser());
   }
@@ -129,17 +131,39 @@ public class SolrHTTPClient extends SolrServer {
    * @see #useMultiPartPost
    * @see #_parser
    */
-  public SolrHTTPClient(URL baseURL, ResponseParser parser) {
-    _baseURL = baseURL.toExternalForm();
-    if( _baseURL.endsWith( "/" ) ) {
-      _baseURL = _baseURL.substring( 0, _baseURL.length()-1 );
+  public SolrHTTPClient(final URL baseURL, final ResponseParser parser) {
+    this._baseURL = baseURL.toExternalForm();
+    if( this._baseURL.endsWith( "/" ) ) {
+      this._baseURL = this._baseURL.substring( 0, this._baseURL.length()-1 );
     }
-    if( _baseURL.indexOf( '?' ) >=0 ) {
-      throw new RuntimeException( "Invalid base url for solrj.  The base URL must not contain parameters: "+_baseURL );
+    if( this._baseURL.indexOf( '?' ) >=0 ) {
+      throw new RuntimeException( "Invalid base url for solrj.  The base URL must not contain parameters: "+this._baseURL );
     }
-    _parser = parser;
+
+    MultiProtocolURI u;
+    try {
+        u = new MultiProtocolURI(this._baseURL.toString());
+        this.host = u.getHost();
+        this.port = u.getPort();
+        final String userinfo = u.getUserInfo();
+        if (userinfo == null || userinfo.length() == 0) {
+            this.solraccount = ""; this.solrpw = "";
+        } else {
+            final int p = userinfo.indexOf(':');
+            if (p < 0) {
+                this.solraccount = userinfo; this.solrpw = "";
+            } else {
+                this.solraccount = userinfo.substring(0, p); this.solrpw = userinfo.substring(p + 1);
+            }
+        }
+    } catch (final MalformedURLException e) {
+        this.solraccount = ""; this.solrpw = "";
+        this.host = ""; this.port = -1;
+    }
+
+    this._parser = parser;
   }
-  
+
   //------------------------------------------------------------------------
   //------------------------------------------------------------------------
 
@@ -158,26 +182,26 @@ public class SolrHTTPClient extends SolrServer {
   {
     ResponseParser responseParser = request.getResponseParser();
     if (responseParser == null) {
-      responseParser = _parser;
+      responseParser = this._parser;
     }
     return request(request, responseParser);
   }
 
-  
-  public NamedList<Object> request(final SolrRequest request, ResponseParser processor) throws SolrServerException, IOException {
+
+  public NamedList<Object> request(final SolrRequest request, final ResponseParser processor) throws SolrServerException, IOException {
     SolrParams params = request.getParams();
-    Collection<ContentStream> streams = requestWriter.getContentStreams(request);
-    String path = requestWriter.getPath(request);
+    final Collection<ContentStream> streams = this.requestWriter.getContentStreams(request);
+    String path = this.requestWriter.getPath(request);
     if( path == null || !path.startsWith( "/" ) ) {
       path = "/select";
     }
-    
+
     // The parser 'wt=' and 'version=' params are used instead of the original params
     ResponseParser parser = request.getResponseParser();
     if( parser == null ) {
-        parser = _parser;
+        parser = this._parser;
       }
-    ModifiableSolrParams wparams = new ModifiableSolrParams();
+    final ModifiableSolrParams wparams = new ModifiableSolrParams();
     wparams.set( CommonParams.WT, parser.getWriterType() );
     wparams.set( CommonParams.VERSION, parser.getVersion());
     if( params == null ) {
@@ -186,26 +210,30 @@ public class SolrHTTPClient extends SolrServer {
     else {
       params = new DefaultSolrParams( wparams, params );
     }
-    
-    if( _invariantParams != null ) {
-      params = new DefaultSolrParams( _invariantParams, params );
+
+    if( this._invariantParams != null ) {
+      params = new DefaultSolrParams( this._invariantParams, params );
     }
-    
-    
+
+
     byte[] result = null;
-    HTTPClient client = new HTTPClient();
+    final HTTPClient client = new HTTPClient();
+    if (this.solraccount.length() > 0 && this.solrpw.length() > 0 && this.host.length() > 0) {
+        HTTPClient.setAuth(this.host, this.port, this.solraccount, this.solrpw);
+    }
+
     if (SolrRequest.METHOD.POST == request.getMethod()) {
-        boolean isMultipart = ( streams != null && streams.size() > 1 );
+        final boolean isMultipart = ( streams != null && streams.size() > 1 );
         if (streams == null || isMultipart) {
-            String url = _baseURL + path;
-            
-            HashMap<String, ContentBody> parts = new HashMap<String, ContentBody>();
-            Iterator<String> iter = params.getParameterNamesIterator();
+            String url = this._baseURL + path;
+
+            final HashMap<String, ContentBody> parts = new HashMap<String, ContentBody>();
+            final Iterator<String> iter = params.getParameterNamesIterator();
             while (iter.hasNext()) {
-                String p = iter.next();
-                String[] vals = params.getParams(p);
+                final String p = iter.next();
+                final String[] vals = params.getParams(p);
                 if (vals != null) {
-                    for (String v : vals) {
+                    for (final String v : vals) {
                         if (isMultipart) {
                             parts.put(p, new StringBody(v, utf8));
                           } else {
@@ -214,13 +242,13 @@ public class SolrHTTPClient extends SolrServer {
                     }
                 }
             }
-            
+
             if (isMultipart) {
-                for (ContentStream content : streams) {
+                for (final ContentStream content : streams) {
                   parts.put(content.getName(), new InputStreamBody(content.getStream(), content.getContentType(), null));
                 }
             }
-            
+
             try {
                 result = client.POSTbytes(url, parts, true);
             } finally {
@@ -228,32 +256,32 @@ public class SolrHTTPClient extends SolrServer {
             }
         } else {
             // It has one stream, this is the post body, put the params in the URL
-            String pstr = ClientUtils.toQueryString(params, false);
-            String url = _baseURL + path + pstr;
-            
+            final String pstr = ClientUtils.toQueryString(params, false);
+            final String url = this._baseURL + path + pstr;
+
             // Single stream as body
             // Using a loop just to get the first one
             final ContentStream[] contentStream = new ContentStream[1];
-            for (ContentStream content : streams) {
+            for (final ContentStream content : streams) {
               contentStream[0] = content;
               break;
             }
             result = client.POSTbytes(url, contentStream[0].getStream(), contentStream[0].getStream().available());
         }
     } else if (SolrRequest.METHOD.GET == request.getMethod()) {
-        result = client.GETbytes( _baseURL + path + ClientUtils.toQueryString( params, false ));
+        result = client.GETbytes( this._baseURL + path + ClientUtils.toQueryString( params, false ));
     } else {
         throw new SolrServerException("Unsupported method: "+request.getMethod() );
     }
 
-      int statusCode = client.getStatusCode();
+      final int statusCode = client.getStatusCode();
       if (statusCode != 200) {
-        throw new IOException("bad status code: " + statusCode + ", " + client.getHttpResponse().getStatusLine());
+        throw new IOException("bad status code: " + statusCode + ", " + client.getHttpResponse().getStatusLine() + ", url = " + this._baseURL + path);
       }
 
       // Read the contents
       //System.out.println("SOLR RESPONSE: " + UTF8.String(result));
-      InputStream respBody = new ByteArrayInputStream(result);
+      final InputStream respBody = new ByteArrayInputStream(result);
       return processor.processResponse(respBody, "UTF-8");
   }
 
@@ -268,12 +296,12 @@ public class SolrHTTPClient extends SolrServer {
     if( path == null || !path.startsWith( "/" ) ) {
       path = "/select";
     }
-    
+
     ResponseParser parser = request.getResponseParser();
     if( parser == null ) {
       parser = _parser;
     }
-    
+
     // The parser 'wt=' and 'version=' params are used instead of the original params
     ModifiableSolrParams wparams = new ModifiableSolrParams();
     wparams.set( CommonParams.WT, parser.getWriterType() );
@@ -284,7 +312,7 @@ public class SolrHTTPClient extends SolrServer {
     else {
       params = new DefaultSolrParams( wparams, params );
     }
-    
+
     if( _invariantParams != null ) {
       params = new DefaultSolrParams( _invariantParams, params );
     }
@@ -505,30 +533,30 @@ public class SolrHTTPClient extends SolrServer {
   }
 
    */
-  
+
   //-------------------------------------------------------------------
   //-------------------------------------------------------------------
-  
+
   /**
    * Retrieve the default list of parameters are added to every request regardless.
-   * 
+   *
    * @see #_invariantParams
    */
   public ModifiableSolrParams getInvariantParams()
   {
-    return _invariantParams;
+    return this._invariantParams;
   }
 
   public String getBaseURL() {
-    return _baseURL;
+    return this._baseURL;
   }
 
-  public void setBaseURL(String baseURL) {
+  public void setBaseURL(final String baseURL) {
     this._baseURL = baseURL;
   }
 
   public ResponseParser getParser() {
-    return _parser;
+    return this._parser;
   }
 
   /**
@@ -536,12 +564,12 @@ public class SolrHTTPClient extends SolrServer {
    * @param processor Default Response Parser chosen to parse the response if the parser were not specified as part of the request.
    * @see  org.apache.solr.client.solrj.SolrRequest#getResponseParser()
    */
-  public void setParser(ResponseParser processor) {
-    _parser = processor;
+  public void setParser(final ResponseParser processor) {
+    this._parser = processor;
   }
 
 
-  public void setRequestWriter(RequestWriter requestWriter) {
+  public void setRequestWriter(final RequestWriter requestWriter) {
     this.requestWriter = requestWriter;
   }
 
@@ -552,10 +580,10 @@ public class SolrHTTPClient extends SolrServer {
    *
    * @return the response from the SolrServer
    */
-  public UpdateResponse add(Iterator<SolrInputDocument> docIterator)
+  public UpdateResponse add(final Iterator<SolrInputDocument> docIterator)
           throws SolrServerException, IOException {
-    UpdateRequest req = new UpdateRequest();
-    req.setDocIterator(docIterator);    
+    final UpdateRequest req = new UpdateRequest();
+    req.setDocIterator(docIterator);
     return req.process(this);
   }
 
@@ -568,7 +596,7 @@ public class SolrHTTPClient extends SolrServer {
    */
   public UpdateResponse addBeans(final Iterator<?> beanIterator)
           throws SolrServerException, IOException {
-    UpdateRequest req = new UpdateRequest();
+    final UpdateRequest req = new UpdateRequest();
     req.setDocIterator(new Iterator<SolrInputDocument>() {
 
       public boolean hasNext() {
@@ -576,7 +604,7 @@ public class SolrHTTPClient extends SolrServer {
       }
 
       public SolrInputDocument next() {
-        Object o = beanIterator.next();
+        final Object o = beanIterator.next();
         if (o == null) return null;
         return getBinder().toSolrInputDocument(o);
       }
