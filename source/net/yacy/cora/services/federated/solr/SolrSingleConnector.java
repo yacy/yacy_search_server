@@ -44,6 +44,7 @@ import net.yacy.kelondro.logging.Log;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
@@ -72,7 +73,7 @@ public class SolrSingleConnector {
             this.transmissionQueue[i] = new ArrayBlockingQueue<SolrInputDocument>(transmissionQueueSize);
         }
         try {
-            this.server = new SolrHTTPClient(this.solrurl);
+            this.server = new CommonsHttpSolrServer(this.solrurl);
         } catch (final MalformedURLException e) {
             throw new IOException("bad connector url: " + this.solrurl);
         }
