@@ -24,7 +24,7 @@ lat_coordinate
 ## last-modified from http header, date
 last_modified
 
-## if of host of url (after DNS lookup), string
+## ip of host of url (after DNS lookup), string
 ip_s
 
 ## mime-type of document, string
