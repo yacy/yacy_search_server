@@ -28,7 +28,6 @@ package net.yacy;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-//import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -56,7 +55,6 @@ import net.yacy.cora.storage.ScoreMap;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.kelondro.blob.MapDataMining;
-//import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -69,23 +67,18 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
-
-//import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-
 import de.anomic.data.Translator;
-//import de.anomic.http.client.Client;
 import de.anomic.http.server.HTTPDemon;
-//import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.MetadataRepository;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.tools.enumerateFiles;
-import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyRelease;
+import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyVersion;
 
 /**
@@ -125,16 +118,16 @@ import de.anomic.yacy.yacyVersion;
 */
 
 public final class yacy {
-    
+
     // static objects
     public static final String vString = yacyBuildProperties.getVersion();
     public static float version = 0.1f;
-    
+
     public static final String vDATE   = yacyBuildProperties.getBuildDate();
     public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     public static final String hline = "-------------------------------------------------------------------------------";
     public static final Semaphore shutdownSemaphore = new Semaphore(0);
-    
+
     /**
      * a reference to the {@link Switchboard} created by the
      * {@link yacy#startup(String, long, long)} method.
@@ -148,7 +141,7 @@ public final class yacy {
     * @param homePath Root-path where all information is to be found.
     * @param startupFree free memory at startup time, to be used later for statistics
     */
-    private static void startup(final File dataHome, final File appHome, final long startupMemFree, final long startupMemTotal, boolean gui) {
+    private static void startup(final File dataHome, final File appHome, final long startupMemFree, final long startupMemTotal, final boolean gui) {
         try {
             // start up
             System.out.println(copyright);
@@ -162,17 +155,17 @@ public final class yacy {
                 Thread.sleep(3000);
                 System.exit(-1);
             }
-            
+
             // ensure that there is a DATA directory, if not, create one and if that fails warn and die
             mkdirsIfNeseccary(dataHome);
             mkdirsIfNeseccary(appHome);
             File f = new File(dataHome, "DATA/");
             mkdirsIfNeseccary(f);
-			if (!(f.exists())) { 
-				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate."); 
-				System.exit(-1); 
+			if (!(f.exists())) {
+				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate.");
+				System.exit(-1);
 			}
-            
+
             // setting up logging
 			f = new File(dataHome, "DATA/LOG/");
             mkdirsIfNeseccary(f);
@@ -195,7 +188,7 @@ public final class yacy {
             Log.logConfig("STARTUP", "Data root-path: " + dataHome);
             Log.logConfig("STARTUP", "Time zone: UTC" + GenericFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
             Log.logConfig("STARTUP", "Maximum file system path length: " + OS.maxPathLength);
-            
+
             f = new File(dataHome, "DATA/yacy.running");
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
                 Log.logSevere("STARTUP", "WARNING: the file " + f + " exists, this usually means that a YaCy instance is still running");
@@ -203,9 +196,9 @@ public final class yacy {
             }
             if(!f.createNewFile())
                 Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
-            try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (Exception e) { } // write PID
+            try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (final Exception e) { } // write PID
             f.deleteOnExit();
-            
+
             final String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
             final String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             final File oldconffile = new File(dataHome, oldconf);
@@ -216,24 +209,24 @@ public final class yacy {
             }
             sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), newconf);
             //sbSync.V(); // signal that the sb reference was set
-            
+
             // save information about available memory at startup time
             sb.setConfig("memoryFreeAfterStartup", startupMemFree);
             sb.setConfig("memoryTotalAfterStartup", startupMemTotal);
-            
+
             // start gui if wanted
             if (gui) YaCyApp.start("localhost", (int) sb.getConfigLong("port", 8090));
-            
+
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
 
             int oldRev;
     	    try {
                 oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
-            } catch (NumberFormatException e) {
+            } catch (final NumberFormatException e) {
                 oldRev = 0;
     	    }
-            int newRev = Integer.parseInt(yacyBuildProperties.getSVNRevision());
+            final int newRev = Integer.parseInt(yacyBuildProperties.getSVNRevision());
             sb.setConfig("svnRevision", yacyBuildProperties.getSVNRevision());
             sb.setConfig("applicationRoot", appHome.toString());
             sb.setConfig("dataRoot", dataHome.toString());
@@ -280,14 +273,14 @@ public final class yacy {
             mkdirIfNeseccary(shareDefaultPath);
 
             migration.migrate(sb, oldRev, newRev);
-            
+
             // delete old release files
             final int deleteOldDownloadsAfterDays = (int) sb.getConfigLong("update.deleteOld", 30);
             yacyRelease.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
-            
+
             // set user-agent
             HTTPClient.setDefaultUserAgent(ClientIdentification.getUserAgent());
-            
+
             // start main threads
             final String port = sb.getConfig("port", "8090");
             try {
@@ -301,7 +294,7 @@ public final class yacy {
                 server.setName("httpd:"+port);
                 server.setPriority(Thread.MAX_PRIORITY);
                 server.setObeyIntermission(false);
-                
+
                 // start the server
                 sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
                 //server.start();
@@ -313,10 +306,11 @@ public final class yacy {
                     //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
                     Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage);
-                } catch (RuntimeException e) {
-                    Log.logException(e);
+                } catch (final RuntimeException e) {
+                    // cannot open browser. This may be normal in headless environments
+                    //Log.logException(e);
                 }
-                
+
                 // unlock yacyTray browser popup
                 Tray.lockBrowserPopup = false;
 
@@ -327,11 +321,11 @@ public final class yacy {
                     final File[] locale_source_files = locale_source.listFiles();
                     mkdirsIfNeseccary(locale_work);
                     File target;
-                    for (int i=0; i < locale_source_files.length; i++){
-                    	target = new File(locale_work, locale_source_files[i].getName());
-                        if (locale_source_files[i].getName().endsWith(".lng")) {
+                    for (final File locale_source_file : locale_source_files) {
+                    	target = new File(locale_work, locale_source_file.getName());
+                        if (locale_source_file.getName().endsWith(".lng")) {
                         	if (target.exists()) delete(target);
-                            FileUtils.copy(locale_source_files[i], target);
+                            FileUtils.copy(locale_source_file, target);
                         }
                     }
                     Log.logInfo("STARTUP", "Copied the default locales to " + locale_work.toString());
@@ -364,7 +358,7 @@ public final class yacy {
                 }
                 // initialize number formatter with this locale
                 Formatter.setLocale(lang);
-                
+
                 // registering shutdown hook
                 Log.logConfig("STARTUP", "Registering Shutdown Hook");
                 final Runtime run = Runtime.getRuntime();
@@ -378,7 +372,7 @@ public final class yacy {
                     sb.setConfig("memoryFreeAfterInitAGC", MemoryControl.free());
                     sb.setConfig("memoryTotalAfterInitAGC", MemoryControl.total());
                 //} catch (ConcurrentModificationException e) {}
-                    
+
                 // wait for server shutdown
                 try {
                     sb.waitForShutdown();
@@ -403,7 +397,7 @@ public final class yacy {
                 */
 //                Client.closeAllConnections();
 //                MultiThreadedHttpConnectionManager.shutdownAll();
-                
+
                 // idle until the processes are down
                 if (server.isAlive()) {
                     //Thread.sleep(2000); // wait a while
@@ -426,13 +420,13 @@ public final class yacy {
         shutdownSemaphore.release(1000);
         try {
             System.exit(0);
-        } catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
+        } catch (final Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }
 
 	/**
 	 * @param f
 	 */
-	private static void delete(File f) {
+	private static void delete(final File f) {
 		if(!f.delete())
 		    Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be deleted!");
 	}
@@ -492,7 +486,7 @@ public final class yacy {
         	if(fis != null) {
         		try {
 					fis.close();
-				} catch (IOException e) {
+				} catch (final IOException e) {
 				    Log.logException(e);
 				}
         	}
@@ -500,7 +494,7 @@ public final class yacy {
 
         return config;
     }
-    
+
     /**
     * Call the shutdown-page of YaCy to tell it to shut down. This method is
     * called if you start yacy with the argument -shutdown.
@@ -521,7 +515,7 @@ public final class yacy {
         submitURL(homePath, "ConfigUpdate_p.html?autoUpdate=", "Update YaCy to most recent version");
     }
 
-    private static void submitURL(final File homePath, String path, String processdescription) {
+    private static void submitURL(final File homePath, final String path, final String processdescription) {
         final Properties config = configuration("COMMAND-STEERING", homePath);
 
         // read port
@@ -566,17 +560,17 @@ public final class yacy {
 //                res.closeStream();
 //            }
         }
-        
+
         try {
 			HTTPClient.closeConnectionManager();
-		} catch (InterruptedException e) {
+		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
 
         // finished
         Log.logConfig("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
     }
-    
+
     /**
     * This method gets all found words and outputs a statistic about the score
     * of the words. The output of this method can be used to create stop-word
@@ -623,10 +617,10 @@ public final class yacy {
         // finished
         Log.logConfig("GEN-WORDSTAT", "FINISHED");
     }
-    
+
     /**
      * @param homePath path to the YaCy directory
-     * @param networkName 
+     * @param networkName
      */
     public static void minimizeUrlDB(final File dataHome, final File appHome, final String networkName) {
         // run with "java -classpath classes yacy -minimizeUrlDB"
@@ -636,41 +630,41 @@ public final class yacy {
         final Log log = new Log("URL-CLEANUP");
         try {
             log.logInfo("STARTING URL CLEANUP");
-            
+
             // db containing all currently loades urls
             final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexPrimaryRoot, networkName), "TEXT"), "text.urlmd", false, false);
-            
+
             // db used to hold all neede urls
             final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"), "text.urlmd", false, false);
-            
+
             final int cacheMem = (int)(MemoryControl.maxMemory - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
-                
+
             final Segment wordIndex = new Segment(
                     log,
                     new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                     10000,
                     (long) Integer.MAX_VALUE, false, false);
             final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().references("AAAAAAAAAAAA".getBytes(), false, false);
-            
+
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
             String wordChunkStartHash = "AAAAAAAAAAAA", wordChunkEndHash;
-            
+
             while (indexContainerIterator.hasNext()) {
                 ReferenceContainer<WordReference> wordIdxContainer = null;
                 try {
                     wordCounter++;
                     wordIdxContainer = indexContainerIterator.next();
-                    
+
                     // the combined container will fit, read the container
                     final Iterator<WordReference> wordIdxEntries = wordIdxContainer.entries();
                     Reference iEntry;
                     while (wordIdxEntries.hasNext()) {
                         iEntry = wordIdxEntries.next();
-                        final byte[] urlHash = iEntry.urlhash();                    
+                        final byte[] urlHash = iEntry.urlhash();
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            final URIMetadataRow urlEntry = currentUrlDB.load(urlHash);                       
+                            final URIMetadataRow urlEntry = currentUrlDB.load(urlHash);
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -678,23 +672,23 @@ public final class yacy {
                             }
                         } catch (final IOException e) {}
                     }
-                    
+
                     if (wordCounter%500 == 0) {
                         wordChunkEndHash = ASCII.String(wordIdxContainer.getTermHash());
                         wordChunkEnd = System.currentTimeMillis();
                         final long duration = wordChunkEnd - wordChunkStart;
                         log.logInfo(wordCounter + " words scanned " +
-                                "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "]\n" + 
+                                "[" + wordChunkStartHash + " .. " + wordChunkEndHash + "]\n" +
                                 "Duration: "+ 500*1000/duration + " words/s" +
-                                " | Free memory: " + MemoryControl.free() + 
+                                " | Free memory: " + MemoryControl.free() +
                                 " | Total memory: " + MemoryControl.total());
                         wordChunkStart = wordChunkEnd;
                         wordChunkStartHash = wordChunkEndHash;
                     }
-                    
+
                     // we have read all elements, now we can close it
                     wordIdxContainer = null;
-                    
+
                 } catch (final Exception e) {
                     log.logSevere("Exception", e);
                 } finally {
@@ -703,16 +697,16 @@ public final class yacy {
             }
             log.logInfo("current LURL DB contains " + currentUrlDB.size() + " entries.");
             log.logInfo("mimimized LURL DB contains " + minimizedUrlDB.size() + " entries.");
-            
+
             currentUrlDB.close();
             minimizedUrlDB.close();
             wordIndex.close();
-            
-            // TODO: rename the mimimized UrlDB to the name of the previous UrlDB            
-            
+
+            // TODO: rename the mimimized UrlDB to the name of the previous UrlDB
+
             log.logInfo("FINISHED URL CLEANUP, WAIT FOR DUMP");
             log.logInfo("You can now backup your old URL DB and rename minimized/urlHash.db to urlHash.db");
-            
+
             log.logInfo("TERMINATED URL CLEANUP");
         } catch (final Exception e) {
             log.logSevere("Exception: " + e.getMessage(), e);
@@ -792,14 +786,14 @@ public final class yacy {
         // finished
         Log.logConfig("CLEAN-WORDLIST", "FINISHED");
     }
-    
+
     private static String[] shift(final String[] args, final int pos, final int count) {
         final String[] newargs = new String[args.length - count];
         System.arraycopy(args, 0, newargs, 0, pos);
         System.arraycopy(args, pos + count, newargs, pos, args.length - pos - count);
         return newargs;
     }
-    
+
     /**
      * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
      * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
@@ -814,7 +808,7 @@ public final class yacy {
         currentUrlDB.deadlinkCleaner();
         currentUrlDB.close();
     }
-    
+
     private static void RWIHashList(final File dataHome, final File appHome, final String targetName, final String resource, final String format) {
         Segment WordIndex = null;
         final Log log = new Log("HASHLIST");
@@ -881,21 +875,21 @@ public final class yacy {
             WordIndex = null;
         }
     }
-    
+
     /**
      * Searching for peers affected by Bug
      * @param homePath
      */
     public static void testPeerDB(final File homePath) {
-        
+
         try {
             final File yacyDBPath = new File(homePath, "DATA/INDEX/freeworld/NETWORK");
-            
+
             final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
-            for (int i=0; i < dbFileNames.length; i++) {
-                final File dbFile = new File(yacyDBPath,dbFileNames[i]);
+            for (final String dbFileName : dbFileNames) {
+                final File dbFile = new File(yacyDBPath,dbFileName);
                 final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null);
-                
+
                 MapDataMining.mapIterator it;
                 it = db.maps(true, false);
                 while (it.hasNext()) {
@@ -905,9 +899,9 @@ public final class yacy {
                         final String peerName = dna.get("Name");
                         final String peerIP = dna.get("IP");
                         final String peerPort = dna.get("Port");
-                        
-                        while (peerHash.length() < Word.commonHashLength) { peerHash = peerHash + "_"; }                        
-                        System.err.println("Invalid Peer-Hash found in '" + dbFileNames[i] + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);
+
+                        while (peerHash.length() < Word.commonHashLength) { peerHash = peerHash + "_"; }
+                        System.err.println("Invalid Peer-Hash found in '" + dbFileName + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);
                     }
                 }
                 db.close();
@@ -917,29 +911,29 @@ public final class yacy {
         }
     }
 
- 
+
     /**
      * Main-method which is started by java. Checks for special arguments or
      * starts up the application.
-     * 
+     *
      * @param args
      *            Given arguments from the command line.
      */
     public static void main(String args[]) {
-    	
+
     	try {
-	
+
 	        // check assertion status
 	        //ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
 	        boolean assertionenabled = false;
 	        assert assertionenabled = true;
 	        if (assertionenabled) System.out.println("Asserts are enabled");
-	        
+
 	        // check memory amount
 	        System.gc();
 	        final long startupMemFree  = MemoryControl.free();
 	        final long startupMemTotal = MemoryControl.total();
-	        
+
 	        // maybe go into headless awt mode: we have three cases depending on OS and one exception:
 	        // windows   : better do not go into headless mode
 	        // mac       : go into headless mode because an application is shown in gui which may not be wanted
@@ -949,10 +943,10 @@ public final class yacy {
 	        if (OS.isWindows) headless = false;
 	        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
 	        System.setProperty("java.awt.headless", headless ? "true" : "false");
-	        
-	        String s = ""; for (String a: args) s += a + " ";
+
+	        String s = ""; for (final String a: args) s += a + " ";
 	        yacyRelease.startParameter = s.trim();
-	        
+
 	        File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
 	        File dataRoot = applicationRoot;
 	        //System.out.println("args.length=" + args.length);
