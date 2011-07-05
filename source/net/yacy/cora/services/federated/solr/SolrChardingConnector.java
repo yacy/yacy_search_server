@@ -165,7 +165,7 @@ public class SolrChardingConnector {
             try {
                 final SolrDocumentList list = connector.get("*:*", 0, 1);
                 size[i++] = list.getNumFound();
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 Log.logException(e);
                 size[i++] = 0;
             }

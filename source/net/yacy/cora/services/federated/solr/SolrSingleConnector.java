@@ -35,12 +35,17 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.ASCII;
+import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthPolicy;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -48,12 +53,14 @@ import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 
 
 public class SolrSingleConnector {
 
-    private final String solrurl;
+    private final String solrurl, host, solrpath, solraccount, solrpw;
+    private final int port;
     private SolrServer server;
     private final SolrScheme scheme;
 
@@ -72,11 +79,47 @@ public class SolrSingleConnector {
         for (int i = 0; i < transmissionQueueCount; i++) {
             this.transmissionQueue[i] = new ArrayBlockingQueue<SolrInputDocument>(transmissionQueueSize);
         }
-        try {
-            this.server = new CommonsHttpSolrServer(this.solrurl);
-        } catch (final MalformedURLException e) {
-            throw new IOException("bad connector url: " + this.solrurl);
+
+        // connect using authentication
+        final MultiProtocolURI u = new MultiProtocolURI(this.solrurl);
+        this.host = u.getHost();
+        this.port = u.getPort();
+        this.solrpath = u.getPath();
+        final String userinfo = u.getUserInfo();
+        if (userinfo == null || userinfo.length() == 0) {
+            this.solraccount = ""; this.solrpw = "";
+        } else {
+            final int p = userinfo.indexOf(':');
+            if (p < 0) {
+                this.solraccount = userinfo; this.solrpw = "";
+            } else {
+                this.solraccount = userinfo.substring(0, p); this.solrpw = userinfo.substring(p + 1);
+            }
         }
+        if (this.solraccount.length() > 0) {
+            final HttpClient client = new HttpClient();
+            final AuthScope scope = new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, null, null);
+            client.getState().setCredentials(scope,new UsernamePasswordCredentials(this.solraccount, this.solrpw));
+            final List<String> authPrefs = new ArrayList<String>(2);
+            authPrefs.add(AuthPolicy.DIGEST);
+            authPrefs.add(AuthPolicy.BASIC);
+            // This will exclude the NTLM authentication scheme
+            client.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
+            client.getParams().setAuthenticationPreemptive(true);
+            try {
+                this.server = new CommonsHttpSolrServer("http://" + this.host + ":" + this.port + this.solrpath, client);
+            } catch (final MalformedURLException e) {
+                throw new IOException("bad auth connector url: " + this.solrurl);
+            }
+        } else {
+            try {
+                this.server = new CommonsHttpSolrServer(this.solrurl);
+            } catch (final MalformedURLException e) {
+                throw new IOException("bad connector url: " + this.solrurl);
+            }
+        }
+
+        // start worker
         this.transmissionWorker = new Worker[transmissionQueueCount];
         for (int i = 0; i < transmissionQueueCount; i++) {
             this.transmissionWorker[i] = new Worker(i);
@@ -100,7 +143,10 @@ public class SolrSingleConnector {
                     try {
                         flushTransmissionQueue(this.idx);
                     } catch (final IOException e) {
-                        Log.logSevere("SolrSingleConnector", "flush Transmission failed in worker", e);
+                        Log.logSevere("SolrSingleConnector", "flush Transmission failed in worker:IO", e);
+                        continue;
+                    } catch (final SolrException e) {
+                        Log.logSevere("SolrSingleConnector", "flush Transmission failed in worker:Solr", e);
                         continue;
                     }
                 } else {
@@ -123,7 +169,12 @@ public class SolrSingleConnector {
         for (int i = 0; i < transmissionQueueCount; i++) {
             try {
                 flushTransmissionQueue(i);
-            } catch (final IOException e) {}
+            } catch (final IOException e) {
+                Log.logException(e);
+            } catch (final SolrException e) {
+                Log.logException(e);
+            }
+
         }
     }
 
@@ -171,11 +222,11 @@ public class SolrSingleConnector {
         }
     }
 
-    public void add(final String id, final ResponseHeader header, final Document doc) throws IOException {
+    public void add(final String id, final ResponseHeader header, final Document doc) throws IOException, SolrException {
         add(this.scheme.yacy2solr(id, header, doc));
     }
 
-    protected void add(final SolrInputDocument solrdoc) throws IOException {
+    protected void add(final SolrInputDocument solrdoc) throws IOException, SolrException {
         int thisrrc = this.transmissionRoundRobinCounter;
         int nextrrc = thisrrc++;
         if (nextrrc >= transmissionQueueCount) nextrrc = 0;
@@ -190,7 +241,7 @@ public class SolrSingleConnector {
         }
     }
 
-    protected void addSolr(final Collection<SolrInputDocument> docs) throws IOException {
+    protected void addSolr(final Collection<SolrInputDocument> docs) throws IOException, SolrException {
         try {
             this.server.add(docs);
             this.server.commit();
@@ -227,7 +278,7 @@ public class SolrSingleConnector {
             add(solrdoc);
     }
 
-    private void flushTransmissionQueue(final int idx) throws IOException {
+    private void flushTransmissionQueue(final int idx) throws IOException, SolrException {
         final Collection<SolrInputDocument> c = new ArrayList<SolrInputDocument>();
         while (this.transmissionQueue[idx].size() > 0) {
             try {
