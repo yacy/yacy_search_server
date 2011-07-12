@@ -73,6 +73,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Date;
@@ -1392,7 +1393,7 @@ public final class HTTPDFileHandler {
 				if(m.group(6) != null) url = m.group(6);
 				if(m.group(8) != null) url = m.group(8);
 				if(m.group(10) != null) url = m.group(10);
-				if (url.startsWith("data:") || url.startsWith("#")) {
+				if (url.startsWith("data:") || url.startsWith("#") || url.startsWith("mailto:") || url.startsWith("javascript:")) {
 				    m.appendReplacement(result, init + url);
 
 				} else if (url.startsWith("http")) {
@@ -1411,8 +1412,11 @@ public final class HTTPDFileHandler {
 
 				} else {
 					// relative path of form href="relative/path"
-					MultiProtocolURI target = new MultiProtocolURI(proxyurl.getHost() + directory + "/" + url);
-				    m.appendReplacement(result, init + "/proxy.html?url=" + target.toString());
+					try {
+						MultiProtocolURI target = new MultiProtocolURI(proxyurl.getHost() + directory + "/" + url);						
+						m.appendReplacement(result, init + "/proxy.html?url=" + target.toString());
+					}
+					catch (MalformedURLException e) {}
 
 				}
 			}
