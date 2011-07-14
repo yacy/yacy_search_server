@@ -102,6 +102,7 @@ public class SearchEventCache {
     private static SearchEvent dummyEvent = null;
 
     private static SearchEvent getDummyEvent(final WorkTables workTables, final LoaderDispatcher loader, final Segment indexSegment) {
+        Log.logWarning("SearchEventCache", "returning dummy event");
         if (dummyEvent != null) return dummyEvent;
         final QueryParams query = new QueryParams("", 0, null, indexSegment, new RankingProfile(ContentDomain.TEXT), "");
         dummyEvent = new SearchEvent(query, null, workTables, null, false, loader, 0, 0, 0, 0, false);

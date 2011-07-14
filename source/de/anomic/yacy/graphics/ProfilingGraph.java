@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -29,18 +29,17 @@ package de.anomic.yacy.graphics;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
-import de.anomic.search.SearchEvent;
-
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.EventTracker.Event;
-import net.yacy.visualization.RasterPlotter;
 import net.yacy.visualization.ChartPlotter;
+import net.yacy.visualization.RasterPlotter;
+import de.anomic.search.SearchEvent;
 
 public class ProfilingGraph {
-    
+
     private static ChartPlotter bufferChart = null;
     public static long maxTime = 600000L;
-    
+
     public static long maxPayload(final EventTracker.EClass eventname, final long min) {
     	final Iterator<Event> list = EventTracker.getHistory(eventname);
     	if (list == null) return min;
@@ -55,21 +54,21 @@ public class ProfilingGraph {
         }
         return max;
     }
-    
-    public static RasterPlotter performanceGraph(final int width, final int height, final String subline) {        
+
+    public static RasterPlotter performanceGraph(final int width, final int height, final String subline, final boolean showMemory) {
         // find maximum values for automatic graph dimension adoption
         final int maxppm = (int) maxPayload(EventTracker.EClass.PPM, 25);
         final int maxwords = (int) maxPayload(EventTracker.EClass.WORDCACHE, 12000);
         final long maxbytes = maxPayload(EventTracker.EClass.MEMORY, 110 * 1024 * 1024);
         final int maxmbytes = (int)(maxbytes / 1024 / 1024);
-        
+
         // declare graph and set dimensions
         final int leftborder = 30;
         final int rightborder = 30;
         final int topborder = 20;
         final int bottomborder = 20;
-        final int leftscale; if(maxwords > 150000) leftscale = maxwords / 150000 * 20000; else leftscale  = 10000;
-        final int rightscale; if (maxmbytes > 1500) rightscale = maxmbytes / 1500 * 200; else rightscale = 100;
+        final int leftscale = (maxwords > 150000) ? maxwords / 150000 * 20000 : 10000;
+        final int rightscale = showMemory ? ((maxmbytes > 1500) ? maxmbytes / 1500 * 200 : 100) : Math.max(100, maxppm / 100 * 100);
         final int anotscale = 1000;
         final int bottomscale = 60;
         final int vspace = height - topborder - bottomborder;
@@ -77,11 +76,15 @@ public class ProfilingGraph {
         final int maxtime = 600;
         ChartPlotter chart = new ChartPlotter(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "YACY PEER PERFORMANCE: MAIN MEMORY, WORD CACHE AND PAGES/MINUTE (PPM)", subline);
         chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
-        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, "008800", null , "INDEXING, WORDS IN CACHE");
-        chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / maxmbytes, 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
+        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, "008800", null , "WORDS IN INDEXING CACHE");
+        if (showMemory) {
+            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / maxmbytes, 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
+        } else {
+            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / Math.max(1, maxppm), 0, "FF0000", "CCCCCC", "INDEXING SPEED/PAGES PER MINUTE");
+        }
         chart.declareDimension(ChartPlotter.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
         chart.declareDimension(ChartPlotter.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, "888800", null , "URL");
-        
+
         // draw chart
         long time;
         final long now = System.currentTimeMillis();
@@ -104,25 +107,28 @@ public class ProfilingGraph {
                 x0 = x1; y0 = y1;
             }
             */
+            Iterator<Event> events;
             // draw memory
-            Iterator<Event> events = EventTracker.getHistory(EventTracker.EClass.MEMORY);
-            x0 = 1; y0 = 0;
-            if (events != null) {
-                EventTracker.Event event;
-                while (events.hasNext()) {
-                    event = events.next();
-                    time = event.time - now;
-                    bytes = ((Long) event.payload).longValue();
-                    x1 = (int) (time/1000);
-                    y1 = (int) (bytes / 1024 / 1024);
-                    chart.setColor("AAAAFF");
-                    chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
-                    chart.setColor("0000FF");
-                    if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x0, y0, x1, y1);
-                    x0 = x1; y0 = y1;
+            if (showMemory) {
+                events = EventTracker.getHistory(EventTracker.EClass.MEMORY);
+                x0 = 1; y0 = 0;
+                if (events != null) {
+                    EventTracker.Event event;
+                    while (events.hasNext()) {
+                        event = events.next();
+                        time = event.time - now;
+                        bytes = ((Long) event.payload).longValue();
+                        x1 = (int) (time/1000);
+                        y1 = (int) (bytes / 1024 / 1024);
+                        chart.setColor("AAAAFF");
+                        chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
+                        chart.setColor("0000FF");
+                        if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x0, y0, x1, y1);
+                        x0 = x1; y0 = y1;
+                    }
                 }
             }
-            
+
             // draw wordcache
             events = EventTracker.getHistory(EventTracker.EClass.WORDCACHE);
             x0 = 1; y0 = 0;
@@ -141,7 +147,7 @@ public class ProfilingGraph {
                     x0 = x1; y0 = y1;
                 }
             }
-            
+
             // draw ppm
             events = EventTracker.getHistory(EventTracker.EClass.PPM);
             x0 = 1; y0 = 0;
@@ -160,23 +166,23 @@ public class ProfilingGraph {
                     x0 = x1; y0 = y1;
                 }
             }
-            
+
             bufferChart = chart;
         } catch (final ConcurrentModificationException cme) {
             chart = bufferChart;
         }
-        
+
         return chart;
     }
-    
+
     public static class searchEvent {
         public SearchEvent.Type processName;
         public String comment;
     	public String queryID;
     	public long duration;
     	public int resultCount;
-    	
-    	public searchEvent(final String queryID, final SearchEvent.Type processName, String comment, final int resultCount, final long duration) {
+
+    	public searchEvent(final String queryID, final SearchEvent.Type processName, final String comment, final int resultCount, final long duration) {
     		this.queryID = queryID;
     		this.processName = processName;
     		this.comment = comment;
@@ -184,5 +190,5 @@ public class ProfilingGraph {
     		this.duration = duration;
     	}
     }
-    
+
 }
