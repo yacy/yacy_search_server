@@ -186,7 +186,7 @@ public class yacysearchitem {
                 }
                 prop.put("content_heuristic_name", heuristic.heuristicName);
             }
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.FINALIZATION, "" + item, 0, 0), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.FINALIZATION, "" + item, 0, 0), false);
             final String ext = resultURL.getFileExtension().toLowerCase();
             if (ext.equals("png") || ext.equals("jpg") || ext.equals("gif")) {
                 final String license = sb.licensedURLs.aquireLicense(resultURL);

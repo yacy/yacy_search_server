@@ -604,7 +604,7 @@ public class yacysearch {
                     header.get(RequestHeader.USER_AGENT, ""),
                     sb.getConfigBool(SwitchboardConstants.NETWORK_SEARCHVERIFY, false) && sb.peers.mySeed().getFlagAcceptRemoteIndex());
             EventTracker.delete(EventTracker.EClass.SEARCH);
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.INITIALIZATION, "", 0, 0), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.INITIALIZATION, "", 0, 0), false);
 
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(3000);

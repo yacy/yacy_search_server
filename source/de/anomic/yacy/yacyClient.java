@@ -87,6 +87,7 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
@@ -104,6 +105,7 @@ import de.anomic.search.Switchboard;
 import de.anomic.search.TextSnippet;
 import de.anomic.server.serverCore;
 import de.anomic.tools.crypt;
+import de.anomic.yacy.graphics.ProfilingGraph;
 import de.anomic.yacy.graphics.WebStructureGraph;
 import de.anomic.yacy.graphics.WebStructureGraph.HostReference;
 
@@ -143,7 +145,7 @@ public final class yacyClient {
      *
      * @return the number of new seeds
      */
-    public static int hello(final yacySeed mySeed, final yacyPeerActions peerActions, final String address, final String otherHash) {
+    public static int hello(final yacySeed mySeed, final yacyPeerActions peerActions, final String address, final String otherHash, final String otherName) {
 
         Map<String, String> result = null;
         final String salt = crypt.randomSalt();
@@ -256,6 +258,7 @@ public final class yacyClient {
         int count = 0;
         String seedStr;
         yacySeed s;
+        final int connectedBefore = peerActions.sizeConnected();
         while ((seedStr = result.get("seed" + i++)) != null) {
             // integrate new seed into own database
             // the first seed, "seed0" is the seed of the responding peer
@@ -277,6 +280,11 @@ public final class yacyClient {
                 }
             }
         }
+        final int connectedAfter = peerActions.sizeConnected();
+
+        // update event tracker
+        EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(mySeed.getName(), otherName, true, connectedAfter - connectedBefore), false);
+
         return count;
     }
 

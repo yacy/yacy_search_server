@@ -1,4 +1,4 @@
-// yacyPeerActions.java 
+// yacyPeerActions.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://yacy.net
@@ -34,12 +34,12 @@ import net.yacy.kelondro.util.MapTools;
 
 
 public class yacyPeerActions {
-   
+
     private final yacySeedDB seedDB;
     private Map<String, String> userAgents;
     public  long disconnects;
     private final yacyNewsPool newsPool;
-    
+
     public yacyPeerActions(final yacySeedDB seedDB, final yacyNewsPool newsPool) {
         this.seedDB = seedDB;
         this.newsPool = newsPool;
@@ -49,10 +49,10 @@ public class yacyPeerActions {
 
     public void close() {
         // the seedDB and newsPool should be cleared elsewhere
-        if (userAgents != null) userAgents.clear();
-        userAgents = null;
+        if (this.userAgents != null) this.userAgents.clear();
+        this.userAgents = null;
     }
-    
+
     public boolean connectPeer(final yacySeed seed, final boolean direct) {
         // store a remote peer's seed
         // returns true if the peer is new and previously unknown
@@ -113,7 +113,7 @@ public class yacyPeerActions {
 
         // disconnection time
         long dtimeUTC0;
-        final yacySeed disconnectedSeed = seedDB.getDisconnected(seed.hash);
+        final yacySeed disconnectedSeed = this.seedDB.getDisconnected(seed.hash);
         if (disconnectedSeed == null) {
             dtimeUTC0 = 0; // never disconnected: virtually disconnected maximum time ago
         } else {
@@ -173,12 +173,12 @@ public class yacyPeerActions {
                 return false;
             }
             if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: updated KNOWN " + ((direct) ? "direct " : "") + peerType + " peer '" + seed.getName() + "' from " + seed.getPublicAddress());
-            seedDB.addConnected(seed);
+            this.seedDB.addConnected(seed);
             return true;
         }
-        
+
         // the seed is new
-        if ((seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
+        if ((this.seedDB.mySeedIsDefined()) && (seed.getIP().equals(this.seedDB.mySeed().getIP()))) {
             // seed from the same IP as the calling client: can be
             // the case if there runs another one over a NAT
             if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: saved NEW seed (myself IP) " + seed.getPublicAddress());
@@ -195,33 +195,33 @@ public class yacyPeerActions {
         final boolean res = connectPeer(peer, direct);
         if (res) {
             // perform all actions if peer is effective new
-            this.processPeerArrival(peer);
+            processPeerArrival(peer);
             yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
         }
         return res;
     }
-    
+
     public void peerDeparture(final yacySeed peer, final String cause) {
         if (peer == null) return;
         // we do this if we did not get contact with the other peer
         if (yacyCore.log.isFine()) yacyCore.log.logFine("connect: no contact to a " + peer.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN) + " peer '" + peer.getName() + "' at " + peer.getPublicAddress() + ". Cause: " + cause);
-        synchronized (seedDB) {
-            if (!seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { disconnects++; }
+        synchronized (this.seedDB) {
+            if (!this.seedDB.hasDisconnected(ASCII.getBytes(peer.hash))) { this.disconnects++; }
             peer.put("dct", Long.toString(System.currentTimeMillis()));
-            seedDB.addDisconnected(peer); // update info
+            this.seedDB.addDisconnected(peer); // update info
         }
         yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " left the network", "", ""));
     }
-    
+
     public void peerPing(final yacySeed peer) {
         if (peer == null) return;
         // this is called only if the peer has junior status
-        seedDB.addPotential(peer);
+        this.seedDB.addPotential(peer);
         // perform all actions
         processPeerArrival(peer);
         yacyChannel.channels(yacyChannel.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " sent me a ping", "", ""));
     }
-    
+
     private void processPeerArrival(final yacySeed peer) {
         final String recordString = peer.get("news", null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
@@ -243,14 +243,18 @@ public class yacyPeerActions {
             }
         }
     }
-    
-    public void setUserAgent(final String IP, final String userAgent) {
-        if (userAgents == null) return; // case can happen during shutdown
-        userAgents.put(IP, userAgent);
+
+    public int sizeConnected() {
+        return this.seedDB.sizeConnected();
     }
-    
+
+    public void setUserAgent(final String IP, final String userAgent) {
+        if (this.userAgents == null) return; // case can happen during shutdown
+        this.userAgents.put(IP, userAgent);
+    }
+
     public String getUserAgent(final String IP) {
-        final String userAgent = userAgents.get(IP);
+        final String userAgent = this.userAgents.get(IP);
         return (userAgent == null) ? "" : userAgent;
     }
 
@@ -261,22 +265,22 @@ public class yacyPeerActions {
     public static String formatInterval(final long millis) {
         try {
             final long mins = millis / 60000;
-            
+
             final StringBuilder uptime = new StringBuilder(40);
-            
+
             final int uptimeDays  = (int) (Math.floor(mins/1440.0));
             final int uptimeHours = (int) (Math.floor(mins/60.0)%24);
             final int uptimeMins  = (int) mins%60;
-            
+
             uptime.append(uptimeDays)
                   .append(((uptimeDays == 1)?" day ":" days "))
                   .append((uptimeHours < 10)?"0":"")
                   .append(uptimeHours)
                   .append(':')
                   .append((uptimeMins < 10)?"0":"")
-                  .append(uptimeMins);            
-            
-            return uptime.toString();       
+                  .append(uptimeMins);
+
+            return uptime.toString();
         } catch (final Exception e) {
             return "unknown";
         }

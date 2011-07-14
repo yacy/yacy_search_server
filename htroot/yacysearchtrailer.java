@@ -240,7 +240,7 @@ public class yacysearchtrailer {
             prop.put("cat-location_queryenc", theQuery.queryString(true).replace(' ', '+'));
         }
 
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.FINALIZATION, "bottomline", 0, 0), false);
 
         return prop;
     }

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -29,7 +29,7 @@ package net.yacy.visualization;
 
 public class PrintTool {
 
-    
+
     private static long[] font = new long[]{
     	0x00000000000000L,0x00300C03000030L,0x00CC3300000000L,0x00CCFFCCCFFCCCL,0x02FFCC2FE0CFFEL,0x00C3CF0FC3CF0CL,0x02FCE02ECCE2ECL,0x00300C00000000L,
     	0x00030380C03803L,0x0300B00C0B0000L,0x0000332BA03000L,0x00000C0FC0C000L,0x0000000302C0C0L,0x0000000FC00000L,0x00000000000030L,0x00030383838380L,
@@ -84,7 +84,7 @@ public class PrintTool {
             }
         }
     }
-    
+
     public static void print(final RasterPlotter matrix, final int x, final int y, final int angle, final String message, final int align) {
         // align = -1 : left
         // align =  1 : right
@@ -107,8 +107,8 @@ public class PrintTool {
             else if (angle == 315) {xx += 6; yy += 6;}
         }
     }
-    
-    
+
+
     private static final int arcDist = 8;
     public static void arcPrint(final RasterPlotter matrix, final int cx, final int cy, final int radius, final int angle, final String message) {
         final int x = cx + (int) ((radius + 1) * Math.cos(RasterPlotter.PI180 * angle));
@@ -123,6 +123,6 @@ public class PrintTool {
         if ((angle < (90 - arcDist)) || (angle > (270 + arcDist))) xp = x;
         print(matrix, xp, yp, 0, message, -1);
     }
-    
-    
+
+
 }

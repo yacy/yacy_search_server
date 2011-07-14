@@ -44,11 +44,11 @@ public class PerformanceSearch_p {
         int c = 0;
         if (events != null) {
             EventTracker.Event event;
-            ProfilingGraph.searchEvent search;
+            ProfilingGraph.EventSearch search;
             long lastt = 0;
             while (events.hasNext()) {
                 event = events.next();
-                search = (ProfilingGraph.searchEvent) event.payload;
+                search = (ProfilingGraph.EventSearch) event.payload;
                 prop.put("table_" + c + "_query", search.queryID);
                 prop.put("table_" + c + "_event", search.processName.name());
                 prop.put("table_" + c + "_comment", search.comment);

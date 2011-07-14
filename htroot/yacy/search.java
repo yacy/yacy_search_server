@@ -250,7 +250,7 @@ public final class search {
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
             final TreeMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2Handles(urls));
 
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.COLLECTION, "", incc.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.COLLECTION, "", incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
                 final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = incc.entrySet().iterator();
                 Map.Entry<byte[], ReferenceContainer<WordReference>> entry;
@@ -373,7 +373,7 @@ public final class search {
                 i++;
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.REFERENCECOLLECTION, "", i, System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.REFERENCECOLLECTION, "", i, System.currentTimeMillis() - timer), false);
         }
         prop.put("indexabstract", indexabstract.toString());
 
@@ -401,7 +401,7 @@ public final class search {
             theQuery.transmitcount = accu.size() + 1;
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.Type.RESULTLIST, "", accu.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theQuery.id(true), SearchEvent.Type.RESULTLIST, "", accu.size(), System.currentTimeMillis() - timer), false);
         }
 
         // add information about forward peers

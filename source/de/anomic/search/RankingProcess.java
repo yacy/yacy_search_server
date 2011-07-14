@@ -149,7 +149,7 @@ public final class RankingProcess extends Thread {
                     this.query.maxDistance);
             this.localSearchInclusion = search.inclusion();
             final ReferenceContainer<WordReference> index = search.joined();
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.JOIN, this.query.queryString, index.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.JOIN, this.query.queryString, index.size(), System.currentTimeMillis() - timer), false);
             if (index.isEmpty()) {
                 return;
             }
@@ -188,7 +188,7 @@ public final class RankingProcess extends Thread {
 
         // normalize entries
         final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.NORMALIZING, resourceName, index.size(), System.currentTimeMillis() - timer), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.NORMALIZING, resourceName, index.size(), System.currentTimeMillis() - timer), false);
 
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -279,7 +279,7 @@ public final class RankingProcess extends Thread {
         }
 
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.PRESORT, resourceName, index.size(), System.currentTimeMillis() - timer), false);
     }
 
     /**

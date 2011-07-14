@@ -84,12 +84,13 @@ public class ProfilingGraph {
         }
         chart.declareDimension(ChartPlotter.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
         chart.declareDimension(ChartPlotter.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, "888800", null , "URL");
+        chart.declareDimension(ChartPlotter.DIMENSION_ANOT2, 1, 1, 0, "888800", null , "PING");
 
         // draw chart
         long time;
         final long now = System.currentTimeMillis();
         long bytes;
-        int x0, x1, y0, y1, ppm, words;
+        int x0, x1, y0, y1;
         try {
             // draw urls
             /*
@@ -134,6 +135,7 @@ public class ProfilingGraph {
             x0 = 1; y0 = 0;
             if (events != null) {
                 EventTracker.Event event;
+                int words;
                 while (events.hasNext()) {
                     event = events.next();
                     time = event.time - now;
@@ -153,6 +155,7 @@ public class ProfilingGraph {
             x0 = 1; y0 = 0;
             if (events != null) {
                 EventTracker.Event event;
+                int ppm;
                 while (events.hasNext()) {
                     event = events.next();
                     time = event.time - now;
@@ -167,6 +170,24 @@ public class ProfilingGraph {
                 }
             }
 
+            // draw peer ping
+            events = EventTracker.getHistory(EventTracker.EClass.PEERPING);
+            x0 = 1; y0 = 0;
+            if (events != null) {
+                EventTracker.Event event;
+                EventPing ping;
+                while (events.hasNext()) {
+                    event = events.next();
+                    time = event.time - now;
+                    ping = (EventPing) event.payload;
+                    x1 = (int) (time/1000);
+                    y1 = Math.abs((ping.outgoing ? ping.toPeer : ping.fromPeer).hashCode()) % vspace;
+                    chart.setColor("444444");
+                    chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT2, x1, y1, 2, "PING " + ping.fromPeer.toUpperCase() + " -> " + ping.toPeer.toUpperCase() + (ping.newPeers > 0 ? "(+" + ping.newPeers + ")" : ""), 0);
+                    x0 = x1; y0 = y1;
+                }
+            }
+
             bufferChart = chart;
         } catch (final ConcurrentModificationException cme) {
             chart = bufferChart;
@@ -175,14 +196,14 @@ public class ProfilingGraph {
         return chart;
     }
 
-    public static class searchEvent {
+    public static class EventSearch {
         public SearchEvent.Type processName;
         public String comment;
     	public String queryID;
     	public long duration;
     	public int resultCount;
 
-    	public searchEvent(final String queryID, final SearchEvent.Type processName, final String comment, final int resultCount, final long duration) {
+    	public EventSearch(final String queryID, final SearchEvent.Type processName, final String comment, final int resultCount, final long duration) {
     		this.queryID = queryID;
     		this.processName = processName;
     		this.comment = comment;
@@ -191,4 +212,31 @@ public class ProfilingGraph {
     	}
     }
 
+    public static class EventDHT {
+        public String fromPeer, toPeer;
+        public boolean outgoing;
+        public int totalReferences, newReferences;
+
+        public EventDHT(final String fromPeer, final String toPeer, final boolean outgoing, final int totalReferences, final int newReferences) {
+            this.fromPeer = fromPeer;
+            this.toPeer = toPeer;
+            this.outgoing = outgoing;
+            this.totalReferences = totalReferences;
+            this.newReferences = newReferences;
+        }
+    }
+
+    public static class EventPing {
+
+        public String fromPeer, toPeer;
+        public boolean outgoing;
+        public int newPeers;
+
+        public EventPing(final String fromPeer, final String toPeer, final boolean outgoing, final int newPeers) {
+            this.fromPeer = fromPeer;
+            this.toPeer = toPeer;
+            this.outgoing = outgoing;
+            this.newPeers = newPeers;
+        }
+    }
 }

@@ -34,59 +34,61 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class EventTracker {
-    
+
     private final static int  maxQueueSize = 30000;
     private final static long maxQueueAge = ProfilingGraph.maxTime;
-    
+
     public enum EClass {
         WORDCACHE,
         MEMORY,
         PPM,
+        PEERPING,
+        DHT,
         INDEX,
         SEARCH;
     }
-    
+
     private final static Map<EClass, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<EClass, ConcurrentLinkedQueue<Event>>();
     private final static Map<EClass, Long> eventAccess = new ConcurrentHashMap<EClass, Long>(); // value: last time when this was accessed
-    
+
     public final static void delete(final EClass eventName) {
         historyMaps.remove(eventName);
         eventAccess.remove(eventName);
     }
-    
-    public final static void update(final EClass eventName, final Object eventPayload, boolean useProtection) {
+
+    public final static void update(final EClass eventName, final Object eventPayload, final boolean useProtection) {
         // check protection against too heavy access
         if (useProtection) {
-            Long lastAcc = eventAccess.get(eventName);
+            final Long lastAcc = eventAccess.get(eventName);
             if (lastAcc == null) {
                 eventAccess.put(eventName, Long.valueOf(System.currentTimeMillis()));
             } else {
-                long time = System.currentTimeMillis();
+                final long time = System.currentTimeMillis();
                 if (time - lastAcc.longValue() < 1000) {
                     return; // protect against too heavy load
                 }
                 eventAccess.put(eventName, Long.valueOf(time));
             }
         }
-        
+
         // get event history container
         ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
-        
+
         // create history
         if (history == null) {
             history = new ConcurrentLinkedQueue<Event>();
 
             // update entry
             history.offer(new Event(eventPayload));
-            
+
             // store map
             historyMaps.put(eventName, history);
             return;
         }
-        
+
         // update history
         history.offer(new Event(eventPayload));
-        
+
         // clean up too old entries
         int tp = history.size() - maxQueueSize;
         while (tp-- > 0) history.poll();
@@ -104,24 +106,24 @@ public class EventTracker {
             }
         }
     }
-    
+
     public final static Iterator<Event> getHistory(final EClass eventName) {
-        ConcurrentLinkedQueue<Event> list = historyMaps.get(eventName);
+        final ConcurrentLinkedQueue<Event> list = historyMaps.get(eventName);
         if (list == null) return null;
         return list.iterator();
     }
 
-    public final static int countEvents(final EClass eventName, long time) {
-        Iterator<Event> event = getHistory(eventName);
+    public final static int countEvents(final EClass eventName, final long time) {
+        final Iterator<Event> event = getHistory(eventName);
         if (event == null) return 0;
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         int count = 0;
         while (event.hasNext()) {
             if (now - event.next().time < time) count++;
         }
         return count;
     }
-    
+
     public final static class Event {
         public Object payload;
         public long time;

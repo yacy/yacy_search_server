@@ -1,4 +1,4 @@
-// hello.java 
+// hello.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -37,7 +37,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.logging.Log;
-
+import net.yacy.kelondro.util.EventTracker;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -48,6 +48,7 @@ import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.dht.PeerSelection;
+import de.anomic.yacy.graphics.ProfilingGraph;
 
 public final class hello {
 
@@ -57,7 +58,7 @@ public final class hello {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         prop.put("message", "none");
         if ((post == null) || (env == null)) {
             prop.put("message", "no post or no enviroment");
@@ -67,18 +68,18 @@ public final class hello {
             prop.put("message", "not in my network");
             return prop;
         }
-        
+
 //      final String iam      = (String) post.get("iam", "");      // complete seed of the requesting peer
 //      final String mytime   = (String) post.get(MYTIME, ""); //
         final String key      = post.get("key", "");      // transmission key for response
         final String seed     = post.get("seed", "");
         int  count            = post.getInt("count", 0);
-        long  magic           = post.getLong("magic", 0);
+        final long  magic           = post.getLong("magic", 0);
 //      final Date remoteTime = yacyCore.parseUniversalDate(post.get(MYTIME)); // read remote time
         final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
         long time = System.currentTimeMillis();
         final InetAddress ias = Domains.dnsResolve(clientip);
-        long time_dnsResolve = System.currentTimeMillis() - time;
+        final long time_dnsResolve = System.currentTimeMillis() - time;
         if (ias == null) {
             yacyCore.log.logInfo("hello/server: failed contacting seed; clientip not resolvable (clientip=" + clientip + ", time_dnsResolve=" + time_dnsResolve + ")");
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);
@@ -92,18 +93,18 @@ public final class hello {
         yacySeed remoteSeed;
         try {
             remoteSeed = yacySeed.genRemoteSeed(seed, key, true, ias.getHostAddress());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             yacyCore.log.logInfo("hello/server: bad seed: " + e.getMessage() + ", time_dnsResolve=" + time_dnsResolve);
             prop.put("message", "bad seed: " + e.getMessage());
             return prop;
         }
-        
+
         if (remoteSeed == null || remoteSeed.hash == null) {
             yacyCore.log.logInfo("hello/server: bad seed: null, time_dnsResolve=" + time_dnsResolve);
             prop.put("message", "cannot parse your seed");
             return prop;
         }
-        
+
 //      final String properTest = remoteSeed.isProper();
         // The remote peer might not know its IP yet, so don't abort if the IP check fails
 //      if ((properTest != null) && (! properTest.substring(0,1).equals("IP"))) { return null; }
@@ -119,12 +120,12 @@ public final class hello {
             prop.put("message", "I am robinson, I do not answer");
             return prop;
         }
-        
+
         long[] callback = new long[]{-1, -1};
         if (sb.clusterhashes != null) remoteSeed.setAlternativeAddress(sb.clusterhashes.get(remoteSeed.hash.getBytes()));
-        
+
         // if the remote client has reported its own IP address and the client supports
-        // the port forwarding feature (if client version >= 0.383) then we try to 
+        // the port forwarding feature (if client version >= 0.383) then we try to
         // connect to the reported IP address first
         time = System.currentTimeMillis();
         long time_backping = 0;
@@ -132,9 +133,9 @@ public final class hello {
         if (reportedip.length() > 0 &&
             !clientip.equals(reportedip) &&
             clientversion >= yacyVersion.YACY_SUPPORTS_PORT_FORWARDING &&
-            magic != 0) {            
+            magic != 0) {
             serverCore.checkInterruption();
-            
+
             // try first the reportedip, since this may be a connect from a port-forwarding host
             prop.put("yourip", reportedip);
             remoteSeed.setIP(reportedip);
@@ -158,7 +159,7 @@ public final class hello {
 
             if (isNotLocal) {
                 serverCore.checkInterruption();
-                
+
                 prop.put("yourip", clientip);
                 remoteSeed.setIP(clientip);
                 callback = yacyClient.queryUrlCount(remoteSeed);
@@ -170,8 +171,9 @@ public final class hello {
 //      System.out.println("YACYHELLO: YOUR IP=" + clientip);
         // set lastseen value (we have seen that peer, it contacted us!)
         remoteSeed.setLastSeenUTC();
-        
+
         // assign status
+        final int connectedBefore = sb.peers.sizeConnected();
         if (callback[0] >= 0) {
             if (remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR) == null) {
                 prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_SENIOR);
@@ -194,6 +196,11 @@ public final class hello {
                 sb.peers.peerActions.peerPing(remoteSeed);
             }
         }
+        final int connectedAfter = sb.peers.sizeConnected();
+
+        // update event tracker
+        EventTracker.update(EventTracker.EClass.PEERPING, new ProfilingGraph.EventPing(remoteSeed.getName(), sb.peers.myName(), false, connectedAfter - connectedBefore), false);
+
         sb.peers.peerActions.setUserAgent(clientip, userAgent);
         if (!(prop.get(yacySeed.YOURTYPE)).equals(reportedPeerType)) {
             yacyCore.log.logInfo("hello/server: changing remote peer '" + remoteSeed.getName() +
@@ -208,14 +215,14 @@ public final class hello {
         if (sb.peers.sizeConnected() > 0) {
             if (count > sb.peers.sizeConnected()) { count = sb.peers.sizeConnected(); }
             if (count > 100) { count = 100; }
-            
+
             // latest seeds
             final Map<String, yacySeed> ySeeds = PeerSelection.seedsByAge(sb.peers, true, count); // peerhash/yacySeed relation
-            
+
             // attach also my own seed
             seeds.append("seed0=").append(sb.peers.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
-            count = 1;            
-            
+            count = 1;
+
             // attach other seeds
             if (ySeeds != null) {
                 seeds.ensureCapacity((ySeeds.size() + 1) * 768);

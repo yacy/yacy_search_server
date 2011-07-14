@@ -150,7 +150,7 @@ public final class SearchEvent {
             if (this.primarySearchThreads != null) {
                 Log.logFine("SEARCH_EVENT", "STARTING " + this.primarySearchThreads.length + " THREADS TO CATCH EACH " + remote_maxcount + " URLs");
                 this.rankingProcess.moreFeeders(this.primarySearchThreads.length);
-                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
+                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), Type.REMOTESEARCH_START, "", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
                 // finished searching
                 Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + this.primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
             } else {
@@ -189,7 +189,7 @@ public final class SearchEvent {
                     this.IACount.put(wordhash, LargeNumberCache.valueOf(container.size()));
                     this.IAResults.put(wordhash, WordReferenceFactory.compressIndex(container, null, 1000).toString());
                 }
-                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
+                EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), Type.ABSTRACTS, "", this.rankingProcess.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             } else {
                 this.rankingProcess.start(); // start concurrently
                 // but give process time to accumulate a certain amount of data
@@ -208,7 +208,7 @@ public final class SearchEvent {
 
         // clean up events
         SearchEventCache.cleanupEvents(false);
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), Type.CLEANUP, "", 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), Type.CLEANUP, "", 0, 0), false);
 
         // store this search to a cache so it can be re-used
         if (MemoryControl.available() < 1024 * 1024 * 100) SearchEventCache.cleanupEvents(true);

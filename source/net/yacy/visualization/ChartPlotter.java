@@ -40,17 +40,19 @@ public class ChartPlotter extends RasterPlotter {
     public static final int DIMENSION_BOTTOM = 3;
     public static final int DIMENSION_ANOT0  = 4;
     public static final int DIMENSION_ANOT1  = 5;
+    public static final int DIMENSION_ANOT2  = 6;
+    public static final int DIMENSION_ANOT3  = 7;
 
     private final int leftborder;
     private final int rightborder;
     private final int topborder;
     private final int bottomborder;
-    private final int[] scales = new int[]{0,0,0,0,0,0};
-    private final int[] pixels = new int[]{0,0,0,0,0,0};
-    private final int[] offsets = new int[]{0,0,0,0,0,0};
-    private final String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
-    private final String[] colscale = new String[]{null,null,null,null,null,null};
-    private final String[] tablenames = new String[]{"","","","","",""};
+    private final int[] scales = new int[]{0,0,0,0,0,0,0,0};
+    private final int[] pixels = new int[]{0,0,0,0,0,0,0,0};
+    private final int[] offsets = new int[]{0,0,0,0,0,0,0,0};
+    private final String[] colnames = new String[]{"FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF","FFFFFF"};
+    private final String[] colscale = new String[]{null,null,null,null,null,null,null,null};
+    private final String[] tablenames = new String[]{"","","","","","","",""};
 
     public ChartPlotter(final int width, final int height, final String backgroundColor, final String foregroundColor, final String lightColor,
                       final int leftborder, final int rightborder, final int topborder, final int bottomborder,
@@ -93,7 +95,7 @@ public class ChartPlotter extends RasterPlotter {
         final int y = (coord_y - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
         if (dotsize == 1) plot(this.leftborder + x, this.height - this.bottomborder - y, 100);
                       else dot(this.leftborder + x, this.height - this.bottomborder - y, dotsize, true, 100);
-        if (anot != null) PrintTool.print(this, this.leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), this.height - this.bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? -1 : ((anotAngle == 315) ? 1 : 0));
+        if (anot != null) PrintTool.print(this, this.leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), this.height - this.bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? (anot.length() * 6 + x > this.width ? 1 : -1) : ((anotAngle == 315) ? 1 : 0));
     }
 
     public void chartLine(final int dimension_x, final int dimension_y, final int coord_x1, final int coord_y1, final int coord_x2, final int coord_y2) {

@@ -111,7 +111,7 @@ public class ResultFetcher {
         // start worker threads to fetch urls and snippets
         this.workerThreads = null;
         deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(query.id(true), SearchEvent.Type.SNIPPETFETCH_START, ((this.workerThreads == null) ? "no" : this.workerThreads.length) + " online snippet fetch threads started", 0, 0), false);
     }
 
     public void setCleanupState() {
@@ -132,11 +132,11 @@ public class ResultFetcher {
         if (!this.query.isLocal() && item == 0) try { Thread.sleep(100); } catch (final InterruptedException e1) {} // wait a little time to get first results in the search
 
         final long finishTime = System.currentTimeMillis() + timeout;
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.ONERESULT, "started, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "started, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
         if (this.result.sizeAvailable() > item) {
             // we have the wanted result already in the result array .. return that
             final ResultEntry re = this.result.element(item).getElement();
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.ONERESULT, "prefetched, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "prefetched, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
             return re;
         }
 
@@ -155,11 +155,11 @@ public class ResultFetcher {
 
         // finally, if there is something, return the result
         if (entry == null) {
-            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.ONERESULT, "not found, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
+            EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "not found, item = " + item + ", available = " + this.result.sizeAvailable(), 0, 0), false);
             return null;
         }
         final ResultEntry re = entry.getElement();
-        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.searchEvent(this.query.id(true), SearchEvent.Type.ONERESULT, "retrieved, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
+        EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEvent.Type.ONERESULT, "retrieved, item = " + item + ", available = " + this.result.sizeAvailable() + ": " + re.urlstring(), 0, 0), false);
         return re;
     }
 
