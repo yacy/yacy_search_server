@@ -152,7 +152,7 @@ public class Balancer {
     public Request get(final byte[] urlhash) throws IOException {
         assert urlhash != null;
         if (this.urlFileIndex == null) return null; // case occurs during shutdown
-        final Row.Entry entry = this.urlFileIndex.get(urlhash);
+        final Row.Entry entry = this.urlFileIndex.get(urlhash, false);
         if (entry == null) return null;
         return new Request(entry);
     }
@@ -540,7 +540,7 @@ public class Balancer {
         Request request;
     	while (i.hasNext()) {
     	    handle = i.next();
-    	    final Row.Entry entry = this.urlFileIndex.get(handle);
+    	    final Row.Entry entry = this.urlFileIndex.get(handle, false);
     	    if (entry == null) continue;
     	    request = new Request(entry);
     	    host = request.url().getHost();
@@ -562,7 +562,7 @@ public class Balancer {
     	for (final byte[] n: ta) {
     	    if (n == null) break;
     		try {
-                    final Row.Entry rowEntry = this.urlFileIndex.get(n);
+                    final Row.Entry rowEntry = this.urlFileIndex.get(n, false);
                     if (rowEntry == null) continue;
                     final Request crawlEntry = new Request(rowEntry);
                     cel.add(crawlEntry);
@@ -580,7 +580,7 @@ public class Balancer {
 	            final byte[] n = list.getOne(depth);
 	            if (n == null) continue ll;
                 try {
-                    final Row.Entry rowEntry = this.urlFileIndex.get(n);
+                    final Row.Entry rowEntry = this.urlFileIndex.get(n, false);
                     if (rowEntry == null) continue;
                     final Request crawlEntry = new Request(rowEntry);
                     cel.add(crawlEntry);

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -53,14 +53,14 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
 
     private   byte[] termHash;
     protected ReferenceFactory<ReferenceType> factory;
-    
+
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final RowSet collection) {
         super(collection);
         assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
         this.factory = factory;
         this.termHash = termHash;
     }
-    
+
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash) {
         super(factory.getRow());
         assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
@@ -68,7 +68,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.factory = factory;
         this.lastTimeWrote = 0;
     }
-    
+
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int objectCount) throws RowSpaceExceededException {
         super(factory.getRow(), objectCount);
         assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
@@ -76,13 +76,13 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.factory = factory;
         this.lastTimeWrote = 0;
     }
-    
+
     public ReferenceContainer<ReferenceType> topLevelClone() throws RowSpaceExceededException {
-        final ReferenceContainer<ReferenceType> newContainer = new ReferenceContainer<ReferenceType>(this.factory, this.termHash, this.size());
+        final ReferenceContainer<ReferenceType> newContainer = new ReferenceContainer<ReferenceType>(this.factory, this.termHash, size());
         newContainer.addAllUnique(this);
         return newContainer;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> emptyContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash) {
         assert termHash == null || (termHash[2] != '@' && termHash.length == factory.getRow().primaryKeyLength);
         return new ReferenceContainer<ReferenceType>(factory, termHash);
@@ -94,7 +94,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public void setWordHash(final byte[] newTermHash) {
-    	assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
+    	assert this.termHash == null || (this.termHash[2] != '@' && this.termHash.length == this.rowdef.primaryKeyLength);
         this.termHash = newTermHash;
     }
 
@@ -103,31 +103,31 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public byte[] getTermHash() {
-        return termHash;
+        return this.termHash;
     }
-    
+
     public void add(final Reference entry) throws RowSpaceExceededException {
         // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         this.addUnique(entry.toKelondroEntry());
     }
-    
+
     public ReferenceContainer<ReferenceType> merge(final ReferenceContainer<ReferenceType> c) throws RowSpaceExceededException {
         return new ReferenceContainer<ReferenceType>(this.factory, this.termHash, super.merge(c));
     }
-    
+
     public Reference replace(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         final Row.Entry r = super.replace(entry.toKelondroEntry());
         if (r == null) return null;
-        return factory.produceSlow(r);
+        return this.factory.produceSlow(r);
     }
-    
+
     public void put(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         super.put(entry.toKelondroEntry());
     }
-    
+
     public boolean putRecent(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         // returns true if the new entry was added, false if it already existed
@@ -135,7 +135,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         if (oldEntryRow == null) {
             return true;
         }
-        final Reference oldEntry = factory.produceSlow(oldEntryRow);
+        final Reference oldEntry = this.factory.produceSlow(oldEntryRow);
         if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
             this.replace(oldEntry.toKelondroEntry()); // put it back
             return false;
@@ -161,9 +161,9 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.lastTimeWrote = java.lang.Math.max(this.lastTimeWrote, c.updated());
         return x;
     }
-    
+
     public ReferenceType getReference(final byte[] urlHash) {
-        final Row.Entry entry = super.get(urlHash);
+        final Row.Entry entry = super.get(urlHash, false);
         if (entry == null) return null;
         return this.factory.produceSlow(entry);
     }
@@ -194,33 +194,33 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     public class entryIterator implements Iterator<ReferenceType> {
 
         Iterator<Row.Entry> rowEntryIterator;
-        
+
         public entryIterator() {
-            rowEntryIterator = iterator();
+            this.rowEntryIterator = iterator();
         }
-        
+
         public boolean hasNext() {
-            return rowEntryIterator.hasNext();
+            return this.rowEntryIterator.hasNext();
         }
 
         public ReferenceType next() {
-            final Row.Entry rentry = rowEntryIterator.next();
+            final Row.Entry rentry = this.rowEntryIterator.next();
             if (rentry == null) return null;
-            return factory.produceSlow(rentry);
+            return ReferenceContainer.this.factory.produceSlow(rentry);
         }
 
         public void remove() {
-            rowEntryIterator.remove();
+            this.rowEntryIterator.remove();
         }
-        
+
     }
-    
+
     public static Object mergeUnique(final Object a, final Object b) throws RowSpaceExceededException {
         final ReferenceContainer<?> c = (ReferenceContainer<?>) a;
         c.addAllUnique((ReferenceContainer<?>) b);
         return c;
     }
-    
+
     public static final Method containerMergeMethod;
     static {
         Method meth = null;
@@ -252,15 +252,15 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         final ReferenceContainer<ReferenceType> rcLocal = ReferenceContainer.joinContainers(factory, includeContainers, maxDistance);
         if (rcLocal == null) return ReferenceContainer.emptyContainer(factory, null, 0);
         excludeContainers(factory, rcLocal, excludeContainers);
-        
+
         return rcLocal;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinContainers(
             final ReferenceFactory<ReferenceType> factory,
             final Collection<ReferenceContainer<ReferenceType>> containers,
             final int maxDistance) throws RowSpaceExceededException {
-        
+
         // order entities by their size
         final TreeMap<Long, ReferenceContainer<ReferenceType>> map = new TreeMap<Long, ReferenceContainer<ReferenceType>>();
         ReferenceContainer<ReferenceType> singleContainer;
@@ -269,18 +269,18 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         while (i.hasNext()) {
             // get next entity:
             singleContainer = i.next();
-            
+
             // check result
             if (singleContainer == null || singleContainer.isEmpty()) return null; // as this is a cunjunction of searches, we have no result if any word is not known
-            
+
             // store result in order of result size
             map.put(Long.valueOf(singleContainer.size() * 1000 + count), singleContainer);
             count++;
         }
-        
+
         // check if there is any result
         if (map.isEmpty()) return null; // no result, nothing found
-        
+
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
         Long k = map.firstKey(); // the smallest, which means, the one with the least entries
@@ -300,31 +300,31 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         if (searchResult.isEmpty()) return null;
         return searchResult;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeContainers(
                             final ReferenceFactory<ReferenceType> factory,
                             ReferenceContainer<ReferenceType> pivot,
                             final Collection<ReferenceContainer<ReferenceType>> containers) {
-        
+
         // check if there is any result
         if (containers == null || containers.isEmpty()) return pivot; // no result, nothing found
-        
+
         final Iterator<ReferenceContainer<ReferenceType>> i = containers.iterator();
         while (i.hasNext()) {
         	pivot = excludeDestructive(factory, pivot, i.next());
         	if (pivot == null || pivot.isEmpty()) return null;
         }
-        
+
         return pivot;
     }
-    
+
     // join methods
     private static int log2(int x) {
         int l = 0;
         while (x > 0) {x = x >> 1; l++;}
         return l;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructive(
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> i1,
@@ -332,13 +332,13 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final int maxDistance) throws RowSpaceExceededException {
         if ((i1 == null) || (i2 == null)) return null;
         if (i1.isEmpty() || i2.isEmpty()) return null;
-        
+
         // decide which method to use
         final int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
         final int low  = ((i1.size() > i2.size()) ? i2.size() : i1.size());
         final int stepsEnum = 10 * (high + low - 1);
         final int stepsTest = 12 * log2(high) * low;
-        
+
         // start most efficient method
         if (stepsEnum > stepsTest) {
             if (i1.size() < i2.size())
@@ -348,7 +348,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         }
         return joinConstructiveByEnumeration(factory, i1, i2, maxDistance);
     }
-    
+
     private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructiveByTest(
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> small,
@@ -369,7 +369,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 assert (ie1.urlhash().length == keylength) : "ie0.urlHash() = " + ASCII.String(ie1.urlhash());
                 assert (ie2.urlhash().length == keylength) : "ie1.urlHash() = " + ASCII.String(ie2.urlhash());
                 // this is a hit. Calculate word distance:
-                
+
                 ie1 = factory.produceFast(ie2);
                 ie1.join(ie2);
                 if (ie1.distance() <= maxDistance) conj.add(ie1);
@@ -377,7 +377,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         }
         return conj;
     }
-    
+
     private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructiveByEnumeration(
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> i1,
@@ -389,7 +389,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         assert (keylength == i2.rowdef.width(0));
         final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())))) return conj; // ordering must be equal
-        ByteOrder ordering = i1.rowdef.getOrdering();
+        final ByteOrder ordering = i1.rowdef.getOrdering();
         final Iterator<ReferenceType> e1 = i1.entries();
         final Iterator<ReferenceType> e2 = i2.entries();
         int c;
@@ -420,7 +420,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         }
         return conj;
     }
-    
+
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructive(
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> pivot,
@@ -429,20 +429,20 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         if (excl == null) return pivot;
         if (pivot.isEmpty()) return null;
         if (excl.isEmpty()) return pivot;
-        
+
         // decide which method to use
         final int high = ((pivot.size() > excl.size()) ? pivot.size() : excl.size());
         final int low  = ((pivot.size() > excl.size()) ? excl.size() : pivot.size());
         final int stepsEnum = 10 * (high + low - 1);
         final int stepsTest = 12 * log2(high) * low;
-        
+
         // start most efficient method
         if (stepsEnum > stepsTest) {
             return excludeDestructiveByTest(pivot, excl);
         }
         return excludeDestructiveByEnumeration(factory, pivot, excl);
     }
-    
+
     private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructiveByTest(
             final ReferenceContainer<ReferenceType> pivot,
             final ReferenceContainer<ReferenceType> excl) {
@@ -463,7 +463,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             }
         return pivot;
     }
-    
+
     private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructiveByEnumeration(
                             final ReferenceFactory<ReferenceType> factory,
                             final ReferenceContainer<ReferenceType> pivot,
@@ -504,11 +504,11 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public synchronized String toString() {
-        return "C[" + ASCII.String(termHash) + "] has " + this.size() + " entries";
+        return "C[" + ASCII.String(this.termHash) + "] has " + size() + " entries";
     }
-    
+
     public int hashCode() {
         return (int) Base64Order.enhancedCoder.decodeLong(this.termHash, 0, 4);
     }
-    
+
 }

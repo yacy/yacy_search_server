@@ -130,18 +130,18 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         return index >= 0;
     }
 
-    public final synchronized Row.Entry get(final byte[] key) {
+    public final synchronized Row.Entry get(final byte[] key, final boolean forcecopy) {
         assert key.length == this.rowdef.primaryKeyLength;
         final int index = find(key, 0);
         if (index < 0) return null;
-        return get(index, true);
+        return get(index, forcecopy);
     }
 
-    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys) throws IOException, InterruptedException {
+    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = get(key);
+            entry = get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
@@ -668,7 +668,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
         for (int i = 0; i < testsize; i++) {
             key = randomHash(random);
             if (i % 5 == 0) continue;
-            if (c.get(key) == null) System.out.println("missing entry " + UTF8.String(key));
+            if (c.get(key, true) == null) System.out.println("missing entry " + UTF8.String(key));
         }
         c.sort();
         System.out.println("RESULT SIZE: " + c.size());

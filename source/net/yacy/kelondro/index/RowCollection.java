@@ -1177,7 +1177,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     	boolean allfound = true;
         for (int i = 0; i < testsize; i++) {
             final String rh = randomHash();
-            if (e.get(rh.getBytes()) == null) {
+            if (e.get(rh.getBytes(), true) == null) {
                 allfound = false;
                 System.out.println("not found hash " + rh + " at attempt " + i);
                 break;
@@ -1187,7 +1187,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         System.out.println("e allfound = " + ((allfound) ? "true" : "false") + ": " + (t13 - t12) + " nanoseconds");
         boolean noghosts = true;
         for (int i = 0; i < testsize; i++) {
-            if (e.get(randomHash().getBytes()) != null) {
+            if (e.get(randomHash().getBytes(), true) != null) {
                 noghosts = false;
                 break;
             }

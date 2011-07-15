@@ -446,7 +446,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return this.file.filename().toString();
     }
 
-    public Entry get(final byte[] key) throws IOException {
+    public Entry get(final byte[] key, final boolean _forcecopy) throws IOException {
         if (this.file == null || this.index == null) return null;
         Entry e = get0(key);
         if (e != null && this.rowdef.objectOrder.equal(key, e.getPrimaryKeyBytes())) return e;
@@ -479,11 +479,11 @@ public class Table implements Index, Iterable<Row.Entry> {
         return this.rowdef.newEntry(b);
     }
 
-    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys) throws IOException, InterruptedException {
+    public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
         final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = get(key);
+            entry = get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
@@ -859,7 +859,7 @@ public class Table implements Index, Iterable<Row.Entry> {
             if (this.key == null) return null;
             this.idx = (int) entry.getColLong(1);
             try {
-                return get(this.key);
+                return get(this.key, false);
             } catch (final IOException e) {
                 return null;
             }
@@ -1031,7 +1031,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         while (i.hasNext()) {
             System.out.print("row " + i + ": ");
             key = i.next();
-            row = get(key);
+            row = get(key, false);
             System.out.println(row.toString());
         }
         System.out.println("EndOfTable");

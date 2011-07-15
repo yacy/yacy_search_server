@@ -199,7 +199,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
 
     public final long get(final byte[] key) {
         assert (key != null);
-        final Row.Entry indexentry = this.index.get(key);
+        final Row.Entry indexentry = this.index.get(key, false);
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }
@@ -236,7 +236,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         assert key != null;
         assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
         synchronized (this.index) {
-            final Row.Entry indexentry = this.index.get(key);
+            final Row.Entry indexentry = this.index.get(key, true);
             if (indexentry == null) {
                 final Row.Entry newentry = this.rowdef.newEntry();
                 newentry.setCol(0, key);

@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -38,8 +38,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
-import de.anomic.crawler.CrawlStacker;
-
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.MultiProtocolURI;
 import net.yacy.cora.document.UTF8;
@@ -61,13 +59,14 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.repository.Blacklist;
+import de.anomic.crawler.CrawlStacker;
 
 public final class MetadataRepository implements Iterable<byte[]> {
 
     // class objects
     protected Index               urlIndexFile;
     private   Export              exportthread; // will have a export thread assigned if exporter is running
-    private   File                location;
+    private final   File                location;
     private   ArrayList<HostStat> statsDump;
 
     public MetadataRepository(
@@ -79,10 +78,10 @@ public final class MetadataRepository implements Iterable<byte[]> {
         Index backupIndex = null;
         try {
             backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
-        } catch (RowSpaceExceededException e) {
+        } catch (final RowSpaceExceededException e) {
             try {
                 backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, false, exceed134217727);
-            } catch (RowSpaceExceededException e1) {
+            } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
@@ -92,34 +91,34 @@ public final class MetadataRepository implements Iterable<byte[]> {
     }
 
     public void clearCache() {
-        if (urlIndexFile instanceof Cache) ((Cache) urlIndexFile).clearCache();
-        statsDump = null;
+        if (this.urlIndexFile instanceof Cache) ((Cache) this.urlIndexFile).clearCache();
+        this.statsDump = null;
     }
-    
+
     public void clear() throws IOException {
-        if (exportthread != null) exportthread.interrupt();
-        urlIndexFile.clear();
-        statsDump = null;
+        if (this.exportthread != null) this.exportthread.interrupt();
+        this.urlIndexFile.clear();
+        this.statsDump = null;
     }
-    
+
     public int size() {
-        return urlIndexFile == null ? 0 : urlIndexFile.size();
+        return this.urlIndexFile == null ? 0 : this.urlIndexFile.size();
     }
 
     public void close() {
-        statsDump = null;
-        if (urlIndexFile != null) {
-            urlIndexFile.close();
-            urlIndexFile = null;
+        this.statsDump = null;
+        if (this.urlIndexFile != null) {
+            this.urlIndexFile.close();
+            this.urlIndexFile = null;
         }
     }
 
     public int writeCacheSize() {
-        if (urlIndexFile instanceof SplitTable) return ((SplitTable) urlIndexFile).writeBufferSize();
-        if (urlIndexFile instanceof Cache) return ((Cache) urlIndexFile).writeBufferSize();
+        if (this.urlIndexFile instanceof SplitTable) return ((SplitTable) this.urlIndexFile).writeBufferSize();
+        if (this.urlIndexFile instanceof Cache) return ((Cache) this.urlIndexFile).writeBufferSize();
         return 0;
     }
-    
+
     /**
      * generates an plasmaLURLEntry using the url hash
      * if the url cannot be found, this returns null
@@ -127,24 +126,24 @@ public final class MetadataRepository implements Iterable<byte[]> {
      * @return
      */
     public URIMetadataRow load(final WeakPriorityBlockingQueue.Element<WordReferenceVars> obrwi) {
-        if (urlIndexFile == null) return null;
+        if (this.urlIndexFile == null) return null;
         if (obrwi == null) return null; // all time was already wasted in takeRWI to get another element
-        byte[] urlHash = obrwi.getElement().urlhash();
+        final byte[] urlHash = obrwi.getElement().urlhash();
         if (urlHash == null) return null;
         try {
-            final Row.Entry entry = urlIndexFile.get(urlHash);
+            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
             if (entry == null) return null;
             return new URIMetadataRow(entry, obrwi.getElement(), obrwi.getWeight());
         } catch (final IOException e) {
             return null;
         }
     }
-    
+
     public URIMetadataRow load(final byte[] urlHash) {
-        if (urlIndexFile == null) return null;
+        if (this.urlIndexFile == null) return null;
         if (urlHash == null) return null;
         try {
-            final Row.Entry entry = urlIndexFile.get(urlHash);
+            final Row.Entry entry = this.urlIndexFile.get(urlHash, false);
             if (entry == null) return null;
             return new URIMetadataRow(entry, null, 0);
         } catch (final IOException e) {
@@ -155,9 +154,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
     public void store(final URIMetadataRow entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
         URIMetadataRow oldEntry;
-        if (urlIndexFile == null) return; // case may happen during shutdown or startup
+        if (this.urlIndexFile == null) return; // case may happen during shutdown or startup
         try {
-            Row.Entry oe = urlIndexFile.get(entry.hash());
+            final Row.Entry oe = this.urlIndexFile.get(entry.hash(), false);
             oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
         } catch (final Exception e) {
             Log.logException(e);
@@ -173,19 +172,19 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
 
         try {
-            urlIndexFile.put(entry.toRowEntry());
-        } catch (RowSpaceExceededException e) {
+            this.urlIndexFile.put(entry.toRowEntry());
+        } catch (final RowSpaceExceededException e) {
             throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
         }
-        statsDump = null;
+        this.statsDump = null;
         if (MemoryControl.shortStatus()) clearCache() ;
     }
-    
+
     public boolean remove(final byte[] urlHashBytes) {
         if (urlHashBytes == null) return false;
         try {
-            final Row.Entry r = urlIndexFile.remove(urlHashBytes);
-            if (r != null) statsDump = null;
+            final Row.Entry r = this.urlIndexFile.remove(urlHashBytes);
+            if (r != null) this.statsDump = null;
             return r != null;
         } catch (final IOException e) {
             return false;
@@ -193,14 +192,14 @@ public final class MetadataRepository implements Iterable<byte[]> {
     }
 
     public boolean exists(final byte[] urlHash) {
-        if (urlIndexFile == null) return false; // case may happen during shutdown
-        return urlIndexFile.has(urlHash);
+        if (this.urlIndexFile == null) return false; // case may happen during shutdown
+        return this.urlIndexFile.has(urlHash);
     }
 
-    public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
+    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         try {
             return this.urlIndexFile.keys(up, firstKey);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             Log.logException(e);
             return null;
         }
@@ -209,7 +208,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     public Iterator<byte[]> iterator() {
         return keys(true, null);
     }
-    
+
     public CloneableIterator<URIMetadataRow> entries() throws IOException {
         // enumerates entry elements
         return new kiter();
@@ -228,24 +227,24 @@ public final class MetadataRepository implements Iterable<byte[]> {
 
         public kiter() throws IOException {
             this.up = true;
-            this.iter = urlIndexFile.rows();
+            this.iter = MetadataRepository.this.urlIndexFile.rows();
             this.error = false;
         }
 
         public kiter(final boolean up, final String firstHash) throws IOException {
             this.up = up;
-            this.iter = urlIndexFile.rows(up, (firstHash == null) ? null : ASCII.getBytes(firstHash));
+            this.iter = MetadataRepository.this.urlIndexFile.rows(up, (firstHash == null) ? null : ASCII.getBytes(firstHash));
             this.error = false;
         }
 
         public kiter clone(final Object secondHash) {
             try {
-                return new kiter(up, (String) secondHash);
+                return new kiter(this.up, (String) secondHash);
             } catch (final IOException e) {
                 return null;
             }
         }
-        
+
         public final boolean hasNext() {
             if (this.error) return false;
             if (this.iter == null) return false;
@@ -269,8 +268,8 @@ public final class MetadataRepository implements Iterable<byte[]> {
     /**
      * Uses an Iteration over urlHash.db to detect malformed URL-Entries.
      * Damaged URL-Entries will be marked in a HashSet and removed at the end of the function.
-     * 
-     * @param proxyConfig 
+     *
+     * @param proxyConfig
      */
     public void deadlinkCleaner() {
         final Log log = new Log("URLDBCLEANUP");
@@ -289,7 +288,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     log.logSevere("RuntimeException:", e);
                 }
             }
-            log.logInfo("URLs vorher: " + urlIndexFile.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
+            log.logInfo("URLs vorher: " + this.urlIndexFile.size() + " Entries loaded during Iteratorloop: " + iteratorCount + " kaputte URLs: " + damagedURLS.size());
 
             final HTTPClient client = new HTTPClient();
             final Iterator<String> eiter2 = damagedURLS.iterator();
@@ -301,7 +300,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                 String oldUrlStr = null;
                 try {
                     // getting the url data as byte array
-                    final Row.Entry entry = urlIndexFile.get(urlHashBytes);
+                    final Row.Entry entry = this.urlIndexFile.get(urlHashBytes, true);
 
                     // getting the wrong url string
                     oldUrlStr = entry.getColString(1).trim();
@@ -315,7 +314,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                         if (client.HEADResponse(newUrl.toString()) != null
                         		&& client.getHttpResponse().getStatusLine().getStatusCode() == 200) {
                             entry.setCol(1, UTF8.getBytes(newUrl.toString()));
-                            urlIndexFile.put(entry);
+                            this.urlIndexFile.put(entry);
                             if (log.isInfo()) log.logInfo("UrlDB-Entry with urlHash '" + ASCII.String(urlHashBytes) + "' corrected\n\tURL: " + oldUrlStr + " -> " + newUrlStr);
                         } else {
                             remove(urlHashBytes);
@@ -337,7 +336,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     public BlacklistCleaner getBlacklistCleaner(final Blacklist blacklist, final CrawlStacker crawlStacker) {
         return new BlacklistCleaner(blacklist, crawlStacker);
     }
-    
+
     public class BlacklistCleaner extends Thread {
 
         private boolean run = true;
@@ -360,7 +359,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             try {
                 Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
                 final Iterator<URIMetadataRow> eiter = entries(true, null);
-                while (eiter.hasNext() && run) {
+                while (eiter.hasNext() && this.run) {
                     synchronized (this) {
                         if (this.pause) {
                             try {
@@ -376,33 +375,33 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     if (entry == null) {
                         if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
-                        if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
+                        if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + "hash == null");
                     } else {
                         final URIMetadataRow.Components metadata = entry.metadata();
-                        totalSearchedUrls++;
+                        this.totalSearchedUrls++;
                         if (metadata == null) {
                             if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "corrupted entry for hash = " + ASCII.String(entry.hash()));
                             remove(entry.hash());
                             continue;
                         }
                         if (metadata.url() == null) {
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + ASCII.String(entry.hash()) + "URL == null");
+                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + ASCII.String(entry.hash()) + "URL == null");
                             remove(entry.hash());
                             continue;
                         }
-                        if (blacklist.isListed(Blacklist.BLACKLIST_CRAWLER, metadata.url()) ||
-                            blacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url()) ||
-                            (crawlStacker.urlInAcceptedDomain(metadata.url()) != null)) {
-                            lastBlacklistedUrl = metadata.url().toNormalform(true, true);
-                            lastBlacklistedHash = ASCII.String(entry.hash());
-                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + ASCII.String(entry.hash()) + " " + metadata.url().toNormalform(false, true));
+                        if (this.blacklist.isListed(Blacklist.BLACKLIST_CRAWLER, metadata.url()) ||
+                            this.blacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url()) ||
+                            (this.crawlStacker.urlInAcceptedDomain(metadata.url()) != null)) {
+                            this.lastBlacklistedUrl = metadata.url().toNormalform(true, true);
+                            this.lastBlacklistedHash = ASCII.String(entry.hash());
+                            if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++this.blacklistedUrls + " blacklisted (" + ((double) this.blacklistedUrls / this.totalSearchedUrls) * 100 + "%): " + ASCII.String(entry.hash()) + " " + metadata.url().toNormalform(false, true));
                             remove(entry.hash());
-                            if (blacklistedUrls % 100 == 0) {
-                                Log.logInfo("URLDBCLEANER", "Deleted " + blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + lastBlacklistedUrl);
+                            if (this.blacklistedUrls % 100 == 0) {
+                                Log.logInfo("URLDBCLEANER", "Deleted " + this.blacklistedUrls + " URLs until now. Last deleted URL-Hash: " + this.lastBlacklistedUrl);
                             }
                         }
-                        lastUrl = metadata.url().toNormalform(true, true);
-                        lastHash = ASCII.String(entry.hash());
+                        this.lastUrl = metadata.url().toNormalform(true, true);
+                        this.lastHash = ASCII.String(entry.hash());
                     }
                 }
             } catch (final RuntimeException e) {
@@ -411,29 +410,29 @@ public final class MetadataRepository implements Iterable<byte[]> {
                 }
                 else {
                     Log.logWarning("URLDBCLEANER", "RuntimeException", e);
-                    run = false;
+                    this.run = false;
                 }
             } catch (final IOException e) {
                 Log.logException(e);
-                run = false;
+                this.run = false;
             } catch (final Exception e) {
                 Log.logException(e);
-                run = false;
+                this.run = false;
             }
             Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
         }
 
         public void abort() {
             synchronized(this) {
-                run = false;
-                this.notifyAll();
+                this.run = false;
+                notifyAll();
             }
         }
 
         public void pause() {
             synchronized(this) {
-                if (!pause) {
-                    pause = true;
+                if (!this.pause) {
+                    this.pause = true;
                     Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread paused");
                 }
             }
@@ -441,30 +440,30 @@ public final class MetadataRepository implements Iterable<byte[]> {
 
         public void endPause() {
             synchronized(this) {
-                if (pause) {
-                    pause = false;
-                    this.notifyAll();
+                if (this.pause) {
+                    this.pause = false;
+                    notifyAll();
                     Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread resumed");
                 }
             }
         }
     }
-    
+
     // export methods
-    public Export export(final File f, final String filter, HandleSet set, final int format, final boolean dom) {
-        if ((exportthread != null) && (exportthread.isAlive())) {
+    public Export export(final File f, final String filter, final HandleSet set, final int format, final boolean dom) {
+        if ((this.exportthread != null) && (this.exportthread.isAlive())) {
             Log.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
-            return exportthread;
+            return this.exportthread;
         }
         this.exportthread = new Export(f, filter, set, format, dom);
         this.exportthread.start();
-        return exportthread;
+        return this.exportthread;
     }
-    
+
     public Export export() {
         return this.exportthread;
     }
-    
+
     public class Export extends Thread {
         private final File f;
         private final String filter;
@@ -473,8 +472,8 @@ public final class MetadataRepository implements Iterable<byte[]> {
         private final int format;
         private final boolean dom;
         private final HandleSet set;
-        
-        public Export(final File f, final String filter, HandleSet set, final int format, boolean dom) {
+
+        public Export(final File f, final String filter, final HandleSet set, final int format, boolean dom) {
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.filter = filter;
@@ -485,16 +484,16 @@ public final class MetadataRepository implements Iterable<byte[]> {
             this.set = set;
             if ((dom) && (format == 2)) dom = false;
         }
-        
+
         public void run() {
             try {
-                File parentf = f.getParentFile();
+                final File parentf = this.f.getParentFile();
                 if (parentf != null) parentf.mkdirs();
-                final PrintWriter pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
-                if (format == 1) {
+                final PrintWriter pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(this.f)));
+                if (this.format == 1) {
                     pw.println("<html><head></head><body>");
                 }
-                if (format == 2) {
+                if (this.format == 2) {
                     pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                     pw.println("<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>");
                     pw.println("<rss version=\"2.0\" xmlns:yacy=\"http://www.yacy.net/\" xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\" xmlns:atom=\"http://www.w3.org/2005/Atom\">");
@@ -503,14 +502,14 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     pw.println("<description></description>");
                     pw.println("<link>http://yacy.net</link>");
                 }
-                
-                if (dom) {
-                    TreeSet<String> set = domainNameCollector(-1, domainSampleCollector());
-                    for (String host: set) {
-                        if (!host.matches(filter)) continue;
-                        if (format == 0) pw.println(host);
-                        if (format == 1) pw.println("<a href=\"http://" + host + "\">" + host + "</a><br>");
-                        count++;
+
+                if (this.dom) {
+                    final TreeSet<String> set = domainNameCollector(-1, domainSampleCollector());
+                    for (final String host: set) {
+                        if (!host.matches(this.filter)) continue;
+                        if (this.format == 0) pw.println(host);
+                        if (this.format == 1) pw.println("<a href=\"http://" + host + "\">" + host + "</a><br>");
+                        this.count++;
                     }
                 } else {
                     final Iterator<URIMetadataRow> i = entries(); // iterates indexURLEntry objects
@@ -519,17 +518,17 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     String url;
                     while (i.hasNext()) {
                         entry = i.next();
-                        if (this.set != null && !set.has(entry.hash())) continue;
+                        if (this.set != null && !this.set.has(entry.hash())) continue;
                         metadata = entry.metadata();
                         url = metadata.url().toNormalform(true, false);
-                        if (!url.matches(filter)) continue;
-                        if (format == 0) {
+                        if (!url.matches(this.filter)) continue;
+                        if (this.format == 0) {
                             pw.println(url);
                         }
-                        if (format == 1) {
+                        if (this.format == 1) {
                             pw.println("<a href=\"" + url + "\">" + CharacterCoding.unicode2xml(metadata.dc_title(), true) + "</a><br>");
                         }
-                        if (format == 2) {
+                        if (this.format == 2) {
                             pw.println("<item>");
                             pw.println("<title>" + CharacterCoding.unicode2xml(metadata.dc_title(), true) + "</title>");
                             pw.println("<link>" + MultiProtocolURI.escape(url) + "</link>");
@@ -540,13 +539,13 @@ public final class MetadataRepository implements Iterable<byte[]> {
                             pw.println("<guid isPermaLink=\"false\">" + ASCII.String(entry.hash()) + "</guid>");
                             pw.println("</item>");
                         }
-                        count++;
+                        this.count++;
                     }
                 }
-                if (format == 1) {
+                if (this.format == 1) {
                     pw.println("</body></html>");
                 }
-                if (format == 2) {
+                if (this.format == 2) {
                     pw.println("</channel>");
                     pw.println("</rss>");
                 }
@@ -560,21 +559,21 @@ public final class MetadataRepository implements Iterable<byte[]> {
             }
             // terminate process
         }
-        
+
         public File file() {
             return this.f;
         }
-        
+
         public String failed() {
             return this.failure;
         }
-        
+
         public int count() {
             return this.count;
         }
-        
+
     }
-    
+
     /**
      * collect domain samples: all url hashes from the metadata database is listed and the domain part
      * of the url hashes is used to count how many of these domain hashes appear
@@ -582,9 +581,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
      * @throws IOException
      */
     public Map<String, URLHashCounter> domainSampleCollector() throws IOException {
-        Map<String, URLHashCounter> map = new HashMap<String, URLHashCounter>();
+        final Map<String, URLHashCounter> map = new HashMap<String, URLHashCounter>();
         // first collect all domains and calculate statistics about it
-        CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+        final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
         String hosthash;
         byte[] urlhashb;
         URLHashCounter ds;
@@ -601,22 +600,22 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
         return map;
     }
-    
+
     /**
      * create a list of domain names in this database
      * @param count number of entries or -1 for all
      * @param domainSamples a map from domain hashes to hash statistics
      * @return a set of domain names, ordered by name of the domains
      */
-    public TreeSet<String> domainNameCollector(int count, Map<String, URLHashCounter> domainSamples) {
+    public TreeSet<String> domainNameCollector(int count, final Map<String, URLHashCounter> domainSamples) {
         // collect hashes from all domains
-        
+
         // fetch urls from the database to determine the host in clear text
         URIMetadataRow urlref;
         if (count < 0 || count > domainSamples.size()) count = domainSamples.size();
-        statsDump = new ArrayList<HostStat>();
-        TreeSet<String> set = new TreeSet<String>();
-        for (URLHashCounter hs: domainSamples.values()) {
+        this.statsDump = new ArrayList<HostStat>();
+        final TreeSet<String> set = new TreeSet<String>();
+        for (final URLHashCounter hs: domainSamples.values()) {
             if (hs == null) continue;
             urlref = this.load(hs.urlhashb);
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
@@ -634,30 +633,30 @@ public final class MetadataRepository implements Iterable<byte[]> {
      * @param domainSamples a map from domain hashes to hash statistics
      * @return a map from url hash samples to counters
      */
-    public ScoreMap<String> urlSampleScores(Map<String, URLHashCounter> domainSamples) {
-        ScoreMap<String> urlSampleScore = new ConcurrentScoreMap<String>();
-        for (Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
+    public ScoreMap<String> urlSampleScores(final Map<String, URLHashCounter> domainSamples) {
+        final ScoreMap<String> urlSampleScore = new ConcurrentScoreMap<String>();
+        for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
             urlSampleScore.inc(ASCII.String(e.getValue().urlhashb), e.getValue().count);
         }
         return urlSampleScore;
     }
-    
+
     /**
      * calculate all domain names for all domain hashes
      * @param domainSamples a map from domain hashes to hash statistics
      * @return a map from domain hashes to host stats including domain names
      */
-    public Map<String, HostStat> domainHashResolver(Map<String, URLHashCounter> domainSamples) {
-        HashMap<String, HostStat> hostMap = new HashMap<String, HostStat>();
+    public Map<String, HostStat> domainHashResolver(final Map<String, URLHashCounter> domainSamples) {
+        final HashMap<String, HostStat> hostMap = new HashMap<String, HostStat>();
         URIMetadataRow urlref;
-        
-        ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
-        for (Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
+
+        final ScoreMap<String> hosthashScore = new ConcurrentScoreMap<String>();
+        for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
             hosthashScore.inc(ASCII.String(e.getValue().urlhashb, 6, 6), e.getValue().count);
         }
         URIMetadataRow.Components comps;
         DigestURI url;
-        for (Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
+        for (final Map.Entry<String, URLHashCounter> e: domainSamples.entrySet()) {
             urlref = this.load(e.getValue().urlhashb);
             comps = urlref.metadata();
             url = comps.url();
@@ -665,18 +664,18 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
         return hostMap;
     }
-    
-    public Iterator<HostStat> statistics(int count, ScoreMap<String> domainScore) {
+
+    public Iterator<HostStat> statistics(int count, final ScoreMap<String> domainScore) {
         // prevent too heavy IO.
-        if (statsDump != null && count <= statsDump.size()) return statsDump.iterator();
-    
+        if (this.statsDump != null && count <= this.statsDump.size()) return this.statsDump.iterator();
+
         // fetch urls from the database to determine the host in clear text
-        Iterator<String> j = domainScore.keys(false); // iterate urlhash-examples in reverse order (biggest first)
+        final Iterator<String> j = domainScore.keys(false); // iterate urlhash-examples in reverse order (biggest first)
         URIMetadataRow urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || domainScore.sizeSmaller(count)) count = domainScore.size();
-        statsDump = new ArrayList<HostStat>();
+        this.statsDump = new ArrayList<HostStat>();
         URIMetadataRow.Components comps;
         DigestURI url;
         while (j.hasNext()) {
@@ -684,31 +683,31 @@ public final class MetadataRepository implements Iterable<byte[]> {
             if (urlhash == null) continue;
             urlref = this.load(ASCII.getBytes(urlhash));
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
-            if (statsDump == null) return new ArrayList<HostStat>().iterator(); // some other operation has destroyed the object
+            if (this.statsDump == null) return new ArrayList<HostStat>().iterator(); // some other operation has destroyed the object
             comps = urlref.metadata();
             url = comps.url();
-            statsDump.add(new HostStat(url.getHost(), url.getPort(), urlhash.substring(6), domainScore.get(urlhash)));
+            this.statsDump.add(new HostStat(url.getHost(), url.getPort(), urlhash.substring(6), domainScore.get(urlhash)));
             count--;
             if (count == 0) break;
         }
         // finally return an iterator for the result array
-        return (statsDump == null) ? new ArrayList<HostStat>().iterator() : statsDump.iterator();
+        return (this.statsDump == null) ? new ArrayList<HostStat>().iterator() : this.statsDump.iterator();
     }
-    
+
     private static class URLHashCounter {
         public byte[] urlhashb;
         public int count;
-        public URLHashCounter(byte[] urlhashb) {
+        public URLHashCounter(final byte[] urlhashb) {
             this.urlhashb = urlhashb;
             this.count = 1;
         }
     }
-    
+
     public static class HostStat {
         public String hostname, hosthash;
         public int port;
         public int count;
-        public HostStat(String host, int port, String urlhashfragment, int count) {
+        public HostStat(final String host, final int port, final String urlhashfragment, final int count) {
             assert urlhashfragment.length() == 6;
             this.hostname = host;
             this.port = port;
@@ -716,7 +715,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             this.count = count;
         }
     }
-    
+
     /**
      * using a fragment of the url hash (5 bytes: bytes 6 to 10) it is possible to address all urls from a specific domain
      * here such a fragment can be used to delete all these domains at once
@@ -724,26 +723,26 @@ public final class MetadataRepository implements Iterable<byte[]> {
      * @return number of deleted domains
      * @throws IOException
      */
-    public int deleteDomain(String hosthash) throws IOException {
+    public int deleteDomain(final String hosthash) throws IOException {
         // first collect all url hashes that belong to the domain
         assert hosthash.length() == 6;
-        ArrayList<String> l = new ArrayList<String>();
-        CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
+        final ArrayList<String> l = new ArrayList<String>();
+        final CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
         String hash;
         while (i != null && i.hasNext()) {
             hash = ASCII.String(i.next());
             if (hosthash.equals(hash.substring(6))) l.add(hash);
         }
-        
+
         // then delete the urls using this list
         int cnt = 0;
-        for (String h: l) {
-            if (urlIndexFile.delete(ASCII.getBytes(h))) cnt++;
+        for (final String h: l) {
+            if (this.urlIndexFile.delete(ASCII.getBytes(h))) cnt++;
         }
-        
+
         // finally remove the line with statistics
-        if (statsDump != null) {
-            Iterator<HostStat> hsi = statsDump.iterator();
+        if (this.statsDump != null) {
+            final Iterator<HostStat> hsi = this.statsDump.iterator();
             HostStat hs;
             while (hsi.hasNext()) {
                 hs = hsi.next();
@@ -753,7 +752,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                 }
             }
         }
-        
+
         return cnt;
     }
 }

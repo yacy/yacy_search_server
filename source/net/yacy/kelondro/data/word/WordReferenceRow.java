@@ -9,7 +9,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -46,7 +46,7 @@ import net.yacy.kelondro.util.ByteArray;
  */
 public final class WordReferenceRow extends AbstractReference implements WordReference, Cloneable {
 
-	
+
     public static final Row urlEntryRow = new Row(new Column[]{
             new Column("h", Column.celltype_string,    Column.encoder_bytes, Word.commonHashLength, "urlhash"),
             new Column("a", Column.celltype_cardinal,  Column.encoder_b256,  2, "lastModified"),
@@ -72,14 +72,14 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         Base64Order.enhancedCoder
     );
     // available chars: b,e,j,q
-    
+
     /**
 	 * object for termination of concurrent blocking queue processing
 	 */
     public static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
 	public static final WordReferenceRow poison = new WordReferenceRow(poisonRowEntry);
-    
-    
+
+
     // static properties
     private static final int col_urlhash       =  0; // h 12 the url hash b64-encoded
     private static final int col_lastModified  =  1; // a  2 last-modified time of the document where word appears
@@ -94,7 +94,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     private static final int col_urlLength     = 10; // m  1 byte-length of complete URL
     private static final int col_urlComps      = 11; // n  1 number of path components
 
-    // dynamic properties    
+    // dynamic properties
     private static final int col_typeofword    = 12; // g  1 grammatical classification
     private static final int col_flags         = 13; // z  4 b64-encoded appearance flags (24 bit, see definition below)
     private static final int col_hitcount      = 14; // c  1 number of occurrences of this word in text
@@ -115,7 +115,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public  static final int flag_app_emphasized    = 29; // word is emphasized in text (i.e. bold, italics, special size)
 
     private final Row.Entry entry;
-    
+
     public WordReferenceRow(
             final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
@@ -161,7 +161,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_reserve1, 0);
         this.entry.setCol(col_reserve2, 0);
     }
-    
+
     public WordReferenceRow(final byte[]   urlHash,
                             final int      urlLength,     // byte-length of complete URL
                             final int      urlComps,      // number of path components
@@ -194,7 +194,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_reserve1, 0);
                         this.entry.setCol(col_reserve2, 0);
                     }
-    
+
     public void setWord(final Word word) {
                         this.entry.setCol(col_typeofword, new byte[]{(byte) 0});
                         this.entry.setCol(col_flags, word.flags.bytes());
@@ -203,35 +203,35 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_posinphrase, word.posInPhrase);
                         this.entry.setCol(col_posofphrase, word.numOfPhrase);
     }
-    
+
     public WordReferenceRow(final String external) {
         this.entry = urlEntryRow.newEntry(external, true);
     }
-    
+
     public WordReferenceRow(final byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
     }
-    
+
     public WordReferenceRow(final byte[] row, final int offset, final boolean clone) {
         this.entry = urlEntryRow.newEntry(row, offset, clone);
     }
-    
+
     public WordReferenceRow(final Row.Entry rentry) {
-        // FIXME: see if cloning is necessary
+        // no cloning is necessary since there is no further manipulation after this initial instantiation
         this.entry = rentry;
     }
-    
+
     @Override
     public WordReferenceRow clone() {
         final byte[] b = new byte[urlEntryRow.objectsize];
-        System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
+        System.arraycopy(this.entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
         return new WordReferenceRow(b);
     }
 
     public String toPropertyForm() {
-        return entry.toPropertyForm('=', true, true, false, false);
+        return this.entry.toPropertyForm('=', true, true, false, false);
     }
-    
+
     public Entry toKelondroEntry() {
         return this.entry;
     }
@@ -247,7 +247,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public long lastModified() {
         return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
     }
-    
+
     public long freshUntil() {
         return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_freshUntil));
     }
@@ -292,31 +292,31 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public int wordsintitle() {
         return (int) this.entry.getColLong(col_wordsInTitle);
     }
-    
+
     public int llocal() {
         return (int) this.entry.getColLong(col_llocal);
     }
-    
+
     public int lother() {
         return (int) this.entry.getColLong(col_lother);
     }
-    
+
     public int urllength() {
         return (int) this.entry.getColLong(col_urlLength);
     }
-    
+
     public int urlcomps() {
         return (int) this.entry.getColLong(col_urlComps);
     }
-    
+
     public Bitfield flags() {
         return new Bitfield(this.entry.getColBytes(col_flags, false));
     }
-    
+
     public double termFrequency() {
-        return (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
+        return (((double) hitcount()) / ((double) (wordsintext() + wordsintitle() + 1)));
     }
-    
+
     @Override
     public String toString() {
         return toPropertyForm();
@@ -327,18 +327,18 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof WordReferenceRow)) return false;
-        WordReferenceRow other = (WordReferenceRow) obj;
-        return Base64Order.enhancedCoder.equal(this.urlhash(), other.urlhash());
+        final WordReferenceRow other = (WordReferenceRow) obj;
+        return Base64Order.enhancedCoder.equal(urlhash(), other.urlhash());
     }
-    
+
     @Override
     public int hashCode() {
-        return ByteArray.hashCode(this.urlhash());
+        return ByteArray.hashCode(urlhash());
     }
 
     public void join(final Reference oe) {
         throw new UnsupportedOperationException("");
-        
+
     }
-    
+
 }

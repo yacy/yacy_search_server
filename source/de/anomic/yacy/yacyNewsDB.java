@@ -50,8 +50,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.UTF8;
@@ -64,8 +64,8 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.kelondroException;
 import net.yacy.kelondro.util.MapTools;
+import net.yacy.kelondro.util.kelondroException;
 
 
 public class yacyNewsDB {
@@ -94,15 +94,15 @@ public class yacyNewsDB {
                 "String cat-" + categoryStringLength + "," +
                 "String rec-" + GenericFormatter.PATTERN_SHORT_SECOND.length() + "," +
                 "short  dis-2 {b64e}," +
-                "String att-" + attributesMaxLength,
+                "String att-" + this.attributesMaxLength,
                 NaturalOrder.naturalOrder
             );
         try {
-            this.news = new Table(path, rowdef, 10, 0, useTailCache, exceed134217727);
-        } catch (RowSpaceExceededException e) {
+            this.news = new Table(path, this.rowdef, 10, 0, useTailCache, exceed134217727);
+        } catch (final RowSpaceExceededException e) {
             try {
-                this.news = new Table(path, rowdef, 0, 0, false, exceed134217727);
-            } catch (RowSpaceExceededException e1) {
+                this.news = new Table(path, this.rowdef, 0, 0, false, exceed134217727);
+            } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
@@ -110,21 +110,21 @@ public class yacyNewsDB {
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
-        if (path.exists()) FileUtils.deletedelete(path);
+        if (this.path.exists()) FileUtils.deletedelete(this.path);
         try {
-            this.news = new Table(path, rowdef, 10, 0, false, false);
-        } catch (RowSpaceExceededException e) {
+            this.news = new Table(this.path, this.rowdef, 10, 0, false, false);
+        } catch (final RowSpaceExceededException e) {
             try {
-                this.news = new Table(path, rowdef, 0, 0, false, false);
-            } catch (RowSpaceExceededException e1) {
+                this.news = new Table(this.path, this.rowdef, 0, 0, false, false);
+            } catch (final RowSpaceExceededException e1) {
                 Log.logException(e1);
             }
         }
     }
-    
+
     public void close() {
-        if (news != null) news.close();
-        news = null;
+        if (this.news != null) this.news.close();
+        this.news = null;
     }
 
     @Override
@@ -133,31 +133,31 @@ public class yacyNewsDB {
     }
 
     public int size() {
-        return news.size();
+        return this.news.size();
     }
 
     public void remove(final String id) throws IOException {
-        news.delete(UTF8.getBytes(id));
+        this.news.delete(UTF8.getBytes(id));
     }
 
     public synchronized Record put(final Record record) throws IOException, RowSpaceExceededException {
         try {
-            return b2r(news.replace(r2b(record)));
+            return b2r(this.news.replace(r2b(record)));
         } catch (final Exception e) {
             resetDB();
-            return b2r(news.replace(r2b(record)));
+            return b2r(this.news.replace(r2b(record)));
         }
     }
 
     public synchronized Record get(final String id) throws IOException {
         try {
-            return b2r(news.get(UTF8.getBytes(id)));
+            return b2r(this.news.get(UTF8.getBytes(id), false));
         } catch (final kelondroException e) {
             resetDB();
             return null;
         }
     }
-    
+
     // use our own formatter to prevent concurrency locks with other processes
     private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
 
@@ -175,8 +175,8 @@ public class yacyNewsDB {
     private final Row.Entry r2b(final Record r) {
         if (r == null) return null;
         String attributes = r.attributes().toString();
-        if (attributes.length() > attributesMaxLength) {
-            Log.logWarning("yacyNewsDB", "attribute length=" + attributes.length() + " exceeds maximum size=" + attributesMaxLength);
+        if (attributes.length() > this.attributesMaxLength) {
+            Log.logWarning("yacyNewsDB", "attribute length=" + attributes.length() + " exceeds maximum size=" + this.attributesMaxLength);
             attributes = new HashMap<String, String>().toString();
         }
         final Row.Entry entry = this.news.row().newEntry();
@@ -187,7 +187,7 @@ public class yacyNewsDB {
         entry.setCol(4, UTF8.getBytes(attributes));
         return entry;
     }
-    
+
     public Record newRecord(final yacySeed mySeed, final String category, final Properties attributes) {
         try {
             final Map<String, String> m = new HashMap<String, String>();
@@ -213,7 +213,7 @@ public class yacyNewsDB {
         }
     }
 
-    public Record newRecord(String external) {
+    public Record newRecord(final String external) {
         try {
             return new Record(external);
         } catch (final IllegalArgumentException e) {
@@ -231,22 +231,22 @@ public class yacyNewsDB {
         private       int    distributed; // counter that counts number of distributions of this news record
         private final Map<String, String> attributes;  // elements of the news for a special category
 
-        
+
         private Record(final String newsString) {
             this.attributes = MapTools.string2map(newsString, ",");
-            if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
-            this.category = (attributes.containsKey("cat")) ? attributes.get("cat") : "";
-            if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
-            this.received = (attributes.containsKey("rec")) ? my_SHORT_SECOND_FORMATTER.parse(attributes.get("rec"), GenericFormatter.UTCDiffString()) : new Date();
-            this.created = (attributes.containsKey("cre")) ? my_SHORT_SECOND_FORMATTER.parse(attributes.get("cre"), GenericFormatter.UTCDiffString()) : new Date();
-            this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt(attributes.get("dis")) : 0;
-            this.originator = (attributes.containsKey("ori")) ? attributes.get("ori") : "";
+            if (this.attributes.toString().length() > yacyNewsDB.this.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + this.attributes.toString().length() + ") exceeds maximum (" + yacyNewsDB.this.attributesMaxLength + ")");
+            this.category = (this.attributes.containsKey("cat")) ? this.attributes.get("cat") : "";
+            if (this.category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + this.category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
+            this.received = (this.attributes.containsKey("rec")) ? my_SHORT_SECOND_FORMATTER.parse(this.attributes.get("rec"), GenericFormatter.UTCDiffString()) : new Date();
+            this.created = (this.attributes.containsKey("cre")) ? my_SHORT_SECOND_FORMATTER.parse(this.attributes.get("cre"), GenericFormatter.UTCDiffString()) : new Date();
+            this.distributed = (this.attributes.containsKey("dis")) ? Integer.parseInt(this.attributes.get("dis")) : 0;
+            this.originator = (this.attributes.containsKey("ori")) ? this.attributes.get("ori") : "";
             removeStandards();
         }
 
         private Record(final yacySeed mySeed, final String category, final Map<String, String> attributes) {
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
-            if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
+            if (attributes.toString().length() > yacyNewsDB.this.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + yacyNewsDB.this.attributesMaxLength + ")");
             this.attributes = attributes;
             this.received = null;
             this.created = new Date();
@@ -258,7 +258,7 @@ public class yacyNewsDB {
 
         private Record(final String id, final String category, final Date received, final int distributed, final Map<String, String> attributes) {
             if (category.length() > yacyNewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + yacyNewsDB.categoryStringLength + ")");
-            if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
+            if (attributes.toString().length() > yacyNewsDB.this.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + yacyNewsDB.this.attributesMaxLength + ")");
             this.attributes = attributes;
             this.received = received;
             this.created = my_SHORT_SECOND_FORMATTER.parse(id.substring(0, GenericFormatter.PATTERN_SHORT_SECOND.length()), GenericFormatter.UTCDiffString());
@@ -269,61 +269,61 @@ public class yacyNewsDB {
         }
 
         private void removeStandards() {
-            attributes.remove("ori");
-            attributes.remove("cat");
-            attributes.remove("cre");
-            attributes.remove("rec");
-            attributes.remove("dis");
+            this.attributes.remove("ori");
+            this.attributes.remove("cat");
+            this.attributes.remove("cre");
+            this.attributes.remove("rec");
+            this.attributes.remove("dis");
         }
-        
+
         @Override
         public String toString() {
             // this creates the string that shall be distributed
             // attention: this has no additional encoding
-            if (this.originator != null) attributes.put("ori", this.originator);
-            if (this.category != null)   attributes.put("cat", this.category);
-            if (this.created != null)    attributes.put("cre", my_SHORT_SECOND_FORMATTER.format(this.created));
-            if (this.received != null)   attributes.put("rec", my_SHORT_SECOND_FORMATTER.format(this.received));
-            attributes.put("dis", Integer.toString(this.distributed));
-            final String theString = attributes.toString();
+            if (this.originator != null) this.attributes.put("ori", this.originator);
+            if (this.category != null)   this.attributes.put("cat", this.category);
+            if (this.created != null)    this.attributes.put("cre", my_SHORT_SECOND_FORMATTER.format(this.created));
+            if (this.received != null)   this.attributes.put("rec", my_SHORT_SECOND_FORMATTER.format(this.received));
+            this.attributes.put("dis", Integer.toString(this.distributed));
+            final String theString = this.attributes.toString();
             removeStandards();
             return theString;
         }
 
         public String id() {
-            return my_SHORT_SECOND_FORMATTER.format(created) + originator;
+            return my_SHORT_SECOND_FORMATTER.format(this.created) + this.originator;
         }
 
         public String originator() {
-            return originator;
+            return this.originator;
         }
 
         public Date created() {
-            return created;
+            return this.created;
         }
 
         public Date received() {
-            return received;
+            return this.received;
         }
 
         public String category() {
-            return category;
+            return this.category;
         }
 
         public int distributed() {
-            return distributed;
+            return this.distributed;
         }
 
         public void incDistribution() {
-            distributed++;
+            this.distributed++;
         }
 
         public Map<String, String> attributes() {
-            return attributes;
+            return this.attributes;
         }
-        
+
         public String attribute(final String key, final String dflt) {
-            final String s = attributes.get(key);
+            final String s = this.attributes.get(key);
             if ((s == null) || (s.length() == 0)) return dflt;
             return s;
         }
