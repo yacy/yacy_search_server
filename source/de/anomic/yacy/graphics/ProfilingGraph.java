@@ -176,14 +176,16 @@ public class ProfilingGraph {
             if (events != null) {
                 EventTracker.Event event;
                 EventPing ping;
+                String pingPeer;
                 while (events.hasNext()) {
                     event = events.next();
                     time = event.time - now;
                     ping = (EventPing) event.payload;
                     x1 = (int) (time/1000);
                     y1 = Math.abs((ping.outgoing ? ping.toPeer : ping.fromPeer).hashCode()) % vspace;
+                    pingPeer = ping.outgoing ? "-> " + ping.toPeer.toUpperCase() : "<- " + ping.fromPeer.toUpperCase();
                     chart.setColor("444444");
-                    chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT2, x1, y1, 2, "PING " + ping.fromPeer.toUpperCase() + " -> " + ping.toPeer.toUpperCase() + (ping.newPeers > 0 ? "(+" + ping.newPeers + ")" : ""), 0);
+                    chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT2, x1, y1, 2, pingPeer + (ping.newPeers > 0 ? "(+" + ping.newPeers + ")" : ""), 0);
                     x0 = x1; y0 = y1;
                 }
             }
