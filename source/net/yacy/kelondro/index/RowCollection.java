@@ -31,32 +31,26 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Array;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.order.Sortable;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.NamePrefixThreadFactory;
 import net.yacy.kelondro.util.kelondroException;
 
 
-public class RowCollection implements Iterable<Row.Entry>, Cloneable {
+public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, Cloneable {
 
     public  static final long growfactorLarge100 = 140L;
     public  static final long growfactorSmall100 = 120L;
     private static final int isortlimit = 20;
-    private static final int availableCPU = Runtime.getRuntime().availableProcessors();
 
     private static final int exp_chunkcount  = 0;
     private static final int exp_last_read   = 1;
@@ -64,28 +58,6 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     private static final int exp_order_type  = 3;
     private static final int exp_order_bound = 4;
     private static final int exp_collection  = 5;
-
-    public static final ExecutorService sortingthreadexecutor =
-        (availableCPU > 1)
-        ? new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors(),
-                Integer.MAX_VALUE,
-                120L, TimeUnit.SECONDS,
-                new SynchronousQueue<Runnable>(),
-                new NamePrefixThreadFactory("sorting"),
-                new ThreadPoolExecutor.CallerRunsPolicy())
-        : null;
-
-    private static final ExecutorService partitionthreadexecutor =
-        (availableCPU > 1)
-        ? new ThreadPoolExecutor(
-                Runtime.getRuntime().availableProcessors(),
-                Integer.MAX_VALUE,
-                120L, TimeUnit.SECONDS,
-                new SynchronousQueue<Runnable>(),
-                new NamePrefixThreadFactory("partition"),
-                new ThreadPoolExecutor.CallerRunsPolicy())
-        : null;
 
     protected final Row    rowdef;
     protected       byte[] chunkcache;
@@ -307,6 +279,25 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return neededSpaceForEnsuredSize(this.chunkcount + 1, false);
     }
 
+    @Override
+    public int compare(final Entry o1, final Entry o2) {
+        return o1.compareTo(o2);
+    }
+
+    @Override
+    public Entry buffer() {
+        return row().newEntry();
+    }
+
+    @Override
+    public void swap(final int i, final int j, final Entry buffer) {
+        if (i == j) return;
+        final byte[] swapspace = buffer.bytes();
+        System.arraycopy(this.chunkcache, this.rowdef.objectsize * i, swapspace, 0, this.rowdef.objectsize);
+        System.arraycopy(this.chunkcache, this.rowdef.objectsize * j, this.chunkcache, this.rowdef.objectsize * i, this.rowdef.objectsize);
+        System.arraycopy(swapspace, 0, this.chunkcache, this.rowdef.objectsize * j, this.rowdef.objectsize);
+    }
+
     protected synchronized void trim() {
         if (this.chunkcache.length == 0) return;
         final long needed = this.chunkcount * this.rowdef.objectsize;
@@ -482,6 +473,11 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         this.lastTimeWrote = System.currentTimeMillis();
     }
 
+
+    public final void delete(final int p) {
+        removeRow(p, true);
+    }
+
     /**
      * removes the last entry from the collection
      * @return
@@ -616,151 +612,10 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
 
     }
 
-    public synchronized final void sort() {
-        assert (this.rowdef.objectOrder != null);
-        if (this.sortBound == this.chunkcount) return; // this is already sorted
-        if (this.chunkcount < isortlimit) {
-            isort(0, this.chunkcount, new byte[this.rowdef.objectsize]);
-            this.sortBound = this.chunkcount;
-            assert isSorted();
-            return;
-        }
-        final byte[] swapspace = new byte[this.rowdef.objectsize];
-        final int p = partition(0, this.chunkcount, this.sortBound, swapspace);
-        if (sortingthreadexecutor != null &&
-            !sortingthreadexecutor.isShutdown() &&
-            availableCPU > 1 &&
-            this.chunkcount > 8000 &&
-            p > isortlimit * 5 &&
-            this.chunkcount - p > isortlimit * 5
-            ) {
-        	// sort this using multi-threading
-            Future<Integer> part0, part1;
-            int p0 = -1, p1 = -1;
-            try {
-                part0 = partitionthreadexecutor.submit(new partitionthread(this, 0, p, 0));
-            } catch (final RejectedExecutionException e) {
-                part0 = null;
-                try {p0 = new partitionthread(this, 0, p, 0).call().intValue();} catch (final Exception ee) {}
-            }
-            try {
-                part1 = partitionthreadexecutor.submit(new partitionthread(this, p, this.chunkcount, p));
-            } catch (final RejectedExecutionException e) {
-                part1 = null;
-                try {p1 = new partitionthread(this, p, this.chunkcount, p).call().intValue();} catch (final Exception ee) {}
-            }
-            try {
-                if (part0 != null) p0 = part0.get().intValue();
-                Future<Object> sort0, sort1, sort2, sort3;
-                try {
-                    sort0 = sortingthreadexecutor.submit(new qsortthread(this, 0, p0, 0));
-                } catch (final RejectedExecutionException e) {
-                    sort0 = null;
-                    try {new qsortthread(this, 0, p0, 0).call();} catch (final Exception ee) {}
-                }
-                try {
-                    sort1 = sortingthreadexecutor.submit(new qsortthread(this, p0, p, p0));
-                } catch (final RejectedExecutionException e) {
-                    sort1 = null;
-                    try {new qsortthread(this, p0, p, p0).call();} catch (final Exception ee) {}
-                }
-                if (part1 != null) p1 = part1.get().intValue();
-                try {
-                    sort2 = sortingthreadexecutor.submit(new qsortthread(this, p, p1, p));
-                } catch (final RejectedExecutionException e) {
-                    sort2 = null;
-                    try {new qsortthread(this, p, p1, p).call();} catch (final Exception ee) {}
-                }
-                try {
-                    sort3 = sortingthreadexecutor.submit(new qsortthread(this, p1, this.chunkcount, p1));
-                } catch (final RejectedExecutionException e) {
-                    sort3 = null;
-                    try {new qsortthread(this, p1, this.chunkcount, p1).call();} catch (final Exception ee) {}
-                }
-                // wait for all results
-                if (sort0 != null) sort0.get();
-                if (sort1 != null) sort1.get();
-                if (sort2 != null) sort2.get();
-                if (sort3 != null) sort3.get();
-            } catch (final InterruptedException e) {
-                Log.logSevere("RowCollection", "", e);
-            } catch (final ExecutionException e) {
-                Log.logSevere("RowCollection", "", e);
-            }
-        } else {
-        	qsort(0, p, 0, swapspace);
-        	qsort(p + 1, this.chunkcount, 0, swapspace);
-        }
-        this.sortBound = this.chunkcount;
-        //assert this.isSorted();
+    public final void sort() {
+        net.yacy.kelondro.order.Array.sort(this);
+        this.sortBound = size();
     }
-
-    /*
-    public synchronized final void sort2() {
-        assert (this.rowdef.objectOrder != null);
-        if (this.sortBound == this.chunkcount) return; // this is already sorted
-        if (this.chunkcount < isortlimit) {
-            isort(0, this.chunkcount, new byte[this.rowdef.objectsize]);
-            this.sortBound = this.chunkcount;
-            assert this.isSorted();
-            return;
-        }
-        final byte[] swapspace = new byte[this.rowdef.objectsize];
-        final int p = partition(0, this.chunkcount, this.sortBound, swapspace);
-        if ((sortingthreadexecutor != null) &&
-            (!sortingthreadexecutor.isShutdown()) &&
-            (availableCPU > 1) &&
-            (this.chunkcount > 4000)) {
-            // sort this using multi-threading
-            final Future<Object> part = sortingthreadexecutor.submit(new qsortthread(this, 0, p, 0));
-            //CompletionService<Object> sortingthreadcompletion = new ExecutorCompletionService<Object>(sortingthreadexecutor);
-            //Future<Object> part = sortingthreadcompletion.submit(new qsortthread(this, 0, p, 0));
-            qsort(p + 1, this.chunkcount, 0, swapspace);
-            try {
-                part.get();
-            } catch (final InterruptedException e) {
-                Log.logSevere("RowCollection", "", e);
-            } catch (final ExecutionException e) {
-                Log.logSevere("RowCollection", "", e);
-            }
-        } else {
-            qsort(0, p, 0, swapspace);
-            qsort(p + 1, this.chunkcount, 0, swapspace);
-        }
-        this.sortBound = this.chunkcount;
-        //assert this.isSorted();
-    }
-    */
-
-    private static class qsortthread implements Callable<Object> {
-        private final RowCollection rc;
-        int L, R, S;
-
-    	public qsortthread(final RowCollection rc, final int L, final int R, final int S) {
-    	    this.rc = rc;
-    	    this.L = L;
-    	    this.R = R;
-    	    this.S = S;
-        }
-
-    	public Object call() throws Exception {
-    	    this.rc.qsort(this.L, this.R, this.S, new byte[this.rc.rowdef.objectsize]);
-            return null;
-        }
-    }
-
-    final void qsort(final int L, final int R, final int S, final byte[] swapspace) {
-    	if (R - L < isortlimit) {
-            isort(L, R, swapspace);
-            return;
-        }
-    	assert R > L: "L = " + L + ", R = " + R + ", S = " + S;
-		final int p = partition(L, R, S, swapspace);
-		assert p >= L: "L = " + L + ", R = " + R + ", S = " + S + ", p = " + p;
-		assert p < R: "L = " + L + ", R = " + R + ", S = " + S + ", p = " + p;
-		qsort(L, p, 0, swapspace);
-		qsort(p + 1, R, 0, swapspace);
-	}
 
     public static class partitionthread implements Callable<Integer> {
         RowCollection rc;
@@ -889,47 +744,6 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         //if (a < b && c > b || c < b && a > b) return b;
     }
 
-    /*
-    private final int picMiddle(final int[] list, int len) {
-        assert len % 2 != 0;
-        assert len <= list.length;
-        final int cut = list.length / 2;
-        for (int i = 0; i < cut; i++) {remove(list, len, min(list, len)); len--;}
-        for (int i = 0; i < cut; i++) {remove(list, len, max(list, len)); len--;}
-        // the remaining element must be the middle element
-        assert len == 1;
-        return list[0];
-    }
-    private final void remove(final int[] list, final int len, final int idx) {
-        if (idx == len - 1) return;
-        list[idx] = list[len - 1]; // shift last element to front
-    }
-
-    private final int min(final int[] list, int len) {
-        assert len > 0;
-        int f = 0;
-        while (len-- > 0) {
-            if (compare(list[f], list[len]) > 0) f = len;
-        }
-        return f;
-    }
-
-    private final int max(final int[] list, int len) {
-        assert len > 0;
-        int f = 0;
-        while (len-- > 0) {
-            if (compare(list[f], list[len]) < 0) f = len;
-        }
-        return f;
-    }
-    */
-
-    private final void isort(final int L, final int R, final byte[] swapspace) {
-        for (int i = L + 1; i < R; i++)
-            for (int j = i; j > L && compare(j - 1, j) > 0; j--)
-                swap(j, j - 1, 0, swapspace);
-    }
-
     private final int swap(final int i, final int j, final int p, final byte[] swapspace) {
         if (i == j) return p;
         System.arraycopy(this.chunkcache, this.rowdef.objectsize * i, swapspace, 0, this.rowdef.objectsize);
@@ -939,31 +753,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     }
 
     protected synchronized void uniq() {
-        assert (this.rowdef.objectOrder != null);
-        // removes double-occurrences of chunks
-        // this works only if the collection was ordered with sort before
-        // if the collection is large and the number of deletions is also large,
-        // then this method may run a long time with 100% CPU load which is caused
-        // by the large number of memory movements.
-        if (this.chunkcount < 2) return;
-        int i = this.chunkcount - 2;
-        final long t = System.currentTimeMillis(); // for time-out
-        int d = 0;
-        try {
-            while (i >= 0) {
-                if (match(i, i + 1)) {
-                    removeRow(i + 1, true);
-                    d++;
-                }
-                i--;
-                if (System.currentTimeMillis() - t > 60000) {
-                	Log.logWarning("RowCollection", "uniq() time-out at " + i + " (backwards) from " + this.chunkcount + " elements after " + (System.currentTimeMillis() - t) + " milliseconds; " + d + " deletions so far");
-                	return;
-                }
-            }
-        } catch (final RuntimeException e) {
-            Log.logWarning("RowCollection", e.getMessage(), e);
-        }
+        Array.uniq(this);
     }
 
     public synchronized ArrayList<RowCollection> removeDoubles() throws RowSpaceExceededException {
@@ -1100,6 +890,21 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     			new Column("hash", Column.celltype_string, Column.encoder_bytes, 12, "hash")},
     			Base64Order.enhancedCoder);
 
+    	// test compare method
+    	random = new Random(0);
+    	for (int i = 0; i < testsize; i++) {
+    	    final byte[] a = ASCII.getBytes(randomHash());
+    	    final byte[] b = ASCII.getBytes(randomHash());
+    	    final int c = Base64Order.enhancedCoder.compare(a, b);
+            if (c == 0 && Base64Order.enhancedCoder.compare(b, a) != 0)
+                System.out.println("compare failed / =; a = " + ASCII.String(a) + ", b = " + ASCII.String(b));
+            if (c == -1 && Base64Order.enhancedCoder.compare(b, a) != 1)
+                System.out.println("compare failed / =; a < " + ASCII.String(a) + ", b = " + ASCII.String(b));
+            if (c == 1 && Base64Order.enhancedCoder.compare(b, a) != -1)
+                System.out.println("compare failed / =; a > " + ASCII.String(a) + ", b = " + ASCII.String(b));
+    	}
+
+    	// test sorting methods
     	RowCollection a = new RowCollection(r, testsize);
     	a.add("AAAAAAAAAAAA".getBytes());
     	a.add("BBBBBBBBBBBB".getBytes());
@@ -1115,11 +920,20 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         a = new RowCollection(r, testsize);
         long t0 = System.nanoTime();
         random = new Random(0);
-        for (int i = 0; i < testsize; i++) a.add(randomHash().getBytes());
+        for (int i = 0; i < testsize / 2; i++) a.add(randomHash().getBytes());
+        //System.out.println("check: after first random feed"); for (final Row.Entry w: a) System.out.println("1 check-row " + ASCII.String(w.getPrimaryKeyBytes()));
         random = new Random(0);
-        for (int i = 0; i < testsize; i++) a.add(randomHash().getBytes());
+        for (int i = 0; i < testsize / 2; i++) a.add(randomHash().getBytes());
+        //System.out.println("check: after second random feed"); for (final Row.Entry w: a) System.out.println("2 check-row " + ASCII.String(w.getPrimaryKeyBytes()));
         a.sort();
+        //System.out.println("check: after sort"); for (final Row.Entry w: a) System.out.println("3 check-row " + ASCII.String(w.getPrimaryKeyBytes()));
         a.uniq();
+        //System.out.println("check: after sort uniq"); for (final Row.Entry w: a) System.out.println("4 check-row " + ASCII.String(w.getPrimaryKeyBytes()));
+        // check order that the element have
+        for (int i = 0; i < a.size() - 1; i++) {
+            if (a.get(i, false).compareTo(a.get(i + 1, false)) >= 0) System.out.println("Compare error at pos " + i + ": a.get(i)=" + a.get(i, false) + ", a.get(i + 1)=" + a.get(i + 1, false));
+        }
+
         long t1 = System.nanoTime();
         System.out.println("create a   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds; a.size() = " + a.size());
 
@@ -1196,23 +1010,91 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         System.out.println("e noghosts = " + ((noghosts) ? "true" : "false") + ": " + (t14 - t13) + " nanoseconds");
         System.out.println("Result size: c = " + c.size() + ", d = " + d.size() + ", e = " + e.size());
     	System.out.println();
-    	if (sortingthreadexecutor != null) sortingthreadexecutor.shutdown();
     }
 
     public static void main(final String[] args) {
-    	//test(1000);
     	try {
-            test(50000);
+            test(500000);
+            //test(1000);
+            //test(50000);
+            //test(100000);
+            //test(1000000);
+            Log.shutdown();
+            Array.terminate();
         } catch (final RowSpaceExceededException e) {
             e.printStackTrace();
         }
-    	//test(100000);
-    	//test(1000000);
-
-    	/*
-        System.out.println(new java.util.Date(10957 * day));
-        System.out.println(new java.util.Date(0));
-        System.out.println(daysSince2000(System.currentTimeMillis()));
-        */
     }
+
 }
+
+/*
+neues sort
+[{hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}]rows double
+AAAAAAAAAAAA
+CCCCCCCCCCCC
+kelondroRowCollection test with size = 50000
+create a   : 550687000 nanoseconds, 0 entries/nanoseconds; a.size() = 25000
+create c   : 31556000 nanoseconds, 0 entries/nanoseconds
+copy c -> d: 13798000 nanoseconds, 0 entries/nanoseconds
+sort c (1) : 80845000 nanoseconds, 0 entries/nanoseconds
+sort d (2) : 79981000 nanoseconds, 0 entries/nanoseconds
+uniq c     : 3697000 nanoseconds, 0 entries/nanoseconds
+uniq d     : 3649000 nanoseconds, 0 entries/nanoseconds
+create e   : 5719968000 nanoseconds, 0 entries/nanoseconds
+sort e (2) : 65563000 nanoseconds, 0 entries/nanoseconds
+uniq e     : 3540000 nanoseconds, 0 entries/nanoseconds
+c isSorted = true: 119000 nanoseconds
+d isSorted = true: 90000 nanoseconds
+e isSorted = true: 94000 nanoseconds
+e allfound = true: 64049000 nanoseconds
+e noghosts = true: 57150000 nanoseconds
+Result size: c = 50000, d = 50000, e = 50000
+
+altes plus concurrency
+[{hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}]rows double
+AAAAAAAAAAAA
+CCCCCCCCCCCC
+kelondroRowCollection test with size = 50000
+Compare error at pos 23548: a.get(i)={hash=8dV7ACC_D1ir}, a.get(i + 1)={hash=8Ypevst5u_tV}
+create a   : 507683000 nanoseconds, 0 entries/nanoseconds; a.size() = 25001
+create c   : 38420000 nanoseconds, 0 entries/nanoseconds
+copy c -> d: 12995000 nanoseconds, 0 entries/nanoseconds
+sort c (1) : 20805000 nanoseconds, 0 entries/nanoseconds
+sort d (2) : 18935000 nanoseconds, 0 entries/nanoseconds
+uniq c     : 3712000 nanoseconds, 0 entries/nanoseconds
+uniq d     : 3604000 nanoseconds, 0 entries/nanoseconds
+create e   : 1333761000 nanoseconds, 0 entries/nanoseconds
+sort e (2) : 16124000 nanoseconds, 0 entries/nanoseconds
+uniq e     : 3453000 nanoseconds, 0 entries/nanoseconds
+c isSorted = true: 115000 nanoseconds
+d isSorted = true: 89000 nanoseconds
+e isSorted = true: 94000 nanoseconds
+e allfound = true: 58685000 nanoseconds
+e noghosts = true: 59132000 nanoseconds
+Result size: c = 50000, d = 50000, e = 50000
+
+altes ohne concurrency
+[{hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}, {hash=BBBBBBBBBBBB}]rows double
+AAAAAAAAAAAA
+CCCCCCCCCCCC
+kelondroRowCollection test with size = 50000
+Compare error at pos 23548: a.get(i)={hash=8dV7ACC_D1ir}, a.get(i + 1)={hash=8Ypevst5u_tV}
+create a   : 502494000 nanoseconds, 0 entries/nanoseconds; a.size() = 25001
+create c   : 36062000 nanoseconds, 0 entries/nanoseconds
+copy c -> d: 16164000 nanoseconds, 0 entries/nanoseconds
+sort c (1) : 32442000 nanoseconds, 0 entries/nanoseconds
+sort d (2) : 32025000 nanoseconds, 0 entries/nanoseconds
+uniq c     : 3581000 nanoseconds, 0 entries/nanoseconds
+uniq d     : 3561000 nanoseconds, 0 entries/nanoseconds
+create e   : 1788591000 nanoseconds, 0 entries/nanoseconds
+sort e (2) : 22318000 nanoseconds, 0 entries/nanoseconds
+uniq e     : 3438000 nanoseconds, 0 entries/nanoseconds
+c isSorted = true: 113000 nanoseconds
+d isSorted = true: 89000 nanoseconds
+e isSorted = true: 94000 nanoseconds
+e allfound = true: 64161000 nanoseconds
+e noghosts = true: 55975000 nanoseconds
+Result size: c = 50000, d = 50000, e = 50000
+
+*/

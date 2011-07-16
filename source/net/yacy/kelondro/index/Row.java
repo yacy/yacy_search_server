@@ -230,7 +230,7 @@ public final class Row {
 
     }
 
-    public class Entry implements Comparable<Entry>, Comparator<Entry> {
+    public class Entry implements Comparable<Entry>, Comparator<Entry>, Cloneable {
 
         private byte[] rowinstance;
         private int offset; // the offset where the row starts within rowinstance

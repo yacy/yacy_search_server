@@ -58,8 +58,8 @@ import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Array;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -380,7 +380,7 @@ public final class yacy {
                     Log.logSevere("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                 }
                 // shut down
-                if (RowCollection.sortingthreadexecutor != null) RowCollection.sortingthreadexecutor.shutdown();
+                Array.terminate();
                 Log.logConfig("SHUTDOWN", "caught termination signal");
                 server.terminate(false);
                 server.interrupt();

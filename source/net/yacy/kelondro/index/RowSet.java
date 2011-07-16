@@ -154,23 +154,25 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry> 
      * @throws IOException
      * @throws RowSpaceExceededException
      */
-    public final synchronized boolean put(final Row.Entry entry) throws RowSpaceExceededException {
+    public final boolean put(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
         // when reaching a specific amount of un-sorted entries, re-sort all
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
             sort();
         }
-        assert entry.bytes().length >= this.rowdef.primaryKeyLength;
-        final int index = find(entry.bytes(), 0);
-        if (index < 0) {
-            super.addUnique(entry);
-            return true;
-        } else {
-            final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
-            set(index, entry);       // this may alter the sortBound, which we will revert in the next step
-            this.sortBound = sb;     // revert a sortBound altering
-            return false;
+        synchronized (this) {
+            assert entry.bytes().length >= this.rowdef.primaryKeyLength;
+            final int index = find(entry.bytes(), 0);
+            if (index < 0) {
+                super.addUnique(entry);
+                return true;
+            } else {
+                final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
+                set(index, entry);       // this may alter the sortBound, which we will revert in the next step
+                this.sortBound = sb;     // revert a sortBound altering
+                return false;
+            }
         }
     }
 
