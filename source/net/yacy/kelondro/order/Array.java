@@ -90,7 +90,7 @@ public class Array {
 
     public static <A> void sort(final Sortable<A> x) {
         UpDownLatch latch;
-        final boolean threaded = x.size() > 100000;
+        final boolean threaded = false;//x.size() > 100000;
         sort(new SortJob<A>(x, 0, x.size(), x.buffer(), 0, latch = new UpDownLatch(0)), threaded);
         //for (int i = 0; i < 100; i++) {System.out.println("latch = " + latch.getCount());try {Thread.sleep(10);} catch (final InterruptedException e) {}}
         if (threaded) try {latch.await();} catch (final InterruptedException e) {}
