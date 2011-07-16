@@ -1,35 +1,63 @@
-package net.yacy.kelondro.order;
+/**
+ *  Array
+ *  Copyright 2011 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
+ *  First released 16.07.2011 at http://yacy.net
+ *
+ *  $LastChangedDate: 2011-05-30 10:53:58 +0200 (Mo, 30 Mai 2011) $
+ *  $LastChangedRevision: 7759 $
+ *  $LastChangedBy: orbiter $
+ *
+ *  This library is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation; either
+ *  version 2.1 of the License, or (at your option) any later version.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ *  Lesser General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with this program in the file lgpl21.txt
+ *  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package net.yacy.cora.storage;
 
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.AbstractQueuedSynchronizer;
+
 
 /**
  * an abstraction of the quicksort from the java.util.Array class
  * @author admin
  *
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Array {
 
-    private final static int SORT_JOBS = Runtime.getRuntime().availableProcessors() + 1;
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private final static int SORT_JOBS = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
     private final static SortJob<?> POISON_JOB_WORKER = new SortJob(null, 0, 0, 0, 0, null);
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private final static BlockingQueue<SortJob<?>> sortJobs = new LinkedBlockingQueue();
+    private static BlockingQueue<SortJob<?>> sortJobs = null;
 
     static {
-        for (int i = 0; i < SORT_JOBS; i++) {
-            new SortJobWorker().start();
+        if (SORT_JOBS > 1) {
+            for (int i = 0; i < SORT_JOBS; i++) {
+                new SortJobWorker().start();
+            }
+            sortJobs = new LinkedBlockingQueue();
         }
     }
 
     public static void terminate() {
-        for (int i = 0; i < SORT_JOBS; i++) {
-            try {
-                sortJobs.put(POISON_JOB_WORKER);
-            } catch (final InterruptedException e) {}
+        if (SORT_JOBS > 1 && sortJobs != null) {
+            for (int i = 0; i < SORT_JOBS; i++) {
+                try {
+                    sortJobs.put(POISON_JOB_WORKER);
+                } catch (final InterruptedException e) {}
+            }
         }
     }
 
@@ -43,48 +71,6 @@ public class Array {
                 }
             } catch (final InterruptedException e) {
             }
-        }
-    }
-
-    public static final class UpDownLatch extends AbstractQueuedSynchronizer {
-
-        private static final long serialVersionUID = 1L;
-
-        public UpDownLatch(final int count) {
-            setState(count);
-        }
-
-        public int getCount() {
-            return getState();
-        }
-
-        public int tryAcquireShared(final int acquires) {
-            return getState() == 0? 1 : -1;
-        }
-
-        public boolean tryReleaseShared(final int releases) {
-            // Decrement count; signal when transition to zero
-            for (;;) {
-                final int c = getState();
-                if (c == 0) return false;
-                final int nextc = c-1;
-                if (compareAndSetState(c, nextc)) return nextc == 0;
-            }
-        }
-
-        public void countUp() {
-            for (;;) {
-                final int c = getState();
-                if (compareAndSetState(c, c + 1)) return;
-            }
-        }
-
-        public void countDown() {
-            releaseShared(1);
-        }
-
-        public void await() throws InterruptedException {
-            acquireSharedInterruptibly(1);
         }
     }
 
@@ -156,8 +142,8 @@ public class Array {
         if ((s = b - a) > 1) {
             final SortJob<A> nextJob = new SortJob<A>(job.x, job.o, s, job.f, job.depth + 1, job.latch);
             if (threaded) try {
-                job.latch.countUp();
                 sortJobs.put(nextJob);
+                job.latch.countUp();
             } catch (final InterruptedException e) {
             } else {
                 sort(nextJob, threaded);
@@ -166,8 +152,8 @@ public class Array {
         if ((s = d - c) > 1) {
             final SortJob<A> nextJob = new SortJob<A>(job.x, n - s, s, job.x.buffer(), job.depth + 1, job.latch);
             if (threaded) try {
-                job.latch.countUp();
                 sortJobs.put(nextJob);
+                job.latch.countUp();
             } catch (final InterruptedException e) {
             } else {
                 sort(nextJob, threaded);

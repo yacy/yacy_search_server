@@ -34,13 +34,13 @@ import java.util.concurrent.Callable;
 
 import net.yacy.cora.document.ASCII;
 import net.yacy.cora.document.UTF8;
+import net.yacy.cora.storage.Array;
+import net.yacy.cora.storage.Sortable;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.Array;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
-import net.yacy.kelondro.order.Sortable;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.kelondroException;
@@ -613,7 +613,7 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     }
 
     public final void sort() {
-        net.yacy.kelondro.order.Array.sort(this);
+        net.yacy.cora.storage.Array.sort(this);
         this.sortBound = size();
     }
 
