@@ -146,7 +146,7 @@ public class Array {
                 job.latch.countUp();
             } catch (final InterruptedException e) {
             } else {
-                sort(nextJob, threaded);
+                sort(nextJob, false);
             }
         }
         if ((s = d - c) > 1) {
@@ -156,7 +156,7 @@ public class Array {
                 job.latch.countUp();
             } catch (final InterruptedException e) {
             } else {
-                sort(nextJob, threaded);
+                sort(nextJob, false);
             }
         }
     }

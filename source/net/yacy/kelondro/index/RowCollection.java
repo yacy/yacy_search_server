@@ -613,8 +613,9 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
     }
 
     public final void sort() {
+        if (this.sortBound == this.chunkcount) return; // this is sorted
         net.yacy.cora.storage.Array.sort(this);
-        this.sortBound = size();
+        this.sortBound = this.chunkcount;
     }
 
     public static class partitionthread implements Callable<Integer> {
