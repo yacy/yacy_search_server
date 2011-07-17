@@ -190,13 +190,15 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
          * because of a strange bug these objects cannot be initialized as normal
          * static final. If I try that, they are not initialized and are assigned null. why?
          */
+        final StringBuilder colName = new StringBuilder(30);
+        colName.append("byte[] collection-").append(Integer.toString(chunkcachelength));
         final Row er = new Row(new Column[]{
                     exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4,
-                    new Column("byte[] collection-" + chunkcachelength)
+                    new Column(colName.toString())
                 },
                 NaturalOrder.naturalOrder
         );
-        assert er.objectsize == chunkcachelength +exportOverheadSize;
+        assert er.objectsize == chunkcachelength + exportOverheadSize;
         return er;
     }
 
