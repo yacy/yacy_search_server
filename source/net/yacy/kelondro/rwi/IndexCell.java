@@ -108,7 +108,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private class CleanupThread extends Thread {
         public void run() {
             while (IndexCell.this.cleanupShallRun) {
-                cleanCache();
+                try {
+                    cleanCache();
+                } catch (final Exception e) {
+                    Log.logException(e);
+                }
                 try { Thread.sleep(3000); } catch (final InterruptedException e) {}
             }
         }
