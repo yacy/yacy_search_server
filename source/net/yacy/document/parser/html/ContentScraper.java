@@ -53,6 +53,7 @@ import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
+import net.yacy.kelondro.util.MemoryControl;
 
 
 public class ContentScraper extends AbstractScraper implements Scraper {
@@ -472,6 +473,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     private final static String cleanLine(final String s) {
+        if (!MemoryControl.request(s.length() * 2, false)) return "";
         final StringBuilder sb = new StringBuilder(s.length());
         char l = ' ';
         char c;
