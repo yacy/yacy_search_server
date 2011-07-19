@@ -34,7 +34,6 @@ public class MemoryControl {
 
 	
     private static final Runtime runtime = Runtime.getRuntime();
-    public static long maxMemory = runtime.maxMemory(); // this value does never change during runtime
 	private static final Log log = new Log("MEMORY");
     
     private static final long[] gcs = new long[5];
@@ -103,7 +102,16 @@ public class MemoryControl {
      * @return bytes
      */
     public static final long available() {
-        return maxMemory - total() + free();
+        return maxMemory() - total() + free();
+    }
+    
+    /**
+	 * maximum memory the Java virtual will allocate machine; may vary over time in some cases
+	 * @return bytes
+	 */
+	public static final long maxMemory()
+    {
+    	return runtime.maxMemory();
     }
 
 	/**
@@ -225,16 +233,19 @@ public class MemoryControl {
         // try this with a jvm 1.4.2 and with a jvm 1.5 and compare results
         final int mb = 1024 * 1024;
         System.out.println("vm: " + System.getProperty("java.vm.version"));
-        System.out.println("computed max = " + (maxMemory / mb) + " mb");
-        final int alloc = 10000;
+        System.out.println("computed max = " + (maxMemory() / mb) + " mb");
         final byte[][] x = new byte[100000][];
         for (int i = 0; i < 100000; i++) {
-            x[i] = new byte[alloc];
-            if (i % 100 == 0) System.out.println("used = " + (i * alloc / mb) +
-                    ", total = " + (total() / mb) +
-                    ", free = " + (free() / mb) +
-                    ", max = " + (maxMemory / mb) +
-                    ", avail = " + (available() / mb));
+        	if (request(mb, false))
+        	{
+	            x[i] = new byte[mb];
+	            System.out.println("used = " + i + " / " + (used() /mb) + 
+	                    ", total = " + (total() / mb) +
+	                    ", free = " + (free() / mb) +
+	                    ", max = " + (maxMemory() / mb) +
+	                    ", avail = " + (available() / mb) + 
+	                    ", averageGC = " + getAverageGCFree());
+        	}
         }
 
     }
