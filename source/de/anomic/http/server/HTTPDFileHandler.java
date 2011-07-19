@@ -904,6 +904,12 @@ public final class HTTPDFileHandler {
                     }
 
                     targetDate = new Date(targetFile.lastModified());
+                    Date expireDate = null;
+                    if (templatePatterns == null) {
+                    	// if the file will not be changed, cache it in the browser
+                    	expireDate = new Date(new Date().getTime() + (31l * 24 * 60 * 60 * 1000));
+                    }
+
 
                     // rewrite the file
                     InputStream fis = null;
@@ -923,7 +929,7 @@ public final class HTTPDFileHandler {
                         if (templateCacheEntry == null || targetFileDate.after(templateCacheEntry.lastModified)) {
                             // loading the content of the template file into
                             // a byte array
-                        templateCacheEntry = new TemplateCacheEntry();
+                            templateCacheEntry = new TemplateCacheEntry();
                             templateCacheEntry.lastModified = targetFileDate;
                             templateCacheEntry.content = FileUtils.read(targetFile);
 
@@ -972,6 +978,7 @@ public final class HTTPDFileHandler {
                     // since yacy clients do not understand chunked mode (yet), we use this only for communication with the administrator
                     final boolean yacyClient = requestHeader.userAgent().startsWith("yacy");
                     final boolean chunked = !method.equals(HeaderFramework.METHOD_HEAD) && !yacyClient && httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1);
+                    final String contentEncoding = (zipContent) ? "gzip" : null;
                     if (chunked) {
                         // send page in chunks and parse SSIs
                         final ByteBuffer o = new ByteBuffer();
@@ -980,16 +987,23 @@ public final class HTTPDFileHandler {
                         fis.close();
                         HTTPDemon.sendRespondHeader(conProp, out,
                                 httpVersion, 200, null, mimeType, -1,
-                                targetDate, null, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
-                                null, "chunked", nocache);
+                                targetDate, expireDate, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                contentEncoding, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
-                        final ChunkedOutputStream chos = new ChunkedOutputStream(out);
-                        ServerSideIncludes.writeSSI(o, chos, realmProp, clientIP);
-                        //chos.write(result);
-                        chos.finish();
-                    } else {
+                        ChunkedOutputStream chos = new ChunkedOutputStream(out);
+                        if (contentEncoding != null) {
+                        	GZIPOutputStream zippedOutput = new GZIPOutputStream(chos);
+                            ServerSideIncludes.writeSSI(o, zippedOutput, realmProp, clientIP);
+                            zippedOutput.finish();
+                            zippedOutput.flush();
+                        } else {
+                            ServerSideIncludes.writeSSI(o, chos, realmProp, clientIP);
+                            //chos.write(result);
+                            chos.finish();
+                            chos.flush();                        	
+                        }
+                     } else {
                         // send page as whole thing, SSIs are not possible
-                        final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
                         final ByteBuffer o1 = new ByteBuffer();
                         TemplateEngine.writeTemplate(fis, o1, templatePatterns, ASCII.getBytes("-UNRESOLVED_PATTERN-"));
@@ -1011,13 +1025,13 @@ public final class HTTPDFileHandler {
                         if (method.equals(HeaderFramework.METHOD_HEAD)) {
                             HTTPDemon.sendRespondHeader(conProp, out,
                                     httpVersion, 200, null, mimeType, o.length(),
-                                    targetDate, null, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                    targetDate, expireDate, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
                         } else {
                             final byte[] result = o.getBytes(); // this interrupts streaming (bad idea!)
                             HTTPDemon.sendRespondHeader(conProp, out,
                                     httpVersion, 200, null, mimeType, result.length,
-                                    targetDate, null, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
+                                    targetDate, expireDate, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
                                     contentEncoding, null, nocache);
                             FileUtils.copy(result, out);
                         }
@@ -1071,12 +1085,14 @@ public final class HTTPDFileHandler {
 
                     // write the file to the client
                     targetDate = new Date(targetFile.lastModified());
+                    // cache file for one month in browser (but most browsers won't cache for that long)
+                    final Date expireDate = new Date(new Date().getTime() + (31l * 24 * 60 * 60 * 1000));
                     final long   contentLength    = (zipContent)?-1:targetFile.length()-rangeStartOffset;
                     final String contentEncoding  = (zipContent) ? "gzip" : null;
                     final String transferEncoding = (httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1) && zipContent) ? "chunked" : null;
                     if (!httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1) && zipContent) forceConnectionClose(conProp);
 
-                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, null, header, contentEncoding, transferEncoding, nocache);
+                    HTTPDemon.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, contentLength, targetDate, expireDate, header, contentEncoding, transferEncoding, nocache);
 
                     if (!method.equals(HeaderFramework.METHOD_HEAD)) {
                         ChunkedOutputStream chunkedOut = null;

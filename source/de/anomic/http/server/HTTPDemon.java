@@ -108,7 +108,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
      
      //TODO: Load this from a file
     private static final Set<String> disallowZippedContentEncoding = new HashSet<String>(Arrays.asList(new String[]{
-            ".gz", ".tgz", ".jpg", ".jpeg", ".png", ".mp3", ".mov", ".avi", ".gif", ".zip", ".rar", ".bz2", ".lha", ".jar", ".rpm", ".arc", ".arj", ".wmv", ".ico", ".bmp"
+            ".gz", ".tgz", ".jpg", ".jpeg", ".png", ".mp3", ".mov", ".avi", ".gif", ".zip", ".rar", ".bz2", ".lha", ".jar", ".rpm", ".arc", ".arj", ".wmv"
     }));    
     
     // static objects
