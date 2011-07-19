@@ -978,7 +978,6 @@ public final class HTTPDFileHandler {
                     // since yacy clients do not understand chunked mode (yet), we use this only for communication with the administrator
                     final boolean yacyClient = requestHeader.userAgent().startsWith("yacy");
                     final boolean chunked = !method.equals(HeaderFramework.METHOD_HEAD) && !yacyClient && httpVersion.equals(HeaderFramework.HTTP_VERSION_1_1);
-                    final String contentEncoding = (zipContent) ? "gzip" : null;
                     if (chunked) {
                         // send page in chunks and parse SSIs
                         final ByteBuffer o = new ByteBuffer();
@@ -988,22 +987,17 @@ public final class HTTPDFileHandler {
                         HTTPDemon.sendRespondHeader(conProp, out,
                                 httpVersion, 200, null, mimeType, -1,
                                 targetDate, expireDate, (templatePatterns == null) ? new ResponseHeader() : templatePatterns.getOutgoingHeader(),
-                                contentEncoding, "chunked", nocache);
+                                null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
-                        ChunkedOutputStream chos = new ChunkedOutputStream(out);
-                        if (contentEncoding != null) {
-                        	GZIPOutputStream zippedOutput = new GZIPOutputStream(chos);
-                            ServerSideIncludes.writeSSI(o, zippedOutput, realmProp, clientIP);
-                            zippedOutput.finish();
-                            zippedOutput.flush();
-                        } else {
-                            ServerSideIncludes.writeSSI(o, chos, realmProp, clientIP);
-                            //chos.write(result);
-                            chos.finish();
-                            chos.flush();                        	
-                        }
-                     } else {
+                        final ChunkedOutputStream chos = new ChunkedOutputStream(out);
+                        // GZIPOutputStream does not implement flush (this is a bug IMHO)
+                        // so we can't compress this stuff, without loosing the cool SSI trickle feature
+                        ServerSideIncludes.writeSSI(o, chos, realmProp, clientIP);
+                        //chos.write(result);
+                        chos.finish();
+                    } else {
                         // send page as whole thing, SSIs are not possible
+                        final String contentEncoding = (zipContent) ? "gzip" : null;
                         // apply templates
                         final ByteBuffer o1 = new ByteBuffer();
                         TemplateEngine.writeTemplate(fis, o1, templatePatterns, ASCII.getBytes("-UNRESOLVED_PATTERN-"));
