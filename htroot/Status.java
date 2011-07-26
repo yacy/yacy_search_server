@@ -143,7 +143,7 @@ public class Status {
                 prop.put("warningDiskSpaceLow_minSpace", minFree);
             }
             if (!sb.observer.getMemoryAvailable()){
-                final String minFree = Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L);
+                final String minFree = Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L * 1024L);
                 prop.put("warningMemoryLow", "1");
                 prop.put("warningMemoryLow_minSpace", minFree);
             }
