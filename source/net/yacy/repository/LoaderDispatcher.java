@@ -136,7 +136,7 @@ public final class LoaderDispatcher {
                     0);
     }
 
-    public void load(final DigestURI url, final CacheStrategy cacheStratgy, final long maxFileSize, final File targetFile) throws IOException {
+    public void load(final DigestURI url, final CacheStrategy cacheStratgy, final int maxFileSize, final File targetFile) throws IOException {
 
         final byte[] b = load(request(url, false, true), cacheStratgy, maxFileSize, false).getContent();
         if (b == null) throw new IOException("load == null");
@@ -149,7 +149,7 @@ public final class LoaderDispatcher {
         tmp.renameTo(targetFile);
     }
 
-    public Response load(final Request request, final CacheStrategy cacheStrategy, final long maxFileSize, final boolean checkBlacklist) throws IOException {
+    public Response load(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, final boolean checkBlacklist) throws IOException {
         final String url = request.url().toNormalform(true, false);
         Semaphore check = this.loaderSteering.get(url);
         if (check != null) {
@@ -181,7 +181,7 @@ public final class LoaderDispatcher {
      * @return the loaded entity in a Response object
      * @throws IOException
      */
-    private Response loadInternal(final Request request, CacheStrategy cacheStrategy, final long maxFileSize, final boolean checkBlacklist) throws IOException {
+    private Response loadInternal(final Request request, CacheStrategy cacheStrategy, final int maxFileSize, final boolean checkBlacklist) throws IOException {
         // get the protocol of the next URL
         final DigestURI url = request.url();
         if (url.isFile() || url.isSMB()) cacheStrategy = CacheStrategy.NOCACHE; // load just from the file system
@@ -302,7 +302,7 @@ public final class LoaderDispatcher {
      */
     public byte[] loadContent(final Request request, final CacheStrategy cacheStrategy) throws IOException {
         // try to download the resource using the loader
-        final long maxFileSize = this.sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+        final int maxFileSize = this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
         final Response entry = load(request, cacheStrategy, maxFileSize, false);
         if (entry == null) return null; // not found in web
 
@@ -310,7 +310,7 @@ public final class LoaderDispatcher {
         return entry.getContent();
     }
 
-    public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int timeout, final long maxFileSize) throws IOException, Parser.Failure {
+    public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int timeout, final int maxFileSize) throws IOException, Parser.Failure {
 
         // load resource
         final Response response = load(request, cacheStrategy, maxFileSize, false);
@@ -326,7 +326,7 @@ public final class LoaderDispatcher {
 
     public ContentScraper parseResource(final DigestURI location, final CacheStrategy cachePolicy) throws IOException {
         // load page
-        final long maxFileSize = this.sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+        final int maxFileSize = this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
         final Response r = this.load(request(location, true, false), cachePolicy, maxFileSize, false);
         final byte[] page = (r == null) ? null : r.getContent();
         if (page == null) throw new IOException("no response from url " + location.toString());
@@ -346,23 +346,20 @@ public final class LoaderDispatcher {
      * @throws IOException
      */
     public final Map<MultiProtocolURI, String> loadLinks(final DigestURI url, final CacheStrategy cacheStrategy) throws IOException {
-        final Response response = load(request(url, true, false), cacheStrategy, Long.MAX_VALUE, false);
+        final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, false);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
-        byte[] resource = response.getContent();
-        if (resource == null) throw new IOException("resource == null");
+        if (response.getContent() == null) throw new IOException("resource == null");
         if (responseHeader == null) throw new IOException("responseHeader == null");
 
         Document[] documents = null;
         final String supportError = TextParser.supports(url, responseHeader.mime());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), resource.length, new ByteArrayInputStream(resource));
+            documents = TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), response.getContent());
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());
-        } finally {
-            resource = null;
         }
 
         return Document.getHyperlinks(documents);
@@ -378,11 +375,11 @@ public final class LoaderDispatcher {
         }
     }
 
-    public void loadIfNotExistBackground(final String url, final File cache, final long maxFileSize) {
+    public void loadIfNotExistBackground(final String url, final File cache, final int maxFileSize) {
         new Loader(url, cache, maxFileSize, CacheStrategy.IFEXIST).start();
     }
 
-    public void loadIfNotExistBackground(final String url, final long maxFileSize) {
+    public void loadIfNotExistBackground(final String url, final int maxFileSize) {
         new Loader(url, null, maxFileSize, CacheStrategy.IFEXIST).start();
     }
 
@@ -390,10 +387,10 @@ public final class LoaderDispatcher {
 
         private final String url;
         private final File cache;
-        private final long maxFileSize;
+        private final int maxFileSize;
         private final CacheStrategy cacheStrategy;
 
-        public Loader(final String url, final File cache, final long maxFileSize, final CacheStrategy cacheStrategy) {
+        public Loader(final String url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy) {
             this.url = url;
             this.cache = cache;
             this.maxFileSize = maxFileSize;

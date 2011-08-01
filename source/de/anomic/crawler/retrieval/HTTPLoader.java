@@ -51,7 +51,7 @@ public final class HTTPLoader {
     private static final String DEFAULT_ENCODING = "gzip,deflate";
     private static final String DEFAULT_LANGUAGE = "en-us,en;q=0.5";
     private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
-    public  static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
+    public  static final int    DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
     public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
     
     /**
@@ -69,14 +69,14 @@ public final class HTTPLoader {
         this.socketTimeout = (int) sb.getConfigLong("crawler.clientTimeout", 10000);
     }  
    
-    public Response load(final Request entry, long maxFileSize, boolean checkBlacklist) throws IOException {
+    public Response load(final Request entry, final int maxFileSize, final boolean checkBlacklist) throws IOException {
         long start = System.currentTimeMillis();
         Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT, maxFileSize, checkBlacklist);
         Latency.update(entry.url(), System.currentTimeMillis() - start);
         return doc;
     }
     
-    private Response load(final Request request, final int retryCount, final long maxFileSize, final boolean checkBlacklist) throws IOException {
+    private Response load(final Request request, final int retryCount, final int maxFileSize, final boolean checkBlacklist) throws IOException {
 
         if (retryCount < 0) {
             sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirection counter exceeded", -1);
@@ -243,7 +243,7 @@ public final class HTTPLoader {
         final HTTPClient client = new HTTPClient();
         client.setTimout(20000);
         client.setHeader(requestHeader.entrySet());
-        	final byte[] responseBody = client.GETbytes(request.url(), Long.MAX_VALUE);
+        	final byte[] responseBody = client.GETbytes(request.url());
         	final ResponseHeader header = new ResponseHeader(client.getHttpResponse().getAllHeaders());
         	final int code = client.getHttpResponse().getStatusLine().getStatusCode();
             // FIXME: 30*-handling (bottom) is never reached

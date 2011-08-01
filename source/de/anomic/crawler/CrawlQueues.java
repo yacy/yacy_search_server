@@ -595,7 +595,7 @@ public class CrawlQueues {
                     // returns null if everything went fine, a fail reason string if a problem occurred
                     try {
                         this.request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
-                        final long maxFileSize = CrawlQueues.this.sb.getConfigLong("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
+                        final int maxFileSize = CrawlQueues.this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
                         final CrawlProfile e = CrawlQueues.this.sb.crawler.getActive(UTF8.getBytes(this.request.profileHandle()));
                         final Response response = CrawlQueues.this.sb.loader.load(this.request, e == null ? CacheStrategy.IFEXIST : e.cacheStrategy(), maxFileSize, true);
                         if (response == null) {

@@ -87,6 +87,7 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.ByteArrayBuffer;
 import org.apache.http.util.EntityUtils;
 
 
@@ -288,7 +289,7 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] GETbytes(final String uri) throws IOException {
-        return GETbytes(uri, Long.MAX_VALUE);
+        return GETbytes(uri, Integer.MAX_VALUE);
     }
 
     /**
@@ -299,7 +300,7 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] GETbytes(final MultiProtocolURI url) throws IOException {
-        return GETbytes(url, Long.MAX_VALUE);
+        return GETbytes(url, Integer.MAX_VALUE);
     }
 
     /**
@@ -310,7 +311,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final String uri, final long maxBytes) throws IOException {
+    public byte[] GETbytes(final String uri, final int maxBytes) throws IOException {
         return GETbytes(new MultiProtocolURI(uri), maxBytes);
     }
 
@@ -323,7 +324,7 @@ public class HTTPClient {
      * @return content bytes
      * @throws IOException
      */
-    public byte[] GETbytes(final MultiProtocolURI url, final long maxBytes) throws IOException {
+    public byte[] GETbytes(final MultiProtocolURI url, final int maxBytes) throws IOException {
         final boolean localhost = url.getHost().equals("localhost");
         final String urix = url.toNormalform(true, false, !localhost, false);
         final HttpGet httpGet = new HttpGet(urix);
@@ -431,7 +432,7 @@ public class HTTPClient {
             httpPost.setEntity(multipartEntity);
         }
 
-        return getContentBytes(httpPost, Long.MAX_VALUE);
+        return getContentBytes(httpPost, Integer.MAX_VALUE);
     }
 
     /**
@@ -454,7 +455,7 @@ public class HTTPClient {
         // statistics
         this.upbytes = length;
         httpPost.setEntity(inputStreamEntity);
-        return getContentBytes(httpPost, Long.MAX_VALUE);
+        return getContentBytes(httpPost, Integer.MAX_VALUE);
     }
 
 	/**
@@ -543,8 +544,7 @@ public class HTTPClient {
         }
     }
 
-    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final long maxBytes) throws IOException {
-    	byte[] content = null;
+    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes) throws IOException {
     	try {
             execute(httpUriRequest);
             if (this.httpResponse == null) return null;
@@ -552,22 +552,18 @@ public class HTTPClient {
             final HttpEntity httpEntity = this.httpResponse.getEntity();
             if (httpEntity != null) {
                 if (getStatusCode() == 200 && httpEntity.getContentLength() < maxBytes) {
-                    try {
-                        content = EntityUtils.toByteArray(httpEntity);
-                    } catch (final OutOfMemoryError e) {
-                        throw new IOException(e.toString());
-                    }
+                    return getByteArray(httpEntity, maxBytes);
                 }
                 // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
             	EntityUtils.consume(httpEntity);
             }
+            return null;
         } catch (final IOException e) {
-                ConnectionInfo.removeConnection(httpUriRequest.hashCode());
                 httpUriRequest.abort();
                 throw e;
+        } finally {
+        	ConnectionInfo.removeConnection(httpUriRequest.hashCode());
         }
-        ConnectionInfo.removeConnection(httpUriRequest.hashCode());
-        return content;
     }
 
     private void execute(final HttpUriRequest httpUriRequest) throws IOException {
@@ -595,6 +591,32 @@ public class HTTPClient {
             ConnectionInfo.removeConnection(httpUriRequest.hashCode());
             httpUriRequest.abort();
             throw new IOException("Client can't execute: " + e.getMessage());
+        }
+    }
+
+    private byte[] getByteArray(final HttpEntity entity, final int maxBytes) throws IOException {
+        final InputStream instream = entity.getContent();
+        if (instream == null) {
+            return null;
+        }
+        try {
+            int i = Math.min(maxBytes, (int)entity.getContentLength());
+            if (i < 0) {
+                i = 4096;
+            }
+            final ByteArrayBuffer buffer = new ByteArrayBuffer(i);
+            byte[] tmp = new byte[4096];
+            int l, sum = 0;
+            while((l = instream.read(tmp)) != -1) {
+            	sum += l;
+            	if (sum > maxBytes) throw new IOException("Download exceeded maximum value of " + maxBytes + " bytes");
+                buffer.append(tmp, 0, l);
+            }
+            return buffer.toByteArray();
+        } catch (final OutOfMemoryError e) {
+            throw new IOException(e.toString());
+        } finally {
+            instream.close();
         }
     }
 

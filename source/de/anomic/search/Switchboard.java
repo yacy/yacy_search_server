@@ -1897,21 +1897,19 @@ public final class Switchboard extends serverSwitch {
 
         // PARSE CONTENT
         final long parsingStartTime = System.currentTimeMillis();
-        // fetch the document from the response
-        byte[] b = response.getContent();
-        if (b == null) {
+        if (response.getContent() == null) {
             // fetch the document from cache
-            b = Cache.getContent(response.url().hash());
-            if (b == null) {
+            response.setContent(Cache.getContent(response.url().hash()));
+            if (response.getContent() == null) {
                 this.log.logWarning("the resource '" + response.url() + "' is missing in the cache.");
                 addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), FailCategory.FINAL_LOAD_CONTEXT, "missing in cache");
                 return null;
             }
         }
-        assert b != null;
+        assert response.getContent() != null;
         try {
             // parse the document
-            documents = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), b);
+            documents = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), response.getContent());
             if (documents == null) {
                 throw new Parser.Failure("Parser returned null.", response.url());
             }
@@ -2218,7 +2216,7 @@ public final class Switchboard extends serverSwitch {
             @Override
             public void run() {
                 try {
-                    final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, Long.MAX_VALUE, true);
+                    final Response response = Switchboard.this.loader.load(request, CacheStrategy.IFFRESH, Integer.MAX_VALUE, true);
                     if (response == null) {
                         throw new IOException("response == null");
                     }
@@ -2612,7 +2610,7 @@ public final class Switchboard extends serverSwitch {
                 // if we have an url then try to load the rss
                 RSSReader rss = null;
                 try {
-                    final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
+                    final Response response = sb.loader.load(sb.loader.request(url, true, false), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);
                     final byte[] resource = (response == null) ? null : response.getContent();
                     //System.out.println("BLEKKO: " + UTF8.String(resource));
                     rss = resource == null ? null : RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, resource);

@@ -59,7 +59,7 @@ public class OAIListFriendsLoader {
     public static void init(final LoaderDispatcher loader, final Map<String, File> moreFriends) {
         listFriends.putAll(moreFriends);
         if (loader != null) for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) {
-            loader.loadIfNotExistBackground(oaiFriend.getKey(), oaiFriend.getValue(), Long.MAX_VALUE);
+            loader.loadIfNotExistBackground(oaiFriend.getKey(), oaiFriend.getValue(), Integer.MAX_VALUE);
         }
     }
 
@@ -82,7 +82,7 @@ public class OAIListFriendsLoader {
         Map<String, String> m;
         for (final Map.Entry<String, File> oaiFriend: listFriends.entrySet()) try {
             if (!oaiFriend.getValue().exists()) {
-                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Long.MAX_VALUE, true);
+                final Response response = loader == null ? null : loader.load(loader.request(new DigestURI(oaiFriend.getKey()), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, true);
                 if (response != null) FileUtils.copy(response.getContent(), oaiFriend.getValue());
             }
 

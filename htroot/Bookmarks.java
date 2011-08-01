@@ -198,7 +198,7 @@ public class Bookmarks {
                         final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(ASCII.getBytes(urlHash));
                         if (urlentry != null) try {
                             final URIMetadataRow.Components metadata = urlentry.metadata();
-                            final Document document = Document.mergeDocuments(metadata.url(), null, sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE));
+                            final Document document = Document.mergeDocuments(metadata.url(), null, sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE));
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", metadata.url().toNormalform(false, true));
                             prop.putHTML("mode_title", metadata.dc_title());

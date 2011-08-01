@@ -529,7 +529,7 @@ public class yacysearch {
                     final URIMetadataRow.Components metadata = urlentry.metadata();
                     Document[] documents = null;
                     try {
-                        documents = sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CacheStrategy.IFEXIST, 5000, Long.MAX_VALUE);
+                        documents = sb.loader.loadDocuments(sb.loader.request(metadata.url(), true, false), CacheStrategy.IFEXIST, 5000, Integer.MAX_VALUE);
                     } catch (final IOException e) {
                     } catch (final Parser.Failure e) {
                     }
