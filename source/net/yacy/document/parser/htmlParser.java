@@ -136,9 +136,11 @@ public class htmlParser extends AbstractParser implements Parser {
         final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false);
         try {
             FileUtils.copy(sourceStream, writer, c);
-            writer.close();
         } catch (IOException e) {
             throw new Parser.Failure("IO error:" + e.getMessage(), location);
+        } finally {
+        	sourceStream.close();
+            writer.close();
         }
         //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
         //serverFileUtils.copy(sourceFile, hfos);
