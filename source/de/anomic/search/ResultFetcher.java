@@ -194,9 +194,10 @@ public class ResultFetcher {
         // iterate over all images in the result
         final List<MediaSnippet> imagemedia = result.mediaSnippets();
         if (imagemedia != null) {
+        	ResponseHeader header;
             feedloop: for (final MediaSnippet ms: imagemedia) {
                 // check cache to see if the mime type of the image url is correct
-                final ResponseHeader header = Cache.getResponseHeader(ms.href.hash());
+                header = Cache.getResponseHeader(ms.href.hash());
                 if (header != null) {
                     // this does not work for all urls since some of them may not be in the cache
                     if (header.mime().startsWith("text") || header.mime().startsWith("application")) continue feedloop;
@@ -269,12 +270,12 @@ public class ResultFetcher {
         if (this.cleanupState) return; // we do not start another worker if we are in cleanup state
         if (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0) return;
         if (this.result.sizeAvailable() >= neededResults) return;
-
+        Worker worker;
         if (this.workerThreads == null) {
             this.workerThreads = new Worker[deployCount];
             synchronized(this.workerThreads) {
                 for (int i = 0; i < this.workerThreads.length; i++) {
-                    final Worker worker = new Worker(i, 10000, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
+                    worker = new Worker(i, 10000, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
                     worker.start();
                     this.workerThreads[i] = worker;
                     if (this.rankingProcess.feedingIsFinished() && this.rankingProcess.sizeQueue() == 0) break;
@@ -288,7 +289,7 @@ public class ResultFetcher {
                 for (int i = 0; i < this.workerThreads.length; i++) {
                    if (deployCount <= 0) break;
                    if (this.workerThreads[i] == null || !this.workerThreads[i].isAlive()) {
-                       final Worker worker = new Worker(i, 10000, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
+                       worker = new Worker(i, 10000, this.query.snippetCacheStrategy, this.query.snippetMatcher, neededResults);
                        worker.start();
                        this.workerThreads[i] = worker;
                        deployCount--;
@@ -337,6 +338,8 @@ public class ResultFetcher {
 
             // start fetching urls and snippets
             URIMetadataRow page;
+            ResultEntry resultEntry;
+            String rawLine;
             //final int fetchAhead = snippetMode == 0 ? 0 : 10;
             final boolean nav_topics = ResultFetcher.this.query.navigators.equals("all") || ResultFetcher.this.query.navigators.indexOf("topics") >= 0;
             try {
@@ -344,6 +347,10 @@ public class ResultFetcher {
                 int loops = 0;
                 while (this.shallrun && System.currentTimeMillis() < this.timeout) {
                     this.lastLifeSign = System.currentTimeMillis();
+                    
+                    if (MemoryControl.shortStatus()) {
+                    	break;
+                    }
 
                     // check if we have enough
                     if (ResultFetcher.this.result.sizeAvailable() >= this.neededResults) {
@@ -367,9 +374,9 @@ public class ResultFetcher {
                     if (ResultFetcher.this.query.filterfailurls && ResultFetcher.this.workTables.failURLsContains(page.hash())) continue;
 
                     loops++;
-                    final ResultEntry resultEntry = fetchSnippet(page, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
+                    resultEntry = fetchSnippet(page, this.cacheStrategy); // does not fetch snippets if snippetMode == 0
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
-                    final String rawLine = resultEntry.textSnippet() == null ? null : resultEntry.textSnippet().getLineRaw();
+                    rawLine = resultEntry.textSnippet() == null ? null : resultEntry.textSnippet().getLineRaw();
                     //System.out.println("***SNIPPET*** raw='" + rawLine + "', pattern='" + this.snippetPattern.toString() + "'");
                     if (rawLine != null && !this.snippetPattern.matcher(rawLine).matches()) continue;
 
