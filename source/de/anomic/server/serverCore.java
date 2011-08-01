@@ -686,8 +686,11 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 // start dialog
                 byte[] requestBytes = null;
                 boolean terminate = false;
-                String reqCmd;
+                String reqCmd, tmp;
                 String reqProtocol = "HTTP";
+                Object result;
+                Object[] parameter;
+                Method commandMethod;
                 final long situationDependentKeepAliveTimeout = keepAliveTimeout;
                 while (this.in != null &&
                        this.controlSocket != null &&
@@ -706,7 +709,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         // of the commandObject
                         if (this.request.trim().length() == 0) this.request = "EMPTY";
 
-                        final Object[] parameter = new Object[2];
+                        parameter = new Object[2];
 
                         // get the rest of the request parameters
                         final int pos = this.request.indexOf(' ');
@@ -738,7 +741,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         this.controlSocket.setSoTimeout(this.socketTimeout);
 
                         // exec command and return value
-                        Method commandMethod = commandObjMethodCache.get(reqProtocol + "_" + reqCmd);
+                        commandMethod = commandObjMethodCache.get(reqProtocol + "_" + reqCmd);
                         if (commandMethod == null) {
                             try {
                                 commandMethod = this.commandObj.getClass().getMethod(reqCmd, sessionCallType);
@@ -749,7 +752,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                             }
                         }
 
-                        Object result = null;
+                        result = null;
                         try {
                             result = commandMethod.invoke(this.commandObj, parameter);
                         } catch (final OutOfMemoryError e) {
@@ -786,7 +789,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                                 }
                                 writeLine((String) result);
                             } else if (result instanceof InputStream) {
-                                String tmp = send(this.out, (InputStream) result);
+                                tmp = send(this.out, (InputStream) result);
                                 if ((tmp.length() > 4) && (tmp.toUpperCase().startsWith("PASS"))) {
                                     log(true, "PASS ********");
                                 } else {

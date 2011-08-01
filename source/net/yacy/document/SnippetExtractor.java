@@ -46,10 +46,10 @@ public class SnippetExtractor {
         TreeSet<Integer> positions;
         int linenumber = 0;
         int fullmatchcounter = 0;
-        lookup: for (StringBuilder sentence: sentences) {
+        lookup: for (final StringBuilder sentence: sentences) {
             hs = WordTokenizer.hashSentence(sentence.toString(), null);
             positions = new TreeSet<Integer>();
-            for (byte[] word: queryhashes) {
+            for (final byte[] word: queryhashes) {
                 pos = hs.get(word);
                 if (pos != null) {
                     positions.add(pos);

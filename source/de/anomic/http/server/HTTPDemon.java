@@ -832,6 +832,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
         // format information for further usage
         final Map<String, byte[]> files = new HashMap<String, byte[]>();
+        byte[] fileContent;
         for (final FileItem item : items) {
             if (item.isFormField()) {
                 // simple text
@@ -845,7 +846,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             } else {
                 // file
                 args.put(item.getFieldName(), item.getName());
-                final byte[] fileContent = FileUtils.read(item.getInputStream());
+                fileContent = FileUtils.read(item.getInputStream());
                 item.getInputStream().close();
                 files.put(item.getFieldName(), fileContent);
             }
@@ -1261,10 +1262,11 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                   
                 //read custom headers
                 final Iterator<ResponseHeader.Entry> it = responseHeader.getAdditionalHeaderProperties().iterator();
+                ResponseHeader.Entry e;
                 while(it.hasNext()) {
                         //Append user properties to the main String
                         //TODO: Should we check for user properites. What if they intersect properties that are already in header?
-                    final ResponseHeader.Entry e = it.next();
+                    e = it.next();
                     header.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");
                 }
 

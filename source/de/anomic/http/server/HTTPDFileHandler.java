@@ -1390,14 +1390,16 @@ public final class HTTPDFileHandler {
 			final Pattern p = Pattern.compile("(href=\"|src=\")([^\"]+)|(href='|src=')([^']+)|(url\\(')([^']+)|(url\\(\")([^\"]+)|(url\\()([^\\)]+)");
 			final Matcher m = p.matcher(sbuffer);
 			final StringBuffer result = new StringBuffer(80);
+			String init, url;
+			MultiProtocolURI target;
 			while (m.find()) {
-				String init = null;
+				init = null;
 				if(m.group(1) != null) init = m.group(1);
 				if(m.group(3) != null) init = m.group(3);
 				if(m.group(5) != null) init = m.group(5);
 				if(m.group(7) != null) init = m.group(7);
 				if(m.group(9) != null) init = m.group(9);
-				String url = null;
+				url = null;
 				if(m.group(2) != null) url = m.group(2);
 				if(m.group(4) != null) url = m.group(4);
 				if(m.group(6) != null) url = m.group(6);
@@ -1423,7 +1425,7 @@ public final class HTTPDFileHandler {
 				} else {
 					// relative path of form href="relative/path"
 					try {
-						MultiProtocolURI target = new MultiProtocolURI(proxyurl.getHost() + directory + "/" + url);						
+						target = new MultiProtocolURI(proxyurl.getHost() + directory + "/" + url);						
 						m.appendReplacement(result, init + "/proxy.html?url=" + target.toString());
 					}
 					catch (MalformedURLException e) {}
